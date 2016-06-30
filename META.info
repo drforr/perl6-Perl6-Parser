@@ -1,0 +1,12 @@
+{
+	"name"         : "Perl6-Tidy",
+	"version"      : "*",
+	"description"  : "Perl 6 tidying tool",
+	"test-depends" : [
+		"Test"
+	],
+	"provides"     : {
+		"Perl6::Tidy"        : "lib/Perl6/Tidy.pm6"
+	},
+	"source-url"   : "git://github.com/drforr/perl6-Perl6-Tidy.git"
+}
