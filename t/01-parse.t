@@ -6,7 +6,7 @@ use Perl6::Tidy;
 
 plan 1;
 
-my $pt = Perl6::Tidy.new;
+my $pt = Perl6::Tidy.new( :debugging(True) );
 
 #`(
 
@@ -27,7 +27,7 @@ subtest sub {
   # Use 'print' to make sure that it's there regardless.
   #
   my $parsed = $pt.tidy(
-    q{Pkg::say 'Hello, world!', 1; print 'Hello, world!'}
+    q{Pkg::say 'Hello, world!', 0x1; print 'Goodbye, cruel world!'}
   );
 
 #  isa-ok $parsed, 'Perl6::Tidy::StatementList';

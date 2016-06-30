@@ -1,6 +1,13 @@
 class Perl6::Tidy {
 	use nqp;
 
+	has $.debugging = False;
+
+	# convert-hex-integers is just a sample.
+	role Formatter {
+		has Bool $.convert-hex-integers = False;
+	}
+
 	method tidy( Str $text ) {
 		my $compiler := nqp::getcomp('perl6');
 		my $g := nqp::findmethod($compiler,'parsegrammar')($compiler);
@@ -8,11 +15,22 @@ class Perl6::Tidy {
 		my $a := nqp::findmethod($compiler,'parseactions')($compiler);
 
 		my $root = $g.parse( $text, :p( 0 ), :actions( $a ) );
-		self.root( $root )
+		die "root is not a hash"
+			unless $root.hash;
+		die "root does not have a statementlist"
+			unless $root.hash.<statementlist>;
+
+		my $statementlist =
+			self.statementlist( $root.hash.<statementlist> );
+say $statementlist.perl;
+	}
+
+	class StatementList is Formatter {
+		has $.statement;
 	}
 
 	method root( Mu $parsed ) {
-say "Root:\n" ~ $parsed.dump;
+say "Root:\n" ~ $parsed.dump if $.debugging;
 		die "root is not a hash"
 			unless $parsed.hash;
 		die "root does not have a statementlist"
@@ -21,8 +39,12 @@ say "Root:\n" ~ $parsed.dump;
 		self.statementlist( $parsed.hash.<statementlist> )
 	}
 
+	class Statement is Formatter {
+		has @.items;
+	}
+
 	method statementlist( Mu $parsed ) {
-say "statementlist:\n" ~ $parsed.dump;
+say "statementlist:\n" ~ $parsed.dump if $.debugging;
 		die "statementlist is not a hash"
 			unless $parsed.hash;
 		die "statementlist does not have a statement"
@@ -35,19 +57,28 @@ say "statementlist:\n" ~ $parsed.dump;
 		die "statement is not a list"
 			unless $parsed.list;
 
-		for $parsed.list -> $statement {
-say "statement[]:\n" ~ $statement.dump;
+		my @items;
+		for $parsed.list {
+say "statement[]:\n" ~ $_.dump if $.debugging;
 			die "statement is not a hash"
-				unless $statement.hash;
+				unless $_.hash;
 			die "statement has no EXPR"
-				unless $statement.hash.<EXPR>;
+				unless $_.hash.<EXPR>;
 
-			self.EXPR( $statement.hash.<EXPR> )
+			my $expr = self.EXPR( $_.hash.<EXPR> );
+			@items.push( $expr )
 		}
+		Statement.new( :items(
+			@items
+		) )
+	}
+
+	class EXPR is Formatter {
+		has @.items;
 	}
 
 	method EXPR( Mu $parsed ) {
-say "EXPR:\n" ~ $parsed.dump;
+say "EXPR:\n" ~ $parsed.dump if $.debugging;
 		die "EXPR is not a hash"
 			unless $parsed.hash;
 
@@ -55,15 +86,23 @@ say "EXPR:\n" ~ $parsed.dump;
 		   $parsed.hash.<args> {
 			self.args( $parsed.hash.<args> )
 		}
-elsif $parsed.list {
-	for $parsed.list -> $arg {
-		self.EXPR-item( $arg )
-	}
-}
+		elsif $parsed.hash.<value> {
+			self.value( $parsed.hash.<value> )
+		}
+		elsif $parsed.list {
+			my @items;
+			for $parsed.list {
+				my $item = self.EXPR-item( $_ );
+				@items.push( $item )
+			}
+			EXPR.new( :items(
+				@items
+			) )
+		}
 	}
 
 	method EXPR-item( Mu $parsed ) {
-say "EXPR-item:\n" ~ $parsed.dump;
+say "EXPR-item:\n" ~ $parsed.dump if $.debugging;
 		die "EXPR-item is not a hash"
 			unless $parsed.hash;
 		die "EXPR-item does not have a value"
@@ -73,7 +112,7 @@ say "EXPR-item:\n" ~ $parsed.dump;
 	}
 
 	method value( Mu $parsed ) {
-say "value:\n" ~ $parsed.dump;
+say "value:\n" ~ $parsed.dump if $.debugging;
 		die "value is not a hash"
 			unless $parsed.hash;
 
@@ -88,8 +127,12 @@ die "uncaught type";
 		}
 	}
 
+	class Quote does Formatter {
+		has $.value
+	}
+
 	method quote( Mu $parsed ) {
-say "quote:\n" ~ $parsed.dump;
+say "quote:\n" ~ $parsed.dump if $.debugging;
 		die "quote is not a hash"
 			unless $parsed.hash;
 		die "quote does not have a nibble"
@@ -98,13 +141,21 @@ say "quote:\n" ~ $parsed.dump;
 		self.nibble( $parsed.hash.<nibble> )
 	}
 
+	class Nibble does Formatter {
+		has $.value
+	}
+
 	method nibble( Mu $parsed ) {
-say "nibble:\n" ~ $parsed.Str;
-say "End of Line.";
+say "nibble:\n" ~ $parsed.Str if $.debugging;
+say "End of Line." if $.debugging;
+
+		Nibble.new( :value(
+			$parsed.Str
+		) )
 	}
 
 	method number( Mu $parsed ) {
-say "number:\n" ~ $parsed.dump;
+say "number:\n" ~ $parsed.dump if $.debugging;
 		die "number is not a hash"
 			unless $parsed.hash;
 		die "number does not have a numish"
@@ -114,7 +165,7 @@ say "number:\n" ~ $parsed.dump;
 	}
 
 	method numish( Mu $parsed ) {
-say "numish:\n" ~ $parsed.dump;
+say "numish:\n" ~ $parsed.dump if $.debugging;
 		die "numish is not a hash"
 			unless $parsed.hash;
 		die "numish does not have an integer"
@@ -124,25 +175,47 @@ say "numish:\n" ~ $parsed.dump;
 	}
 
 	method integer( Mu $parsed ) {
-say "integer:\n" ~ $parsed.dump;
+say "integer:\n" ~ $parsed.dump if $.debugging;
 		die "integer is not a hash"
 			unless $parsed.hash;
 
 		if $parsed.hash.<decint> {
 			self.decint( $parsed.hash.<decint> )
 		}
+		elsif $parsed.hash.<hexint> {
+			self.hexint( $parsed.hash.<hexint> )
+		}
 		else {
 die "uncaught type";
 		}
 	}
 
+	class DecInt does Formatter {
+		has $.value;
+	}
+
 	method decint( Mu $parsed ) {
-say "decint:\n" ~ $parsed.Int;
-say "End of Line.";
+say "decint:\n" ~ $parsed.Int if $.debugging;
+say "End of Line." if $.debugging;
+
+		$parsed.Int
+	}
+
+	class HexInt does Formatter {
+		has $.value;
+	}
+
+	method hexint( Mu $parsed ) {
+say "hexint:\n" ~ $parsed.Int if $.debugging;
+say "End of Line." if $.debugging;
+
+		HexInt.new( :value(
+			$parsed.Int
+		) )
 	}
 
 	method args( Mu $parsed ) {
-say "args:\n" ~ $parsed.dump;
+say "args:\n" ~ $parsed.dump if $.debugging;
 		die "args is not a hash"
 			unless $parsed.hash;
 		die "args does not have an arglist"
@@ -152,7 +225,7 @@ say "args:\n" ~ $parsed.dump;
 	}
 
 	method arglist( Mu $parsed ) {
-say "arglist:\n" ~ $parsed.dump;
+say "arglist:\n" ~ $parsed.dump if $.debugging;
 		die "arglist is not a hash"
 			unless $parsed.hash;
 		die "arglist does not have an EXPR"
@@ -160,131 +233,4 @@ say "arglist:\n" ~ $parsed.dump;
 
 		self.EXPR( $parsed.hash.<EXPR> )
 	}
-
-
-
-
-
-
-
-	my class StatementList {
-	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#`(
-
-	sub g-root( Mu $parsed ) {
-
-		# Test structure at each point, that way we raise failures as
-		# early as possible.
-		#
-		die "document root is not a hash"
-			unless $parsed.hash;
-		die "document root has no statementlist"
-			unless $parsed.hash.<statementlist>;
-
-		g-statementlist( $parsed.hash.<statementlist> );
-	}
-
-# Just keep on breaking it down.
-# Keep in mind that for:
-#
-# class, token, rule, regex, module
-#
-# you can create a mixin Role NamedBlock {} that has a perl6() method
-# that generically requires a $.name and a $.type, and spits back
-# "$.type $.name { @content }" or the like.
-#
-# For the unions like below...
-#
-# Drop the generic EXPR, and have it return the typed value for now.
-#
-# Yes, may have to rejigger things into a DOM-ish layer for easier use for
-# later, but for now just give this a try.
-
-	class EXPR {
-		has $.longname;
-		has $.args;
-		has $.value;
-	}
-
-	sub g-EXPR( Mu $parsed ) {
-
-		die "EXPR is not a hash"
-			unless $parsed.hash;
-		if $parsed.hash.<longname> {
-			die "EXPR's longname is not a Str"
-				unless $parsed.hash.<longname>.Str;
-		}
-		if $parsed.hash.<args> {
-			die "EXPR's args is not a hash"
-				unless $parsed.hash.<args>.hash;
-		}
-
-# Not looking further into hash.<longname>
-return EXPR.new(
-#	:longname( $parsed.hash.<longname>.Str ),
-);
-	}
-
-	class Statement {
-		has $.EXPR;
-	}
-
-	# 0-19, and 21-43, so 
-	sub g-statement( Mu $parsed ) {
-
-		die "statement is not a hash"
-			unless $parsed.hash;
-		die "statement has no EXPR"
-			unless $parsed.hash.<EXPR>;
-say "from [{$parsed.from}] to [{$parsed.to}], orig [{$parsed.orig.chars}]";
-say $parsed.dump;
-
-		my $EXPR = g-EXPR( $parsed.hash.<EXPR> );
-return Statement.new( :EXPR( $EXPR ) );
-	}
-
-	class StatementList {
-		has @.statement;
-	}
-
-	# statementlist matches the entire text block, apparently.
-	#
-	sub g-statementlist( Mu $parsed ) {
-
-		die "statementlist is not a hash"
-			unless $parsed.hash;
-		die "statementlist has no statement"
-			unless $parsed.hash.<statement>;
-
-		my @statement = map { g-statement( $_ ) }, 
-			$parsed.hash.<statement>.list;
-
-say "from [{$parsed.from}] to [{$parsed.to}], orig [{$parsed.orig.chars}]";
-return StatementList.new( :statement( @statement ) );
-	}
-)
 }
