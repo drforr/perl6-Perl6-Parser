@@ -27,7 +27,7 @@ subtest sub {
   # Use 'print' to make sure that it's there regardless.
   #
   my $parsed = $pt.tidy(
-    q{Pkg::say 'Hello, world!', 0x1; print 'Goodbye, cruel world!'}
+    q{Pkg::say 'Hello, world!', 0x1; print( 'Goodbye, cruel world!' )}
   );
 
 #  isa-ok $parsed, 'Perl6::Tidy::StatementList';
