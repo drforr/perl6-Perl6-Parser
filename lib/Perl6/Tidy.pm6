@@ -8,6 +8,13 @@ class Perl6::Tidy {
 		has Bool $.convert-hex-integers = False;
 	}
 
+	method assert-Str( $name, Mu $parsed ) {
+		say "$name:\n" ~ $parsed.Str if $.debugging;
+		unless $parsed.Str {
+			die "$name is not a Str"
+		}
+	}
+
 	method assert-hash( $name, Mu $parsed, &sub ) {
 		say "$name:\n" ~ $parsed.dump if $.debugging;
 		if $parsed.hash {
@@ -15,6 +22,27 @@ class Perl6::Tidy {
 		}
 		else {
 			die "$name is not a hash"
+		}
+	}
+
+	method assert-hash-key( $name, $key, Mu $parsed, &sub ) {
+		if $parsed.hash.{$key} {
+			&sub($parsed)
+		}
+		else {
+			die "$name does not have key '$key'"
+		}
+	}
+
+	method assert-hash-with-key( $name, $key, Mu $parsed, &sub ) {
+		unless $parsed.hash {
+			die "$name is not a hash"
+		}
+		if $parsed.hash.{$key} {
+			&sub($parsed)
+		}
+		else {
+			die "$name does not have key '$key'"
 		}
 	}
 
@@ -54,10 +82,7 @@ say $statementlist.perl;
 	}
 
 	method statementlist( Mu $parsed ) {
-		self.assert-hash( 'statementlist', $parsed, {
-			die "statementlist does not have a statement"
-				unless $parsed.hash.<statement>;
-
+		self.assert-hash-with-key( 'statementlist', 'statement', $parsed, {
 			self.statement( $parsed.hash.<statement> )
 		} )
 	}
@@ -70,10 +95,7 @@ say $statementlist.perl;
 		self.assert-list( 'stateement', $parsed, {
 			my @items;
 			for $parsed.list {
-				self.assert-hash( 'statement', $_, {
-					die "statement has no EXPR"
-						unless $_.hash.<EXPR>;
-
+				self.assert-hash-with-key( 'statement', 'EXPR', $_, {
 					my $expr = self.EXPR( $_.hash.<EXPR> );
 					@items.push( $expr )
 				} )
@@ -125,10 +147,7 @@ say $statementlist.perl;
 	}
 
 	method EXPR-item( Mu $parsed ) {
-		self.assert-hash( 'EXPR-item', $parsed, {
-			die "EXPR-item does not have a value"
-				unless $parsed.hash.<value>;
-				
+		self.assert-hash-with-key( 'EXPR-item', 'value', $parsed, {
 			self.value( $parsed.hash.<value> )
 		} )
 	}
@@ -152,10 +171,7 @@ say $statementlist.perl;
 	}
 
 	method quote( Mu $parsed ) {
-		self.assert-hash( 'quote', $parsed, {
-			die "quote does not have a nibble"
-				unless $parsed.hash.<nibble>;
-
+		self.assert-hash-with-key( 'quote', 'nibble', $parsed, {
 			self.nibble( $parsed.hash.<nibble> )
 		} )
 	}
@@ -165,9 +181,7 @@ say $statementlist.perl;
 	}
 
 	method nibble( Mu $parsed ) {
-say "nibble:\n" ~ $parsed.Str if $.debugging;
-say "End of Line." if $.debugging;
-
+		self.assert-Str( 'nibble', $parsed );
 		Nibble.new(
 			:value(
 				$parsed.Str
@@ -176,19 +190,13 @@ say "End of Line." if $.debugging;
 	}
 
 	method number( Mu $parsed ) {
-		self.assert-hash( 'number', $parsed, {
-			die "number does not have a numish"
-				unless $parsed.hash.<numish>;
-
+		self.assert-hash-with-key( 'number', 'numish', $parsed, {
 			self.numish( $parsed.hash.<numish> )
 		} )
 	}
 
 	method numish( Mu $parsed ) {
-		self.assert-hash( 'numish', $parsed, {
-			die "numish does not have an integer"
-				unless $parsed.hash.<integer>;
-
+		self.assert-hash-with-key( 'numish', 'integer', $parsed, {
 			self.integer( $parsed.hash.<integer> )
 		} )
 	}
@@ -248,21 +256,20 @@ say "End of Line." if $.debugging;
 	}
 
 	method longname-args( Mu $longname, Mu $args ) {
-say "|longname:\n" ~ $longname.dump if $.debugging;
-say "|args:\n" ~ $args.dump if $.debugging;
-		die "args is not a hash"
-			unless $args.hash;
-		die "args does not have an arglist"
-			unless $args.hash.<arglist>;
+		self.assert-Str( 'longname', $longname );
+		self.assert-hash( 'args', $args, {
+			die "args does not have an arglist"
+				unless $args.hash.<arglist>;
 
-		LongnameArgs.new(
-			:longname(
-				$longname.Str
-			),
-			:args(
-				self.args( $args )
+			LongnameArgs.new(
+				:longname(
+					$longname.Str
+				),
+				:args(
+					self.args( $args )
+				)
 			)
-		)
+		} )
 	}
 
 	method semiarglist( Mu $parsed ) {
@@ -285,21 +292,20 @@ die "No parsed" unless $parsed;
 	}
 
 	method identifier-args( Mu $identifier, Mu $semiarglist ) {
-say "identifier:\n" ~ $identifier.dump if $.debugging;
-say "semiarglist:\n" ~ $semiarglist.dump if $.debugging;
-		die "semiarglist is not a hash"
-			unless $semiarglist.hash;
-		die "semiarglist does not have an arglist"
-			unless $semiarglist.hash.<semiarglist>;
+		self.assert-Str( 'identifier', $identifier );
+		self.assert-hash( 'semiarglist', $semiarglist, {
+			die "semiarglist does not have an arglist"
+				unless $semiarglist.hash.<semiarglist>;
 
-		IdentifierArgs.new(
-			:identifier(
-				$identifier.Str
-			),
-			:semiarglist(
-				self.semiarglist( $semiarglist.hash.<semiarglist> )
+			IdentifierArgs.new(
+				:identifier(
+					$identifier.Str
+				),
+				:semiarglist(
+					self.semiarglist( $semiarglist.hash.<semiarglist> )
+				)
 			)
-		)
+		} )
 	}
 
 	method arglist( Mu $parsed ) {
