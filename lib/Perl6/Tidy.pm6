@@ -7,11 +7,193 @@ class Perl6::Tidy {
 		#$g.HOW.trace-on($g);
 		my $a := nqp::findmethod($compiler,'parseactions')($compiler);
 
-		my $parsed = $g.parse( $text, :p( 0 ), :actions( $a ) );
-say "Root: \n" ~ $parsed.dump;
-
-		g-root( $parsed );
+		my $root = $g.parse( $text, :p( 0 ), :actions( $a ) );
+		self.root( $root )
 	}
+
+	method root( Mu $parsed ) {
+say "Root:\n" ~ $parsed.dump;
+		die "root is not a hash"
+			unless $parsed.hash;
+		die "root does not have a statementlist"
+			unless $parsed.hash.<statementlist>;
+
+		self.statementlist( $parsed.hash.<statementlist> )
+	}
+
+	method statementlist( Mu $parsed ) {
+say "statementlist:\n" ~ $parsed.dump;
+		die "statementlist is not a hash"
+			unless $parsed.hash;
+		die "statementlist does not have a statement"
+			unless $parsed.hash.<statement>;
+
+		self.statement( $parsed.hash.<statement> )
+	}
+
+	method statement( Mu $parsed ) {
+		die "statement is not a list"
+			unless $parsed.list;
+
+		for $parsed.list -> $statement {
+say "statement[]:\n" ~ $statement.dump;
+			die "statement is not a hash"
+				unless $statement.hash;
+			die "statement has no EXPR"
+				unless $statement.hash.<EXPR>;
+
+			self.EXPR( $statement.hash.<EXPR> )
+		}
+	}
+
+	method EXPR( Mu $parsed ) {
+say "EXPR:\n" ~ $parsed.dump;
+		die "EXPR is not a hash"
+			unless $parsed.hash;
+
+		if $parsed.hash.<longname> and
+		   $parsed.hash.<args> {
+			self.args( $parsed.hash.<args> )
+		}
+elsif $parsed.list {
+	for $parsed.list -> $arg {
+		self.EXPR-item( $arg )
+	}
+}
+	}
+
+	method EXPR-item( Mu $parsed ) {
+say "EXPR-item:\n" ~ $parsed.dump;
+		die "EXPR-item is not a hash"
+			unless $parsed.hash;
+		die "EXPR-item does not have a value"
+			unless $parsed.hash.<value>;
+			
+		self.value( $parsed.hash.<value> )
+	}
+
+	method value( Mu $parsed ) {
+say "value:\n" ~ $parsed.dump;
+		die "value is not a hash"
+			unless $parsed.hash;
+
+		if $parsed.hash.<quote> {
+			self.quote( $parsed.hash.<quote> )
+		}
+		elsif $parsed.hash.<number> {
+			self.number( $parsed.hash.<number> )
+		}
+		else {
+die "uncaught type";
+		}
+	}
+
+	method quote( Mu $parsed ) {
+say "quote:\n" ~ $parsed.dump;
+		die "quote is not a hash"
+			unless $parsed.hash;
+		die "quote does not have a nibble"
+			unless $parsed.hash.<nibble>;
+
+		self.nibble( $parsed.hash.<nibble> )
+	}
+
+	method nibble( Mu $parsed ) {
+say "nibble:\n" ~ $parsed.Str;
+say "End of Line.";
+	}
+
+	method number( Mu $parsed ) {
+say "number:\n" ~ $parsed.dump;
+		die "number is not a hash"
+			unless $parsed.hash;
+		die "number does not have a numish"
+			unless $parsed.hash.<numish>;
+
+		self.numish( $parsed.hash.<numish> )
+	}
+
+	method numish( Mu $parsed ) {
+say "numish:\n" ~ $parsed.dump;
+		die "numish is not a hash"
+			unless $parsed.hash;
+		die "numish does not have an integer"
+			unless $parsed.hash.<integer>;
+
+		self.integer( $parsed.hash.<integer> )
+	}
+
+	method integer( Mu $parsed ) {
+say "integer:\n" ~ $parsed.dump;
+		die "integer is not a hash"
+			unless $parsed.hash;
+
+		if $parsed.hash.<decint> {
+			self.decint( $parsed.hash.<decint> )
+		}
+		else {
+die "uncaught type";
+		}
+	}
+
+	method decint( Mu $parsed ) {
+say "decint:\n" ~ $parsed.Int;
+say "End of Line.";
+	}
+
+	method args( Mu $parsed ) {
+say "args:\n" ~ $parsed.dump;
+		die "args is not a hash"
+			unless $parsed.hash;
+		die "args does not have an arglist"
+			unless $parsed.hash.<arglist>;
+
+		self.arglist( $parsed.hash.<arglist> )
+	}
+
+	method arglist( Mu $parsed ) {
+say "arglist:\n" ~ $parsed.dump;
+		die "arglist is not a hash"
+			unless $parsed.hash;
+		die "arglist does not have an EXPR"
+			unless $parsed.hash.<EXPR>;
+
+		self.EXPR( $parsed.hash.<EXPR> )
+	}
+
+
+
+
+
+
+
+	my class StatementList {
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#`(
 
 	sub g-root( Mu $parsed ) {
 
@@ -104,4 +286,5 @@ return Statement.new( :EXPR( $EXPR ) );
 say "from [{$parsed.from}] to [{$parsed.to}], orig [{$parsed.orig.chars}]";
 return StatementList.new( :statement( @statement ) );
 	}
+)
 }
