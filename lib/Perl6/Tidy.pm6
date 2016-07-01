@@ -8,56 +8,45 @@ class Perl6::Tidy {
 		has Bool $.convert-hex-integers = False;
 	}
 
+	method assert-Int( $name, Mu $parsed ) {
+		say "$name:\n" ~ $parsed.Int if $.debugging;
+		die "$name is not a Int" unless $parsed.Int;
+	}
+
 	method assert-Str( $name, Mu $parsed ) {
 		say "$name:\n" ~ $parsed.Str if $.debugging;
-		unless $parsed.Str {
-			die "$name is not a Str"
-		}
+		die "$name is not a Str" unless $parsed.Str;
 	}
 
 	method assert-hash( $name, Mu $parsed, &sub ) {
 		say "$name:\n" ~ $parsed.dump if $.debugging;
-		if $parsed.hash {
-			&sub($parsed)
-		}
-		else {
-			die "$name is not a hash"
-		}
+		die "$name is not a hash" unless $parsed.hash;
+
+		&sub($parsed)
 	}
 
 	method assert-hash-key( $name, $key, Mu $parsed, &sub ) {
-		if $parsed.hash.{$key} {
-			&sub($parsed)
-		}
-		else {
-			die "$name does not have key '$key'"
-		}
+		die "$name does not have key '$key'" unless $parsed.hash.{$key};
+
+		&sub($parsed)
 	}
 
 	method assert-hash-with-key( $name, $key, Mu $parsed, &sub ) {
-		unless $parsed.hash {
-			die "$name is not a hash"
-		}
-		if $parsed.hash.{$key} {
-			&sub($parsed)
-		}
-		else {
-			die "$name does not have key '$key'"
-		}
+		die "$name is not a hash" unless $parsed.hash;
+
+                self.assert-hash-key( $name, $key, $parsed, &sub );
 	}
 
 	method assert-list( $name, Mu $parsed, &sub ) {
+		die "$name is not a list" unless $parsed.list;
+
 		if $.debugging {
 			for $parsed.list {
 				say $name ~ "[]:\n" ~ $_.dump;
 			}
 		}
-		if $parsed.list {
-			&sub($parsed)
-		}
-		else {
-			die "$name is not a list"
-		}
+
+		&sub($parsed)
 	}
 
 	method tidy( Str $text ) {
@@ -220,8 +209,7 @@ say $statementlist.perl;
 	}
 
 	method decint( Mu $parsed ) {
-say "decint:\n" ~ $parsed.Int if $.debugging;
-say "End of Line." if $.debugging;
+		self.assert-Int( 'decint', $parsed );
 
 		$parsed.Int
 	}
@@ -231,8 +219,7 @@ say "End of Line." if $.debugging;
 	}
 
 	method hexint( Mu $parsed ) {
-say "hexint:\n" ~ $parsed.Int if $.debugging;
-say "End of Line." if $.debugging;
+		self.assert-Int( 'hexint', $parsed );
 
 		HexInt.new(
 			:value(
@@ -242,10 +229,7 @@ say "End of Line." if $.debugging;
 	}
 
 	method args( Mu $parsed ) {
-		self.assert-hash( 'args', $parsed, {
-			die "args does not have an arglist"
-				unless $parsed.hash.<arglist>;
-
+		self.assert-hash-key( 'args', 'arglist', $parsed, {
 			self.arglist( $parsed.hash.<arglist> )
 		} )
 	}
@@ -257,10 +241,7 @@ say "End of Line." if $.debugging;
 
 	method longname-args( Mu $longname, Mu $args ) {
 		self.assert-Str( 'longname', $longname );
-		self.assert-hash( 'args', $args, {
-			die "args does not have an arglist"
-				unless $args.hash.<arglist>;
-
+		self.assert-hash-key( 'args', 'arglist', $args, {
 			LongnameArgs.new(
 				:longname(
 					$longname.Str
@@ -274,12 +255,8 @@ say "End of Line." if $.debugging;
 
 	method semiarglist( Mu $parsed ) {
 die "No parsed" unless $parsed;
-		self.assert-hash( 'semiarglist', $parsed, {
+		self.assert-hash-key( 'semiarglist', 'arglist', $parsed, {
 #say "semiarglist:\n" ~ $parsed.dump if $.debugging;
-#		die "semiarglist is not a hash"
-#			unless $parsed.hash;
-#		die "semiarglist does not have an arglist"
-#			unless $parsed.hash.<arglist>;
 #
 #			self.arglist( $parsed.hash.<arglist> )
 1;
@@ -293,10 +270,7 @@ die "No parsed" unless $parsed;
 
 	method identifier-args( Mu $identifier, Mu $semiarglist ) {
 		self.assert-Str( 'identifier', $identifier );
-		self.assert-hash( 'semiarglist', $semiarglist, {
-			die "semiarglist does not have an arglist"
-				unless $semiarglist.hash.<semiarglist>;
-
+		self.assert-hash-key( 'identifier-args', 'semiarglist', $semiarglist, {
 			IdentifierArgs.new(
 				:identifier(
 					$identifier.Str
@@ -309,10 +283,7 @@ die "No parsed" unless $parsed;
 	}
 
 	method arglist( Mu $parsed ) {
-		self.assert-hash( 'arglist', $parsed, {
-			die "arglist does not have an EXPR"
-				unless $parsed.hash.<EXPR>;
-
+		self.assert-hash-key( 'arglist', 'EXPR', $parsed, {
 			self.EXPR( $parsed.hash.<EXPR> )
 		} )
 	}
