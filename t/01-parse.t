@@ -8,19 +8,41 @@ plan 1;
 
 my $pt = Perl6::Tidy.new( :debugging(True) );
 
-#`(
-
 subtest sub {
+  plan 2;
+
   my $parsed = $pt.tidy( q{} );
   isa-ok $parsed, 'Perl6::Tidy::StatementList';
-  nok $parsed.statement, 'Contains no statements';
+  is $parsed.statement.elems, 0;
 }, 'Empty file';
 
 subtest sub {
   my $parsed = $pt.tidy( q{1} );
+  isa-ok $parsed, 'Perl6::Tidy::StatementList';
+  is $parsed.statement.elems, 1;
 }, 'single integer';
 
+#`(
+
+Perl6::Tidy::Statement.new(
+  items => [
+    Perl6::Tidy::LongnameArgs.new(
+      longname => "Pkg::say",
+       args => [
+        Perl6::Tidy::EXPR.new(
+          items => [
+            Perl6::Tidy::Nibble.new( value => "Hello, world!" ),
+            Perl6::Tidy::HexInt.new( value => 1e0 ) ] ) ] ),
+    Perl6::Tidy::IdentifierArgs.new(
+      identifier => "print",
+      semiarglist => [
+        Perl6::Tidy::EXPR.new(
+          items => [
+            Perl6::Tidy::Nibble.new( value => "Goodbye, cruel world!" ) ] ) ] ) ] )
+
 )
+
+#`(
 
 subtest sub {
   # Use 'Pkg::' to check that <longname>.Str is qualified.
@@ -45,5 +67,7 @@ subtest sub {
 #    }, 'EXPR';
 #  }, 'statement 0';
 }, 'basic test';
+
+)
 
 # vim: ft=perl6
