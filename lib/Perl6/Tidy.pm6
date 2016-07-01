@@ -110,9 +110,23 @@ class Perl6::Tidy {
 		}
 	}
 
+	class Statement {
+		has @.statement;
+	}
+
 	method statement( Mu $parsed ) {
 		if $parsed.list {
-			die "statementlist: list"
+			my @statement;
+			for $parsed.list {
+				@statement.push(
+					self.EXPR( $_.hash.<EXPR> )
+				)
+			}
+			Statement.new(
+				:statement(
+					@statement
+				)
+			)
 		}
 		elsif $parsed.hash {
 			say "statement:\n" ~ $parsed.dump if $.debugging;
