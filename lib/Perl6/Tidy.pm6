@@ -5,11 +5,11 @@ class Perl6::Tidy {
 
 #`(
 	method boilerplate( Mu $parsed ) {
-		say "boilerplate:\n" ~ $parsed.dump if $.debugging;
 		if $parsed.list {
 			die "statementlist: list"
 		}
 		elsif $parsed.hash {
+			say "boilerplate:\n" ~ $parsed.dump if $.debugging;
 			die "statementlist: hash"
 		}
 		elsif $parsed.Int {
@@ -30,49 +30,6 @@ class Perl6::Tidy {
 	# convert-hex-integers is just a sample.
 	role Formatter {
 	}
-
-#`(
-	method assert-Int( $name, Mu $parsed ) {
-		say "$name:\n" ~ $parsed.Int if $.debugging;
-		die "$name is not a Int" unless $parsed.Int;
-	}
-
-	method assert-Str( $name, Mu $parsed ) {
-		say "$name:\n" ~ $parsed.Str if $.debugging;
-		die "$name is not a Str" unless $parsed.Str;
-	}
-
-	method assert-hash( $name, Mu $parsed, &sub ) {
-		say "$name:\n" ~ $parsed.dump if $.debugging;
-		die "$name is not a hash" unless $parsed.hash;
-
-		&sub($parsed)
-	}
-
-	method assert-hash-key( $name, $key, Mu $parsed, &sub ) {
-		die "$name does not have key '$key'" unless $parsed.hash.{$key};
-
-		&sub($parsed)
-	}
-
-	method assert-hash-with-key( $name, $key, Mu $parsed, &sub ) {
-		die "$name is not a hash" unless $parsed.hash;
-
-                self.assert-hash-key( $name, $key, $parsed, &sub );
-	}
-
-	method assert-list( $name, Mu $parsed, &sub ) {
-		die "$name is not a list" unless $parsed.list;
-
-		if $.debugging {
-			for $parsed.list {
-				say $name ~ "[]:\n" ~ $_.dump;
-			}
-		}
-
-		&sub($parsed)
-	}
-)
 
 	method tidy( Str $text ) {
 		my $compiler := nqp::getcomp('perl6');
@@ -117,11 +74,11 @@ class Perl6::Tidy {
 	}
 
 	method statementlist( Mu $parsed ) {
-		say "statementlist:\n" ~ $parsed.dump if $.debugging;
 		if $parsed.list {
 			die "statementlist: list"
 		}
 		elsif $parsed.hash {
+			say "statementlist:\n" ~ $parsed.dump if $.debugging;
 			if $parsed.hash.<statement> {
 				my @statement;
 				for $parsed.hash.<statement> {
@@ -154,11 +111,11 @@ class Perl6::Tidy {
 	}
 
 	method statement( Mu $parsed ) {
-		say "statement:\n" ~ $parsed.dump if $.debugging;
 		if $parsed.list {
 			die "statementlist: list"
 		}
 		elsif $parsed.hash {
+			say "statement:\n" ~ $parsed.dump if $.debugging;
 			if $parsed.hash.<EXPR> {
 				self.EXPR( $parsed.hash.<EXPR> )
 			}
@@ -181,11 +138,11 @@ class Perl6::Tidy {
 	}
 
 	method EXPR( Mu $parsed ) {
-		say "EXPR:\n" ~ $parsed.dump if $.debugging;
 		if $parsed.list {
 			die "EXPR: list"
 		}
 		elsif $parsed.hash {
+			say "EXPR:\n" ~ $parsed.dump if $.debugging;
 			if $parsed.hash.<value> {
 				self.value( $parsed.hash.<value> )
 			}
@@ -208,18 +165,16 @@ class Perl6::Tidy {
 	}
 
 	method value( Mu $parsed ) {
-		say "value:\n" ~ $parsed.dump if $.debugging;
 		if $parsed.list {
-			if $parsed.hash.<number> {
-				self.number( $parsed.hash.<number> )
-			}
-			else {
-				die "value: list"
-			}
+			die "value: list"
 		}
 		elsif $parsed.hash {
+			say "value:\n" ~ $parsed.dump if $.debugging;
 			if $parsed.hash.<number> {
 				self.number( $parsed.hash.<number> )
+			}
+			elsif $parsed.hash.<quote> {
+				self.quote( $parsed.hash.<quote> )
 			}
 			else {
 				die "value: Unknown key"
@@ -240,11 +195,11 @@ class Perl6::Tidy {
 	}
 
 	method number( Mu $parsed ) {
-		say "number:\n" ~ $parsed.dump if $.debugging;
 		if $parsed.list {
 			die "number: list"
 		}
 		elsif $parsed.hash {
+			say "number:\n" ~ $parsed.dump if $.debugging;
 			if $parsed.hash.<numish> {
 				self.numish( $parsed.hash.<numish> )
 			}
@@ -266,14 +221,66 @@ class Perl6::Tidy {
 		}
 	}
 
+	method quote( Mu $parsed ) {
+		if $parsed.list {
+			die "quote: list"
+		}
+		elsif $parsed.hash {
+			say "quote:\n" ~ $parsed.dump if $.debugging;
+			if $parsed.hash.<nibble> {
+				self.nibble( $parsed.hash.<nibble> )
+			}
+			else {
+				die "quote: Unknown key"
+			}
+		}
+		elsif $parsed.Int {
+			die "quote: Int"
+		}
+		elsif $parsed.Str {
+			die "quote: Str"
+		}
+		elsif $parsed.Bool {
+			die "quote: Bool"
+		}
+		else {
+			die "quote: Unknown type"
+		}
+	}
+
+	method nibble( Mu $parsed ) {
+		if $parsed.list {
+			die "nibble: list"
+		}
+		elsif $parsed.hash {
+			say "nibble:\n" ~ $parsed.dump if $.debugging;
+			die "nibble: Unknown key"
+		}
+		elsif $parsed.Int {
+			die "nibble: Int"
+		}
+		elsif $parsed.Str {
+			$parsed.Str
+		}
+		elsif $parsed.Bool {
+			die "nibble: Bool"
+		}
+		else {
+			die "nibble: Unknown type"
+		}
+	}
+
 	method numish( Mu $parsed ) {
-		say "numish:\n" ~ $parsed.dump if $.debugging;
 		if $parsed.list {
 			die "numish: list"
 		}
 		elsif $parsed.hash {
+			say "numish:\n" ~ $parsed.dump if $.debugging;
 			if $parsed.hash.<integer> {
 				self.integer( $parsed.hash.<integer> )
+			}
+			elsif $parsed.hash.<rad_number> {
+				self.rad_number( $parsed.hash.<rad_number> )
 			}
 			else {
 				die "numish: Unknown key"
@@ -294,13 +301,22 @@ class Perl6::Tidy {
 	}
 
 	method integer( Mu $parsed ) {
-		say "integer:\n" ~ $parsed.dump if $.debugging;
 		if $parsed.list {
 			die "integer: list"
 		}
 		elsif $parsed.hash {
+			say "integer:\n" ~ $parsed.dump if $.debugging;
 			if $parsed.hash.<decint> {
 				self.decint( $parsed.hash.<decint> )
+			}
+			elsif $parsed.hash.<binint> {
+				self.binint( $parsed.hash.<binint> )
+			}
+			elsif $parsed.hash.<octint> {
+				self.octint( $parsed.hash.<octint> )
+			}
+			elsif $parsed.hash.<hexint> {
+				self.hexint( $parsed.hash.<hexint> )
 			}
 			else {
 				die "integer: Unknown key"
@@ -320,12 +336,137 @@ class Perl6::Tidy {
 		}
 	}
 
+	method circumfix( Mu $parsed ) {
+		if $parsed.list {
+			die "circumfix: list"
+		}
+		elsif $parsed.hash {
+			say "circumfix:\n" ~ $parsed.dump if $.debugging;
+			if $parsed.hash.<semilist> {
+				self.semilist( $parsed.hash.<semilist> )
+			}
+			else {
+				die "circumfix: Unknown key"
+			}
+		}
+		elsif $parsed.Int {
+			die "circumfix: Int"
+		}
+		elsif $parsed.Str {
+			die "circumfix: Str"
+		}
+		elsif $parsed.Bool {
+			die "circumfix: Bool"
+		}
+		else {
+			die "circumfix: Unknown type"
+		}
+	}
+
+	method semilist( Mu $parsed ) {
+		if $parsed.list {
+			die "semilist: list"
+		}
+		elsif $parsed.hash {
+			say "semilist:\n" ~ $parsed.dump if $.debugging;
+			if $parsed.hash.<statement> {
+				self.statement( $parsed.hash.<statement> )
+			}
+			else {
+				die "semilist: Unknown key"
+			}
+		}
+		elsif $parsed.Int {
+			die "semilist: Int"
+		}
+		elsif $parsed.Str {
+			die "semilist: Str"
+		}
+		elsif $parsed.Bool {
+			die "semilist: Bool"
+		}
+		else {
+			die "semilist: Unknown type"
+		}
+	}
+
+	method rad_number( Mu $parsed ) {
+		if $parsed.list {
+			die "rad_number: list"
+		}
+		elsif $parsed.hash {
+			say "rad_number:\n" ~ $parsed.dump if $.debugging;
+			if $parsed.hash.<circumfix> {
+				self.circumfix( $parsed.hash.<circumfix> )
+			}
+			else {
+				die "rad_number: Unknown key"
+			}
+		}
+		elsif $parsed.Int {
+			die "rad_number: Int"
+		}
+		elsif $parsed.Str {
+			die "rad_number: Str"
+		}
+		elsif $parsed.Bool {
+			die "rad_number: Bool"
+		}
+		else {
+			die "rad_number: Unknown type"
+		}
+	}
+
+	method binint( Mu $parsed ) {
+		if $parsed.list {
+			die "binint: list"
+		}
+		elsif $parsed.hash {
+			say "binint:\n" ~ $parsed.dump if $.debugging;
+			die "binint: hash"
+		}
+		elsif $parsed.Int {
+			$parsed.Int
+		}
+		elsif $parsed.Str {
+			die "binint: Str"
+		}
+		elsif $parsed.Bool {
+			die "binint: Bool"
+		}
+		else {
+			die "binint: Unknown type"
+		}
+	}
+
+	method octint( Mu $parsed ) {
+		if $parsed.list {
+			die "octint: list"
+		}
+		elsif $parsed.hash {
+			say "octint:\n" ~ $parsed.dump if $.debugging;
+			die "octint: hash"
+		}
+		elsif $parsed.Int {
+			$parsed.Int
+		}
+		elsif $parsed.Str {
+			die "octint: Str"
+		}
+		elsif $parsed.Bool {
+			die "octint: Bool"
+		}
+		else {
+			die "octint: Unknown type"
+		}
+	}
+
 	method decint( Mu $parsed ) {
-		say "decint:\n" ~ $parsed.dump if $.debugging;
 		if $parsed.list {
 			die "decint: list"
 		}
 		elsif $parsed.hash {
+			say "decint:\n" ~ $parsed.dump if $.debugging;
 			die "decint: hash"
 		}
 		elsif $parsed.Int {
@@ -339,6 +480,28 @@ class Perl6::Tidy {
 		}
 		else {
 			die "decint: Unknown type"
+		}
+	}
+
+	method hexint( Mu $parsed ) {
+		if $parsed.list {
+			die "hexint: list"
+		}
+		elsif $parsed.hash {
+			say "hexint:\n" ~ $parsed.dump if $.debugging;
+			die "hexint: hash"
+		}
+		elsif $parsed.Int {
+			$parsed.Int
+		}
+		elsif $parsed.Str {
+			die "hexint: Str"
+		}
+		elsif $parsed.Bool {
+			die "hexint: Bool"
+		}
+		else {
+			die "hexint: Unknown type"
 		}
 	}
 
@@ -380,104 +543,6 @@ die "EXPR: Unknown type"
 		} )
 	}
 
-	method EXPR-item( Mu $parsed ) {
-		self.assert-hash-with-key( 'EXPR-item', 'value', $parsed, {
-			self.value( $parsed.hash.<value> )
-		} )
-	}
-
-	method value( Mu $parsed ) {
-		self.assert-hash( 'value', $parsed, {
-			if $parsed.hash.<quote> {
-				self.quote( $parsed.hash.<quote> )
-			}
-			elsif $parsed.hash.<number> {
-				self.number( $parsed.hash.<number> )
-			}
-			else {
-die "value: Unknown key"
-			}
-		} )
-	}
-
-	class Quote does Formatter {
-		has $.value;
-	}
-
-	method quote( Mu $parsed ) {
-		self.assert-hash-with-key( 'quote', 'nibble', $parsed, {
-			self.nibble( $parsed.hash.<nibble> )
-		} )
-	}
-
-	class Nibble does Formatter {
-		has $.value;
-	}
-
-	method nibble( Mu $parsed ) {
-		self.assert-Str( 'nibble', $parsed );
-		Nibble.new(
-			:value(
-				$parsed.Str
-			)
-		)
-	}
-
-	method number( Mu $parsed ) {
-		self.assert-hash-with-key( 'number', 'numish', $parsed, {
-			self.numish( $parsed.hash.<numish> )
-		} )
-	}
-
-	method numish( Mu $parsed ) {
-		self.assert-hash-with-key( 'numish', 'integer', $parsed, {
-			self.integer( $parsed.hash.<integer> )
-		} )
-	}
-
-	method integer( Mu $parsed ) {
-		self.assert-hash( 'integer', $parsed, {
-			if $parsed.hash.<decint> {
-				self.decint( $parsed.hash.<decint> )
-			}
-			elsif $parsed.hash.<hexint> {
-				self.hexint( $parsed.hash.<hexint> )
-			}
-			else {
-die "integer: Unknown key"
-			}
-		} )
-	}
-
-	class DecInt does Formatter {
-		has $.value;
-	}
-
-	method decint( Mu $parsed ) {
-		self.assert-Int( 'decint', $parsed );
-
-		$parsed.Int
-	}
-
-	class HexInt does Formatter {
-		has $.value;
-	}
-
-	method hexint( Mu $parsed ) {
-		self.assert-Int( 'hexint', $parsed );
-
-		HexInt.new(
-			:value(
-				$parsed.Int
-			)
-		)
-	}
-
-	method args( Mu $parsed ) {
-		self.assert-hash-key( 'args', 'arglist', $parsed, {
-			self.arglist( $parsed.hash.<arglist> )
-		} )
-	}
 
 	class LongnameArgs does Formatter {
 		has $.longname;
@@ -495,12 +560,6 @@ die "integer: Unknown key"
 					self.args( $args )
 				)
 			)
-		} )
-	}
-
-	method semiarglist( Mu $parsed ) {
-		self.assert-hash-key( 'semiarglist', 'arglist', $parsed, {
-			self.arglist( $parsed.hash.<arglist> )
 		} )
 	}
 

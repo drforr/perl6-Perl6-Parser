@@ -4,23 +4,55 @@ use nqp;
 use Test;
 use Perl6::Tidy;
 
-plan 1;
+plan 2;
 
 my $pt = Perl6::Tidy.new( :debugging(True) );
 
 subtest sub {
-  plan 2;
+	plan 2;
 
-  my $parsed = $pt.tidy( q{} );
-  isa-ok $parsed, 'Perl6::Tidy::StatementList';
-  is $parsed.statement.elems, 0;
+	my $parsed = $pt.tidy( q{} );
+	isa-ok $parsed, 'Perl6::Tidy::StatementList';
+	is $parsed.statement.elems, 0;
 }, 'Empty file';
 
 subtest sub {
-  my $parsed = $pt.tidy( q{1} );
-  isa-ok $parsed, 'Perl6::Tidy::StatementList';
-  is $parsed.statement.elems, 1;
-}, 'single integer';
+	subtest sub {
+		my $parsed = $pt.tidy( q{1} );
+		isa-ok $parsed, 'Perl6::Tidy::StatementList';
+		is $parsed.statement.elems, 1;
+	}, 'single decimal integer';
+
+	subtest sub {
+		my $parsed = $pt.tidy( q{0b1} );
+		isa-ok $parsed, 'Perl6::Tidy::StatementList';
+		is $parsed.statement.elems, 1;
+	}, 'single binary integer';
+
+	subtest sub {
+		my $parsed = $pt.tidy( q{0o1} );
+		isa-ok $parsed, 'Perl6::Tidy::StatementList';
+		is $parsed.statement.elems, 1;
+	}, 'single octal integer';
+
+	subtest sub {
+		my $parsed = $pt.tidy( q{0x1} );
+		isa-ok $parsed, 'Perl6::Tidy::StatementList';
+		is $parsed.statement.elems, 1;
+	}, 'single hex integer';
+
+	subtest sub {
+		my $parsed = $pt.tidy( q{:13(1)} );
+		isa-ok $parsed, 'Perl6::Tidy::StatementList';
+		is $parsed.statement.elems, 1;
+	}, 'single hex integer';
+
+	subtest sub {
+		my $parsed = $pt.tidy( q{'Hello, world!'} );
+		isa-ok $parsed, 'Perl6::Tidy::StatementList';
+		is $parsed.statement.elems, 1;
+	}, 'single string';
+}, 'single term';
 
 #`(
 
