@@ -254,6 +254,62 @@ class Perl6::Tidy {
 		}
 	}
 
+	method twigil_sigil_desigilname( Mu $twigil, Mu $sigil, Mu $desigilname ) {
+		if $twigil.list {
+			die "list"
+		}
+		elsif $twigil.hash {
+			say "twigil_sigil_desigilname:\n" ~ $desigilname.Str if $.debugging;
+			$desigilname.Str
+		}
+		elsif $twigil.Int {
+			die "Int"
+		}
+		elsif $twigil.Str {
+			die "Str"
+		}
+		elsif $twigil.Bool {
+			die "Bool"
+		}
+		else {
+			die "Unknown type"
+		}
+	}
+
+	method variable( Mu $parsed ) {
+		if $parsed.list {
+			die "list"
+		}
+		elsif $parsed.hash {
+			say "statement:\n" ~ $parsed.dump if $.debugging;
+			if $parsed.hash.<twigil> and
+			   $parsed.hash.<sigil> and
+                           $parsed.hash.<desigilname> {
+				die "Too many keys" if $parsed.hash.keys > 3;
+				self.twigil_sigil_desigilname(
+					$parsed.hash.<twigil>,
+					$parsed.hash.<sigil>,
+					$parsed.hash.<desigilname>
+				)
+			}
+			else {
+				die "hash"
+			}
+		}
+		elsif $parsed.Int {
+			die "Int"
+		}
+		elsif $parsed.Str {
+			die "Str"
+		}
+		elsif $parsed.Bool {
+			die "Bool"
+		}
+		else {
+			die "Unknown type"
+		}
+	}
+
 	method EXPR( Mu $parsed ) {
 		if $parsed.list {
 			my @children;
@@ -287,6 +343,9 @@ class Perl6::Tidy {
 						),
 					)
 				}
+				else {
+					die "Unknown key"
+				}
 			}
 			else {
 				EXPR.new(
@@ -301,6 +360,10 @@ class Perl6::Tidy {
 			if $parsed.hash.<value> {
 				die "Too many keys" if $parsed.hash.keys > 1;
 				self.value( $parsed.hash.<value> )
+			}
+			elsif $parsed.hash.<variable> {
+				die "Too many keys" if $parsed.hash.keys > 1;
+				self.variable( $parsed.hash.<variable> )
 			}
 			else {
 				die "Unknown key"

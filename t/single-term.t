@@ -204,4 +204,16 @@ END}
 	}, Q{q:to[]};
 }, Q{string};
 
+subtest sub {
+	plan 1;
+
+	subtest sub {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{@*ARGS} );
+		isa-ok $parsed, Q{Perl6::Tidy::statementlist};
+		is $parsed.children.elems, 1;
+	}, Q{@*ARGS (is a global, so available everywhere)};
+}, Q{variable};
+
 # vim: ft=perl6
