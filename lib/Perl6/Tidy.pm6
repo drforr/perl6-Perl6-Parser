@@ -16,7 +16,7 @@ class Perl6::Tidy {
 			die "list"
 		}
 		elsif $parsed.hash {
-			say "boilerplate:\n" ~ $parsed.hash.dump if $.debugging;
+			say "boilerplate:\n" ~ $parsed.dump if $.debugging;
 			if $parsed.list {
 				die "hash and list"
 			}
@@ -388,6 +388,118 @@ class Perl6::Tidy {
 			if $parsed.hash.<nibble> {
 				die "Too many keys" if $parsed.hash.keys > 1;
 				self.nibble( $parsed.hash.<nibble> )
+			}
+			elsif $parsed.hash.<quibble> {
+				die "Too many keys" if $parsed.hash.keys > 1;
+				self.quibble( $parsed.hash.<quibble> )
+			}
+			else {
+				die "Unknown key"
+			}
+		}
+		elsif $parsed.Int {
+			die "Int"
+		}
+		elsif $parsed.Str {
+			die "Str"
+		}
+		elsif $parsed.Bool {
+			die "Bool"
+		}
+		else {
+			die "Unknown type"
+		}
+	}
+
+	method B( Mu $parsed ) {
+		if $parsed.list {
+			die "list"
+		}
+		elsif $parsed.hash {
+			die "hash"
+		}
+		elsif $parsed.Int {
+			die "Int"
+		}
+		elsif $parsed.Str {
+			die "Str"
+		}
+		elsif $parsed.Bool {
+			say "B:\n" ~ $parsed.Bool if $.debugging;
+			$parsed.Bool
+		}
+		else {
+			die "Unknown type"
+		}
+	}
+
+	method babble( Mu $parsed ) {
+		if $parsed.list {
+			die "list"
+		}
+		elsif $parsed.hash {
+			say "babble:\n" ~ $parsed.dump if $.debugging;
+			if $parsed.hash.<B> {
+				self.B(
+					$parsed.hash.<B>
+				)
+			}
+		}
+		elsif $parsed.Int {
+			die "Int"
+		}
+		elsif $parsed.Str {
+			die "Str"
+		}
+		elsif $parsed.Bool {
+			die "Bool"
+		}
+		else {
+			die "Unknown type"
+		}
+	}
+
+	method babble_nibble( Mu $babble, Mu $nibble ) {
+		if $babble.list {
+			die "list"
+		}
+		elsif $babble.hash {
+			say "babble_nibble:\n" ~ $babble.dump if $.debugging;
+			if $babble.hash.<B> {
+				self.B(
+					$babble.hash.<B>
+				)
+			}
+			else {
+				die "Unknown key"
+			}
+		}
+		elsif $babble.Int {
+			die "Int"
+		}
+		elsif $babble.Str {
+			die "Str"
+		}
+		elsif $babble.Bool {
+			die "Bool"
+		}
+		else {
+			die "Unknown type"
+		}
+	}
+
+	method quibble( Mu $parsed ) {
+		if $parsed.list {
+			die "list"
+		}
+		elsif $parsed.hash {
+			say "quibble:\n" ~ $parsed.dump if $.debugging;
+			if $parsed.hash.<babble> and
+			   $parsed.hash.<nibble> {
+				self.babble_nibble(
+					$parsed.hash.<babble>,
+					$parsed.hash.<nibble>
+				)
 			}
 			else {
 				die "Unknown key"

@@ -92,7 +92,7 @@ subtest sub {
 	}, 'integer';
 
 	subtest sub {
-		plan 2;
+		plan 3;
 
 		subtest sub {
 			plan 2;
@@ -123,13 +123,27 @@ subtest sub {
 		}, 'double quote';
 
 		subtest sub {
+			plan 2;
+
 			subtest sub {
 				plan 2;
 
-				my $parsed = $pt.tidy( q[q{Hello, {'world'}!}] );
+				my $parsed = $pt.tidy(
+					q[q{Hello, {'world'}!}]
+				);
 				isa-ok $parsed, 'Perl6::Tidy::statementlist';
 				is $parsed.children.elems, 1;
 			}, 'q{}';
+
+			subtest sub {
+				plan 2;
+
+				my $parsed = $pt.tidy(
+					q[q[Hello, {'world'}!]]
+				);
+				isa-ok $parsed, 'Perl6::Tidy::statementlist';
+				is $parsed.children.elems, 1;
+			}, 'q[]';
 		}, 'q{}';
 	}, 'string';
 }, 'single term';
