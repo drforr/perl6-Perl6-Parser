@@ -3,32 +3,49 @@ class Perl6::Tidy {
 
 	has $.debugging = False;
 
+	role Nesting {
+		has @.children;
+	}
+
 #`(
 	method boilerplate( Mu $parsed ) {
 		if $parsed.list {
-			die "statementlist: list"
+			if $parsed.hash {
+				die "list and hash"
+			}
+			die "list"
 		}
 		elsif $parsed.hash {
-			say "boilerplate:\n" ~ $parsed.dump if $.debugging;
-			die "statementlist: hash"
+			say "boilerplate:\n" ~ $parsed.hash.dump if $.debugging;
+			if $parsed.list {
+				die "hash and list"
+			}
+			if $parsed.hash.<key> {
+				die "Too many keys" if $parsed.hash.keys > 1;
+				die "key";
+			}
+			else {
+				die "No key found"
+			}
+			die "hash"
 		}
 		elsif $parsed.Int {
-			die "statementlist: Int"
+			die "Int"
 		}
 		elsif $parsed.Str {
-			die "statementlist: Str"
+			die "Str"
 		}
 		elsif $parsed.Bool {
-			die "statementlist: Bool"
+			die " Bool"
 		}
 		else {
-			die "statementlist: Unknown type"
+			die "Unknown type"
 		}
 	}
 )
 
 	# convert-hex-integers is just a sample.
-	role Formatter {
+	role Formatting {
 	}
 
 	method tidy( Str $text ) {
@@ -39,593 +56,628 @@ class Perl6::Tidy {
 
 		my $parsed = $g.parse( $text, :p( 0 ), :actions( $a ) );
 
-		say "boilerplate:\n" ~ $parsed.dump if $.debugging;
+		say "tidy:\n" ~ $parsed.dump if $.debugging;
 		if $parsed.list {
-			die "tidy: list"
+			die "list"
 		}
 		elsif $parsed.hash {
 			if $parsed.hash.<statementlist> {
+				die "Too many keys" if $parsed.hash.keys > 1;
 				self.statementlist(
 					$parsed.hash.<statementlist>
 				);
 			}
 			else {
-				die "tidy: hash"
+				die "hash"
 			}
 		}
 		elsif $parsed.Int {
-			die "tidy: Int"
+			die "Int"
 		}
 		elsif $parsed.Str {
-			die "tidy: Str"
+			die "Str"
 		}
 		elsif $parsed.Bool {
-			die "tidy: Bool"
+			die "Bool"
 		}
 		else {
-			die "tidy: Unknown type"
+			die "Unknown type"
 		}
 	}
 
-	role Formatted { }
-
-	class StatementList is Formatted {
-		has @.statement;
+	class statementlist does Nesting does Formatting {
 	}
 
 	method statementlist( Mu $parsed ) {
 		if $parsed.list {
-			die "statementlist: list"
+			die "list"
 		}
 		elsif $parsed.hash {
 			say "statementlist:\n" ~ $parsed.dump if $.debugging;
 			if $parsed.hash.<statement> {
-				my @statement;
+				die "Too many keys" if $parsed.hash.keys > 1;
+				my @children;
 				for $parsed.hash.<statement> {
-					@statement.push(
+					say "statementlist[]:\n" ~ $_.dump if $.debugging;
+					@children.push(
 						self.statement( $_ )
 					)
 				}
-				StatementList.new(
-					:statement(
-						@statement
+				statementlist.new(
+					:children(
+						@children
 					)
 				)
 			}
 			else {
-				StatementList.new
+				statementlist.new
 			}
 		}
 		elsif $parsed.Int {
-			die "statementlist: Int"
+			die "Int"
 		}
 		elsif $parsed.Str {
-			die "statementlist: Str"
+			die "Str"
 		}
 		elsif $parsed.Bool {
-			StatementList.new
+			statementlist.new
 		}
 		else {
-			die "statementlist: Unknown type"
+			die "Unknown type"
 		}
 	}
 
-	class Statement {
-		has @.statement;
+	class statement does Nesting does Formatting {
 	}
 
 	method statement( Mu $parsed ) {
 		if $parsed.list {
-			my @statement;
+			my @children;
 			for $parsed.list {
-				@statement.push(
+				say "statement[]:\n" ~ $_.dump if $.debugging;
+				@children.push(
 					self.EXPR( $_.hash.<EXPR> )
 				)
 			}
-			Statement.new(
-				:statement(
-					@statement
+			statement.new(
+				:children(
+					@children
 				)
 			)
 		}
 		elsif $parsed.hash {
 			say "statement:\n" ~ $parsed.dump if $.debugging;
 			if $parsed.hash.<EXPR> {
+				die "Too many keys" if $parsed.hash.keys > 1;
 				self.EXPR( $parsed.hash.<EXPR> )
 			}
 			else {
-				die "statementlist: hash"
+				die "hash"
 			}
 		}
 		elsif $parsed.Int {
-			die "statementlist: Int"
+			die "Int"
 		}
 		elsif $parsed.Str {
-			die "statementlist: Str"
+			die "Str"
 		}
 		elsif $parsed.Bool {
-			die "statementlist: Bool"
+			die "Bool"
 		}
 		else {
-			die "statementlist: Unknown type"
+			die "Unknown type"
 		}
 	}
 
-	method EXPR( Mu $parsed ) {
-		if $parsed.list {
-			die "EXPR: list"
-		}
-		elsif $parsed.hash {
-			say "EXPR:\n" ~ $parsed.dump if $.debugging;
-			if $parsed.hash.<value> {
-				self.value( $parsed.hash.<value> )
-			}
-			else {
-				die "EXPR: Unknown key"
-			}
-		}
-		elsif $parsed.Int {
-			die "EXPR: Int"
-		}
-		elsif $parsed.Str {
-			die "EXPR: Str"
-		}
-		elsif $parsed.Bool {
-			die "EXPR: Bool"
-		}
-		else {
-			die "EXPR: Unknown type"
-		}
+	class EXPR does Nesting does Formatting {
+		has $.postfix;
+		has $.OPER;
 	}
 
-	method value( Mu $parsed ) {
+	method sym( Mu $parsed ) {
 		if $parsed.list {
-			die "value: list"
+			die "list"
 		}
 		elsif $parsed.hash {
-			say "value:\n" ~ $parsed.dump if $.debugging;
-			if $parsed.hash.<number> {
-				self.number( $parsed.hash.<number> )
-			}
-			elsif $parsed.hash.<quote> {
-				self.quote( $parsed.hash.<quote> )
-			}
-			else {
-				die "value: Unknown key"
-			}
+			die "hash"
 		}
 		elsif $parsed.Int {
-			die "value: Int"
-		}
-		elsif $parsed.Str {
-			die "value: Str"
-		}
-		elsif $parsed.Bool {
-			die "value: Bool"
-		}
-		else {
-			die "value: Unknown type"
-		}
-	}
-
-	method number( Mu $parsed ) {
-		if $parsed.list {
-			die "number: list"
-		}
-		elsif $parsed.hash {
-			say "number:\n" ~ $parsed.dump if $.debugging;
-			if $parsed.hash.<numish> {
-				self.numish( $parsed.hash.<numish> )
-			}
-			else {
-				die "number: Unknown key"
-			}
-		}
-		elsif $parsed.Int {
-			die "number: Int"
-		}
-		elsif $parsed.Str {
-			die "number: Str"
-		}
-		elsif $parsed.Bool {
-			die "number: Bool"
-		}
-		else {
-			die "number: Unknown type"
-		}
-	}
-
-	method quote( Mu $parsed ) {
-		if $parsed.list {
-			die "quote: list"
-		}
-		elsif $parsed.hash {
-			say "quote:\n" ~ $parsed.dump if $.debugging;
-			if $parsed.hash.<nibble> {
-				self.nibble( $parsed.hash.<nibble> )
-			}
-			else {
-				die "quote: Unknown key"
-			}
-		}
-		elsif $parsed.Int {
-			die "quote: Int"
-		}
-		elsif $parsed.Str {
-			die "quote: Str"
-		}
-		elsif $parsed.Bool {
-			die "quote: Bool"
-		}
-		else {
-			die "quote: Unknown type"
-		}
-	}
-
-	method nibble( Mu $parsed ) {
-		if $parsed.list {
-			die "nibble: list"
-		}
-		elsif $parsed.hash {
-			say "nibble:\n" ~ $parsed.dump if $.debugging;
-			die "nibble: Unknown key"
-		}
-		elsif $parsed.Int {
-			die "nibble: Int"
+			die "Int"
 		}
 		elsif $parsed.Str {
 			$parsed.Str
 		}
 		elsif $parsed.Bool {
-			die "nibble: Bool"
+			die "Bool"
 		}
 		else {
-			die "nibble: Unknown type"
+			die "Unknown type"
+		}
+	}
+
+	method postfix( Mu $parsed ) {
+		if $parsed.list {
+			die "list"
+		}
+		elsif $parsed.hash {
+			say "statement:\n" ~ $parsed.dump if $.debugging;
+			if $parsed.hash.<sym> and
+			   $parsed.hash.<O> {
+				die "Too many keys" if $parsed.hash.keys > 2;
+				self.sym( $parsed.hash.<sym> )
+			}
+			else {
+				die "hash"
+			}
+		}
+		elsif $parsed.Int {
+			die "Int"
+		}
+		elsif $parsed.Str {
+			die "Str"
+		}
+		elsif $parsed.Bool {
+			die "Bool"
+		}
+		else {
+			die "Unknown type"
+		}
+	}
+
+	method OPER( Mu $parsed ) {
+		if $parsed.list {
+			die "list"
+		}
+		elsif $parsed.hash {
+			say "statement:\n" ~ $parsed.dump if $.debugging;
+			if $parsed.hash.<sym> and
+			   $parsed.hash.<O> {
+				die "Too many keys" if $parsed.hash.keys > 2;
+				self.sym( $parsed.hash.<sym> )
+			}
+			else {
+				die "hash"
+			}
+		}
+		elsif $parsed.Int {
+			die "Int"
+		}
+		elsif $parsed.Str {
+			die "Str"
+		}
+		elsif $parsed.Bool {
+			die "Bool"
+		}
+		else {
+			die "Unknown type"
+		}
+	}
+
+	method EXPR( Mu $parsed ) {
+		if $parsed.list {
+			my @children;
+			for $parsed.list {
+				say "EXPR[]:\n" ~ $_.dump if $.debugging;
+				if $_.hash.<value> {
+					@children.push(
+						self.value( $_.hash.<value> )
+					)
+				}
+				else {
+					die "Unknown key"
+				}
+			}
+			if $parsed.hash {
+				if $parsed.hash.<postfix> and
+				   $parsed.hash.<OPER> {
+					EXPR.new(
+						:children(
+							@children
+						),
+						:postfix(
+							self.postfix(
+								$parsed.hash.<postfix>
+							)
+						),
+						:OPER(
+							self.OPER(
+								$parsed.hash.<OPER>
+							)
+						),
+					)
+				}
+			}
+			else {
+				EXPR.new(
+					:children(
+						@children
+					)
+				)
+			}
+		}
+		elsif $parsed.hash {
+			say "EXPR:\n" ~ $parsed.dump if $.debugging;
+			if $parsed.hash.<value> {
+				die "Too many keys" if $parsed.hash.keys > 1;
+				self.value( $parsed.hash.<value> )
+			}
+			else {
+				die "Unknown key"
+			}
+		}
+		elsif $parsed.Int {
+			die "Int"
+		}
+		elsif $parsed.Str {
+			die "Str"
+		}
+		elsif $parsed.Bool {
+			die "Bool"
+		}
+		else {
+			die "Unknown type"
+		}
+	}
+
+	method value( Mu $parsed ) {
+		if $parsed.list {
+			die "list"
+		}
+		elsif $parsed.hash {
+			say "value:\n" ~ $parsed.dump if $.debugging;
+			if $parsed.hash.<number> {
+				die "Too many keys" if $parsed.hash.keys > 1;
+				self.number( $parsed.hash.<number> )
+			}
+			elsif $parsed.hash.<quote> {
+				die "Too many keys" if $parsed.hash.keys > 1;
+				self.quote( $parsed.hash.<quote> )
+			}
+			else {
+				die "Unknown key"
+			}
+		}
+		elsif $parsed.Int {
+			die "Int"
+		}
+		elsif $parsed.Str {
+			die "Str"
+		}
+		elsif $parsed.Bool {
+			die "Bool"
+		}
+		else {
+			die "Unknown type"
+		}
+	}
+
+	method number( Mu $parsed ) {
+		if $parsed.list {
+			die "list"
+		}
+		elsif $parsed.hash {
+			say "number:\n" ~ $parsed.dump if $.debugging;
+			if $parsed.hash.<numish> {
+				die "Too many keys" if $parsed.hash.keys > 1;
+				self.numish( $parsed.hash.<numish> )
+			}
+			else {
+				die "Unknown key"
+			}
+		}
+		elsif $parsed.Int {
+			die "Int"
+		}
+		elsif $parsed.Str {
+			die "Str"
+		}
+		elsif $parsed.Bool {
+			die "Bool"
+		}
+		else {
+			die "Unknown type"
+		}
+	}
+
+	method quote( Mu $parsed ) {
+		if $parsed.list {
+			die "list"
+		}
+		elsif $parsed.hash {
+			say "quote:\n" ~ $parsed.dump if $.debugging;
+			if $parsed.hash.<nibble> {
+				die "Too many keys" if $parsed.hash.keys > 1;
+				self.nibble( $parsed.hash.<nibble> )
+			}
+			else {
+				die "Unknown key"
+			}
+		}
+		elsif $parsed.Int {
+			die "Int"
+		}
+		elsif $parsed.Str {
+			die "Str"
+		}
+		elsif $parsed.Bool {
+			die "Bool"
+		}
+		else {
+			die "Unknown type"
+		}
+	}
+
+	method nibble( Mu $parsed ) {
+		if $parsed.list {
+			die "list"
+		}
+		elsif $parsed.hash {
+			die " Unknown key"
+		}
+		elsif $parsed.Int {
+			die "Int"
+		}
+		elsif $parsed.Str {
+			say "nibble:\n" ~ $parsed.Str if $.debugging;
+			$parsed.Str
+		}
+		elsif $parsed.Bool {
+			die "Bool"
+		}
+		else {
+			die "Unknown type"
 		}
 	}
 
 	method numish( Mu $parsed ) {
 		if $parsed.list {
-			die "numish: list"
+			die "list"
 		}
 		elsif $parsed.hash {
 			say "numish:\n" ~ $parsed.dump if $.debugging;
 			if $parsed.hash.<integer> {
+				die "Too many keys" if $parsed.hash.keys > 1;
 				self.integer( $parsed.hash.<integer> )
 			}
 			elsif $parsed.hash.<rad_number> {
+				die "Too many keys" if $parsed.hash.keys > 1;
 				self.rad_number( $parsed.hash.<rad_number> )
 			}
 			else {
-				die "numish: Unknown key"
+				die "Unknown key"
 			}
 		}
 		elsif $parsed.Int {
-			die "numish: Int"
+			die "Int"
 		}
 		elsif $parsed.Str {
-			die "number: Str"
+			die "Str"
 		}
 		elsif $parsed.Bool {
-			die "numish: Bool"
+			die "Bool"
 		}
 		else {
-			die "numish: Unknown type"
+			die "Unknown type"
 		}
 	}
 
 	method integer( Mu $parsed ) {
 		if $parsed.list {
-			die "integer: list"
+			die "list"
 		}
 		elsif $parsed.hash {
 			say "integer:\n" ~ $parsed.dump if $.debugging;
-			if $parsed.hash.<decint> {
+			if $parsed.hash.<decint> and
+			   $parsed.hash.<VALUE> {
+				die "Too many keys" if $parsed.hash.keys > 2;
 				self.decint( $parsed.hash.<decint> )
 			}
-			elsif $parsed.hash.<binint> {
+			elsif $parsed.hash.<binint> and
+			      $parsed.hash.<VALUE> {
+				die "Too many keys" if $parsed.hash.keys > 2;
 				self.binint( $parsed.hash.<binint> )
 			}
-			elsif $parsed.hash.<octint> {
+			elsif $parsed.hash.<octint> and
+			      $parsed.hash.<VALUE> {
+				die "Too many keys" if $parsed.hash.keys > 2;
 				self.octint( $parsed.hash.<octint> )
 			}
-			elsif $parsed.hash.<hexint> {
+			elsif $parsed.hash.<hexint> and
+			      $parsed.hash.<VALUE> {
+				die "Too many keys" if $parsed.hash.keys > 2;
 				self.hexint( $parsed.hash.<hexint> )
 			}
 			else {
-				die "integer: Unknown key"
+				die "Unknown key"
 			}
 		}
 		elsif $parsed.Int {
-			die "integer: Int"
+			die "Int"
 		}
 		elsif $parsed.Str {
-			die "integer: Str"
+			die "Str"
 		}
 		elsif $parsed.Bool {
-			die "integer: Bool"
+			die "Bool"
 		}
 		else {
-			die "integer: Unknown type"
+			die "Unknown type"
 		}
 	}
 
-	method circumfix( Mu $parsed ) {
-		if $parsed.list {
-			die "circumfix: list"
+	method circumfix_radix( Mu $circumfix, Mu $radix ) {
+		if $circumfix.list {
+			die "list"
 		}
-		elsif $parsed.hash {
-			say "circumfix:\n" ~ $parsed.dump if $.debugging;
-			if $parsed.hash.<semilist> {
-				self.semilist( $parsed.hash.<semilist> )
+		elsif $circumfix.hash {
+			say "circumfix:\n" ~ $circumfix.dump if $.debugging;
+			if $circumfix.hash.<semilist> {
+				die "Too many keys" if $circumfix.hash.keys > 1;
+				self.semilist( $circumfix.hash.<semilist> )
 			}
 			else {
-				die "circumfix: Unknown key"
+				die "Unknown key"
 			}
 		}
-		elsif $parsed.Int {
-			die "circumfix: Int"
+		elsif $circumfix.Int {
+			die "Int"
 		}
-		elsif $parsed.Str {
-			die "circumfix: Str"
+		elsif $circumfix.Str {
+			die "Str"
 		}
-		elsif $parsed.Bool {
-			die "circumfix: Bool"
+		elsif $circumfix.Bool {
+			die "Bool"
 		}
 		else {
-			die "circumfix: Unknown type"
+			die "Unknown type"
 		}
 	}
 
 	method semilist( Mu $parsed ) {
 		if $parsed.list {
-			die "semilist: list"
+			die "list"
 		}
 		elsif $parsed.hash {
 			say "semilist:\n" ~ $parsed.dump if $.debugging;
 			if $parsed.hash.<statement> {
+				die "Too many keys" if $parsed.hash.keys > 1;
 				self.statement( $parsed.hash.<statement> )
 			}
 			else {
-				die "semilist: Unknown key"
+				die "Unknown key"
 			}
 		}
 		elsif $parsed.Int {
-			die "semilist: Int"
+			die "Int"
 		}
 		elsif $parsed.Str {
-			die "semilist: Str"
+			die "Str"
 		}
 		elsif $parsed.Bool {
-			die "semilist: Bool"
+			die "Bool"
 		}
 		else {
-			die "semilist: Unknown type"
+			die "Unknown type"
 		}
 	}
 
 	method rad_number( Mu $parsed ) {
 		if $parsed.list {
-			die "rad_number: list"
+			die "list"
 		}
 		elsif $parsed.hash {
 			say "rad_number:\n" ~ $parsed.dump if $.debugging;
-			if $parsed.hash.<circumfix> {
-				self.circumfix( $parsed.hash.<circumfix> )
+			if $parsed.hash.<circumfix> and
+			   $parsed.hash.<radix> {
+				die "Too many keys" if $parsed.hash.keys > 4;
+				self.circumfix_radix(
+					$parsed.hash.<circumfix>,
+					$parsed.hash.<radix>
+				)
 			}
 			else {
-				die "rad_number: Unknown key"
+				die "Unknown key"
 			}
 		}
 		elsif $parsed.Int {
-			die "rad_number: Int"
+			die "Int"
 		}
 		elsif $parsed.Str {
-			die "rad_number: Str"
+			die "Str"
 		}
 		elsif $parsed.Bool {
-			die "rad_number: Bool"
+			die "Bool"
 		}
 		else {
-			die "rad_number: Unknown type"
+			die "Unknown type"
 		}
 	}
 
 	method binint( Mu $parsed ) {
 		if $parsed.list {
-			die "binint: list"
+			die "list"
 		}
 		elsif $parsed.hash {
-			say "binint:\n" ~ $parsed.dump if $.debugging;
-			die "binint: hash"
+			die "hash"
 		}
 		elsif $parsed.Int {
+			say "binint:\n" ~ $parsed.Int if $.debugging;
 			$parsed.Int
 		}
 		elsif $parsed.Str {
-			die "binint: Str"
+			die "Str"
 		}
 		elsif $parsed.Bool {
-			die "binint: Bool"
+			die "Bool"
 		}
 		else {
-			die "binint: Unknown type"
+			die "Unknown type"
 		}
 	}
 
 	method octint( Mu $parsed ) {
 		if $parsed.list {
-			die "octint: list"
+			die "list"
 		}
 		elsif $parsed.hash {
-			say "octint:\n" ~ $parsed.dump if $.debugging;
-			die "octint: hash"
+			die "hash"
 		}
 		elsif $parsed.Int {
+			say "octint:\n" ~ $parsed.Int if $.debugging;
 			$parsed.Int
 		}
 		elsif $parsed.Str {
-			die "octint: Str"
+			die "Str"
 		}
 		elsif $parsed.Bool {
-			die "octint: Bool"
+			die "Bool"
 		}
 		else {
-			die "octint: Unknown type"
+			die "Unknown type"
 		}
 	}
 
 	method decint( Mu $parsed ) {
 		if $parsed.list {
-			die "decint: list"
+			die "list"
 		}
 		elsif $parsed.hash {
-			say "decint:\n" ~ $parsed.dump if $.debugging;
-			die "decint: hash"
+			die "hash"
 		}
 		elsif $parsed.Int {
+			say "decint:\n" ~ $parsed.Int if $.debugging;
 			$parsed.Int
 		}
 		elsif $parsed.Str {
-			die "decint: Str"
+			die "Str"
 		}
 		elsif $parsed.Bool {
-			die "decint: Bool"
+			die "Bool"
 		}
 		else {
-			die "decint: Unknown type"
+			die "Unknown type"
 		}
 	}
 
 	method hexint( Mu $parsed ) {
 		if $parsed.list {
-			die "hexint: list"
+			die "list"
 		}
 		elsif $parsed.hash {
-			say "hexint:\n" ~ $parsed.dump if $.debugging;
-			die "hexint: hash"
+			die "hash"
 		}
 		elsif $parsed.Int {
+			say "hexint:\n" ~ $parsed.Int if $.debugging;
 			$parsed.Int
 		}
 		elsif $parsed.Str {
-			die "hexint: Str"
+			die "Str"
 		}
 		elsif $parsed.Bool {
-			die "hexint: Bool"
+			die "Bool"
 		}
 		else {
-			die "hexint: Unknown type"
+			die "Unknown type"
 		}
 	}
-
-#`(
-	method EXPR( Mu $parsed ) {
-		self.assert-hash( 'EXPR', $parsed, {
-			if $parsed.hash.<longname> and
-			   $parsed.hash.<args> {
-				self.longname-args(
-					$parsed.hash.<longname>,
-					$parsed.hash.<args>
-				)
-			}
-			elsif $parsed.hash.<identifier> and
-			      $parsed.hash.<args> {
-				self.identifier-args(
-					$parsed.hash.<identifier>,
-					$parsed.hash.<args>
-				)
-			}
-			elsif $parsed.hash.<value> {
-				self.value( $parsed.hash.<value> )
-			}
-			elsif $parsed.list {
-				my @items;
-				for $parsed.list {
-					my $item = self.EXPR-item( $_ );
-					@items.push( $item )
-				}
-				EXPR.new(
-					:items(
-						@items
-					)
-				)
-			}
-			else {
-die "EXPR: Unknown type"
-			}
-		} )
-	}
-
-
-	class LongnameArgs does Formatter {
-		has $.longname;
-		has @.args;
-	}
-
-	method longname-args( Mu $longname, Mu $args ) {
-		self.assert-Str( 'longname', $longname );
-		self.assert-hash-key( 'args', 'arglist', $args, {
-			LongnameArgs.new(
-				:longname(
-					$longname.Str
-				),
-				:args(
-					self.args( $args )
-				)
-			)
-		} )
-	}
-
-	class IdentifierArgs does Formatter {
-		has $.identifier;
-		has @.semiarglist;
-	}
-
-	method identifier-args( Mu $identifier, Mu $semiarglist ) {
-		self.assert-Str( 'identifier', $identifier );
-		self.assert-hash-key( 'identifier-args', 'semiarglist', $semiarglist, {
-			IdentifierArgs.new(
-				:identifier(
-					$identifier.Str
-				),
-				:semiarglist(
-					self.semiarglist( $semiarglist.hash.<semiarglist> )
-				)
-			)
-		} )
-	}
-
-	method arglist( Mu $parsed ) {
-		if $parsed.list {
-			self.assert-list( 'arglist', $parsed, {
-				my @items;
-				for $parsed.list {
-					self.assert-hash-with-key( 'arglist','EXPR', $_, {
-							my $expr = self.EXPR( $_.hash.<EXPR> );
-							@items.push( $expr )
-					} );
-				}
-				EXPR.new(
-					:items(
-						@items
-					)
-				)
-			} )
-		}
-		elsif $parsed.hash {
-			if $parsed.hash.<EXPR> {
-				self.assert-hash-key( 'arglist', 'EXPR', $parsed, {
-					self.EXPR( $parsed.hash.<EXPR> )
-				} )
-			}
-			else {
-die "aglist: Unknown key"
-			}
-		}
-		else {
-die "arglist: Unknown type"
-		}
-	}
-)
 }
