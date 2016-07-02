@@ -83,7 +83,7 @@ subtest sub {
 }, Q{integer};
 
 subtest sub {
-	plan 4;
+	plan 5;
 
 	subtest sub {
 		plan 2;
@@ -174,6 +174,34 @@ subtest sub {
 			is $parsed.children.elems, 1;
 		}, Q{interpolated};
 	}, Q{qq{}};
+
+	subtest sub {
+		plan 2;
+
+		subtest sub {
+			plan 2;
+
+			my $parsed = $pt.tidy(
+				Q{q:to/END/
+Hello world!
+END}
+			);
+			isa-ok $parsed, Q{Perl6::Tidy::statementlist};
+			is $parsed.children.elems, 1;
+		}, Q{q:to/END/, no spaces};
+
+		subtest sub {
+			plan 2;
+
+			my $parsed = $pt.tidy(
+				Q{q:to/END/
+  Hello world!
+  END}
+			);
+			isa-ok $parsed, Q{Perl6::Tidy::statementlist};
+			is $parsed.children.elems, 1;
+		}, Q{q:to/END/, spaces};
+	}, Q{q:to[]};
 }, Q{string};
 
 # vim: ft=perl6

@@ -185,6 +185,7 @@ class Perl6::Tidy {
 			die "Int"
 		}
 		elsif $parsed.Str {
+			say "sym:\n" ~ $parsed.Str if $.debugging;
 			$parsed.Str
 		}
 		elsif $parsed.Bool {
@@ -444,6 +445,82 @@ class Perl6::Tidy {
 					$parsed.hash.<B>
 				)
 			}
+			else {
+				die "Unknown type"
+			}
+		}
+		elsif $parsed.Int {
+			die "Int"
+		}
+		elsif $parsed.Str {
+			die "Str"
+		}
+		elsif $parsed.Bool {
+			die "Bool"
+		}
+		else {
+			die "Unknown type"
+		}
+	}
+
+	class identifier does Nesting does Formatting {
+	}
+
+	method identifier( Mu $parsed ) {
+		if $parsed.list {
+			my @children;
+			for $parsed.list {
+				say "identifier[]:\n" ~ $_.Str if $.debugging;
+				@children.push(
+					$_.Str
+				)
+			}
+			identifier.new(
+				:children(
+					@children
+				)
+			)
+		}
+		elsif $parsed.hash {
+			die "hash"
+		}
+		elsif $parsed.Int {
+			die "Int"
+		}
+		elsif $parsed.Str {
+			say "identifier:\n" ~ $parsed.Str if $.debugging;
+			$parsed.Str
+		}
+		elsif $parsed.Bool {
+			die "Bool"
+		}
+		else {
+			die "Unknown type"
+		}
+	}
+
+	class quotepair does Nesting does Formatting {
+	}
+
+	method quotepair( Mu $parsed ) {
+		if $parsed.list {
+			my @children;
+			for $parsed.list {
+				say "quotepair[]:\n" ~ $_.dump if $.debugging;
+				@children.push(
+					self.identifier(
+						$_.hash.<identifier>
+					)
+				)
+			}
+			quotepair.new(
+				:children(
+					@children
+				)
+			)
+		}
+		elsif $parsed.hash {
+			die "hash"
 		}
 		elsif $parsed.Int {
 			die "Int"
@@ -465,7 +542,12 @@ class Perl6::Tidy {
 		}
 		elsif $babble.hash {
 			say "babble_nibble:\n" ~ $babble.dump if $.debugging;
-			if $babble.hash.<B> {
+			if $babble.hash.<quotepair> {
+				self.quotepair(
+					$babble.hash.<quotepair>
+				)
+			}
+			elsif $babble.hash.<B> {
 				self.B(
 					$babble.hash.<B>
 				)
