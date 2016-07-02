@@ -120,6 +120,7 @@ class Perl6::Tidy {
 			die "Str"
 		}
 		elsif $parsed.Bool {
+			say "statemetlist:\n" ~ $parsed.Bool if $.debugging;
 			statementlist.new
 		}
 		else {
@@ -128,6 +129,34 @@ class Perl6::Tidy {
 	}
 
 	class statement does Nesting does Formatting {
+	}
+
+	method sigil_desigilname( Mu $sigil, Mu $desigilname ) {
+		if $desigilname.list {
+			die "list"
+		}
+		elsif $desigilname.hash {
+			say "sigil_desigilname:\n" ~ $desigilname.dump if $.debugging;
+			if $desigilname.hash.<longname> {
+				die "Too many keys" if $desigilname.hash.keys > 1;
+				self.longname( $desigilname.hash.<longname> )
+			}
+			else {
+				die "Unknown type"
+			}
+		}
+		elsif $desigilname.Int {
+			die "Int"
+		}
+		elsif $desigilname.Str {
+			die "Str"
+		}
+		elsif $desigilname.Bool {
+			die "Bool"
+		}
+		else {
+			die "Unknown type"
+		}
 	}
 
 	method statement( Mu $parsed ) {
@@ -150,6 +179,14 @@ class Perl6::Tidy {
 			if $parsed.hash.<EXPR> {
 				die "Too many keys" if $parsed.hash.keys > 1;
 				self.EXPR( $parsed.hash.<EXPR> )
+			}
+			elsif $parsed.hash.<sigil> and
+			      $parsed.hash.<desigilname> {
+				die "Too many keys" if $parsed.hash.keys > 2;
+				self.sigil_desigilname(
+					$parsed.hash.<sigil>,
+					$parsed.hash.<desigilname>,
+				)
 			}
 			else {
 				die "hash"
@@ -201,7 +238,7 @@ class Perl6::Tidy {
 			die "list"
 		}
 		elsif $parsed.hash {
-			say "statement:\n" ~ $parsed.dump if $.debugging;
+			say "postfix:\n" ~ $parsed.dump if $.debugging;
 			if $parsed.hash.<sym> and
 			   $parsed.hash.<O> {
 				die "Too many keys" if $parsed.hash.keys > 2;
@@ -230,11 +267,78 @@ class Perl6::Tidy {
 			die "list"
 		}
 		elsif $parsed.hash {
-			say "statement:\n" ~ $parsed.dump if $.debugging;
+			say "OPER:\n" ~ $parsed.dump if $.debugging;
 			if $parsed.hash.<sym> and
 			   $parsed.hash.<O> {
 				die "Too many keys" if $parsed.hash.keys > 2;
 				self.sym( $parsed.hash.<sym> )
+			}
+			else {
+				die "hash"
+			}
+		}
+		elsif $parsed.Int {
+			die "Int"
+		}
+		elsif $parsed.Str {
+			die "Str"
+		}
+		elsif $parsed.Bool {
+			die "Bool"
+		}
+		else {
+			die "Unknown type"
+		}
+	}
+
+	method name( Mu $parsed ) {
+		if $parsed.list {
+			die "list"
+		}
+		elsif $parsed.hash {
+			say "name:\n" ~ $parsed.dump if $.debugging;
+			# XXX fix this branch
+			if $parsed.hash.<identifier> and
+			   $parsed.hash.<morename> {
+				die "Too many keys" if $parsed.hash.keys > 2;
+				self.identifier_morename(
+					$parsed.hash.<identifier>,
+					$parsed.hash.<morename>
+				)
+			}
+			# XXX fix this branch
+			elsif $parsed.hash.<identifier> {
+				die "Too many keys" if $parsed.hash.keys > 2;
+				self.identifier( $parsed.hash.<identifier> )
+			}
+			else {
+				die "hash"
+			}
+		}
+		elsif $parsed.Int {
+			die "Int"
+		}
+		elsif $parsed.Str {
+			die "Str"
+		}
+		elsif $parsed.Bool {
+			die "Bool"
+		}
+		else {
+			die "Unknown type"
+		}
+	}
+
+	method longname( Mu $parsed ) {
+		if $parsed.list {
+			die "list"
+		}
+		elsif $parsed.hash {
+			say "longname:\n" ~ $parsed.dump if $.debugging;
+			# XXX fix this branch...
+			if $parsed.hash.<name> {
+				die "Too many keys" if $parsed.hash.keys > 2;
+				self.name( $parsed.hash.<name> )
 			}
 			else {
 				die "hash"
@@ -281,7 +385,7 @@ class Perl6::Tidy {
 			die "list"
 		}
 		elsif $parsed.hash {
-			say "statement:\n" ~ $parsed.dump if $.debugging;
+			say "variable:\n" ~ $parsed.dump if $.debugging;
 			if $parsed.hash.<twigil> and
 			   $parsed.hash.<sigil> and
                            $parsed.hash.<desigilname> {
@@ -292,8 +396,16 @@ class Perl6::Tidy {
 					$parsed.hash.<desigilname>
 				)
 			}
+			elsif $parsed.hash.<sigil> and
+                              $parsed.hash.<desigilname> {
+				die "Too many keys" if $parsed.hash.keys > 2;
+				self.sigil_desigilname(
+					$parsed.hash.<sigil>,
+					$parsed.hash.<desigilname>
+				)
+			}
 			else {
-				die "hash"
+				die "Unknown key"
 			}
 		}
 		elsif $parsed.Int {
@@ -364,6 +476,10 @@ class Perl6::Tidy {
 			elsif $parsed.hash.<variable> {
 				die "Too many keys" if $parsed.hash.keys > 1;
 				self.variable( $parsed.hash.<variable> )
+			}
+			elsif $parsed.hash.<longname> {
+				die "Too many keys" if $parsed.hash.keys > 1;
+				self.longname( $parsed.hash.<longname> )
 			}
 			else {
 				die "Unknown key"
@@ -529,6 +645,39 @@ class Perl6::Tidy {
 	class identifier does Nesting does Formatting {
 	}
 
+	method identifier_morename( Mu $identifier, Mu $morename ) {
+		if $identifier.list {
+			my @children;
+			for $identifier.list {
+				say "identifier_morename[]:\n" ~ $_.Str if $.debugging;
+				@children.push(
+					$_.Str
+				)
+			}
+			identifier.new(
+				:children(
+					@children
+				)
+			)
+		}
+		elsif $identifier.hash {
+			die "hash"
+		}
+		elsif $identifier.Int {
+			die "Int"
+		}
+		elsif $identifier.Str {
+			say "identifier_morename:\n" ~ $identifier.Str if $.debugging;
+			$identifier.Str
+		}
+		elsif $identifier.Bool {
+			die "Bool"
+		}
+		else {
+			die "Unknown type"
+		}
+	}
+
 	method identifier( Mu $parsed ) {
 		if $parsed.list {
 			my @children;
@@ -669,7 +818,7 @@ class Perl6::Tidy {
 			die "list"
 		}
 		elsif $parsed.hash {
-			die " Unknown key"
+			die "hash"
 		}
 		elsif $parsed.Int {
 			die "Int"
@@ -677,6 +826,92 @@ class Perl6::Tidy {
 		elsif $parsed.Str {
 			say "nibble:\n" ~ $parsed.Str if $.debugging;
 			$parsed.Str
+		}
+		elsif $parsed.Bool {
+			die "Bool"
+		}
+		else {
+			die "Unknown type"
+		}
+	}
+
+	method int_coeff_frac( Mu $int, Mu $coeff, Mu $frac ) {
+		if $int.list {
+			die "list"
+		}
+		elsif $int.hash {
+			die "hash"
+		}
+		elsif $int.Int {
+			say "int_coeff_frac:\n" ~ $int.Int if $.debugging;
+			$int.Int
+		}
+		elsif $int.Str {
+			die "Str"
+		}
+		elsif $int.Bool {
+			die "Bool"
+		}
+		else {
+			die "Unknown type"
+		}
+	}
+
+	method int_coeff_escale( Mu $int, Mu $coeff, Mu $escale ) {
+		if $int.list {
+			die "list"
+		}
+		elsif $int.hash {
+			die "hash"
+		}
+		elsif $int.Int {
+			say "int_coeff_escale:\n" ~ $int.Int if $.debugging;
+			$int.Int
+		}
+		elsif $int.Str {
+			die "Str"
+		}
+		elsif $int.Bool {
+			die "Bool"
+		}
+		else {
+			die "Unknown type"
+		}
+	}
+
+	method dec_number( Mu $parsed ) {
+		if $parsed.list {
+			die "list"
+		}
+		elsif $parsed.hash {
+			say "dec_number:\n" ~ $parsed.dump if $.debugging;
+			if $parsed.hash.<int> and
+			   $parsed.hash.<coeff> and
+			   $parsed.hash.<frac> {
+				self.int_coeff_frac(
+					$parsed.hash.<int>,
+					$parsed.hash.<coeff>,
+					$parsed.hash.<frac>
+				)
+			}
+			elsif $parsed.hash.<int> and
+			      $parsed.hash.<coeff> and
+			      $parsed.hash.<escale> {
+				self.int_coeff_escale(
+					$parsed.hash.<int>,
+					$parsed.hash.<coeff>,
+					$parsed.hash.<escale>
+				)
+			}
+			else {
+				die "Unknown key"
+			}
+		}
+		elsif $parsed.Int {
+			die "Int"
+		}
+		elsif $parsed.Str {
+			die "Str"
 		}
 		elsif $parsed.Bool {
 			die "Bool"
@@ -699,6 +934,10 @@ class Perl6::Tidy {
 			elsif $parsed.hash.<rad_number> {
 				die "Too many keys" if $parsed.hash.keys > 1;
 				self.rad_number( $parsed.hash.<rad_number> )
+			}
+			elsif $parsed.hash.<dec_number> {
+				die "Too many keys" if $parsed.hash.keys > 1;
+				self.dec_number( $parsed.hash.<dec_number> )
 			}
 			else {
 				die "Unknown key"
@@ -767,7 +1006,7 @@ class Perl6::Tidy {
 			die "list"
 		}
 		elsif $circumfix.hash {
-			say "circumfix:\n" ~ $circumfix.dump if $.debugging;
+			say "circumfix_radix:\n" ~ $circumfix.dump if $.debugging;
 			if $circumfix.hash.<semilist> {
 				die "Too many keys" if $circumfix.hash.keys > 1;
 				self.semilist( $circumfix.hash.<semilist> )
@@ -824,6 +1063,7 @@ class Perl6::Tidy {
 		}
 		elsif $parsed.hash {
 			say "rad_number:\n" ~ $parsed.dump if $.debugging;
+			# XXX fix this branch...
 			if $parsed.hash.<circumfix> and
 			   $parsed.hash.<radix> {
 				die "Too many keys" if $parsed.hash.keys > 4;

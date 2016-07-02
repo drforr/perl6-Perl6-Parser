@@ -4,14 +4,12 @@ use nqp;
 use Test;
 use Perl6::Tidy;
 
-plan 2;
+plan 5;
 
 my $pt = Perl6::Tidy.new( :debugging(True) );
 
-plan 2;
-
 subtest sub {
-	plan 7;
+	plan 9;
 
 	subtest sub {
 		plan 2;
@@ -72,6 +70,22 @@ subtest sub {
 		isa-ok $parsed, Q{Perl6::Tidy::statementlist};
 		is $parsed.children.elems, 1;
 	}, Q{base-13};
+
+	subtest sub {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{1.3} );
+		isa-ok $parsed, Q{Perl6::Tidy::statementlist};
+		is $parsed.children.elems, 1;
+	}, Q{rational};
+
+	subtest sub {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{1e3} );
+		isa-ok $parsed, Q{Perl6::Tidy::statementlist};
+		is $parsed.children.elems, 1;
+	}, Q{Num};
 
 	subtest sub {
 		plan 2;
@@ -205,7 +219,7 @@ END}
 }, Q{string};
 
 subtest sub {
-	plan 1;
+	plan 2;
 
 	subtest sub {
 		plan 2;
@@ -214,6 +228,46 @@ subtest sub {
 		isa-ok $parsed, Q{Perl6::Tidy::statementlist};
 		is $parsed.children.elems, 1;
 	}, Q{@*ARGS (is a global, so available everywhere)};
+
+	subtest sub {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{$Foo::Bar} );
+		isa-ok $parsed, Q{Perl6::Tidy::statementlist};
+		is $parsed.children.elems, 1;
+	}, Q{$Foo::Bar}
 }, Q{variable};
+
+subtest sub {
+	plan 2;
+
+	subtest sub {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{Int} );
+		isa-ok $parsed, Q{Perl6::Tidy::statementlist};
+		is $parsed.children.elems, 1;
+	}, Q{Int};
+
+	subtest sub {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{IO::Handle} );
+		isa-ok $parsed, Q{Perl6::Tidy::statementlist};
+		is $parsed.children.elems, 1;
+	}, Q{IO::Handle (Two package names)};
+}, Q{type};
+
+subtest sub {
+	plan 1;
+
+	subtest sub {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{pi} );
+		isa-ok $parsed, Q{Perl6::Tidy::statementlist};
+		is $parsed.children.elems, 1;
+	}, Q{pi};
+}, Q{constant};
 
 # vim: ft=perl6
