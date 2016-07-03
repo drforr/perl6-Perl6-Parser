@@ -182,6 +182,23 @@ class Perl6::Tidy {
 		die "Uncaught type"
 	}
 
+	method sign( Mu $parsed ) {
+		self.debug(
+			'sign',
+			'sign', $parsed
+		);
+
+		if $parsed.Bool {
+			return Node.new(
+				:type( 'sign' ),
+				:name(
+					$parsed.Bool
+				)
+			)
+		}
+		die "Uncaught type"
+	}
+
 	method postfix( Mu $parsed ) {
 		self.debug(
 			'postfix',
@@ -723,41 +740,6 @@ class Perl6::Tidy {
 		die "Uncaught type"
 	}
 
-	method babble_nibble( Mu $babble, Mu $nibble ) {
-		self.debug(
-			'babble_nibble',
-			'babble', $babble,
-			'nibble', $nibble
-		);
-
-		if $babble.hash {
-			if $babble.hash.<quotepair> {
-				my @child;
-				for $babble.hash.<quotepair> {
-					@child.push(
-						self.quotepair( $_ )
-					)
-				}
-				return Node.new(
-					:type( 'babble_nibble' ),
-					:child( @child )
-				)
-			}
-			elsif $babble.hash.<B> {
-				return Node.new(
-					:type( 'babble_nibble' ),
-					:name(
-						self.B(
-							$babble.hash.<B>
-						)
-					)
-				)
-			}
-			die "Uncaught key"
-		}
-		die "Uncaught type"
-	}
-
 	method quibble( Mu $parsed ) {
 		self.debug(
 			'quibble',
@@ -769,9 +751,13 @@ class Perl6::Tidy {
 			   $parsed.hash.<nibble> {
 				return Node.new(
 					:type( 'quibble' ),
-					:name(
-						self.babble_nibble(
-							$parsed.hash.<babble>,
+					:babble(
+						self.babble(
+							$parsed.hash.<babble>
+						)
+					),
+					:nibble(
+						self.nibble(
 							$parsed.hash.<nibble>
 						)
 					)
@@ -1017,50 +1003,6 @@ class Perl6::Tidy {
 		die "Uncaught type"
 	}
 
-	method int_coeff_frac( Mu $int, Mu $coeff, Mu $frac ) {
-		self.debug(
-			'int_coeff_frac',
-			'int',   $int,
-			'coeff', $coeff,
-			'frac',  $frac
-		);
-
-		if $int.hash {
-			die "hash"
-		}
-		if $int.Int {
-			return Node.new(
-				:type( 'int_coeff_frac' ),
-				:name(
-					$int.Int
-				)
-			)
-		}
-		die "Uncaught type"
-	}
-
-	method int_coeff_escale( Mu $int, Mu $coeff, Mu $escale ) {
-		self.debug(
-			'int_coeff_escale',
-			'int',    $int,
-			'coeff',  $coeff,
-			'escale', $escale
-		);
-
-		if $int.hash {
-			die "hash"
-		}
-		if $int.Int {
-			return Node.new(
-				:type( 'int_coeff_escale' ),
-				:name(
-					$int.Int
-				)
-			)
-		}
-		die "Uncaught type"
-	}
-
 	method dec_number( Mu $parsed ) {
 		self.debug(
 			'dec_number',
@@ -1073,13 +1015,21 @@ class Perl6::Tidy {
 			   $parsed.hash.<frac> {
 				return Node.new(
 					:type( 'dec_number' ),
-					:name(
-						self.int_coeff_frac(
-							$parsed.hash.<int>,
-							$parsed.hash.<coeff>,
+					:int(
+						self.int(
+							$parsed.hash.<int>
+						)
+					),
+					:coeff(
+						self.coeff(
+							$parsed.hash.<coeff>
+						)
+					),
+					:frac(
+						self.frac(
 							$parsed.hash.<frac>
 						)
-					)
+					),
 				)
 			}
 			elsif $parsed.hash.<int> and
@@ -1087,13 +1037,21 @@ class Perl6::Tidy {
 			      $parsed.hash.<escale> {
 				return Node.new(
 					:type( 'dec_number' ),
-					:name(
-						self.int_coeff_escale(
-							$parsed.hash.<int>,
-							$parsed.hash.<coeff>,
+					:int(
+						self.int(
+							$parsed.hash.<int>
+						)
+					),
+					:coeff(
+						self.coeff(
+							$parsed.hash.<coeff>
+						)
+					),
+					:escale(
+						self.escale(
 							$parsed.hash.<escale>
 						)
-					)
+					),
 				)
 			}
 			die "Uncaught key"
@@ -1350,6 +1308,96 @@ class Perl6::Tidy {
 						self.circumfix_radix(
 							$parsed.hash.<circumfix>,
 							$parsed.hash.<radix>
+						)
+					)
+				)
+			}
+			die "Uncaught key"
+		}
+		die "Uncaught type"
+	}
+
+	method int( Mu $parsed ) {
+		self.debug(
+			'int',
+			'int', $parsed
+		);
+
+		if $parsed.hash {
+			die "hash"
+		}
+		if $parsed.Int {
+			return Node.new(
+				:type( 'int' ),
+				:name(
+					$parsed.Int
+				)
+			)
+		}
+		die "Uncaught type"
+	}
+
+	method frac( Mu $parsed ) {
+		self.debug(
+			'frac',
+			'frac', $parsed
+		);
+
+		if $parsed.hash {
+			die "hash"
+		}
+		if $parsed.Int {
+			return Node.new(
+				:type( 'frac' ),
+				:name(
+					$parsed.Int
+				)
+			)
+		}
+		die "Uncaught type"
+	}
+
+	method coeff( Mu $parsed ) {
+		self.debug(
+			'coeff',
+			'coeff', $parsed
+		);
+
+		if $parsed.hash {
+			die "hash"
+		}
+		if $parsed.Int {
+			return Node.new(
+				:type( 'coeff' ),
+				:name(
+					$parsed.Int
+				)
+			)
+		}
+		die "Uncaught type"
+	}
+
+	method escale( Mu $parsed ) {
+		self.debug(
+			'escale',
+			'escale', $parsed
+		);
+
+		if $parsed.hash {
+			if $parsed.hash.<sign> and
+			   $parsed.hash.<decint> {
+				die "Too many keys"
+					if $parsed.hash.keys > 2;
+				return Node.new(
+					:type( 'escale' ),
+					:sign(
+						self.sign(
+							$parsed.hash.<sign>
+						)
+					),
+					:decint(
+						self.decint(
+							$parsed.hash.<decint>
 						)
 					)
 				)
