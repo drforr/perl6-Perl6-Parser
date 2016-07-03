@@ -37,10 +37,10 @@ class Perl6::Tidy {
 				say "$key\[\]:\n" ~ $_.dump
 			}
 		}
-		say "$key\{\}:\n" ~ $value.dump      if $value.hash;
-		say "\+$key: "    ~ $value.Int       if $value.Int;
-		say "\~$key: '"   ~ $value.Str ~ "'" if $value.Str;
-		say "\?$key: "    ~ ~?$value.Bool    if $value.Bool;
+		say "$key\{\}:\n" ~   $value.dump      if $value.hash;
+		say "\+$key: "    ~   $value.Int       if $value.Int;
+		say "\~$key: '"   ~   $value.Str ~ "'" if $value.Str;
+		say "\?$key: "    ~ ~?$value.Bool      if $value.Bool;
 	}
 
 	method debug( Str $name, *@inputs ) {
@@ -50,43 +50,6 @@ class Perl6::Tidy {
 		}
 		say "";
 	}
-
-#`(
-	method boilerplate( Mu $parsed ) {
-		if $parsed.list {
-			if $parsed.hash {
-				die "list and hash"
-			}
-			die "list"
-		}
-		elsif $parsed.hash {
-			say "boilerplate:\n" ~ $parsed.dump if $.debugging;
-			if $parsed.list {
-				die "hash and list"
-			}
-			if $parsed.hash.<key> {
-				die "Too many keys" if $parsed.hash.keys > 1;
-				die "key";
-			}
-			else {
-				die "No key found"
-			}
-			die "hash"
-		}
-		elsif $parsed.Int {
-			die "Int"
-		}
-		elsif $parsed.Str {
-			die "Str"
-		}
-		elsif $parsed.Bool {
-			die " Bool"
-		}
-		else {
-			die "Uncaught type"
-		}
-	}
-)
 
 	# convert-hex-integers is just a sample.
 	role Formatting {
@@ -160,7 +123,7 @@ class Perl6::Tidy {
 	method sigil_desigilname( Mu $sigil, Mu $desigilname ) {
 		self.debug(
 			'sigil_desigilname',
-			'sigil', $sigil,
+			'sigil',       $sigil,
 			'desigilname', $desigilname
 		);
 
@@ -341,8 +304,8 @@ class Perl6::Tidy {
 					 Mu $desigilname ) {
 		self.debug(
 			'twigil_sigil_desigilname',
-			'twigil', $twigil,
-			'sigil', $sigil,
+			'twigil',      $twigil,
+			'sigil',       $sigil,
 			'desigilname', $desigilname
 		);
 
@@ -895,9 +858,9 @@ class Perl6::Tidy {
 	method int_coeff_frac( Mu $int, Mu $coeff, Mu $frac ) {
 		self.debug(
 			'int_coeff_escale',
-			'int', $int,
+			'int',   $int,
 			'coeff', $coeff,
-			'frac', $frac
+			'frac',  $frac
 		);
 
 		if $int.hash {
@@ -912,8 +875,8 @@ class Perl6::Tidy {
 	method int_coeff_escale( Mu $int, Mu $coeff, Mu $escale ) {
 		self.debug(
 			'int_coeff_escale',
-			'int', $int,
-			'coeff', $coeff,
+			'int',    $int,
+			'coeff',  $coeff,
 			'escale', $escale
 		);
 
@@ -1037,7 +1000,7 @@ class Perl6::Tidy {
 		self.debug(
 			'circumfix',
 			'circumfix', $circumfix,
-			'radix', $radix
+			'radix',     $radix
 		);
 
 		if $circumfix.hash {
