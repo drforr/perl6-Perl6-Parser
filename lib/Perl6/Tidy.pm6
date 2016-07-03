@@ -87,8 +87,7 @@ class Perl6::Tidy {
 
 		my $parsed = $g.parse( $text, :p( 0 ), :actions( $a ) );
 
-		debug(	'tidy',
-			'tidy', $parsed ) if $.debugging;
+		debug( 'tidy', 'tidy', $parsed ) if $.debugging;
 
 		if $parsed.list {
 			die "list"
@@ -166,11 +165,14 @@ class Perl6::Tidy {
 	}
 
 	method sigil_desigilname( Mu $sigil, Mu $desigilname ) {
+		debug(	'sigil_desigilname',
+			'sigil', $sigil,
+			'desigilname', $desigilname ) if $.debugging;
+
 		if $desigilname.list {
 			die "list"
 		}
 		elsif $desigilname.hash {
-			say "sigil_desigilname:\n" ~ $desigilname.dump if $.debugging;
 			if $desigilname.hash.<longname> {
 				die "Too many keys" if $desigilname.hash.keys > 1;
 				self.longname( $desigilname.hash.<longname> )
@@ -249,6 +251,9 @@ class Perl6::Tidy {
 	}
 
 	method sym( Mu $parsed ) {
+		debug(	'sym',
+			'sym', $parsed ) if $.debugging;
+
 		if $parsed.list {
 			die "list"
 		}
@@ -259,7 +264,6 @@ class Perl6::Tidy {
 			die "Int"
 		}
 		elsif $parsed.Str {
-			say "sym:\n" ~ $parsed.Str if $.debugging;
 			$parsed.Str
 		}
 		elsif $parsed.Bool {
@@ -271,11 +275,13 @@ class Perl6::Tidy {
 	}
 
 	method postfix( Mu $parsed ) {
+		debug(	'postfix',
+			'postfix', $parsed ) if $.debugging;
+
 		if $parsed.list {
 			die "list"
 		}
 		elsif $parsed.hash {
-			say "postfix:\n" ~ $parsed.dump if $.debugging;
 			if $parsed.hash.<sym> and
 			   $parsed.hash.<O> {
 				die "Too many keys" if $parsed.hash.keys > 2;
@@ -300,11 +306,13 @@ class Perl6::Tidy {
 	}
 
 	method OPER( Mu $parsed ) {
+		debug(	'OPER',
+			'OPER', $parsed ) if $.debugging;
+
 		if $parsed.list {
 			die "list"
 		}
 		elsif $parsed.hash {
-			say "OPER:\n" ~ $parsed.dump if $.debugging;
 			if $parsed.hash.<sym> and
 			   $parsed.hash.<O> {
 				die "Too many keys" if $parsed.hash.keys > 2;
@@ -400,11 +408,15 @@ class Perl6::Tidy {
 	}
 
 	method twigil_sigil_desigilname( Mu $twigil, Mu $sigil, Mu $desigilname ) {
+		debug(	'twigil_sigil_desigilname',
+			'twigil', $twigil,
+			'sigil', $sigil,
+			'desigilname', $desigilname ) if $.debugging;
+
 		if $twigil.list {
 			die "list"
 		}
 		elsif $twigil.hash {
-			say "twigil_sigil_desigilname:\n" ~ $desigilname.Str if $.debugging;
 			$desigilname.Str
 		}
 		elsif $twigil.Int {
@@ -422,11 +434,13 @@ class Perl6::Tidy {
 	}
 
 	method variable( Mu $parsed ) {
+		debug(	'variable',
+			'variable', $parsed ) if $.debugging;
+
 		if $parsed.list {
 			die "list"
 		}
 		elsif $parsed.hash {
-			say "variable:\n" ~ $parsed.dump if $.debugging;
 			if $parsed.hash.<twigil> and
 			   $parsed.hash.<sigil> and
                            $parsed.hash.<desigilname> {
@@ -542,11 +556,13 @@ class Perl6::Tidy {
 	}
 
 	method value( Mu $parsed ) {
+		debug(	'value',
+			'value', $parsed ) if $.debugging;
+
 		if $parsed.list {
 			die "list"
 		}
 		elsif $parsed.hash {
-			say "value:\n" ~ $parsed.dump if $.debugging;
 			if $parsed.hash.<number> {
 				die "Too many keys" if $parsed.hash.keys > 1;
 				self.number( $parsed.hash.<number> )
@@ -574,11 +590,13 @@ class Perl6::Tidy {
 	}
 
 	method number( Mu $parsed ) {
+		debug(	'number',
+			'number', $parsed ) if $.debugging;
+
 		if $parsed.list {
 			die "list"
 		}
 		elsif $parsed.hash {
-			say "number:\n" ~ $parsed.dump if $.debugging;
 			if $parsed.hash.<numish> {
 				die "Too many keys" if $parsed.hash.keys > 1;
 				self.numish( $parsed.hash.<numish> )
@@ -602,11 +620,13 @@ class Perl6::Tidy {
 	}
 
 	method quote( Mu $parsed ) {
+		debug(	'quote',
+			'quote', $parsed ) if $.debugging;
+
 		if $parsed.list {
 			die "list"
 		}
 		elsif $parsed.hash {
-			say "quote:\n" ~ $parsed.dump if $.debugging;
 			if $parsed.hash.<nibble> {
 				die "Too many keys" if $parsed.hash.keys > 1;
 				self.nibble( $parsed.hash.<nibble> )
@@ -634,6 +654,9 @@ class Perl6::Tidy {
 	}
 
 	method B( Mu $parsed ) {
+		debug(	'B',
+			'B', $parsed ) if $.debugging;
+
 		if $parsed.list {
 			die "list"
 		}
@@ -647,7 +670,6 @@ class Perl6::Tidy {
 			die "Str"
 		}
 		elsif $parsed.Bool {
-			say "B:\n" ~ $parsed.Bool if $.debugging;
 			$parsed.Bool
 		}
 		else {
@@ -656,11 +678,13 @@ class Perl6::Tidy {
 	}
 
 	method babble( Mu $parsed ) {
+		debug(	'babble',
+			'babble', $parsed ) if $.debugging;
+
 		if $parsed.list {
 			die "list"
 		}
 		elsif $parsed.hash {
-			say "babble:\n" ~ $parsed.dump if $.debugging;
 			if $parsed.hash.<B> {
 				self.B(
 					$parsed.hash.<B>
@@ -793,11 +817,14 @@ class Perl6::Tidy {
 	}
 
 	method babble_nibble( Mu $babble, Mu $nibble ) {
+		debug(	'babble_nibble',
+			'babble', $babble,
+			'nibble', $nibble ) if $.debugging;
+
 		if $babble.list {
 			die "list"
 		}
 		elsif $babble.hash {
-			say "babble_nibble:\n" ~ $babble.dump if $.debugging;
 			if $babble.hash.<quotepair> {
 				self.quotepair(
 					$babble.hash.<quotepair>
@@ -827,11 +854,13 @@ class Perl6::Tidy {
 	}
 
 	method quibble( Mu $parsed ) {
+		debug(	'quibble',
+			'quibble', $parsed ) if $.debugging;
+
 		if $parsed.list {
 			die "list"
 		}
 		elsif $parsed.hash {
-			say "quibble:\n" ~ $parsed.dump if $.debugging;
 			if $parsed.hash.<babble> and
 			   $parsed.hash.<nibble> {
 				self.babble_nibble(
@@ -858,6 +887,9 @@ class Perl6::Tidy {
 	}
 
 	method nibble( Mu $parsed ) {
+		debug(	'nibble',
+			'nibble', $parsed ) if $.debugging;
+
 		if $parsed.list {
 			die "list"
 		}
@@ -868,7 +900,6 @@ class Perl6::Tidy {
 			die "Int"
 		}
 		elsif $parsed.Str {
-			say "nibble:\n" ~ $parsed.Str if $.debugging;
 			$parsed.Str
 		}
 		elsif $parsed.Bool {
@@ -880,6 +911,11 @@ class Perl6::Tidy {
 	}
 
 	method int_coeff_frac( Mu $int, Mu $coeff, Mu $frac ) {
+		debug(	'int_coeff_escale',
+			'int', $int,
+			'coeff', $coeff,
+			'frac', $frac ) if $.debugging;
+
 		if $int.list {
 			die "list"
 		}
@@ -887,7 +923,6 @@ class Perl6::Tidy {
 			die "hash"
 		}
 		elsif $int.Int {
-			say "int_coeff_frac:\n" ~ $int.Int if $.debugging;
 			$int.Int
 		}
 		elsif $int.Str {
@@ -902,6 +937,11 @@ class Perl6::Tidy {
 	}
 
 	method int_coeff_escale( Mu $int, Mu $coeff, Mu $escale ) {
+		debug(	'int_coeff_escale',
+			'int', $int,
+			'coeff', $coeff,
+			'escale', $escale ) if $.debugging;
+
 		if $int.list {
 			die "list"
 		}
@@ -909,7 +949,6 @@ class Perl6::Tidy {
 			die "hash"
 		}
 		elsif $int.Int {
-			say "int_coeff_escale:\n" ~ $int.Int if $.debugging;
 			$int.Int
 		}
 		elsif $int.Str {
@@ -924,11 +963,13 @@ class Perl6::Tidy {
 	}
 
 	method dec_number( Mu $parsed ) {
+		debug(	'dec_number',
+			'dec_number', $parsed ) if $.debugging;
+
 		if $parsed.list {
 			die "list"
 		}
 		elsif $parsed.hash {
-			say "dec_number:\n" ~ $parsed.dump if $.debugging;
 			if $parsed.hash.<int> and
 			   $parsed.hash.<coeff> and
 			   $parsed.hash.<frac> {
@@ -966,11 +1007,13 @@ class Perl6::Tidy {
 	}
 
 	method numish( Mu $parsed ) {
+		debug(	'numish',
+			'numish', $parsed ) if $.debugging;
+
 		if $parsed.list {
 			die "list"
 		}
 		elsif $parsed.hash {
-			say "numish:\n" ~ $parsed.dump if $.debugging;
 			if $parsed.hash.<integer> {
 				die "Too many keys" if $parsed.hash.keys > 1;
 				self.integer( $parsed.hash.<integer> )
@@ -1002,11 +1045,13 @@ class Perl6::Tidy {
 	}
 
 	method integer( Mu $parsed ) {
+		debug(	'integer',
+			'integer', $parsed ) if $.debugging;
+
 		if $parsed.list {
 			die "list"
 		}
 		elsif $parsed.hash {
-			say "integer:\n" ~ $parsed.dump if $.debugging;
 			if $parsed.hash.<decint> and
 			   $parsed.hash.<VALUE> {
 				die "Too many keys" if $parsed.hash.keys > 2;
@@ -1046,11 +1091,14 @@ class Perl6::Tidy {
 	}
 
 	method circumfix_radix( Mu $circumfix, Mu $radix ) {
+		debug(	'circumfix',
+			'circumfix', $circumfix,
+			'radix', $radix ) if $.debugging;
+
 		if $circumfix.list {
 			die "list"
 		}
 		elsif $circumfix.hash {
-			say "circumfix_radix:\n" ~ $circumfix.dump if $.debugging;
 			if $circumfix.hash.<semilist> {
 				die "Too many keys" if $circumfix.hash.keys > 1;
 				self.semilist( $circumfix.hash.<semilist> )
@@ -1077,16 +1125,24 @@ class Perl6::Tidy {
 	}
 
 	method semilist( Mu $parsed ) {
+		debug(	'semilist',
+			'semilist', $parsed ) if $.debugging;
+
 		if $parsed.list {
 			die "list"
 		}
 		elsif $parsed.hash {
-			say "semilist:\n" ~ $parsed.dump if $.debugging;
 			if $parsed.hash.<statement> {
 				die "Too many keys" if $parsed.hash.keys > 1;
+				my @children;
 				for $parsed.hash.<statement> {
-					self.statement( $_ )
+					@children.push(
+						self.statement( $_ )
+					)
 				}
+				semilist.new(
+					:children( @children )
+				)
 			}
 			else {
 				die "Unknown key"
@@ -1107,11 +1163,13 @@ class Perl6::Tidy {
 	}
 
 	method rad_number( Mu $parsed ) {
+		debug(	'rad_number',
+			'rad_number', $parsed ) if $.debugging;
+
 		if $parsed.list {
 			die "list"
 		}
 		elsif $parsed.hash {
-			say "rad_number:\n" ~ $parsed.dump if $.debugging;
 			# XXX fix this branch...
 			if $parsed.hash.<circumfix> and
 			   $parsed.hash.<radix> {
@@ -1140,6 +1198,9 @@ class Perl6::Tidy {
 	}
 
 	method binint( Mu $parsed ) {
+		debug(	'binint',
+			'binint', $parsed ) if $.debugging;
+
 		if $parsed.list {
 			die "list"
 		}
@@ -1147,7 +1208,6 @@ class Perl6::Tidy {
 			die "hash"
 		}
 		elsif $parsed.Int {
-			say "binint:\n" ~ $parsed.Int if $.debugging;
 			$parsed.Int
 		}
 		elsif $parsed.Str {
@@ -1162,6 +1222,9 @@ class Perl6::Tidy {
 	}
 
 	method octint( Mu $parsed ) {
+		debug(	'octint',
+			'octint', $parsed ) if $.debugging;
+
 		if $parsed.list {
 			die "list"
 		}
@@ -1169,7 +1232,6 @@ class Perl6::Tidy {
 			die "hash"
 		}
 		elsif $parsed.Int {
-			say "octint:\n" ~ $parsed.Int if $.debugging;
 			$parsed.Int
 		}
 		elsif $parsed.Str {
@@ -1184,6 +1246,9 @@ class Perl6::Tidy {
 	}
 
 	method decint( Mu $parsed ) {
+		debug(	'decint',
+			'decint', $parsed ) if $.debugging;
+
 		if $parsed.list {
 			die "list"
 		}
@@ -1191,7 +1256,6 @@ class Perl6::Tidy {
 			die "hash"
 		}
 		elsif $parsed.Int {
-			say "decint:\n" ~ $parsed.Int if $.debugging;
 			$parsed.Int
 		}
 		elsif $parsed.Str {
@@ -1206,6 +1270,9 @@ class Perl6::Tidy {
 	}
 
 	method hexint( Mu $parsed ) {
+		debug(	'hexint',
+			'hexint', $parsed ) if $.debugging;
+
 		if $parsed.list {
 			die "list"
 		}
@@ -1213,7 +1280,6 @@ class Perl6::Tidy {
 			die "hash"
 		}
 		elsif $parsed.Int {
-			say "hexint:\n" ~ $parsed.Int if $.debugging;
 			$parsed.Int
 		}
 		elsif $parsed.Str {
