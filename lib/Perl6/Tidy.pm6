@@ -7,6 +7,10 @@ class Perl6::Tidy {
 		has @.children;
 	}
 
+	role Naming {
+		has $.name;
+	}
+
 	sub _debug( Str $key, Mu $value ) {
 		my @types;
 
@@ -336,6 +340,9 @@ class Perl6::Tidy {
 		}
 	}
 
+	class name does Naming does Nesting does Formatting {
+	}
+
 	method name( Mu $parsed ) {
 		debug(	'name',
 			'name', $parsed ) if $.debugging;
@@ -348,9 +355,17 @@ class Perl6::Tidy {
 			if $parsed.hash.<identifier> and
 			   $parsed.hash.<morename> {
 				die "Too many keys" if $parsed.hash.keys > 2;
-				self.identifier_morename(
-					$parsed.hash.<identifier>,
-					$parsed.hash.<morename>
+				my @children;
+				for $parsed.hash.<morename> {
+					@children.push( $_ )
+				}
+				name.new(
+					:name(
+						$parsed.hash.<identifier>
+					),
+					:children(
+						@children
+					)
 				)
 			}
 			# XXX fix this branch
@@ -709,39 +724,6 @@ class Perl6::Tidy {
 	}
 
 	class identifier does Nesting does Formatting {
-	}
-
-	method identifier_morename( Mu $identifier, Mu $morename ) {
-		if $identifier.list {
-			my @children;
-			for $identifier.list {
-				say "identifier_morename[]:\n" ~ $_.Str if $.debugging;
-				@children.push(
-					$_.Str
-				)
-			}
-			identifier.new(
-				:children(
-					@children
-				)
-			)
-		}
-		elsif $identifier.hash {
-			die "hash"
-		}
-		elsif $identifier.Int {
-			die "Int"
-		}
-		elsif $identifier.Str {
-			say "identifier_morename:\n" ~ $identifier.Str if $.debugging;
-			$identifier.Str
-		}
-		elsif $identifier.Bool {
-			die "Bool"
-		}
-		else {
-			die "Unknown type"
-		}
 	}
 
 	method identifier( Mu $parsed ) {
