@@ -8,7 +8,7 @@ class Perl6::Tidy {
 	# naming scheme for child elements.
 	#
 	role Nesting {
-		has @.children;
+		has @.child;
 	}
 
 	# When a class needs to be given a name, or even just a value,
@@ -22,11 +22,11 @@ class Perl6::Tidy {
 	sub _debug( Str $key, Mu $value ) {
 		my @types;
 
-		@types.push( 'list' ) if $value.list();
-		@types.push( 'hash' ) if $value.hash();
-		@types.push( 'Int' )  if $value.Int();
-		@types.push( 'Str' )  if $value.Str();
-		@types.push( 'Bool' ) if $value.Bool();
+		@types.push( 'list' ) if $value.list;
+		@types.push( 'hash' ) if $value.hash;
+		@types.push( 'Int'  ) if $value.Int;
+		@types.push( 'Str'  ) if $value.Str;
+		@types.push( 'Bool' ) if $value.Bool;
 
 		die "$key: Unknown type" unless @types;
 
@@ -37,10 +37,10 @@ class Perl6::Tidy {
 				say "$key\[\]:\n" ~ $_.dump
 			}
 		}
-		say "$key\{\}:\n" ~ $value.dump if $value.hash;
-		say "\+$key: " ~ $value.Int if $value.Int;
-		say "\~$key: '" ~ $value.Str ~ "'" if $value.Str;
-		say "\?$key: " ~ ~?$value.Bool if $value.Bool;
+		say "$key\{\}:\n" ~ $value.dump      if $value.hash;
+		say "\+$key: "    ~ $value.Int       if $value.Int;
+		say "\~$key: '"   ~ $value.Str ~ "'" if $value.Str;
+		say "\?$key: "    ~ ~?$value.Bool    if $value.Bool;
 	}
 
 	sub debug( Str $name, *@inputs ) {
@@ -97,13 +97,18 @@ class Perl6::Tidy {
 		#$g.HOW.trace-on($g);
 		my $a := nqp::findmethod($compiler,'parseactions')($compiler);
 
-		my $parsed = $g.parse( $text, :p( 0 ), :actions( $a ) );
+		my $parsed = $g.parse(
+			$text,
+			:p( 0 ),
+			:actions( $a )
+		);
 
 		debug( 'tidy', 'tidy', $parsed ) if $.debugging;
 
 		if $parsed.hash {
 			if $parsed.hash.<statementlist> {
-				die "Too many keys" if $parsed.hash.keys > 1;
+				die "Too many keys"
+					if $parsed.hash.keys > 1;
 				return self.statementlist(
 					$parsed.hash.<statementlist>
 				);
@@ -124,16 +129,17 @@ class Perl6::Tidy {
 
 		if $parsed.hash {
 			if $parsed.hash.<statement> {
-				die "Too many keys" if $parsed.hash.keys > 1;
-				my @children;
+				die "Too many keys"
+					if $parsed.hash.keys > 1;
+				my @child;
 				for $parsed.hash.<statement> {
-					@children.push(
+					@child.push(
 						self.statement( $_ )
 					)
 				}
 				return statementlist.new(
-					:children(
-						@children
+					:child(
+						@child
 					)
 				)
 			}
@@ -155,8 +161,11 @@ class Perl6::Tidy {
 
 		if $desigilname.hash {
 			if $desigilname.hash.<longname> {
-				die "Too many keys" if $desigilname.hash.keys > 1;
-				return self.longname( $desigilname.hash.<longname> )
+				die "Too many keys"
+					if $desigilname.hash.keys > 1;
+				return self.longname(
+					$desigilname.hash.<longname>
+				)
 			}
 			die "Uncaught key"
 		}
@@ -168,26 +177,28 @@ class Perl6::Tidy {
 			'statement', $parsed ) if $.debugging;
 
 		if $parsed.list {
-			my @children;
+			my @child;
 			for $parsed.list {
-				@children.push(
+				@child.push(
 					self.EXPR( $_.hash.<EXPR> )
 				)
 			}
 			return statement.new(
-				:children(
-					@children
+				:child(
+					@child
 				)
 			)
 		}
 		elsif $parsed.hash {
 			if $parsed.hash.<EXPR> {
-				die "Too many keys" if $parsed.hash.keys > 1;
+				die "Too many keys"
+					if $parsed.hash.keys > 1;
 				return self.EXPR( $parsed.hash.<EXPR> )
 			}
 			elsif $parsed.hash.<sigil> and
 			      $parsed.hash.<desigilname> {
-				die "Too many keys" if $parsed.hash.keys > 2;
+				die "Too many keys"
+					if $parsed.hash.keys > 2;
 				return self.sigil_desigilname(
 					$parsed.hash.<sigil>,
 					$parsed.hash.<desigilname>,
@@ -218,8 +229,11 @@ class Perl6::Tidy {
 		if $parsed.hash {
 			if $parsed.hash.<sym> and
 			   $parsed.hash.<O> {
-				die "Too many keys" if $parsed.hash.keys > 2;
-				return self.sym( $parsed.hash.<sym> )
+				die "Too many keys"
+					if $parsed.hash.keys > 2;
+				return self.sym(
+					$parsed.hash.<sym>
+				)
 			}
 			die "Uncaught key"
 		}
@@ -233,8 +247,11 @@ class Perl6::Tidy {
 		if $parsed.hash {
 			if $parsed.hash.<sym> and
 			   $parsed.hash.<O> {
-				die "Too many keys" if $parsed.hash.keys > 2;
-				return self.sym( $parsed.hash.<sym> )
+				die "Too many keys"
+					if $parsed.hash.keys > 2;
+				return self.sym(
+					$parsed.hash.<sym>
+				)
 			}
 			die "Uncaught key"
 		}
@@ -252,23 +269,25 @@ class Perl6::Tidy {
 			# XXX fix this branch
 			if $parsed.hash.<identifier> and
 			   $parsed.hash.<morename> {
-				die "Too many keys" if $parsed.hash.keys > 2;
-				my @children;
+				die "Too many keys"
+					if $parsed.hash.keys > 2;
+				my @child;
 				for $parsed.hash.<morename> {
-					@children.push( $_ )
+					@child.push( $_ )
 				}
 				return name.new(
 					:name(
 						$parsed.hash.<identifier>
 					),
-					:children(
-						@children
+					:child(
+						@child
 					)
 				)
 			}
 			# XXX fix this branch
 			elsif $parsed.hash.<identifier> {
-				die "Too many keys" if $parsed.hash.keys > 2;
+				die "Too many keys"
+					if $parsed.hash.keys > 2;
 				return self.identifier(
 					$parsed.hash.<identifier>
 				)
@@ -285,15 +304,20 @@ class Perl6::Tidy {
 		if $parsed.hash {
 			# XXX fix this branch...
 			if $parsed.hash.<name> {
-				die "Too many keys" if $parsed.hash.keys > 2;
-				return self.name( $parsed.hash.<name> )
+				die "Too many keys"
+					if $parsed.hash.keys > 2;
+				return self.name(
+					$parsed.hash.<name>
+				)
 			}
 			die "Uncaught key"
 		}
 		die "Uncaught type"
 	}
 
-	method twigil_sigil_desigilname( Mu $twigil, Mu $sigil, Mu $desigilname ) {
+	method twigil_sigil_desigilname( Mu $twigil,
+					 Mu $sigil,
+					 Mu $desigilname ) {
 		debug(	'twigil_sigil_desigilname',
 			'twigil', $twigil,
 			'sigil', $sigil,
@@ -313,7 +337,8 @@ class Perl6::Tidy {
 			if $parsed.hash.<twigil> and
 			   $parsed.hash.<sigil> and
                            $parsed.hash.<desigilname> {
-				die "Too many keys" if $parsed.hash.keys > 3;
+				die "Too many keys"
+					if $parsed.hash.keys > 3;
 				return self.twigil_sigil_desigilname(
 					$parsed.hash.<twigil>,
 					$parsed.hash.<sigil>,
@@ -322,7 +347,8 @@ class Perl6::Tidy {
 			}
 			elsif $parsed.hash.<sigil> and
                               $parsed.hash.<desigilname> {
-				die "Too many keys" if $parsed.hash.keys > 2;
+				die "Too many keys"
+					if $parsed.hash.keys > 2;
 				return self.sigil_desigilname(
 					$parsed.hash.<sigil>,
 					$parsed.hash.<desigilname>
@@ -343,11 +369,13 @@ class Perl6::Tidy {
 			'EXPR', $parsed ) if $.debugging;
 
 		if $parsed.list {
-			my @children;
+			my @child;
 			for $parsed.list {
 				if $_.hash.<value> {
-					@children.push(
-						self.value( $_.hash.<value> )
+					@child.push(
+						self.value(
+							$_.hash.<value>
+						)
 					)
 				}
 				else {
@@ -358,8 +386,8 @@ class Perl6::Tidy {
 				if $parsed.hash.<postfix> and
 				   $parsed.hash.<OPER> {
 					return EXPR.new(
-						:children(
-							@children
+						:child(
+							@child
 						),
 						:postfix(
 							self.postfix(
@@ -377,24 +405,33 @@ class Perl6::Tidy {
 			}
 			else {
 				return EXPR.new(
-					:children(
-						@children
+					:child(
+						@child
 					)
 				)
 			}
 		}
 		elsif $parsed.hash {
 			if $parsed.hash.<value> {
-				die "Too many keys" if $parsed.hash.keys > 1;
-				return self.value( $parsed.hash.<value> )
+				die "Too many keys"
+					if $parsed.hash.keys > 1;
+				return self.value(
+					$parsed.hash.<value>
+				)
 			}
 			elsif $parsed.hash.<variable> {
-				die "Too many keys" if $parsed.hash.keys > 1;
-				return self.variable( $parsed.hash.<variable> )
+				die "Too many keys"
+					if $parsed.hash.keys > 1;
+				return self.variable(
+					$parsed.hash.<variable>
+				)
 			}
 			elsif $parsed.hash.<longname> {
-				die "Too many keys" if $parsed.hash.keys > 1;
-				return self.longname( $parsed.hash.<longname> )
+				die "Too many keys"
+					if $parsed.hash.keys > 1;
+				return self.longname(
+					$parsed.hash.<longname>
+				)
 			}
 			die "Uncaught key"
 		}
@@ -407,12 +444,18 @@ class Perl6::Tidy {
 
 		if $parsed.hash {
 			if $parsed.hash.<number> {
-				die "Too many keys" if $parsed.hash.keys > 1;
-				return self.number( $parsed.hash.<number> )
+				die "Too many keys"
+					if $parsed.hash.keys > 1;
+				return self.number(
+					$parsed.hash.<number>
+				)
 			}
 			elsif $parsed.hash.<quote> {
-				die "Too many keys" if $parsed.hash.keys > 1;
-				return self.quote( $parsed.hash.<quote> )
+				die "Too many keys"
+					if $parsed.hash.keys > 1;
+				return self.quote(
+					$parsed.hash.<quote>
+				)
 			}
 			die "Uncaught key"
 		}
@@ -425,8 +468,11 @@ class Perl6::Tidy {
 
 		if $parsed.hash {
 			if $parsed.hash.<numish> {
-				die "Too many keys" if $parsed.hash.keys > 1;
-				return self.numish( $parsed.hash.<numish> )
+				die "Too many keys"
+					if $parsed.hash.keys > 1;
+				return self.numish(
+					$parsed.hash.<numish>
+				)
 			}
 			die "Uncaught key"
 		}
@@ -439,12 +485,18 @@ class Perl6::Tidy {
 
 		if $parsed.hash {
 			if $parsed.hash.<nibble> {
-				die "Too many keys" if $parsed.hash.keys > 1;
-				return self.nibble( $parsed.hash.<nibble> )
+				die "Too many keys"
+					if $parsed.hash.keys > 1;
+				return self.nibble(
+					$parsed.hash.<nibble>
+				)
 			}
 			elsif $parsed.hash.<quibble> {
-				die "Too many keys" if $parsed.hash.keys > 1;
-				return self.quibble( $parsed.hash.<quibble> )
+				die "Too many keys"
+					if $parsed.hash.keys > 1;
+				return self.quibble(
+					$parsed.hash.<quibble>
+				)
 			}
 			die "Uncaught key"
 		}
@@ -490,15 +542,15 @@ class Perl6::Tidy {
 			die "hash"
 		}
 		if $parsed.list {
-			my @children;
+			my @child;
 			for $parsed.list {
-				@children.push(
+				@child.push(
 					$_.Str
 				)
 			}
 			return identifier.new(
-				:children(
-					@children
+				:child(
+					@child
 				)
 			)
 		}
@@ -536,15 +588,15 @@ class Perl6::Tidy {
 
 		if $babble.hash {
 			if $babble.hash.<quotepair> {
-				my @children;
+				my @child;
 				for $babble.hash.<quotepair> {
-					@children.push(
+					@child.push(
 						self.quotepair( $_ )
 					)
 				}
 				return babble_nibble.new(
-					:children(
-						@children
+					:child(
+						@child
 					)
 				)
 			}
@@ -594,7 +646,9 @@ class Perl6::Tidy {
 
 		if $parsed.hash {
 			if $parsed.hash.<atom> {
-				return self.atom( $parsed.hash.<atom> )
+				return self.atom(
+					$parsed.hash.<atom>
+				)
 			}
 			die "Uncaught key"
 		}
@@ -613,14 +667,14 @@ class Perl6::Tidy {
 
 		if $parsed.hash {
 			if $parsed.hash.<noun> {
-				my @children;
+				my @child;
 				for $parsed.hash.<noun> {
-					@children.push(
+					@child.push(
 						self.noun( $_ )
 					)
 				}
 				return termish.new(
-					:children( @children )
+					:child( @child )
 				)
 			}
 			die "Uncaught key"
@@ -640,14 +694,14 @@ class Perl6::Tidy {
 
 		if $parsed.hash {
 			if $parsed.hash.<termish> {
-				my @children;
+				my @child;
 				for $parsed.hash.<termish> {
-					@children.push(
+					@child.push(
 						self.termish( $_ )
 					)
 				}
 				return termconj.new(
-					:children( @children )
+					:child( @child )
 				)
 			}
 			die "Uncaught key"
@@ -667,14 +721,14 @@ class Perl6::Tidy {
 
 		if $parsed.hash {
 			if $parsed.hash.<termconj> {
-				my @children;
+				my @child;
 				for $parsed.hash.<termconj> {
-					@children.push(
+					@child.push(
 						self.termconj( $_ )
 					)
 				}
 				return termalt.new(
-					:children( @children )
+					:child( @child )
 				)
 			}
 			die "Uncaught key"
@@ -694,14 +748,14 @@ class Perl6::Tidy {
 
 		if $parsed.hash {
 			if $parsed.hash.<termalt> {
-				my @children;
+				my @child;
 				for $parsed.hash.<termalt> {
-					@children.push(
+					@child.push(
 						self.termalt( $_ )
 					)
 				}
 				return termconjseq.new(
-					:children( @children )
+					:child( @child )
 				)
 			}
 			die "Uncaught key"
@@ -721,14 +775,14 @@ class Perl6::Tidy {
 
 		if $parsed.hash {
 			if $parsed.hash.<termconjseq> {
-				my @children;
+				my @child;
 				for $parsed.hash.<termconjseq> {
-					@children.push(
+					@child.push(
 						self.termconjseq( $_ )
 					)
 				}
 				return termaltseq.new(
-					:children( @children )
+					:child( @child )
 				)
 			}
 			die "Uncaught key"
@@ -763,7 +817,9 @@ class Perl6::Tidy {
 
 		if $parsed.hash {
 			if $parsed.hash.<termseq> {
-				return self.termseq( $parsed.hash.<termseq> )
+				return self.termseq(
+					$parsed.hash.<termseq>
+				)
 			}
 			die "Uncaught key"
 		}
@@ -837,17 +893,22 @@ class Perl6::Tidy {
 
 		if $parsed.hash {
 			if $parsed.hash.<integer> {
-				die "Too many keys" if $parsed.hash.keys > 1;
-				return self.integer( $parsed.hash.<integer> )
+				die "Too many keys"
+					if $parsed.hash.keys > 1;
+				return self.integer(
+					$parsed.hash.<integer>
+				)
 			}
 			elsif $parsed.hash.<rad_number> {
-				die "Too many keys" if $parsed.hash.keys > 1;
+				die "Too many keys"
+					if $parsed.hash.keys > 1;
 				return self.rad_number(
 					$parsed.hash.<rad_number>
 				)
 			}
 			elsif $parsed.hash.<dec_number> {
-				die "Too many keys" if $parsed.hash.keys > 1;
+				die "Too many keys"
+					if $parsed.hash.keys > 1;
 				return self.dec_number(
 					$parsed.hash.<dec_number>
 				)
@@ -864,23 +925,35 @@ class Perl6::Tidy {
 		if $parsed.hash {
 			if $parsed.hash.<decint> and
 			   $parsed.hash.<VALUE> {
-				die "Too many keys" if $parsed.hash.keys > 2;
-				return self.decint( $parsed.hash.<decint> )
+				die "Too many keys"
+					if $parsed.hash.keys > 2;
+				return self.decint(
+					$parsed.hash.<decint>
+				)
 			}
 			elsif $parsed.hash.<binint> and
 			      $parsed.hash.<VALUE> {
-				die "Too many keys" if $parsed.hash.keys > 2;
-				return self.binint( $parsed.hash.<binint> )
+				die "Too many keys"
+					if $parsed.hash.keys > 2;
+				return self.binint(
+					$parsed.hash.<binint>
+				)
 			}
 			elsif $parsed.hash.<octint> and
 			      $parsed.hash.<VALUE> {
-				die "Too many keys" if $parsed.hash.keys > 2;
-				return self.octint( $parsed.hash.<octint> )
+				die "Too many keys"
+					if $parsed.hash.keys > 2;
+				return self.octint(
+					$parsed.hash.<octint>
+				)
 			}
 			elsif $parsed.hash.<hexint> and
 			      $parsed.hash.<VALUE> {
-				die "Too many keys" if $parsed.hash.keys > 2;
-				return self.hexint( $parsed.hash.<hexint> )
+				die "Too many keys"
+					if $parsed.hash.keys > 2;
+				return self.hexint(
+					$parsed.hash.<hexint>
+				)
 			}
 			die "Uncaught key"
 		}
@@ -894,7 +967,8 @@ class Perl6::Tidy {
 
 		if $circumfix.hash {
 			if $circumfix.hash.<semilist> {
-				die "Too many keys" if $circumfix.hash.keys > 1;
+				die "Too many keys"
+					if $circumfix.hash.keys > 1;
 				return self.semilist(
 					$circumfix.hash.<semilist>
 				)
@@ -913,15 +987,16 @@ class Perl6::Tidy {
 
 		if $parsed.hash {
 			if $parsed.hash.<statement> {
-				die "Too many keys" if $parsed.hash.keys > 1;
-				my @children;
+				die "Too many keys"
+					if $parsed.hash.keys > 1;
+				my @child;
 				for $parsed.hash.<statement> {
-					@children.push(
+					@child.push(
 						self.statement( $_ )
 					)
 				}
 				return semilist.new(
-					:children( @children )
+					:child( @child )
 				)
 			}
 			die "Uncaught key"
@@ -937,7 +1012,8 @@ class Perl6::Tidy {
 			# XXX fix this branch...
 			if $parsed.hash.<circumfix> and
 			   $parsed.hash.<radix> {
-				die "Too many keys" if $parsed.hash.keys > 4;
+				die "Too many keys"
+					if $parsed.hash.keys > 4;
 				return self.circumfix_radix(
 					$parsed.hash.<circumfix>,
 					$parsed.hash.<radix>
