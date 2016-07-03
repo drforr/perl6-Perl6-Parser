@@ -3,10 +3,18 @@ class Perl6::Tidy {
 
 	has $.debugging = False;
 
+	# When a class needs an arbitrary list of items,
+	# give it this role. That way we *always* have a consistent
+	# naming scheme for child elements.
+	#
 	role Nesting {
 		has @.children;
 	}
 
+	# When a class needs to be given a name, or even just a value,
+	# give it this role. That way we *always* have a consistent
+	# naming scheme for values or whatnot.
+	#
 	role Naming {
 		has $.name;
 	}
@@ -249,11 +257,6 @@ class Perl6::Tidy {
 		}
 	}
 
-	class EXPR does Nesting does Formatting {
-		has $.postfix;
-		has $.OPER;
-	}
-
 	method sym( Mu $parsed ) {
 		debug(	'sym',
 			'sym', $parsed ) if $.debugging;
@@ -490,6 +493,11 @@ class Perl6::Tidy {
 		else {
 			die "Unknown type"
 		}
+	}
+
+	class EXPR does Nesting does Formatting {
+		has $.postfix;
+		has $.OPER;
 	}
 
 	method EXPR( Mu $parsed ) {
@@ -765,24 +773,21 @@ class Perl6::Tidy {
 	}
 
 	method quotepair( Mu $parsed ) {
+		debug(	'quotepair',
+			'quotepair', $parsed ) if $.debugging;
+
 		if $parsed.list {
-			my @children;
-			for $parsed.list {
-				say "quotepair[]:\n" ~ $_.dump if $.debugging;
-				@children.push(
-					self.identifier(
-						$_.hash.<identifier>
-					)
-				)
-			}
-			quotepair.new(
-				:children(
-					@children
-				)
-			)
+			die "list"
 		}
 		elsif $parsed.hash {
-			die "hash"
+			if $parsed.hash.<identifier> {
+				self.identifier(
+					$parsed.hash.<identifier>
+				)
+			}
+			else {
+				die "Unknown key"
+			}
 		}
 		elsif $parsed.Int {
 			die "Int"
@@ -798,6 +803,9 @@ class Perl6::Tidy {
 		}
 	}
 
+	class babble_nibble does Nesting does Formatting {
+	}
+
 	method babble_nibble( Mu $babble, Mu $nibble ) {
 		debug(	'babble_nibble',
 			'babble', $babble,
@@ -808,8 +816,16 @@ class Perl6::Tidy {
 		}
 		elsif $babble.hash {
 			if $babble.hash.<quotepair> {
-				self.quotepair(
-					$babble.hash.<quotepair>
+				my @children;
+				for $babble.hash.<quotepair> {
+					@children.push(
+						self.quotepair( $_ )
+					)
+				}
+				babble_nibble.new(
+					:children(
+						@children
+					)
 				)
 			}
 			elsif $babble.hash.<B> {
