@@ -1234,31 +1234,6 @@ class Perl6::Tidy {
 		die "Uncaught type"
 	}
 
-	method circumfix_radix( Mu $circumfix, Mu $radix ) {
-		self.debug(
-			'circumfix',
-			'circumfix', $circumfix,
-			'radix',     $radix
-		);
-
-		if $circumfix.hash {
-			if $circumfix.hash.<semilist> {
-				die "Too many keys"
-					if $circumfix.hash.keys > 1;
-				return Node.new(
-					:type( 'circumfix_radix' ),
-					:name(
-						self.semilist(
-							$circumfix.hash.<semilist>
-						)
-					)
-				)
-			}
-			die "Uncaught key"
-		}
-		die "Uncaught type"
-	}
-
 	method semilist( Mu $parsed ) {
 		self.debug(
 			'semilist',
@@ -1304,10 +1279,14 @@ class Perl6::Tidy {
 					if $parsed.hash.keys > 4;
 				return Node.new(
 					:type( 'rad_number' ),
-					:name(
-						self.circumfix_radix(
+					:circumfix(
+						self.circumfix(
 							$parsed.hash.<circumfix>,
-							$parsed.hash.<radix>
+						)
+					),
+					:radix(
+						self.radix(
+							$parsed.hash.<radix>,
 						)
 					)
 				)
@@ -1329,6 +1308,26 @@ class Perl6::Tidy {
 		if $parsed.Int {
 			return Node.new(
 				:type( 'int' ),
+				:name(
+					$parsed.Int
+				)
+			)
+		}
+		die "Uncaught type"
+	}
+
+	method radix( Mu $parsed ) {
+		self.debug(
+			'radix',
+			'radix', $parsed
+		);
+
+		if $parsed.hash {
+			die "hash"
+		}
+		if $parsed.Int {
+			return Node.new(
+				:type( 'radix' ),
 				:name(
 					$parsed.Int
 				)
