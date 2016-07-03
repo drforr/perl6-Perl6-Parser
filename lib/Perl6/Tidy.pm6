@@ -434,7 +434,7 @@ class Perl6::Tidy {
 				)
 			}
 		}
-		elsif $parsed.hash {
+		if $parsed.hash {
 			if $parsed.hash.<value> {
 				die "Too many keys"
 					if $parsed.hash.keys > 1;
@@ -480,6 +480,18 @@ class Perl6::Tidy {
 					:name(
 						self.longname(
 							$parsed.hash.<longname>
+						)
+					)
+				)
+			}
+			elsif $parsed.hash.<circumfix> {
+				die "Too many keys"
+					if $parsed.hash.keys > 1;
+				return Node.new(
+					:type( 'EXPR' ),
+					:name(
+						self.circumfix(
+							$parsed.hash.<circumfix>
 						)
 					)
 				)
@@ -1173,6 +1185,69 @@ class Perl6::Tidy {
 		die "Uncaught type"
 	}
 
+	method circumfix( Mu $parsed ) {
+		self.debug(
+			'circumfix',
+			'circumfix', $parsed
+		);
+
+		if $parsed.hash {
+			if $parsed.hash.<semilist> {
+				die "Too many keys"
+					if $parsed.hash.keys > 2;
+				return Node.new(
+					:type( 'circumfix' ),
+					:name(
+						self.semilist(
+							$parsed.hash.<semilist>
+						)
+					)
+				)
+			}
+			elsif $parsed.hash.<binint> and
+			      $parsed.hash.<VALUE> {
+				die "Too many keys"
+					if $parsed.hash.keys > 2;
+				return Node.new(
+					:type( 'integer' ),
+					:name(
+						self.binint(
+							$parsed.hash.<binint>
+						)
+					)
+				)
+			}
+			elsif $parsed.hash.<octint> and
+			      $parsed.hash.<VALUE> {
+				die "Too many keys"
+					if $parsed.hash.keys > 2;
+				return Node.new(
+					:type( 'integer' ),
+					:name(
+						self.octint(
+							$parsed.hash.<octint>
+						)
+					)
+				)
+			}
+			elsif $parsed.hash.<hexint> and
+			      $parsed.hash.<VALUE> {
+				die "Too many keys"
+					if $parsed.hash.keys > 2;
+				return Node.new(
+					:type( 'integer' ),
+					:name(
+						self.hexint(
+							$parsed.hash.<hexint>
+						)
+					)
+				)
+			}
+			die "Uncaught key"
+		}
+		die "Uncaught type"
+	}
+
 	method circumfix_radix( Mu $circumfix, Mu $radix ) {
 		self.debug(
 			'circumfix',
@@ -1217,6 +1292,11 @@ class Perl6::Tidy {
 				return Node.new(
 					:type( 'semilist' ),
 					:child( @child )
+				)
+			}
+			elsif $parsed.hash:defined<statement> {
+				return Node.new(
+					:type( 'semilist' )
 				)
 			}
 			die "Uncaught key"
