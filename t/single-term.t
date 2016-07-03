@@ -270,4 +270,16 @@ subtest sub {
 	}, Q{pi};
 }, Q{constant};
 
+#subtest sub {
+#	plan 1;
+#
+#	subtest sub {
+#		plan 2;
+#
+#		my $parsed = $pt.tidy( Q{/pi/} );
+#		isa-ok $parsed, Q{Perl6::Tidy::statementlist};
+#		is $parsed.children.elems, 1;
+#	}, Q{/pi/};
+#}, Q{regex};
+
 # vim: ft=perl6

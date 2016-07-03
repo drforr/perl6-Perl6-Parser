@@ -82,7 +82,7 @@ class Perl6::Tidy {
 			die " Bool"
 		}
 		else {
-			die "Unknown type"
+			die "Uncaught type"
 		}
 	}
 )
@@ -101,32 +101,18 @@ class Perl6::Tidy {
 
 		debug( 'tidy', 'tidy', $parsed ) if $.debugging;
 
-		if $parsed.list {
-			die "list"
-		}
-		elsif $parsed.hash {
+		if $parsed.hash {
 			if $parsed.hash.<statementlist> {
 				die "Too many keys" if $parsed.hash.keys > 1;
-				self.statementlist(
+				return self.statementlist(
 					$parsed.hash.<statementlist>
 				);
 			}
-			else {
-				die "hash"
-			}
+
+			die "Uncaught key"
 		}
-		elsif $parsed.Int {
-			die "Int"
-		}
-		elsif $parsed.Str {
-			die "Str"
-		}
-		elsif $parsed.Bool {
-			die "Bool"
-		}
-		else {
-			die "Unknown type"
-		}
+
+		die "Uncaught type"
 	}
 
 	class statementlist does Nesting does Formatting {
@@ -136,41 +122,27 @@ class Perl6::Tidy {
 		debug(	'statementlist',
 			'statementlist', $parsed ) if $.debugging;
 
-		if $parsed.list {
-			die "list"
-		}
-		elsif $parsed.hash {
+		if $parsed.hash {
 			if $parsed.hash.<statement> {
 				die "Too many keys" if $parsed.hash.keys > 1;
 				my @children;
 				for $parsed.hash.<statement> {
-					say "statementlist[]:\n" ~ $_.dump if $.debugging;
 					@children.push(
 						self.statement( $_ )
 					)
 				}
-				statementlist.new(
+				return statementlist.new(
 					:children(
 						@children
 					)
 				)
 			}
-			else {
-				statementlist.new
-			}
-		}
-		elsif $parsed.Int {
-			die "Int"
-		}
-		elsif $parsed.Str {
-			die "Str"
+			return statementlist.new
 		}
 		elsif $parsed.Bool {
-			statementlist.new
+			return statementlist.new
 		}
-		else {
-			die "Unknown type"
-		}
+		die "Uncaught type"
 	}
 
 	class statement does Nesting does Formatting {
@@ -181,30 +153,14 @@ class Perl6::Tidy {
 			'sigil', $sigil,
 			'desigilname', $desigilname ) if $.debugging;
 
-		if $desigilname.list {
-			die "list"
-		}
-		elsif $desigilname.hash {
+		if $desigilname.hash {
 			if $desigilname.hash.<longname> {
 				die "Too many keys" if $desigilname.hash.keys > 1;
-				self.longname( $desigilname.hash.<longname> )
+				return self.longname( $desigilname.hash.<longname> )
 			}
-			else {
-				die "Unknown type"
-			}
+			die "Uncaught key"
 		}
-		elsif $desigilname.Int {
-			die "Int"
-		}
-		elsif $desigilname.Str {
-			die "Str"
-		}
-		elsif $desigilname.Bool {
-			die "Bool"
-		}
-		else {
-			die "Unknown type"
-		}
+		die "Uncaught type"
 	}
 
 	method statement( Mu $parsed ) {
@@ -214,133 +170,72 @@ class Perl6::Tidy {
 		if $parsed.list {
 			my @children;
 			for $parsed.list {
-				say "statement[]:\n" ~ $_.dump if $.debugging;
 				@children.push(
 					self.EXPR( $_.hash.<EXPR> )
 				)
 			}
-			statement.new(
+			return statement.new(
 				:children(
 					@children
 				)
 			)
 		}
 		elsif $parsed.hash {
-			say "statement:\n" ~ $parsed.dump if $.debugging;
 			if $parsed.hash.<EXPR> {
 				die "Too many keys" if $parsed.hash.keys > 1;
-				self.EXPR( $parsed.hash.<EXPR> )
+				return self.EXPR( $parsed.hash.<EXPR> )
 			}
 			elsif $parsed.hash.<sigil> and
 			      $parsed.hash.<desigilname> {
 				die "Too many keys" if $parsed.hash.keys > 2;
-				self.sigil_desigilname(
+				return self.sigil_desigilname(
 					$parsed.hash.<sigil>,
 					$parsed.hash.<desigilname>,
 				)
 			}
-			else {
-				die "hash"
-			}
+			die "Uncaught key"
 		}
-		elsif $parsed.Int {
-			die "Int"
-		}
-		elsif $parsed.Str {
-			die "Str"
-		}
-		elsif $parsed.Bool {
-			die "Bool"
-		}
-		else {
-			die "Unknown type"
-		}
+		die "Uncaught type"
 	}
 
 	method sym( Mu $parsed ) {
 		debug(	'sym',
 			'sym', $parsed ) if $.debugging;
 
-		if $parsed.list {
-			die "list"
+		if $parsed.Str {
+			return $parsed.Str
 		}
-		elsif $parsed.hash {
-			die "hash"
-		}
-		elsif $parsed.Int {
-			die "Int"
-		}
-		elsif $parsed.Str {
-			$parsed.Str
-		}
-		elsif $parsed.Bool {
-			die "Bool"
-		}
-		else {
-			die "Unknown type"
-		}
+		die "Uncaught type"
 	}
 
 	method postfix( Mu $parsed ) {
 		debug(	'postfix',
 			'postfix', $parsed ) if $.debugging;
 
-		if $parsed.list {
-			die "list"
-		}
-		elsif $parsed.hash {
+		if $parsed.hash {
 			if $parsed.hash.<sym> and
 			   $parsed.hash.<O> {
 				die "Too many keys" if $parsed.hash.keys > 2;
-				self.sym( $parsed.hash.<sym> )
+				return self.sym( $parsed.hash.<sym> )
 			}
-			else {
-				die "hash"
-			}
+			die "Uncaught key"
 		}
-		elsif $parsed.Int {
-			die "Int"
-		}
-		elsif $parsed.Str {
-			die "Str"
-		}
-		elsif $parsed.Bool {
-			die "Bool"
-		}
-		else {
-			die "Unknown type"
-		}
+		die "Uncaught type"
 	}
 
 	method OPER( Mu $parsed ) {
 		debug(	'OPER',
 			'OPER', $parsed ) if $.debugging;
 
-		if $parsed.list {
-			die "list"
-		}
-		elsif $parsed.hash {
+		if $parsed.hash {
 			if $parsed.hash.<sym> and
 			   $parsed.hash.<O> {
 				die "Too many keys" if $parsed.hash.keys > 2;
-				self.sym( $parsed.hash.<sym> )
+				return self.sym( $parsed.hash.<sym> )
 			}
-			else {
-				die "hash"
-			}
+			die "Uncaught key"
 		}
-		elsif $parsed.Int {
-			die "Int"
-		}
-		elsif $parsed.Str {
-			die "Str"
-		}
-		elsif $parsed.Bool {
-			die "Bool"
-		}
-		else {
-			die "Unknown type"
-		}
+		die "Uncaught type"
 	}
 
 	class name does Naming does Nesting does Formatting {
@@ -350,10 +245,7 @@ class Perl6::Tidy {
 		debug(	'name',
 			'name', $parsed ) if $.debugging;
 
-		if $parsed.list {
-			die "list"
-		}
-		elsif $parsed.hash {
+		if $parsed.hash {
 			# XXX fix this branch
 			if $parsed.hash.<identifier> and
 			   $parsed.hash.<morename> {
@@ -362,7 +254,7 @@ class Perl6::Tidy {
 				for $parsed.hash.<morename> {
 					@children.push( $_ )
 				}
-				name.new(
+				return name.new(
 					:name(
 						$parsed.hash.<identifier>
 					),
@@ -374,55 +266,28 @@ class Perl6::Tidy {
 			# XXX fix this branch
 			elsif $parsed.hash.<identifier> {
 				die "Too many keys" if $parsed.hash.keys > 2;
-				self.identifier( $parsed.hash.<identifier> )
+				return self.identifier(
+					$parsed.hash.<identifier>
+				)
 			}
-			else {
-				die "hash"
-			}
+			die "Uncaught key"
 		}
-		elsif $parsed.Int {
-			die "Int"
-		}
-		elsif $parsed.Str {
-			die "Str"
-		}
-		elsif $parsed.Bool {
-			die "Bool"
-		}
-		else {
-			die "Unknown type"
-		}
+		die "Uncaught type"
 	}
 
 	method longname( Mu $parsed ) {
 		debug(	'longname',
 			'longname', $parsed ) if $.debugging;
 
-		if $parsed.list {
-			die "list"
-		}
-		elsif $parsed.hash {
+		if $parsed.hash {
 			# XXX fix this branch...
 			if $parsed.hash.<name> {
 				die "Too many keys" if $parsed.hash.keys > 2;
-				self.name( $parsed.hash.<name> )
+				return self.name( $parsed.hash.<name> )
 			}
-			else {
-				die "hash"
-			}
+			die "Uncaught key"
 		}
-		elsif $parsed.Int {
-			die "Int"
-		}
-		elsif $parsed.Str {
-			die "Str"
-		}
-		elsif $parsed.Bool {
-			die "Bool"
-		}
-		else {
-			die "Unknown type"
-		}
+		die "Uncaught type"
 	}
 
 	method twigil_sigil_desigilname( Mu $twigil, Mu $sigil, Mu $desigilname ) {
@@ -431,39 +296,22 @@ class Perl6::Tidy {
 			'sigil', $sigil,
 			'desigilname', $desigilname ) if $.debugging;
 
-		if $twigil.list {
-			die "list"
+		if $twigil.hash {
+			return $desigilname.Str
 		}
-		elsif $twigil.hash {
-			$desigilname.Str
-		}
-		elsif $twigil.Int {
-			die "Int"
-		}
-		elsif $twigil.Str {
-			die "Str"
-		}
-		elsif $twigil.Bool {
-			die "Bool"
-		}
-		else {
-			die "Unknown type"
-		}
+		die "Uncaught type"
 	}
 
 	method variable( Mu $parsed ) {
 		debug(	'variable',
 			'variable', $parsed ) if $.debugging;
 
-		if $parsed.list {
-			die "list"
-		}
-		elsif $parsed.hash {
+		if $parsed.hash {
 			if $parsed.hash.<twigil> and
 			   $parsed.hash.<sigil> and
                            $parsed.hash.<desigilname> {
 				die "Too many keys" if $parsed.hash.keys > 3;
-				self.twigil_sigil_desigilname(
+				return self.twigil_sigil_desigilname(
 					$parsed.hash.<twigil>,
 					$parsed.hash.<sigil>,
 					$parsed.hash.<desigilname>
@@ -472,27 +320,14 @@ class Perl6::Tidy {
 			elsif $parsed.hash.<sigil> and
                               $parsed.hash.<desigilname> {
 				die "Too many keys" if $parsed.hash.keys > 2;
-				self.sigil_desigilname(
+				return self.sigil_desigilname(
 					$parsed.hash.<sigil>,
 					$parsed.hash.<desigilname>
 				)
 			}
-			else {
-				die "Unknown key"
-			}
+			die "Uncaught key"
 		}
-		elsif $parsed.Int {
-			die "Int"
-		}
-		elsif $parsed.Str {
-			die "Str"
-		}
-		elsif $parsed.Bool {
-			die "Bool"
-		}
-		else {
-			die "Unknown type"
-		}
+		die "Uncaught type"
 	}
 
 	class EXPR does Nesting does Formatting {
@@ -513,13 +348,13 @@ class Perl6::Tidy {
 					)
 				}
 				else {
-					die "Unknown key"
+					die "Uncaught key"
 				}
 			}
 			if $parsed.hash {
 				if $parsed.hash.<postfix> and
 				   $parsed.hash.<OPER> {
-					EXPR.new(
+					return EXPR.new(
 						:children(
 							@children
 						),
@@ -535,12 +370,10 @@ class Perl6::Tidy {
 						),
 					)
 				}
-				else {
-					die "Unknown key"
-				}
+				die "Uncaught key"
 			}
 			else {
-				EXPR.new(
+				return EXPR.new(
 					:children(
 						@children
 					)
@@ -550,185 +383,94 @@ class Perl6::Tidy {
 		elsif $parsed.hash {
 			if $parsed.hash.<value> {
 				die "Too many keys" if $parsed.hash.keys > 1;
-				self.value( $parsed.hash.<value> )
+				return self.value( $parsed.hash.<value> )
 			}
 			elsif $parsed.hash.<variable> {
 				die "Too many keys" if $parsed.hash.keys > 1;
-				self.variable( $parsed.hash.<variable> )
+				return self.variable( $parsed.hash.<variable> )
 			}
 			elsif $parsed.hash.<longname> {
 				die "Too many keys" if $parsed.hash.keys > 1;
-				self.longname( $parsed.hash.<longname> )
+				return self.longname( $parsed.hash.<longname> )
 			}
-			else {
-				die "Unknown key"
-			}
+			die "Uncaught key"
 		}
-		elsif $parsed.Int {
-			die "Int"
-		}
-		elsif $parsed.Str {
-			die "Str"
-		}
-		elsif $parsed.Bool {
-			die "Bool"
-		}
-		else {
-			die "Unknown type"
-		}
+		die "Uncaught type"
 	}
 
 	method value( Mu $parsed ) {
 		debug(	'value',
 			'value', $parsed ) if $.debugging;
 
-		if $parsed.list {
-			die "list"
-		}
-		elsif $parsed.hash {
+		if $parsed.hash {
 			if $parsed.hash.<number> {
 				die "Too many keys" if $parsed.hash.keys > 1;
-				self.number( $parsed.hash.<number> )
+				return self.number( $parsed.hash.<number> )
 			}
 			elsif $parsed.hash.<quote> {
 				die "Too many keys" if $parsed.hash.keys > 1;
-				self.quote( $parsed.hash.<quote> )
+				return self.quote( $parsed.hash.<quote> )
 			}
-			else {
-				die "Unknown key"
-			}
+			die "Uncaught key"
 		}
-		elsif $parsed.Int {
-			die "Int"
-		}
-		elsif $parsed.Str {
-			die "Str"
-		}
-		elsif $parsed.Bool {
-			die "Bool"
-		}
-		else {
-			die "Unknown type"
-		}
+		die "Uncaught type"
 	}
 
 	method number( Mu $parsed ) {
 		debug(	'number',
 			'number', $parsed ) if $.debugging;
 
-		if $parsed.list {
-			die "list"
-		}
-		elsif $parsed.hash {
+		if $parsed.hash {
 			if $parsed.hash.<numish> {
 				die "Too many keys" if $parsed.hash.keys > 1;
-				self.numish( $parsed.hash.<numish> )
+				return self.numish( $parsed.hash.<numish> )
 			}
-			else {
-				die "Unknown key"
-			}
+			die "Uncaught key"
 		}
-		elsif $parsed.Int {
-			die "Int"
-		}
-		elsif $parsed.Str {
-			die "Str"
-		}
-		elsif $parsed.Bool {
-			die "Bool"
-		}
-		else {
-			die "Unknown type"
-		}
+		die "Uncaught type"
 	}
 
 	method quote( Mu $parsed ) {
 		debug(	'quote',
 			'quote', $parsed ) if $.debugging;
 
-		if $parsed.list {
-			die "list"
-		}
-		elsif $parsed.hash {
+		if $parsed.hash {
 			if $parsed.hash.<nibble> {
 				die "Too many keys" if $parsed.hash.keys > 1;
-				self.nibble( $parsed.hash.<nibble> )
+				return self.nibble( $parsed.hash.<nibble> )
 			}
 			elsif $parsed.hash.<quibble> {
 				die "Too many keys" if $parsed.hash.keys > 1;
-				self.quibble( $parsed.hash.<quibble> )
+				return self.quibble( $parsed.hash.<quibble> )
 			}
-			else {
-				die "Unknown key"
-			}
+			die "Uncaught key"
 		}
-		elsif $parsed.Int {
-			die "Int"
-		}
-		elsif $parsed.Str {
-			die "Str"
-		}
-		elsif $parsed.Bool {
-			die "Bool"
-		}
-		else {
-			die "Unknown type"
-		}
+		die "Uncaught type"
 	}
 
 	method B( Mu $parsed ) {
 		debug(	'B',
 			'B', $parsed ) if $.debugging;
 
-		if $parsed.list {
-			die "list"
+		if $parsed.Bool {
+			return $parsed.Bool
 		}
-		elsif $parsed.hash {
-			die "hash"
-		}
-		elsif $parsed.Int {
-			die "Int"
-		}
-		elsif $parsed.Str {
-			die "Str"
-		}
-		elsif $parsed.Bool {
-			$parsed.Bool
-		}
-		else {
-			die "Unknown type"
-		}
+		die "Uncaught type"
 	}
 
 	method babble( Mu $parsed ) {
 		debug(	'babble',
 			'babble', $parsed ) if $.debugging;
 
-		if $parsed.list {
-			die "list"
-		}
-		elsif $parsed.hash {
+		if $parsed.hash {
 			if $parsed.hash.<B> {
-				self.B(
+				return self.B(
 					$parsed.hash.<B>
 				)
 			}
-			else {
-				die "Unknown type"
-			}
+			die "Uncaught type"
 		}
-		elsif $parsed.Int {
-			die "Int"
-		}
-		elsif $parsed.Str {
-			die "Str"
-		}
-		elsif $parsed.Bool {
-			die "Bool"
-		}
-		else {
-			die "Unknown type"
-		}
+		die "Uncaught type"
 	}
 
 	class identifier does Nesting does Formatting {
@@ -741,32 +483,20 @@ class Perl6::Tidy {
 		if $parsed.list {
 			my @children;
 			for $parsed.list {
-				say "identifier[]:\n" ~ $_.Str if $.debugging;
 				@children.push(
 					$_.Str
 				)
 			}
-			identifier.new(
+			return identifier.new(
 				:children(
 					@children
 				)
 			)
 		}
-		elsif $parsed.hash {
-			die "hash"
-		}
-		elsif $parsed.Int {
-			die "Int"
-		}
 		elsif $parsed.Str {
-			$parsed.Str
+			return $parsed.Str
 		}
-		elsif $parsed.Bool {
-			die "Bool"
-		}
-		else {
-			die "Unknown type"
-		}
+		die "Uncaught type"
 	}
 
 	class quotepair does Nesting does Formatting {
@@ -776,31 +506,15 @@ class Perl6::Tidy {
 		debug(	'quotepair',
 			'quotepair', $parsed ) if $.debugging;
 
-		if $parsed.list {
-			die "list"
-		}
-		elsif $parsed.hash {
+		if $parsed.hash {
 			if $parsed.hash.<identifier> {
-				self.identifier(
+				return self.identifier(
 					$parsed.hash.<identifier>
 				)
 			}
-			else {
-				die "Unknown key"
-			}
+			die "Uncaught key"
 		}
-		elsif $parsed.Int {
-			die "Int"
-		}
-		elsif $parsed.Str {
-			die "Str"
-		}
-		elsif $parsed.Bool {
-			die "Bool"
-		}
-		else {
-			die "Unknown type"
-		}
+		die "Uncaught type"
 	}
 
 	class babble_nibble does Nesting does Formatting {
@@ -811,10 +525,7 @@ class Perl6::Tidy {
 			'babble', $babble,
 			'nibble', $nibble ) if $.debugging;
 
-		if $babble.list {
-			die "list"
-		}
-		elsif $babble.hash {
+		if $babble.hash {
 			if $babble.hash.<quotepair> {
 				my @children;
 				for $babble.hash.<quotepair> {
@@ -822,90 +533,47 @@ class Perl6::Tidy {
 						self.quotepair( $_ )
 					)
 				}
-				babble_nibble.new(
+				return babble_nibble.new(
 					:children(
 						@children
 					)
 				)
 			}
 			elsif $babble.hash.<B> {
-				self.B(
+				return self.B(
 					$babble.hash.<B>
 				)
 			}
-			else {
-				die "Unknown key"
-			}
+			die "Uncaught key"
 		}
-		elsif $babble.Int {
-			die "Int"
-		}
-		elsif $babble.Str {
-			die "Str"
-		}
-		elsif $babble.Bool {
-			die "Bool"
-		}
-		else {
-			die "Unknown type"
-		}
+		die "Uncaught type"
 	}
 
 	method quibble( Mu $parsed ) {
 		debug(	'quibble',
 			'quibble', $parsed ) if $.debugging;
 
-		if $parsed.list {
-			die "list"
-		}
-		elsif $parsed.hash {
+		if $parsed.hash {
 			if $parsed.hash.<babble> and
 			   $parsed.hash.<nibble> {
-				self.babble_nibble(
+				return self.babble_nibble(
 					$parsed.hash.<babble>,
 					$parsed.hash.<nibble>
 				)
 			}
-			else {
-				die "Unknown key"
-			}
+			die "Uncaught key"
 		}
-		elsif $parsed.Int {
-			die "Int"
-		}
-		elsif $parsed.Str {
-			die "Str"
-		}
-		elsif $parsed.Bool {
-			die "Bool"
-		}
-		else {
-			die "Unknown type"
-		}
+		die "Uncaught type"
 	}
 
 	method nibble( Mu $parsed ) {
 		debug(	'nibble',
 			'nibble', $parsed ) if $.debugging;
 
-		if $parsed.list {
-			die "list"
+		if $parsed.Str {
+			return $parsed.Str
 		}
-		elsif $parsed.hash {
-			die "hash"
-		}
-		elsif $parsed.Int {
-			die "Int"
-		}
-		elsif $parsed.Str {
-			$parsed.Str
-		}
-		elsif $parsed.Bool {
-			die "Bool"
-		}
-		else {
-			die "Unknown type"
-		}
+		die "Uncaught type"
 	}
 
 	method int_coeff_frac( Mu $int, Mu $coeff, Mu $frac ) {
@@ -914,24 +582,10 @@ class Perl6::Tidy {
 			'coeff', $coeff,
 			'frac', $frac ) if $.debugging;
 
-		if $int.list {
-			die "list"
+		if $int.Int {
+			return $int.Int
 		}
-		elsif $int.hash {
-			die "hash"
-		}
-		elsif $int.Int {
-			$int.Int
-		}
-		elsif $int.Str {
-			die "Str"
-		}
-		elsif $int.Bool {
-			die "Bool"
-		}
-		else {
-			die "Unknown type"
-		}
+		die "Uncaught type"
 	}
 
 	method int_coeff_escale( Mu $int, Mu $coeff, Mu $escale ) {
@@ -940,38 +594,21 @@ class Perl6::Tidy {
 			'coeff', $coeff,
 			'escale', $escale ) if $.debugging;
 
-		if $int.list {
-			die "list"
+		if $int.Int {
+			return $int.Int
 		}
-		elsif $int.hash {
-			die "hash"
-		}
-		elsif $int.Int {
-			$int.Int
-		}
-		elsif $int.Str {
-			die "Str"
-		}
-		elsif $int.Bool {
-			die "Bool"
-		}
-		else {
-			die "Unknown type"
-		}
+		die "Uncaught type"
 	}
 
 	method dec_number( Mu $parsed ) {
 		debug(	'dec_number',
 			'dec_number', $parsed ) if $.debugging;
 
-		if $parsed.list {
-			die "list"
-		}
-		elsif $parsed.hash {
+		if $parsed.hash {
 			if $parsed.hash.<int> and
 			   $parsed.hash.<coeff> and
 			   $parsed.hash.<frac> {
-				self.int_coeff_frac(
+				return self.int_coeff_frac(
 					$parsed.hash.<int>,
 					$parsed.hash.<coeff>,
 					$parsed.hash.<frac>
@@ -980,112 +617,71 @@ class Perl6::Tidy {
 			elsif $parsed.hash.<int> and
 			      $parsed.hash.<coeff> and
 			      $parsed.hash.<escale> {
-				self.int_coeff_escale(
+				return self.int_coeff_escale(
 					$parsed.hash.<int>,
 					$parsed.hash.<coeff>,
 					$parsed.hash.<escale>
 				)
 			}
-			else {
-				die "Unknown key"
-			}
+			die "Uncaught key"
 		}
-		elsif $parsed.Int {
-			die "Int"
-		}
-		elsif $parsed.Str {
-			die "Str"
-		}
-		elsif $parsed.Bool {
-			die "Bool"
-		}
-		else {
-			die "Unknown type"
-		}
+		die "Uncaught type"
 	}
 
 	method numish( Mu $parsed ) {
 		debug(	'numish',
 			'numish', $parsed ) if $.debugging;
 
-		if $parsed.list {
-			die "list"
-		}
-		elsif $parsed.hash {
+		if $parsed.hash {
 			if $parsed.hash.<integer> {
 				die "Too many keys" if $parsed.hash.keys > 1;
-				self.integer( $parsed.hash.<integer> )
+				return self.integer( $parsed.hash.<integer> )
 			}
 			elsif $parsed.hash.<rad_number> {
 				die "Too many keys" if $parsed.hash.keys > 1;
-				self.rad_number( $parsed.hash.<rad_number> )
+				return self.rad_number(
+					$parsed.hash.<rad_number>
+				)
 			}
 			elsif $parsed.hash.<dec_number> {
 				die "Too many keys" if $parsed.hash.keys > 1;
-				self.dec_number( $parsed.hash.<dec_number> )
+				return self.dec_number(
+					$parsed.hash.<dec_number>
+				)
 			}
-			else {
-				die "Unknown key"
-			}
+			die "Uncaught key"
 		}
-		elsif $parsed.Int {
-			die "Int"
-		}
-		elsif $parsed.Str {
-			die "Str"
-		}
-		elsif $parsed.Bool {
-			die "Bool"
-		}
-		else {
-			die "Unknown type"
-		}
+		die "Uncaught type"
 	}
 
 	method integer( Mu $parsed ) {
 		debug(	'integer',
 			'integer', $parsed ) if $.debugging;
 
-		if $parsed.list {
-			die "list"
-		}
-		elsif $parsed.hash {
+		if $parsed.hash {
 			if $parsed.hash.<decint> and
 			   $parsed.hash.<VALUE> {
 				die "Too many keys" if $parsed.hash.keys > 2;
-				self.decint( $parsed.hash.<decint> )
+				return self.decint( $parsed.hash.<decint> )
 			}
 			elsif $parsed.hash.<binint> and
 			      $parsed.hash.<VALUE> {
 				die "Too many keys" if $parsed.hash.keys > 2;
-				self.binint( $parsed.hash.<binint> )
+				return self.binint( $parsed.hash.<binint> )
 			}
 			elsif $parsed.hash.<octint> and
 			      $parsed.hash.<VALUE> {
 				die "Too many keys" if $parsed.hash.keys > 2;
-				self.octint( $parsed.hash.<octint> )
+				return self.octint( $parsed.hash.<octint> )
 			}
 			elsif $parsed.hash.<hexint> and
 			      $parsed.hash.<VALUE> {
 				die "Too many keys" if $parsed.hash.keys > 2;
-				self.hexint( $parsed.hash.<hexint> )
+				return self.hexint( $parsed.hash.<hexint> )
 			}
-			else {
-				die "Unknown key"
-			}
+			die "Uncaught key"
 		}
-		elsif $parsed.Int {
-			die "Int"
-		}
-		elsif $parsed.Str {
-			die "Str"
-		}
-		elsif $parsed.Bool {
-			die "Bool"
-		}
-		else {
-			die "Unknown type"
-		}
+		die "Uncaught type"
 	}
 
 	method circumfix_radix( Mu $circumfix, Mu $radix ) {
@@ -1093,30 +689,16 @@ class Perl6::Tidy {
 			'circumfix', $circumfix,
 			'radix', $radix ) if $.debugging;
 
-		if $circumfix.list {
-			die "list"
-		}
-		elsif $circumfix.hash {
+		if $circumfix.hash {
 			if $circumfix.hash.<semilist> {
 				die "Too many keys" if $circumfix.hash.keys > 1;
-				self.semilist( $circumfix.hash.<semilist> )
+				return self.semilist(
+					$circumfix.hash.<semilist>
+				)
 			}
-			else {
-				die "Unknown key"
-			}
+			die "Uncaught key"
 		}
-		elsif $circumfix.Int {
-			die "Int"
-		}
-		elsif $circumfix.Str {
-			die "Str"
-		}
-		elsif $circumfix.Bool {
-			die "Bool"
-		}
-		else {
-			die "Unknown type"
-		}
+		die "Uncaught type"
 	}
 
 	class semilist does Nesting does Formatting {
@@ -1126,10 +708,7 @@ class Perl6::Tidy {
 		debug(	'semilist',
 			'semilist', $parsed ) if $.debugging;
 
-		if $parsed.list {
-			die "list"
-		}
-		elsif $parsed.hash {
+		if $parsed.hash {
 			if $parsed.hash.<statement> {
 				die "Too many keys" if $parsed.hash.keys > 1;
 				my @children;
@@ -1138,156 +717,71 @@ class Perl6::Tidy {
 						self.statement( $_ )
 					)
 				}
-				semilist.new(
+				return semilist.new(
 					:children( @children )
 				)
 			}
-			else {
-				die "Unknown key"
-			}
+			die "Uncaught key"
 		}
-		elsif $parsed.Int {
-			die "Int"
-		}
-		elsif $parsed.Str {
-			die "Str"
-		}
-		elsif $parsed.Bool {
-			die "Bool"
-		}
-		else {
-			die "Unknown type"
-		}
+		die "Uncaught type"
 	}
 
 	method rad_number( Mu $parsed ) {
 		debug(	'rad_number',
 			'rad_number', $parsed ) if $.debugging;
 
-		if $parsed.list {
-			die "list"
-		}
-		elsif $parsed.hash {
+		if $parsed.hash {
 			# XXX fix this branch...
 			if $parsed.hash.<circumfix> and
 			   $parsed.hash.<radix> {
 				die "Too many keys" if $parsed.hash.keys > 4;
-				self.circumfix_radix(
+				return self.circumfix_radix(
 					$parsed.hash.<circumfix>,
 					$parsed.hash.<radix>
 				)
 			}
-			else {
-				die "Unknown key"
-			}
+			die "Uncaught key"
 		}
-		elsif $parsed.Int {
-			die "Int"
-		}
-		elsif $parsed.Str {
-			die "Str"
-		}
-		elsif $parsed.Bool {
-			die "Bool"
-		}
-		else {
-			die "Unknown type"
-		}
+		die "Uncaught type"
 	}
 
 	method binint( Mu $parsed ) {
 		debug(	'binint',
 			'binint', $parsed ) if $.debugging;
 
-		if $parsed.list {
-			die "list"
+		if $parsed.Int {
+			return $parsed.Int
 		}
-		elsif $parsed.hash {
-			die "hash"
-		}
-		elsif $parsed.Int {
-			$parsed.Int
-		}
-		elsif $parsed.Str {
-			die "Str"
-		}
-		elsif $parsed.Bool {
-			die "Bool"
-		}
-		else {
-			die "Unknown type"
-		}
+		die "Uncaught type"
 	}
 
 	method octint( Mu $parsed ) {
 		debug(	'octint',
 			'octint', $parsed ) if $.debugging;
 
-		if $parsed.list {
-			die "list"
+		if $parsed.Int {
+			return $parsed.Int
 		}
-		elsif $parsed.hash {
-			die "hash"
-		}
-		elsif $parsed.Int {
-			$parsed.Int
-		}
-		elsif $parsed.Str {
-			die "Str"
-		}
-		elsif $parsed.Bool {
-			die "Bool"
-		}
-		else {
-			die "Unknown type"
-		}
+		die "Uncaught type"
 	}
 
 	method decint( Mu $parsed ) {
 		debug(	'decint',
 			'decint', $parsed ) if $.debugging;
 
-		if $parsed.list {
-			die "list"
+		if $parsed.Int {
+			return $parsed.Int
 		}
-		elsif $parsed.hash {
-			die "hash"
-		}
-		elsif $parsed.Int {
-			$parsed.Int
-		}
-		elsif $parsed.Str {
-			die "Str"
-		}
-		elsif $parsed.Bool {
-			die "Bool"
-		}
-		else {
-			die "Unknown type"
-		}
+		die "Uncaught type"
 	}
 
 	method hexint( Mu $parsed ) {
 		debug(	'hexint',
 			'hexint', $parsed ) if $.debugging;
 
-		if $parsed.list {
-			die "list"
+		if $parsed.Int {
+			return $parsed.Int
 		}
-		elsif $parsed.hash {
-			die "hash"
-		}
-		elsif $parsed.Int {
-			$parsed.Int
-		}
-		elsif $parsed.Str {
-			die "Str"
-		}
-		elsif $parsed.Bool {
-			die "Bool"
-		}
-		else {
-			die "Unknown type"
-		}
+		die "Uncaught type"
 	}
 }
