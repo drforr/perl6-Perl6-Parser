@@ -339,6 +339,11 @@ class Perl6::Tidy {
 					self.longname(
 						$desigilname.hash.<longname>
 					)
+				),
+				:twigil(
+					self.sym(
+						$twigil.hash.<sym>
+					)
 				)
 			)
 		}
@@ -991,7 +996,7 @@ class Perl6::Tidy {
 
 	method int_coeff_frac( Mu $int, Mu $coeff, Mu $frac ) {
 		self.debug(
-			'int_coeff_escale',
+			'int_coeff_frac',
 			'int',   $int,
 			'coeff', $coeff,
 			'frac',  $frac
@@ -1060,7 +1065,7 @@ class Perl6::Tidy {
 				return Node.new(
 					:type( 'dec_number' ),
 					:name(
-						self.int_coeff_frac(
+						self.int_coeff_escale(
 							$parsed.hash.<int>,
 							$parsed.hash.<coeff>,
 							$parsed.hash.<escale>
