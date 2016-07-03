@@ -202,6 +202,9 @@ class Perl6::Tidy {
 		debug(	'sym',
 			'sym', $parsed ) if $.debugging;
 
+		if $parsed.hash {
+			die "hash"
+		}
 		if $parsed.Str {
 			return $parsed.Str
 		}
@@ -452,6 +455,9 @@ class Perl6::Tidy {
 		debug(	'B',
 			'B', $parsed ) if $.debugging;
 
+		if $parsed.hash {
+			die "hash"
+		}
 		if $parsed.Bool {
 			return $parsed.Bool
 		}
@@ -480,6 +486,9 @@ class Perl6::Tidy {
 		debug(	'identifier',
 			'identifier', $parsed ) if $.debugging;
 
+		if $parsed.hash {
+			die "hash"
+		}
 		if $parsed.list {
 			my @children;
 			for $parsed.list {
@@ -566,10 +575,198 @@ class Perl6::Tidy {
 		die "Uncaught type"
 	}
 
+	method atom( Mu $parsed ) {
+		debug(	'atom',
+			'atom', $parsed ) if $.debugging;
+
+		if $parsed.hash {
+			die "hash"
+		}
+		if $parsed.Str {
+			return $parsed.Str
+		}
+		die "Uncaught type"
+	}
+
+	method noun( Mu $parsed ) {
+		debug(	'noun',
+			'noun', $parsed ) if $.debugging;
+
+		if $parsed.hash {
+			if $parsed.hash.<atom> {
+				return self.atom( $parsed.hash.<atom> )
+			}
+			die "Uncaught key"
+		}
+		if $parsed.Str {
+			die "str"
+		}
+		die "Uncaught type"
+	}
+
+	class termish does Nesting does Formatting {
+	}
+
+	method termish( Mu $parsed ) {
+		debug(	'termish',
+			'termish', $parsed ) if $.debugging;
+
+		if $parsed.hash {
+			if $parsed.hash.<noun> {
+				my @children;
+				for $parsed.hash.<noun> {
+					@children.push(
+						self.noun( $_ )
+					)
+				}
+				return termish.new(
+					:children( @children )
+				)
+			}
+			die "Uncaught key"
+		}
+		if $parsed.Str {
+			die "Str"
+		}
+		die "Uncaught type"
+	}
+
+	class termconj does Nesting does Formatting {
+	}
+
+	method termconj( Mu $parsed ) {
+		debug(	'termconj',
+			'termconj', $parsed ) if $.debugging;
+
+		if $parsed.hash {
+			if $parsed.hash.<termish> {
+				my @children;
+				for $parsed.hash.<termish> {
+					@children.push(
+						self.termish( $_ )
+					)
+				}
+				return termconj.new(
+					:children( @children )
+				)
+			}
+			die "Uncaught key"
+		}
+		if $parsed.Str {
+			die "Str"
+		}
+		die "Uncaught type"
+	}
+
+	class termalt does Nesting does Formatting {
+	}
+
+	method termalt( Mu $parsed ) {
+		debug(	'termalt',
+			'termalt', $parsed ) if $.debugging;
+
+		if $parsed.hash {
+			if $parsed.hash.<termconj> {
+				my @children;
+				for $parsed.hash.<termconj> {
+					@children.push(
+						self.termconj( $_ )
+					)
+				}
+				return termalt.new(
+					:children( @children )
+				)
+			}
+			die "Uncaught key"
+		}
+		if $parsed.Str {
+			die "Str"
+		}
+		die "Uncaught type"
+	}
+
+	class termconjseq does Nesting does Formatting {
+	}
+
+	method termconjseq( Mu $parsed ) {
+		debug(	'termconjseq',
+			'termconjseq', $parsed ) if $.debugging;
+
+		if $parsed.hash {
+			if $parsed.hash.<termalt> {
+				my @children;
+				for $parsed.hash.<termalt> {
+					@children.push(
+						self.termalt( $_ )
+					)
+				}
+				return termconjseq.new(
+					:children( @children )
+				)
+			}
+			die "Uncaught key"
+		}
+		if $parsed.Str {
+			die "Str"
+		}
+		die "Uncaught type"
+	}
+
+	class termaltseq does Nesting does Formatting {
+	}
+
+	method termaltseq( Mu $parsed ) {
+		debug(	'termaltseq',
+			'termaltseq', $parsed ) if $.debugging;
+
+		if $parsed.hash {
+			if $parsed.hash.<termconjseq> {
+				my @children;
+				for $parsed.hash.<termconjseq> {
+					@children.push(
+						self.termconjseq( $_ )
+					)
+				}
+				return termaltseq.new(
+					:children( @children )
+				)
+			}
+			die "Uncaught key"
+		}
+		if $parsed.Str {
+			die "Str"
+		}
+		die "Uncaught type"
+	}
+
+	method termseq( Mu $parsed ) {
+		debug(	'termseq',
+			'termseq', $parsed ) if $.debugging;
+
+		if $parsed.hash {
+			if $parsed.hash.<termaltseq> {
+				return self.termaltseq(
+					$parsed.hash.<termaltseq>
+				)
+			}
+			die "Uncaught key"
+		}
+		if $parsed.Str {
+			die "Str"
+		}
+		die "Uncaught type"
+	}
+
 	method nibble( Mu $parsed ) {
 		debug(	'nibble',
 			'nibble', $parsed ) if $.debugging;
 
+		if $parsed.hash {
+			if $parsed.hash.<termseq> {
+				return self.termseq( $parsed.hash.<termseq> )
+			}
+			die "Uncaught key"
+		}
 		if $parsed.Str {
 			return $parsed.Str
 		}
@@ -582,6 +779,9 @@ class Perl6::Tidy {
 			'coeff', $coeff,
 			'frac', $frac ) if $.debugging;
 
+		if $int.hash {
+			die "hash"
+		}
 		if $int.Int {
 			return $int.Int
 		}
@@ -594,6 +794,9 @@ class Perl6::Tidy {
 			'coeff', $coeff,
 			'escale', $escale ) if $.debugging;
 
+		if $int.hash {
+			die "hash"
+		}
 		if $int.Int {
 			return $int.Int
 		}
@@ -749,6 +952,9 @@ class Perl6::Tidy {
 		debug(	'binint',
 			'binint', $parsed ) if $.debugging;
 
+		if $parsed.hash {
+			die "hash"
+		}
 		if $parsed.Int {
 			return $parsed.Int
 		}
@@ -759,6 +965,9 @@ class Perl6::Tidy {
 		debug(	'octint',
 			'octint', $parsed ) if $.debugging;
 
+		if $parsed.hash {
+			die "hash"
+		}
 		if $parsed.Int {
 			return $parsed.Int
 		}
@@ -769,6 +978,9 @@ class Perl6::Tidy {
 		debug(	'decint',
 			'decint', $parsed ) if $.debugging;
 
+		if $parsed.hash {
+			die "hash"
+		}
 		if $parsed.Int {
 			return $parsed.Int
 		}
@@ -779,6 +991,9 @@ class Perl6::Tidy {
 		debug(	'hexint',
 			'hexint', $parsed ) if $.debugging;
 
+		if $parsed.hash {
+			die "hash"
+		}
 		if $parsed.Int {
 			return $parsed.Int
 		}

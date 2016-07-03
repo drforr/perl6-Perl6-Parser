@@ -4,7 +4,7 @@ use nqp;
 use Test;
 use Perl6::Tidy;
 
-plan 5;
+plan 6;
 
 my $pt = Perl6::Tidy.new( :debugging(True) );
 
@@ -270,16 +270,16 @@ subtest sub {
 	}, Q{pi};
 }, Q{constant};
 
-#subtest sub {
-#	plan 1;
-#
-#	subtest sub {
-#		plan 2;
-#
-#		my $parsed = $pt.tidy( Q{/pi/} );
-#		isa-ok $parsed, Q{Perl6::Tidy::statementlist};
-#		is $parsed.children.elems, 1;
-#	}, Q{/pi/};
-#}, Q{regex};
+subtest sub {
+	plan 1;
+
+	subtest sub {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{/pi/} );
+		isa-ok $parsed, Q{Perl6::Tidy::statementlist};
+		is $parsed.children.elems, 1;
+	}, Q{/pi/};
+}, Q{regex};
 
 # vim: ft=perl6
