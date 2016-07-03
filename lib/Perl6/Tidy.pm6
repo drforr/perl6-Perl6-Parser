@@ -344,6 +344,14 @@ class Perl6::Tidy {
 					self.sym(
 						$twigil.hash.<sym>
 					)
+				),
+				:sigil(
+					$sigil.Str
+				),
+				:desigilname(
+					self.longname(
+						$desigilname.hash.<longname>
+					)
 				)
 			)
 		}
