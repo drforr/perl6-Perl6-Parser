@@ -3,20 +3,9 @@ class Perl6::Tidy {
 
 	has $.debugging = False;
 
-	# When a class needs an arbitrary list of items,
-	# give it this role. That way we *always* have a consistent
-	# naming scheme for child elements.
-	#
-	role Nesting {
-		has @.child;
-	}
-
-	# When a class needs to be given a name, or even just a value,
-	# give it this role. That way we *always* have a consistent
-	# naming scheme for values or whatnot.
-	#
-	role Naming {
+	class Node {
 		has $.name;
+		has $.child;
 	}
 
 	sub _debug( Str $key, Mu $value ) {
@@ -84,9 +73,6 @@ class Perl6::Tidy {
 		die "Uncaught type"
 	}
 
-	class statementlist does Nesting does Formatting {
-	}
-
 	method statementlist( Mu $parsed ) {
 		self.debug(
 			'statementlist',
@@ -103,21 +89,19 @@ class Perl6::Tidy {
 						self.statement( $_ )
 					)
 				}
-				return statementlist.new(
+				return {
 					:child(
 						@child
 					)
-				)
+				}
 			}
 			die "Uncaught key"
 		}
 		elsif $parsed.Bool {
-			return statementlist.new
+			return {
+			}
 		}
 		die "Uncaught type"
-	}
-
-	class statement does Nesting does Formatting {
 	}
 
 	method sigil_desigilname( Mu $sigil, Mu $desigilname ) {
@@ -155,11 +139,11 @@ class Perl6::Tidy {
 					)
 				)
 			}
-			return statement.new(
+			return {
 				:child(
 					@child
 				)
-			)
+			}
 		}
 		elsif $parsed.hash {
 			if $parsed.hash.<EXPR> {
@@ -238,9 +222,6 @@ class Perl6::Tidy {
 		die "Uncaught type"
 	}
 
-	class name does Naming does Nesting does Formatting {
-	}
-
 	method name( Mu $parsed ) {
 		self.debug(
 			'name',
@@ -257,14 +238,14 @@ class Perl6::Tidy {
 				for $parsed.hash.<morename> {
 					@child.push( $_ )
 				}
-				return name.new(
+				return {
 					:name(
 						$parsed.hash.<identifier>
 					),
 					:child(
 						@child
 					)
-				)
+				}
 			}
 			# XXX fix this branch
 			elsif $parsed.hash.<identifier> {
@@ -347,11 +328,6 @@ class Perl6::Tidy {
 		die "Uncaught type"
 	}
 
-	class EXPR does Nesting does Formatting {
-		has $.postfix;
-		has $.OPER;
-	}
-
 	method EXPR( Mu $parsed ) {
 		self.debug(
 			'EXPR',
@@ -366,16 +342,15 @@ class Perl6::Tidy {
 						self.value(
 							$_.hash.<value>
 						)
-					)
+					);
+					next;
 				}
-				else {
-					die "Uncaught key"
-				}
+				die "Uncaught key"
 			}
 			if $parsed.hash {
 				if $parsed.hash.<postfix> and
 				   $parsed.hash.<OPER> {
-					return EXPR.new(
+					return {
 						:child(
 							@child
 						),
@@ -389,16 +364,16 @@ class Perl6::Tidy {
 								$parsed.hash.<OPER>
 							)
 						),
-					)
+					}
 				}
 				die "Uncaught key"
 			}
 			else {
-				return EXPR.new(
+				return {
 					:child(
 						@child
 					)
-				)
+				}
 			}
 		}
 		elsif $parsed.hash {
@@ -531,9 +506,6 @@ class Perl6::Tidy {
 		die "Uncaught type"
 	}
 
-	class identifier does Nesting does Formatting {
-	}
-
 	method identifier( Mu $parsed ) {
 		self.debug(
 			'identifier',
@@ -550,19 +522,20 @@ class Perl6::Tidy {
 					$_.Str
 				)
 			}
-			return identifier.new(
+			return {
 				:child(
 					@child
 				)
-			)
+			}
 		}
 		elsif $parsed.Str {
-			return $parsed.Str
+			return {
+				:name(
+					$parsed.Str
+				)
+			}
 		}
 		die "Uncaught type"
-	}
-
-	class quotepair does Nesting does Formatting {
 	}
 
 	method quotepair( Mu $parsed ) {
@@ -582,9 +555,6 @@ class Perl6::Tidy {
 		die "Uncaught type"
 	}
 
-	class babble_nibble does Nesting does Formatting {
-	}
-
 	method babble_nibble( Mu $babble, Mu $nibble ) {
 		self.debug(
 			'babble_nibble',
@@ -600,11 +570,11 @@ class Perl6::Tidy {
 						self.quotepair( $_ )
 					)
 				}
-				return babble_nibble.new(
+				return {
 					:child(
 						@child
 					)
-				)
+				}
 			}
 			elsif $babble.hash.<B> {
 				return self.B(
@@ -670,9 +640,6 @@ class Perl6::Tidy {
 		die "Uncaught type"
 	}
 
-	class termish does Nesting does Formatting {
-	}
-
 	method termish( Mu $parsed ) {
 		self.debug(
 			'termish',
@@ -687,9 +654,9 @@ class Perl6::Tidy {
 						self.noun( $_ )
 					)
 				}
-				return termish.new(
+				return {
 					:child( @child )
-				)
+				}
 			}
 			die "Uncaught key"
 		}
@@ -697,9 +664,6 @@ class Perl6::Tidy {
 			die "Str"
 		}
 		die "Uncaught type"
-	}
-
-	class termconj does Nesting does Formatting {
 	}
 
 	method termconj( Mu $parsed ) {
@@ -716,9 +680,9 @@ class Perl6::Tidy {
 						self.termish( $_ )
 					)
 				}
-				return termconj.new(
+				return {
 					:child( @child )
-				)
+				}
 			}
 			die "Uncaught key"
 		}
@@ -726,9 +690,6 @@ class Perl6::Tidy {
 			die "Str"
 		}
 		die "Uncaught type"
-	}
-
-	class termalt does Nesting does Formatting {
 	}
 
 	method termalt( Mu $parsed ) {
@@ -745,9 +706,9 @@ class Perl6::Tidy {
 						self.termconj( $_ )
 					)
 				}
-				return termalt.new(
+				return {
 					:child( @child )
-				)
+				}
 			}
 			die "Uncaught key"
 		}
@@ -755,9 +716,6 @@ class Perl6::Tidy {
 			die "Str"
 		}
 		die "Uncaught type"
-	}
-
-	class termconjseq does Nesting does Formatting {
 	}
 
 	method termconjseq( Mu $parsed ) {
@@ -774,9 +732,9 @@ class Perl6::Tidy {
 						self.termalt( $_ )
 					)
 				}
-				return termconjseq.new(
+				return {
 					:child( @child )
-				)
+				}
 			}
 			die "Uncaught key"
 		}
@@ -784,9 +742,6 @@ class Perl6::Tidy {
 			die "Str"
 		}
 		die "Uncaught type"
-	}
-
-	class termaltseq does Nesting does Formatting {
 	}
 
 	method termaltseq( Mu $parsed ) {
@@ -803,9 +758,11 @@ class Perl6::Tidy {
 						self.termconjseq( $_ )
 					)
 				}
-				return termaltseq.new(
-					:child( @child )
-				)
+				return {
+					:child(
+						@child
+					)
+				}
 			}
 			die "Uncaught key"
 		}
@@ -1016,9 +973,6 @@ class Perl6::Tidy {
 		die "Uncaught type"
 	}
 
-	class semilist does Nesting does Formatting {
-	}
-
 	method semilist( Mu $parsed ) {
 		self.debug(
 			'semilist',
@@ -1035,9 +989,11 @@ class Perl6::Tidy {
 						self.statement( $_ )
 					)
 				}
-				return semilist.new(
-					:child( @child )
-				)
+				return {
+					:child(
+						@child
+					)
+				}
 			}
 			die "Uncaught key"
 		}
