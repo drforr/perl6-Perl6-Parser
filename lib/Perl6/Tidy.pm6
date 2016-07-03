@@ -7,6 +7,37 @@ class Perl6::Tidy {
 		has @.children;
 	}
 
+	sub _debug( Str $key, Mu $value ) {
+		my @types;
+
+		@types.push( 'list' ) if $value.list();
+		@types.push( 'hash' ) if $value.hash();
+		@types.push( 'Int' )  if $value.Int();
+		@types.push( 'Str' )  if $value.Str();
+		@types.push( 'Bool' ) if $value.Bool();
+
+		die "$key: Unknown type" unless @types;
+
+		say "$key ({@types})";
+
+		if $value.list {
+			for $value.list {
+				say "$key\[\]:\n" ~ $_.dump
+			}
+		}
+		say "$key\{\}:\n" ~ $value.dump if $value.hash;
+		say "\+$key: " ~ $value.Int if $value.Int;
+		say "\~$key: '" ~ $value.Str ~ "'" if $value.Str;
+		say "\?$key: " ~ ~?$value.Bool if $value.Bool;
+	}
+
+	sub debug( Str $name, *@inputs ) {
+		for @inputs -> $k, $v {
+			_debug( $k, $v )
+		}
+		say "";
+	}
+
 #`(
 	method boilerplate( Mu $parsed ) {
 		if $parsed.list {
@@ -56,7 +87,9 @@ class Perl6::Tidy {
 
 		my $parsed = $g.parse( $text, :p( 0 ), :actions( $a ) );
 
-		say "tidy:\n" ~ $parsed.dump if $.debugging;
+		debug(	'tidy',
+			'tidy', $parsed ) if $.debugging;
+
 		if $parsed.list {
 			die "list"
 		}
@@ -89,11 +122,13 @@ class Perl6::Tidy {
 	}
 
 	method statementlist( Mu $parsed ) {
+		debug(	'statementlist',
+			'statementlist', $parsed ) if $.debugging;
+
 		if $parsed.list {
 			die "list"
 		}
 		elsif $parsed.hash {
-			say "statementlist:\n" ~ $parsed.dump if $.debugging;
 			if $parsed.hash.<statement> {
 				die "Too many keys" if $parsed.hash.keys > 1;
 				my @children;
@@ -120,7 +155,6 @@ class Perl6::Tidy {
 			die "Str"
 		}
 		elsif $parsed.Bool {
-			say "statemetlist:\n" ~ $parsed.Bool if $.debugging;
 			statementlist.new
 		}
 		else {
@@ -160,6 +194,9 @@ class Perl6::Tidy {
 	}
 
 	method statement( Mu $parsed ) {
+		debug(	'statement',
+			'statement', $parsed ) if $.debugging;
+
 		if $parsed.list {
 			my @children;
 			for $parsed.list {
@@ -292,11 +329,13 @@ class Perl6::Tidy {
 	}
 
 	method name( Mu $parsed ) {
+		debug(	'name',
+			'name', $parsed ) if $.debugging;
+
 		if $parsed.list {
 			die "list"
 		}
 		elsif $parsed.hash {
-			say "name:\n" ~ $parsed.dump if $.debugging;
 			# XXX fix this branch
 			if $parsed.hash.<identifier> and
 			   $parsed.hash.<morename> {
@@ -330,11 +369,13 @@ class Perl6::Tidy {
 	}
 
 	method longname( Mu $parsed ) {
+		debug(	'longname',
+			'longname', $parsed ) if $.debugging;
+
 		if $parsed.list {
 			die "list"
 		}
 		elsif $parsed.hash {
-			say "longname:\n" ~ $parsed.dump if $.debugging;
 			# XXX fix this branch...
 			if $parsed.hash.<name> {
 				die "Too many keys" if $parsed.hash.keys > 2;
@@ -423,10 +464,12 @@ class Perl6::Tidy {
 	}
 
 	method EXPR( Mu $parsed ) {
+		debug(	'EXPR',
+			'EXPR', $parsed ) if $.debugging;
+
 		if $parsed.list {
 			my @children;
 			for $parsed.list {
-				say "EXPR[]:\n" ~ $_.dump if $.debugging;
 				if $_.hash.<value> {
 					@children.push(
 						self.value( $_.hash.<value> )
@@ -468,7 +511,6 @@ class Perl6::Tidy {
 			}
 		}
 		elsif $parsed.hash {
-			say "EXPR:\n" ~ $parsed.dump if $.debugging;
 			if $parsed.hash.<value> {
 				die "Too many keys" if $parsed.hash.keys > 1;
 				self.value( $parsed.hash.<value> )
@@ -679,6 +721,9 @@ class Perl6::Tidy {
 	}
 
 	method identifier( Mu $parsed ) {
+		debug(	'identifier',
+			'identifier', $parsed ) if $.debugging;
+
 		if $parsed.list {
 			my @children;
 			for $parsed.list {
@@ -700,7 +745,6 @@ class Perl6::Tidy {
 			die "Int"
 		}
 		elsif $parsed.Str {
-			say "identifier:\n" ~ $parsed.Str if $.debugging;
 			$parsed.Str
 		}
 		elsif $parsed.Bool {
@@ -1029,6 +1073,9 @@ class Perl6::Tidy {
 		}
 	}
 
+	class semilist does Nesting does Formatting {
+	}
+
 	method semilist( Mu $parsed ) {
 		if $parsed.list {
 			die "list"
@@ -1037,7 +1084,9 @@ class Perl6::Tidy {
 			say "semilist:\n" ~ $parsed.dump if $.debugging;
 			if $parsed.hash.<statement> {
 				die "Too many keys" if $parsed.hash.keys > 1;
-				self.statement( $parsed.hash.<statement> )
+				for $parsed.hash.<statement> {
+					self.statement( $_ )
+				}
 			}
 			else {
 				die "Unknown key"
