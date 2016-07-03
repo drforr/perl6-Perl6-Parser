@@ -106,31 +106,6 @@ class Perl6::Tidy {
 		die "Uncaught type"
 	}
 
-	method sigil_desigilname( Mu $sigil, Mu $desigilname ) {
-		self.debug(
-			'sigil_desigilname',
-			'sigil',       $sigil,
-			'desigilname', $desigilname
-		);
-
-		if $desigilname.hash {
-			if $desigilname.hash.<longname> {
-				die "Too many keys"
-					if $desigilname.hash.keys > 1;
-				return Node.new(
-					:type( 'sigil_desigilname' ),
-					:name(
-						 self.longname(
-							$desigilname.hash.<longname>
-						)
-					)
-				)
-			}
-			die "Uncaught key"
-		}
-		die "Uncaught type"
-	}
-
 	method statement( Mu $parsed ) {
 		self.debug(
 			'statement',
@@ -170,9 +145,13 @@ class Perl6::Tidy {
 					if $parsed.hash.keys > 2;
 				return Node.new(
 					:type( 'statement' ),
-					:name(
-						self.sigil_desigilname(
-							$parsed.hash.<sigil>,
+					:sigil(
+						self.sigil(
+							$parsed.hash.<sigil>
+						)
+					),
+					:desigilname(
+						self.desigilname(
 							$parsed.hash.<desigilname>
 						)
 					)
@@ -322,38 +301,62 @@ class Perl6::Tidy {
 		die "Uncaught type"
 	}
 
-	method twigil_sigil_desigilname( Mu $twigil,
-					 Mu $sigil,
-					 Mu $desigilname ) {
+	method twigil( Mu $parsed ) {
 		self.debug(
-			'twigil_sigil_desigilname',
-			'twigil',      $twigil,
-			'sigil',       $sigil,
-			'desigilname', $desigilname
+			'twigil',
+			'twigil', $parsed
 		);
 
-		if $twigil.hash {
-			return Node.new(
-				:type( 'twigil_sigil_desigilname' ),
-				:name(
-					self.longname(
-						$desigilname.hash.<longname>
-					)
-				),
-				:twigil(
-					self.sym(
-						$twigil.hash.<sym>
-					)
-				),
-				:sigil(
-					$sigil.Str
-				),
-				:desigilname(
-					self.longname(
-						$desigilname.hash.<longname>
+		if $parsed.hash {
+			if $parsed.hash.<sym> {
+				die "Too many keys"
+					if $parsed.hash.keys > 1;
+				return Node.new(
+					:type( 'twigil' ),
+					:name(
+						self.sym(
+							$parsed.hash.<sym>
+						)
 					)
 				)
-			)
+			}
+			die "Uncaught key"
+		}
+		die "Uncaught type"
+	}
+
+	method sigil( Mu $parsed ) {
+		self.debug(
+			'sigil',
+			'sigil', $parsed
+		);
+
+		if $parsed.Str {
+			return $parsed.Str
+		}
+		die "Uncaught type"
+	}
+
+	method desigilname( Mu $parsed ) {
+		self.debug(
+			'desigilname',
+			'desigilname', $parsed
+		);
+
+		if $parsed.hash {
+			if $parsed.hash.<longname> {
+				die "Too many keys"
+					if $parsed.hash.keys > 1;
+				return Node.new(
+					:type( 'desigilname' ),
+					:name(
+						self.longname(
+							$parsed.hash.<longname>
+						)
+					)
+				)
+			}
+			die "Unknown key"
 		}
 		die "Uncaught type"
 	}
@@ -372,13 +375,21 @@ class Perl6::Tidy {
 					if $parsed.hash.keys > 3;
 				return Node.new(
 					:type( 'variable' ),
-					:name(
-						self.twigil_sigil_desigilname(
-							$parsed.hash.<twigil>,
-							$parsed.hash.<sigil>,
+					:twigil(
+						self.twigil(
+							$parsed.hash.<twigil>
+						)
+					),
+					:sigil(
+						self.sigil(
+							$parsed.hash.<sigil>
+						)
+					),
+					:desigilname(
+						self.desigilname(
 							$parsed.hash.<desigilname>
 						)
-					)
+					),
 				)
 			}
 			elsif $parsed.hash.<sigil> and
@@ -387,9 +398,13 @@ class Perl6::Tidy {
 					if $parsed.hash.keys > 2;
 				return Node.new(
 					:type( 'variable' ),
-					:name(
-						self.sigil_desigilname(
-							$parsed.hash.<sigil>,
+					:sigil(
+						self.sigil(
+							$parsed.hash.<sigil>
+						)
+					),
+					:desigilname(
+						self.desigilname(
 							$parsed.hash.<desigilname>
 						)
 					)
