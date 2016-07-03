@@ -61,7 +61,7 @@ class Perl6::Tidy {
 					if $parsed.hash.keys > 1;
 				return Node.new(
 					:type(
-						'root'
+						'tidy'
 					),
 					:name(
 						self.statementlist(
@@ -206,6 +206,9 @@ class Perl6::Tidy {
 		if $parsed.Str {
 			return Node.new(
 				:type(
+					'sym'
+				),
+				:name(
 					$parsed.Str
 				)
 			)
@@ -355,10 +358,12 @@ class Perl6::Tidy {
 		if $twigil.hash {
 			return Node.new(
 				:type(
-					'twigil_sigil_desigil'
+					'twigil_sigil_desigilname'
 				),
 				:name(
-					$desigilname.Str
+					self.longname(
+						$desigilname.hash.<longname>
+					)
 				)
 			)
 		}
@@ -440,6 +445,7 @@ class Perl6::Tidy {
 						:child(
 							@child
 						),
+
 						:postfix(
 							self.postfix(
 								$parsed.hash.<postfix>
@@ -754,8 +760,15 @@ class Perl6::Tidy {
 				)
 			}
 			elsif $babble.hash.<B> {
-				return self.B(
-					$babble.hash.<B>
+				return Node.new(
+					:type(
+						'babble_nibble'
+					),
+					:name(
+						self.B(
+							$babble.hash.<B>
+						)
+					)
 				)
 			}
 			die "Uncaught key"
