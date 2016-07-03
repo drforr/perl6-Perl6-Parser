@@ -43,7 +43,8 @@ class Perl6::Tidy {
 		say "\?$key: "    ~ ~?$value.Bool    if $value.Bool;
 	}
 
-	sub debug( Str $name, *@inputs ) {
+	method debug( Str $name, *@inputs ) {
+		return unless $.debugging;
 		for @inputs -> $k, $v {
 			_debug( $k, $v )
 		}
@@ -103,7 +104,7 @@ class Perl6::Tidy {
 			:actions( $a )
 		);
 
-		debug( 'tidy', 'tidy', $parsed ) if $.debugging;
+		self.debug( 'tidy', 'tidy', $parsed );
 
 		if $parsed.hash {
 			if $parsed.hash.<statementlist> {
@@ -124,8 +125,10 @@ class Perl6::Tidy {
 	}
 
 	method statementlist( Mu $parsed ) {
-		debug(	'statementlist',
-			'statementlist', $parsed ) if $.debugging;
+		self.debug(
+			'statementlist',
+			'statementlist', $parsed
+		);
 
 		if $parsed.hash {
 			if $parsed.hash.<statement> {
@@ -143,7 +146,7 @@ class Perl6::Tidy {
 					)
 				)
 			}
-			return statementlist.new
+			die "Uncaught key"
 		}
 		elsif $parsed.Bool {
 			return statementlist.new
@@ -155,9 +158,11 @@ class Perl6::Tidy {
 	}
 
 	method sigil_desigilname( Mu $sigil, Mu $desigilname ) {
-		debug(	'sigil_desigilname',
+		self.debug(
+			'sigil_desigilname',
 			'sigil', $sigil,
-			'desigilname', $desigilname ) if $.debugging;
+			'desigilname', $desigilname
+		);
 
 		if $desigilname.hash {
 			if $desigilname.hash.<longname> {
@@ -173,14 +178,18 @@ class Perl6::Tidy {
 	}
 
 	method statement( Mu $parsed ) {
-		debug(	'statement',
-			'statement', $parsed ) if $.debugging;
+		self.debug(
+			'statement',
+			'statement', $parsed
+		);
 
 		if $parsed.list {
 			my @child;
 			for $parsed.list {
 				@child.push(
-					self.EXPR( $_.hash.<EXPR> )
+					self.EXPR(
+						$_.hash.<EXPR>
+					)
 				)
 			}
 			return statement.new(
@@ -193,7 +202,9 @@ class Perl6::Tidy {
 			if $parsed.hash.<EXPR> {
 				die "Too many keys"
 					if $parsed.hash.keys > 1;
-				return self.EXPR( $parsed.hash.<EXPR> )
+				return self.EXPR(
+					$parsed.hash.<EXPR>
+				)
 			}
 			elsif $parsed.hash.<sigil> and
 			      $parsed.hash.<desigilname> {
@@ -201,7 +212,7 @@ class Perl6::Tidy {
 					if $parsed.hash.keys > 2;
 				return self.sigil_desigilname(
 					$parsed.hash.<sigil>,
-					$parsed.hash.<desigilname>,
+					$parsed.hash.<desigilname>
 				)
 			}
 			die "Uncaught key"
@@ -210,8 +221,10 @@ class Perl6::Tidy {
 	}
 
 	method sym( Mu $parsed ) {
-		debug(	'sym',
-			'sym', $parsed ) if $.debugging;
+		self.debug(
+			'sym',
+			'sym', $parsed
+		);
 
 		if $parsed.hash {
 			die "hash"
@@ -223,8 +236,10 @@ class Perl6::Tidy {
 	}
 
 	method postfix( Mu $parsed ) {
-		debug(	'postfix',
-			'postfix', $parsed ) if $.debugging;
+		self.debug(
+			'postfix',
+			'postfix', $parsed
+		);
 
 		if $parsed.hash {
 			if $parsed.hash.<sym> and
@@ -241,8 +256,10 @@ class Perl6::Tidy {
 	}
 
 	method OPER( Mu $parsed ) {
-		debug(	'OPER',
-			'OPER', $parsed ) if $.debugging;
+		self.debug(
+			'OPER',
+			'OPER', $parsed
+		);
 
 		if $parsed.hash {
 			if $parsed.hash.<sym> and
@@ -262,8 +279,10 @@ class Perl6::Tidy {
 	}
 
 	method name( Mu $parsed ) {
-		debug(	'name',
-			'name', $parsed ) if $.debugging;
+		self.debug(
+			'name',
+			'name', $parsed
+		);
 
 		if $parsed.hash {
 			# XXX fix this branch
@@ -298,8 +317,10 @@ class Perl6::Tidy {
 	}
 
 	method longname( Mu $parsed ) {
-		debug(	'longname',
-			'longname', $parsed ) if $.debugging;
+		self.debug(
+			'longname',
+			'longname', $parsed
+		);
 
 		if $parsed.hash {
 			# XXX fix this branch...
@@ -318,10 +339,12 @@ class Perl6::Tidy {
 	method twigil_sigil_desigilname( Mu $twigil,
 					 Mu $sigil,
 					 Mu $desigilname ) {
-		debug(	'twigil_sigil_desigilname',
+		self.debug(
+			'twigil_sigil_desigilname',
 			'twigil', $twigil,
 			'sigil', $sigil,
-			'desigilname', $desigilname ) if $.debugging;
+			'desigilname', $desigilname
+		);
 
 		if $twigil.hash {
 			return $desigilname.Str
@@ -330,8 +353,10 @@ class Perl6::Tidy {
 	}
 
 	method variable( Mu $parsed ) {
-		debug(	'variable',
-			'variable', $parsed ) if $.debugging;
+		self.debug(
+			'variable',
+			'variable', $parsed
+		);
 
 		if $parsed.hash {
 			if $parsed.hash.<twigil> and
@@ -365,8 +390,10 @@ class Perl6::Tidy {
 	}
 
 	method EXPR( Mu $parsed ) {
-		debug(	'EXPR',
-			'EXPR', $parsed ) if $.debugging;
+		self.debug(
+			'EXPR',
+			'EXPR', $parsed
+		);
 
 		if $parsed.list {
 			my @child;
@@ -439,8 +466,10 @@ class Perl6::Tidy {
 	}
 
 	method value( Mu $parsed ) {
-		debug(	'value',
-			'value', $parsed ) if $.debugging;
+		self.debug(
+			'value',
+			'value', $parsed
+		);
 
 		if $parsed.hash {
 			if $parsed.hash.<number> {
@@ -463,8 +492,10 @@ class Perl6::Tidy {
 	}
 
 	method number( Mu $parsed ) {
-		debug(	'number',
-			'number', $parsed ) if $.debugging;
+		self.debug(
+			'number',
+			'number', $parsed
+		);
 
 		if $parsed.hash {
 			if $parsed.hash.<numish> {
@@ -480,8 +511,10 @@ class Perl6::Tidy {
 	}
 
 	method quote( Mu $parsed ) {
-		debug(	'quote',
-			'quote', $parsed ) if $.debugging;
+		self.debug(
+			'quote',
+			'quote', $parsed
+		);
 
 		if $parsed.hash {
 			if $parsed.hash.<nibble> {
@@ -504,8 +537,10 @@ class Perl6::Tidy {
 	}
 
 	method B( Mu $parsed ) {
-		debug(	'B',
-			'B', $parsed ) if $.debugging;
+		self.debug(
+			'B',
+			'B', $parsed
+		);
 
 		if $parsed.hash {
 			die "hash"
@@ -517,8 +552,10 @@ class Perl6::Tidy {
 	}
 
 	method babble( Mu $parsed ) {
-		debug(	'babble',
-			'babble', $parsed ) if $.debugging;
+		self.debug(	
+			'babble',
+			'babble', $parsed
+		);
 
 		if $parsed.hash {
 			if $parsed.hash.<B> {
@@ -535,8 +572,10 @@ class Perl6::Tidy {
 	}
 
 	method identifier( Mu $parsed ) {
-		debug(	'identifier',
-			'identifier', $parsed ) if $.debugging;
+		self.debug(
+			'identifier',
+			'identifier', $parsed
+		);
 
 		if $parsed.hash {
 			die "hash"
@@ -564,8 +603,10 @@ class Perl6::Tidy {
 	}
 
 	method quotepair( Mu $parsed ) {
-		debug(	'quotepair',
-			'quotepair', $parsed ) if $.debugging;
+		self.debug(
+			'quotepair',
+			'quotepair', $parsed
+		);
 
 		if $parsed.hash {
 			if $parsed.hash.<identifier> {
@@ -582,9 +623,11 @@ class Perl6::Tidy {
 	}
 
 	method babble_nibble( Mu $babble, Mu $nibble ) {
-		debug(	'babble_nibble',
+		self.debug(
+			'babble_nibble',
 			'babble', $babble,
-			'nibble', $nibble ) if $.debugging;
+			'nibble', $nibble
+		);
 
 		if $babble.hash {
 			if $babble.hash.<quotepair> {
@@ -611,8 +654,10 @@ class Perl6::Tidy {
 	}
 
 	method quibble( Mu $parsed ) {
-		debug(	'quibble',
-			'quibble', $parsed ) if $.debugging;
+		self.debug(
+			'quibble',
+			'quibble', $parsed
+		);
 
 		if $parsed.hash {
 			if $parsed.hash.<babble> and
@@ -628,8 +673,10 @@ class Perl6::Tidy {
 	}
 
 	method atom( Mu $parsed ) {
-		debug(	'atom',
-			'atom', $parsed ) if $.debugging;
+		self.debug(
+			'atom',
+			'atom', $parsed
+		);
 
 		if $parsed.hash {
 			die "hash"
@@ -641,8 +688,10 @@ class Perl6::Tidy {
 	}
 
 	method noun( Mu $parsed ) {
-		debug(	'noun',
-			'noun', $parsed ) if $.debugging;
+		self.debug(
+			'noun',
+			'noun', $parsed
+		);
 
 		if $parsed.hash {
 			if $parsed.hash.<atom> {
@@ -662,8 +711,10 @@ class Perl6::Tidy {
 	}
 
 	method termish( Mu $parsed ) {
-		debug(	'termish',
-			'termish', $parsed ) if $.debugging;
+		self.debug(
+			'termish',
+			'termish', $parsed
+		);
 
 		if $parsed.hash {
 			if $parsed.hash.<noun> {
@@ -689,8 +740,10 @@ class Perl6::Tidy {
 	}
 
 	method termconj( Mu $parsed ) {
-		debug(	'termconj',
-			'termconj', $parsed ) if $.debugging;
+		self.debug(
+			'termconj',
+			'termconj', $parsed
+		);
 
 		if $parsed.hash {
 			if $parsed.hash.<termish> {
@@ -716,8 +769,10 @@ class Perl6::Tidy {
 	}
 
 	method termalt( Mu $parsed ) {
-		debug(	'termalt',
-			'termalt', $parsed ) if $.debugging;
+		self.debug(
+			'termalt',
+			'termalt', $parsed
+		);
 
 		if $parsed.hash {
 			if $parsed.hash.<termconj> {
@@ -743,8 +798,10 @@ class Perl6::Tidy {
 	}
 
 	method termconjseq( Mu $parsed ) {
-		debug(	'termconjseq',
-			'termconjseq', $parsed ) if $.debugging;
+		self.debug(
+			'termconjseq',
+			'termconjseq', $parsed
+		);
 
 		if $parsed.hash {
 			if $parsed.hash.<termalt> {
@@ -770,8 +827,10 @@ class Perl6::Tidy {
 	}
 
 	method termaltseq( Mu $parsed ) {
-		debug(	'termaltseq',
-			'termaltseq', $parsed ) if $.debugging;
+		self.debug(
+			'termaltseq',
+			'termaltseq', $parsed
+		);
 
 		if $parsed.hash {
 			if $parsed.hash.<termconjseq> {
@@ -794,8 +853,10 @@ class Perl6::Tidy {
 	}
 
 	method termseq( Mu $parsed ) {
-		debug(	'termseq',
-			'termseq', $parsed ) if $.debugging;
+		self.debug(
+			'termseq',
+			'termseq', $parsed
+		);
 
 		if $parsed.hash {
 			if $parsed.hash.<termaltseq> {
@@ -812,8 +873,10 @@ class Perl6::Tidy {
 	}
 
 	method nibble( Mu $parsed ) {
-		debug(	'nibble',
-			'nibble', $parsed ) if $.debugging;
+		self.debug(
+			'nibble',
+			'nibble', $parsed
+		);
 
 		if $parsed.hash {
 			if $parsed.hash.<termseq> {
@@ -830,10 +893,12 @@ class Perl6::Tidy {
 	}
 
 	method int_coeff_frac( Mu $int, Mu $coeff, Mu $frac ) {
-		debug(	'int_coeff_escale',
+		self.debug(
+			'int_coeff_escale',
 			'int', $int,
 			'coeff', $coeff,
-			'frac', $frac ) if $.debugging;
+			'frac', $frac
+		);
 
 		if $int.hash {
 			die "hash"
@@ -845,10 +910,12 @@ class Perl6::Tidy {
 	}
 
 	method int_coeff_escale( Mu $int, Mu $coeff, Mu $escale ) {
-		debug(	'int_coeff_escale',
+		self.debug(
+			'int_coeff_escale',
 			'int', $int,
 			'coeff', $coeff,
-			'escale', $escale ) if $.debugging;
+			'escale', $escale
+		);
 
 		if $int.hash {
 			die "hash"
@@ -860,8 +927,10 @@ class Perl6::Tidy {
 	}
 
 	method dec_number( Mu $parsed ) {
-		debug(	'dec_number',
-			'dec_number', $parsed ) if $.debugging;
+		self.debug(
+			'dec_number',
+			'dec_number', $parsed
+		);
 
 		if $parsed.hash {
 			if $parsed.hash.<int> and
@@ -888,8 +957,10 @@ class Perl6::Tidy {
 	}
 
 	method numish( Mu $parsed ) {
-		debug(	'numish',
-			'numish', $parsed ) if $.debugging;
+		self.debug(
+			'numish',
+			'numish', $parsed
+		);
 
 		if $parsed.hash {
 			if $parsed.hash.<integer> {
@@ -919,8 +990,10 @@ class Perl6::Tidy {
 	}
 
 	method integer( Mu $parsed ) {
-		debug(	'integer',
-			'integer', $parsed ) if $.debugging;
+		self.debug(
+			'integer',
+			'integer', $parsed
+		);
 
 		if $parsed.hash {
 			if $parsed.hash.<decint> and
@@ -961,9 +1034,11 @@ class Perl6::Tidy {
 	}
 
 	method circumfix_radix( Mu $circumfix, Mu $radix ) {
-		debug(	'circumfix',
+		self.debug(
+			'circumfix',
 			'circumfix', $circumfix,
-			'radix', $radix ) if $.debugging;
+			'radix', $radix
+		);
 
 		if $circumfix.hash {
 			if $circumfix.hash.<semilist> {
@@ -982,8 +1057,10 @@ class Perl6::Tidy {
 	}
 
 	method semilist( Mu $parsed ) {
-		debug(	'semilist',
-			'semilist', $parsed ) if $.debugging;
+		self.debug(
+			'semilist',
+			'semilist', $parsed
+		);
 
 		if $parsed.hash {
 			if $parsed.hash.<statement> {
@@ -1005,8 +1082,10 @@ class Perl6::Tidy {
 	}
 
 	method rad_number( Mu $parsed ) {
-		debug(	'rad_number',
-			'rad_number', $parsed ) if $.debugging;
+		self.debug(
+			'rad_number',
+			'rad_number', $parsed
+		);
 
 		if $parsed.hash {
 			# XXX fix this branch...
@@ -1025,8 +1104,10 @@ class Perl6::Tidy {
 	}
 
 	method binint( Mu $parsed ) {
-		debug(	'binint',
-			'binint', $parsed ) if $.debugging;
+		self.debug(
+			'binint',
+			'binint', $parsed
+		);
 
 		if $parsed.hash {
 			die "hash"
@@ -1038,8 +1119,10 @@ class Perl6::Tidy {
 	}
 
 	method octint( Mu $parsed ) {
-		debug(	'octint',
-			'octint', $parsed ) if $.debugging;
+		self.debug(
+			'octint',
+			'octint', $parsed
+		);
 
 		if $parsed.hash {
 			die "hash"
@@ -1051,8 +1134,10 @@ class Perl6::Tidy {
 	}
 
 	method decint( Mu $parsed ) {
-		debug(	'decint',
-			'decint', $parsed ) if $.debugging;
+		self.debug(
+			'decint',
+			'decint', $parsed
+		);
 
 		if $parsed.hash {
 			die "hash"
@@ -1064,8 +1149,10 @@ class Perl6::Tidy {
 	}
 
 	method hexint( Mu $parsed ) {
-		debug(	'hexint',
-			'hexint', $parsed ) if $.debugging;
+		self.debug(
+			'hexint',
+			'hexint', $parsed
+		);
 
 		if $parsed.hash {
 			die "hash"
