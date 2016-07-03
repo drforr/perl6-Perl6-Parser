@@ -459,6 +459,19 @@ class Perl6::Tidy {
 					)
 				)
 			}
+			elsif $parsed.hash.<longname> and
+			      $parsed.hash.<args> {
+				die "Too many keys"
+					if $parsed.hash.keys > 2;
+				return Node.new(
+					:type( 'EXPR' ),
+					:name(
+						self.longname(
+							$parsed.hash.<longname>
+						)
+					)
+				)
+			}
 			elsif $parsed.hash.<longname> {
 				die "Too many keys"
 					if $parsed.hash.keys > 1;
