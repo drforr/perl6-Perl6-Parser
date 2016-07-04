@@ -90,7 +90,9 @@ class Perl6::Tidy {
 				my @child;
 				for $parsed.hash.<statement> {
 					@child.push(
-						self.statement( $_ )
+						self.statement(
+							$_
+						)
 					)
 				}
 				return Node.new(
@@ -244,7 +246,9 @@ class Perl6::Tidy {
 					if $parsed.hash.keys > 2;
 				my @child;
 				for $parsed.hash.<morename> {
-					@child.push( $_ )
+					@child.push(
+						$_
+					)
 				}
 				return Node.new(
 					:type( 'name' ),
@@ -494,7 +498,7 @@ class Perl6::Tidy {
 	}
 
 	method deflongname( Mu $parsed ) {
-		self.debug( 'routine_def', $parsed );
+		self.debug( 'deflongname', $parsed );
 
 		if $parsed.hash {
 			if $parsed.hash.<name> {
@@ -669,7 +673,33 @@ class Perl6::Tidy {
 			   $parsed.hash:defined<postcircumfix> and
 			   $parsed.hash:defined<signature> and
 			   $parsed.hash:defined<trait> and
-			   $parsed.hash:defined<post_constraint> {
+			   $parsed.hash.<post_constraint> {
+				die "Too many keys"
+					if $parsed.hash.keys > 6;
+				my @child;
+				for $parsed.hash.<post_constraint> {
+					@child.push(
+						self.EXPR(
+							$_.hash.<EXPR>
+						)
+					)
+				}
+				return Node.new(
+					:type( 'variable_declarator' ),
+					:child( @child )
+					:variable(
+						self.variable(
+							$parsed.hash.<variable>
+						)
+					)
+				)
+			}
+			elsif $parsed.hash.<variable> and
+			      $parsed.hash:defined<semilist> and
+			      $parsed.hash:defined<postcircumfix> and
+			      $parsed.hash:defined<signature> and
+			      $parsed.hash:defined<trait> and
+			      $parsed.hash:defined<post_constraint> {
 				die "Too many keys"
 					if $parsed.hash.keys > 6;
 				return Node.new(
@@ -1182,7 +1212,9 @@ class Perl6::Tidy {
 				my @child;
 				for $parsed.hash.<noun> {
 					@child.push(
-						self.noun( $_ )
+						self.noun(
+							$_
+						)
 					)
 				}
 				return Node.new(
