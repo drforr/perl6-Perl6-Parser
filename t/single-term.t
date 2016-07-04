@@ -4,7 +4,7 @@ use nqp;
 use Test;
 use Perl6::Tidy;
 
-plan 8;
+plan 10;
 
 my $pt = Perl6::Tidy.new( :debugging(True) );
 
@@ -199,7 +199,7 @@ END}
 }, Q{string};
 
 subtest sub {
-	plan 3;
+	plan 4;
 
 	subtest sub {
 		plan 1;
@@ -214,6 +214,13 @@ subtest sub {
 		my $parsed = $pt.tidy( Q{$Foo::Bar} );
 		is $parsed.child.elems, 1;
 	}, Q{$Foo::Bar};
+
+	subtest sub {
+		plan 1;
+
+		my $parsed = $pt.tidy( Q{&sum} );
+		is $parsed.child.elems, 1;
+	}, Q{&sum};
 
 	ok 1, Q{$Foo::($bar)::Bar (requires a second term) to compile};
 #	subtest sub {
@@ -285,5 +292,27 @@ subtest sub {
 		is $parsed.child.elems, 1;
 	}, Q{circumfix};
 }, Q{operator};
+
+subtest sub {
+	plan 1;
+
+	subtest sub {
+		plan 1;
+
+		my $parsed = $pt.tidy( Q{:foo} );
+		is $parsed.child.elems, 1;
+	}, Q{:foo};
+}, Q{adverbial-pair};
+
+subtest sub {
+	plan 1;
+
+	subtest sub {
+		plan 1;
+
+		my $parsed = $pt.tidy( Q{:()} );
+		is $parsed.child.elems, 1;
+	}, Q{:()};
+}, Q{signature};
 
 # vim: ft=perl6

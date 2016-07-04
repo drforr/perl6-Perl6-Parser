@@ -161,9 +161,7 @@ class Perl6::Tidy {
 		if $parsed.Str {
 			return Node.new(
 				:type( 'sym' ),
-				:name(
-					$parsed.Str
-				)
+				:name( $parsed.Str )
 			)
 		}
 		die "Uncaught type"
@@ -175,9 +173,7 @@ class Perl6::Tidy {
 		if $parsed.Bool {
 			return Node.new(
 				:type( 'sign' ),
-				:name(
-					$parsed.Bool
-				)
+				:name( $parsed.Bool )
 			)
 		}
 		die "Uncaught type"
@@ -317,9 +313,7 @@ class Perl6::Tidy {
 		if $parsed.Str {
 			return Node.new(
 				:type( 'sigil' ),
-				:name(
-					$parsed.Str
-				)
+				:name( $parsed.Str )
 			)
 		}
 		die "Uncaught type"
@@ -503,6 +497,18 @@ class Perl6::Tidy {
 					)
 				)
 			}
+			elsif $parsed.hash.<colonpair> {
+				die "Too many keys"
+					if $parsed.hash.keys > 1;
+				return Node.new(
+					:type( 'EXPR' ),
+					:name(
+						self.colonpair(
+							$parsed.hash.<colonpair>
+						)
+					)
+				)
+			}
 			die "Uncaught key"
 		}
 		die "Uncaught type"
@@ -604,9 +610,7 @@ class Perl6::Tidy {
 		if $parsed.Bool {
 			return Node.new(
 				:type( 'B' ),
-				:name(
-					 $parsed.Bool
-				)
+				:name( $parsed.Bool )
 			)
 		}
 		die "Uncaught type"
@@ -626,7 +630,73 @@ class Perl6::Tidy {
 					)
 				)
 			}
-			die "Uncaught type"
+			die "Uncaught key"
+		}
+		die "Uncaught type"
+	}
+
+	method signature( Mu $parsed ) {
+		self.debug( 'signature', $parsed );
+
+		if $parsed.Bool {
+			return Node.new(
+				:type( 'signature' ),
+				:name( $parsed.Bool )
+			)
+		}
+		die "Uncaught type"
+	}
+
+	method fakesignature( Mu $parsed ) {
+		self.debug( 'fakesignature', $parsed );
+
+		if $parsed.hash {
+			if $parsed.hash.<signature> {
+				die "Too many keys"
+					if $parsed.hash.keys > 1;
+				return Node.new(
+					:type( 'fakesignature' ),
+					:name(
+						self.signature(
+							$parsed.hash.<signature>
+						)
+					)
+				)
+			}
+			die "Uncaught key"
+		}
+		die "Uncaught type"
+	}
+
+	method colonpair( Mu $parsed ) {
+		self.debug( 'colonpair', $parsed );
+
+		if $parsed.hash {
+			if $parsed.hash.<identifier> {
+				die "Too many keys"
+					if $parsed.hash.keys > 1;
+				return Node.new(
+					:type( 'colonpair' ),
+					:name(
+						self.identifier(
+							$parsed.hash.<identifier>
+						)
+					)
+				)
+			}
+			elsif $parsed.hash.<fakesignature> {
+				die "Too many keys"
+					if $parsed.hash.keys > 1;
+				return Node.new(
+					:type( 'colonpair' ),
+					:name(
+						self.fakesignature(
+							$parsed.hash.<fakesignature>
+						)
+					)
+				)
+			}
+			die "Uncaught key"
 		}
 		die "Uncaught type"
 	}
@@ -652,9 +722,7 @@ class Perl6::Tidy {
 		elsif $parsed.Str {
 			return Node.new(
 				:type( 'identifier' ),
-				:name(
-					$parsed.Str
-				)
+				:name( $parsed.Str )
 			)
 		}
 		die "Uncaught type"
@@ -715,9 +783,7 @@ class Perl6::Tidy {
 		if $parsed.Str {
 			return Node.new(
 				:type( 'atom' ),
-				:name(
-					$parsed.Str
-				)
+				:name( $parsed.Str )
 			)
 		}
 		die "Uncaught type"
@@ -777,7 +843,9 @@ class Perl6::Tidy {
 				my @child;
 				for $parsed.hash.<termish> {
 					@child.push(
-						self.termish( $_ )
+						self.termish(
+							$_
+						)
 					)
 				}
 				return Node.new(
@@ -801,7 +869,9 @@ class Perl6::Tidy {
 				my @child;
 				for $parsed.hash.<termconj> {
 					@child.push(
-						self.termconj( $_ )
+						self.termconj(
+							$_
+						)
 					)
 				}
 				return Node.new(
@@ -825,7 +895,9 @@ class Perl6::Tidy {
 				my @child;
 				for $parsed.hash.<termalt> {
 					@child.push(
-						self.termalt( $_ )
+						self.termalt(
+							$_
+						)
 					)
 				}
 				return Node.new(
@@ -849,7 +921,9 @@ class Perl6::Tidy {
 				my @child;
 				for $parsed.hash.<termconjseq> {
 					@child.push(
-						self.termconjseq( $_ )
+						self.termconjseq(
+							$_
+						)
 					)
 				}
 				return Node.new(
@@ -906,9 +980,7 @@ class Perl6::Tidy {
 		if $parsed.Str {
 			return Node.new(
 				:type( 'nibble' ),
-				:name(
-					$parsed.Str
-				)
+				:name( $parsed.Str )
 			)
 		}
 		die "Uncaught type"
@@ -1143,7 +1215,9 @@ class Perl6::Tidy {
 				my @child;
 				for $parsed.hash.<statement> {
 					@child.push(
-						self.statement( $_ )
+						self.statement(
+							$_
+						)
 					)
 				}
 				return Node.new(
@@ -1198,9 +1272,7 @@ class Perl6::Tidy {
 		if $parsed.Int {
 			return Node.new(
 				:type( 'int' ),
-				:name(
-					$parsed.Int
-				)
+				:name( $parsed.Int )
 			)
 		}
 		die "Uncaught type"
@@ -1215,9 +1287,7 @@ class Perl6::Tidy {
 		if $parsed.Int {
 			return Node.new(
 				:type( 'radix' ),
-				:name(
-					$parsed.Int
-				)
+				:name( $parsed.Int )
 			)
 		}
 		die "Uncaught type"
@@ -1232,9 +1302,7 @@ class Perl6::Tidy {
 		if $parsed.Int {
 			return Node.new(
 				:type( 'frac' ),
-				:name(
-					$parsed.Int
-				)
+				:name( $parsed.Int )
 			)
 		}
 		die "Uncaught type"
@@ -1249,9 +1317,7 @@ class Perl6::Tidy {
 		if $parsed.Int {
 			return Node.new(
 				:type( 'coeff' ),
-				:name(
-					$parsed.Int
-				)
+				:name( $parsed.Int )
 			)
 		}
 		die "Uncaught type"
@@ -1293,9 +1359,7 @@ class Perl6::Tidy {
 		if $parsed.Int {
 			return Node.new(
 				:type( 'binint' ),
-				:name(
-					$parsed.Int
-				)
+				:name( $parsed.Int )
 			)
 		}
 		die "Uncaught type"
@@ -1310,9 +1374,7 @@ class Perl6::Tidy {
 		if $parsed.Int {
 			return Node.new(
 				:type( 'octint' ),
-				:name(
-					$parsed.Int
-				)
+				:name( $parsed.Int )
 			)
 		}
 		die "Uncaught type"
@@ -1327,9 +1389,7 @@ class Perl6::Tidy {
 		if $parsed.Int {
 			return Node.new(
 				:type( 'decint' ),
-				:name(
-					$parsed.Int
-				)
+				:name( $parsed.Int )
 			)
 		}
 		die "Uncaught type"
@@ -1344,9 +1404,7 @@ class Perl6::Tidy {
 		if $parsed.Int {
 			return Node.new(
 				:type( 'hexint' ),
-				:name(
-					$parsed.Int
-				)
+				:name( $parsed.Int )
 			)
 		}
 		die "Uncaught type"
