@@ -24,14 +24,15 @@ class Perl6::Tidy {
 
 		say "$name ({@types})";
 
+		if $parsed.hash() {
+			say "$name\{\} keys: " ~ $parsed.hash.keys;
+			say "$name\{\}:\n" ~   $parsed.dump;
+		}
 		if $parsed.list {
 			for $parsed.list {
 				say "$name\[\]:\n" ~ $_.dump
 			}
-		}
-		if $parsed.hash {
-			say "$name\{\} keys: " ~ $parsed.hash.keys;
-			say "$name\{\}:\n" ~   $parsed.dump;
+			return;
 		}
 		say "\+$name: "    ~   $parsed.Int       if $parsed.Int;
 		say "\~$name: '"   ~   $parsed.Str ~ "'" if $parsed.Str;
@@ -60,7 +61,7 @@ class Perl6::Tidy {
 					if $parsed.hash.keys > 1;
 				return Node.new(
 					:type( 'tidy' ),
-					:name(
+					:statementlist(
 						self.statementlist(
 							$parsed.hash.<statementlist>
 						)
@@ -92,12 +93,14 @@ class Perl6::Tidy {
 					:child( @child )
 				)
 			}
+			elsif $parsed.hash:defined<statement> {
+				die "Too many keys"
+					if $parsed.hash.keys > 1;
+				return Node.new(
+					:type( 'statementlist' ),
+				)
+			}
 			die "Uncaught key"
-		}
-		elsif $parsed.Bool {
-			return Node.new(
-				:type( 'statementlist' )
-			)
 		}
 		die "Uncaught type"
 	}
@@ -125,7 +128,7 @@ class Perl6::Tidy {
 					if $parsed.hash.keys > 1;
 				return Node.new(
 					:type( 'statement' ),
-					:name(
+					:EXPR(
 						self.EXPR(
 							$parsed.hash.<EXPR>
 						)
@@ -192,7 +195,7 @@ class Perl6::Tidy {
 					if $parsed.hash.keys > 2;
 				return Node.new(
 					:type( 'postfix' ),
-					:name(
+					:sym(
 						self.sym(
 							$parsed.hash.<sym>
 						)
@@ -214,7 +217,7 @@ class Perl6::Tidy {
 					if $parsed.hash.keys > 2;
 				return Node.new(
 					:type( 'OPER' ),
-					:name(
+					:sym(
 						self.sym(
 							$parsed.hash.<sym>
 						)
@@ -240,7 +243,7 @@ class Perl6::Tidy {
 				}
 				return Node.new(
 					:type( 'name' ),
-					:name(
+					:identifier(
 						self.identifier(
 							$parsed.hash.<identifier>
 						)
@@ -254,7 +257,7 @@ class Perl6::Tidy {
 					if $parsed.hash.keys > 2;
 				return Node.new(
 					:type( 'name' ),
-					:name(
+					:identifier(
 						self.identifier(
 							$parsed.hash.<identifier>
 						)
@@ -297,7 +300,7 @@ class Perl6::Tidy {
 					if $parsed.hash.keys > 1;
 				return Node.new(
 					:type( 'twigil' ),
-					:name(
+					:sym(
 						self.sym(
 							$parsed.hash.<sym>
 						)
@@ -330,7 +333,7 @@ class Perl6::Tidy {
 					if $parsed.hash.keys > 1;
 				return Node.new(
 					:type( 'desigilname' ),
-					:name(
+					:longname(
 						self.longname(
 							$parsed.hash.<longname>
 						)
@@ -338,6 +341,12 @@ class Perl6::Tidy {
 				)
 			}
 			die "Unknown key"
+		}
+		if $parsed.Str {
+			return Node.new(
+				:type( 'desigilname' ),
+				:name( $parsed.Str )
+			)
 		}
 		die "Uncaught type"
 	}
@@ -393,7 +402,7 @@ class Perl6::Tidy {
 					if $parsed.hash.keys > 1;
 				return Node.new(
 					:type( 'variable' ),
-					:name(
+					:sigil(
 						self.sigil(
 							$parsed.hash.<sigil>
 						)
@@ -427,7 +436,6 @@ class Perl6::Tidy {
 					return Node.new(
 						:type( 'EXPR' ),
 						:child( @child ),
-
 						:postfix(
 							self.postfix(
 								$parsed.hash.<postfix>
@@ -455,7 +463,7 @@ class Perl6::Tidy {
 					if $parsed.hash.keys > 1;
 				return Node.new(
 					:type( 'EXPR' ),
-					:name(
+					:value(
 						self.value(
 							$parsed.hash.<value>
 						)
@@ -467,7 +475,7 @@ class Perl6::Tidy {
 					if $parsed.hash.keys > 1;
 				return Node.new(
 					:type( 'EXPR' ),
-					:name(
+					:variable(
 						self.variable(
 							$parsed.hash.<variable>
 						)
@@ -480,7 +488,7 @@ class Perl6::Tidy {
 					if $parsed.hash.keys > 2;
 				return Node.new(
 					:type( 'EXPR' ),
-					:name(
+					:longname(
 						self.longname(
 							$parsed.hash.<longname>
 						)
@@ -492,7 +500,7 @@ class Perl6::Tidy {
 					if $parsed.hash.keys > 1;
 				return Node.new(
 					:type( 'EXPR' ),
-					:name(
+					:longname(
 						self.longname(
 							$parsed.hash.<longname>
 						)
@@ -504,7 +512,7 @@ class Perl6::Tidy {
 					if $parsed.hash.keys > 1;
 				return Node.new(
 					:type( 'EXPR' ),
-					:name(
+					:circumfix(
 						self.circumfix(
 							$parsed.hash.<circumfix>
 						)
@@ -516,7 +524,7 @@ class Perl6::Tidy {
 					if $parsed.hash.keys > 1;
 				return Node.new(
 					:type( 'EXPR' ),
-					:name(
+					:colonpair(
 						self.colonpair(
 							$parsed.hash.<colonpair>
 						)
@@ -528,7 +536,7 @@ class Perl6::Tidy {
 					if $parsed.hash.keys > 1;
 				return Node.new(
 					:type( 'EXPR' ),
-					:name(
+					:scope_declarator(
 						self.scope_declarator(
 							$parsed.hash.<scope_declarator>
 						)
@@ -554,9 +562,30 @@ class Perl6::Tidy {
 					if $parsed.hash.keys > 6;
 				return Node.new(
 					:type( 'variable_declarator' ),
-					:declarator(
+					:variable(
 						self.variable(
 							$parsed.hash.<variable>
+						)
+					),
+				)
+			}
+			die "Uncaught key"
+		}
+		die "Uncaught type"
+	}
+
+	method multi_declarator( Mu $parsed ) {
+		self.debug( 'multi_declarator', $parsed );
+
+		if $parsed.hash {
+			if $parsed.hash.<declarator> {
+				die "Too many keys"
+					if $parsed.hash.keys > 1;
+				return Node.new(
+					:type( 'multi_declarator' ),
+					:declarator(
+						self.declarator(
+							$parsed.hash.<declarator>
 						)
 					),
 				)
@@ -576,7 +605,7 @@ class Perl6::Tidy {
 					if $parsed.hash.keys > 2;
 				return Node.new(
 					:type( 'declarator' ),
-					:declarator(
+					:variable_declarator(
 						self.variable_declarator(
 							$parsed.hash.<variable_declarator>
 						)
@@ -598,11 +627,44 @@ class Perl6::Tidy {
 					if $parsed.hash.keys > 2;
 				return Node.new(
 					:type( 'DECL' ),
-					:variable(
+					:variable_declarator(
 						self.variable_declarator(
 							$parsed.hash.<variable_declarator>
 						)
 					),
+				)
+			}
+			elsif $parsed.hash.<declarator> {
+				die "Too many keys"
+					if $parsed.hash.keys > 2;
+				return Node.new(
+					:type( 'DECL' ),
+					:declarator(
+						self.declarator(
+							$parsed.hash.<declarator>
+						)
+					),
+				)
+			}
+			die "Uncaught key"
+		}
+		die "Uncaught type"
+	}
+
+	method typename( Mu $parsed ) {
+		self.debug( 'typename', $parsed );
+
+		if $parsed.hash {
+			if $parsed.hash.<longname> {
+				die "Too many keys"
+					if $parsed.hash.keys > 3;
+				return Node.new(
+					:type( 'typename' ),
+					:longname(
+						self.longname(
+							$parsed.hash.<longname>
+						)
+					)
 				)
 			}
 			die "Uncaught key"
@@ -629,6 +691,31 @@ class Perl6::Tidy {
 					:DECL(
 						self.DECL(
 							$parsed.hash.<DECL>
+						)
+					),
+				)
+			}
+			elsif $parsed.hash.<multi_declarator> and
+			      $parsed.hash.<DECL> and
+			      $parsed.hash.<typename> {
+warn "YYY";
+				die "Too many keys"
+					if $parsed.hash.keys > 3;
+				return Node.new(
+					:type( 'scoped' ),
+					:multi_declarator(
+						self.multi_declarator(
+							$parsed.hash.<multi_declarator>
+						)
+					),
+					:DECL(
+						self.DECL(
+							$parsed.hash.<DECL>
+						)
+					),
+					:typename(
+						self.typename(
+							$parsed.hash.<typename>
 						)
 					),
 				)
@@ -674,7 +761,7 @@ class Perl6::Tidy {
 					if $parsed.hash.keys > 1;
 				return Node.new(
 					:type( 'value' ),
-					:name(
+					:number(
 						self.number(
 							$parsed.hash.<number>
 						)
@@ -686,7 +773,7 @@ class Perl6::Tidy {
 					if $parsed.hash.keys > 1;
 				return Node.new(
 					:type( 'value' ),
-					:name(
+					:quote(
 						self.quote(
 							$parsed.hash.<quote>
 						)
@@ -707,7 +794,7 @@ class Perl6::Tidy {
 					if $parsed.hash.keys > 1;
 				return Node.new(
 					:type( 'number' ),
-					:name(
+					:numish(
 						self.numish(
 							$parsed.hash.<numish>
 						)
@@ -728,7 +815,7 @@ class Perl6::Tidy {
 					if $parsed.hash.keys > 1;
 				return Node.new(
 					:type( 'quote' ),
-					:name(
+					:nibble(
 						self.nibble(
 							$parsed.hash.<nibble>
 						)
@@ -740,7 +827,7 @@ class Perl6::Tidy {
 					if $parsed.hash.keys > 1;
 				return Node.new(
 					:type( 'quote' ),
-					:name(
+					:quibble(
 						self.quibble(
 							$parsed.hash.<quibble>
 						)
@@ -774,7 +861,7 @@ class Perl6::Tidy {
 			if $parsed.hash.<B> {
 				return Node.new(
 					:type( 'babble' ),
-					:name(
+					:B(
 						self.B(
 							$parsed.hash.<B>
 						)
@@ -807,7 +894,7 @@ class Perl6::Tidy {
 					if $parsed.hash.keys > 1;
 				return Node.new(
 					:type( 'fakesignature' ),
-					:name(
+					:signature(
 						self.signature(
 							$parsed.hash.<signature>
 						)
@@ -828,7 +915,7 @@ class Perl6::Tidy {
 					if $parsed.hash.keys > 1;
 				return Node.new(
 					:type( 'colonpair' ),
-					:name(
+					:identifier(
 						self.identifier(
 							$parsed.hash.<identifier>
 						)
@@ -840,7 +927,7 @@ class Perl6::Tidy {
 					if $parsed.hash.keys > 1;
 				return Node.new(
 					:type( 'colonpair' ),
-					:name(
+					:fakesignature(
 						self.fakesignature(
 							$parsed.hash.<fakesignature>
 						)
@@ -888,7 +975,7 @@ class Perl6::Tidy {
 					if $parsed.hash.keys > 1;
 				return Node.new(
 					:type( 'quotepair' ),
-					:node(
+					:identifier(
 						self.identifier(
 							$parsed.hash.<identifier>
 						)
@@ -947,7 +1034,7 @@ class Perl6::Tidy {
 			if $parsed.hash.<atom> {
 				return Node.new(
 					:type( 'noun' ),
-					:name(
+					:atom(
 						self.atom(
 							$parsed.hash.<atom>
 						)
@@ -1097,7 +1184,7 @@ class Perl6::Tidy {
 			if $parsed.hash.<termaltseq> {
 				return Node.new(
 					:type( 'termseq' ),
-					:name(
+					:termaltseq(
 						self.termaltseq(
 							$parsed.hash.<termaltseq>
 						)
@@ -1119,7 +1206,7 @@ class Perl6::Tidy {
 			if $parsed.hash.<termseq> {
 				return Node.new(
 					:type( 'nibble' ),
-					:name(
+					:termseq(
 						self.termseq(
 							$parsed.hash.<termseq>
 						)
@@ -1199,7 +1286,7 @@ class Perl6::Tidy {
 					if $parsed.hash.keys > 1;
 				return Node.new(
 					:type( 'numish' ),
-					:name(
+					:integer(
 						self.integer(
 							$parsed.hash.<integer>
 						)
@@ -1211,7 +1298,7 @@ class Perl6::Tidy {
 					if $parsed.hash.keys > 1;
 				return Node.new(
 					:type( 'numish' ),
-					:name(
+					:rad_number(
 						self.rad_number(
 							$parsed.hash.<rad_number>
 						)
@@ -1223,7 +1310,7 @@ class Perl6::Tidy {
 					if $parsed.hash.keys > 1;
 				return Node.new(
 					:type( 'numish' ),
-					:name(
+					:dec_number(
 						self.dec_number(
 							$parsed.hash.<dec_number>
 						)
@@ -1245,7 +1332,7 @@ class Perl6::Tidy {
 					if $parsed.hash.keys > 2;
 				return Node.new(
 					:type( 'integer' ),
-					:name(
+					:decint(
 						self.decint(
 							$parsed.hash.<decint>
 						)
@@ -1258,7 +1345,7 @@ class Perl6::Tidy {
 					if $parsed.hash.keys > 2;
 				return Node.new(
 					:type( 'integer' ),
-					:name(
+					:binint(
 						self.binint(
 							$parsed.hash.<binint>
 						)
@@ -1271,7 +1358,7 @@ class Perl6::Tidy {
 					if $parsed.hash.keys > 2;
 				return Node.new(
 					:type( 'integer' ),
-					:name(
+					:octint(
 						self.octint(
 							$parsed.hash.<octint>
 						)
@@ -1284,7 +1371,7 @@ class Perl6::Tidy {
 					if $parsed.hash.keys > 2;
 				return Node.new(
 					:type( 'integer' ),
-					:name(
+					:hexint(
 						self.hexint(
 							$parsed.hash.<hexint>
 						)
@@ -1305,7 +1392,7 @@ class Perl6::Tidy {
 					if $parsed.hash.keys > 2;
 				return Node.new(
 					:type( 'circumfix' ),
-					:name(
+					:semilist(
 						self.semilist(
 							$parsed.hash.<semilist>
 						)
@@ -1317,8 +1404,8 @@ class Perl6::Tidy {
 				die "Too many keys"
 					if $parsed.hash.keys > 2;
 				return Node.new(
-					:type( 'integer' ),
-					:name(
+					:type( 'circumfix' ),
+					:binint(
 						self.binint(
 							$parsed.hash.<binint>
 						)
@@ -1330,8 +1417,8 @@ class Perl6::Tidy {
 				die "Too many keys"
 					if $parsed.hash.keys > 2;
 				return Node.new(
-					:type( 'integer' ),
-					:name(
+					:type( 'circumfix' ),
+					:octint(
 						self.octint(
 							$parsed.hash.<octint>
 						)
@@ -1343,8 +1430,8 @@ class Perl6::Tidy {
 				die "Too many keys"
 					if $parsed.hash.keys > 2;
 				return Node.new(
-					:type( 'integer' ),
-					:name(
+					:type( 'circumfix' ),
+					:hexint(
 						self.hexint(
 							$parsed.hash.<hexint>
 						)

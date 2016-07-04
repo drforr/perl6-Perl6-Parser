@@ -199,7 +199,7 @@ END}
 }, Q{string};
 
 subtest sub {
-	plan 4;
+	plan 7;
 
 	subtest sub {
 		plan 1;
@@ -214,6 +214,27 @@ subtest sub {
 		my $parsed = $pt.tidy( Q{$} );
 		is $parsed.child.elems, 1;
 	}, Q{$};
+
+	subtest sub {
+		plan 1;
+
+		my $parsed = $pt.tidy( Q{$_} );
+		is $parsed.child.elems, 1;
+	}, Q{$_};
+
+	subtest sub {
+		plan 1;
+
+		my $parsed = $pt.tidy( Q{$/} );
+		is $parsed.child.elems, 1;
+	}, Q{$/};
+
+	subtest sub {
+		plan 1;
+
+		my $parsed = $pt.tidy( Q{$!} );
+		is $parsed.child.elems, 1;
+	}, Q{$!};
 
 	subtest sub {
 		plan 1;
