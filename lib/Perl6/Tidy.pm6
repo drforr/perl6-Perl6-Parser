@@ -29,7 +29,10 @@ class Perl6::Tidy {
 				say "$name\[\]:\n" ~ $_.dump
 			}
 		}
-		say "$name\{\}:\n" ~   $parsed.dump      if $parsed.hash;
+		if $parsed.hash {
+			say "$name\{\} keys: " ~ $parsed.hash.keys;
+			say "$name\{\}:\n" ~   $parsed.dump;
+		}
 		say "\+$name: "    ~   $parsed.Int       if $parsed.Int;
 		say "\~$name: '"   ~   $parsed.Str ~ "'" if $parsed.Str;
 		say "\?$name: "    ~ ~?$parsed.Bool      if $parsed.Bool;
@@ -227,7 +230,6 @@ class Perl6::Tidy {
 		self.debug( 'name', $parsed );
 
 		if $parsed.hash {
-			# XXX fix this branch
 			if $parsed.hash.<identifier> and
 			   $parsed.hash.<morename> {
 				die "Too many keys"
@@ -246,8 +248,8 @@ class Perl6::Tidy {
 					:child( @child )
 				)
 			}
-			# XXX fix this branch
-			elsif $parsed.hash.<identifier> {
+			elsif $parsed.hash.<identifier> and
+			      $parsed.hash:defined<morename> {
 				die "Too many keys"
 					if $parsed.hash.keys > 2;
 				return Node.new(
@@ -268,8 +270,8 @@ class Perl6::Tidy {
 		self.debug( 'longname', $parsed );
 
 		if $parsed.hash {
-			# XXX fix this branch...
-			if $parsed.hash.<name> {
+			if $parsed.hash.<name> and
+			   $parsed.hash:defined<colonpair> {
 				die "Too many keys"
 					if $parsed.hash.keys > 2;
 				return Node.new(
@@ -382,6 +384,18 @@ class Perl6::Tidy {
 					:desigilname(
 						self.desigilname(
 							$parsed.hash.<desigilname>
+						)
+					)
+				)
+			}
+			elsif $parsed.hash.<sigil> {
+				die "Too many keys"
+					if $parsed.hash.keys > 1;
+				return Node.new(
+					:type( 'variable' ),
+					:name(
+						self.sigil(
+							$parsed.hash.<sigil>
 						)
 					)
 				)
@@ -505,6 +519,143 @@ class Perl6::Tidy {
 					:name(
 						self.colonpair(
 							$parsed.hash.<colonpair>
+						)
+					)
+				)
+			}
+			elsif $parsed.hash.<scope_declarator> {
+				die "Too many keys"
+					if $parsed.hash.keys > 1;
+				return Node.new(
+					:type( 'EXPR' ),
+					:name(
+						self.scope_declarator(
+							$parsed.hash.<scope_declarator>
+						)
+					)
+				)
+			}
+			die "Uncaught key"
+		}
+		die "Uncaught type"
+	}
+
+	method variable_declarator( Mu $parsed ) {
+		self.debug( 'variable_declarator', $parsed );
+
+		if $parsed.hash {
+			if $parsed.hash.<variable> and
+			   $parsed.hash:defined<semilist> and
+			   $parsed.hash:defined<postcircumfix> and
+			   $parsed.hash:defined<signature> and
+			   $parsed.hash:defined<trait> and
+			   $parsed.hash:defined<post_constraint> {
+				die "Too many keys"
+					if $parsed.hash.keys > 6;
+				return Node.new(
+					:type( 'variable_declarator' ),
+					:declarator(
+						self.variable(
+							$parsed.hash.<variable>
+						)
+					),
+				)
+			}
+			die "Uncaught key"
+		}
+		die "Uncaught type"
+	}
+
+	method declarator( Mu $parsed ) {
+		self.debug( 'declarator', $parsed );
+
+		if $parsed.hash {
+			if $parsed.hash.<variable_declarator> and
+			   $parsed.hash:defined<trait> {
+				die "Too many keys"
+					if $parsed.hash.keys > 2;
+				return Node.new(
+					:type( 'declarator' ),
+					:declarator(
+						self.variable_declarator(
+							$parsed.hash.<variable_declarator>
+						)
+					),
+				)
+			}
+			die "Uncaught key"
+		}
+		die "Uncaught type"
+	}
+
+	method DECL( Mu $parsed ) {
+		self.debug( 'DECL', $parsed );
+
+		if $parsed.hash {
+			if $parsed.hash.<variable_declarator> and
+			   $parsed.hash:defined<trait> {
+				die "Too many keys"
+					if $parsed.hash.keys > 2;
+				return Node.new(
+					:type( 'DECL' ),
+					:variable(
+						self.variable_declarator(
+							$parsed.hash.<variable_declarator>
+						)
+					),
+				)
+			}
+			die "Uncaught key"
+		}
+		die "Uncaught type"
+	}
+
+	method scoped( Mu $parsed ) {
+		self.debug( 'scoped', $parsed );
+
+		if $parsed.hash {
+			if $parsed.hash.<declarator> and
+			   $parsed.hash.<DECL> and
+			   $parsed.hash:defined<typename> {
+				die "Too many keys"
+					if $parsed.hash.keys > 3;
+				return Node.new(
+					:type( 'scoped' ),
+					:declarator(
+						self.declarator(
+							$parsed.hash.<declarator>
+						)
+					),
+					:DECL(
+						self.DECL(
+							$parsed.hash.<DECL>
+						)
+					),
+				)
+			}
+			die "Uncaught key"
+		}
+		die "Uncaught type"
+	}
+
+	method scope_declarator( Mu $parsed ) {
+		self.debug( 'scope_declarator', $parsed );
+
+		if $parsed.hash {
+			if $parsed.hash.<sym> and
+			   $parsed.hash.<scoped> {
+				die "Too many keys"
+					if $parsed.hash.keys > 2;
+				return Node.new(
+					:type( 'scope_declarator' ),
+					:sym(
+						self.sym(
+							$parsed.hash.<sym>
+						)
+					),
+					:scoped(
+						self.scoped(
+							$parsed.hash.<scoped>
 						)
 					)
 				)
@@ -1239,9 +1390,10 @@ class Perl6::Tidy {
 		self.debug( 'rad_number', $parsed );
 
 		if $parsed.hash {
-			# XXX fix this branch...
 			if $parsed.hash.<circumfix> and
-			   $parsed.hash.<radix> {
+			   $parsed.hash.<radix> and
+			   $parsed.hash:defined<exp> and
+			   $parsed.hash:defined<base> {
 				die "Too many keys"
 					if $parsed.hash.keys > 4;
 				return Node.new(

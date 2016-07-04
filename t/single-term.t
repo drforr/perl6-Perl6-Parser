@@ -211,6 +211,13 @@ subtest sub {
 	subtest sub {
 		plan 1;
 
+		my $parsed = $pt.tidy( Q{$} );
+		is $parsed.child.elems, 1;
+	}, Q{$};
+
+	subtest sub {
+		plan 1;
+
 		my $parsed = $pt.tidy( Q{$Foo::Bar} );
 		is $parsed.child.elems, 1;
 	}, Q{$Foo::Bar};
@@ -222,7 +229,7 @@ subtest sub {
 		is $parsed.child.elems, 1;
 	}, Q{&sum};
 
-	ok 1, Q{$Foo::($bar)::Bar (requires a second term) to compile};
+	todo Q{$Foo::($bar)::Bar (requires a second term) to compile};
 #	subtest sub {
 #		plan 1;
 #
