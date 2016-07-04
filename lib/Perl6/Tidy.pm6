@@ -14,8 +14,12 @@ class Perl6::Tidy {
 
 		return unless $.debugging;
 
-		@types.push( 'list' ) if $parsed.list;
-		@types.push( 'hash' ) if $parsed.hash;
+		if $parsed.list {
+			@types.push( 'list' )
+		}
+		elsif $parsed.hash {
+			@types.push( 'hash' )
+		}
 		@types.push( 'Int'  ) if $parsed.Int;
 		@types.push( 'Str'  ) if $parsed.Str;
 		@types.push( 'Bool' ) if $parsed.Bool;
@@ -24,15 +28,15 @@ class Perl6::Tidy {
 
 		say "$name ({@types})";
 
-		if $parsed.hash() {
-			say "$name\{\} keys: " ~ $parsed.hash.keys;
-			say "$name\{\}:\n" ~   $parsed.dump;
-		}
 		if $parsed.list {
 			for $parsed.list {
 				say "$name\[\]:\n" ~ $_.dump
 			}
 			return;
+		}
+		elsif $parsed.hash() {
+			say "$name\{\} keys: " ~ $parsed.hash.keys;
+			say "$name\{\}:\n" ~   $parsed.dump;
 		}
 		say "\+$name: "    ~   $parsed.Int       if $parsed.Int;
 		say "\~$name: '"   ~   $parsed.Str ~ "'" if $parsed.Str;
@@ -654,7 +658,21 @@ class Perl6::Tidy {
 	method typename( Mu $parsed ) {
 		self.debug( 'typename', $parsed );
 
-		if $parsed.hash {
+		if $parsed.list {
+			my @child;
+			for $parsed.list {
+				@child.push(
+					self.longname(
+						$_.hash.<longname>
+					)
+				)
+			}
+			return Node.new(
+				:type( 'typename' ),
+				:child( @child )
+			)
+		}
+		elsif $parsed.hash {
 			if $parsed.hash.<longname> {
 				die "Too many keys"
 					if $parsed.hash.keys > 3;
@@ -698,7 +716,6 @@ class Perl6::Tidy {
 			elsif $parsed.hash.<multi_declarator> and
 			      $parsed.hash.<DECL> and
 			      $parsed.hash.<typename> {
-warn "YYY";
 				die "Too many keys"
 					if $parsed.hash.keys > 3;
 				return Node.new(
