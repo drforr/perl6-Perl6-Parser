@@ -46,6 +46,7 @@ class Perl6::Tidy {
 	}
 
 	method tidy( Str $text ) {
+		my $*LINEPOSCACHE;
 		my $compiler := nqp::getcomp('perl6');
 		my $g := nqp::findmethod($compiler,'parsegrammar')($compiler);
 		#$g.HOW.trace-on($g);
@@ -418,6 +419,101 @@ class Perl6::Tidy {
 		die "Uncaught type"
 	}
 
+	method routine_declarator( Mu $parsed ) {
+		self.debug( 'routine_declarator', $parsed );
+
+		if $parsed.hash {
+			if $parsed.hash.<sym> and
+			   $parsed.hash.<routine_def> {
+				die "Too many keys"
+					if $parsed.hash.keys > 2;
+				return Node.new(
+					:type( 'routine_declarator' ),
+					:sym(
+						self.sym(
+							$parsed.hash.<sym>
+						)
+					),
+					:routine_def(
+						self.routine_def(
+							$parsed.hash.<routine_def>
+						)
+					)
+				)
+			}
+			die "Uncaught key"
+		}
+		die "Uncaught type"
+	}
+
+	method routine_def( Mu $parsed ) {
+		self.debug( 'routine_def', $parsed );
+
+		if $parsed.hash {
+			if $parsed.hash.<blockoid> {
+				die "Too many keys"
+					if $parsed.hash.keys > 3;
+				return Node.new(
+					:type( 'routine_def' ),
+					:blockoid(
+						self.blockoid(
+							$parsed.hash.<blockoid>
+						)
+					),
+					:deflongname(
+						self.deflongname(
+							$parsed.hash.<deflongname>
+						)
+					)
+				)
+			}
+			die "Uncaught key"
+		}
+		die "Uncaught type"
+	}
+
+	method blockoid( Mu $parsed ) {
+		self.debug( 'blockoid', $parsed );
+
+		if $parsed.hash {
+			if $parsed.hash.<statementlist> {
+				die "Too many keys"
+					if $parsed.hash.keys > 1;
+				return Node.new(
+					:type( 'blockoid' ),
+					:statementlist(
+						self.statementlist(
+							$parsed.hash.<statementlist>
+						)
+					)
+				)
+			}
+			die "Uncaught key"
+		}
+		die "Uncaught type"
+	}
+
+	method deflongname( Mu $parsed ) {
+		self.debug( 'routine_def', $parsed );
+
+		if $parsed.hash {
+			if $parsed.hash.<name> {
+				die "Too many keys"
+					if $parsed.hash.keys > 2;
+				return Node.new(
+					:type( 'deflongname' ),
+					:name(
+						self.name(
+							$parsed.hash.<name>
+						)
+					)
+				)
+			}
+			die "Uncaught key"
+		}
+		die "Uncaught type"
+	}
+
 	method EXPR( Mu $parsed ) {
 		self.debug( 'EXPR', $parsed );
 
@@ -543,6 +639,18 @@ class Perl6::Tidy {
 					:scope_declarator(
 						self.scope_declarator(
 							$parsed.hash.<scope_declarator>
+						)
+					)
+				)
+			}
+			elsif $parsed.hash.<routine_declarator> {
+				die "Too many keys"
+					if $parsed.hash.keys > 1;
+				return Node.new(
+					:type( 'EXPR' ),
+					:routine_declarator(
+						self.routine_declarator(
+							$parsed.hash.<routine_declarator>
 						)
 					)
 				)

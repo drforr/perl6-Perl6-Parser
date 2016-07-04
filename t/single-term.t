@@ -199,7 +199,7 @@ END}
 }, Q{string};
 
 subtest sub {
-	plan 7;
+	plan 8;
 
 	subtest sub {
 		plan 1;
@@ -251,12 +251,12 @@ subtest sub {
 	}, Q{&sum};
 
 	todo Q{$Foo::($bar)::Bar (requires a second term) to compile};
-#	subtest sub {
-#		plan 1;
-#
-#		my $parsed = $pt.tidy( Q[$Foo::($bar)::Bar] );
-#		is $parsed.child.elems, 1;
-#	}, Q[$Foo::($bar)::Bar];
+	subtest sub {
+		plan 1;
+
+		my $parsed = $pt.tidy( Q[$Foo::($*GLOBAL)::Bar] );
+		is $parsed.child.elems, 1;
+	}, Q[$Foo::($*GLOBAL)::Bar (Need $*GLOBAL in order to compile)];
 }, Q{variable};
 
 subtest sub {
