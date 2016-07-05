@@ -530,7 +530,8 @@ class Perl6::Tidy {
 
 		if $parsed.hash {
 			if $parsed.hash.<blockoid> and
-			   $parsed.hash.<deflongname> {
+			   $parsed.hash.<deflongname> and
+			   $parsed.hash:defined<trait> {
 				die "Too many keys"
 					if $parsed.hash.keys > 3;
 				return Node.new(
@@ -556,7 +557,9 @@ class Perl6::Tidy {
 		self.debug( 'package_def', $parsed );
 
 		if $parsed.hash {
-			if $parsed.hash.<blockoid> {
+			if $parsed.hash.<blockoid> and
+			   $parsed.hash.<longname> and
+			   $parsed.hash:defined<trait> {
 				die "Too many keys"
 					if $parsed.hash.keys > 3;
 				return Node.new(
@@ -651,7 +654,8 @@ class Perl6::Tidy {
 		self.debug( 'deflongname', $parsed );
 
 		if $parsed.hash {
-			if $parsed.hash.<name> {
+			if $parsed.hash.<name> and
+			   $parsed.hash:defined<colonpair> {
 				die "Too many keys"
 					if $parsed.hash.keys > 2;
 				return Node.new(
@@ -978,7 +982,7 @@ class Perl6::Tidy {
 			}
 			elsif $parsed.hash.<declarator> {
 				die "Too many keys"
-					if $parsed.hash.keys > 2;
+					if $parsed.hash.keys > 1;
 				return Node.new(
 					:type( 'DECL' ),
 					:declarator(
@@ -1031,7 +1035,7 @@ class Perl6::Tidy {
 		elsif $parsed.hash {
 			if $parsed.hash.<longname> {
 				die "Too many keys"
-					if $parsed.hash.keys > 3;
+					if $parsed.hash.keys > 1;
 				return Node.new(
 					:type( 'typename' ),
 					:longname(
@@ -1767,7 +1771,7 @@ class Perl6::Tidy {
 		if $parsed.hash {
 			if $parsed.hash.<semilist> {
 				die "Too many keys"
-					if $parsed.hash.keys > 2;
+					if $parsed.hash.keys > 1;
 				return Node.new(
 					:type( 'circumfix' ),
 					:semilist(

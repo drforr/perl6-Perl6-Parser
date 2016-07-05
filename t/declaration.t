@@ -78,14 +78,22 @@ subtest {
 }, Q{variable};
 
 subtest {
-	subtest {
-		subtest {
-			plan 1;
+	plan 2;
 
-			my $parsed = $pt.tidy( Q[sub foo{}] );
-			is $parsed.child.elems, 1;
-		}, Q{sub foo {}};
-	}, Q{...};
+	subtest {
+		plan 1;
+
+		my $parsed = $pt.tidy( Q[sub foo {}] );
+		is $parsed.child.elems, 1;
+	}, Q{sub foo {}};
+
+	subtest {
+		plan 1;
+
+		diag Q[Whitespace sensitivity - 'returns Int{&body}'];
+		my $parsed = $pt.tidy( Q[sub foo returns Int {}] );
+		is $parsed.child.elems, 1;
+	}, Q{sub foo returns Int {}};
 }, Q{subroutine};
 
 
@@ -112,18 +120,42 @@ subtest {
 	}, q{module};
 
 	subtest {
-		plan 1;
+		plan 2;
 
-		my $parsed = $pt.tidy( Q[class foo{}] );
-		is $parsed.child.elems, 1;
-	}, Q{class foo {}};
+		subtest {
+			plan 1;
+
+			diag "Interesting, 'unit class foo' is illegal.";
+			my $parsed = $pt.tidy( Q[unit class foo;] );
+			is $parsed.child.elems, 1;
+		}, Q{unit class foo;};
+
+		subtest {
+			plan 1;
+
+			my $parsed = $pt.tidy( Q[class foo{}] );
+			is $parsed.child.elems, 1;
+		}, Q{class foo {}};
+	}, Q{class};
 
 	subtest {
-		plan 1;
+		plan 2;
 
-		my $parsed = $pt.tidy( Q[role foo{}] );
-		is $parsed.child.elems, 1;
-	}, Q{role foo {}};
+		subtest {
+			plan 1;
+
+			diag "Interesting, 'unit role foo' is illegal.";
+			my $parsed = $pt.tidy( Q[unit role foo;] );
+			is $parsed.child.elems, 1;
+		}, Q{unit role foo;};
+
+		subtest {
+			plan 1;
+
+			my $parsed = $pt.tidy( Q[role foo{}] );
+			is $parsed.child.elems, 1;
+		}, Q{role foo {}};
+	}, Q{role};
 
 	subtest {
 		plan 1;
@@ -131,19 +163,29 @@ subtest {
 		diag "There may be a Q[] bug lurking here.";
 		my $parsed = $pt.tidy( Q[my regex foo{a}] );
 		is $parsed.child.elems, 1;
-	}, Q{my regex foo {a} (null regex not allowed, must give it content.)};
+	}, Q{my regex foo {a} (null regex not allowed)};
+
+	subtest {
+		plan 2;
+
+		subtest {
+			plan 1;
+
+			my $parsed = $pt.tidy( Q[unit grammar foo;] );
+			is $parsed.child.elems, 1;
+		}, Q{unit grammar foo;};
+
+		subtest {
+			plan 1;
+
+			my $parsed = $pt.tidy( Q[grammar foo{}] );
+			is $parsed.child.elems, 1;
+		}, Q{grammar foo {}};
+	}, Q{grammar};
 
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q[grammar foo{}] );
-		is $parsed.child.elems, 1;
-	}, Q{grammar foo {}};
-
-	subtest {
-		plan 1;
-
-		diag "Interesting, 'token' is still a regex_declarator";
 		my $parsed = $pt.tidy( Q[my token foo{a}] );
 		is $parsed.child.elems, 1;
 	}, Q{my token foo {a} (null regex not allowed, must give it content.)};
