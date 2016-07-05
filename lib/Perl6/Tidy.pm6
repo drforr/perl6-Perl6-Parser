@@ -573,6 +573,25 @@ class Perl6::Tidy {
 					)
 				)
 			}
+			elsif $parsed.hash.<longname> and
+			      $parsed.hash.<statementlist> and
+			      $parsed.hash:defined<trait> {
+				die "Too many keys"
+					if $parsed.hash.keys > 3;
+				return Node.new(
+					:type( 'package_def' ),
+					:longname(
+						self.longname(
+							$parsed.hash.<longname>
+						)
+					),
+					:statementlist(
+						self.statementlist(
+							$parsed.hash.<statementlist>
+						)
+					)
+				)
+			}
 			die "Uncaught key"
 		}
 		die "Uncaught type"
@@ -969,6 +988,24 @@ class Perl6::Tidy {
 					),
 				)
 			}
+			elsif $parsed.hash.<package_def> and
+			      $parsed.hash.<sym> {
+				die "Too many keys"
+					if $parsed.hash.keys > 2;
+				return Node.new(
+					:type( 'DECL' ),
+					:package_def(
+						self.package_def(
+							$parsed.hash.<package_def>
+						)
+					),
+					:sym(
+						self.sym(
+							$parsed.hash.<sym>
+						)
+					),
+				)
+			}
 			die "Uncaught key"
 		}
 		die "Uncaught type"
@@ -1054,6 +1091,25 @@ class Perl6::Tidy {
 							$parsed.hash.<typename>
 						)
 					),
+				)
+			}
+			elsif $parsed.hash.<package_declarator> and
+			      $parsed.hash.<DECL> and
+			      $parsed.hash:defined<typename> {
+				die "Too many keys"
+					if $parsed.hash.keys > 3;
+				return Node.new(
+					:type( 'scoped' ),
+					:package_declarator(
+						self.package_declarator(
+							$parsed.hash.<package_declarator>
+						)
+					),
+					:DECL(
+						self.DECL(
+							$parsed.hash.<DECL>
+						)
+					)
 				)
 			}
 			die "Uncaught key"

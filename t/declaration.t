@@ -93,11 +93,23 @@ subtest {
 	plan 7;
 
 	subtest {
-		plan 1;
+		plan 2;
 
-		my $parsed = $pt.tidy( Q[module foo{}] );
-		is $parsed.child.elems, 1;
-	}, Q{module foo {}};
+		subtest {
+			plan 1;
+
+			diag "Interesting, 'unit module foo' is illegal.";
+			my $parsed = $pt.tidy( Q[unit module foo;] );
+			is $parsed.child.elems, 1;
+		}, Q{unit module foo;};
+
+		subtest {
+			plan 1;
+
+			my $parsed = $pt.tidy( Q[module foo{}] );
+			is $parsed.child.elems, 1;
+		}, Q{module foo {}};
+	}, q{module};
 
 	subtest {
 		plan 1;
@@ -131,9 +143,10 @@ subtest {
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q[token foo{a}] );
+		diag "Interesting, 'token' is still a regex_declarator";
+		my $parsed = $pt.tidy( Q[my token foo{a}] );
 		is $parsed.child.elems, 1;
-	}, Q{token foo {a} (null regex not allowed, must give it content.)};
+	}, Q{my token foo {a} (null regex not allowed, must give it content.)};
 
 	subtest {
 		plan 1;
