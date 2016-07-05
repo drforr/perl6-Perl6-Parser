@@ -93,6 +93,24 @@ class Perl6::Tidy {
 		die "Uncaught type"
 	}
 
+	sub assert-keys( Mu $parsed, *@keys ) {
+		die "Too many keys"
+			if $parsed.hash.keys > @keys.elems;
+		for @keys -> $key {
+			return False unless $parsed.hash.{$key}
+		}
+		return True
+	}
+
+	sub assert-defined-keys( Mu $parsed, *@keys ) {
+		die "Too many keys"
+			if $parsed.hash.keys > @keys.elems;
+		for @keys -> $key {
+			return False unless $parsed.hash:defined{$key}
+		}
+		return True
+	}
+
 	method tidy( Str $text ) {
 		my $*LINEPOSCACHE;
 		my $compiler := nqp::getcomp('perl6');
@@ -109,9 +127,7 @@ class Perl6::Tidy {
 		self.debug( 'tidy', $parsed );
 
 		if $parsed.hash {
-			if $parsed.hash.<statementlist> {
-				die "Too many keys"
-					if $parsed.hash.keys > 1;
+			if assert-keys( $parsed, < statementlist > ) {
 				return Node.new(
 					:type( 'tidy' ),
 					:statementlist(
@@ -121,7 +137,6 @@ class Perl6::Tidy {
 					)
 				);
 			}
-
 			die "Uncaught key"
 		}
 
@@ -132,9 +147,7 @@ class Perl6::Tidy {
 		self.debug( 'statementlist', $parsed );
 
 		if $parsed.hash {
-			if $parsed.hash.<statement> {
-				die "Too many keys"
-					if $parsed.hash.keys > 1;
+			if assert-keys( $parsed, < statement > ) {
 				my @child;
 				for $parsed.hash.<statement> {
 					@child.push(
@@ -148,7 +161,7 @@ class Perl6::Tidy {
 					:child( @child )
 				)
 			}
-			elsif $parsed.hash:defined<statement> {
+			elsif assert-defined-keys( $parsed, < statement > ) {
 				die "Too many keys"
 					if $parsed.hash.keys > 1;
 				return Node.new(
@@ -178,9 +191,7 @@ class Perl6::Tidy {
 			)
 		}
 		elsif $parsed.hash {
-			if $parsed.hash.<EXPR> {
-				die "Too many keys"
-					if $parsed.hash.keys > 1;
+			if assert-keys( $parsed, < EXPR > ) {
 				return Node.new(
 					:type( 'statement' ),
 					:EXPR(
@@ -190,10 +201,7 @@ class Perl6::Tidy {
 					)
 				)
 			}
-			elsif $parsed.hash.<sigil> and
-			      $parsed.hash.<desigilname> {
-				die "Too many keys"
-					if $parsed.hash.keys > 2;
+			elsif assert-keys( $parsed, < sigil desigilname > ) {
 				return Node.new(
 					:type( 'statement' ),
 					:sigil(
@@ -225,10 +233,7 @@ class Perl6::Tidy {
 		self.debug( 'postfix', $parsed );
 
 		if $parsed.hash {
-			if $parsed.hash.<sym> and
-			   $parsed.hash.<O> {
-				die "Too many keys"
-					if $parsed.hash.keys > 2;
+			if assert-keys( $parsed, < sym O > ) {
 				return Node.new(
 					:type( 'postfix' ),
 					:sym(
@@ -247,10 +252,7 @@ class Perl6::Tidy {
 		self.debug( 'OPER', $parsed );
 
 		if $parsed.hash {
-			if $parsed.hash.<sym> and
-			   $parsed.hash.<O> {
-				die "Too many keys"
-					if $parsed.hash.keys > 2;
+			if assert-keys( $parsed, < sym O > ) {
 				return Node.new(
 					:type( 'OPER' ),
 					:sym(
@@ -269,10 +271,7 @@ class Perl6::Tidy {
 		self.debug( 'name', $parsed );
 
 		if $parsed.hash {
-			if $parsed.hash.<identifier> and
-			   $parsed.hash.<morename> {
-				die "Too many keys"
-					if $parsed.hash.keys > 2;
+			if assert-keys( $parsed, < identifier morename > ) {
 				my @child;
 				for $parsed.hash.<morename> {
 					@child.push(
@@ -333,9 +332,7 @@ class Perl6::Tidy {
 		self.debug( 'twigil', $parsed );
 
 		if $parsed.hash {
-			if $parsed.hash.<sym> {
-				die "Too many keys"
-					if $parsed.hash.keys > 1;
+			if assert-keys( $parsed, < sym > ) {
 				return Node.new(
 					:type( 'twigil' ),
 					:sym(
@@ -358,9 +355,7 @@ class Perl6::Tidy {
 		self.debug( 'desigilname', $parsed );
 
 		if $parsed.hash {
-			if $parsed.hash.<longname> {
-				die "Too many keys"
-					if $parsed.hash.keys > 1;
+			if assert-keys( $parsed, < longname > ) {
 				return Node.new(
 					:type( 'desigilname' ),
 					:longname(
@@ -385,11 +380,7 @@ class Perl6::Tidy {
 		self.debug( 'variable', $parsed );
 
 		if $parsed.hash {
-			if $parsed.hash.<twigil> and
-			   $parsed.hash.<sigil> and
-                           $parsed.hash.<desigilname> {
-				die "Too many keys"
-					if $parsed.hash.keys > 3;
+			if assert-keys( $parsed, < twigil sigil desigilname > ) {
 				return Node.new(
 					:type( 'variable' ),
 					:twigil(
@@ -409,10 +400,7 @@ class Perl6::Tidy {
 					),
 				)
 			}
-			elsif $parsed.hash.<sigil> and
-                              $parsed.hash.<desigilname> {
-				die "Too many keys"
-					if $parsed.hash.keys > 2;
+			elsif assert-keys( $parsed, < sigil desigilname > ) {
 				return Node.new(
 					:type( 'variable' ),
 					:sigil(
@@ -427,9 +415,7 @@ class Perl6::Tidy {
 					)
 				)
 			}
-			elsif $parsed.hash.<sigil> {
-				die "Too many keys"
-					if $parsed.hash.keys > 1;
+			elsif assert-keys( $parsed, < sigil > ) {
 				return Node.new(
 					:type( 'variable' ),
 					:sigil(
@@ -448,10 +434,7 @@ class Perl6::Tidy {
 		self.debug( 'routine_declarator', $parsed );
 
 		if $parsed.hash {
-			if $parsed.hash.<sym> and
-			   $parsed.hash.<routine_def> {
-				die "Too many keys"
-					if $parsed.hash.keys > 2;
+			if assert-keys( $parsed, < sym routine-def > ) {
 				return Node.new(
 					:type( 'routine_declarator' ),
 					:sym(
@@ -475,10 +458,7 @@ class Perl6::Tidy {
 		self.debug( 'package_declarator', $parsed );
 
 		if $parsed.hash {
-			if $parsed.hash.<sym> and
-			   $parsed.hash.<package_def> {
-				die "Too many keys"
-					if $parsed.hash.keys > 2;
+			if assert-keys( $parsed, < sym package_def > ) {
 				return Node.new(
 					:type( 'package_declarator' ),
 					:sym(
@@ -502,10 +482,7 @@ class Perl6::Tidy {
 		self.debug( 'regex_declarator', $parsed );
 
 		if $parsed.hash {
-			if $parsed.hash.<sym> and
-			   $parsed.hash.<regex_def> {
-				die "Too many keys"
-					if $parsed.hash.keys > 2;
+			if assert-keys( $parsed, < sym regex_def > ) {
 				return Node.new(
 					:type( 'regex_declarator' ),
 					:sym(
