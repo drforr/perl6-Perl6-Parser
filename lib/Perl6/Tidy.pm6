@@ -94,7 +94,7 @@ class Perl6::Tidy {
 	}
 
 	sub assert-keys( Mu $parsed, *@keys ) {
-		die "Too many keys"
+		die "Too many keys " ~ $parsed.hash.keys.gist
 			if $parsed.hash.keys > @keys.elems;
 		for @keys -> $key {
 			return False unless $parsed.hash.{$key}
@@ -434,7 +434,7 @@ class Perl6::Tidy {
 		self.debug( 'routine_declarator', $parsed );
 
 		if $parsed.hash {
-			if assert-keys( $parsed, < sym routine-def > ) {
+			if assert-keys( $parsed, < sym routine_def > ) {
 				return Node.new(
 					:type( 'routine_declarator' ),
 					:sym(
@@ -667,7 +667,10 @@ class Perl6::Tidy {
 			}
 			if $parsed.hash {
 				if $parsed.hash.<postfix> and
-				   $parsed.hash.<OPER> {
+				   $parsed.hash.<OPER> and
+				   $parsed.hash:defined<postfix_prefix_meta_operator> {
+					die "Too many keys"
+						if $parsed.hash.keys > 3;
 					return Node.new(
 						:type( 'EXPR' ),
 						:child( @child ),
@@ -693,9 +696,17 @@ class Perl6::Tidy {
 			}
 		}
 		if $parsed.hash {
-			if $parsed.hash.<value> {
-				die "Too many keys"
-					if $parsed.hash.keys > 1;
+			if assert-keys( $parsed, <longname args > ) {
+				return Node.new(
+					:type( 'EXPR' ),
+					:longname(
+						self.longname(
+							$parsed.hash.<longname>
+						)
+					)
+				)
+			}
+			if assert-keys( $parsed, < value > ) {
 				return Node.new(
 					:type( 'EXPR' ),
 					:value(
@@ -705,9 +716,7 @@ class Perl6::Tidy {
 					)
 				)
 			}
-			elsif $parsed.hash.<variable> {
-				die "Too many keys"
-					if $parsed.hash.keys > 1;
+			if assert-keys( $parsed, < variable > ) {
 				return Node.new(
 					:type( 'EXPR' ),
 					:variable(
@@ -717,10 +726,7 @@ class Perl6::Tidy {
 					)
 				)
 			}
-			elsif $parsed.hash.<longname> and
-			      $parsed.hash.<args> {
-				die "Too many keys"
-					if $parsed.hash.keys > 2;
+			if assert-keys( $parsed, < longname > ) {
 				return Node.new(
 					:type( 'EXPR' ),
 					:longname(
@@ -730,21 +736,7 @@ class Perl6::Tidy {
 					)
 				)
 			}
-			elsif $parsed.hash.<longname> {
-				die "Too many keys"
-					if $parsed.hash.keys > 1;
-				return Node.new(
-					:type( 'EXPR' ),
-					:longname(
-						self.longname(
-							$parsed.hash.<longname>
-						)
-					)
-				)
-			}
-			elsif $parsed.hash.<circumfix> {
-				die "Too many keys"
-					if $parsed.hash.keys > 1;
+			if assert-keys( $parsed, < circumfix > ) {
 				return Node.new(
 					:type( 'EXPR' ),
 					:circumfix(
@@ -754,9 +746,7 @@ class Perl6::Tidy {
 					)
 				)
 			}
-			elsif $parsed.hash.<colonpair> {
-				die "Too many keys"
-					if $parsed.hash.keys > 1;
+			if assert-keys( $parsed, < colonpair > ) {
 				return Node.new(
 					:type( 'EXPR' ),
 					:colonpair(
@@ -766,9 +756,7 @@ class Perl6::Tidy {
 					)
 				)
 			}
-			elsif $parsed.hash.<scope_declarator> {
-				die "Too many keys"
-					if $parsed.hash.keys > 1;
+			if assert-keys( $parsed, < scope_declarator > ) {
 				return Node.new(
 					:type( 'EXPR' ),
 					:scope_declarator(
@@ -778,9 +766,7 @@ class Perl6::Tidy {
 					)
 				)
 			}
-			elsif $parsed.hash.<routine_declarator> {
-				die "Too many keys"
-					if $parsed.hash.keys > 1;
+			if assert-keys( $parsed, < routine_declarator > ) {
 				return Node.new(
 					:type( 'EXPR' ),
 					:routine_declarator(
@@ -790,9 +776,7 @@ class Perl6::Tidy {
 					)
 				)
 			}
-			elsif $parsed.hash.<package_declarator> {
-				die "Too many keys"
-					if $parsed.hash.keys > 1;
+			if assert-keys( $parsed, < package_declarator > ) {
 				return Node.new(
 					:type( 'EXPR' ),
 					:package_declarator(
@@ -802,7 +786,7 @@ class Perl6::Tidy {
 					)
 				)
 			}
-			elsif $parsed.hash.<regex_declarator> {
+			if assert-keys( $parsed, < regex_declarator > ) {
 				die "Too many keys"
 					if $parsed.hash.keys > 1;
 				return Node.new(
@@ -875,9 +859,7 @@ class Perl6::Tidy {
 		self.debug( 'multi_declarator', $parsed );
 
 		if $parsed.hash {
-			if $parsed.hash.<declarator> {
-				die "Too many keys"
-					if $parsed.hash.keys > 1;
+			if assert-keys( $parsed, < declarator > ) {
 				return Node.new(
 					:type( 'multi_declarator' ),
 					:declarator(
@@ -957,22 +939,7 @@ class Perl6::Tidy {
 					),
 				)
 			}
-			elsif $parsed.hash.<declarator> {
-				die "Too many keys"
-					if $parsed.hash.keys > 1;
-				return Node.new(
-					:type( 'DECL' ),
-					:declarator(
-						self.declarator(
-							$parsed.hash.<declarator>
-						)
-					),
-				)
-			}
-			elsif $parsed.hash.<package_def> and
-			      $parsed.hash.<sym> {
-				die "Too many keys"
-					if $parsed.hash.keys > 2;
+			elsif assert-keys( $parsed, < package_def sym > ) {
 				return Node.new(
 					:type( 'DECL' ),
 					:package_def(
@@ -983,6 +950,16 @@ class Perl6::Tidy {
 					:sym(
 						self.sym(
 							$parsed.hash.<sym>
+						)
+					),
+				)
+			}
+			elsif assert-keys( $parsed, < declarator > ) {
+				return Node.new(
+					:type( 'DECL' ),
+					:declarator(
+						self.declarator(
+							$parsed.hash.<declarator>
 						)
 					),
 				)
@@ -1010,9 +987,7 @@ class Perl6::Tidy {
 			)
 		}
 		elsif $parsed.hash {
-			if $parsed.hash.<longname> {
-				die "Too many keys"
-					if $parsed.hash.keys > 1;
+			if assert-keys( $parsed, < longname > ) {
 				return Node.new(
 					:type( 'typename' ),
 					:longname(
@@ -1050,11 +1025,9 @@ class Perl6::Tidy {
 					),
 				)
 			}
-			elsif $parsed.hash.<multi_declarator> and
-			      $parsed.hash.<DECL> and
-			      $parsed.hash.<typename> {
-				die "Too many keys"
-					if $parsed.hash.keys > 3;
+			if assert-keys( $parsed, < multi_declarator
+						   DECL
+						   typename > ) {
 				return Node.new(
 					:type( 'scoped' ),
 					:multi_declarator(
@@ -1102,10 +1075,7 @@ class Perl6::Tidy {
 		self.debug( 'scope_declarator', $parsed );
 
 		if $parsed.hash {
-			if $parsed.hash.<sym> and
-			   $parsed.hash.<scoped> {
-				die "Too many keys"
-					if $parsed.hash.keys > 2;
+			if assert-keys( $parsed, < sym scoped > ) {
 				return Node.new(
 					:type( 'scope_declarator' ),
 					:sym(
@@ -1129,9 +1099,7 @@ class Perl6::Tidy {
 		self.debug( 'value', $parsed );
 
 		if $parsed.hash {
-			if $parsed.hash.<number> {
-				die "Too many keys"
-					if $parsed.hash.keys > 1;
+			if assert-keys( $parsed, < number > ) {
 				return Node.new(
 					:type( 'value' ),
 					:number(
@@ -1141,9 +1109,7 @@ class Perl6::Tidy {
 					)
 				)
 			}
-			elsif $parsed.hash.<quote> {
-				die "Too many keys"
-					if $parsed.hash.keys > 1;
+			elsif assert-keys( $parsed, < quote > ) {
 				return Node.new(
 					:type( 'value' ),
 					:quote(
