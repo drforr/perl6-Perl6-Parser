@@ -1128,9 +1128,7 @@ class Perl6::Tidy {
 		self.debug( 'number', $parsed );
 
 		if $parsed.hash {
-			if $parsed.hash.<numish> {
-				die "Too many keys"
-					if $parsed.hash.keys > 1;
+			if assert-keys( $parsed, < numish > ) {
 				return Node.new(
 					:type( 'number' ),
 					:numish(
@@ -1149,9 +1147,7 @@ class Perl6::Tidy {
 		self.debug( 'quote', $parsed );
 
 		if $parsed.hash {
-			if $parsed.hash.<nibble> {
-				die "Too many keys"
-					if $parsed.hash.keys > 1;
+			if assert-keys( $parsed, < nibble > ) {
 				return Node.new(
 					:type( 'quote' ),
 					:nibble(
@@ -1161,9 +1157,7 @@ class Perl6::Tidy {
 					)
 				)
 			}
-			elsif $parsed.hash.<quibble> {
-				die "Too many keys"
-					if $parsed.hash.keys > 1;
+			if assert-keys( $parsed, < quibble > ) {
 				return Node.new(
 					:type( 'quote' ),
 					:quibble(
@@ -1186,7 +1180,8 @@ class Perl6::Tidy {
 		self.debug( 'babble', $parsed );
 
 		if $parsed.hash {
-			if $parsed.hash.<B> {
+			if $parsed.hash.<B> and
+			   $parsed.hash:defined<quotepair> {
 				return Node.new(
 					:type( 'babble' ),
 					:B(
@@ -1223,9 +1218,7 @@ class Perl6::Tidy {
 		self.debug( 'fakesignature', $parsed );
 
 		if $parsed.hash {
-			if $parsed.hash.<signature> {
-				die "Too many keys"
-					if $parsed.hash.keys > 1;
+			if assert-keys( $parsed, < signature > ) {
 				return Node.new(
 					:type( 'fakesignature' ),
 					:signature(
@@ -1244,9 +1237,7 @@ class Perl6::Tidy {
 		self.debug( 'colonpair', $parsed );
 
 		if $parsed.hash {
-			if $parsed.hash.<identifier> {
-				die "Too many keys"
-					if $parsed.hash.keys > 1;
+			if assert-keys( $parsed, < identifier > ) {
 				return Node.new(
 					:type( 'colonpair' ),
 					:identifier(
@@ -1256,9 +1247,7 @@ class Perl6::Tidy {
 					)
 				)
 			}
-			elsif $parsed.hash.<fakesignature> {
-				die "Too many keys"
-					if $parsed.hash.keys > 1;
+			if assert-keys( $parsed, < fakesignature > ) {
 				return Node.new(
 					:type( 'colonpair' ),
 					:fakesignature(
@@ -1304,9 +1293,7 @@ class Perl6::Tidy {
 		self.debug( 'quotepair', $parsed );
 
 		if $parsed.hash {
-			if $parsed.hash.<identifier> {
-				die "Too many keys"
-					if $parsed.hash.keys > 1;
+			if assert-keys( $parsed, < identifier > ) {
 				return Node.new(
 					:type( 'quotepair' ),
 					:identifier(
@@ -1325,8 +1312,7 @@ class Perl6::Tidy {
 		self.debug( 'quibble', $parsed );
 
 		if $parsed.hash {
-			if $parsed.hash.<babble> and
-			   $parsed.hash.<nibble> {
+			if assert-keys( $parsed, < babble nibble > ) {
 				return Node.new(
 					:type( 'quibble' ),
 					:babble(
@@ -1354,7 +1340,7 @@ class Perl6::Tidy {
 		self.debug( 'noun', $parsed );
 
 		if $parsed.hash {
-			if $parsed.hash.<atom> {
+			if assert-keys( $parsed, < atom > ) {
 				return Node.new(
 					:type( 'noun' ),
 					:atom(
@@ -1428,7 +1414,7 @@ class Perl6::Tidy {
 		self.debug( 'termalt', $parsed );
 
 		if $parsed.hash {
-			if $parsed.hash.<termconj> {
+			if assert-keys( $parsed, < termconj > ) {
 				my @child;
 				for $parsed.hash.<termconj> {
 					@child.push(
@@ -1454,7 +1440,7 @@ class Perl6::Tidy {
 		self.debug( 'termconjseq', $parsed );
 
 		if $parsed.hash {
-			if $parsed.hash.<termalt> {
+			if assert-keys( $parsed, < termalt > ) {
 				my @child;
 				for $parsed.hash.<termalt> {
 					@child.push(
@@ -1480,7 +1466,7 @@ class Perl6::Tidy {
 		self.debug( 'termaltseq', $parsed );
 
 		if $parsed.hash {
-			if $parsed.hash.<termconjseq> {
+			if assert-keys( $parsed, < termconjseq > ) {
 				my @child;
 				for $parsed.hash.<termconjseq> {
 					@child.push(
@@ -1506,7 +1492,7 @@ class Perl6::Tidy {
 		self.debug( 'termseq', $parsed );
 
 		if $parsed.hash {
-			if $parsed.hash.<termaltseq> {
+			if assert-keys( $parsed, < termaltseq > ) {
 				return Node.new(
 					:type( 'termseq' ),
 					:termaltseq(
@@ -1528,7 +1514,7 @@ class Perl6::Tidy {
 		self.debug( 'nibble', $parsed );
 
 		if $parsed.hash {
-			if $parsed.hash.<termseq> {
+			if assert-keys( $parsed, < termseq > ) {
 				return Node.new(
 					:type( 'nibble' ),
 					:termseq(
