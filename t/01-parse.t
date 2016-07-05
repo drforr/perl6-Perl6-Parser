@@ -8,7 +8,7 @@ plan 1;
 
 my $pt = Perl6::Tidy.new( :debugging(True) );
 
-subtest sub {
+subtest {
 	plan 1;
 
 	my $parsed = $pt.tidy( Q{} );

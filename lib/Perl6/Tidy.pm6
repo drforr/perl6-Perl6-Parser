@@ -450,11 +450,66 @@ class Perl6::Tidy {
 		die "Uncaught type"
 	}
 
+	method package_declarator( Mu $parsed ) {
+		self.debug( 'package_declarator', $parsed );
+
+		if $parsed.hash {
+			if $parsed.hash.<sym> and
+			   $parsed.hash.<package_def> {
+				die "Too many keys"
+					if $parsed.hash.keys > 2;
+				return Node.new(
+					:type( 'package_declarator' ),
+					:sym(
+						self.sym(
+							$parsed.hash.<sym>
+						)
+					),
+					:package_def(
+						self.package_def(
+							$parsed.hash.<package_def>
+						)
+					)
+				)
+			}
+			die "Uncaught key"
+		}
+		die "Uncaught type"
+	}
+
+	method regex_declarator( Mu $parsed ) {
+		self.debug( 'regex_declarator', $parsed );
+
+		if $parsed.hash {
+			if $parsed.hash.<sym> and
+			   $parsed.hash.<regex_def> {
+				die "Too many keys"
+					if $parsed.hash.keys > 2;
+				return Node.new(
+					:type( 'regex_declarator' ),
+					:sym(
+						self.sym(
+							$parsed.hash.<sym>
+						)
+					),
+					:regex_def(
+						self.regex_def(
+							$parsed.hash.<regex_def>
+						)
+					)
+				)
+			}
+			die "Uncaught key"
+		}
+		die "Uncaught type"
+	}
+
 	method routine_def( Mu $parsed ) {
 		self.debug( 'routine_def', $parsed );
 
 		if $parsed.hash {
-			if $parsed.hash.<blockoid> {
+			if $parsed.hash.<blockoid> and
+			   $parsed.hash.<deflongname> {
 				die "Too many keys"
 					if $parsed.hash.keys > 3;
 				return Node.new(
@@ -462,6 +517,61 @@ class Perl6::Tidy {
 					:blockoid(
 						self.blockoid(
 							$parsed.hash.<blockoid>
+						)
+					),
+					:deflongname(
+						self.deflongname(
+							$parsed.hash.<deflongname>
+						)
+					)
+				)
+			}
+			die "Uncaught key"
+		}
+		die "Uncaught type"
+	}
+
+	method package_def( Mu $parsed ) {
+		self.debug( 'package_def', $parsed );
+
+		if $parsed.hash {
+			if $parsed.hash.<blockoid> {
+				die "Too many keys"
+					if $parsed.hash.keys > 3;
+				return Node.new(
+					:type( 'package_def' ),
+					:blockoid(
+						self.blockoid(
+							$parsed.hash.<blockoid>
+						)
+					),
+					:longname(
+						self.longname(
+							$parsed.hash.<longname>
+						)
+					)
+				)
+			}
+			die "Uncaught key"
+		}
+		die "Uncaught type"
+	}
+
+	method regex_def( Mu $parsed ) {
+		self.debug( 'regex_def', $parsed );
+
+		if $parsed.hash {
+			if $parsed.hash.<deflongname> and
+			   $parsed.hash:defined<signature> and
+			   $parsed.hash:defined<trait> and
+			   $parsed.hash.<nibble> {
+				die "Too many keys"
+					if $parsed.hash.keys > 4;
+				return Node.new(
+					:type( 'regex_def' ),
+					:nibble(
+						self.nibble(
+							$parsed.hash.<nibble>
 						)
 					),
 					:deflongname(
@@ -659,6 +769,30 @@ class Perl6::Tidy {
 					)
 				)
 			}
+			elsif $parsed.hash.<package_declarator> {
+				die "Too many keys"
+					if $parsed.hash.keys > 1;
+				return Node.new(
+					:type( 'EXPR' ),
+					:package_declarator(
+						self.package_declarator(
+							$parsed.hash.<package_declarator>
+						)
+					)
+				)
+			}
+			elsif $parsed.hash.<regex_declarator> {
+				die "Too many keys"
+					if $parsed.hash.keys > 1;
+				return Node.new(
+					:type( 'EXPR' ),
+					:regex_declarator(
+						self.regex_declarator(
+							$parsed.hash.<regex_declarator>
+						)
+					)
+				)
+			}
 			die "Uncaught key"
 		}
 		die "Uncaught type"
@@ -754,6 +888,19 @@ class Perl6::Tidy {
 					),
 				)
 			}
+			elsif $parsed.hash.<regex_declarator> and
+			      $parsed.hash:defined<trait> {
+				die "Too many keys"
+					if $parsed.hash.keys > 2;
+				return Node.new(
+					:type( 'declarator' ),
+					:regex_declarator(
+						self.regex_declarator(
+							$parsed.hash.<regex_declarator>
+						)
+					),
+				)
+			}
 			die "Uncaught key"
 		}
 		die "Uncaught type"
@@ -772,6 +919,19 @@ class Perl6::Tidy {
 					:variable_declarator(
 						self.variable_declarator(
 							$parsed.hash.<variable_declarator>
+						)
+					),
+				)
+			}
+			elsif $parsed.hash.<regex_declarator> and
+			      $parsed.hash:defined<trait> {
+				die "Too many keys"
+					if $parsed.hash.keys > 2;
+				return Node.new(
+					:type( 'DECL' ),
+					:regex_declarator(
+						self.regex_declarator(
+							$parsed.hash.<regex_declarator>
 						)
 					),
 				)

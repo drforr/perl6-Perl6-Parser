@@ -4,22 +4,22 @@ use nqp;
 use Test;
 use Perl6::Tidy;
 
-plan 2;
+plan 3;
 
 my $pt = Perl6::Tidy.new( :debugging(True) );
 
-subtest sub {
-	subtest sub {
+subtest {
+	subtest {
 		plan 3;
 
-		subtest sub {
+		subtest {
 			plan 1;
 
 			my $parsed = $pt.tidy( Q{my $a} );
 			is $parsed.child.elems, 1;
 		}, Q{my $a};
 
-		subtest sub {
+		subtest {
 			plan 1;
 
 			my $parsed = $pt.tidy( Q{our $a} );
@@ -27,14 +27,14 @@ subtest sub {
 		}, Q{our $a};
 
 		todo Q{'anon $a' not implemented yet};
-	#	subtest sub {
+	#	subtest {
 	#		plan 1;
 	#
 	#		my $parsed = $pt.tidy( Q{anon $a} );
 	#		is $parsed.child.elems, 1;
 	#	}, Q{anon $a};
 
-		subtest sub {
+		subtest {
 			plan 1;
 
 			my $parsed = $pt.tidy( Q{state $a} );
@@ -42,7 +42,7 @@ subtest sub {
 		}, Q{state $a};
 
 		todo Q{'augment $a' not implemented yet};
-	#	subtest sub {
+	#	subtest {
 	#		plan 1;
 	#
 	#		my $parsed = $pt.tidy( Q{augment $a} );
@@ -50,7 +50,7 @@ subtest sub {
 	#	}, Q{augment $a};
 
 		todo Q{'supersede $a' not implemented yet};
-	#	subtest sub {
+	#	subtest {
 	#		plan 1;
 	#
 	#		my $parsed = $pt.tidy( Q{supersede $a} );
@@ -58,8 +58,8 @@ subtest sub {
 	#	}, Q{supersede $a};
 	}, Q{untyped};
 
-	subtest sub {
-		subtest sub {
+	subtest {
+		subtest {
 			plan 1;
 
 			my $parsed = $pt.tidy( Q{my Int $a} );
@@ -67,8 +67,8 @@ subtest sub {
 		}, Q{my Int $a};
 	}, Q{typed};
 
-	subtest sub {
-		subtest sub {
+	subtest {
+		subtest {
 			plan 1;
 
 			my $parsed = $pt.tidy( Q{my $a where 1} );
@@ -77,9 +77,9 @@ subtest sub {
 	}, Q{constrained};
 }, Q{variable};
 
-subtest sub {
-	subtest sub {
-		subtest sub {
+subtest {
+	subtest {
+		subtest {
 			plan 1;
 
 			my $parsed = $pt.tidy( Q[sub foo{}] );
@@ -89,57 +89,58 @@ subtest sub {
 }, Q{subroutine};
 
 
-subtest sub {
+subtest {
 	plan 7;
 
-	subtest sub {
+	subtest {
 		plan 1;
 
 		my $parsed = $pt.tidy( Q[module foo{}] );
 		is $parsed.child.elems, 1;
 	}, Q{module foo {}};
 
-	subtest sub {
+	subtest {
 		plan 1;
 
 		my $parsed = $pt.tidy( Q[class foo{}] );
 		is $parsed.child.elems, 1;
 	}, Q{class foo {}};
 
-	subtest sub {
+	subtest {
 		plan 1;
 
 		my $parsed = $pt.tidy( Q[role foo{}] );
 		is $parsed.child.elems, 1;
 	}, Q{role foo {}};
 
-	subtest sub {
+	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q[regex foo{}] );
+		diag "There may be a Q[] bug lurking here.";
+		my $parsed = $pt.tidy( Q[my regex foo{a}] );
 		is $parsed.child.elems, 1;
-	}, Q{regex foo {}};
+	}, Q{my regex foo {a} (null regex not allowed, must give it content.)};
 
-	subtest sub {
+	subtest {
 		plan 1;
 
 		my $parsed = $pt.tidy( Q[grammar foo{}] );
 		is $parsed.child.elems, 1;
 	}, Q{grammar foo {}};
 
-	subtest sub {
+	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q[token foo{}] );
+		my $parsed = $pt.tidy( Q[token foo{a}] );
 		is $parsed.child.elems, 1;
-	}, Q{token foo {}};
+	}, Q{token foo {a} (null regex not allowed, must give it content.)};
 
-	subtest sub {
+	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q[rule foo{}] );
+		my $parsed = $pt.tidy( Q[my rule foo{a}] );
 		is $parsed.child.elems, 1;
-	}, Q{rule foo {}};
+	}, Q{my rule foo {a}};
 }, Q{braced things};
 
 # vim: ft=perl6

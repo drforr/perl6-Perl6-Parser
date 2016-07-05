@@ -8,20 +8,20 @@ plan 10;
 
 my $pt = Perl6::Tidy.new( :debugging(True) );
 
-subtest sub {
+subtest {
 	plan 9;
 
-	subtest sub {
+	subtest {
 		plan 2;
 
-		subtest sub {
+		subtest {
 			plan 1;
 
 			my $parsed = $pt.tidy( Q{1} );
 			is $parsed.child.elems, 1;
 		}, Q{no underscores};
 
-		subtest sub {
+		subtest {
 			plan 1;
 
 			my $parsed = $pt.tidy( Q{1_1} );
@@ -29,56 +29,56 @@ subtest sub {
 		}, Q{underscores};
 	}, Q{decimal};
 
-	subtest sub {
+	subtest {
 		plan 1;
 
 		my $parsed = $pt.tidy( Q{0b1} );
 		is $parsed.child.elems, 1;
 	}, Q{binary};
 
-	subtest sub {
+	subtest {
 		plan 1;
 
 		my $parsed = $pt.tidy( Q{0o1} );
 		is $parsed.child.elems, 1;
 	}, Q{octal};
 
-	subtest sub {
+	subtest {
 		plan 1;
 
 		my $parsed = $pt.tidy( Q{0o1} );
 		is $parsed.child.elems, 1;
 	}, Q{octal};
 
-	subtest sub {
+	subtest {
 		plan 1;
 
 		my $parsed = $pt.tidy( Q{0x1} );
 		is $parsed.child.elems, 1;
 	}, Q{hex};
 
-	subtest sub {
+	subtest {
 		plan 1;
 
 		my $parsed = $pt.tidy( Q{:13(1)} );
 		is $parsed.child.elems, 1;
 	}, Q{base-13};
 
-	subtest sub {
+	subtest {
 		plan 1;
 
 		my $parsed = $pt.tidy( Q{1.3} );
 		is $parsed.child.elems, 1;
 	}, Q{rational};
 
-	subtest sub {
+	subtest {
 		plan 1;
 
 		my $parsed = $pt.tidy( Q{1e3} );
 		is $parsed.child.elems, 1;
 	}, Q{Num};
 
-	subtest sub {
+	subtest {
 		plan 1;
 
 		my $parsed = $pt.tidy( Q{2i} );
@@ -86,27 +86,27 @@ subtest sub {
 	}, Q{imaginary};
 }, Q{integer};
 
-subtest sub {
+subtest {
 	plan 5;
 
-	subtest sub {
+	subtest {
 		plan 1;
 
 		my $parsed = $pt.tidy( Q{'Hello, world!'} );
 		is $parsed.child.elems, 1;
 	}, Q{single quote};
 
-	subtest sub {
+	subtest {
 		plan 2;
 
-		subtest sub {
+		subtest {
 			plan 1;
 
 			my $parsed = $pt.tidy( Q{"Hello, world!"} );
 			is $parsed.child.elems, 1;
 		}, Q{uninterpolated};
 
-		subtest sub {
+		subtest {
 			plan 1;
 
 			my $parsed = $pt.tidy(
@@ -116,10 +116,10 @@ subtest sub {
 		}, Q{interpolated};
 	}, Q{double quote};
 
-	subtest sub {
+	subtest {
 		plan 2;
 
-		subtest sub {
+		subtest {
 			plan 1;
 
 			my $parsed = $pt.tidy(
@@ -128,8 +128,8 @@ subtest sub {
 			is $parsed.child.elems, 1;
 		}, Q{Q{} (only uninterpolated)};
 
-		subtest sub {
-			subtest sub {
+		subtest {
+			subtest {
 				plan 1;
 
 				my $parsed = $pt.tidy(
@@ -138,7 +138,7 @@ subtest sub {
 				is $parsed.child.elems, 1;
 			}, Q{unescaped};
 
-			subtest sub {
+			subtest {
 				plan 1;
 
 				my $parsed = $pt.tidy(
@@ -149,10 +149,10 @@ subtest sub {
 		}, Q{q[]};
 	}, Q{q{}};
 
-	subtest sub {
+	subtest {
 		plan 2;
 
-		subtest sub {
+		subtest {
 			plan 1;
 
 			my $parsed = $pt.tidy(
@@ -161,7 +161,7 @@ subtest sub {
 			is $parsed.child.elems, 1;
 		}, Q{uninterpolated};
 
-		subtest sub {
+		subtest {
 			plan 1;
 
 			my $parsed = $pt.tidy(
@@ -171,10 +171,10 @@ subtest sub {
 		}, Q{interpolated};
 	}, Q{qq{}};
 
-	subtest sub {
+	subtest {
 		plan 2;
 
-		subtest sub {
+		subtest {
 			plan 1;
 
 			my $parsed = $pt.tidy(
@@ -185,7 +185,7 @@ END}
 			is $parsed.child.elems, 1;
 		}, Q{q:to/END/, no spaces};
 
-		subtest sub {
+		subtest {
 			plan 1;
 
 			my $parsed = $pt.tidy(
@@ -198,52 +198,52 @@ END}
 	}, Q{q:to[]};
 }, Q{string};
 
-subtest sub {
+subtest {
 	plan 8;
 
-	subtest sub {
+	subtest {
 		plan 1;
 
 		my $parsed = $pt.tidy( Q{@*ARGS} );
 		is $parsed.child.elems, 1;
 	}, Q{@*ARGS (is a global, so available everywhere)};
 
-	subtest sub {
+	subtest {
 		plan 1;
 
 		my $parsed = $pt.tidy( Q{$} );
 		is $parsed.child.elems, 1;
 	}, Q{$};
 
-	subtest sub {
+	subtest {
 		plan 1;
 
 		my $parsed = $pt.tidy( Q{$_} );
 		is $parsed.child.elems, 1;
 	}, Q{$_};
 
-	subtest sub {
+	subtest {
 		plan 1;
 
 		my $parsed = $pt.tidy( Q{$/} );
 		is $parsed.child.elems, 1;
 	}, Q{$/};
 
-	subtest sub {
+	subtest {
 		plan 1;
 
 		my $parsed = $pt.tidy( Q{$!} );
 		is $parsed.child.elems, 1;
 	}, Q{$!};
 
-	subtest sub {
+	subtest {
 		plan 1;
 
 		my $parsed = $pt.tidy( Q{$Foo::Bar} );
 		is $parsed.child.elems, 1;
 	}, Q{$Foo::Bar};
 
-	subtest sub {
+	subtest {
 		plan 1;
 
 		my $parsed = $pt.tidy( Q{&sum} );
@@ -251,7 +251,7 @@ subtest sub {
 	}, Q{&sum};
 
 	todo Q{$Foo::($bar)::Bar (requires a second term) to compile};
-	subtest sub {
+	subtest {
 		plan 1;
 
 		my $parsed = $pt.tidy( Q[$Foo::($*GLOBAL)::Bar] );
@@ -259,17 +259,17 @@ subtest sub {
 	}, Q[$Foo::($*GLOBAL)::Bar (Need $*GLOBAL in order to compile)];
 }, Q{variable};
 
-subtest sub {
+subtest {
 	plan 2;
 
-	subtest sub {
+	subtest {
 		plan 1;
 
 		my $parsed = $pt.tidy( Q{Int} );
 		is $parsed.child.elems, 1;
 	}, Q{Int};
 
-	subtest sub {
+	subtest {
 		plan 1;
 
 		my $parsed = $pt.tidy( Q{IO::Handle} );
@@ -277,10 +277,10 @@ subtest sub {
 	}, Q{IO::Handle (Two package names)};
 }, Q{type};
 
-subtest sub {
+subtest {
 	plan 1;
 
-	subtest sub {
+	subtest {
 		plan 1;
 
 		my $parsed = $pt.tidy( Q{pi} );
@@ -288,10 +288,10 @@ subtest sub {
 	}, Q{pi};
 }, Q{constant};
 
-subtest sub {
+subtest {
 	plan 1;
 
-	subtest sub {
+	subtest {
 		plan 1;
 
 		my $parsed = $pt.tidy( Q{/pi/} );
@@ -299,10 +299,10 @@ subtest sub {
 	}, Q{/pi/};
 }, Q{regex};
 
-subtest sub {
+subtest {
 	plan 1;
 
-	subtest sub {
+	subtest {
 		plan 1;
 
 		my $parsed = $pt.tidy( Q{sum} );
@@ -310,10 +310,10 @@ subtest sub {
 	}, Q{sum};
 }, Q{function call};
 
-subtest sub {
+subtest {
 	plan 1;
 
-	subtest sub {
+	subtest {
 		plan 1;
 
 		my $parsed = $pt.tidy( Q{()} );
@@ -321,10 +321,10 @@ subtest sub {
 	}, Q{circumfix};
 }, Q{operator};
 
-subtest sub {
+subtest {
 	plan 1;
 
-	subtest sub {
+	subtest {
 		plan 1;
 
 		my $parsed = $pt.tidy( Q{:foo} );
@@ -332,10 +332,10 @@ subtest sub {
 	}, Q{:foo};
 }, Q{adverbial-pair};
 
-subtest sub {
+subtest {
 	plan 1;
 
-	subtest sub {
+	subtest {
 		plan 1;
 
 		my $parsed = $pt.tidy( Q{:()} );
