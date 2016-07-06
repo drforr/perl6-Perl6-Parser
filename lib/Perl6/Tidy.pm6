@@ -58,35 +58,29 @@ class Perl6::Tidy {
 	}
 
 	# $parsed can only be Str, by extension Bool
-	
-	method assert-Str( Str $name, Mu $parsed ) {
-		self.debug( $name, $parsed );
-
+	#
+	sub assert-Str( Mu $parsed ) {
 		die "hash" if $parsed.hash;
 		die "list" if $parsed.list;
 		die "Int"  if $parsed.Int;
 
-		return Node.new(
-			:type( $name ),
-			:name( $parsed.Str )
-		) if $parsed.Str;
+		if $parsed.Str {
+			return True
+		}
 		die "Uncaught type"
 	}
 
 	# $parsed can only be Bool
 	#
-	method assert-Bool( Str $name, Mu $parsed ) {
-		self.debug( $name, $parsed );
-
+	sub assert-Bool( Mu $parsed ) {
 		die "hash" if $parsed.hash;
 		die "list" if $parsed.list;
 		die "Int"  if $parsed.Int;
 		die "Str"  if $parsed.Str;
 
-		return Node.new(
-			:type( $name ),
-			:name( $parsed.Bool )
-		) if $parsed.Bool;
+		if $parsed.Bool {
+			return True
+		}
 		die "Uncaught type"
 	}
 
@@ -221,11 +215,25 @@ class Perl6::Tidy {
 	}
 
 	method sym( Mu $parsed ) {
-		self.assert-Str( 'sym', $parsed )
+		self.debug( 'sym', $parsed );
+
+		if assert-Str( $parsed ) {
+			return Node.new(
+				:type( 'sym' ),
+				:name( $parsed.Str )
+			)
+		}
 	}
 
 	method sign( Mu $parsed ) {
-		self.assert-Bool( 'sign', $parsed )
+		self.debug( 'sign', $parsed );
+
+		if assert-Bool( $parsed ) {
+			return Node.new(
+				:type( 'sign' ),
+				:name( $parsed.Bool )
+			)
+		}
 	}
 
 	method postfix( Mu $parsed ) {
@@ -354,7 +362,14 @@ class Perl6::Tidy {
 	}
 
 	method sigil( Mu $parsed ) {
-		self.assert-Str( 'sigil', $parsed )
+		self.debug( 'sigil', $parsed );
+
+		if assert-Str( $parsed ) {
+			return Node.new(
+				:type( 'sigil' ),
+				:name( $parsed.Str )
+			)
+		}
 	}
 
 	method desigilname( Mu $parsed ) {
@@ -1230,7 +1245,14 @@ class Perl6::Tidy {
 	}
 
 	method B( Mu $parsed ) {
-		self.assert-Bool( 'B', $parsed )
+		self.debug( 'B', $parsed );
+
+		if assert-Bool( $parsed ) {
+			return Node.new(
+				:type( 'B' ),
+				:name( $parsed.Bool )
+			)
+		}
 	}
 
 	method babble( Mu $parsed ) {
