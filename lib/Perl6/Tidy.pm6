@@ -127,10 +127,6 @@ class Perl6::Tidy {
 				)
 			);
 		}
-		if $parsed.hash {
-			die "Uncaught key"
-		}
-
 		die "Uncaught type"
 	}
 
@@ -155,9 +151,6 @@ class Perl6::Tidy {
 			return Node.new(
 				:type( 'statementlist' ),
 			)
-		}
-		if $parsed.hash {
-			die "Uncaught key"
 		}
 		die "Uncaught type"
 	}
@@ -208,9 +201,6 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		if $parsed.hash {
-			die "Uncaught key"
-		}
 		die "Uncaught type"
 	}
 
@@ -251,9 +241,6 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		if $parsed.hash {
-			die "Uncaught key"
-		}
 		die "Uncaught type"
 	}
 
@@ -271,9 +258,6 @@ class Perl6::Tidy {
 					)
 				)
 			)
-		}
-		if $parsed.hash {
-			die "Uncaught key"
 		}
 		die "Uncaught type"
 	}
@@ -313,9 +297,6 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		if $parsed.hash {
-			die "Uncaught key"
-		}
 		die "Uncaught type"
 	}
 
@@ -334,9 +315,6 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		if $parsed.hash {
-			die "Uncaught key"
-		}
 		die "Uncaught type"
 	}
 
@@ -354,9 +332,6 @@ class Perl6::Tidy {
 					)
 				)
 			)
-		}
-		if $parsed.hash {
-			die "Uncaught key"
 		}
 		die "Uncaught type"
 	}
@@ -386,9 +361,6 @@ class Perl6::Tidy {
 					)
 				)
 			)
-		}
-		if $parsed.hash {
-			die "Unknown key"
 		}
 		if $parsed.Str {
 			return Node.new(
@@ -454,9 +426,6 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		if $parsed.hash {
-			die "Uncaught key"
-		}
 		die "Uncaught type"
 	}
 
@@ -479,9 +448,6 @@ class Perl6::Tidy {
 					)
 				)
 			)
-		}
-		if $parsed.hash {
-			die "Uncaught key"
 		}
 		die "Uncaught type"
 	}
@@ -506,9 +472,6 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		if $parsed.hash {
-			die "Uncaught key"
-		}
 		die "Uncaught type"
 	}
 
@@ -531,9 +494,6 @@ class Perl6::Tidy {
 					)
 				)
 			)
-		}
-		if $parsed.hash {
-			die "Uncaught key"
 		}
 		die "Uncaught type"
 	}
@@ -559,9 +519,6 @@ class Perl6::Tidy {
 					)
 				)
 			)
-		}
-		if $parsed.hash {
-			die "Uncaught key"
 		}
 		die "Uncaught type"
 	}
@@ -606,9 +563,6 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		if $parsed.hash {
-			die "Uncaught key"
-		}
 		die "Uncaught type"
 	}
 
@@ -634,9 +588,6 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		if $parsed.hash {
-			die "Uncaught key"
-		}
 		die "Uncaught type"
 	}
 
@@ -654,9 +605,6 @@ class Perl6::Tidy {
 					)
 				)
 			)
-		}
-		if $parsed.hash {
-			die "Uncaught key"
 		}
 		die "Uncaught type"
 	}
@@ -677,9 +625,6 @@ class Perl6::Tidy {
 					)
 				)
 			)
-		}
-		if $parsed.hash {
-			die "Uncaught key"
 		}
 		die "Uncaught type"
 	}
@@ -850,9 +795,6 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		if $parsed.hash {
-			die "Uncaught key"
-		}
 		die "Uncaught type"
 	}
 
@@ -896,9 +838,6 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		if $parsed.hash {
-			die "Uncaught key"
-		}
 		die "Uncaught type"
 	}
 
@@ -916,9 +855,6 @@ class Perl6::Tidy {
 					)
 				)
 			)
-		}
-		if $parsed.hash {
-			die "Uncaught key"
 		}
 		die "Uncaught type"
 	}
@@ -953,9 +889,6 @@ class Perl6::Tidy {
 					)
 				)
 			)
-		}
-		if $parsed.hash {
-			die "Uncaught key"
 		}
 		die "Uncaught type"
 	}
@@ -1020,9 +953,6 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		if $parsed.hash {
-			die "Uncaught key"
-		}
 		die "Uncaught type"
 	}
 
@@ -1054,9 +984,6 @@ class Perl6::Tidy {
 					)
 				)
 			)
-		}
-		if $parsed.hash {
-			die "Uncaught key"
 		}
 		die "Uncaught type"
 	}
@@ -1125,9 +1052,6 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		if $parsed.hash {
-			die "Uncaught key"
-		}
 		die "Uncaught type"
 	}
 
@@ -1150,9 +1074,6 @@ class Perl6::Tidy {
 					)
 				)
 			)
-		}
-		if $parsed.hash {
-			die "Uncaught key"
 		}
 		die "Uncaught type"
 	}
@@ -1184,9 +1105,6 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		if $parsed.hash {
-			die "Uncaught key"
-		}
 		die "Uncaught type"
 	}
 
@@ -1204,9 +1122,6 @@ class Perl6::Tidy {
 					)
 				)
 			)
-		}
-		if $parsed.hash {
-			die "Uncaught key"
 		}
 		die "Uncaught type"
 	}
@@ -1237,9 +1152,6 @@ class Perl6::Tidy {
 					)
 				)
 			)
-		}
-		if $parsed.hash {
-			die "Uncaught key"
 		}
 		die "Uncaught type"
 	}
@@ -1272,9 +1184,6 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		if $parsed.hash {
-			die "Uncaught key"
-		}
 		die "Uncaught type"
 	}
 
@@ -1288,9 +1197,6 @@ class Perl6::Tidy {
 				:type( 'signature' ),
 				:name( $parsed.Bool )
 			)
-		}
-		if $parsed.hash {
-			die "Uncaught key"
 		}
 		die "Uncaught type"
 	}
@@ -1309,9 +1215,6 @@ class Perl6::Tidy {
 					)
 				)
 			)
-		}
-		if $parsed.hash {
-			die "Uncaught key"
 		}
 		die "Uncaught type"
 	}
@@ -1343,18 +1246,12 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		if $parsed.hash {
-			die "Uncaught key"
-		}
 		die "Uncaught type"
 	}
 
 	method identifier( Mu $parsed ) {
 		self.debug( 'identifier', $parsed );
 
-		if $parsed.hash {
-			die "hash"
-		}
 		if $parsed.list {
 			my @child;
 			for $parsed.list {
@@ -1391,9 +1288,6 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		if $parsed.hash {
-			die "Uncaught key"
-		}
 		die "Uncaught type"
 	}
 
@@ -1417,9 +1311,6 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		if $parsed.hash {
-			die "Uncaught key"
-		}
 		die "Uncaught type"
 	}
 
@@ -1442,9 +1333,6 @@ class Perl6::Tidy {
 					)
 				)
 			)
-		}
-		if $parsed.hash {
-			die "Uncaught key"
 		}
 		die "Uncaught type"
 	}
@@ -1514,9 +1402,6 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		if $parsed.hash {
-			die "Uncaught key"
-		}
 		die "Uncaught type"
 	}
 
@@ -1535,9 +1420,6 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		if $parsed.hash {
-			die "Uncaught key"
-		}
 		die "Uncaught type"
 	}
 
@@ -1555,9 +1437,6 @@ class Perl6::Tidy {
 					)
 				)
 			)
-		}
-		if $parsed.hash {
-			die "Uncaught key"
 		}
 		if $parsed.Str {
 			return Node.new(
@@ -1583,9 +1462,6 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		if $parsed.hash {
-			die "Uncaught key"
-		}
 		if $parsed.Str {
 			die "str"
 		}
@@ -1608,9 +1484,6 @@ class Perl6::Tidy {
 				:type( 'termish' ),
 				:child( @child )
 			)
-		}
-		if $parsed.hash {
-			die "Uncaught key"
 		}
 		if $parsed.Str {
 			die "Str"
@@ -1635,9 +1508,6 @@ class Perl6::Tidy {
 				:child( @child )
 			)
 		}
-		if $parsed.hash {
-			die "Uncaught key"
-		}
 		if $parsed.Str {
 			die "Str"
 		}
@@ -1660,9 +1530,6 @@ class Perl6::Tidy {
 				:type( 'termalt' )
 				:child( @child )
 			)
-		}
-		if $parsed.hash {
-			die "Uncaught key"
 		}
 		if $parsed.Str {
 			die "Str"
@@ -1687,9 +1554,6 @@ class Perl6::Tidy {
 				:child( @child )
 			)
 		}
-		if $parsed.hash {
-			die "Uncaught key"
-		}
 		if $parsed.Str {
 			die "Str"
 		}
@@ -1713,9 +1577,6 @@ class Perl6::Tidy {
 				:child( @child )
 			)
 		}
-		if $parsed.hash {
-			die "Uncaught key"
-		}
 		if $parsed.Str {
 			die "Str"
 		}
@@ -1737,9 +1598,6 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		if $parsed.hash {
-			die "Uncaught key"
-		}
 		if $parsed.Str {
 			die "Str"
 		}
@@ -1760,9 +1618,6 @@ class Perl6::Tidy {
 					)
 				)
 			)
-		}
-		if $parsed.hash {
-			die "Uncaught key"
 		}
 		if $parsed.Str {
 			return Node.new(
@@ -1820,9 +1675,6 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		if $parsed.hash {
-			die "Uncaught key"
-		}
 		die "Uncaught type"
 	}
 
@@ -1864,9 +1716,6 @@ class Perl6::Tidy {
 					)
 				)
 			)
-		}
-		if $parsed.hash {
-			die "Uncaught key"
 		}
 		die "Uncaught type"
 	}
@@ -1922,9 +1771,6 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		if $parsed.hash {
-			die "Uncaught key"
-		}
 		die "Uncaught type"
 	}
 
@@ -1979,9 +1825,6 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		if $parsed.hash {
-			die "Uncaught key"
-		}
 		die "Uncaught type"
 	}
 
@@ -2007,9 +1850,6 @@ class Perl6::Tidy {
 				:type( 'semilist' )
 			)
 		}
-		if $parsed.hash {
-			die "Uncaught key"
-		}
 		die "Uncaught type"
 	}
 
@@ -2034,9 +1874,6 @@ class Perl6::Tidy {
 					)
 				)
 			)
-		}
-		if $parsed.hash {
-			die "Uncaught key"
 		}
 		die "Uncaught type"
 	}
@@ -2108,9 +1945,6 @@ class Perl6::Tidy {
 					)
 				)
 			)
-		}
-		if $parsed.hash {
-			die "Uncaught key"
 		}
 		die "Uncaught type"
 	}
