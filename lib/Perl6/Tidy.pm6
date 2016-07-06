@@ -83,7 +83,7 @@ class Perl6::Tidy {
 		die "Uncaught type"
 	}
 
-	sub assert-keys( Mu $parsed, $keys, $defined-keys = [] ) {
+	sub assert-hash-keys( Mu $parsed, $keys, $defined-keys = [] ) {
 		if $parsed.hash {
 			die "Too many keys " ~ $parsed.hash.keys.gist
 				if $parsed.hash.keys.elems >
@@ -116,7 +116,7 @@ class Perl6::Tidy {
 
 		self.debug( 'tidy', $parsed );
 
-		if assert-keys( $parsed, [< statementlist >] ) {
+		if assert-hash-keys( $parsed, [< statementlist >] ) {
 			return Root.new(
 				:content(
 					:statementlist(
@@ -135,7 +135,7 @@ class Perl6::Tidy {
 	method statementlist( Mu $parsed ) {
 		self.debug( 'statementlist', $parsed );
 
-		if assert-keys( $parsed, [< statement >] ) {
+		if assert-hash-keys( $parsed, [< statement >] ) {
 			my @child;
 			for $parsed.hash.<statement> {
 				@child.push(
@@ -148,7 +148,7 @@ class Perl6::Tidy {
 				:child( @child )
 			)
 		}
-		if assert-keys( $parsed, [], [< statement >] ) {
+		if assert-hash-keys( $parsed, [], [< statement >] ) {
 			return StatementList.new
 		}
 		die "Uncaught type"
@@ -172,7 +172,7 @@ class Perl6::Tidy {
 				:child( @child )
 			)
 		}
-		if assert-keys( $parsed, [< EXPR >] ) {
+		if assert-hash-keys( $parsed, [< EXPR >] ) {
 			return Statement.new(
 				:content(
 					:EXPR(
@@ -183,7 +183,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		if assert-keys( $parsed, [< sigil desigilname >] ) {
+		if assert-hash-keys( $parsed, [< sigil desigilname >] ) {
 			return Statement.new(
 				:content(
 					:sigil(
@@ -212,6 +212,7 @@ class Perl6::Tidy {
 				:name( $parsed.Str )
 			)
 		}
+		die "Uncaught type"
 	}
 
 	class Sign does Node { }
@@ -224,6 +225,7 @@ class Perl6::Tidy {
 				:name( $parsed.Bool )
 			)
 		}
+		die "Uncaught type"
 	}
 
 	class Postfix does Node { }
@@ -231,7 +233,7 @@ class Perl6::Tidy {
 	method postfix( Mu $parsed ) {
 		self.debug( 'postfix', $parsed );
 
-		if assert-keys( $parsed, [< sym O >] ) {
+		if assert-hash-keys( $parsed, [< sym O >] ) {
 			return Postfix.new(
 				:content(
 					:sym(
@@ -250,7 +252,7 @@ class Perl6::Tidy {
 	method OPER( Mu $parsed ) {
 		self.debug( 'OPER', $parsed );
 
-		if assert-keys( $parsed, [< sym O >] ) {
+		if assert-hash-keys( $parsed, [< sym O >] ) {
 			return OPER.new(
 				:content(
 					:sym(
@@ -269,7 +271,7 @@ class Perl6::Tidy {
 	method name( Mu $parsed ) {
 		self.debug( 'name', $parsed );
 
-		if assert-keys( $parsed, [< identifier morename >] ) {
+		if assert-hash-keys( $parsed, [< identifier morename >] ) {
 			my @child;
 			for $parsed.hash.<morename> {
 				@child.push(
@@ -287,7 +289,7 @@ class Perl6::Tidy {
 				:child( @child )
 			)
 		}
-		if assert-keys( $parsed, [< identifier >],
+		if assert-hash-keys( $parsed, [< identifier >],
 					 [< morename >] ) {
 			return Name.new(
 				:content(
@@ -307,7 +309,7 @@ class Perl6::Tidy {
 	method longname( Mu $parsed ) {
 		self.debug( 'longname', $parsed );
 
-		if assert-keys( $parsed, [< name >], [< colonpair >] ) {
+		if assert-hash-keys( $parsed, [< name >], [< colonpair >] ) {
 			return Longname.new(
 				:content(
 					:name(
@@ -326,7 +328,7 @@ class Perl6::Tidy {
 	method twigil( Mu $parsed ) {
 		self.debug( 'twigil', $parsed );
 
-		if assert-keys( $parsed, [< sym >] ) {
+		if assert-hash-keys( $parsed, [< sym >] ) {
 			return Twigil.new(
 				:content(
 					:sym(
@@ -350,6 +352,7 @@ class Perl6::Tidy {
 				:name( $parsed.Str )
 			)
 		}
+		die "Uncaught type"
 	}
 
 	class DeSigilName does Node { }
@@ -357,7 +360,7 @@ class Perl6::Tidy {
 	method desigilname( Mu $parsed ) {
 		self.debug( 'desigilname', $parsed );
 
-		if assert-keys( $parsed, [< longname >] ) {
+		if assert-hash-keys( $parsed, [< longname >] ) {
 			return DeSigilName.new(
 				:content(
 					:longname(
@@ -381,8 +384,7 @@ class Perl6::Tidy {
 	method variable( Mu $parsed ) {
 		self.debug( 'variable', $parsed );
 
-		if assert-keys( $parsed,
-			[< twigil sigil desigilname >] ) {
+		if assert-hash-keys( $parsed, [< twigil sigil desigilname >] ) {
 			return Variable.new(
 				:content(
 					:twigil(
@@ -403,7 +405,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		elsif assert-keys( $parsed, [< sigil desigilname >] ) {
+		elsif assert-hash-keys( $parsed, [< sigil desigilname >] ) {
 			return Variable.new(
 				:content(
 					:sigil(
@@ -419,7 +421,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		elsif assert-keys( $parsed, [< sigil >] ) {
+		elsif assert-hash-keys( $parsed, [< sigil >] ) {
 			return Variable.new(
 				:content(
 					:sigil(
@@ -438,7 +440,7 @@ class Perl6::Tidy {
 	method routine_declarator( Mu $parsed ) {
 		self.debug( 'routine_declarator', $parsed );
 
-		if assert-keys( $parsed, [< sym routine_def >] ) {
+		if assert-hash-keys( $parsed, [< sym routine_def >] ) {
 			return RoutineDeclarator.new(
 				:content(
 					:sym(
@@ -462,7 +464,7 @@ class Perl6::Tidy {
 	method package_declarator( Mu $parsed ) {
 		self.debug( 'package_declarator', $parsed );
 
-		if assert-keys( $parsed, [< sym package_def >] ) {
+		if assert-hash-keys( $parsed, [< sym package_def >] ) {
 			return PackageDeclarator.new(
 				:content(
 					:sym(
@@ -486,7 +488,7 @@ class Perl6::Tidy {
 	method regex_declarator( Mu $parsed ) {
 		self.debug( 'regex_declarator', $parsed );
 
-		if assert-keys( $parsed, [< sym regex_def >] ) {
+		if assert-hash-keys( $parsed, [< sym regex_def >] ) {
 			return RegexDeclarator.new(
 				:content(
 					:sym(
@@ -510,9 +512,8 @@ class Perl6::Tidy {
 	method routine_def( Mu $parsed ) {
 		self.debug( 'routine_def', $parsed );
 
-		if assert-keys( $parsed,
-				[< blockoid deflongname >],
-				[< trait >] ) {
+		if assert-hash-keys( $parsed, [< blockoid deflongname >],
+					      [< trait >] ) {
 			return RoutineDef.new(
 				:content(
 					:blockoid(
@@ -536,8 +537,8 @@ class Perl6::Tidy {
 	method package_def( Mu $parsed ) {
 		self.debug( 'package_def', $parsed );
 
-		if assert-keys( $parsed,
-				[< blockoid longname >], [< trait >] ) {
+		if assert-hash-keys( $parsed, [< blockoid longname >],
+					      [< trait >] ) {
 			return PackageDef.new(
 				:content(
 					:blockoid(
@@ -553,9 +554,8 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		if assert-keys( $parsed,
-				[< longname statementlist >],
-				[< trait >] ) {
+		if assert-hash-keys( $parsed, [< longname statementlist >],
+					      [< trait >] ) {
 			return PackageDef.new(
 				:content(
 					:longname(
@@ -579,9 +579,8 @@ class Perl6::Tidy {
 	method regex_def( Mu $parsed ) {
 		self.debug( 'regex_def', $parsed );
 
-		if assert-keys( $parsed,
-				[< deflongname nibble >],
-				[< signature trait >] ) {
+		if assert-hash-keys( $parsed, [< deflongname nibble >],
+					      [< signature trait >] ) {
 			return RegexDef.new(
 				:content(
 					:nibble(
@@ -605,7 +604,7 @@ class Perl6::Tidy {
 	method blockoid( Mu $parsed ) {
 		self.debug( 'blockoid', $parsed );
 
-		if assert-keys( $parsed, [< statementlist >] ) {
+		if assert-hash-keys( $parsed, [< statementlist >] ) {
 			return Blockoid.new(
 				:content(
 					:statementlist(
@@ -624,9 +623,7 @@ class Perl6::Tidy {
 	method deflongname( Mu $parsed ) {
 		self.debug( 'deflongname', $parsed );
 
-		if assert-keys( $parsed,
-				[< name >],
-				[< colonpair >] ) {
+		if assert-hash-keys( $parsed, [< name >], [< colonpair >] ) {
 			return DefLongName.new(
 				:content(
 					:name(
@@ -659,9 +656,10 @@ class Perl6::Tidy {
 				die "Uncaught key"
 			}
 			if $parsed.hash {
-				if assert-keys( $parsed,
-						[< postfix OPER >],
-						[< postfix_prefix_meta_operator >] ) {
+				if assert-hash-keys(
+					$parsed,
+					[< postfix OPER >],
+					[< postfix_prefix_meta_operator >] ) {
 					return EXPR.new(
 						:content(
 							:postfix(
@@ -686,7 +684,7 @@ class Perl6::Tidy {
 				)
 			}
 		}
-		if assert-keys( $parsed, [< longname args >] ) {
+		if assert-hash-keys( $parsed, [< longname args >] ) {
 			return EXPR.new(
 				:content(
 					:longname(
@@ -697,7 +695,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		if assert-keys( $parsed, [< value >] ) {
+		if assert-hash-keys( $parsed, [< value >] ) {
 			return EXPR.new(
 				:content(
 					:value(
@@ -708,7 +706,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		if assert-keys( $parsed, [< variable >] ) {
+		if assert-hash-keys( $parsed, [< variable >] ) {
 			return EXPR.new(
 				:content(
 					:variable(
@@ -719,7 +717,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		if assert-keys( $parsed, [< longname >] ) {
+		if assert-hash-keys( $parsed, [< longname >] ) {
 			return EXPR.new(
 				:content(
 					:longname(
@@ -730,7 +728,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		if assert-keys( $parsed, [< circumfix >] ) {
+		if assert-hash-keys( $parsed, [< circumfix >] ) {
 			return EXPR.new(
 				:content(
 					:circumfix(
@@ -741,7 +739,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		if assert-keys( $parsed, [< colonpair >] ) {
+		if assert-hash-keys( $parsed, [< colonpair >] ) {
 			return EXPR.new(
 				:content(
 					:colonpair(
@@ -752,7 +750,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		if assert-keys( $parsed, [< scope_declarator >] ) {
+		if assert-hash-keys( $parsed, [< scope_declarator >] ) {
 			return EXPR.new(
 				:content(
 					:scope_declarator(
@@ -763,7 +761,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		if assert-keys( $parsed, [< routine_declarator >] ) {
+		if assert-hash-keys( $parsed, [< routine_declarator >] ) {
 			return EXPR.new(
 				:content(
 					:routine_declarator(
@@ -774,7 +772,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		if assert-keys( $parsed, [< package_declarator >] ) {
+		if assert-hash-keys( $parsed, [< package_declarator >] ) {
 			return EXPR.new(
 				:content(
 					:package_declarator(
@@ -785,7 +783,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		if assert-keys( $parsed, [< regex_declarator >] ) {
+		if assert-hash-keys( $parsed, [< regex_declarator >] ) {
 			return EXPR.new(
 				:content(
 					:regex_declarator(
@@ -804,9 +802,10 @@ class Perl6::Tidy {
 	method variable_declarator( Mu $parsed ) {
 		self.debug( 'variable_declarator', $parsed );
 
-		if assert-keys( $parsed,
-				[< variable post_constraint >],
-				[< semilist postcircumfix signature trait >] ) {
+		if assert-hash-keys(
+			$parsed,
+			[< variable post_constraint >],
+			[< semilist postcircumfix signature trait >] ) {
 			my @child;
 			for $parsed.hash.<post_constraint> {
 				@child.push(
@@ -826,9 +825,10 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		if assert-keys( $parsed,
-				[< variable >],
-				[< semilist postcircumfix signature trait post_constraint >] ) {
+		if assert-hash-keys(
+			$parsed,
+			[< variable >],
+			[< semilist postcircumfix signature trait post_constraint >] ) {
 			return VariableDeclarator.new(
 				:content(
 					:variable(
@@ -847,7 +847,7 @@ class Perl6::Tidy {
 	method multi_declarator( Mu $parsed ) {
 		self.debug( 'multi_declarator', $parsed );
 
-		if assert-keys( $parsed, [< declarator >] ) {
+		if assert-hash-keys( $parsed, [< declarator >] ) {
 			return MultiDeclarator.new(
 				:content(
 					:declarator(
@@ -866,9 +866,8 @@ class Perl6::Tidy {
 	method declarator( Mu $parsed ) {
 		self.debug( 'declarator', $parsed );
 
-		if assert-keys( $parsed,
-				[< variable_declarator >],
-				[< trait >] ) {
+		if assert-hash-keys( $parsed, [< variable_declarator >],
+					      [< trait >] ) {
 			return Declarator.new(
 				:content(
 					:variable_declarator(
@@ -879,9 +878,8 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		if assert-keys( $parsed,
-				[< regex_declarator >],
-				[< trait >] ) {
+		if assert-hash-keys( $parsed, [< regex_declarator >],
+					      [< trait >] ) {
 			return Declarator.new(
 				:content(
 					:regex_declarator(
@@ -900,9 +898,8 @@ class Perl6::Tidy {
 	method DECL( Mu $parsed ) {
 		self.debug( 'DECL', $parsed );
 
-		if assert-keys( $parsed,
-				[< variable_declarator >],
-				[< trait >] ) {
+		if assert-hash-keys( $parsed, [< variable_declarator >],
+					      [< trait >] ) {
 			return DECL.new(
 				:content(
 					:variable_declarator(
@@ -913,9 +910,8 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		if assert-keys( $parsed,
-				[< regex_declarator >],
-				[< trait >] ) {
+		if assert-hash-keys( $parsed, [< regex_declarator >],
+					      [< trait >] ) {
 			return DECL.new(
 				:content(
 					:regex_declarator(
@@ -926,7 +922,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		elsif assert-keys( $parsed, [< package_def sym >] ) {
+		elsif assert-hash-keys( $parsed, [< package_def sym >] ) {
 			return DECL.new(
 				:content(
 					:package_def(
@@ -942,7 +938,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		elsif assert-keys( $parsed, [< declarator >] ) {
+		elsif assert-hash-keys( $parsed, [< declarator >] ) {
 			return DECL.new(
 				:content(
 					:declarator(
@@ -974,7 +970,7 @@ class Perl6::Tidy {
 				:child( @child )
 			)
 		}
-		if assert-keys( $parsed, [< longname >] ) {
+		if assert-hash-keys( $parsed, [< longname >] ) {
 			return TypeName.new(
 				:content(
 					:longname(
@@ -993,9 +989,8 @@ class Perl6::Tidy {
 	method scoped( Mu $parsed ) {
 		self.debug( 'scoped', $parsed );
 
-		if assert-keys( $parsed,
-				[< declarator DECL >],
-				[< typename >] ) {
+		if assert-hash-keys( $parsed, [< declarator DECL >],
+					      [< typename >] ) {
 			return Scoped.new(
 				:content(
 					:declarator(
@@ -1011,9 +1006,8 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		if assert-keys( $parsed, [< multi_declarator
-					    DECL
-					    typename >] ) {
+		if assert-hash-keys( $parsed,
+					[< multi_declarator DECL typename >] ) {
 			return Scoped.new(
 				:content(
 					:multi_declarator(
@@ -1034,7 +1028,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		if assert-keys( $parsed, [< package_declarator DECL >],
+		if assert-hash-keys( $parsed, [< package_declarator DECL >],
 					 [< typename >] ) {
 			return Scoped.new(
 				:content(
@@ -1059,7 +1053,7 @@ class Perl6::Tidy {
 	method scope_declarator( Mu $parsed ) {
 		self.debug( 'scope_declarator', $parsed );
 
-		if assert-keys( $parsed, [< sym scoped >] ) {
+		if assert-hash-keys( $parsed, [< sym scoped >] ) {
 			return ScopeDeclarator.new(
 				:content(
 					:sym(
@@ -1083,7 +1077,7 @@ class Perl6::Tidy {
 	method value( Mu $parsed ) {
 		self.debug( 'value', $parsed );
 
-		if assert-keys( $parsed, [< number >] ) {
+		if assert-hash-keys( $parsed, [< number >] ) {
 			return Value.new(
 				:content(
 					:number(
@@ -1094,7 +1088,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		if assert-keys( $parsed, [< quote >] ) {
+		if assert-hash-keys( $parsed, [< quote >] ) {
 			return Value.new(
 				:content(
 					:quote(
@@ -1113,7 +1107,7 @@ class Perl6::Tidy {
 	method number( Mu $parsed ) {
 		self.debug( 'number', $parsed );
 
-		if assert-keys( $parsed, [< numish >] ) {
+		if assert-hash-keys( $parsed, [< numish >] ) {
 			return Number.new(
 				:content(
 					:numish(
@@ -1132,7 +1126,7 @@ class Perl6::Tidy {
 	method quote( Mu $parsed ) {
 		self.debug( 'quote', $parsed );
 
-		if assert-keys( $parsed, [< nibble >] ) {
+		if assert-hash-keys( $parsed, [< nibble >] ) {
 			return Quote.new(
 				:content(
 					:nibble(
@@ -1143,7 +1137,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		if assert-keys( $parsed, [< quibble >] ) {
+		if assert-hash-keys( $parsed, [< quibble >] ) {
 			return Quote.new(
 				:content(
 					:quibble(
@@ -1167,6 +1161,7 @@ class Perl6::Tidy {
 				:name( $parsed.Bool )
 			)
 		}
+		die "Uncaught type"
 	}
 
 	class Babble does Node { }
@@ -1174,9 +1169,7 @@ class Perl6::Tidy {
 	method babble( Mu $parsed ) {
 		self.debug( 'babble', $parsed );
 
-		if assert-keys( $parsed,
-				[< B >],
-				[< quotepair >] ) {
+		if assert-hash-keys( $parsed, [< B >], [< quotepair >] ) {
 			return Babble.new(
 				:content(
 					:B(
@@ -1195,9 +1188,7 @@ class Perl6::Tidy {
 	method signature( Mu $parsed ) {
 		self.debug( 'signature', $parsed );
 
-		if assert-keys( $parsed,
-				[],
-				[< param_sep parameter >] ) {
+		if assert-hash-keys( $parsed, [], [< param_sep parameter >] ) {
 			return Signature.new(
 				:name( $parsed.Bool )
 			)
@@ -1210,7 +1201,7 @@ class Perl6::Tidy {
 	method fakesignature( Mu $parsed ) {
 		self.debug( 'fakesignature', $parsed );
 
-		if assert-keys( $parsed, [< signature >] ) {
+		if assert-hash-keys( $parsed, [< signature >] ) {
 			return FakeSignature.new(
 				:content(
 					:signature(
@@ -1229,7 +1220,7 @@ class Perl6::Tidy {
 	method colonpair( Mu $parsed ) {
 		self.debug( 'colonpair', $parsed );
 
-		if assert-keys( $parsed, [< identifier >] ) {
+		if assert-hash-keys( $parsed, [< identifier >] ) {
 			return ColonPair.new(
 				:content(
 					:identifier(
@@ -1240,7 +1231,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		if assert-keys( $parsed, [< fakesignature >] ) {
+		if assert-hash-keys( $parsed, [< fakesignature >] ) {
 			return ColonPair.new(
 				:content(
 					:fakesignature(
@@ -1283,7 +1274,7 @@ class Perl6::Tidy {
 	method quotepair( Mu $parsed ) {
 		self.debug( 'quotepair', $parsed );
 
-		if assert-keys( $parsed, [< identifier >] ) {
+		if assert-hash-keys( $parsed, [< identifier >] ) {
 			return QuotePair.new(
 				:content(
 					:identifier(
@@ -1302,7 +1293,7 @@ class Perl6::Tidy {
 	method quibble( Mu $parsed ) {
 		self.debug( 'quibble', $parsed );
 
-		if assert-keys( $parsed, [< babble nibble >] ) {
+		if assert-hash-keys( $parsed, [< babble nibble >] ) {
 			return Quibble.new(
 				:content(
 					:babble(
@@ -1326,7 +1317,7 @@ class Perl6::Tidy {
 	method _0( Mu $parsed ) {
 		self.debug( '0', $parsed );
 
-		if assert-keys( $parsed, [< 0 >] ) {
+		if assert-hash-keys( $parsed, [< 0 >] ) {
 			return _0.new(
 				:content(
 					:babble(
@@ -1403,7 +1394,7 @@ class Perl6::Tidy {
 	method assertion( Mu $parsed ) {
 		self.debug( 'metachar', $parsed );
 
-		if assert-keys( $parsed, [< cclass_elem >] ) {
+		if assert-hash-keys( $parsed, [< cclass_elem >] ) {
 			return Assertion.new(
 				:content(
 					:cclass_elem(
@@ -1422,7 +1413,7 @@ class Perl6::Tidy {
 	method metachar( Mu $parsed ) {
 		self.debug( 'metachar', $parsed );
 
-		if assert-keys( $parsed, [< assertion >] ) {
+		if assert-hash-keys( $parsed, [< assertion >] ) {
 			return MetaChar.new(
 				:content(
 					:metachar(
@@ -1441,7 +1432,7 @@ class Perl6::Tidy {
 	method atom( Mu $parsed ) {
 		self.debug( 'noun', $parsed );
 
-		if assert-keys( $parsed, [< metachar >] ) {
+		if assert-hash-keys( $parsed, [< metachar >] ) {
 			return Atom.new(
 				:content(
 					:atom(
@@ -1465,7 +1456,7 @@ class Perl6::Tidy {
 	method noun( Mu $parsed ) {
 		self.debug( 'noun', $parsed );
 
-		if assert-keys( $parsed, [< atom >] ) {
+		if assert-hash-keys( $parsed, [< atom >] ) {
 			return Noun.new(
 				:content(
 					:atom(
@@ -1487,7 +1478,7 @@ class Perl6::Tidy {
 	method termish( Mu $parsed ) {
 		self.debug( 'termish', $parsed );
 
-		if assert-keys( $parsed, [< noun >] ) {
+		if assert-hash-keys( $parsed, [< noun >] ) {
 			my @child;
 			for $parsed.hash.<noun> {
 				@child.push(
@@ -1511,7 +1502,7 @@ class Perl6::Tidy {
 	method termconj( Mu $parsed ) {
 		self.debug( 'termconj', $parsed );
 
-		if assert-keys( $parsed, [< termish >] ) {
+		if assert-hash-keys( $parsed, [< termish >] ) {
 			my @child;
 			for $parsed.hash.<termish> {
 				@child.push(
@@ -1536,7 +1527,7 @@ class Perl6::Tidy {
 	method termalt( Mu $parsed ) {
 		self.debug( 'termalt', $parsed );
 
-		if assert-keys( $parsed, [< termconj >] ) {
+		if assert-hash-keys( $parsed, [< termconj >] ) {
 			my @child;
 			for $parsed.hash.<termconj> {
 				@child.push(
@@ -1560,7 +1551,7 @@ class Perl6::Tidy {
 	method termconjseq( Mu $parsed ) {
 		self.debug( 'termconjseq', $parsed );
 
-		if assert-keys( $parsed, [< termalt >] ) {
+		if assert-hash-keys( $parsed, [< termalt >] ) {
 			my @child;
 			for $parsed.hash.<termalt> {
 				@child.push(
@@ -1584,7 +1575,7 @@ class Perl6::Tidy {
 	method termaltseq( Mu $parsed ) {
 		self.debug( 'termaltseq', $parsed );
 
-		if assert-keys( $parsed, [< termconjseq >] ) {
+		if assert-hash-keys( $parsed, [< termconjseq >] ) {
 			my @child;
 			for $parsed.hash.<termconjseq> {
 				@child.push(
@@ -1608,7 +1599,7 @@ class Perl6::Tidy {
 	method termseq( Mu $parsed ) {
 		self.debug( 'termseq', $parsed );
 
-		if assert-keys( $parsed, [< termaltseq >] ) {
+		if assert-hash-keys( $parsed, [< termaltseq >] ) {
 			return TermSeq.new(
 				:content(
 					:termaltseq(
@@ -1630,7 +1621,7 @@ class Perl6::Tidy {
 	method nibble( Mu $parsed ) {
 		self.debug( 'nibble', $parsed );
 
-		if assert-keys( $parsed, [< termseq >] ) {
+		if assert-hash-keys( $parsed, [< termseq >] ) {
 			return Nibble.new(
 				:content(
 					:termseq(
@@ -1654,7 +1645,7 @@ class Perl6::Tidy {
 	method dec_number( Mu $parsed ) {
 		self.debug( 'dec_number', $parsed );
 
-		if assert-keys( $parsed, [< int coeff frac >] ) {
+		if assert-hash-keys( $parsed, [< int coeff frac >] ) {
 			return DecNumber.new(
 				:content(
 					:int(
@@ -1675,7 +1666,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		if assert-keys( $parsed, [< int coeff escale >] ) {
+		if assert-hash-keys( $parsed, [< int coeff escale >] ) {
 			return DecNumber.new(
 				:content(
 					:int(
@@ -1704,7 +1695,7 @@ class Perl6::Tidy {
 	method numish( Mu $parsed ) {
 		self.debug( 'numish', $parsed );
 
-		if assert-keys( $parsed, [< integer >] ) {
+		if assert-hash-keys( $parsed, [< integer >] ) {
 			return Numish.new(
 				:content(
 					:integer(
@@ -1715,7 +1706,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		if assert-keys( $parsed, [< rad_number >] ) {
+		if assert-hash-keys( $parsed, [< rad_number >] ) {
 			return Numish.new(
 				:type( 'numish' ),
 				:content(
@@ -1727,7 +1718,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		if assert-keys( $parsed, [< dec_number >] ) {
+		if assert-hash-keys( $parsed, [< dec_number >] ) {
 			return Numish.new(
 				:type( 'numish' ),
 				:content(
@@ -1747,7 +1738,7 @@ class Perl6::Tidy {
 	method integer( Mu $parsed ) {
 		self.debug( 'integer', $parsed );
 
-		if assert-keys( $parsed, [< decint VALUE >] ) {
+		if assert-hash-keys( $parsed, [< decint VALUE >] ) {
 			return Integer.new(
 				:content(
 					:decint(
@@ -1758,7 +1749,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		if assert-keys( $parsed, [< binint VALUE >] ) {
+		if assert-hash-keys( $parsed, [< binint VALUE >] ) {
 			return Integer.new(
 				:content(
 					:binint(
@@ -1769,7 +1760,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		if assert-keys( $parsed, [< octint VALUE >] ) {
+		if assert-hash-keys( $parsed, [< octint VALUE >] ) {
 			return Integer.new(
 				:content(
 					:octint(
@@ -1780,7 +1771,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		if assert-keys( $parsed, [< hexint VALUE >] ) {
+		if assert-hash-keys( $parsed, [< hexint VALUE >] ) {
 			return Integer.new(
 				:content(
 					:hexint(
@@ -1799,7 +1790,7 @@ class Perl6::Tidy {
 	method circumfix( Mu $parsed ) {
 		self.debug( 'circumfix', $parsed );
 
-		if assert-keys( $parsed, [< semilist >] ) {
+		if assert-hash-keys( $parsed, [< semilist >] ) {
 			return Circumfix.new(
 				:content(
 					:semilist(
@@ -1810,7 +1801,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		if assert-keys( $parsed, [< binint VALUE >] ) {
+		if assert-hash-keys( $parsed, [< binint VALUE >] ) {
 			return Circumfix.new(
 				:content(
 					:binint(
@@ -1821,7 +1812,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		if assert-keys( $parsed, [< octint VALUE >] ) {
+		if assert-hash-keys( $parsed, [< octint VALUE >] ) {
 			return Circumfix.new(
 				:content(
 					:octint(
@@ -1832,7 +1823,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		if assert-keys( $parsed, [< hexint VALUE >] ) {
+		if assert-hash-keys( $parsed, [< hexint VALUE >] ) {
 			return Circumfix.new(
 				:content(
 					:hexint(
@@ -1851,7 +1842,7 @@ class Perl6::Tidy {
 	method semilist( Mu $parsed ) {
 		self.debug( 'semilist', $parsed );
 
-		if assert-keys( $parsed, [< statement >] ) {
+		if assert-hash-keys( $parsed, [< statement >] ) {
 			my @child;
 			for $parsed.hash.<statement> {
 				@child.push(
@@ -1865,7 +1856,7 @@ class Perl6::Tidy {
 				:child( @child )
 			)
 		}
-		if assert-keys( $parsed, [], [< statement >] ) {
+		if assert-hash-keys( $parsed, [], [< statement >] ) {
 			return SemiList.new
 		}
 		die "Uncaught type"
@@ -1876,9 +1867,8 @@ class Perl6::Tidy {
 	method rad_number( Mu $parsed ) {
 		self.debug( 'rad_number', $parsed );
 
-		if assert-keys( $parsed,
-				[< circumfix radix >],
-				[< exp base >] ) {
+		if assert-hash-keys( $parsed, [< circumfix radix >],
+					      [< exp base >] ) {
 			return RadNumber.new(
 				:content(
 					:circumfix(
@@ -1954,7 +1944,7 @@ class Perl6::Tidy {
 	method escale( Mu $parsed ) {
 		self.debug( 'escale', $parsed );
 
-		if assert-keys( $parsed, [< sign decint >] ) {
+		if assert-hash-keys( $parsed, [< sign decint >] ) {
 			return EScale.new(
 				:content(
 					:sign(
