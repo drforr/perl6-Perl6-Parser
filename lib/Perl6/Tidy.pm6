@@ -47,21 +47,18 @@ class Perl6::Tidy {
 
 	# $parsed can only be Int, by extension Str, by extension Bool.
 	#
-	method assert-Int( Str $name, Mu $parsed ) {
-		self.debug( $name, $parsed );
-
+	sub assert-Int( Mu $parsed ) {
 		die "hash" if $parsed.hash;
 		die "list" if $parsed.list;
 
-		return Node.new(
-			:type( $name ),
-			:name( $parsed.Int )
-		) if $parsed.Int;
+		if $parsed.Int {
+			return True
+		}
 		die "Uncaught type"
 	}
 
 	# $parsed can only be Str, by extension Bool
-	#
+	
 	method assert-Str( Str $name, Mu $parsed ) {
 		self.debug( $name, $parsed );
 
@@ -2023,19 +2020,51 @@ class Perl6::Tidy {
 	}
 
 	method int( Mu $parsed ) {
-		self.assert-Int( 'int', $parsed )
+		self.debug( 'int', $parsed );
+
+		if assert-Int( $parsed ) {
+			return Node.new(
+				:type( 'hexint' ),
+				:name( $parsed.Int )
+			)
+		}
+		die "Uncaught type"
 	}
 
 	method radix( Mu $parsed ) {
-		self.assert-Int( 'radix', $parsed )
+		self.debug( 'radix', $parsed );
+
+		if assert-Int( $parsed ) {
+			return Node.new(
+				:type( 'hexint' ),
+				:name( $parsed.Int )
+			)
+		}
+		die "Uncaught type"
 	}
 
 	method frac( Mu $parsed ) {
-		self.assert-Int( 'frac', $parsed )
+		self.debug( 'frac', $parsed );
+
+		if assert-Int( $parsed ) {
+			return Node.new(
+				:type( 'hexint' ),
+				:name( $parsed.Int )
+			)
+		}
+		die "Uncaught type"
 	}
 
 	method coeff( Mu $parsed ) {
-		self.assert-Int( 'coeff', $parsed )
+		self.debug( 'coeff', $parsed );
+
+		if assert-Int( $parsed ) {
+			return Node.new(
+				:type( 'hexint' ),
+				:name( $parsed.Int )
+			)
+		}
+		die "Uncaught type"
 	}
 
 	method escale( Mu $parsed ) {
@@ -2065,18 +2094,50 @@ class Perl6::Tidy {
 	}
 
 	method binint( Mu $parsed ) {
-		self.assert-Int( 'binint', $parsed )
+		self.debug( 'binint', $parsed );
+
+		if assert-Int( $parsed ) {
+			return Node.new(
+				:type( 'hexint' ),
+				:name( $parsed.Int )
+			)
+		}
+		die "Uncaught type"
 	}
 
 	method octint( Mu $parsed ) {
-		self.assert-Int( 'octint', $parsed )
+		self.debug( 'octint', $parsed );
+
+		if assert-Int( $parsed ) {
+			return Node.new(
+				:type( 'hexint' ),
+				:name( $parsed.Int )
+			)
+		}
+		die "Uncaught type"
 	}
 
 	method decint( Mu $parsed ) {
-		self.assert-Int( 'decint', $parsed )
+		self.debug( 'decint', $parsed );
+
+		if assert-Int( $parsed ) {
+			return Node.new(
+				:type( 'hexint' ),
+				:name( $parsed.Int )
+			)
+		}
+		die "Uncaught type"
 	}
 
 	method hexint( Mu $parsed ) {
-		self.assert-Int( 'hexint', $parsed )
+		self.debug( 'hexint', $parsed );
+
+		if assert-Int( $parsed ) {
+			return Node.new(
+				:type( 'hexint' ),
+				:name( $parsed.Int )
+			)
+		}
+		die "Uncaught type"
 	}
 }
