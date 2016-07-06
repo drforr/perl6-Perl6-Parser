@@ -1285,8 +1285,139 @@ class Perl6::Tidy {
 		die "Uncaught type"
 	}
 
+	method _0( Mu $parsed ) {
+		self.debug( '0', $parsed );
+
+		if $parsed.hash {
+			if assert-keys( $parsed, [< 0 >] ) {
+				return Node.new(
+					:type( 'quibble' ),
+					:babble(
+						self.babble(
+							$parsed.hash.<babble>
+						)
+					),
+					:nibble(
+						self.nibble(
+							$parsed.hash.<nibble>
+						)
+					)
+				)
+			}
+			die "Uncaught key"
+		}
+		die "Uncaught type"
+	}
+
+	method charspec( Mu $parsed ) {
+		self.debug( 'charspec', $parsed );
+
+		if $parsed.list {
+			my @child;
+			for $parsed.list {
+				@child.push(
+					$_.hash.<0>
+				)
+			}
+			return Node.new(
+				:type( 'cclass_elem' ),
+				:child( @child )
+			)
+		}
+		die "Uncaught type"
+	}
+
+	method cclass_elem( Mu $parsed ) {
+		self.debug( 'cclass_elem', $parsed );
+
+		if $parsed.list {
+			my @child;
+			for $parsed.list {
+				@child.push(
+					Node.new(
+						:type( 'INTERMEDIARY' ),
+						:sign(
+							self.sign(
+								$_.hash.<sign>
+							)
+						),
+						:charspec(
+							self.charspec(
+								$_.hash.<charspec>
+							)
+						)
+					)
+				)
+			}
+			return Node.new(
+				:type( 'cclass_elem' ),
+				:child( @child )
+			)
+		}
+		die "Uncaught type"
+	}
+
+	method assertion( Mu $parsed ) {
+		self.debug( 'metachar', $parsed );
+
+		if $parsed.hash {
+			if assert-keys( $parsed, [< cclass_elem >] ) {
+				return Node.new(
+					:type( 'assertion' ),
+					:cclass_elem(
+						self.cclass_elem(
+							$parsed.hash.<cclass_elem>
+						)
+					)
+				)
+			}
+			die "Uncaught key"
+		}
+		die "Uncaught type"
+	}
+
+	method metachar( Mu $parsed ) {
+		self.debug( 'metachar', $parsed );
+
+		if $parsed.hash {
+			if assert-keys( $parsed, [< assertion >] ) {
+				return Node.new(
+					:type( 'metachar' ),
+					:metachar(
+						self.assertion(
+							$parsed.hash.<assertion>
+						)
+					)
+				)
+			}
+			die "Uncaught key"
+		}
+		die "Uncaught type"
+	}
+
 	method atom( Mu $parsed ) {
-		self.assert-Str( 'atom', $parsed )
+		self.debug( 'noun', $parsed );
+
+		if $parsed.hash {
+			if assert-keys( $parsed, [< metachar >] ) {
+				return Node.new(
+					:type( 'atom' ),
+					:atom(
+						self.metachar(
+							$parsed.hash.<metachar>
+						)
+					)
+				)
+			}
+			die "Uncaught key"
+		}
+		if $parsed.Str {
+			return Node.new(
+				:type( 'atom' ),
+				:name( $parsed.Str )
+			)
+		}
+		die "Uncaught type"
 	}
 
 	method noun( Mu $parsed ) {

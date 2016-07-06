@@ -4,7 +4,7 @@ use nqp;
 use Test;
 use Perl6::Tidy;
 
-plan 10;
+plan 9;
 
 my $pt = Perl6::Tidy.new( :debugging(True) );
 
@@ -287,17 +287,6 @@ subtest {
 		is $parsed.child.elems, 1;
 	}, Q{pi};
 }, Q{constant};
-
-subtest {
-	plan 1;
-
-	subtest {
-		plan 1;
-
-		my $parsed = $pt.tidy( Q{/pi/} );
-		is $parsed.child.elems, 1;
-	}, Q{/pi/};
-}, Q{regex};
 
 subtest {
 	plan 1;
