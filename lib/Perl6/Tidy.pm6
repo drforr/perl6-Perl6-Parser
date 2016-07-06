@@ -1392,7 +1392,7 @@ class Perl6::Tidy {
 	class Assertion does Node { }
 
 	method assertion( Mu $parsed ) {
-		self.debug( 'metachar', $parsed );
+		self.debug( 'assertion', $parsed );
 
 		if assert-hash-keys( $parsed, [< cclass_elem >] ) {
 			return Assertion.new(
@@ -1408,11 +1408,52 @@ class Perl6::Tidy {
 		die "Uncaught type"
 	}
 
+	class BackSlash does Node { }
+
+	method backslash( Mu $parsed ) {
+		self.debug( 'backslash', $parsed );
+
+		if assert-hash-keys( $parsed, [< sym >] ) {
+			return BackSlash.new(
+				:content(
+					:sym(
+						self.sym(
+							$parsed.hash.<sym>
+						)
+					)
+				)
+			)
+		}
+		die "Uncaught type"
+	}
+
 	class MetaChar does Node { }
 
 	method metachar( Mu $parsed ) {
 		self.debug( 'metachar', $parsed );
 
+		if assert-hash-keys( $parsed, [< sym >] ) {
+			return MetaChar.new(
+				:content(
+					:sym(
+						self.sym(
+							$parsed.hash.<sym>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< backslash >] ) {
+			return MetaChar.new(
+				:content(
+					:backslash(
+						self.backslash(
+							$parsed.hash.<backslash>
+						)
+					)
+				)
+			)
+		}
 		if assert-hash-keys( $parsed, [< assertion >] ) {
 			return MetaChar.new(
 				:content(
@@ -1430,7 +1471,7 @@ class Perl6::Tidy {
 	class Atom does Node { }
 
 	method atom( Mu $parsed ) {
-		self.debug( 'noun', $parsed );
+		self.debug( 'atom', $parsed );
 
 		if assert-hash-keys( $parsed, [< metachar >] ) {
 			return Atom.new(
@@ -1451,11 +1492,58 @@ class Perl6::Tidy {
 		die "Uncaught type"
 	}
 
+	class NormSpace does Node { }
+
+	method normspace( Mu $parsed ) {
+		self.debug( 'normspace', $parsed );
+
+		if $parsed.Str {
+			return NormSpace.new(
+				:name( $parsed.Str )
+			)
+		}
+		die "Uncaught type"
+	}
+	class SigFinal does Node { }
+
+	method sigfinal( Mu $parsed ) {
+		self.debug( 'sigfinal', $parsed );
+
+		if assert-hash-keys( $parsed, [< normspace >] ) {
+			return SigFinal.new(
+				:content(
+					:normspace(
+						self.normspace(
+							$parsed.hash.<normspace>
+						)
+					)
+				)
+			)
+		}
+		die "Uncaught type"
+	}
+
 	class Noun does Node { }
 
 	method noun( Mu $parsed ) {
 		self.debug( 'noun', $parsed );
 
+		if assert-hash-keys( $parsed, [< atom sigfinal >] ) {
+			return Noun.new(
+				:content(
+					:atom(
+						self.atom(
+							$parsed.hash.<atom>
+						)
+					),
+					:sigfinal(
+						self.sigfinal(
+							$parsed.hash.<sigfinal>
+						)
+					)
+				)
+			)
+		}
 		if assert-hash-keys( $parsed, [< atom >] ) {
 			return Noun.new(
 				:content(

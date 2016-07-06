@@ -9,7 +9,7 @@ plan 1;
 my $pt = Perl6::Tidy.new( :debugging(True) );
 
 subtest {
-	plan 2;
+	plan 4;
 
 	subtest {
 		plan 2;
@@ -26,6 +26,22 @@ subtest {
 		isa-ok $parsed, 'Perl6::Tidy::Root';
 		is $parsed.child.elems, 1;
 	}, Q{/<[ p i ]>/};
+
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{/ \d /} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q{/ \d /};
+
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{/ . /} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q{/ . /};
 }, Q{regex};
 
 # vim: ft=perl6
