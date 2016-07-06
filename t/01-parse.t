@@ -9,9 +9,10 @@ plan 1;
 my $pt = Perl6::Tidy.new( :debugging(True) );
 
 subtest {
-	plan 1;
+	plan 2;
 
 	my $parsed = $pt.tidy( Q{} );
+	isa-ok $parsed, 'Perl6::Tidy::Root';
 	is $parsed.child.elems, 1;
 }, 'Empty file';
 

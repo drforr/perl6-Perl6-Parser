@@ -12,16 +12,18 @@ subtest {
 	plan 2;
 
 	subtest {
-		plan 1;
+		plan 2;
 
 		my $parsed = $pt.tidy( Q{/pi/} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
 		is $parsed.child.elems, 1;
 	}, Q{/pi/};
 
 	subtest {
-		plan 1;
+		plan 2;
 
 		my $parsed = $pt.tidy( Q{/<[ p i ]>/} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
 		is $parsed.child.elems, 1;
 	}, Q{/<[ p i ]>/};
 }, Q{regex};

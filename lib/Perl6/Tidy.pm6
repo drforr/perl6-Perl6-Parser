@@ -99,7 +99,7 @@ class Perl6::Tidy {
 		return False
 	}
 
-	class Tidy does Node { }
+	class Root does Node { }
 
 	method tidy( Str $text ) {
 		my $*LINEPOSCACHE;
@@ -117,7 +117,7 @@ class Perl6::Tidy {
 		self.debug( 'tidy', $parsed );
 
 		if assert-keys( $parsed, [< statementlist >] ) {
-			return Tidy.new(
+			return Root.new(
 				:content(
 					:statementlist(
 						self.statementlist(
