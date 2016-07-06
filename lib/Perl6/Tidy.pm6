@@ -125,9 +125,11 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< statementlist >] ) {
 				return Node.new(
 					:type( 'tidy' ),
-					:statementlist(
-						self.statementlist(
-							$parsed.hash.<statementlist>
+					:content(
+						:statementlist(
+							self.statementlist(
+								$parsed.hash.<statementlist>
+							)
 						)
 					)
 				);
@@ -187,9 +189,11 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< EXPR >] ) {
 				return Node.new(
 					:type( 'statement' ),
-					:EXPR(
-						self.EXPR(
-							$parsed.hash.<EXPR>
+					:content(
+						:EXPR(
+							self.EXPR(
+								$parsed.hash.<EXPR>
+							)
 						)
 					)
 				)
@@ -197,14 +201,16 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< sigil desigilname >] ) {
 				return Node.new(
 					:type( 'statement' ),
-					:sigil(
-						self.sigil(
-							$parsed.hash.<sigil>
-						)
-					),
-					:desigilname(
-						self.desigilname(
-							$parsed.hash.<desigilname>
+					:content(
+						:sigil(
+							self.sigil(
+								$parsed.hash.<sigil>
+							)
+						),
+						:desigilname(
+							self.desigilname(
+								$parsed.hash.<desigilname>
+							)
 						)
 					)
 				)
@@ -229,9 +235,11 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< sym O >] ) {
 				return Node.new(
 					:type( 'postfix' ),
-					:sym(
-						self.sym(
-							$parsed.hash.<sym>
+					:content(
+						:sym(
+							self.sym(
+								$parsed.hash.<sym>
+							)
 						)
 					)
 				)
@@ -248,9 +256,11 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< sym O >] ) {
 				return Node.new(
 					:type( 'OPER' ),
-					:sym(
-						self.sym(
-							$parsed.hash.<sym>
+					:content(
+						:sym(
+							self.sym(
+								$parsed.hash.<sym>
+							)
 						)
 					)
 				)
@@ -273,10 +283,12 @@ class Perl6::Tidy {
 				}
 				return Node.new(
 					:type( 'name' ),
-					:identifier(
-						self.identifier(
-							$parsed.hash.<identifier>
-						)
+					:content(
+						:identifier(
+							self.identifier(
+								$parsed.hash.<identifier>
+							)
+						),
 					),
 					:child( @child )
 				)
@@ -285,9 +297,11 @@ class Perl6::Tidy {
 						 [< morename >] ) {
 				return Node.new(
 					:type( 'name' ),
-					:identifier(
-						self.identifier(
-							$parsed.hash.<identifier>
+					:content(
+						:identifier(
+							self.identifier(
+								$parsed.hash.<identifier>
+							)
 						)
 					)
 				)
@@ -304,9 +318,11 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< name >], [< colonpair >] ) {
 				return Node.new(
 					:type( 'longname' ),
-					:name(
-						self.name(
-							$parsed.hash.<name>
+					:content(
+						:name(
+							self.name(
+								$parsed.hash.<name>
+							)
 						)
 					)
 				)
@@ -323,9 +339,11 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< sym >] ) {
 				return Node.new(
 					:type( 'twigil' ),
-					:sym(
-						self.sym(
-							$parsed.hash.<sym>
+					:content(
+						:sym(
+							self.sym(
+								$parsed.hash.<sym>
+							)
 						)
 					)
 				)
@@ -346,9 +364,11 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< longname >] ) {
 				return Node.new(
 					:type( 'desigilname' ),
-					:longname(
-						self.longname(
-							$parsed.hash.<longname>
+					:content(
+						:longname(
+							self.longname(
+								$parsed.hash.<longname>
+							)
 						)
 					)
 				)
@@ -372,34 +392,38 @@ class Perl6::Tidy {
 					[< twigil sigil desigilname >] ) {
 				return Node.new(
 					:type( 'variable' ),
-					:twigil(
-						self.twigil(
-							$parsed.hash.<twigil>
+					:content(
+						:twigil(
+							self.twigil(
+								$parsed.hash.<twigil>
+							)
+						),
+						:sigil(
+							self.sigil(
+								$parsed.hash.<sigil>
+							)
+						),
+						:desigilname(
+							self.desigilname(
+								$parsed.hash.<desigilname>
+							)
 						)
-					),
-					:sigil(
-						self.sigil(
-							$parsed.hash.<sigil>
-						)
-					),
-					:desigilname(
-						self.desigilname(
-							$parsed.hash.<desigilname>
-						)
-					),
+					)
 				)
 			}
 			elsif assert-keys( $parsed, [< sigil desigilname >] ) {
 				return Node.new(
 					:type( 'variable' ),
-					:sigil(
-						self.sigil(
-							$parsed.hash.<sigil>
-						)
-					),
-					:desigilname(
-						self.desigilname(
-							$parsed.hash.<desigilname>
+					:content(
+						:sigil(
+							self.sigil(
+								$parsed.hash.<sigil>
+							)
+						),
+						:desigilname(
+							self.desigilname(
+								$parsed.hash.<desigilname>
+							)
 						)
 					)
 				)
@@ -407,9 +431,11 @@ class Perl6::Tidy {
 			elsif assert-keys( $parsed, [< sigil >] ) {
 				return Node.new(
 					:type( 'variable' ),
-					:sigil(
-						self.sigil(
-							$parsed.hash.<sigil>
+					:content(
+						:sigil(
+							self.sigil(
+								$parsed.hash.<sigil>
+							)
 						)
 					)
 				)
@@ -426,14 +452,16 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< sym routine_def >] ) {
 				return Node.new(
 					:type( 'routine_declarator' ),
-					:sym(
-						self.sym(
-							$parsed.hash.<sym>
-						)
-					),
-					:routine_def(
-						self.routine_def(
-							$parsed.hash.<routine_def>
+					:content(
+						:sym(
+							self.sym(
+								$parsed.hash.<sym>
+							)
+						),
+						:routine_def(
+							self.routine_def(
+								$parsed.hash.<routine_def>
+							)
 						)
 					)
 				)
@@ -450,14 +478,16 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< sym package_def >] ) {
 				return Node.new(
 					:type( 'package_declarator' ),
-					:sym(
-						self.sym(
-							$parsed.hash.<sym>
-						)
-					),
-					:package_def(
-						self.package_def(
-							$parsed.hash.<package_def>
+					:content(
+						:sym(
+							self.sym(
+								$parsed.hash.<sym>
+							)
+						),
+						:package_def(
+							self.package_def(
+								$parsed.hash.<package_def>
+							)
 						)
 					)
 				)
@@ -474,14 +504,16 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< sym regex_def >] ) {
 				return Node.new(
 					:type( 'regex_declarator' ),
-					:sym(
-						self.sym(
-							$parsed.hash.<sym>
-						)
-					),
-					:regex_def(
-						self.regex_def(
-							$parsed.hash.<regex_def>
+					:content(
+						:sym(
+							self.sym(
+								$parsed.hash.<sym>
+							)
+						),
+						:regex_def(
+							self.regex_def(
+								$parsed.hash.<regex_def>
+							)
 						)
 					)
 				)
@@ -500,14 +532,16 @@ class Perl6::Tidy {
 					[< trait >] ) {
 				return Node.new(
 					:type( 'routine_def' ),
-					:blockoid(
-						self.blockoid(
-							$parsed.hash.<blockoid>
-						)
-					),
-					:deflongname(
-						self.deflongname(
-							$parsed.hash.<deflongname>
+					:cotent(
+						:blockoid(
+							self.blockoid(
+								$parsed.hash.<blockoid>
+							)
+						),
+						:deflongname(
+							self.deflongname(
+								$parsed.hash.<deflongname>
+							)
 						)
 					)
 				)
@@ -525,14 +559,16 @@ class Perl6::Tidy {
 					[< blockoid longname >], [< trait >] ) {
 				return Node.new(
 					:type( 'package_def' ),
-					:blockoid(
-						self.blockoid(
-							$parsed.hash.<blockoid>
-						)
-					),
-					:longname(
-						self.longname(
-							$parsed.hash.<longname>
+					:content(
+						:blockoid(
+							self.blockoid(
+								$parsed.hash.<blockoid>
+							)
+						),
+						:longname(
+							self.longname(
+								$parsed.hash.<longname>
+							)
 						)
 					)
 				)
@@ -542,14 +578,16 @@ class Perl6::Tidy {
 					[< trait >] ) {
 				return Node.new(
 					:type( 'package_def' ),
-					:longname(
-						self.longname(
-							$parsed.hash.<longname>
-						)
-					),
-					:statementlist(
-						self.statementlist(
-							$parsed.hash.<statementlist>
+					:content(
+						:longname(
+							self.longname(
+								$parsed.hash.<longname>
+							)
+						),
+						:statementlist(
+							self.statementlist(
+								$parsed.hash.<statementlist>
+							)
 						)
 					)
 				)
@@ -568,14 +606,16 @@ class Perl6::Tidy {
 					[< signature trait >] ) {
 				return Node.new(
 					:type( 'regex_def' ),
-					:nibble(
-						self.nibble(
-							$parsed.hash.<nibble>
-						)
-					),
-					:deflongname(
-						self.deflongname(
-							$parsed.hash.<deflongname>
+					:content(
+						:nibble(
+							self.nibble(
+								$parsed.hash.<nibble>
+							)
+						),
+						:deflongname(
+							self.deflongname(
+								$parsed.hash.<deflongname>
+							)
 						)
 					)
 				)
@@ -592,9 +632,11 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< statementlist >] ) {
 				return Node.new(
 					:type( 'blockoid' ),
-					:statementlist(
-						self.statementlist(
-							$parsed.hash.<statementlist>
+					:content(
+						:statementlist(
+							self.statementlist(
+								$parsed.hash.<statementlist>
+							)
 						)
 					)
 				)
@@ -613,9 +655,11 @@ class Perl6::Tidy {
 					[< colonpair >] ) {
 				return Node.new(
 					:type( 'deflongname' ),
-					:name(
-						self.name(
-							$parsed.hash.<name>
+					:content(
+						:name(
+							self.name(
+								$parsed.hash.<name>
+							)
 						)
 					)
 				)
@@ -647,17 +691,19 @@ class Perl6::Tidy {
 						[< postfix_prefix_meta_operator >] ) {
 					return Node.new(
 						:type( 'EXPR' ),
-						:child( @child ),
-						:postfix(
-							self.postfix(
-								$parsed.hash.<postfix>
+						:content(
+							:postfix(
+								self.postfix(
+									$parsed.hash.<postfix>
+								)
+							),
+							:OPER(
+								self.OPER(
+									$parsed.hash.<OPER>
+								)
 							)
 						),
-						:OPER(
-							self.OPER(
-								$parsed.hash.<OPER>
-							)
-						),
+						:child( @child )
 					)
 				}
 				die "Uncaught key"
@@ -673,9 +719,11 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< longname args >] ) {
 				return Node.new(
 					:type( 'EXPR' ),
-					:longname(
-						self.longname(
-							$parsed.hash.<longname>
+					:content(
+						:longname(
+							self.longname(
+								$parsed.hash.<longname>
+							)
 						)
 					)
 				)
@@ -683,9 +731,11 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< value >] ) {
 				return Node.new(
 					:type( 'EXPR' ),
-					:value(
-						self.value(
-							$parsed.hash.<value>
+					:content(
+						:value(
+							self.value(
+								$parsed.hash.<value>
+							)
 						)
 					)
 				)
@@ -693,9 +743,11 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< variable >] ) {
 				return Node.new(
 					:type( 'EXPR' ),
-					:variable(
-						self.variable(
-							$parsed.hash.<variable>
+					:content(
+						:variable(
+							self.variable(
+								$parsed.hash.<variable>
+							)
 						)
 					)
 				)
@@ -703,9 +755,11 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< longname >] ) {
 				return Node.new(
 					:type( 'EXPR' ),
-					:longname(
-						self.longname(
-							$parsed.hash.<longname>
+					:content(
+						:longname(
+							self.longname(
+								$parsed.hash.<longname>
+							)
 						)
 					)
 				)
@@ -713,9 +767,11 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< circumfix >] ) {
 				return Node.new(
 					:type( 'EXPR' ),
-					:circumfix(
-						self.circumfix(
-							$parsed.hash.<circumfix>
+					:content(
+						:circumfix(
+							self.circumfix(
+								$parsed.hash.<circumfix>
+							)
 						)
 					)
 				)
@@ -723,9 +779,11 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< colonpair >] ) {
 				return Node.new(
 					:type( 'EXPR' ),
-					:colonpair(
-						self.colonpair(
-							$parsed.hash.<colonpair>
+					:content(
+						:colonpair(
+							self.colonpair(
+								$parsed.hash.<colonpair>
+							)
 						)
 					)
 				)
@@ -733,9 +791,11 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< scope_declarator >] ) {
 				return Node.new(
 					:type( 'EXPR' ),
-					:scope_declarator(
-						self.scope_declarator(
-							$parsed.hash.<scope_declarator>
+					:content(
+						:scope_declarator(
+							self.scope_declarator(
+								$parsed.hash.<scope_declarator>
+							)
 						)
 					)
 				)
@@ -743,9 +803,11 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< routine_declarator >] ) {
 				return Node.new(
 					:type( 'EXPR' ),
-					:routine_declarator(
-						self.routine_declarator(
-							$parsed.hash.<routine_declarator>
+					:content(
+						:routine_declarator(
+							self.routine_declarator(
+								$parsed.hash.<routine_declarator>
+							)
 						)
 					)
 				)
@@ -753,9 +815,11 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< package_declarator >] ) {
 				return Node.new(
 					:type( 'EXPR' ),
-					:package_declarator(
-						self.package_declarator(
-							$parsed.hash.<package_declarator>
+					:content(
+						:package_declarator(
+							self.package_declarator(
+								$parsed.hash.<package_declarator>
+							)
 						)
 					)
 				)
@@ -763,9 +827,11 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< regex_declarator >] ) {
 				return Node.new(
 					:type( 'EXPR' ),
-					:regex_declarator(
-						self.regex_declarator(
-							$parsed.hash.<regex_declarator>
+					:content(
+						:regex_declarator(
+							self.regex_declarator(
+								$parsed.hash.<regex_declarator>
+							)
 						)
 					)
 				)
@@ -793,9 +859,11 @@ class Perl6::Tidy {
 				return Node.new(
 					:type( 'variable_declarator' ),
 					:child( @child )
-					:variable(
-						self.variable(
-							$parsed.hash.<variable>
+					:content(
+						:variable(
+							self.variable(
+								$parsed.hash.<variable>
+							)
 						)
 					)
 				)
@@ -805,11 +873,13 @@ class Perl6::Tidy {
 					[< semilist postcircumfix signature trait post_constraint >] ) {
 				return Node.new(
 					:type( 'variable_declarator' ),
-					:variable(
-						self.variable(
-							$parsed.hash.<variable>
+					:content(
+						:variable(
+							self.variable(
+								$parsed.hash.<variable>
+							)
 						)
-					),
+					)
 				)
 			}
 			die "Uncaught key"
@@ -824,11 +894,13 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< declarator >] ) {
 				return Node.new(
 					:type( 'multi_declarator' ),
-					:declarator(
-						self.declarator(
-							$parsed.hash.<declarator>
+					:content(
+						:declarator(
+							self.declarator(
+								$parsed.hash.<declarator>
+							)
 						)
-					),
+					)
 				)
 			}
 			die "Uncaught key"
@@ -845,11 +917,13 @@ class Perl6::Tidy {
 					[< trait >] ) {
 				return Node.new(
 					:type( 'declarator' ),
-					:variable_declarator(
-						self.variable_declarator(
-							$parsed.hash.<variable_declarator>
+					:content(
+						:variable_declarator(
+							self.variable_declarator(
+								$parsed.hash.<variable_declarator>
+							)
 						)
-					),
+					)
 				)
 			}
 			if assert-keys( $parsed,
@@ -857,11 +931,13 @@ class Perl6::Tidy {
 					[< trait >] ) {
 				return Node.new(
 					:type( 'declarator' ),
-					:regex_declarator(
-						self.regex_declarator(
-							$parsed.hash.<regex_declarator>
+					:content(
+						:regex_declarator(
+							self.regex_declarator(
+								$parsed.hash.<regex_declarator>
+							)
 						)
-					),
+					)
 				)
 			}
 			die "Uncaught key"
@@ -878,11 +954,13 @@ class Perl6::Tidy {
 					[< trait >] ) {
 				return Node.new(
 					:type( 'DECL' ),
-					:variable_declarator(
-						self.variable_declarator(
-							$parsed.hash.<variable_declarator>
+					:content(
+						:variable_declarator(
+							self.variable_declarator(
+								$parsed.hash.<variable_declarator>
+							)
 						)
-					),
+					)
 				)
 			}
 			if assert-keys( $parsed,
@@ -890,36 +968,42 @@ class Perl6::Tidy {
 					[< trait >] ) {
 				return Node.new(
 					:type( 'DECL' ),
-					:regex_declarator(
-						self.regex_declarator(
-							$parsed.hash.<regex_declarator>
+					:content(
+						:regex_declarator(
+							self.regex_declarator(
+								$parsed.hash.<regex_declarator>
+							)
 						)
-					),
+					)
 				)
 			}
 			elsif assert-keys( $parsed, [< package_def sym >] ) {
 				return Node.new(
 					:type( 'DECL' ),
-					:package_def(
-						self.package_def(
-							$parsed.hash.<package_def>
+					:content(
+						:package_def(
+							self.package_def(
+								$parsed.hash.<package_def>
+							)
+						),
+						:sym(
+							self.sym(
+								$parsed.hash.<sym>
+							)
 						)
-					),
-					:sym(
-						self.sym(
-							$parsed.hash.<sym>
-						)
-					),
+					)
 				)
 			}
 			elsif assert-keys( $parsed, [< declarator >] ) {
 				return Node.new(
 					:type( 'DECL' ),
-					:declarator(
-						self.declarator(
-							$parsed.hash.<declarator>
+					:content(
+						:declarator(
+							self.declarator(
+								$parsed.hash.<declarator>
+							)
 						)
-					),
+					)
 				)
 			}
 			die "Uncaught key"
@@ -948,9 +1032,11 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< longname >] ) {
 				return Node.new(
 					:type( 'typename' ),
-					:longname(
-						self.longname(
-							$parsed.hash.<longname>
+					:content(
+						:longname(
+							self.longname(
+								$parsed.hash.<longname>
+							)
 						)
 					)
 				)
@@ -969,16 +1055,18 @@ class Perl6::Tidy {
 					[< typename >] ) {
 				return Node.new(
 					:type( 'scoped' ),
-					:declarator(
-						self.declarator(
-							$parsed.hash.<declarator>
+					:content(
+						:declarator(
+							self.declarator(
+								$parsed.hash.<declarator>
+							)
+						),
+						:DECL(
+							self.DECL(
+								$parsed.hash.<DECL>
+							)
 						)
-					),
-					:DECL(
-						self.DECL(
-							$parsed.hash.<DECL>
-						)
-					),
+					)
 				)
 			}
 			if assert-keys( $parsed, [< multi_declarator
@@ -986,35 +1074,39 @@ class Perl6::Tidy {
 						    typename >] ) {
 				return Node.new(
 					:type( 'scoped' ),
-					:multi_declarator(
-						self.multi_declarator(
-							$parsed.hash.<multi_declarator>
+					:content(
+						:multi_declarator(
+							self.multi_declarator(
+								$parsed.hash.<multi_declarator>
+							)
+						),
+						:DECL(
+							self.DECL(
+								$parsed.hash.<DECL>
+							)
+						),
+						:typename(
+							self.typename(
+								$parsed.hash.<typename>
+							)
 						)
-					),
-					:DECL(
-						self.DECL(
-							$parsed.hash.<DECL>
-						)
-					),
-					:typename(
-						self.typename(
-							$parsed.hash.<typename>
-						)
-					),
+					)
 				)
 			}
 			if assert-keys( $parsed, [< package_declarator DECL >],
 						 [< typename >] ) {
 				return Node.new(
 					:type( 'scoped' ),
-					:package_declarator(
-						self.package_declarator(
-							$parsed.hash.<package_declarator>
-						)
-					),
-					:DECL(
-						self.DECL(
-							$parsed.hash.<DECL>
+					:content(
+						:package_declarator(
+							self.package_declarator(
+								$parsed.hash.<package_declarator>
+							)
+						),
+						:DECL(
+							self.DECL(
+								$parsed.hash.<DECL>
+							)
 						)
 					)
 				)
@@ -1031,14 +1123,16 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< sym scoped >] ) {
 				return Node.new(
 					:type( 'scope_declarator' ),
-					:sym(
-						self.sym(
-							$parsed.hash.<sym>
-						)
-					),
-					:scoped(
-						self.scoped(
-							$parsed.hash.<scoped>
+					:content(
+						:sym(
+							self.sym(
+								$parsed.hash.<sym>
+							)
+						),
+						:scoped(
+							self.scoped(
+								$parsed.hash.<scoped>
+							)
 						)
 					)
 				)
@@ -1055,9 +1149,11 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< number >] ) {
 				return Node.new(
 					:type( 'value' ),
-					:number(
-						self.number(
-							$parsed.hash.<number>
+					:content(
+						:number(
+							self.number(
+								$parsed.hash.<number>
+							)
 						)
 					)
 				)
@@ -1065,9 +1161,11 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< quote >] ) {
 				return Node.new(
 					:type( 'value' ),
-					:quote(
-						self.quote(
-							$parsed.hash.<quote>
+					:content(
+						:quote(
+							self.quote(
+								$parsed.hash.<quote>
+							)
 						)
 					)
 				)
@@ -1084,9 +1182,11 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< numish >] ) {
 				return Node.new(
 					:type( 'number' ),
-					:numish(
-						self.numish(
-							$parsed.hash.<numish>
+					:content(
+						:numish(
+							self.numish(
+								$parsed.hash.<numish>
+							)
 						)
 					)
 				)
@@ -1103,9 +1203,11 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< nibble >] ) {
 				return Node.new(
 					:type( 'quote' ),
-					:nibble(
-						self.nibble(
-							$parsed.hash.<nibble>
+					:content(
+						:nibble(
+							self.nibble(
+								$parsed.hash.<nibble>
+							)
 						)
 					)
 				)
@@ -1113,9 +1215,11 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< quibble >] ) {
 				return Node.new(
 					:type( 'quote' ),
-					:quibble(
-						self.quibble(
-							$parsed.hash.<quibble>
+					:content(
+						:quibble(
+							self.quibble(
+								$parsed.hash.<quibble>
+							)
 						)
 					)
 				)
@@ -1138,9 +1242,11 @@ class Perl6::Tidy {
 					[< quotepair >] ) {
 				return Node.new(
 					:type( 'babble' ),
-					:B(
-						self.B(
-							$parsed.hash.<B>
+					:content(
+						:B(
+							self.B(
+								$parsed.hash.<B>
+							)
 						)
 					)
 				)
@@ -1174,9 +1280,11 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< signature >] ) {
 				return Node.new(
 					:type( 'fakesignature' ),
-					:signature(
-						self.signature(
-							$parsed.hash.<signature>
+					:content(
+						:signature(
+							self.signature(
+								$parsed.hash.<signature>
+							)
 						)
 					)
 				)
@@ -1193,9 +1301,11 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< identifier >] ) {
 				return Node.new(
 					:type( 'colonpair' ),
-					:identifier(
-						self.identifier(
-							$parsed.hash.<identifier>
+					:content(
+						:identifier(
+							self.identifier(
+								$parsed.hash.<identifier>
+							)
 						)
 					)
 				)
@@ -1203,9 +1313,11 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< fakesignature >] ) {
 				return Node.new(
 					:type( 'colonpair' ),
-					:fakesignature(
-						self.fakesignature(
-							$parsed.hash.<fakesignature>
+					:content(
+						:fakesignature(
+							self.fakesignature(
+								$parsed.hash.<fakesignature>
+							)
 						)
 					)
 				)
@@ -1249,9 +1361,11 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< identifier >] ) {
 				return Node.new(
 					:type( 'quotepair' ),
-					:identifier(
-						self.identifier(
-							$parsed.hash.<identifier>
+					:content(
+						:identifier(
+							self.identifier(
+								$parsed.hash.<identifier>
+							)
 						)
 					)
 				)
@@ -1268,14 +1382,16 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< babble nibble >] ) {
 				return Node.new(
 					:type( 'quibble' ),
-					:babble(
-						self.babble(
-							$parsed.hash.<babble>
-						)
-					),
-					:nibble(
-						self.nibble(
-							$parsed.hash.<nibble>
+					:content(
+						:babble(
+							self.babble(
+								$parsed.hash.<babble>
+							)
+						),
+						:nibble(
+							self.nibble(
+								$parsed.hash.<nibble>
+							)
 						)
 					)
 				)
@@ -1292,14 +1408,16 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< 0 >] ) {
 				return Node.new(
 					:type( 'quibble' ),
-					:babble(
-						self.babble(
-							$parsed.hash.<babble>
-						)
-					),
-					:nibble(
-						self.nibble(
-							$parsed.hash.<nibble>
+					:content(
+						:babble(
+							self.babble(
+								$parsed.hash.<babble>
+							)
+						),
+						:nibble(
+							self.nibble(
+								$parsed.hash.<nibble>
+							)
 						)
 					)
 				)
@@ -1336,14 +1454,16 @@ class Perl6::Tidy {
 				@child.push(
 					Node.new(
 						:type( 'INTERMEDIARY' ),
-						:sign(
-							self.sign(
-								$_.hash.<sign>
-							)
-						),
-						:charspec(
-							self.charspec(
-								$_.hash.<charspec>
+						:content(
+							:sign(
+								self.sign(
+									$_.hash.<sign>
+								)
+							),
+							:charspec(
+								self.charspec(
+									$_.hash.<charspec>
+								)
 							)
 						)
 					)
@@ -1364,9 +1484,11 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< cclass_elem >] ) {
 				return Node.new(
 					:type( 'assertion' ),
-					:cclass_elem(
-						self.cclass_elem(
-							$parsed.hash.<cclass_elem>
+					:content(
+						:cclass_elem(
+							self.cclass_elem(
+								$parsed.hash.<cclass_elem>
+							)
 						)
 					)
 				)
@@ -1383,9 +1505,11 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< assertion >] ) {
 				return Node.new(
 					:type( 'metachar' ),
-					:metachar(
-						self.assertion(
-							$parsed.hash.<assertion>
+					:content(
+						:metachar(
+							self.assertion(
+								$parsed.hash.<assertion>
+							)
 						)
 					)
 				)
@@ -1402,9 +1526,11 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< metachar >] ) {
 				return Node.new(
 					:type( 'atom' ),
-					:atom(
-						self.metachar(
-							$parsed.hash.<metachar>
+					:content(
+						:atom(
+							self.metachar(
+								$parsed.hash.<metachar>
+							)
 						)
 					)
 				)
@@ -1427,9 +1553,11 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< atom >] ) {
 				return Node.new(
 					:type( 'noun' ),
-					:atom(
-						self.atom(
-							$parsed.hash.<atom>
+					:content(
+						:atom(
+							self.atom(
+								$parsed.hash.<atom>
+							)
 						)
 					)
 				)
@@ -1579,9 +1707,11 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< termaltseq >] ) {
 				return Node.new(
 					:type( 'termseq' ),
-					:termaltseq(
-						self.termaltseq(
-							$parsed.hash.<termaltseq>
+					:content(
+						:termaltseq(
+							self.termaltseq(
+								$parsed.hash.<termaltseq>
+							)
 						)
 					)
 				)
@@ -1601,9 +1731,11 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< termseq >] ) {
 				return Node.new(
 					:type( 'nibble' ),
-					:termseq(
-						self.termseq(
-							$parsed.hash.<termseq>
+					:content(
+						:termseq(
+							self.termseq(
+								$parsed.hash.<termseq>
+							)
 						)
 					)
 				)
@@ -1626,41 +1758,45 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< int coeff frac >] ) {
 				return Node.new(
 					:type( 'dec_number' ),
-					:int(
-						self.int(
-							$parsed.hash.<int>
+					:content(
+						:int(
+							self.int(
+								$parsed.hash.<int>
+							)
+						),
+						:coeff(
+							self.coeff(
+								$parsed.hash.<coeff>
+							)
+						),
+						:frac(
+							self.frac(
+								$parsed.hash.<frac>
+							)
 						)
-					),
-					:coeff(
-						self.coeff(
-							$parsed.hash.<coeff>
-						)
-					),
-					:frac(
-						self.frac(
-							$parsed.hash.<frac>
-						)
-					),
+					)
 				)
 			}
 			if assert-keys( $parsed, [< int coeff escale >] ) {
 				return Node.new(
 					:type( 'dec_number' ),
-					:int(
-						self.int(
-							$parsed.hash.<int>
+					:content(
+						:int(
+							self.int(
+								$parsed.hash.<int>
+							)
+						),
+						:coeff(
+							self.coeff(
+								$parsed.hash.<coeff>
+							)
+						),
+						:escale(
+							self.escale(
+								$parsed.hash.<escale>
+							)
 						)
-					),
-					:coeff(
-						self.coeff(
-							$parsed.hash.<coeff>
-						)
-					),
-					:escale(
-						self.escale(
-							$parsed.hash.<escale>
-						)
-					),
+					)
 				)
 			}
 			die "Uncaught key"
@@ -1675,9 +1811,11 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< integer >] ) {
 				return Node.new(
 					:type( 'numish' ),
-					:integer(
-						self.integer(
-							$parsed.hash.<integer>
+					:content(
+						:integer(
+							self.integer(
+								$parsed.hash.<integer>
+							)
 						)
 					)
 				)
@@ -1685,9 +1823,11 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< rad_number >] ) {
 				return Node.new(
 					:type( 'numish' ),
-					:rad_number(
-						self.rad_number(
-							$parsed.hash.<rad_number>
+					:content(
+						:rad_number(
+							self.rad_number(
+								$parsed.hash.<rad_number>
+							)
 						)
 					)
 				)
@@ -1695,9 +1835,11 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< dec_number >] ) {
 				return Node.new(
 					:type( 'numish' ),
-					:dec_number(
-						self.dec_number(
-							$parsed.hash.<dec_number>
+					:content(
+						:dec_number(
+							self.dec_number(
+								$parsed.hash.<dec_number>
+							)
 						)
 					)
 				)
@@ -1714,9 +1856,11 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< decint VALUE >] ) {
 				return Node.new(
 					:type( 'integer' ),
-					:decint(
-						self.decint(
-							$parsed.hash.<decint>
+					:content(
+						:decint(
+							self.decint(
+								$parsed.hash.<decint>
+							)
 						)
 					)
 				)
@@ -1724,9 +1868,11 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< binint VALUE >] ) {
 				return Node.new(
 					:type( 'integer' ),
-					:binint(
-						self.binint(
-							$parsed.hash.<binint>
+					:content(
+						:binint(
+							self.binint(
+								$parsed.hash.<binint>
+							)
 						)
 					)
 				)
@@ -1734,9 +1880,11 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< octint VALUE >] ) {
 				return Node.new(
 					:type( 'integer' ),
-					:octint(
-						self.octint(
-							$parsed.hash.<octint>
+					:content(
+						:octint(
+							self.octint(
+								$parsed.hash.<octint>
+							)
 						)
 					)
 				)
@@ -1744,9 +1892,11 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< hexint VALUE >] ) {
 				return Node.new(
 					:type( 'integer' ),
-					:hexint(
-						self.hexint(
-							$parsed.hash.<hexint>
+					:content(
+						:hexint(
+							self.hexint(
+								$parsed.hash.<hexint>
+							)
 						)
 					)
 				)
@@ -1763,9 +1913,11 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< semilist >] ) {
 				return Node.new(
 					:type( 'circumfix' ),
-					:semilist(
-						self.semilist(
-							$parsed.hash.<semilist>
+					:content(
+						:semilist(
+							self.semilist(
+								$parsed.hash.<semilist>
+							)
 						)
 					)
 				)
@@ -1773,9 +1925,11 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< binint VALUE >] ) {
 				return Node.new(
 					:type( 'circumfix' ),
-					:binint(
-						self.binint(
-							$parsed.hash.<binint>
+					:content(
+						:binint(
+							self.binint(
+								$parsed.hash.<binint>
+							)
 						)
 					)
 				)
@@ -1783,9 +1937,11 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< octint VALUE >] ) {
 				return Node.new(
 					:type( 'circumfix' ),
-					:octint(
-						self.octint(
-							$parsed.hash.<octint>
+					:content(
+						:octint(
+							self.octint(
+								$parsed.hash.<octint>
+							)
 						)
 					)
 				)
@@ -1793,9 +1949,11 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< hexint VALUE >] ) {
 				return Node.new(
 					:type( 'circumfix' ),
-					:hexint(
-						self.hexint(
-							$parsed.hash.<hexint>
+					:content(
+						:hexint(
+							self.hexint(
+								$parsed.hash.<hexint>
+							)
 						)
 					)
 				)
@@ -1842,14 +2000,16 @@ class Perl6::Tidy {
 					[< exp base >] ) {
 				return Node.new(
 					:type( 'rad_number' ),
-					:circumfix(
-						self.circumfix(
-							$parsed.hash.<circumfix>,
-						)
-					),
-					:radix(
-						self.radix(
-							$parsed.hash.<radix>,
+					:content(
+						:circumfix(
+							self.circumfix(
+								$parsed.hash.<circumfix>,
+							)
+						),
+						:radix(
+							self.radix(
+								$parsed.hash.<radix>,
+							)
 						)
 					)
 				)
@@ -1882,14 +2042,16 @@ class Perl6::Tidy {
 			if assert-keys( $parsed, [< sign decint >] ) {
 				return Node.new(
 					:type( 'escale' ),
-					:sign(
-						self.sign(
-							$parsed.hash.<sign>
-						)
-					),
-					:decint(
-						self.decint(
-							$parsed.hash.<decint>
+					:content(
+						:sign(
+							self.sign(
+								$parsed.hash.<sign>
+							)
+						),
+						:decint(
+							self.decint(
+								$parsed.hash.<decint>
+							)
 						)
 					)
 				)
