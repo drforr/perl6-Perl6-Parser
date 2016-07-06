@@ -94,16 +94,19 @@ class Perl6::Tidy {
 	}
 
 	sub assert-keys( Mu $parsed, $keys, $defined-keys = [] ) {
-		die "Too many keys " ~ $parsed.hash.keys.gist
-			if $parsed.hash.keys.elems >
-				$keys.elems + $defined-keys.elems;
-		for @( $keys ) -> $key {
-			return False unless $parsed.hash.{$key}
+		if $parsed.hash {
+			die "Too many keys " ~ $parsed.hash.keys.gist
+				if $parsed.hash.keys.elems >
+					$keys.elems + $defined-keys.elems;
+			for @( $keys ) -> $key {
+				return False unless $parsed.hash.{$key}
+			}
+			for @( $defined-keys ) -> $key {
+				return False unless $parsed.hash:defined{$key}
+			}
+			return True
 		}
-		for @( $defined-keys ) -> $key {
-			return False unless $parsed.hash:defined{$key}
-		}
-		return True
+		return False
 	}
 
 	method tidy( Str $text ) {
@@ -121,19 +124,19 @@ class Perl6::Tidy {
 
 		self.debug( 'tidy', $parsed );
 
-		if $parsed.hash {
-			if assert-keys( $parsed, [< statementlist >] ) {
-				return Node.new(
-					:type( 'tidy' ),
-					:content(
-						:statementlist(
-							self.statementlist(
-								$parsed.hash.<statementlist>
-							)
+		if assert-keys( $parsed, [< statementlist >] ) {
+			return Node.new(
+				:type( 'tidy' ),
+				:content(
+					:statementlist(
+						self.statementlist(
+							$parsed.hash.<statementlist>
 						)
 					)
-				);
-			}
+				)
+			);
+		}
+		if $parsed.hash {
 			die "Uncaught key"
 		}
 
@@ -143,26 +146,26 @@ class Perl6::Tidy {
 	method statementlist( Mu $parsed ) {
 		self.debug( 'statementlist', $parsed );
 
-		if $parsed.hash {
-			if assert-keys( $parsed, [< statement >] ) {
-				my @child;
-				for $parsed.hash.<statement> {
-					@child.push(
-						self.statement(
-							$_
-						)
+		if assert-keys( $parsed, [< statement >] ) {
+			my @child;
+			for $parsed.hash.<statement> {
+				@child.push(
+					self.statement(
+						$_
 					)
-				}
-				return Node.new(
-					:type( 'statementlist' ),
-					:child( @child )
 				)
 			}
-			if assert-keys( $parsed, [], [< statement >] ) {
-				return Node.new(
-					:type( 'statementlist' ),
-				)
-			}
+			return Node.new(
+				:type( 'statementlist' ),
+				:child( @child )
+			)
+		}
+		if assert-keys( $parsed, [], [< statement >] ) {
+			return Node.new(
+				:type( 'statementlist' ),
+			)
+		}
+		if $parsed.hash {
 			die "Uncaught key"
 		}
 		die "Uncaught type"
@@ -185,36 +188,36 @@ class Perl6::Tidy {
 				:child( @child )
 			)
 		}
-		elsif $parsed.hash {
-			if assert-keys( $parsed, [< EXPR >] ) {
-				return Node.new(
-					:type( 'statement' ),
-					:content(
-						:EXPR(
-							self.EXPR(
-								$parsed.hash.<EXPR>
-							)
+		if assert-keys( $parsed, [< EXPR >] ) {
+			return Node.new(
+				:type( 'statement' ),
+				:content(
+					:EXPR(
+						self.EXPR(
+							$parsed.hash.<EXPR>
 						)
 					)
 				)
-			}
-			if assert-keys( $parsed, [< sigil desigilname >] ) {
-				return Node.new(
-					:type( 'statement' ),
-					:content(
-						:sigil(
-							self.sigil(
-								$parsed.hash.<sigil>
-							)
-						),
-						:desigilname(
-							self.desigilname(
-								$parsed.hash.<desigilname>
-							)
+			)
+		}
+		if assert-keys( $parsed, [< sigil desigilname >] ) {
+			return Node.new(
+				:type( 'statement' ),
+				:content(
+					:sigil(
+						self.sigil(
+							$parsed.hash.<sigil>
+						)
+					),
+					:desigilname(
+						self.desigilname(
+							$parsed.hash.<desigilname>
 						)
 					)
 				)
-			}
+			)
+		}
+		if $parsed.hash {
 			die "Uncaught key"
 		}
 		die "Uncaught type"
@@ -231,19 +234,19 @@ class Perl6::Tidy {
 	method postfix( Mu $parsed ) {
 		self.debug( 'postfix', $parsed );
 
-		if $parsed.hash {
-			if assert-keys( $parsed, [< sym O >] ) {
-				return Node.new(
-					:type( 'postfix' ),
-					:content(
-						:sym(
-							self.sym(
-								$parsed.hash.<sym>
-							)
+		if assert-keys( $parsed, [< sym O >] ) {
+			return Node.new(
+				:type( 'postfix' ),
+				:content(
+					:sym(
+						self.sym(
+							$parsed.hash.<sym>
 						)
 					)
 				)
-			}
+			)
+		}
+		if $parsed.hash {
 			die "Uncaught key"
 		}
 		die "Uncaught type"
@@ -252,19 +255,19 @@ class Perl6::Tidy {
 	method OPER( Mu $parsed ) {
 		self.debug( 'OPER', $parsed );
 
-		if $parsed.hash {
-			if assert-keys( $parsed, [< sym O >] ) {
-				return Node.new(
-					:type( 'OPER' ),
-					:content(
-						:sym(
-							self.sym(
-								$parsed.hash.<sym>
-							)
+		if assert-keys( $parsed, [< sym O >] ) {
+			return Node.new(
+				:type( 'OPER' ),
+				:content(
+					:sym(
+						self.sym(
+							$parsed.hash.<sym>
 						)
 					)
 				)
-			}
+			)
+		}
+		if $parsed.hash {
 			die "Uncaught key"
 		}
 		die "Uncaught type"
@@ -273,39 +276,39 @@ class Perl6::Tidy {
 	method name( Mu $parsed ) {
 		self.debug( 'name', $parsed );
 
-		if $parsed.hash {
-			if assert-keys( $parsed, [< identifier morename >] ) {
-				my @child;
-				for $parsed.hash.<morename> {
-					@child.push(
-						$_
-					)
-				}
-				return Node.new(
-					:type( 'name' ),
-					:content(
-						:identifier(
-							self.identifier(
-								$parsed.hash.<identifier>
-							)
-						),
-					),
-					:child( @child )
+		if assert-keys( $parsed, [< identifier morename >] ) {
+			my @child;
+			for $parsed.hash.<morename> {
+				@child.push(
+					$_
 				)
 			}
-			if assert-keys( $parsed, [< identifier >],
-						 [< morename >] ) {
-				return Node.new(
-					:type( 'name' ),
-					:content(
-						:identifier(
-							self.identifier(
-								$parsed.hash.<identifier>
-							)
+			return Node.new(
+				:type( 'name' ),
+				:content(
+					:identifier(
+						self.identifier(
+							$parsed.hash.<identifier>
+						)
+					),
+				),
+				:child( @child )
+			)
+		}
+		if assert-keys( $parsed, [< identifier >],
+					 [< morename >] ) {
+			return Node.new(
+				:type( 'name' ),
+				:content(
+					:identifier(
+						self.identifier(
+							$parsed.hash.<identifier>
 						)
 					)
 				)
-			}
+			)
+		}
+		if $parsed.hash {
 			die "Uncaught key"
 		}
 		die "Uncaught type"
@@ -314,19 +317,19 @@ class Perl6::Tidy {
 	method longname( Mu $parsed ) {
 		self.debug( 'longname', $parsed );
 
-		if $parsed.hash {
-			if assert-keys( $parsed, [< name >], [< colonpair >] ) {
-				return Node.new(
-					:type( 'longname' ),
-					:content(
-						:name(
-							self.name(
-								$parsed.hash.<name>
-							)
+		if assert-keys( $parsed, [< name >], [< colonpair >] ) {
+			return Node.new(
+				:type( 'longname' ),
+				:content(
+					:name(
+						self.name(
+							$parsed.hash.<name>
 						)
 					)
 				)
-			}
+			)
+		}
+		if $parsed.hash {
 			die "Uncaught key"
 		}
 		die "Uncaught type"
@@ -335,19 +338,19 @@ class Perl6::Tidy {
 	method twigil( Mu $parsed ) {
 		self.debug( 'twigil', $parsed );
 
-		if $parsed.hash {
-			if assert-keys( $parsed, [< sym >] ) {
-				return Node.new(
-					:type( 'twigil' ),
-					:content(
-						:sym(
-							self.sym(
-								$parsed.hash.<sym>
-							)
+		if assert-keys( $parsed, [< sym >] ) {
+			return Node.new(
+				:type( 'twigil' ),
+				:content(
+					:sym(
+						self.sym(
+							$parsed.hash.<sym>
 						)
 					)
 				)
-			}
+			)
+		}
+		if $parsed.hash {
 			die "Uncaught key"
 		}
 		die "Uncaught type"
@@ -360,19 +363,19 @@ class Perl6::Tidy {
 	method desigilname( Mu $parsed ) {
 		self.debug( 'desigilname', $parsed );
 
-		if $parsed.hash {
-			if assert-keys( $parsed, [< longname >] ) {
-				return Node.new(
-					:type( 'desigilname' ),
-					:content(
-						:longname(
-							self.longname(
-								$parsed.hash.<longname>
-							)
+		if assert-keys( $parsed, [< longname >] ) {
+			return Node.new(
+				:type( 'desigilname' ),
+				:content(
+					:longname(
+						self.longname(
+							$parsed.hash.<longname>
 						)
 					)
 				)
-			}
+			)
+		}
+		if $parsed.hash {
 			die "Unknown key"
 		}
 		if $parsed.Str {
@@ -387,59 +390,59 @@ class Perl6::Tidy {
 	method variable( Mu $parsed ) {
 		self.debug( 'variable', $parsed );
 
+		if assert-keys( $parsed,
+			[< twigil sigil desigilname >] ) {
+			return Node.new(
+				:type( 'variable' ),
+				:content(
+					:twigil(
+						self.twigil(
+							$parsed.hash.<twigil>
+						)
+					),
+					:sigil(
+						self.sigil(
+							$parsed.hash.<sigil>
+						)
+					),
+					:desigilname(
+						self.desigilname(
+							$parsed.hash.<desigilname>
+						)
+					)
+				)
+			)
+		}
+		elsif assert-keys( $parsed, [< sigil desigilname >] ) {
+			return Node.new(
+				:type( 'variable' ),
+				:content(
+					:sigil(
+						self.sigil(
+							$parsed.hash.<sigil>
+						)
+					),
+					:desigilname(
+						self.desigilname(
+							$parsed.hash.<desigilname>
+						)
+					)
+				)
+			)
+		}
+		elsif assert-keys( $parsed, [< sigil >] ) {
+			return Node.new(
+				:type( 'variable' ),
+				:content(
+					:sigil(
+						self.sigil(
+							$parsed.hash.<sigil>
+						)
+					)
+				)
+			)
+		}
 		if $parsed.hash {
-			if assert-keys( $parsed,
-					[< twigil sigil desigilname >] ) {
-				return Node.new(
-					:type( 'variable' ),
-					:content(
-						:twigil(
-							self.twigil(
-								$parsed.hash.<twigil>
-							)
-						),
-						:sigil(
-							self.sigil(
-								$parsed.hash.<sigil>
-							)
-						),
-						:desigilname(
-							self.desigilname(
-								$parsed.hash.<desigilname>
-							)
-						)
-					)
-				)
-			}
-			elsif assert-keys( $parsed, [< sigil desigilname >] ) {
-				return Node.new(
-					:type( 'variable' ),
-					:content(
-						:sigil(
-							self.sigil(
-								$parsed.hash.<sigil>
-							)
-						),
-						:desigilname(
-							self.desigilname(
-								$parsed.hash.<desigilname>
-							)
-						)
-					)
-				)
-			}
-			elsif assert-keys( $parsed, [< sigil >] ) {
-				return Node.new(
-					:type( 'variable' ),
-					:content(
-						:sigil(
-							self.sigil(
-								$parsed.hash.<sigil>
-							)
-						)
-					)
-				)
-			}
 			die "Uncaught key"
 		}
 		die "Uncaught type"
@@ -448,24 +451,24 @@ class Perl6::Tidy {
 	method routine_declarator( Mu $parsed ) {
 		self.debug( 'routine_declarator', $parsed );
 
-		if $parsed.hash {
-			if assert-keys( $parsed, [< sym routine_def >] ) {
-				return Node.new(
-					:type( 'routine_declarator' ),
-					:content(
-						:sym(
-							self.sym(
-								$parsed.hash.<sym>
-							)
-						),
-						:routine_def(
-							self.routine_def(
-								$parsed.hash.<routine_def>
-							)
+		if assert-keys( $parsed, [< sym routine_def >] ) {
+			return Node.new(
+				:type( 'routine_declarator' ),
+				:content(
+					:sym(
+						self.sym(
+							$parsed.hash.<sym>
+						)
+					),
+					:routine_def(
+						self.routine_def(
+							$parsed.hash.<routine_def>
 						)
 					)
 				)
-			}
+			)
+		}
+		if $parsed.hash {
 			die "Uncaught key"
 		}
 		die "Uncaught type"
@@ -474,24 +477,24 @@ class Perl6::Tidy {
 	method package_declarator( Mu $parsed ) {
 		self.debug( 'package_declarator', $parsed );
 
-		if $parsed.hash {
-			if assert-keys( $parsed, [< sym package_def >] ) {
-				return Node.new(
-					:type( 'package_declarator' ),
-					:content(
-						:sym(
-							self.sym(
-								$parsed.hash.<sym>
-							)
-						),
-						:package_def(
-							self.package_def(
-								$parsed.hash.<package_def>
-							)
+		if assert-keys( $parsed, [< sym package_def >] ) {
+			return Node.new(
+				:type( 'package_declarator' ),
+				:content(
+					:sym(
+						self.sym(
+							$parsed.hash.<sym>
+						)
+					),
+					:package_def(
+						self.package_def(
+							$parsed.hash.<package_def>
 						)
 					)
 				)
-			}
+			)
+		}
+		if $parsed.hash {
 			die "Uncaught key"
 		}
 		die "Uncaught type"
@@ -500,24 +503,24 @@ class Perl6::Tidy {
 	method regex_declarator( Mu $parsed ) {
 		self.debug( 'regex_declarator', $parsed );
 
-		if $parsed.hash {
-			if assert-keys( $parsed, [< sym regex_def >] ) {
-				return Node.new(
-					:type( 'regex_declarator' ),
-					:content(
-						:sym(
-							self.sym(
-								$parsed.hash.<sym>
-							)
-						),
-						:regex_def(
-							self.regex_def(
-								$parsed.hash.<regex_def>
-							)
+		if assert-keys( $parsed, [< sym regex_def >] ) {
+			return Node.new(
+				:type( 'regex_declarator' ),
+				:content(
+					:sym(
+						self.sym(
+							$parsed.hash.<sym>
+						)
+					),
+					:regex_def(
+						self.regex_def(
+							$parsed.hash.<regex_def>
 						)
 					)
 				)
-			}
+			)
+		}
+		if $parsed.hash {
 			die "Uncaught key"
 		}
 		die "Uncaught type"
@@ -526,26 +529,26 @@ class Perl6::Tidy {
 	method routine_def( Mu $parsed ) {
 		self.debug( 'routine_def', $parsed );
 
-		if $parsed.hash {
-			if assert-keys( $parsed,
-					[< blockoid deflongname >],
-					[< trait >] ) {
-				return Node.new(
-					:type( 'routine_def' ),
-					:cotent(
-						:blockoid(
-							self.blockoid(
-								$parsed.hash.<blockoid>
-							)
-						),
-						:deflongname(
-							self.deflongname(
-								$parsed.hash.<deflongname>
-							)
+		if assert-keys( $parsed,
+				[< blockoid deflongname >],
+				[< trait >] ) {
+			return Node.new(
+				:type( 'routine_def' ),
+				:cotent(
+					:blockoid(
+						self.blockoid(
+							$parsed.hash.<blockoid>
+						)
+					),
+					:deflongname(
+						self.deflongname(
+							$parsed.hash.<deflongname>
 						)
 					)
 				)
-			}
+			)
+		}
+		if $parsed.hash {
 			die "Uncaught key"
 		}
 		die "Uncaught type"
@@ -554,44 +557,44 @@ class Perl6::Tidy {
 	method package_def( Mu $parsed ) {
 		self.debug( 'package_def', $parsed );
 
+		if assert-keys( $parsed,
+				[< blockoid longname >], [< trait >] ) {
+			return Node.new(
+				:type( 'package_def' ),
+				:content(
+					:blockoid(
+						self.blockoid(
+							$parsed.hash.<blockoid>
+						)
+					),
+					:longname(
+						self.longname(
+							$parsed.hash.<longname>
+						)
+					)
+				)
+			)
+		}
+		if assert-keys( $parsed,
+				[< longname statementlist >],
+				[< trait >] ) {
+			return Node.new(
+				:type( 'package_def' ),
+				:content(
+					:longname(
+						self.longname(
+							$parsed.hash.<longname>
+						)
+					),
+					:statementlist(
+						self.statementlist(
+							$parsed.hash.<statementlist>
+						)
+					)
+				)
+			)
+		}
 		if $parsed.hash {
-			if assert-keys( $parsed,
-					[< blockoid longname >], [< trait >] ) {
-				return Node.new(
-					:type( 'package_def' ),
-					:content(
-						:blockoid(
-							self.blockoid(
-								$parsed.hash.<blockoid>
-							)
-						),
-						:longname(
-							self.longname(
-								$parsed.hash.<longname>
-							)
-						)
-					)
-				)
-			}
-			if assert-keys( $parsed,
-					[< longname statementlist >],
-					[< trait >] ) {
-				return Node.new(
-					:type( 'package_def' ),
-					:content(
-						:longname(
-							self.longname(
-								$parsed.hash.<longname>
-							)
-						),
-						:statementlist(
-							self.statementlist(
-								$parsed.hash.<statementlist>
-							)
-						)
-					)
-				)
-			}
 			die "Uncaught key"
 		}
 		die "Uncaught type"
@@ -600,26 +603,26 @@ class Perl6::Tidy {
 	method regex_def( Mu $parsed ) {
 		self.debug( 'regex_def', $parsed );
 
-		if $parsed.hash {
-			if assert-keys( $parsed,
-					[< deflongname nibble >],
-					[< signature trait >] ) {
-				return Node.new(
-					:type( 'regex_def' ),
-					:content(
-						:nibble(
-							self.nibble(
-								$parsed.hash.<nibble>
-							)
-						),
-						:deflongname(
-							self.deflongname(
-								$parsed.hash.<deflongname>
-							)
+		if assert-keys( $parsed,
+				[< deflongname nibble >],
+				[< signature trait >] ) {
+			return Node.new(
+				:type( 'regex_def' ),
+				:content(
+					:nibble(
+						self.nibble(
+							$parsed.hash.<nibble>
+						)
+					),
+					:deflongname(
+						self.deflongname(
+							$parsed.hash.<deflongname>
 						)
 					)
 				)
-			}
+			)
+		}
+		if $parsed.hash {
 			die "Uncaught key"
 		}
 		die "Uncaught type"
@@ -628,19 +631,19 @@ class Perl6::Tidy {
 	method blockoid( Mu $parsed ) {
 		self.debug( 'blockoid', $parsed );
 
-		if $parsed.hash {
-			if assert-keys( $parsed, [< statementlist >] ) {
-				return Node.new(
-					:type( 'blockoid' ),
-					:content(
-						:statementlist(
-							self.statementlist(
-								$parsed.hash.<statementlist>
-							)
+		if assert-keys( $parsed, [< statementlist >] ) {
+			return Node.new(
+				:type( 'blockoid' ),
+				:content(
+					:statementlist(
+						self.statementlist(
+							$parsed.hash.<statementlist>
 						)
 					)
 				)
-			}
+			)
+		}
+		if $parsed.hash {
 			die "Uncaught key"
 		}
 		die "Uncaught type"
@@ -649,21 +652,21 @@ class Perl6::Tidy {
 	method deflongname( Mu $parsed ) {
 		self.debug( 'deflongname', $parsed );
 
-		if $parsed.hash {
-			if assert-keys( $parsed,
-					[< name >],
-					[< colonpair >] ) {
-				return Node.new(
-					:type( 'deflongname' ),
-					:content(
-						:name(
-							self.name(
-								$parsed.hash.<name>
-							)
+		if assert-keys( $parsed,
+				[< name >],
+				[< colonpair >] ) {
+			return Node.new(
+				:type( 'deflongname' ),
+				:content(
+					:name(
+						self.name(
+							$parsed.hash.<name>
 						)
 					)
 				)
-			}
+			)
+		}
+		if $parsed.hash {
 			die "Uncaught key"
 		}
 		die "Uncaught type"
@@ -715,127 +718,127 @@ class Perl6::Tidy {
 				)
 			}
 		}
+		if assert-keys( $parsed, [< longname args >] ) {
+			return Node.new(
+				:type( 'EXPR' ),
+				:content(
+					:longname(
+						self.longname(
+							$parsed.hash.<longname>
+						)
+					)
+				)
+			)
+		}
+		if assert-keys( $parsed, [< value >] ) {
+			return Node.new(
+				:type( 'EXPR' ),
+				:content(
+					:value(
+						self.value(
+							$parsed.hash.<value>
+						)
+					)
+				)
+			)
+		}
+		if assert-keys( $parsed, [< variable >] ) {
+			return Node.new(
+				:type( 'EXPR' ),
+				:content(
+					:variable(
+						self.variable(
+							$parsed.hash.<variable>
+						)
+					)
+				)
+			)
+		}
+		if assert-keys( $parsed, [< longname >] ) {
+			return Node.new(
+				:type( 'EXPR' ),
+				:content(
+					:longname(
+						self.longname(
+							$parsed.hash.<longname>
+						)
+					)
+				)
+			)
+		}
+		if assert-keys( $parsed, [< circumfix >] ) {
+			return Node.new(
+				:type( 'EXPR' ),
+				:content(
+					:circumfix(
+						self.circumfix(
+							$parsed.hash.<circumfix>
+						)
+					)
+				)
+			)
+		}
+		if assert-keys( $parsed, [< colonpair >] ) {
+			return Node.new(
+				:type( 'EXPR' ),
+				:content(
+					:colonpair(
+						self.colonpair(
+							$parsed.hash.<colonpair>
+						)
+					)
+				)
+			)
+		}
+		if assert-keys( $parsed, [< scope_declarator >] ) {
+			return Node.new(
+				:type( 'EXPR' ),
+				:content(
+					:scope_declarator(
+						self.scope_declarator(
+							$parsed.hash.<scope_declarator>
+						)
+					)
+				)
+			)
+		}
+		if assert-keys( $parsed, [< routine_declarator >] ) {
+			return Node.new(
+				:type( 'EXPR' ),
+				:content(
+					:routine_declarator(
+						self.routine_declarator(
+							$parsed.hash.<routine_declarator>
+						)
+					)
+				)
+			)
+		}
+		if assert-keys( $parsed, [< package_declarator >] ) {
+			return Node.new(
+				:type( 'EXPR' ),
+				:content(
+					:package_declarator(
+						self.package_declarator(
+							$parsed.hash.<package_declarator>
+						)
+					)
+				)
+			)
+		}
+		if assert-keys( $parsed, [< regex_declarator >] ) {
+			return Node.new(
+				:type( 'EXPR' ),
+				:content(
+					:regex_declarator(
+						self.regex_declarator(
+							$parsed.hash.<regex_declarator>
+						)
+					)
+				)
+			)
+		}
 		if $parsed.hash {
-			if assert-keys( $parsed, [< longname args >] ) {
-				return Node.new(
-					:type( 'EXPR' ),
-					:content(
-						:longname(
-							self.longname(
-								$parsed.hash.<longname>
-							)
-						)
-					)
-				)
-			}
-			if assert-keys( $parsed, [< value >] ) {
-				return Node.new(
-					:type( 'EXPR' ),
-					:content(
-						:value(
-							self.value(
-								$parsed.hash.<value>
-							)
-						)
-					)
-				)
-			}
-			if assert-keys( $parsed, [< variable >] ) {
-				return Node.new(
-					:type( 'EXPR' ),
-					:content(
-						:variable(
-							self.variable(
-								$parsed.hash.<variable>
-							)
-						)
-					)
-				)
-			}
-			if assert-keys( $parsed, [< longname >] ) {
-				return Node.new(
-					:type( 'EXPR' ),
-					:content(
-						:longname(
-							self.longname(
-								$parsed.hash.<longname>
-							)
-						)
-					)
-				)
-			}
-			if assert-keys( $parsed, [< circumfix >] ) {
-				return Node.new(
-					:type( 'EXPR' ),
-					:content(
-						:circumfix(
-							self.circumfix(
-								$parsed.hash.<circumfix>
-							)
-						)
-					)
-				)
-			}
-			if assert-keys( $parsed, [< colonpair >] ) {
-				return Node.new(
-					:type( 'EXPR' ),
-					:content(
-						:colonpair(
-							self.colonpair(
-								$parsed.hash.<colonpair>
-							)
-						)
-					)
-				)
-			}
-			if assert-keys( $parsed, [< scope_declarator >] ) {
-				return Node.new(
-					:type( 'EXPR' ),
-					:content(
-						:scope_declarator(
-							self.scope_declarator(
-								$parsed.hash.<scope_declarator>
-							)
-						)
-					)
-				)
-			}
-			if assert-keys( $parsed, [< routine_declarator >] ) {
-				return Node.new(
-					:type( 'EXPR' ),
-					:content(
-						:routine_declarator(
-							self.routine_declarator(
-								$parsed.hash.<routine_declarator>
-							)
-						)
-					)
-				)
-			}
-			if assert-keys( $parsed, [< package_declarator >] ) {
-				return Node.new(
-					:type( 'EXPR' ),
-					:content(
-						:package_declarator(
-							self.package_declarator(
-								$parsed.hash.<package_declarator>
-							)
-						)
-					)
-				)
-			}
-			if assert-keys( $parsed, [< regex_declarator >] ) {
-				return Node.new(
-					:type( 'EXPR' ),
-					:content(
-						:regex_declarator(
-							self.regex_declarator(
-								$parsed.hash.<regex_declarator>
-							)
-						)
-					)
-				)
-			}
 			die "Uncaught key"
 		}
 		die "Uncaught type"
@@ -844,44 +847,44 @@ class Perl6::Tidy {
 	method variable_declarator( Mu $parsed ) {
 		self.debug( 'variable_declarator', $parsed );
 
+		if assert-keys( $parsed,
+				[< variable post_constraint >],
+				[< semilist postcircumfix signature trait >] ) {
+			my @child;
+			for $parsed.hash.<post_constraint> {
+				@child.push(
+					self.EXPR(
+						$_.hash.<EXPR>
+					)
+				)
+			}
+			return Node.new(
+				:type( 'variable_declarator' ),
+				:child( @child )
+				:content(
+					:variable(
+						self.variable(
+							$parsed.hash.<variable>
+						)
+					)
+				)
+			)
+		}
+		if assert-keys( $parsed,
+				[< variable >],
+				[< semilist postcircumfix signature trait post_constraint >] ) {
+			return Node.new(
+				:type( 'variable_declarator' ),
+				:content(
+					:variable(
+						self.variable(
+							$parsed.hash.<variable>
+						)
+					)
+				)
+			)
+		}
 		if $parsed.hash {
-			if assert-keys( $parsed,
-					[< variable post_constraint >],
-					[< semilist postcircumfix signature trait >] ) {
-				my @child;
-				for $parsed.hash.<post_constraint> {
-					@child.push(
-						self.EXPR(
-							$_.hash.<EXPR>
-						)
-					)
-				}
-				return Node.new(
-					:type( 'variable_declarator' ),
-					:child( @child )
-					:content(
-						:variable(
-							self.variable(
-								$parsed.hash.<variable>
-							)
-						)
-					)
-				)
-			}
-			if assert-keys( $parsed,
-					[< variable >],
-					[< semilist postcircumfix signature trait post_constraint >] ) {
-				return Node.new(
-					:type( 'variable_declarator' ),
-					:content(
-						:variable(
-							self.variable(
-								$parsed.hash.<variable>
-							)
-						)
-					)
-				)
-			}
 			die "Uncaught key"
 		}
 		die "Uncaught type"
@@ -890,19 +893,19 @@ class Perl6::Tidy {
 	method multi_declarator( Mu $parsed ) {
 		self.debug( 'multi_declarator', $parsed );
 
-		if $parsed.hash {
-			if assert-keys( $parsed, [< declarator >] ) {
-				return Node.new(
-					:type( 'multi_declarator' ),
-					:content(
-						:declarator(
-							self.declarator(
-								$parsed.hash.<declarator>
-							)
+		if assert-keys( $parsed, [< declarator >] ) {
+			return Node.new(
+				:type( 'multi_declarator' ),
+				:content(
+					:declarator(
+						self.declarator(
+							$parsed.hash.<declarator>
 						)
 					)
 				)
-			}
+			)
+		}
+		if $parsed.hash {
 			die "Uncaught key"
 		}
 		die "Uncaught type"
@@ -911,35 +914,35 @@ class Perl6::Tidy {
 	method declarator( Mu $parsed ) {
 		self.debug( 'declarator', $parsed );
 
+		if assert-keys( $parsed,
+				[< variable_declarator >],
+				[< trait >] ) {
+			return Node.new(
+				:type( 'declarator' ),
+				:content(
+					:variable_declarator(
+						self.variable_declarator(
+							$parsed.hash.<variable_declarator>
+						)
+					)
+				)
+			)
+		}
+		if assert-keys( $parsed,
+				[< regex_declarator >],
+				[< trait >] ) {
+			return Node.new(
+				:type( 'declarator' ),
+				:content(
+					:regex_declarator(
+						self.regex_declarator(
+							$parsed.hash.<regex_declarator>
+						)
+					)
+				)
+			)
+		}
 		if $parsed.hash {
-			if assert-keys( $parsed,
-					[< variable_declarator >],
-					[< trait >] ) {
-				return Node.new(
-					:type( 'declarator' ),
-					:content(
-						:variable_declarator(
-							self.variable_declarator(
-								$parsed.hash.<variable_declarator>
-							)
-						)
-					)
-				)
-			}
-			if assert-keys( $parsed,
-					[< regex_declarator >],
-					[< trait >] ) {
-				return Node.new(
-					:type( 'declarator' ),
-					:content(
-						:regex_declarator(
-							self.regex_declarator(
-								$parsed.hash.<regex_declarator>
-							)
-						)
-					)
-				)
-			}
 			die "Uncaught key"
 		}
 		die "Uncaught type"
@@ -948,64 +951,64 @@ class Perl6::Tidy {
 	method DECL( Mu $parsed ) {
 		self.debug( 'DECL', $parsed );
 
+		if assert-keys( $parsed,
+				[< variable_declarator >],
+				[< trait >] ) {
+			return Node.new(
+				:type( 'DECL' ),
+				:content(
+					:variable_declarator(
+						self.variable_declarator(
+							$parsed.hash.<variable_declarator>
+						)
+					)
+				)
+			)
+		}
+		if assert-keys( $parsed,
+				[< regex_declarator >],
+				[< trait >] ) {
+			return Node.new(
+				:type( 'DECL' ),
+				:content(
+					:regex_declarator(
+						self.regex_declarator(
+							$parsed.hash.<regex_declarator>
+						)
+					)
+				)
+			)
+		}
+		elsif assert-keys( $parsed, [< package_def sym >] ) {
+			return Node.new(
+				:type( 'DECL' ),
+				:content(
+					:package_def(
+						self.package_def(
+							$parsed.hash.<package_def>
+						)
+					),
+					:sym(
+						self.sym(
+							$parsed.hash.<sym>
+						)
+					)
+				)
+			)
+		}
+		elsif assert-keys( $parsed, [< declarator >] ) {
+			return Node.new(
+				:type( 'DECL' ),
+				:content(
+					:declarator(
+						self.declarator(
+							$parsed.hash.<declarator>
+						)
+					)
+				)
+			)
+		}
 		if $parsed.hash {
-			if assert-keys( $parsed,
-					[< variable_declarator >],
-					[< trait >] ) {
-				return Node.new(
-					:type( 'DECL' ),
-					:content(
-						:variable_declarator(
-							self.variable_declarator(
-								$parsed.hash.<variable_declarator>
-							)
-						)
-					)
-				)
-			}
-			if assert-keys( $parsed,
-					[< regex_declarator >],
-					[< trait >] ) {
-				return Node.new(
-					:type( 'DECL' ),
-					:content(
-						:regex_declarator(
-							self.regex_declarator(
-								$parsed.hash.<regex_declarator>
-							)
-						)
-					)
-				)
-			}
-			elsif assert-keys( $parsed, [< package_def sym >] ) {
-				return Node.new(
-					:type( 'DECL' ),
-					:content(
-						:package_def(
-							self.package_def(
-								$parsed.hash.<package_def>
-							)
-						),
-						:sym(
-							self.sym(
-								$parsed.hash.<sym>
-							)
-						)
-					)
-				)
-			}
-			elsif assert-keys( $parsed, [< declarator >] ) {
-				return Node.new(
-					:type( 'DECL' ),
-					:content(
-						:declarator(
-							self.declarator(
-								$parsed.hash.<declarator>
-							)
-						)
-					)
-				)
-			}
 			die "Uncaught key"
 		}
 		die "Uncaught type"
@@ -1028,19 +1031,19 @@ class Perl6::Tidy {
 				:child( @child )
 			)
 		}
-		elsif $parsed.hash {
-			if assert-keys( $parsed, [< longname >] ) {
-				return Node.new(
-					:type( 'typename' ),
-					:content(
-						:longname(
-							self.longname(
-								$parsed.hash.<longname>
-							)
+		if assert-keys( $parsed, [< longname >] ) {
+			return Node.new(
+				:type( 'typename' ),
+				:content(
+					:longname(
+						self.longname(
+							$parsed.hash.<longname>
 						)
 					)
 				)
-			}
+			)
+		}
+		if $parsed.hash {
 			die "Uncaught key"
 		}
 		die "Uncaught type"
@@ -1049,68 +1052,68 @@ class Perl6::Tidy {
 	method scoped( Mu $parsed ) {
 		self.debug( 'scoped', $parsed );
 
+		if assert-keys( $parsed,
+				[< declarator DECL >],
+				[< typename >] ) {
+			return Node.new(
+				:type( 'scoped' ),
+				:content(
+					:declarator(
+						self.declarator(
+							$parsed.hash.<declarator>
+						)
+					),
+					:DECL(
+						self.DECL(
+							$parsed.hash.<DECL>
+						)
+					)
+				)
+			)
+		}
+		if assert-keys( $parsed, [< multi_declarator
+					    DECL
+					    typename >] ) {
+			return Node.new(
+				:type( 'scoped' ),
+				:content(
+					:multi_declarator(
+						self.multi_declarator(
+							$parsed.hash.<multi_declarator>
+						)
+					),
+					:DECL(
+						self.DECL(
+							$parsed.hash.<DECL>
+						)
+					),
+					:typename(
+						self.typename(
+							$parsed.hash.<typename>
+						)
+					)
+				)
+			)
+		}
+		if assert-keys( $parsed, [< package_declarator DECL >],
+					 [< typename >] ) {
+			return Node.new(
+				:type( 'scoped' ),
+				:content(
+					:package_declarator(
+						self.package_declarator(
+							$parsed.hash.<package_declarator>
+						)
+					),
+					:DECL(
+						self.DECL(
+							$parsed.hash.<DECL>
+						)
+					)
+				)
+			)
+		}
 		if $parsed.hash {
-			if assert-keys( $parsed,
-					[< declarator DECL >],
-					[< typename >] ) {
-				return Node.new(
-					:type( 'scoped' ),
-					:content(
-						:declarator(
-							self.declarator(
-								$parsed.hash.<declarator>
-							)
-						),
-						:DECL(
-							self.DECL(
-								$parsed.hash.<DECL>
-							)
-						)
-					)
-				)
-			}
-			if assert-keys( $parsed, [< multi_declarator
-						    DECL
-						    typename >] ) {
-				return Node.new(
-					:type( 'scoped' ),
-					:content(
-						:multi_declarator(
-							self.multi_declarator(
-								$parsed.hash.<multi_declarator>
-							)
-						),
-						:DECL(
-							self.DECL(
-								$parsed.hash.<DECL>
-							)
-						),
-						:typename(
-							self.typename(
-								$parsed.hash.<typename>
-							)
-						)
-					)
-				)
-			}
-			if assert-keys( $parsed, [< package_declarator DECL >],
-						 [< typename >] ) {
-				return Node.new(
-					:type( 'scoped' ),
-					:content(
-						:package_declarator(
-							self.package_declarator(
-								$parsed.hash.<package_declarator>
-							)
-						),
-						:DECL(
-							self.DECL(
-								$parsed.hash.<DECL>
-							)
-						)
-					)
-				)
-			}
 			die "Uncaught key"
 		}
 		die "Uncaught type"
@@ -1119,24 +1122,24 @@ class Perl6::Tidy {
 	method scope_declarator( Mu $parsed ) {
 		self.debug( 'scope_declarator', $parsed );
 
-		if $parsed.hash {
-			if assert-keys( $parsed, [< sym scoped >] ) {
-				return Node.new(
-					:type( 'scope_declarator' ),
-					:content(
-						:sym(
-							self.sym(
-								$parsed.hash.<sym>
-							)
-						),
-						:scoped(
-							self.scoped(
-								$parsed.hash.<scoped>
-							)
+		if assert-keys( $parsed, [< sym scoped >] ) {
+			return Node.new(
+				:type( 'scope_declarator' ),
+				:content(
+					:sym(
+						self.sym(
+							$parsed.hash.<sym>
+						)
+					),
+					:scoped(
+						self.scoped(
+							$parsed.hash.<scoped>
 						)
 					)
 				)
-			}
+			)
+		}
+		if $parsed.hash {
 			die "Uncaught key"
 		}
 		die "Uncaught type"
@@ -1145,31 +1148,31 @@ class Perl6::Tidy {
 	method value( Mu $parsed ) {
 		self.debug( 'value', $parsed );
 
+		if assert-keys( $parsed, [< number >] ) {
+			return Node.new(
+				:type( 'value' ),
+				:content(
+					:number(
+						self.number(
+							$parsed.hash.<number>
+						)
+					)
+				)
+			)
+		}
+		if assert-keys( $parsed, [< quote >] ) {
+			return Node.new(
+				:type( 'value' ),
+				:content(
+					:quote(
+						self.quote(
+							$parsed.hash.<quote>
+						)
+					)
+				)
+			)
+		}
 		if $parsed.hash {
-			if assert-keys( $parsed, [< number >] ) {
-				return Node.new(
-					:type( 'value' ),
-					:content(
-						:number(
-							self.number(
-								$parsed.hash.<number>
-							)
-						)
-					)
-				)
-			}
-			if assert-keys( $parsed, [< quote >] ) {
-				return Node.new(
-					:type( 'value' ),
-					:content(
-						:quote(
-							self.quote(
-								$parsed.hash.<quote>
-							)
-						)
-					)
-				)
-			}
 			die "Uncaught key"
 		}
 		die "Uncaught type"
@@ -1178,19 +1181,19 @@ class Perl6::Tidy {
 	method number( Mu $parsed ) {
 		self.debug( 'number', $parsed );
 
-		if $parsed.hash {
-			if assert-keys( $parsed, [< numish >] ) {
-				return Node.new(
-					:type( 'number' ),
-					:content(
-						:numish(
-							self.numish(
-								$parsed.hash.<numish>
-							)
+		if assert-keys( $parsed, [< numish >] ) {
+			return Node.new(
+				:type( 'number' ),
+				:content(
+					:numish(
+						self.numish(
+							$parsed.hash.<numish>
 						)
 					)
 				)
-			}
+			)
+		}
+		if $parsed.hash {
 			die "Uncaught key"
 		}
 		die "Uncaught type"
@@ -1199,31 +1202,31 @@ class Perl6::Tidy {
 	method quote( Mu $parsed ) {
 		self.debug( 'quote', $parsed );
 
+		if assert-keys( $parsed, [< nibble >] ) {
+			return Node.new(
+				:type( 'quote' ),
+				:content(
+					:nibble(
+						self.nibble(
+							$parsed.hash.<nibble>
+						)
+					)
+				)
+			)
+		}
+		if assert-keys( $parsed, [< quibble >] ) {
+			return Node.new(
+				:type( 'quote' ),
+				:content(
+					:quibble(
+						self.quibble(
+							$parsed.hash.<quibble>
+						)
+					)
+				)
+			)
+		}
 		if $parsed.hash {
-			if assert-keys( $parsed, [< nibble >] ) {
-				return Node.new(
-					:type( 'quote' ),
-					:content(
-						:nibble(
-							self.nibble(
-								$parsed.hash.<nibble>
-							)
-						)
-					)
-				)
-			}
-			if assert-keys( $parsed, [< quibble >] ) {
-				return Node.new(
-					:type( 'quote' ),
-					:content(
-						:quibble(
-							self.quibble(
-								$parsed.hash.<quibble>
-							)
-						)
-					)
-				)
-			}
 			die "Uncaught key"
 		}
 		die "Uncaught type"
@@ -1236,21 +1239,21 @@ class Perl6::Tidy {
 	method babble( Mu $parsed ) {
 		self.debug( 'babble', $parsed );
 
-		if $parsed.hash {
-			if assert-keys( $parsed,
-					[< B >],
-					[< quotepair >] ) {
-				return Node.new(
-					:type( 'babble' ),
-					:content(
-						:B(
-							self.B(
-								$parsed.hash.<B>
-							)
+		if assert-keys( $parsed,
+				[< B >],
+				[< quotepair >] ) {
+			return Node.new(
+				:type( 'babble' ),
+				:content(
+					:B(
+						self.B(
+							$parsed.hash.<B>
 						)
 					)
 				)
-			}
+			)
+		}
+		if $parsed.hash {
 			die "Uncaught key"
 		}
 		die "Uncaught type"
@@ -1259,15 +1262,15 @@ class Perl6::Tidy {
 	method signature( Mu $parsed ) {
 		self.debug( 'signature', $parsed );
 
+		if assert-keys( $parsed,
+				[],
+				[< param_sep parameter >] ) {
+			return Node.new(
+				:type( 'signature' ),
+				:name( $parsed.Bool )
+			)
+		}
 		if $parsed.hash {
-			if assert-keys( $parsed,
-					[],
-					[< param_sep parameter >] ) {
-				return Node.new(
-					:type( 'signature' ),
-					:name( $parsed.Bool )
-				)
-			}
 			die "Uncaught key"
 		}
 		die "Uncaught type"
@@ -1276,19 +1279,19 @@ class Perl6::Tidy {
 	method fakesignature( Mu $parsed ) {
 		self.debug( 'fakesignature', $parsed );
 
-		if $parsed.hash {
-			if assert-keys( $parsed, [< signature >] ) {
-				return Node.new(
-					:type( 'fakesignature' ),
-					:content(
-						:signature(
-							self.signature(
-								$parsed.hash.<signature>
-							)
+		if assert-keys( $parsed, [< signature >] ) {
+			return Node.new(
+				:type( 'fakesignature' ),
+				:content(
+					:signature(
+						self.signature(
+							$parsed.hash.<signature>
 						)
 					)
 				)
-			}
+			)
+		}
+		if $parsed.hash {
 			die "Uncaught key"
 		}
 		die "Uncaught type"
@@ -1297,31 +1300,31 @@ class Perl6::Tidy {
 	method colonpair( Mu $parsed ) {
 		self.debug( 'colonpair', $parsed );
 
+		if assert-keys( $parsed, [< identifier >] ) {
+			return Node.new(
+				:type( 'colonpair' ),
+				:content(
+					:identifier(
+						self.identifier(
+							$parsed.hash.<identifier>
+						)
+					)
+				)
+			)
+		}
+		if assert-keys( $parsed, [< fakesignature >] ) {
+			return Node.new(
+				:type( 'colonpair' ),
+				:content(
+					:fakesignature(
+						self.fakesignature(
+							$parsed.hash.<fakesignature>
+						)
+					)
+				)
+			)
+		}
 		if $parsed.hash {
-			if assert-keys( $parsed, [< identifier >] ) {
-				return Node.new(
-					:type( 'colonpair' ),
-					:content(
-						:identifier(
-							self.identifier(
-								$parsed.hash.<identifier>
-							)
-						)
-					)
-				)
-			}
-			if assert-keys( $parsed, [< fakesignature >] ) {
-				return Node.new(
-					:type( 'colonpair' ),
-					:content(
-						:fakesignature(
-							self.fakesignature(
-								$parsed.hash.<fakesignature>
-							)
-						)
-					)
-				)
-			}
 			die "Uncaught key"
 		}
 		die "Uncaught type"
@@ -1357,19 +1360,19 @@ class Perl6::Tidy {
 	method quotepair( Mu $parsed ) {
 		self.debug( 'quotepair', $parsed );
 
-		if $parsed.hash {
-			if assert-keys( $parsed, [< identifier >] ) {
-				return Node.new(
-					:type( 'quotepair' ),
-					:content(
-						:identifier(
-							self.identifier(
-								$parsed.hash.<identifier>
-							)
+		if assert-keys( $parsed, [< identifier >] ) {
+			return Node.new(
+				:type( 'quotepair' ),
+				:content(
+					:identifier(
+						self.identifier(
+							$parsed.hash.<identifier>
 						)
 					)
 				)
-			}
+			)
+		}
+		if $parsed.hash {
 			die "Uncaught key"
 		}
 		die "Uncaught type"
@@ -1378,24 +1381,24 @@ class Perl6::Tidy {
 	method quibble( Mu $parsed ) {
 		self.debug( 'quibble', $parsed );
 
-		if $parsed.hash {
-			if assert-keys( $parsed, [< babble nibble >] ) {
-				return Node.new(
-					:type( 'quibble' ),
-					:content(
-						:babble(
-							self.babble(
-								$parsed.hash.<babble>
-							)
-						),
-						:nibble(
-							self.nibble(
-								$parsed.hash.<nibble>
-							)
+		if assert-keys( $parsed, [< babble nibble >] ) {
+			return Node.new(
+				:type( 'quibble' ),
+				:content(
+					:babble(
+						self.babble(
+							$parsed.hash.<babble>
+						)
+					),
+					:nibble(
+						self.nibble(
+							$parsed.hash.<nibble>
 						)
 					)
 				)
-			}
+			)
+		}
+		if $parsed.hash {
 			die "Uncaught key"
 		}
 		die "Uncaught type"
@@ -1404,24 +1407,24 @@ class Perl6::Tidy {
 	method _0( Mu $parsed ) {
 		self.debug( '0', $parsed );
 
-		if $parsed.hash {
-			if assert-keys( $parsed, [< 0 >] ) {
-				return Node.new(
-					:type( 'quibble' ),
-					:content(
-						:babble(
-							self.babble(
-								$parsed.hash.<babble>
-							)
-						),
-						:nibble(
-							self.nibble(
-								$parsed.hash.<nibble>
-							)
+		if assert-keys( $parsed, [< 0 >] ) {
+			return Node.new(
+				:type( 'quibble' ),
+				:content(
+					:babble(
+						self.babble(
+							$parsed.hash.<babble>
+						)
+					),
+					:nibble(
+						self.nibble(
+							$parsed.hash.<nibble>
 						)
 					)
 				)
-			}
+			)
+		}
+		if $parsed.hash {
 			die "Uncaught key"
 		}
 		die "Uncaught type"
@@ -1480,19 +1483,19 @@ class Perl6::Tidy {
 	method assertion( Mu $parsed ) {
 		self.debug( 'metachar', $parsed );
 
-		if $parsed.hash {
-			if assert-keys( $parsed, [< cclass_elem >] ) {
-				return Node.new(
-					:type( 'assertion' ),
-					:content(
-						:cclass_elem(
-							self.cclass_elem(
-								$parsed.hash.<cclass_elem>
-							)
+		if assert-keys( $parsed, [< cclass_elem >] ) {
+			return Node.new(
+				:type( 'assertion' ),
+				:content(
+					:cclass_elem(
+						self.cclass_elem(
+							$parsed.hash.<cclass_elem>
 						)
 					)
 				)
-			}
+			)
+		}
+		if $parsed.hash {
 			die "Uncaught key"
 		}
 		die "Uncaught type"
@@ -1501,19 +1504,19 @@ class Perl6::Tidy {
 	method metachar( Mu $parsed ) {
 		self.debug( 'metachar', $parsed );
 
-		if $parsed.hash {
-			if assert-keys( $parsed, [< assertion >] ) {
-				return Node.new(
-					:type( 'metachar' ),
-					:content(
-						:metachar(
-							self.assertion(
-								$parsed.hash.<assertion>
-							)
+		if assert-keys( $parsed, [< assertion >] ) {
+			return Node.new(
+				:type( 'metachar' ),
+				:content(
+					:metachar(
+						self.assertion(
+							$parsed.hash.<assertion>
 						)
 					)
 				)
-			}
+			)
+		}
+		if $parsed.hash {
 			die "Uncaught key"
 		}
 		die "Uncaught type"
@@ -1522,19 +1525,19 @@ class Perl6::Tidy {
 	method atom( Mu $parsed ) {
 		self.debug( 'noun', $parsed );
 
-		if $parsed.hash {
-			if assert-keys( $parsed, [< metachar >] ) {
-				return Node.new(
-					:type( 'atom' ),
-					:content(
-						:atom(
-							self.metachar(
-								$parsed.hash.<metachar>
-							)
+		if assert-keys( $parsed, [< metachar >] ) {
+			return Node.new(
+				:type( 'atom' ),
+				:content(
+					:atom(
+						self.metachar(
+							$parsed.hash.<metachar>
 						)
 					)
 				)
-			}
+			)
+		}
+		if $parsed.hash {
 			die "Uncaught key"
 		}
 		if $parsed.Str {
@@ -1549,19 +1552,19 @@ class Perl6::Tidy {
 	method noun( Mu $parsed ) {
 		self.debug( 'noun', $parsed );
 
-		if $parsed.hash {
-			if assert-keys( $parsed, [< atom >] ) {
-				return Node.new(
-					:type( 'noun' ),
-					:content(
-						:atom(
-							self.atom(
-								$parsed.hash.<atom>
-							)
+		if assert-keys( $parsed, [< atom >] ) {
+			return Node.new(
+				:type( 'noun' ),
+				:content(
+					:atom(
+						self.atom(
+							$parsed.hash.<atom>
 						)
 					)
 				)
-			}
+			)
+		}
+		if $parsed.hash {
 			die "Uncaught key"
 		}
 		if $parsed.Str {
@@ -1573,21 +1576,21 @@ class Perl6::Tidy {
 	method termish( Mu $parsed ) {
 		self.debug( 'termish', $parsed );
 
-		if $parsed.hash {
-			if assert-keys( $parsed, [< noun >] ) {
-				my @child;
-				for $parsed.hash.<noun> {
-					@child.push(
-						self.noun(
-							$_
-						)
+		if assert-keys( $parsed, [< noun >] ) {
+			my @child;
+			for $parsed.hash.<noun> {
+				@child.push(
+					self.noun(
+						$_
 					)
-				}
-				return Node.new(
-					:type( 'termish' ),
-					:child( @child )
 				)
 			}
+			return Node.new(
+				:type( 'termish' ),
+				:child( @child )
+			)
+		}
+		if $parsed.hash {
 			die "Uncaught key"
 		}
 		if $parsed.Str {
@@ -1599,21 +1602,21 @@ class Perl6::Tidy {
 	method termconj( Mu $parsed ) {
 		self.debug( 'termconj', $parsed );
 
-		if $parsed.hash {
-			if assert-keys( $parsed, [< termish >] ) {
-				my @child;
-				for $parsed.hash.<termish> {
-					@child.push(
-						self.termish(
-							$_
-						)
+		if assert-keys( $parsed, [< termish >] ) {
+			my @child;
+			for $parsed.hash.<termish> {
+				@child.push(
+					self.termish(
+						$_
 					)
-				}
-				return Node.new(
-					:type( 'termconj' ),
-					:child( @child )
 				)
 			}
+			return Node.new(
+				:type( 'termconj' ),
+				:child( @child )
+			)
+		}
+		if $parsed.hash {
 			die "Uncaught key"
 		}
 		if $parsed.Str {
@@ -1625,21 +1628,21 @@ class Perl6::Tidy {
 	method termalt( Mu $parsed ) {
 		self.debug( 'termalt', $parsed );
 
-		if $parsed.hash {
-			if assert-keys( $parsed, [< termconj >] ) {
-				my @child;
-				for $parsed.hash.<termconj> {
-					@child.push(
-						self.termconj(
-							$_
-						)
+		if assert-keys( $parsed, [< termconj >] ) {
+			my @child;
+			for $parsed.hash.<termconj> {
+				@child.push(
+					self.termconj(
+						$_
 					)
-				}
-				return Node.new(
-					:type( 'termalt' )
-					:child( @child )
 				)
 			}
+			return Node.new(
+				:type( 'termalt' )
+				:child( @child )
+			)
+		}
+		if $parsed.hash {
 			die "Uncaught key"
 		}
 		if $parsed.Str {
@@ -1651,21 +1654,21 @@ class Perl6::Tidy {
 	method termconjseq( Mu $parsed ) {
 		self.debug( 'termconjseq', $parsed );
 
-		if $parsed.hash {
-			if assert-keys( $parsed, [< termalt >] ) {
-				my @child;
-				for $parsed.hash.<termalt> {
-					@child.push(
-						self.termalt(
-							$_
-						)
+		if assert-keys( $parsed, [< termalt >] ) {
+			my @child;
+			for $parsed.hash.<termalt> {
+				@child.push(
+					self.termalt(
+						$_
 					)
-				}
-				return Node.new(
-					:type( 'termconjseq' ),
-					:child( @child )
 				)
 			}
+			return Node.new(
+				:type( 'termconjseq' ),
+				:child( @child )
+			)
+		}
+		if $parsed.hash {
 			die "Uncaught key"
 		}
 		if $parsed.Str {
@@ -1677,21 +1680,21 @@ class Perl6::Tidy {
 	method termaltseq( Mu $parsed ) {
 		self.debug( 'termaltseq', $parsed );
 
-		if $parsed.hash {
-			if assert-keys( $parsed, [< termconjseq >] ) {
-				my @child;
-				for $parsed.hash.<termconjseq> {
-					@child.push(
-						self.termconjseq(
-							$_
-						)
+		if assert-keys( $parsed, [< termconjseq >] ) {
+			my @child;
+			for $parsed.hash.<termconjseq> {
+				@child.push(
+					self.termconjseq(
+						$_
 					)
-				}
-				return Node.new(
-					:type( 'termaltseq' ),
-					:child( @child )
 				)
 			}
+			return Node.new(
+				:type( 'termaltseq' ),
+				:child( @child )
+			)
+		}
+		if $parsed.hash {
 			die "Uncaught key"
 		}
 		if $parsed.Str {
@@ -1703,19 +1706,19 @@ class Perl6::Tidy {
 	method termseq( Mu $parsed ) {
 		self.debug( 'termseq', $parsed );
 
-		if $parsed.hash {
-			if assert-keys( $parsed, [< termaltseq >] ) {
-				return Node.new(
-					:type( 'termseq' ),
-					:content(
-						:termaltseq(
-							self.termaltseq(
-								$parsed.hash.<termaltseq>
-							)
+		if assert-keys( $parsed, [< termaltseq >] ) {
+			return Node.new(
+				:type( 'termseq' ),
+				:content(
+					:termaltseq(
+						self.termaltseq(
+							$parsed.hash.<termaltseq>
 						)
 					)
 				)
-			}
+			)
+		}
+		if $parsed.hash {
 			die "Uncaught key"
 		}
 		if $parsed.Str {
@@ -1727,19 +1730,19 @@ class Perl6::Tidy {
 	method nibble( Mu $parsed ) {
 		self.debug( 'nibble', $parsed );
 
-		if $parsed.hash {
-			if assert-keys( $parsed, [< termseq >] ) {
-				return Node.new(
-					:type( 'nibble' ),
-					:content(
-						:termseq(
-							self.termseq(
-								$parsed.hash.<termseq>
-							)
+		if assert-keys( $parsed, [< termseq >] ) {
+			return Node.new(
+				:type( 'nibble' ),
+				:content(
+					:termseq(
+						self.termseq(
+							$parsed.hash.<termseq>
 						)
 					)
 				)
-			}
+			)
+		}
+		if $parsed.hash {
 			die "Uncaught key"
 		}
 		if $parsed.Str {
@@ -1754,51 +1757,51 @@ class Perl6::Tidy {
 	method dec_number( Mu $parsed ) {
 		self.debug( 'dec_number', $parsed );
 
+		if assert-keys( $parsed, [< int coeff frac >] ) {
+			return Node.new(
+				:type( 'dec_number' ),
+				:content(
+					:int(
+						self.int(
+							$parsed.hash.<int>
+						)
+					),
+					:coeff(
+						self.coeff(
+							$parsed.hash.<coeff>
+						)
+					),
+					:frac(
+						self.frac(
+							$parsed.hash.<frac>
+						)
+					)
+				)
+			)
+		}
+		if assert-keys( $parsed, [< int coeff escale >] ) {
+			return Node.new(
+				:type( 'dec_number' ),
+				:content(
+					:int(
+						self.int(
+							$parsed.hash.<int>
+						)
+					),
+					:coeff(
+						self.coeff(
+							$parsed.hash.<coeff>
+						)
+					),
+					:escale(
+						self.escale(
+							$parsed.hash.<escale>
+						)
+					)
+				)
+			)
+		}
 		if $parsed.hash {
-			if assert-keys( $parsed, [< int coeff frac >] ) {
-				return Node.new(
-					:type( 'dec_number' ),
-					:content(
-						:int(
-							self.int(
-								$parsed.hash.<int>
-							)
-						),
-						:coeff(
-							self.coeff(
-								$parsed.hash.<coeff>
-							)
-						),
-						:frac(
-							self.frac(
-								$parsed.hash.<frac>
-							)
-						)
-					)
-				)
-			}
-			if assert-keys( $parsed, [< int coeff escale >] ) {
-				return Node.new(
-					:type( 'dec_number' ),
-					:content(
-						:int(
-							self.int(
-								$parsed.hash.<int>
-							)
-						),
-						:coeff(
-							self.coeff(
-								$parsed.hash.<coeff>
-							)
-						),
-						:escale(
-							self.escale(
-								$parsed.hash.<escale>
-							)
-						)
-					)
-				)
-			}
 			die "Uncaught key"
 		}
 		die "Uncaught type"
@@ -1807,43 +1810,43 @@ class Perl6::Tidy {
 	method numish( Mu $parsed ) {
 		self.debug( 'numish', $parsed );
 
+		if assert-keys( $parsed, [< integer >] ) {
+			return Node.new(
+				:type( 'numish' ),
+				:content(
+					:integer(
+						self.integer(
+							$parsed.hash.<integer>
+						)
+					)
+				)
+			)
+		}
+		if assert-keys( $parsed, [< rad_number >] ) {
+			return Node.new(
+				:type( 'numish' ),
+				:content(
+					:rad_number(
+						self.rad_number(
+							$parsed.hash.<rad_number>
+						)
+					)
+				)
+			)
+		}
+		if assert-keys( $parsed, [< dec_number >] ) {
+			return Node.new(
+				:type( 'numish' ),
+				:content(
+					:dec_number(
+						self.dec_number(
+							$parsed.hash.<dec_number>
+						)
+					)
+				)
+			)
+		}
 		if $parsed.hash {
-			if assert-keys( $parsed, [< integer >] ) {
-				return Node.new(
-					:type( 'numish' ),
-					:content(
-						:integer(
-							self.integer(
-								$parsed.hash.<integer>
-							)
-						)
-					)
-				)
-			}
-			if assert-keys( $parsed, [< rad_number >] ) {
-				return Node.new(
-					:type( 'numish' ),
-					:content(
-						:rad_number(
-							self.rad_number(
-								$parsed.hash.<rad_number>
-							)
-						)
-					)
-				)
-			}
-			if assert-keys( $parsed, [< dec_number >] ) {
-				return Node.new(
-					:type( 'numish' ),
-					:content(
-						:dec_number(
-							self.dec_number(
-								$parsed.hash.<dec_number>
-							)
-						)
-					)
-				)
-			}
 			die "Uncaught key"
 		}
 		die "Uncaught type"
@@ -1852,55 +1855,55 @@ class Perl6::Tidy {
 	method integer( Mu $parsed ) {
 		self.debug( 'integer', $parsed );
 
+		if assert-keys( $parsed, [< decint VALUE >] ) {
+			return Node.new(
+				:type( 'integer' ),
+				:content(
+					:decint(
+						self.decint(
+							$parsed.hash.<decint>
+						)
+					)
+				)
+			)
+		}
+		if assert-keys( $parsed, [< binint VALUE >] ) {
+			return Node.new(
+				:type( 'integer' ),
+				:content(
+					:binint(
+						self.binint(
+							$parsed.hash.<binint>
+						)
+					)
+				)
+			)
+		}
+		if assert-keys( $parsed, [< octint VALUE >] ) {
+			return Node.new(
+				:type( 'integer' ),
+				:content(
+					:octint(
+						self.octint(
+							$parsed.hash.<octint>
+						)
+					)
+				)
+			)
+		}
+		if assert-keys( $parsed, [< hexint VALUE >] ) {
+			return Node.new(
+				:type( 'integer' ),
+				:content(
+					:hexint(
+						self.hexint(
+							$parsed.hash.<hexint>
+						)
+					)
+				)
+			)
+		}
 		if $parsed.hash {
-			if assert-keys( $parsed, [< decint VALUE >] ) {
-				return Node.new(
-					:type( 'integer' ),
-					:content(
-						:decint(
-							self.decint(
-								$parsed.hash.<decint>
-							)
-						)
-					)
-				)
-			}
-			if assert-keys( $parsed, [< binint VALUE >] ) {
-				return Node.new(
-					:type( 'integer' ),
-					:content(
-						:binint(
-							self.binint(
-								$parsed.hash.<binint>
-							)
-						)
-					)
-				)
-			}
-			if assert-keys( $parsed, [< octint VALUE >] ) {
-				return Node.new(
-					:type( 'integer' ),
-					:content(
-						:octint(
-							self.octint(
-								$parsed.hash.<octint>
-							)
-						)
-					)
-				)
-			}
-			if assert-keys( $parsed, [< hexint VALUE >] ) {
-				return Node.new(
-					:type( 'integer' ),
-					:content(
-						:hexint(
-							self.hexint(
-								$parsed.hash.<hexint>
-							)
-						)
-					)
-				)
-			}
 			die "Uncaught key"
 		}
 		die "Uncaught type"
@@ -1909,55 +1912,55 @@ class Perl6::Tidy {
 	method circumfix( Mu $parsed ) {
 		self.debug( 'circumfix', $parsed );
 
+		if assert-keys( $parsed, [< semilist >] ) {
+			return Node.new(
+				:type( 'circumfix' ),
+				:content(
+					:semilist(
+						self.semilist(
+							$parsed.hash.<semilist>
+						)
+					)
+				)
+			)
+		}
+		if assert-keys( $parsed, [< binint VALUE >] ) {
+			return Node.new(
+				:type( 'circumfix' ),
+				:content(
+					:binint(
+						self.binint(
+							$parsed.hash.<binint>
+						)
+					)
+				)
+			)
+		}
+		if assert-keys( $parsed, [< octint VALUE >] ) {
+			return Node.new(
+				:type( 'circumfix' ),
+				:content(
+					:octint(
+						self.octint(
+							$parsed.hash.<octint>
+						)
+					)
+				)
+			)
+		}
+		if assert-keys( $parsed, [< hexint VALUE >] ) {
+			return Node.new(
+				:type( 'circumfix' ),
+				:content(
+					:hexint(
+						self.hexint(
+							$parsed.hash.<hexint>
+						)
+					)
+				)
+			)
+		}
 		if $parsed.hash {
-			if assert-keys( $parsed, [< semilist >] ) {
-				return Node.new(
-					:type( 'circumfix' ),
-					:content(
-						:semilist(
-							self.semilist(
-								$parsed.hash.<semilist>
-							)
-						)
-					)
-				)
-			}
-			if assert-keys( $parsed, [< binint VALUE >] ) {
-				return Node.new(
-					:type( 'circumfix' ),
-					:content(
-						:binint(
-							self.binint(
-								$parsed.hash.<binint>
-							)
-						)
-					)
-				)
-			}
-			if assert-keys( $parsed, [< octint VALUE >] ) {
-				return Node.new(
-					:type( 'circumfix' ),
-					:content(
-						:octint(
-							self.octint(
-								$parsed.hash.<octint>
-							)
-						)
-					)
-				)
-			}
-			if assert-keys( $parsed, [< hexint VALUE >] ) {
-				return Node.new(
-					:type( 'circumfix' ),
-					:content(
-						:hexint(
-							self.hexint(
-								$parsed.hash.<hexint>
-							)
-						)
-					)
-				)
-			}
 			die "Uncaught key"
 		}
 		die "Uncaught type"
@@ -1966,26 +1969,26 @@ class Perl6::Tidy {
 	method semilist( Mu $parsed ) {
 		self.debug( 'semilist', $parsed );
 
-		if $parsed.hash {
-			if assert-keys( $parsed, [< statement >] ) {
-				my @child;
-				for $parsed.hash.<statement> {
-					@child.push(
-						self.statement(
-							$_
-						)
+		if assert-keys( $parsed, [< statement >] ) {
+			my @child;
+			for $parsed.hash.<statement> {
+				@child.push(
+					self.statement(
+						$_
 					)
-				}
-				return Node.new(
-					:type( 'semilist' ),
-					:child( @child )
 				)
 			}
-			elsif $parsed.hash:defined<statement> {
-				return Node.new(
-					:type( 'semilist' )
-				)
-			}
+			return Node.new(
+				:type( 'semilist' ),
+				:child( @child )
+			)
+		}
+		if assert-keys( $parsed, [], [< statement >] ) {
+			return Node.new(
+				:type( 'semilist' )
+			)
+		}
+		if $parsed.hash {
 			die "Uncaught key"
 		}
 		die "Uncaught type"
@@ -1994,26 +1997,26 @@ class Perl6::Tidy {
 	method rad_number( Mu $parsed ) {
 		self.debug( 'rad_number', $parsed );
 
-		if $parsed.hash {
-			if assert-keys( $parsed,
-					[< circumfix radix >],
-					[< exp base >] ) {
-				return Node.new(
-					:type( 'rad_number' ),
-					:content(
-						:circumfix(
-							self.circumfix(
-								$parsed.hash.<circumfix>,
-							)
-						),
-						:radix(
-							self.radix(
-								$parsed.hash.<radix>,
-							)
+		if assert-keys( $parsed,
+				[< circumfix radix >],
+				[< exp base >] ) {
+			return Node.new(
+				:type( 'rad_number' ),
+				:content(
+					:circumfix(
+						self.circumfix(
+							$parsed.hash.<circumfix>,
+						)
+					),
+					:radix(
+						self.radix(
+							$parsed.hash.<radix>,
 						)
 					)
 				)
-			}
+			)
+		}
+		if $parsed.hash {
 			die "Uncaught key"
 		}
 		die "Uncaught type"
@@ -2038,24 +2041,24 @@ class Perl6::Tidy {
 	method escale( Mu $parsed ) {
 		self.debug( 'escale', $parsed );
 
-		if $parsed.hash {
-			if assert-keys( $parsed, [< sign decint >] ) {
-				return Node.new(
-					:type( 'escale' ),
-					:content(
-						:sign(
-							self.sign(
-								$parsed.hash.<sign>
-							)
-						),
-						:decint(
-							self.decint(
-								$parsed.hash.<decint>
-							)
+		if assert-keys( $parsed, [< sign decint >] ) {
+			return Node.new(
+				:type( 'escale' ),
+				:content(
+					:sign(
+						self.sign(
+							$parsed.hash.<sign>
+						)
+					),
+					:decint(
+						self.decint(
+							$parsed.hash.<decint>
 						)
 					)
 				)
-			}
+			)
+		}
+		if $parsed.hash {
 			die "Uncaught key"
 		}
 		die "Uncaught type"
