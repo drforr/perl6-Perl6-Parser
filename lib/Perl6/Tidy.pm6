@@ -27,6 +27,9 @@ class Perl6::Tidy {
 
 		say "$name ({@types})";
 
+		say "\+$name: "    ~   $parsed.Int       if $parsed.Int;
+		say "\~$name: '"   ~   $parsed.Str ~ "'" if $parsed.Str;
+		say "\?$name: "    ~ ~?$parsed.Bool      if $parsed.Bool;
 		if $parsed.list {
 			for $parsed.list {
 				say "$name\[\]:\n" ~ $_.dump
@@ -37,9 +40,6 @@ class Perl6::Tidy {
 			say "$name\{\} keys: " ~ $parsed.hash.keys;
 			say "$name\{\}:\n" ~   $parsed.dump;
 		}
-		say "\+$name: "    ~   $parsed.Int       if $parsed.Int;
-		say "\~$name: '"   ~   $parsed.Str ~ "'" if $parsed.Str;
-		say "\?$name: "    ~ ~?$parsed.Bool      if $parsed.Bool;
 
 		say "";
 	}
