@@ -158,11 +158,16 @@ class Perl6::Tidy {
 		if $parsed.list {
 			my @child;
 			for $parsed.list {
-				@child.push(
-					self.EXPR(
-						$_.hash.<EXPR>
-					)
-				)
+				if assert-hash-keys( $_, 'EXPR' ) {
+					@child.push(
+						self.EXPR(
+							$_.hash.<EXPR>
+						)
+					);
+					next
+				}
+				self.debug( 'EXPR', $_ );
+				die "Uncaught key"
 			}
 			return Statement.new(
 				:child( @child )
@@ -214,9 +219,7 @@ class Perl6::Tidy {
 
 	method sym( Mu $parsed ) {
 		if assert-Str( $parsed ) {
-			return Sym.new(
-				:name( $parsed.Str )
-			)
+			return Sym.new( :name( $parsed.Str ) )
 		}
 		self.debug( 'sym', $parsed );
 		die "Uncaught type"
@@ -226,11 +229,25 @@ class Perl6::Tidy {
 
 	method sign( Mu $parsed ) {
 		if assert-Bool( $parsed ) {
-			return Sign.new(
-				:name( $parsed.Bool )
-			)
+			return Sign.new( :name( $parsed.Bool ) )
 		}
 		self.debug( 'sign', $parsed );
+		die "Uncaught type"
+	}
+
+	class O does Node { }
+
+	method O( Hash $hash ) {
+		if $hash.<prec> and
+		   $hash.<fiddly> and
+		   $hash.<dba> and
+		   $hash.<assoc> {
+			return O.new(
+				:content(
+				)
+			)
+		}
+say $hash.perl;
 		die "Uncaught type"
 	}
 
@@ -244,6 +261,11 @@ class Perl6::Tidy {
 						self.sym(
 							$parsed.hash.<sym>
 						)
+					),
+					:O(
+						self.O(
+							$parsed.hash.<O>
+						)
 					)
 				)
 			)
@@ -252,15 +274,82 @@ class Perl6::Tidy {
 		die "Uncaught type"
 	}
 
+	class MethodOp does Node { }
+
+	method methodop( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< longname args >] ) {
+			return MethodOp.new(
+				:content(
+					:longname(
+						self.longname(
+							$parsed.hash.<longname>
+						)
+					),
+					:args(
+						self.args(
+							$parsed.hash.<args>
+						)
+					)
+				)
+			)
+		}
+		self.debug( 'methodop', $parsed );
+		die "Uncaught type"
+	}
+
+	class DottyOp does Node { }
+
+	method dottyop( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< methodop >] ) {
+			return DottyOp.new(
+				:content(
+					:methodop(
+						self.methodop(
+							$parsed.hash.<methodop>
+						)
+					)
+				)
+			)
+		}
+		self.debug( 'dottyop', $parsed );
+		die "Uncaught type"
+	}
+
 	class OPER does Node { }
 
 	method OPER( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< sym dottyop O >] ) {
+			return OPER.new(
+				:content(
+					:sym(
+						self.sym(
+							$parsed.hash.<sym>
+						)
+					),
+					:dottyop(
+						self.dottyop(
+							$parsed.hash.<dottyop>
+						)
+					),
+					:O(
+						self.O(
+							$parsed.hash.<O>
+						)
+					)
+				)
+			)
+		}
 		if assert-hash-keys( $parsed, [< sym O >] ) {
 			return OPER.new(
 				:content(
 					:sym(
 						self.sym(
 							$parsed.hash.<sym>
+						)
+					),
+					:O(
+						self.O(
+							$parsed.hash.<O>
 						)
 					)
 				)
@@ -292,14 +381,15 @@ class Perl6::Tidy {
 			)
 		}
 		if assert-hash-keys( $parsed, [< identifier >],
-					 [< morename >] ) {
+					      [< morename >] ) {
 			return Name.new(
 				:content(
 					:identifier(
 						self.identifier(
 							$parsed.hash.<identifier>
 						)
-					)
+					),
+					:morename()
 				)
 			)
 		}
@@ -348,9 +438,7 @@ class Perl6::Tidy {
 
 	method sigil( Mu $parsed ) {
 		if assert-Str( $parsed ) {
-			return Sigil.new(
-				:name( $parsed.Str )
-			)
+			return Sigil.new( :name( $parsed.Str ) )
 		}
 		self.debug( 'sigil', $parsed );
 		die "Uncaught type"
@@ -371,9 +459,7 @@ class Perl6::Tidy {
 			)
 		}
 		if $parsed.Str {
-			return DeSigilName.new(
-				:name( $parsed.Str )
-			)
+			return DeSigilName.new( :name( $parsed.Str ) )
 		}
 		self.debug( 'desigilname', $parsed );
 		die "Uncaught type"
@@ -519,7 +605,8 @@ class Perl6::Tidy {
 						self.deflongname(
 							$parsed.hash.<deflongname>
 						)
-					)
+					),
+					:trait()
 				)
 			)
 		}
@@ -543,7 +630,8 @@ class Perl6::Tidy {
 						self.longname(
 							$parsed.hash.<longname>
 						)
-					)
+					),
+					:trait()
 				)
 			)
 		}
@@ -560,7 +648,8 @@ class Perl6::Tidy {
 						self.statementlist(
 							$parsed.hash.<statementlist>
 						)
-					)
+					),
+					:trait()
 				)
 			)
 		}
@@ -584,7 +673,9 @@ class Perl6::Tidy {
 						self.deflongname(
 							$parsed.hash.<deflongname>
 						)
-					)
+					),
+					:signature(),
+					:trait()
 				)
 			)
 		}
@@ -620,11 +711,22 @@ class Perl6::Tidy {
 						self.name(
 							$parsed.hash.<name>
 						)
-					)
+					),
+					:colonpair()
 				)
 			)
 		}
 		self.debug( 'deflongname', $parsed );
+		die "Uncaught type"
+	}
+
+	class Args does Node { }
+
+	method args( Mu $parsed ) {
+		if $parsed.Bool {
+			return Args.new( :name( $parsed.Bool ) )
+		}
+		self.debug( 'args', $parsed );
 		die "Uncaught type"
 	}
 
@@ -634,7 +736,15 @@ class Perl6::Tidy {
 		if $parsed.list {
 			my @child;
 			for $parsed.list {
-				if $_.hash.<value> {
+				if assert-hash-keys( $_, [< longname >] ) {
+					@child.push(
+						self.longname(
+							$_.hash.<longname>
+						)
+					);
+					next;
+				}
+				if assert-hash-keys( $_, [< value >] ) {
 					@child.push(
 						self.value(
 							$_.hash.<value>
@@ -642,9 +752,25 @@ class Perl6::Tidy {
 					);
 					next;
 				}
+				self.debug( 'EXPR', $_ );
 				die "Uncaught key"
 			}
 			if $parsed.hash {
+				if assert-hash-keys(
+					$parsed,
+					[< OPER dotty >],
+					[< postfix_prefix_meta_operator >] ) {
+					return EXPR.new(
+						:content(
+							:OPER(
+								self.OPER(
+									$parsed.hash.<OPER>
+								)
+							)
+						),
+						:child( @child )
+					)
+				}
 				if assert-hash-keys(
 					$parsed,
 					[< postfix OPER >],
@@ -660,11 +786,25 @@ class Perl6::Tidy {
 								self.OPER(
 									$parsed.hash.<OPER>
 								)
-							)
+							),
+							:postfix_prefix_meta_operator()
 						),
 						:child( @child )
 					)
 				}
+				if assert-hash-keys( $parsed, [< longname >] ) {
+					return EXPR.new(
+						:content(
+							:longname(
+								self.longname(
+									$parsed.hash.<longname>
+								)
+							),
+						),
+						:child( @child )
+					)
+				}
+				self.debug( 'EXPR', $parsed );
 				die "Uncaught key"
 			}
 			else {
@@ -674,6 +814,22 @@ class Perl6::Tidy {
 			}
 		}
 		if assert-hash-keys( $parsed, [< longname args >] ) {
+			return EXPR.new(
+				:content(
+					:longname(
+						self.longname(
+							$parsed.hash.<longname>
+						)
+					),
+					:args(
+						self.args(
+							$parsed.hash.<args>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< longname >] ) {
 			return EXPR.new(
 				:content(
 					:longname(
@@ -809,7 +965,11 @@ class Perl6::Tidy {
 						self.variable(
 							$parsed.hash.<variable>
 						)
-					)
+					),
+					:semilist(),
+					:postcircumfix(),
+					:signature(),
+					:trait()
 				)
 			)
 		}
@@ -823,7 +983,12 @@ class Perl6::Tidy {
 						self.variable(
 							$parsed.hash.<variable>
 						)
-					)
+					),
+					:semilist(),
+					:postcircumfix(),
+					:signature(),
+					:trait(),
+					:post_constraint()
 				)
 			)
 		}
@@ -835,9 +1000,7 @@ class Perl6::Tidy {
 
 	method doc( Mu $parsed ) {
 		if assert-Bool( $parsed ) {
-			return Doc.new(
-				:name( $parsed.Bool )
-			)
+			return Doc.new( :name( $parsed.Bool ) )
 		}
 		self.debug( 'doc', $parsed );
 		die "Uncaught type"
@@ -974,9 +1137,19 @@ class Perl6::Tidy {
 	class Initializer does Node { }
 
 	method initializer( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< sym EPR >] ) {
+		if assert-hash-keys( $parsed, [< sym EXPR >] ) {
 			return Initializer.new(
 				:content(
+					:sym(
+						self.sym(
+							$parsed.hash.<sym>
+						)
+					),
+					:EXPR(
+						self.EXPR(
+							$parsed.hash.<EXPR>
+						)
+					)
 				)
 			)
 		}
@@ -992,6 +1165,11 @@ class Perl6::Tidy {
 					      [< trait >] ) {
 			return Declarator.new(
 				:content(
+					:initializer(
+						self.initializer(
+							$parsed.hash.<initializer>
+						)
+					)
 				)
 			)
 		}
@@ -1293,9 +1471,7 @@ class Perl6::Tidy {
 
 	method B( Mu $parsed ) {
 		if assert-Bool( $parsed ) {
-			return B.new(
-				:name( $parsed.Bool )
-			)
+			return B.new( :name( $parsed.Bool ) )
 		}
 		self.debug( 'B', $parsed );
 		die "Uncaught type"
@@ -1323,9 +1499,7 @@ class Perl6::Tidy {
 
 	method signature( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [], [< param_sep parameter >] ) {
-			return Signature.new(
-				:name( $parsed.Bool )
-			)
+			return Signature.new( :name( $parsed.Bool ) )
 		}
 		self.debug( 'signature', $parsed );
 		die "Uncaught type"
@@ -1393,9 +1567,7 @@ class Perl6::Tidy {
 			)
 		}
 		elsif $parsed.Str {
-			return Identifier.new(
-				:name( $parsed.Str )
-			)
+			return Identifier.new( :name( $parsed.Str ) )
 		}
 		self.debug( 'identifier', $parsed );
 		die "Uncaught type"
@@ -1607,9 +1779,7 @@ class Perl6::Tidy {
 			)
 		}
 		if $parsed.Str {
-			return Atom.new(
-				:name( $parsed.Str )
-			)
+			return Atom.new( :name( $parsed.Str ) )
 		}
 		self.debug( 'atom', $parsed );
 		die "Uncaught type"
@@ -1619,9 +1789,7 @@ class Perl6::Tidy {
 
 	method normspace( Mu $parsed ) {
 		if $parsed.Str {
-			return NormSpace.new(
-				:name( $parsed.Str )
-			)
+			return NormSpace.new( :name( $parsed.Str ) )
 		}
 		self.debug( 'normspace', $parsed );
 		die "Uncaught type"
@@ -1812,9 +1980,7 @@ class Perl6::Tidy {
 			)
 		}
 		if $parsed.Str {
-			return Nibble.new(
-				:name( $parsed.Str )
-			)
+			return Nibble.new( :name( $parsed.Str ) )
 		}
 		self.debug( 'nibble', $parsed );
 		die "Uncaught type"
@@ -2065,9 +2231,7 @@ class Perl6::Tidy {
 
 	method int( Mu $parsed ) {
 		if assert-Int( $parsed ) {
-			return _Int.new(
-				:name( $parsed.Int )
-			)
+			return _Int.new( :name( $parsed.Int ) )
 		}
 		self.debug( 'int', $parsed );
 		die "Uncaught type"
@@ -2077,9 +2241,7 @@ class Perl6::Tidy {
 
 	method radix( Mu $parsed ) {
 		if assert-Int( $parsed ) {
-			return Radix.new(
-				:name( $parsed.Int )
-			)
+			return Radix.new( :name( $parsed.Int ) )
 		}
 		self.debug( 'radix', $parsed );
 		die "Uncaught type"
@@ -2089,9 +2251,7 @@ class Perl6::Tidy {
 
 	method frac( Mu $parsed ) {
 		if assert-Int( $parsed ) {
-			return Frac.new(
-				:name( $parsed.Int )
-			)
+			return Frac.new( :name( $parsed.Int ) )
 		}
 		self.debug( 'frac', $parsed );
 		die "Uncaught type"
@@ -2101,9 +2261,7 @@ class Perl6::Tidy {
 
 	method coeff( Mu $parsed ) {
 		if assert-Int( $parsed ) {
-			return Coeff.new(
-				:name( $parsed.Int )
-			)
+			return Coeff.new( :name( $parsed.Int ) )
 		}
 		self.debug( 'coeff', $parsed );
 		die "Uncaught type"
@@ -2136,9 +2294,7 @@ class Perl6::Tidy {
 
 	method binint( Mu $parsed ) {
 		if assert-Int( $parsed ) {
-			return BinInt.new(
-				:name( $parsed.Int )
-			)
+			return BinInt.new( :name( $parsed.Int ) )
 		}
 		self.debug( 'binint', $parsed );
 		die "Uncaught type"
@@ -2148,9 +2304,7 @@ class Perl6::Tidy {
 
 	method octint( Mu $parsed ) {
 		if assert-Int( $parsed ) {
-			return OctInt.new(
-				:name( $parsed.Int )
-			)
+			return OctInt.new( :name( $parsed.Int ) )
 		}
 		self.debug( 'octint', $parsed );
 		die "Uncaught type"
@@ -2160,9 +2314,7 @@ class Perl6::Tidy {
 
 	method decint( Mu $parsed ) {
 		if assert-Int( $parsed ) {
-			return DecInt.new(
-				:name( $parsed.Int )
-			)
+			return DecInt.new( :name( $parsed.Int ) )
 		}
 		self.debug( 'decint', $parsed );
 		die "Uncaught type"
@@ -2172,9 +2324,7 @@ class Perl6::Tidy {
 
 	method hexint( Mu $parsed ) {
 		if assert-Int( $parsed ) {
-			return HexInt.new(
-				:name( $parsed.Int )
-			)
+			return HexInt.new( :name( $parsed.Int ) )
 		}
 		self.debug( 'hexint', $parsed );
 		die "Uncaught type"
