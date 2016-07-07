@@ -16,7 +16,7 @@ class Perl6::Tidy {
 		if $parsed.list {
 			@types.push( 'list' )
 		}
-		elsif $parsed.hash {
+		if $parsed.hash {
 			@types.push( 'hash' )
 		}
 		@types.push( 'Int'  ) if $parsed.Int;
@@ -1699,14 +1699,9 @@ say $hash.perl;
 		if assert-hash-keys( $parsed, [< 0 >] ) {
 			return _0.new(
 				:content(
-					:babble(
-						self.babble(
-							$parsed.hash.<babble>
-						)
-					),
-					:nibble(
-						self.nibble(
-							$parsed.hash.<nibble>
+					:_0(
+						self._0(
+							$parsed.hash.<0>
 						)
 					)
 				)
@@ -1722,9 +1717,8 @@ say $hash.perl;
 		if $parsed.list {
 			my @child;
 			for $parsed.list {
-				@child.push(
-					$_.hash.<0>
-				)
+#				self.debug( 'charspec', $_ );
+#				die "Uncaught type"
 			}
 			return CharSpec.new(
 				:child( @child )
@@ -1742,22 +1736,27 @@ say $hash.perl;
 		if $parsed.list {
 			my @child;
 			for $parsed.list {
-				@child.push(
-					CClassElem_INTERMEDIARY.new(
-						:content(
-							:sign(
-								self.sign(
-									$_.hash.<sign>
-								)
-							),
-							:charspec(
-								self.charspec(
-									$_.hash.<charspec>
+				if assert-hash-keys( $_, [< sign charspec >] ) {
+					@child.push(
+						CClassElem_INTERMEDIARY.new(
+							:content(
+								:sign(
+									self.sign(
+										$_.hash.<sign>
+									)
+								),
+								:charspec(
+									self.charspec(
+										$_.hash.<charspec>
+									)
 								)
 							)
 						)
-					)
-				)
+					);
+					next
+				}
+				self.debug( 'cclass_elem', $_ );
+				die "Uncaught type"
 			}
 			return CClassElem.new(
 				:child( @child )
@@ -1849,7 +1848,7 @@ say $hash.perl;
 		if assert-hash-keys( $parsed, [< metachar >] ) {
 			return Atom.new(
 				:content(
-					:atom(
+					:metachar(
 						self.metachar(
 							$parsed.hash.<metachar>
 						)
@@ -2114,6 +2113,16 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
+	class VALUE does Node { }
+
+	method VALUE( Mu $parsed ) {
+		if assert-Int( $parsed ) {
+			return VALUE.new( :name( $parsed.Int ) )
+		}
+		self.debug( 'VALUE', $parsed );
+		die "Uncaught type"
+	}
+
 	class Numish does Node { }
 
 	method numish( Mu $parsed ) {
@@ -2142,7 +2151,6 @@ say $hash.perl;
 		}
 		if assert-hash-keys( $parsed, [< dec_number >] ) {
 			return Numish.new(
-				:type( 'numish' ),
 				:content(
 					:dec_number(
 						self.dec_number(
@@ -2166,6 +2174,11 @@ say $hash.perl;
 						self.decint(
 							$parsed.hash.<decint>
 						)
+					),
+					:VALUE(
+						self.VALUE(
+							$parsed.hash.<VALUE>
+						)
 					)
 				)
 			)
@@ -2176,6 +2189,11 @@ say $hash.perl;
 					:binint(
 						self.binint(
 							$parsed.hash.<binint>
+						)
+					),
+					:VALUE(
+						self.VALUE(
+							$parsed.hash.<VALUE>
 						)
 					)
 				)
@@ -2188,6 +2206,11 @@ say $hash.perl;
 						self.octint(
 							$parsed.hash.<octint>
 						)
+					),
+					:VALUE(
+						self.VALUE(
+							$parsed.hash.<VALUE>
+						)
 					)
 				)
 			)
@@ -2198,6 +2221,11 @@ say $hash.perl;
 					:hexint(
 						self.hexint(
 							$parsed.hash.<hexint>
+						)
+					),
+					:VALUE(
+						self.VALUE(
+							$parsed.hash.<VALUE>
 						)
 					)
 				)
@@ -2228,6 +2256,11 @@ say $hash.perl;
 						self.binint(
 							$parsed.hash.<binint>
 						)
+					),
+					:VALUE(
+						self.VALUE(
+							$parsed.hash.<VALUE>
+						)
 					)
 				)
 			)
@@ -2239,6 +2272,11 @@ say $hash.perl;
 						self.octint(
 							$parsed.hash.<octint>
 						)
+					),
+					:VALUE(
+						self.VALUE(
+							$parsed.hash.<VALUE>
+						)
 					)
 				)
 			)
@@ -2249,6 +2287,11 @@ say $hash.perl;
 					:hexint(
 						self.hexint(
 							$parsed.hash.<hexint>
+						)
+					),
+					:VALUE(
+						self.VALUE(
+							$parsed.hash.<VALUE>
 						)
 					)
 				)
@@ -2276,7 +2319,11 @@ say $hash.perl;
 			)
 		}
 		if assert-hash-keys( $parsed, [], [< statement >] ) {
-			return SemiList.new
+			return SemiList.new(
+				:content(
+					:statement()
+				)
+			)
 		}
 		self.debug( 'semilist', $parsed );
 		die "Uncaught type"
@@ -2298,7 +2345,9 @@ say $hash.perl;
 						self.radix(
 							$parsed.hash.<radix>,
 						)
-					)
+					),
+					:exp(),
+					:base()
 				)
 			)
 		}
