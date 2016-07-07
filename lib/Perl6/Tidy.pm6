@@ -664,14 +664,14 @@ say $hash.perl;
 					      [< signature trait >] ) {
 			return RegexDef.new(
 				:content(
-					:nibble(
-						self.nibble(
-							$parsed.hash.<nibble>
-						)
-					),
 					:deflongname(
 						self.deflongname(
 							$parsed.hash.<deflongname>
+						)
+					),
+					:nibble(
+						self.nibble(
+							$parsed.hash.<nibble>
 						)
 					),
 					:signature(),
@@ -730,6 +730,34 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
+	class Dotty does Node { }
+
+	method dotty( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< sym dottyop O >] ) {
+			return Dotty.new(
+				:content(
+					:sym(
+						self.sym(
+							$parsed.hash.<sym>
+						)
+					),
+					:dottyop(
+						self.dottyop(
+							$parsed.hash.<dottyop>
+						)
+					),
+					:O(
+						self.O(
+							$parsed.hash.<O>
+						)
+					)
+				)
+			)
+		}
+		self.debug( 'dotty', $parsed );
+		die "Uncaught type"
+	}
+
 	class EXPR does Node { }
 
 	method EXPR( Mu $parsed ) {
@@ -765,6 +793,11 @@ say $hash.perl;
 							:OPER(
 								self.OPER(
 									$parsed.hash.<OPER>
+								)
+							),
+							:dotty(
+								self.dotty(
+									$parsed.hash.<dotty>
 								)
 							)
 						),
