@@ -853,6 +853,84 @@ class Perl6::Tidy {
 		die "Uncaught type"
 	}
 
+	class Doc does Node { }
+
+	method doc( Mu $parsed ) {
+		self.debug( 'doc', $parsed );
+
+		if assert-Bool( $parsed ) {
+			return Doc.new(
+				:name( $parsed.Bool )
+			)
+		}
+		die "Uncaught type"
+	}
+
+	class ModuleName does Node { }
+
+	method module_name( Mu $parsed ) {
+		self.debug( 'module_name', $parsed );
+
+		if assert-hash-keys( $parsed, [< longname >] ) {
+			return ModuleName.new(
+				:content(
+					:longname(
+						self.longname(
+							$parsed.hash.<longname>
+						)
+					)
+				)
+			)
+		}
+		die "Uncaught type"
+	}
+
+	class Version does Node { }
+
+	method version( Mu $parsed ) {
+		self.debug( 'version', $parsed );
+
+		if assert-hash-keys( $parsed, [< vnum vstr >] ) {
+			return Version.new(
+				:content(
+					:vnum(
+						self.vnum(
+							$parsed.hash.<vnum>
+						)
+					),
+					:vstr(
+						self.vstr(
+							$parsed.hash.<vstr>
+						)
+					)
+				)
+			)
+		}
+		die "Uncaught type"
+	}
+
+	class VNum does Node { }
+
+	method vnum( Mu $parsed ) {
+		self.debug( 'vnum', $parsed );
+
+		if $parsed.list {
+			return VNum.new( :child() )
+		}
+		die "Uncaught type"
+	}
+
+	class VStr does Node { }
+
+	method vstr( Mu $parsed ) {
+		self.debug( 'vstr', $parsed );
+
+		if $parsed.Int {
+			return VStr.new( :name( $parsed.Int ) )
+		}
+		die "Uncaught type"
+	}
+
 	class StatementControl does Node { }
 
 	method statement_control( Mu $parsed ) {
@@ -861,12 +939,42 @@ class Perl6::Tidy {
 		if assert-hash-keys( $parsed, [< doc sym module_name >] ) {
 			return StatementControl.new(
 				:content(
+					:doc(
+						self.doc(
+							$parsed.hash.<doc>
+						)
+					),
+					:sym(
+						self.sym(
+							$parsed.hash.<sym>
+						)
+					),
+					:module_name(
+						self.module_name(
+							$parsed.hash.<module_name>
+						)
+					)
 				)
 			)
 		}
 		if assert-hash-keys( $parsed, [< doc sym version >] ) {
 			return StatementControl.new(
 				:content(
+					:doc(
+						self.doc(
+							$parsed.hash.<doc>
+						)
+					),
+					:sym(
+						self.sym(
+							$parsed.hash.<sym>
+						)
+					),
+					:version(
+						self.version(
+							$parsed.hash.<version>
+						)
+					)
 				)
 			)
 		}
