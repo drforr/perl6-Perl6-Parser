@@ -172,6 +172,17 @@ class Perl6::Tidy {
 				:child( @child )
 			)
 		}
+		if assert-hash-keys( $parsed, [< statement_control >] ) {
+			return Statement.new(
+				:content(
+					:statement_control(
+						self.statement_control(
+							$parsed.hash.<statement_control>
+						)
+					)
+				)
+			)
+		}
 		if assert-hash-keys( $parsed, [< EXPR >] ) {
 			return Statement.new(
 				:content(
@@ -842,6 +853,26 @@ class Perl6::Tidy {
 		die "Uncaught type"
 	}
 
+	class StatementControl does Node { }
+
+	method statement_control( Mu $parsed ) {
+		self.debug( 'statement_control', $parsed );
+
+		if assert-hash-keys( $parsed, [< doc sym module_name >] ) {
+			return StatementControl.new(
+				:content(
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< doc sym version >] ) {
+			return StatementControl.new(
+				:content(
+				)
+			)
+		}
+		die "Uncaught type"
+	}
+
 	class MultiDeclarator does Node { }
 
 	method multi_declarator( Mu $parsed ) {
@@ -861,11 +892,33 @@ class Perl6::Tidy {
 		die "Uncaught type"
 	}
 
+	class Initializer does Node { }
+
+	method initializer( Mu $parsed ) {
+		self.debug( 'initializer', $parsed );
+
+		if assert-hash-keys( $parsed, [< sym EPR >] ) {
+			return Initializer.new(
+				:content(
+				)
+			)
+		}
+		die "Uncaught type"
+	}
+
 	class Declarator does Node { }
 
 	method declarator( Mu $parsed ) {
 		self.debug( 'declarator', $parsed );
 
+		if assert-hash-keys( $parsed, [< initializer
+						 variable_declarator >],
+					      [< trait >] ) {
+			return Declarator.new(
+				:content(
+				)
+			)
+		}
 		if assert-hash-keys( $parsed, [< variable_declarator >],
 					      [< trait >] ) {
 			return Declarator.new(
@@ -898,6 +951,21 @@ class Perl6::Tidy {
 	method DECL( Mu $parsed ) {
 		self.debug( 'DECL', $parsed );
 
+		if assert-hash-keys( $parsed, [< initializer
+						 variable_declarator >],
+					      [< trait >] ) {
+			return Declarator.new(
+				:content(
+					:initializer(
+					),
+					:variable_declarator(
+						self.variable_declarator(
+							$parsed.hash.<variable_declarator>
+						)
+					)
+				)
+			)
+		}
 		if assert-hash-keys( $parsed, [< variable_declarator >],
 					      [< trait >] ) {
 			return DECL.new(
