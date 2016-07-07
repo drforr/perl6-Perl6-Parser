@@ -801,6 +801,7 @@ say $hash.perl;
 								)
 							)
 						),
+						:postfix_prefix_meta_operator(),
 						:child( @child )
 					)
 				}
@@ -985,11 +986,16 @@ say $hash.perl;
 			[< semilist postcircumfix signature trait >] ) {
 			my @child;
 			for $parsed.hash.<post_constraint> {
-				@child.push(
-					self.EXPR(
-						$_.hash.<EXPR>
-					)
-				)
+				if assert-hash-keys( $_, [< EXPR >] ) {
+					@child.push(
+						self.EXPR(
+							$_.hash.<EXPR>
+						)
+					);
+					next;
+				}
+				self.debug( 'variable_declarator', $_ );
+				die "Unknown key"
 			}
 			return VariableDeclarator.new(
 				:child( @child )
@@ -1202,6 +1208,11 @@ say $hash.perl;
 						self.initializer(
 							$parsed.hash.<initializer>
 						)
+					),
+					:variable_declarator(
+						self.variable_declarator(
+							$parsed.hash.<variable_declarator>
+						)
 					)
 				)
 			)
@@ -1243,12 +1254,16 @@ say $hash.perl;
 			return Declarator.new(
 				:content(
 					:initializer(
+						self.initializer(
+							$parsed.hash.<initializer>
+						)
 					),
 					:variable_declarator(
 						self.variable_declarator(
 							$parsed.hash.<variable_declarator>
 						)
-					)
+					),
+					:trait()
 				)
 			)
 		}
@@ -1260,7 +1275,8 @@ say $hash.perl;
 						self.variable_declarator(
 							$parsed.hash.<variable_declarator>
 						)
-					)
+					),
+					:trait()
 				)
 			)
 		}
@@ -1272,7 +1288,8 @@ say $hash.perl;
 						self.regex_declarator(
 							$parsed.hash.<regex_declarator>
 						)
-					)
+					),
+					:trait()
 				)
 			)
 		}
@@ -1309,15 +1326,30 @@ say $hash.perl;
 
 	class TypeName does Node { }
 
+	class TypeName_INTERMEDIARY does Node { }
+
 	method typename( Mu $parsed ) {
 		if $parsed.list {
 			my @child;
 			for $parsed.list {
-				@child.push(
-					self.longname(
-						$_.hash.<longname>
-					)
-				)
+				if assert-hash-keys( $_, [< longname >],
+							 [< colonpair >] ) {
+					@child.push(
+						TypeName_INTERMEDIARY.new(
+							:content(
+								:longname(
+									self.longname(
+										$_.hash.<longname>
+									)
+								),
+								:colonpair()
+							)
+						)
+					);
+					next;
+				}
+				self.debug( 'typename', $_ );
+				die "Uncaught type"
 			}
 			return TypeName.new(
 				:child( @child )
@@ -1354,7 +1386,8 @@ say $hash.perl;
 						self.DECL(
 							$parsed.hash.<DECL>
 						)
-					)
+					),
+					:typename()
 				)
 			)
 		}
@@ -1381,7 +1414,7 @@ say $hash.perl;
 			)
 		}
 		if assert-hash-keys( $parsed, [< package_declarator DECL >],
-					 [< typename >] ) {
+ 					      [< typename >] ) {
 			return Scoped.new(
 				:content(
 					:package_declarator(
@@ -1393,7 +1426,8 @@ say $hash.perl;
 						self.DECL(
 							$parsed.hash.<DECL>
 						)
-					)
+					),
+					:typename()
 				)
 			)
 		}
@@ -1520,7 +1554,8 @@ say $hash.perl;
 						self.B(
 							$parsed.hash.<B>
 						)
-					)
+					),
+					:quotepair()
 				)
 			)
 		}
@@ -1532,7 +1567,13 @@ say $hash.perl;
 
 	method signature( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [], [< param_sep parameter >] ) {
-			return Signature.new( :name( $parsed.Bool ) )
+			return Signature.new(
+				:name(
+					$parsed.Bool
+				),
+				:param_sep(),
+				:parameter()
+			)
 		}
 		self.debug( 'signature', $parsed );
 		die "Uncaught type"
@@ -1591,9 +1632,14 @@ say $hash.perl;
 		if $parsed.list {
 			my @child;
 			for $parsed.list {
-				@child.push(
-					$_.Str
-				)
+				if assert-Str( $_ ) {
+					@child.push(
+						$_.Str
+					);
+					next
+				}
+				self.debug( 'identifier', $_ );
+				die "Uncaught type"
 			}
 			return Identifier.new(
 				:child( @child )
@@ -1688,7 +1734,7 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class CClassElemIntermediary does Node { }
+	class CClassElem_INTERMEDIARY does Node { }
 
 	class CClassElem does Node { }
 
@@ -1697,7 +1743,7 @@ say $hash.perl;
 			my @child;
 			for $parsed.list {
 				@child.push(
-					CClassElemIntermediary.new(
+					CClassElem_INTERMEDIARY.new(
 						:content(
 							:sign(
 								self.sign(
