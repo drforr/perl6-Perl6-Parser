@@ -389,8 +389,8 @@ say $hash.perl;
 							$parsed.hash.<identifier>
 						)
 					),
-					:morename()
-				)
+				),
+				:child()
 			)
 		}
 		self.debug( 'name', $parsed );
@@ -849,12 +849,12 @@ say $hash.perl;
 		}
 		if assert-hash-keys( $parsed, [< longname args >] ) {
 			return EXPR.new(
+				:child( 
+					self.longname(
+						$parsed.hash.<longname>
+					)
+				),
 				:content(
-					:longname(
-						self.longname(
-							$parsed.hash.<longname>
-						)
-					),
 					:args(
 						self.args(
 							$parsed.hash.<args>
@@ -865,11 +865,9 @@ say $hash.perl;
 		}
 		if assert-hash-keys( $parsed, [< longname >] ) {
 			return EXPR.new(
-				:content(
-					:longname(
-						self.longname(
-							$parsed.hash.<longname>
-						)
+				:child( 
+					self.longname(
+						$parsed.hash.<longname>
 					)
 				)
 			)
@@ -891,17 +889,6 @@ say $hash.perl;
 					:variable(
 						self.variable(
 							$parsed.hash.<variable>
-						)
-					)
-				)
-			)
-		}
-		if assert-hash-keys( $parsed, [< longname >] ) {
-			return EXPR.new(
-				:content(
-					:longname(
-						self.longname(
-							$parsed.hash.<longname>
 						)
 					)
 				)
@@ -1017,6 +1004,7 @@ say $hash.perl;
 			[< variable >],
 			[< semilist postcircumfix signature trait post_constraint >] ) {
 			return VariableDeclarator.new(
+				:child(), # post_constraint
 				:content(
 					:variable(
 						self.variable(
@@ -1026,8 +1014,7 @@ say $hash.perl;
 					:semilist(),
 					:postcircumfix(),
 					:signature(),
-					:trait(),
-					:post_constraint()
+					:trait()
 				)
 			)
 		}
@@ -1213,7 +1200,8 @@ say $hash.perl;
 						self.variable_declarator(
 							$parsed.hash.<variable_declarator>
 						)
-					)
+					),
+					:trait()
 				)
 			)
 		}
@@ -1225,7 +1213,8 @@ say $hash.perl;
 						self.variable_declarator(
 							$parsed.hash.<variable_declarator>
 						)
-					)
+					),
+					:trait()
 				)
 			)
 		}
@@ -1237,7 +1226,8 @@ say $hash.perl;
 						self.regex_declarator(
 							$parsed.hash.<regex_declarator>
 						)
-					)
+					),
+					:trait()
 				)
 			)
 		}
@@ -2320,9 +2310,7 @@ say $hash.perl;
 		}
 		if assert-hash-keys( $parsed, [], [< statement >] ) {
 			return SemiList.new(
-				:content(
-					:statement()
-				)
+				:child() # statement is the child.
 			)
 		}
 		self.debug( 'semilist', $parsed );
