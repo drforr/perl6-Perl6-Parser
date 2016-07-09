@@ -11,6 +11,7 @@ class Perl6::Tidy {
 	role Intify    { method perl6() { $.name } }
 
 	method debug( Str $name, Mu $parsed ) {
+		my @lines;
 		my @types;
 
 		if $parsed.list {
@@ -25,23 +26,24 @@ class Perl6::Tidy {
 
 		die "$name: Unknown type" unless @types;
 
-		say "$name ({@types})";
+		@lines.push( "$name ({@types})" );
 
-		say "\+$name: "    ~   $parsed.Int       if $parsed.Int;
-		say "\~$name: '"   ~   $parsed.Str ~ "'" if $parsed.Str;
-		say "\?$name: "    ~ ~?$parsed.Bool      if $parsed.Bool;
+		@lines.push( "\+$name: "    ~   $parsed.Int       ) if $parsed.Int;
+		@lines.push( "\~$name: '"   ~   $parsed.Str ~ "'" ) if $parsed.Str;
+		@lines.push( "\?$name: "    ~ ~?$parsed.Bool      ) if $parsed.Bool;
 		if $parsed.list {
 			for $parsed.list {
-				say "$name\[\]:\n" ~ $_.dump
+				@lines.push( "$name\[\]:\n" ~ $_.dump )
 			}
 			return;
 		}
 		elsif $parsed.hash() {
-			say "$name\{\} keys: " ~ $parsed.hash.keys;
-			say "$name\{\}:\n" ~   $parsed.dump;
+			@lines.push( "$name\{\} keys: " ~ $parsed.hash.keys );
+			@lines.push( "$name\{\}:\n" ~   $parsed.dump );
 		}
 
-		say "";
+		@lines.push( "" );
+		return @lines.join("\n");
 	}
 
 	# $parsed can only be Int, by extension Str, by extension Bool.
@@ -133,8 +135,7 @@ class Perl6::Tidy {
 				)
 			);
 		}
-		self.debug( 'root', $parsed );
-		die "Uncaught type"
+		die self.debug( 'root', $parsed );
 	}
 
 	class StatementList does Node {
@@ -158,8 +159,7 @@ class Perl6::Tidy {
 		if assert-hash-keys( $parsed, [], [< statement >] ) {
 			return StatementList.new
 		}
-		self.debug( 'statementlist', $parsed );
-		die "Uncaught type"
+		die self.debug( 'statementlist', $parsed );
 	}
 
 	class Statement does Node {
@@ -188,8 +188,7 @@ class Perl6::Tidy {
 					);
 					next
 				}
-				self.debug( 'statement', $_ );
-				die "Uncaught key"
+				die self.debug( 'statement', $_ );
 			}
 			return Statement.new(
 				:child( @child )
@@ -222,8 +221,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		self.debug( 'statement', $parsed );
-		die "Uncaught type"
+		die self.debug( 'statement', $parsed );
 	}
 
 	class Sym does Node does Stringify { }
@@ -232,8 +230,7 @@ class Perl6::Tidy {
 		if assert-Str( $parsed ) {
 			return Sym.new( :name( $parsed.Str ) )
 		}
-		self.debug( 'sym', $parsed );
-		die "Uncaught type"
+		die self.debug( 'sym', $parsed );
 	}
 
 	class Sign does Node {
@@ -246,8 +243,7 @@ class Perl6::Tidy {
 		if assert-Bool( $parsed ) {
 			return Sign.new( :name( $parsed.Bool ) )
 		}
-		self.debug( 'sign', $parsed );
-		die "Uncaught type"
+		die self.debug( 'sign', $parsed );
 	}
 
 	class O does Node {
@@ -266,8 +262,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		self.debug( 'O', $hash );
-		die "Uncaught type"
+		die self.debug( 'O', $hash );
 	}
 
 	class Postfix does Node {
@@ -293,8 +288,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		self.debug( 'postfix', $parsed );
-		die "Uncaught type"
+		die self.debug( 'postfix', $parsed );
 	}
 
 	class MethodOp does Node {
@@ -320,8 +314,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		self.debug( 'methodop', $parsed );
-		die "Uncaught type"
+		die self.debug( 'methodop', $parsed );
 	}
 
 	class DottyOp does Node {
@@ -342,8 +335,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		self.debug( 'dottyop', $parsed );
-		die "Uncaught type"
+		die self.debug( 'dottyop', $parsed );
 	}
 
 	class OPER does Node {
@@ -390,8 +382,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		self.debug( 'OPER', $parsed );
-		die "Uncaught type"
+		die self.debug( 'OPER', $parsed );
 	}
 
 	class MoreName does Node {
@@ -423,8 +414,7 @@ class Perl6::Tidy {
 				),
 			)
 		}
-		self.debug( 'morename', $parsed );
-		die "Uncaught type"
+		die self.debug( 'morename', $parsed );
 	}
 
 	class Name does Node {
@@ -467,8 +457,7 @@ class Perl6::Tidy {
 				:child()
 			)
 		}
-		self.debug( 'name', $parsed );
-		die "Uncaught type"
+		die self.debug( 'name', $parsed );
 	}
 
 	class LongName does Node {
@@ -490,8 +479,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		self.debug( 'longname', $parsed );
-		die "Uncaught type"
+		die self.debug( 'longname', $parsed );
 	}
 
 	class Twigil does Node {
@@ -512,8 +500,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		self.debug( 'twigil', $parsed );
-		die "Uncaught type"
+		die self.debug( 'twigil', $parsed );
 	}
 
 	class Sigil does Node does Stringify { }
@@ -522,8 +509,7 @@ class Perl6::Tidy {
 		if assert-Str( $parsed ) {
 			return Sigil.new( :name( $parsed.Str ) )
 		}
-		self.debug( 'sigil', $parsed );
-		die "Uncaught type"
+		die self.debug( 'sigil', $parsed );
 	}
 
 	class DeSigilName does Node {
@@ -547,8 +533,7 @@ class Perl6::Tidy {
 		if $parsed.Str {
 			return DeSigilName.new( :name( $parsed.Str ) )
 		}
-		self.debug( 'desigilname', $parsed );
-		die "Uncaught type"
+		die self.debug( 'desigilname', $parsed );
 	}
 
 	class Variable does Node {
@@ -606,8 +591,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		self.debug( 'variable', $parsed );
-		die "Uncaught type"
+		die self.debug( 'variable', $parsed );
 	}
 
 	class RoutineDeclarator does Node {
@@ -633,8 +617,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		self.debug( 'routine_declarator', $parsed );
-		die "Uncaught type"
+		die self.debug( 'routine_declarator', $parsed );
 	}
 
 	class PackageDeclarator does Node {
@@ -660,8 +643,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		self.debug( 'package_declarator', $parsed );
-		die "Uncaught type"
+		die self.debug( 'package_declarator', $parsed );
 	}
 
 	class RegexDeclarator does Node {
@@ -687,8 +669,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		self.debug( 'regex_declarator', $parsed );
-		die "Uncaught type"
+		die self.debug( 'regex_declarator', $parsed );
 	}
 
 	class RoutineDef does Node {
@@ -716,8 +697,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		self.debug( 'routine_def', $parsed );
-		die "Uncaught type"
+		die self.debug( 'routine_def', $parsed );
 	}
 
 	class PackageDef does Node {
@@ -763,8 +743,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		self.debug( 'package_def', $parsed );
-		die "Uncaught type"
+		die self.debug( 'package_def', $parsed );
 	}
 
 	class RegexDef does Node {
@@ -793,8 +772,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		self.debug( 'regex_def', $parsed );
-		die "Uncaught type"
+		die self.debug( 'regex_def', $parsed );
 	}
 
 	class Blockoid does Node {
@@ -815,8 +793,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		self.debug( 'blockoid', $parsed );
-		die "Uncaught type"
+		die self.debug( 'blockoid', $parsed );
 	}
 
 	class DefLongName does Node {
@@ -838,8 +815,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		self.debug( 'deflongname', $parsed );
-		die "Uncaught type"
+		die self.debug( 'deflongname', $parsed );
 	}
 
 	class Args does Node {
@@ -852,8 +828,7 @@ class Perl6::Tidy {
 		if $parsed.Bool {
 			return Args.new( :name( $parsed.Bool ) )
 		}
-		self.debug( 'args', $parsed );
-		die "Uncaught type"
+		die self.debug( 'args', $parsed );
 	}
 
 	class Dotty does Node {
@@ -884,8 +859,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		self.debug( 'dotty', $parsed );
-		die "Uncaught type"
+		die self.debug( 'dotty', $parsed );
 	}
 
 	class EXPR does Node {
@@ -914,8 +888,7 @@ class Perl6::Tidy {
 					);
 					next;
 				}
-				self.debug( 'EXPR', $_ );
-				die "Uncaught key"
+				die self.debug( 'EXPR', $_ );
 			}
 			if $parsed.hash {
 				if assert-hash-keys(
@@ -972,8 +945,7 @@ class Perl6::Tidy {
 						:child( @child )
 					)
 				}
-				self.debug( 'EXPR', $parsed );
-				die "Uncaught key"
+				die self.debug( 'EXPR', $parsed );
 			}
 			else {
 				return EXPR.new(
@@ -1094,8 +1066,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		self.debug( 'EXPR', $parsed );
-		die "Uncaught type"
+		die self.debug( 'EXPR', $parsed );
 	}
 
 	class VariableDeclarator does Node {
@@ -1119,8 +1090,7 @@ class Perl6::Tidy {
 					);
 					next;
 				}
-				self.debug( 'variable_declarator', $_ );
-				die "Unknown key"
+				die self.debug( 'variable_declarator', $_ );
 			}
 			return VariableDeclarator.new(
 				:child( @child )
@@ -1156,8 +1126,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		self.debug( 'variable_declarator', $parsed );
-		die "Uncaught type"
+		die self.debug( 'variable_declarator', $parsed );
 	}
 
 	class Doc does Node {
@@ -1171,8 +1140,7 @@ class Perl6::Tidy {
 		if assert-Bool( $parsed ) {
 			return Doc.new( :name( $parsed.Bool ) )
 		}
-		self.debug( 'doc', $parsed );
-		die "Uncaught type"
+		die self.debug( 'doc', $parsed );
 	}
 
 	class ModuleName does Node {
@@ -1193,8 +1161,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		self.debug( 'module_name', $parsed );
-		die "Uncaught type"
+		die self.debug( 'module_name', $parsed );
 	}
 
 	class Version does Node {
@@ -1220,8 +1187,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		self.debug( 'version', $parsed );
-		die "Uncaught type"
+		die self.debug( 'version', $parsed );
 	}
 
 	class VNum does Node {
@@ -1234,8 +1200,7 @@ class Perl6::Tidy {
 		if $parsed.list {
 			return VNum.new( :child() )
 		}
-		self.debug( 'vnum', $parsed );
-		die "Uncaught type"
+		die self.debug( 'vnum', $parsed );
 	}
 
 	class VStr does Node {
@@ -1248,8 +1213,7 @@ class Perl6::Tidy {
 		if $parsed.Int {
 			return VStr.new( :name( $parsed.Int ) )
 		}
-		self.debug( 'vstr', $parsed );
-		die "Uncaught type"
+		die self.debug( 'vstr', $parsed );
 	}
 
 	class StatementControl does Node {
@@ -1301,8 +1265,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		self.debug( 'statement_control', $parsed );
-		die "Uncaught type"
+		die self.debug( 'statement_control', $parsed );
 	}
 
 	class MultiDeclarator does Node {
@@ -1323,8 +1286,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		self.debug( 'multi_declarator', $parsed );
-		die "Uncaught type"
+		die self.debug( 'multi_declarator', $parsed );
 	}
 
 	class Initializer does Node {
@@ -1350,8 +1312,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		self.debug( 'initializer', $parsed );
-		die "Uncaught type"
+		die self.debug( 'initializer', $parsed );
 	}
 
 	class Declarator does Node {
@@ -1406,8 +1367,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		self.debug( 'declarator', $parsed );
-		die "Uncaught type"
+		die self.debug( 'declarator', $parsed );
 	}
 
 	class DECL does Node {
@@ -1489,8 +1449,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		self.debug( 'DECL', $parsed );
-		die "Uncaught type"
+		die self.debug( 'DECL', $parsed );
 	}
 
 	class TypeName does Node {
@@ -1525,8 +1484,7 @@ class Perl6::Tidy {
 					);
 					next;
 				}
-				self.debug( 'typename', $_ );
-				die "Uncaught type"
+				die self.debug( 'typename', $_ );
 			}
 			return TypeName.new(
 				:child( @child )
@@ -1543,8 +1501,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		self.debug( 'typename', $parsed );
-		die "Uncaught type"
+		die self.debug( 'typename', $parsed );
 	}
 
 	class Scoped is Node { }
@@ -1608,8 +1565,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		self.debug( 'scoped', $parsed );
-		die "Uncaught type"
+		die self.debug( 'scoped', $parsed );
 	}
 
 	class ScopeDeclarator does Node {
@@ -1635,8 +1591,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		self.debug( 'scope_declarator', $parsed );
-		die "Uncaught type"
+		die self.debug( 'scope_declarator', $parsed );
 	}
 
 	class Value does Node {
@@ -1668,8 +1623,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		self.debug( 'value', $parsed );
-		die "Uncaught type"
+		die self.debug( 'value', $parsed );
 	}
 
 	class Number does Node {
@@ -1690,8 +1644,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		self.debug( 'number', $parsed );
-		die "Uncaught type"
+		die self.debug( 'number', $parsed );
 	}
 
 	class Quote does Node {
@@ -1723,8 +1676,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		self.debug( 'quote', $parsed );
-		die "Uncaught type"
+		die self.debug( 'quote', $parsed );
 	}
 
 	class B does Node {
@@ -1737,8 +1689,7 @@ class Perl6::Tidy {
 		if assert-Bool( $parsed ) {
 			return B.new( :name( $parsed.Bool ) )
 		}
-		self.debug( 'B', $parsed );
-		die "Uncaught type"
+		die self.debug( 'B', $parsed );
 	}
 
 	class Babble does Node {
@@ -1760,8 +1711,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		self.debug( 'babble', $parsed );
-		die "Uncaught type"
+		die self.debug( 'babble', $parsed );
 	}
 
 	class Signature does Node {
@@ -1780,8 +1730,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		self.debug( 'signature', $parsed );
-		die "Uncaught type"
+		die self.debug( 'signature', $parsed );
 	}
 
 	class FakeSignature does Node {
@@ -1802,8 +1751,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		self.debug( 'fakesignature', $parsed );
-		die "Uncaught type"
+		die self.debug( 'fakesignature', $parsed );
 	}
 
 	class ColonPair does Node {
@@ -1835,8 +1783,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		self.debug( 'colonpair', $parsed );
-		die "Uncaught type"
+		die self.debug( 'colonpair', $parsed );
 	}
 
 	class Identifier does Node {
@@ -1855,8 +1802,7 @@ class Perl6::Tidy {
 					);
 					next
 				}
-				self.debug( 'identifier', $_ );
-				die "Uncaught type"
+				die self.debug( 'identifier', $_ );
 			}
 			return Identifier.new(
 				:child( @child )
@@ -1865,8 +1811,7 @@ class Perl6::Tidy {
 		elsif $parsed.Str {
 			return Identifier.new( :name( $parsed.Str ) )
 		}
-		self.debug( 'identifier', $parsed );
-		die "Uncaught type"
+		die self.debug( 'identifier', $parsed );
 	}
 
 	class QuotePair does Node {
@@ -1887,8 +1832,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		self.debug( 'quotepair', $parsed );
-		die "Uncaught type"
+		die self.debug( 'quotepair', $parsed );
 	}
 
 	class Quibble does Node {
@@ -1914,8 +1858,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		self.debug( 'quibble', $parsed );
-		die "Uncaught type"
+		die self.debug( 'quibble', $parsed );
 	}
 
 	class _0 does Node {
@@ -1936,8 +1879,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		self.debug( '_0', $parsed );
-		die "Uncaught type"
+		die self.debug( '_0', $parsed );
 	}
 
 	class CharSpec does Node {
@@ -1958,21 +1900,17 @@ class Perl6::Tidy {
 							@__child.push( $_ );
 							next
 						}
-						self.debug( 'charspec', $_ );
-						die "Uncaught type"
+						die self.debug( 'charspec', $_ );
 					}
-#					self.debug( 'charspec', $_list );
-#					die "Uncaught type"
+#					die self.debug( 'charspec', $_list );
 				}
-#				self.debug( 'charspec', $list );
-#				die "Uncaught type"
+#				die self.debug( 'charspec', $list );
 			}
 			return CharSpec.new(
 				:child( @child )
 			)
 		}
-		self.debug( 'charspec', $parsed );
-		die "Uncaught type"
+		die self.debug( 'charspec', $parsed );
 	}
 
 	class CClassElem_INTERMEDIARY does Node {
@@ -2010,15 +1948,13 @@ class Perl6::Tidy {
 					);
 					next
 				}
-				self.debug( 'cclass_elem', $_ );
-				die "Uncaught type"
+				die self.debug( 'cclass_elem', $_ );
 			}
 			return CClassElem.new(
 				:child( @child )
 			)
 		}
-		self.debug( 'cclass_elem', $parsed );
-		die "Uncaught type"
+		die self.debug( 'cclass_elem', $parsed );
 	}
 
 	class Assertion does Node {
@@ -2039,8 +1975,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		self.debug( 'assertion', $parsed );
-		die "Uncaught type"
+		die self.debug( 'assertion', $parsed );
 	}
 
 	class BackSlash does Node {
@@ -2061,8 +1996,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		self.debug( 'backslash', $parsed );
-		die "Uncaught type"
+		die self.debug( 'backslash', $parsed );
 	}
 
 	class MetaChar does Node {
@@ -2105,8 +2039,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		self.debug( 'metachar', $parsed );
-		die "Uncaught type"
+		die self.debug( 'metachar', $parsed );
 	}
 
 	class Atom does Node {
@@ -2130,8 +2063,7 @@ class Perl6::Tidy {
 		if $parsed.Str {
 			return Atom.new( :name( $parsed.Str ) )
 		}
-		self.debug( 'atom', $parsed );
-		die "Uncaught type"
+		die self.debug( 'atom', $parsed );
 	}
 
 	class NormSpace does Node {
@@ -2144,8 +2076,7 @@ class Perl6::Tidy {
 		if $parsed.Str {
 			return NormSpace.new( :name( $parsed.Str ) )
 		}
-		self.debug( 'normspace', $parsed );
-		die "Uncaught type"
+		die self.debug( 'normspace', $parsed );
 	}
 	class SigFinal does Node {
 		method perl6() {
@@ -2165,8 +2096,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		self.debug( 'sigfinal', $parsed );
-		die "Uncaught type"
+		die self.debug( 'sigfinal', $parsed );
 	}
 
 	class Noun does Node {
@@ -2188,15 +2118,13 @@ class Perl6::Tidy {
 					);
 					next
 				}
-				self.debug( 'noun', $_ );
-				die "Uncaught type"
+				die self.debug( 'noun', $_ );
 			}
 			return Noun.new(
 				:child( @child )
 			)
 		}
-		self.debug( 'noun', $parsed );
-		die "Uncaught type"
+		die self.debug( 'noun', $parsed );
 	}
 
 	class TermIsh is Node { }
@@ -2213,8 +2141,7 @@ class Perl6::Tidy {
 					);
 					next
 				}
-				self.debug( 'termish', $_ );
-				die "Uncaught type"
+				die self.debug( 'termish', $_ );
 			}
 			return TermIsh.new(
 				:child( @child )
@@ -2231,8 +2158,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		self.debug( 'termish', $parsed );
-		die "Uncaught type"
+		die self.debug( 'termish', $parsed );
 	}
 
 	class TermConj does Node {
@@ -2253,15 +2179,13 @@ class Perl6::Tidy {
 					);
 					next
 				}
-				self.debug( 'termconj', $_ );
-				die "Uncaught type"
+				die self.debug( 'termconj', $_ );
 			}
 			return TermConj.new(
 				:child( @child )
 			)
 		}
-		self.debug( 'termconj', $parsed );
-		die "Uncaught type"
+		die self.debug( 'termconj', $parsed );
 	}
 
 	class TermAlt does Node {
@@ -2282,15 +2206,13 @@ class Perl6::Tidy {
 					);
 					next
 				}
-				self.debug( 'termalt', $_ );
-				die "Uncaught type"
+				die self.debug( 'termalt', $_ );
 			}
 			return TermAlt.new(
 				:child( @child )
 			)
 		}
-		self.debug( 'termalt', $parsed );
-		die "Uncaught type"
+		die self.debug( 'termalt', $parsed );
 	}
 
 	class TermConjSeq does Node {
@@ -2311,8 +2233,7 @@ class Perl6::Tidy {
 					);
 					next
 				}
-				self.debug( 'termconjseq', $_ );
-				die "Uncaught type"
+				die self.debug( 'termconjseq', $_ );
 			}
 			return TermConjSeq.new(
 				:child( @child )
@@ -2329,8 +2250,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		self.debug( 'termconjseq', $parsed );
-		die "Uncaught type"
+		die self.debug( 'termconjseq', $parsed );
 	}
 
 	class TermAltSeq does Node {
@@ -2351,8 +2271,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		self.debug( 'termaltseq', $parsed );
-		die "Uncaught type"
+		die self.debug( 'termaltseq', $parsed );
 	}
 
 	class TermSeq does Node {
@@ -2373,8 +2292,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		self.debug( 'termseq', $parsed );
-		die "Uncaught type"
+		die self.debug( 'termseq', $parsed );
 	}
 
 	class Nibble does Node {
@@ -2398,8 +2316,7 @@ class Perl6::Tidy {
 		if $parsed.Str {
 			return Nibble.new( :name( $parsed.Str ) )
 		}
-		self.debug( 'nibble', $parsed );
-		die "Uncaught type"
+		die self.debug( 'nibble', $parsed );
 	}
 
 	class DecNumber does Node {
@@ -2451,8 +2368,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		self.debug( 'dec_number', $parsed );
-		die "Uncaught type"
+		die self.debug( 'dec_number', $parsed );
 	}
 
 	class VALUE does Node does Intify {
@@ -2465,8 +2381,7 @@ class Perl6::Tidy {
 		if assert-Int( $parsed ) {
 			return VALUE.new( :name( $parsed.Int ) )
 		}
-		self.debug( 'VALUE', $parsed );
-		die "Uncaught type"
+		die self.debug( 'VALUE', $parsed );
 	}
 
 	class Numish does Node {
@@ -2510,8 +2425,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		self.debug( 'numish', $parsed );
-		die "Uncaught type"
+		die self.debug( 'numish', $parsed );
 	}
 
 	class Integer does Node {
@@ -2585,8 +2499,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		self.debug( 'integer', $parsed );
-		die "Uncaught type"
+		die self.debug( 'integer', $parsed );
 	}
 
 	class Circumfix does Node {
@@ -2655,8 +2568,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		self.debug( 'circumfix', $parsed );
-		die "Uncaught type"
+		die self.debug( 'circumfix', $parsed );
 	}
 
 	class SemiList does Node {
@@ -2680,8 +2592,7 @@ class Perl6::Tidy {
 		if assert-hash-keys( $parsed, [], [< statement >] ) {
 			return SemiList.new
 		}
-		self.debug( 'semilist', $parsed );
-		die "Uncaught type"
+		die self.debug( 'semilist', $parsed );
 	}
 
 	class RadNumber does Node {
@@ -2710,8 +2621,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		self.debug( 'rad_number', $parsed );
-		die "Uncaught type"
+		die self.debug( 'rad_number', $parsed );
 	}
 
 	class _Int does Node does Intify { }
@@ -2720,8 +2630,7 @@ class Perl6::Tidy {
 		if assert-Int( $parsed ) {
 			return _Int.new( :name( $parsed.Int ) )
 		}
-		self.debug( 'int', $parsed );
-		die "Uncaught type"
+		die self.debug( 'int', $parsed );
 	}
 
 	class Radix does Node does Intify { }
@@ -2730,8 +2639,7 @@ class Perl6::Tidy {
 		if assert-Int( $parsed ) {
 			return Radix.new( :name( $parsed.Int ) )
 		}
-		self.debug( 'radix', $parsed );
-		die "Uncaught type"
+		die self.debug( 'radix', $parsed );
 	}
 
 	class Frac does Node does Intify { }
@@ -2740,8 +2648,7 @@ class Perl6::Tidy {
 		if assert-Int( $parsed ) {
 			return Frac.new( :name( $parsed.Int ) )
 		}
-		self.debug( 'frac', $parsed );
-		die "Uncaught type"
+		die self.debug( 'frac', $parsed );
 	}
 
 	class Coeff does Node does Intify { }
@@ -2750,8 +2657,7 @@ class Perl6::Tidy {
 		if assert-Int( $parsed ) {
 			return Coeff.new( :name( $parsed.Int ) )
 		}
-		self.debug( 'coeff', $parsed );
-		die "Uncaught type"
+		die self.debug( 'coeff', $parsed );
 	}
 
 	class EScale does Node {
@@ -2777,8 +2683,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		self.debug( 'escale', $parsed );
-		die "Uncaught type"
+		die self.debug( 'escale', $parsed );
 	}
 
 	class BinInt does Node does Intify { }
@@ -2787,8 +2692,7 @@ class Perl6::Tidy {
 		if assert-Int( $parsed ) {
 			return BinInt.new( :name( $parsed.Int ) )
 		}
-		self.debug( 'binint', $parsed );
-		die "Uncaught type"
+		die self.debug( 'binint', $parsed );
 	}
 
 	class OctInt does Node does Intify { }
@@ -2797,8 +2701,7 @@ class Perl6::Tidy {
 		if assert-Int( $parsed ) {
 			return OctInt.new( :name( $parsed.Int ) )
 		}
-		self.debug( 'octint', $parsed );
-		die "Uncaught type"
+		die self.debug( 'octint', $parsed );
 	}
 
 	class DecInt does Node does Intify { }
@@ -2807,8 +2710,7 @@ class Perl6::Tidy {
 		if assert-Int( $parsed ) {
 			return DecInt.new( :name( $parsed.Int ) )
 		}
-		self.debug( 'decint', $parsed );
-		die "Uncaught type"
+		die self.debug( 'decint', $parsed );
 	}
 
 	class HexInt does Node does Intify { }
@@ -2817,7 +2719,6 @@ class Perl6::Tidy {
 		if assert-Int( $parsed ) {
 			return HexInt.new( :name( $parsed.Int ) )
 		}
-		self.debug( 'hexint', $parsed );
-		die "Uncaught type"
+		die self.debug( 'hexint', $parsed );
 	}
 }
