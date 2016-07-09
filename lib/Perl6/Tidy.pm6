@@ -2297,91 +2297,6 @@ class Perl6::Tidy {
 		die debug( 'scope_declarator', $parsed );
 	}
 
-	class Value does Node {
-		method perl6() {
-"### Value"
-		}
-	}
-
-	method value( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< number >] ) {
-			return Value.new(
-				:content(
-					:number(
-						self.number(
-							$parsed.hash.<number>
-						)
-					)
-				)
-			)
-		}
-		if assert-hash-keys( $parsed, [< quote >] ) {
-			return Value.new(
-				:content(
-					:quote(
-						self.quote(
-							$parsed.hash.<quote>
-						)
-					)
-				)
-			)
-		}
-		die debug( 'value', $parsed );
-	}
-
-	class Number does Node {
-		method perl6() {
-"### Number"
-		}
-	}
-
-	method number( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< numish >] ) {
-			return Number.new(
-				:content(
-					:numish(
-						self.numish(
-							$parsed.hash.<numish>
-						)
-					)
-				)
-			)
-		}
-		die debug( 'number', $parsed );
-	}
-
-	class Quote does Node {
-		method perl6() {
-"### Quote"
-		}
-	}
-
-	method quote( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< nibble >] ) {
-			return Quote.new(
-				:content(
-					:nibble(
-						Nibble.new(
-							$parsed.hash.<nibble>
-						)
-					)
-				)
-			)
-		}
-		if assert-hash-keys( $parsed, [< quibble >] ) {
-			return Quote.new(
-				:content(
-					:quibble(
-						self.quibble(
-							$parsed.hash.<quibble>
-						)
-					)
-				)
-			)
-		}
-		die debug( 'quote', $parsed );
-	}
-
 	class B does Node {
 		method perl6() {
 "### B"
@@ -2419,26 +2334,109 @@ class Perl6::Tidy {
 		method perl6() {
 "### Quibble"
 		}
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< babble nibble >] ) {
+				return self.bless(
+					:content(
+						:babble(
+							Babble.new(
+								$parsed.hash.<babble>
+							)
+						),
+						:nibble(
+							Nibble.new(
+								$parsed.hash.<nibble>
+							)
+						)
+					)
+				)
+			}
+			die debug( 'quibble', $parsed );
+		}
 	}
 
-	method quibble( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< babble nibble >] ) {
-			return Quibble.new(
-				:content(
-					:babble(
-						Babble.new(
-							$parsed.hash.<babble>
+	class Quote does Node {
+		method perl6() {
+"### Quote"
+		}
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< nibble >] ) {
+				return self.bless(
+					:content(
+						:nibble(
+							Nibble.new(
+								$parsed.hash.<nibble>
+							)
 						)
-					),
-					:nibble(
-						Nibble.new(
-							$parsed.hash.<nibble>
+					)
+				)
+			}
+			if assert-hash-keys( $parsed, [< quibble >] ) {
+				return self.bless(
+					:content(
+						:quibble(
+							Quibble.new(
+								$parsed.hash.<quibble>
+							)
+						)
+					)
+				)
+			}
+			die debug( 'quote', $parsed );
+		}
+	}
+
+	class Value does Node {
+		method perl6() {
+"### Value"
+		}
+	}
+
+	method value( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< number >] ) {
+			return Value.new(
+				:content(
+					:number(
+						self.number(
+							$parsed.hash.<number>
 						)
 					)
 				)
 			)
 		}
-		die debug( 'quibble', $parsed );
+		if assert-hash-keys( $parsed, [< quote >] ) {
+			return Value.new(
+				:content(
+					:quote(
+						Quote.new(
+							$parsed.hash.<quote>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'value', $parsed );
+	}
+
+	class Number does Node {
+		method perl6() {
+"### Number"
+		}
+	}
+
+	method number( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< numish >] ) {
+			return Number.new(
+				:content(
+					:numish(
+						self.numish(
+							$parsed.hash.<numish>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'number', $parsed );
 	}
 
 	class _0 does Node {
