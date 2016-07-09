@@ -1950,13 +1950,12 @@ class Perl6::Tidy {
 		method perl6() {
 "### B"
 		}
-	}
-
-	method B( Mu $parsed ) {
-		if assert-Bool( $parsed ) {
-			return B.new( :name( $parsed.Bool ) )
+		method new( Mu $parsed ) {
+			if assert-Bool( $parsed ) {
+				return self.bless( :name( $parsed.Bool ) )
+			}
+			die debug( 'B', $parsed );
 		}
-		die debug( 'B', $parsed );
 	}
 
 	class Babble does Node {
@@ -1970,7 +1969,7 @@ class Perl6::Tidy {
 			return Babble.new(
 				:content(
 					:B(
-						self.B(
+						B.new(
 							$parsed.hash.<B>
 						)
 					),
