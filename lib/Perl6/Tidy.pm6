@@ -163,6 +163,104 @@ class Perl6::Tidy {
 		}
 	}
 
+	class EScale does Node {
+		method perl6() {
+"### EScale"
+		}
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< sign decint >] ) {
+				return self.bless(
+					:content(
+						:sign(
+							Sign.new(
+								$parsed.hash.<sign>
+							)
+						),
+						:decint(
+							DecInt.new(
+								$parsed.hash.<decint>
+							)
+						)
+					)
+				)
+			}
+			die debug( 'escale', $parsed );
+		}
+	}
+
+	class Integer does Node {
+		method perl6() {
+"### Integer"
+		}
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< decint VALUE >] ) {
+				return self.bless(
+					:content(
+						:decint(
+							DecInt.new(
+								$parsed.hash.<decint>
+							)
+						),
+						:VALUE(
+							VALUE.new(
+								$parsed.hash.<VALUE>
+							)
+						)
+					)
+				)
+			}
+			if assert-hash-keys( $parsed, [< binint VALUE >] ) {
+				return self.bless(
+					:content(
+						:binint(
+							BinInt.new(
+								$parsed.hash.<binint>
+							)
+						),
+						:VALUE(
+							VALUE.new(
+								$parsed.hash.<VALUE>
+							)
+						)
+					)
+				)
+			}
+			if assert-hash-keys( $parsed, [< octint VALUE >] ) {
+				return self.bless(
+					:content(
+						:octint(
+							OctInt.new(
+								$parsed.hash.<octint>
+							)
+						),
+						:VALUE(
+							VALUE.new(
+								$parsed.hash.<VALUE>
+							)
+						)
+					)
+				)
+			}
+			if assert-hash-keys( $parsed, [< hexint VALUE >] ) {
+				return self.bless(
+					:content(
+						:hexint(
+							HexInt.new(
+								$parsed.hash.<hexint>
+							)
+						),
+						:VALUE(
+							VALUE.new(
+								$parsed.hash.<VALUE>
+							)
+						)
+					)
+				)
+			}
+			die debug( 'integer', $parsed );
+		}
+	}
+
 	sub debug( Str $name, Mu $parsed ) {
 		my @lines;
 		my @types;
@@ -2433,52 +2531,51 @@ class Perl6::Tidy {
 		method perl6() {
 "### DecNumber"
 		}
-	}
-
-	method dec_number( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< int coeff frac >] ) {
-			return DecNumber.new(
-				:content(
-					:int(
-						_Int.new(
-							$parsed.hash.<int>
-						)
-					),
-					:coeff(
-						Coeff.new(
-							$parsed.hash.<coeff>
-						)
-					),
-					:frac(
-						Frac.new(
-							$parsed.hash.<frac>
-						)
-					)
-				)
-			)
-		}
-		if assert-hash-keys( $parsed, [< int coeff escale >] ) {
-			return DecNumber.new(
-				:content(
-					:int(
-						_Int.new(
-							$parsed.hash.<int>
-						)
-					),
-					:coeff(
-						Coeff.new(
-							$parsed.hash.<coeff>
-						)
-					),
-					:escale(
-						self.escale(
-							$parsed.hash.<escale>
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< int coeff frac >] ) {
+				return self.bless(
+					:content(
+						:int(
+							_Int.new(
+								$parsed.hash.<int>
+							)
+						),
+						:coeff(
+							Coeff.new(
+								$parsed.hash.<coeff>
+							)
+						),
+						:frac(
+							Frac.new(
+								$parsed.hash.<frac>
+							)
 						)
 					)
 				)
-			)
+			}
+			if assert-hash-keys( $parsed, [< int coeff escale >] ) {
+				return self.bless(
+					:content(
+						:int(
+							_Int.new(
+								$parsed.hash.<int>
+							)
+						),
+						:coeff(
+							Coeff.new(
+								$parsed.hash.<coeff>
+							)
+						),
+						:escale(
+							EScale.new(
+								$parsed.hash.<escale>
+							)
+						)
+					)
+				)
+			}
+			die debug( 'dec_number', $parsed );
 		}
-		die debug( 'dec_number', $parsed );
 	}
 
 	class Numish does Node {
@@ -2492,7 +2589,7 @@ class Perl6::Tidy {
 			return Numish.new(
 				:content(
 					:integer(
-						self.integer(
+						Integer.new(
 							$parsed.hash.<integer>
 						)
 					)
@@ -2515,7 +2612,7 @@ class Perl6::Tidy {
 			return Numish.new(
 				:content(
 					:dec_number(
-						self.dec_number(
+						DecNumber.new(
 							$parsed.hash.<dec_number>
 						)
 					)
@@ -2523,80 +2620,6 @@ class Perl6::Tidy {
 			)
 		}
 		die debug( 'numish', $parsed );
-	}
-
-	class Integer does Node {
-		method perl6() {
-"### Integer"
-		}
-	}
-
-	method integer( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< decint VALUE >] ) {
-			return Integer.new(
-				:content(
-					:decint(
-						DecInt.new(
-							$parsed.hash.<decint>
-						)
-					),
-					:VALUE(
-						VALUE.new(
-							$parsed.hash.<VALUE>
-						)
-					)
-				)
-			)
-		}
-		if assert-hash-keys( $parsed, [< binint VALUE >] ) {
-			return Integer.new(
-				:content(
-					:binint(
-						BinInt.new(
-							$parsed.hash.<binint>
-						)
-					),
-					:VALUE(
-						VALUE.new(
-							$parsed.hash.<VALUE>
-						)
-					)
-				)
-			)
-		}
-		if assert-hash-keys( $parsed, [< octint VALUE >] ) {
-			return Integer.new(
-				:content(
-					:octint(
-						OctInt.new(
-							$parsed.hash.<octint>
-						)
-					),
-					:VALUE(
-						VALUE.new(
-							$parsed.hash.<VALUE>
-						)
-					)
-				)
-			)
-		}
-		if assert-hash-keys( $parsed, [< hexint VALUE >] ) {
-			return Integer.new(
-				:content(
-					:hexint(
-						HexInt.new(
-							$parsed.hash.<hexint>
-						)
-					),
-					:VALUE(
-						VALUE.new(
-							$parsed.hash.<VALUE>
-						)
-					)
-				)
-			)
-		}
-		die debug( 'integer', $parsed );
 	}
 
 	class Circumfix does Node {
@@ -2719,31 +2742,5 @@ class Perl6::Tidy {
 			)
 		}
 		die debug( 'rad_number', $parsed );
-	}
-
-	class EScale does Node {
-		method perl6() {
-"### EScale"
-		}
-	}
-
-	method escale( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< sign decint >] ) {
-			return EScale.new(
-				:content(
-					:sign(
-						Sign.new(
-							$parsed.hash.<sign>
-						)
-					),
-					:decint(
-						DecInt.new(
-							$parsed.hash.<decint>
-						)
-					)
-				)
-			)
-		}
-		die debug( 'escale', $parsed );
 	}
 }
