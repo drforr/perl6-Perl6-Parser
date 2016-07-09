@@ -567,6 +567,18 @@ class Perl6::Tidy {
 		die debug( 'postfix', $parsed );
 	}
 
+
+	class Args does Node {
+		method perl6() {
+"### Args"
+		}
+		method new( Mu $parsed ) {
+			if $parsed.Bool {
+				return self.bless( :name( $parsed.Bool ) )
+			}
+			die debug( 'args', $parsed );
+		}
+	}
 	class MethodOp does Node {
 		method perl6() {
 "### MethodOp"
@@ -583,7 +595,7 @@ class Perl6::Tidy {
 						)
 					),
 					:args(
-						self.args(
+						Args.new(
 							$parsed.hash.<args>
 						)
 					)
@@ -734,6 +746,75 @@ class Perl6::Tidy {
 			)
 		}
 		die debug( 'name', $parsed );
+	}
+
+	class Signature does Node {
+		method perl6() {
+"### Signature"
+		}
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [], [< param_sep parameter >] ) {
+				return self.bless(
+					:name( $parsed.Bool ),
+					:content(
+						:param_sep(),
+						:parameter()
+					)
+				)
+			}
+			die debug( 'signature', $parsed );
+		}
+	}
+
+	class FakeSignature does Node {
+		method perl6() {
+"### FakeSignature"
+		}
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< signature >] ) {
+				return self.bless(
+					:content(
+						:signature(
+							Signature.new(
+								$parsed.hash.<signature>
+							)
+						)
+					)
+				)
+			}
+			die debug( 'fakesignature', $parsed );
+		}
+	}
+
+	class ColonPair does Node {
+		method perl6() {
+"### ColonPair"
+		}
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< identifier >] ) {
+				return self.bless(
+					:content(
+						:identifier(
+							Identifier.new(
+								$parsed.hash.<identifier>
+							)
+						)
+					)
+				)
+			}
+			if assert-hash-keys( $parsed, [< fakesignature >] ) {
+				return self.bless(
+					:content(
+						:fakesignature(
+							FakeSignature.new(
+								$parsed.hash.<fakesignature>
+							)
+						)
+					)
+				)
+			}
+			die debug( 'colonpair', $parsed );
+		}
 	}
 
 	class LongName does Node {
@@ -1085,19 +1166,6 @@ class Perl6::Tidy {
 		die debug( 'deflongname', $parsed );
 	}
 
-	class Args does Node {
-		method perl6() {
-"### Args"
-		}
-	}
-
-	method args( Mu $parsed ) {
-		if $parsed.Bool {
-			return Args.new( :name( $parsed.Bool ) )
-		}
-		die debug( 'args', $parsed );
-	}
-
 	class Dotty does Node {
 		method perl6() {
 "### Dotty"
@@ -1229,7 +1297,7 @@ class Perl6::Tidy {
 				),
 				:content(
 					:args(
-						self.args(
+						Args.new(
 							$parsed.hash.<args>
 						)
 					)
@@ -1282,7 +1350,7 @@ class Perl6::Tidy {
 			return EXPR.new(
 				:content(
 					:colonpair(
-						self.colonpair(
+						ColonPair.new(
 							$parsed.hash.<colonpair>
 						)
 					)
@@ -1974,76 +2042,6 @@ class Perl6::Tidy {
 		}
 	}
 
-	class Signature does Node {
-		method perl6() {
-"### Signature"
-		}
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [], [< param_sep parameter >] ) {
-				return self.bless(
-					:name( $parsed.Bool ),
-					:content(
-						:param_sep(),
-						:parameter()
-					)
-				)
-			}
-			die debug( 'signature', $parsed );
-		}
-	}
-
-	class FakeSignature does Node {
-		method perl6() {
-"### FakeSignature"
-		}
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< signature >] ) {
-				return self.bless(
-					:content(
-						:signature(
-							Signature.new(
-								$parsed.hash.<signature>
-							)
-						)
-					)
-				)
-			}
-			die debug( 'fakesignature', $parsed );
-		}
-	}
-
-	class ColonPair does Node {
-		method perl6() {
-"### ColonPair"
-		}
-	}
-
-	method colonpair( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< identifier >] ) {
-			return ColonPair.new(
-				:content(
-					:identifier(
-						Identifier.new(
-							$parsed.hash.<identifier>
-						)
-					)
-				)
-			)
-		}
-		if assert-hash-keys( $parsed, [< fakesignature >] ) {
-			return ColonPair.new(
-				:content(
-					:fakesignature(
-						FakeSignature.new(
-							$parsed.hash.<fakesignature>
-						)
-					)
-				)
-			)
-		}
-		die debug( 'colonpair', $parsed );
-	}
-
 	class Quibble does Node {
 		method perl6() {
 "### Quibble"
@@ -2230,24 +2228,23 @@ class Perl6::Tidy {
 		method perl6() {
 "### Atom"
 		}
-	}
-
-	method atom( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< metachar >] ) {
-			return Atom.new(
-				:content(
-					:metachar(
-						MetaChar.new(
-							$parsed.hash.<metachar>
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< metachar >] ) {
+				return self.bless(
+					:content(
+						:metachar(
+							MetaChar.new(
+								$parsed.hash.<metachar>
+							)
 						)
 					)
 				)
-			)
+			}
+			if $parsed.Str {
+				return self.bless( :name( $parsed.Str ) )
+			}
+			die debug( 'atom', $parsed );
 		}
-		if $parsed.Str {
-			return Atom.new( :name( $parsed.Str ) )
-		}
-		die debug( 'atom', $parsed );
 	}
 
 	class Noun does Node {
@@ -2263,7 +2260,7 @@ class Perl6::Tidy {
 				if assert-hash-keys( $_, [< atom >],
 							 [< sigfinal >] ) {
 					@child.push(
-						self.atom(
+						Atom.new(
 							$_.hash.<atom>
 						)
 					);
