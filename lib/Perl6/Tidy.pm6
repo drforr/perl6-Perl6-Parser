@@ -7,6 +7,18 @@ class Perl6::Tidy {
 		has %.content;
 	}
 
+	class BinInt does Node {
+		method perl6() {
+"### BinInt"
+		}
+		method new( Mu $parsed ) {
+			if assert-Int( $parsed ) {
+				return self.bless( :name( $parsed.Int ) )
+			}
+			die debug( 'binint', $parsed );
+		}
+	}
+
 	sub debug( Str $name, Mu $parsed ) {
 		my @lines;
 		my @types;
@@ -2444,7 +2456,7 @@ class Perl6::Tidy {
 			return Integer.new(
 				:content(
 					:decint(
-						self.decint(
+						decint(
 							$parsed.hash.<decint>
 						)
 					),
@@ -2460,7 +2472,7 @@ class Perl6::Tidy {
 			return Integer.new(
 				:content(
 					:binint(
-						self.binint(
+						BinInt.new(
 							$parsed.hash.<binint>
 						)
 					),
@@ -2476,7 +2488,7 @@ class Perl6::Tidy {
 			return Integer.new(
 				:content(
 					:octint(
-						self.octint(
+						octint(
 							$parsed.hash.<octint>
 						)
 					),
@@ -2492,7 +2504,7 @@ class Perl6::Tidy {
 			return Integer.new(
 				:content(
 					:hexint(
-						self.hexint(
+						hexint(
 							$parsed.hash.<hexint>
 						)
 					),
@@ -2529,7 +2541,7 @@ class Perl6::Tidy {
 			return Circumfix.new(
 				:content(
 					:binint(
-						self.binint(
+						BinInt.new(
 							$parsed.hash.<binint>
 						)
 					),
@@ -2545,7 +2557,7 @@ class Perl6::Tidy {
 			return Circumfix.new(
 				:content(
 					:octint(
-						self.octint(
+						octint(
 							$parsed.hash.<octint>
 						)
 					),
@@ -2561,7 +2573,7 @@ class Perl6::Tidy {
 			return Circumfix.new(
 				:content(
 					:hexint(
-						self.hexint(
+						hexint(
 							$parsed.hash.<hexint>
 						)
 					),
@@ -2697,7 +2709,7 @@ class Perl6::Tidy {
 						)
 					),
 					:decint(
-						self.decint(
+						decint(
 							$parsed.hash.<decint>
 						)
 					)
@@ -2707,26 +2719,13 @@ class Perl6::Tidy {
 		die debug( 'escale', $parsed );
 	}
 
-	class BinInt does Node {
-		method perl6() {
-"### BinInt"
-		}
-	}
-
-	method binint( Mu $parsed ) {
-		if assert-Int( $parsed ) {
-			return BinInt.new( :name( $parsed.Int ) )
-		}
-		die debug( 'binint', $parsed );
-	}
-
 	class OctInt does Node {
 		method perl6() {
 "### OctInt"
 		}
 	}
 
-	method octint( Mu $parsed ) {
+	sub octint( Mu $parsed ) {
 		if assert-Int( $parsed ) {
 			return OctInt.new( :name( $parsed.Int ) )
 		}
@@ -2739,7 +2738,7 @@ class Perl6::Tidy {
 		}
 	}
 
-	method decint( Mu $parsed ) {
+	sub decint( Mu $parsed ) {
 		if assert-Int( $parsed ) {
 			return DecInt.new( :name( $parsed.Int ) )
 		}
@@ -2752,7 +2751,7 @@ class Perl6::Tidy {
 		}
 	}
 
-	method hexint( Mu $parsed ) {
+	sub hexint( Mu $parsed ) {
 		if assert-Int( $parsed ) {
 			return HexInt.new( :name( $parsed.Int ) )
 		}
