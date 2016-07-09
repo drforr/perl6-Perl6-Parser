@@ -281,6 +281,33 @@ class Perl6::Tidy {
 		}
 	}
 
+	class Identifier does Node {
+		method perl6() {
+"### Identifier"
+		}
+		method new( Mu $parsed ) {
+			if $parsed.list {
+				my @child;
+				for $parsed.list {
+					if assert-Str( $_ ) {
+						@child.push(
+							$_.Str
+						);
+						next
+					}
+					die debug( 'identifier', $_ );
+				}
+				return self.bless(
+					:child( @child )
+				)
+			}
+			elsif $parsed.Str {
+				return self.bless( :name( $parsed.Str ) )
+			}
+			die debug( 'identifier', $parsed );
+		}
+	}
+
 	sub debug( Str $name, Mu $parsed ) {
 		my @lines;
 		my @types;
@@ -645,7 +672,7 @@ class Perl6::Tidy {
 			return MoreName.new(
 				:content(
 					:identifier(
-						self.identifier(
+						Identifier.new(
 							$parsed.hash.<identifier>
 						)
 					),
@@ -685,7 +712,7 @@ class Perl6::Tidy {
 			return Name.new(
 				:content(
 					:identifier(
-						self.identifier(
+						Identifier.new(
 							$parsed.hash.<identifier>
 						)
 					),
@@ -698,7 +725,7 @@ class Perl6::Tidy {
 			return Name.new(
 				:content(
 					:identifier(
-						self.identifier(
+						Identifier.new(
 							$parsed.hash.<identifier>
 						)
 					),
@@ -2005,7 +2032,7 @@ class Perl6::Tidy {
 			return ColonPair.new(
 				:content(
 					:identifier(
-						self.identifier(
+						Identifier.new(
 							$parsed.hash.<identifier>
 						)
 					)
@@ -2026,34 +2053,6 @@ class Perl6::Tidy {
 		die debug( 'colonpair', $parsed );
 	}
 
-	class Identifier does Node {
-		method perl6() {
-"### Identifier"
-		}
-	}
-
-	method identifier( Mu $parsed ) {
-		if $parsed.list {
-			my @child;
-			for $parsed.list {
-				if assert-Str( $_ ) {
-					@child.push(
-						$_.Str
-					);
-					next
-				}
-				die debug( 'identifier', $_ );
-			}
-			return Identifier.new(
-				:child( @child )
-			)
-		}
-		elsif $parsed.Str {
-			return Identifier.new( :name( $parsed.Str ) )
-		}
-		die debug( 'identifier', $parsed );
-	}
-
 	class QuotePair does Node {
 		method perl6() {
 "### QuotePair"
@@ -2065,7 +2064,7 @@ class Perl6::Tidy {
 			return QuotePair.new(
 				:content(
 					:identifier(
-						self.identifier(
+						Identifier.new(
 							$parsed.hash.<identifier>
 						)
 					)
@@ -2112,7 +2111,7 @@ class Perl6::Tidy {
 			return _0.new(
 				:content(
 					:_0(
-						self._0(
+						self.B(
 							$parsed.hash.<0>
 						)
 					)
