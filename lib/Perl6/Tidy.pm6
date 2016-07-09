@@ -1739,8 +1739,22 @@ say $hash.perl;
 	method charspec( Mu $parsed ) {
 		if $parsed.list {
 			my @child;
-			for $parsed.list {
-#				self.debug( 'charspec', $_ );
+			for $parsed.list -> $list {
+				my @_child;
+				for $list.list -> $_list {
+					my @__child;
+					for $_list.list {
+						if assert-Str( $_ ) {
+							@__child.push( $_ );
+							next
+						}
+						self.debug( 'charspec', $_ );
+						die "Uncaught type"
+					}
+#					self.debug( 'charspec', $_list );
+#					die "Uncaught type"
+				}
+#				self.debug( 'charspec', $list );
 #				die "Uncaught type"
 			}
 			return CharSpec.new(
@@ -2359,23 +2373,18 @@ say $hash.perl;
 
 	method semilist( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< statement >] ) {
-			my @child;
-			for $parsed.hash.<statement> {
-				@child.push(
-					self.statement(
-						$_
+			return SemiList.new(
+				:content(
+					:statement(
+						self.statement(
+							$parsed.hash.<statement>
+						)
 					)
 				)
-			}
-			return SemiList.new(
-				:type( 'semilist' ),
-				:child( @child )
 			)
 		}
 		if assert-hash-keys( $parsed, [], [< statement >] ) {
-			return SemiList.new(
-				:child() # statement is the child.
-			)
+			return SemiList.new
 		}
 		self.debug( 'semilist', $parsed );
 		die "Uncaught type"
