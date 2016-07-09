@@ -6,7 +6,11 @@ class Perl6::Tidy {
 	role Node {
 		has $.name;
 		has $.child;
+		has %.content;
 	}
+
+	role Stringify { method perl6() { $.name } }
+	role Intify    { method perl6() { $.name } }
 
 	method debug( Str $name, Mu $parsed ) {
 		my @types;
@@ -115,7 +119,11 @@ class Perl6::Tidy {
 		self.root( $parsed )
 	}
 
-	class Root does Node { }
+	class Root does Node {
+		method perl6() {
+"### Root"
+		}
+	}
 
 	method root( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< statementlist >] ) {
@@ -133,7 +141,11 @@ class Perl6::Tidy {
 		die "Uncaught type"
 	}
 
-	class StatementList does Node { }
+	class StatementList does Node {
+		method perl6() {
+"### StatementList"
+		}
+	}
 
 	method statementlist( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< statement >] ) {
@@ -154,7 +166,11 @@ class Perl6::Tidy {
 		die "Uncaught type"
 	}
 
-	class Statement does Node { }
+	class Statement does Node {
+		method perl6() {
+"### Statement"
+		}
+	}
 
 	method statement( Mu $parsed ) {
 		if $parsed.list {
@@ -169,15 +185,12 @@ class Perl6::Tidy {
 					next
 				}
 				if assert-hash-keys( $_, [< statement_control >] ) {
-					return Statement.new(
-						:content(
-							:statement_control(
-								self.statement_control(
-									$_.hash.<statement_control>
-								)
-							)
+					@child.push(
+						self.statement_control(
+							$_.hash.<statement_control>
 						)
-					)
+					);
+					next
 				}
 				self.debug( 'statement', $_ );
 				die "Uncaught key"
@@ -217,7 +230,7 @@ class Perl6::Tidy {
 		die "Uncaught type"
 	}
 
-	class Sym does Node { }
+	class Sym does Node does Stringify { }
 
 	method sym( Mu $parsed ) {
 		if assert-Str( $parsed ) {
@@ -227,7 +240,11 @@ class Perl6::Tidy {
 		die "Uncaught type"
 	}
 
-	class Sign does Node { }
+	class Sign does Node {
+		method perl6() {
+"### Sign"
+		}
+	}
 
 	method sign( Mu $parsed ) {
 		if assert-Bool( $parsed ) {
@@ -237,7 +254,11 @@ class Perl6::Tidy {
 		die "Uncaught type"
 	}
 
-	class O does Node { }
+	class O does Node {
+		method perl6() {
+"### O"
+		}
+	}
 
 	method O( Hash $hash ) {
 		if $hash.<prec> and
@@ -249,11 +270,15 @@ class Perl6::Tidy {
 				)
 			)
 		}
-say $hash.perl;
+		self.debug( 'O', $hash );
 		die "Uncaught type"
 	}
 
-	class Postfix does Node { }
+	class Postfix does Node {
+		method perl6() {
+"### Postfix"
+		}
+	}
 
 	method postfix( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< sym O >] ) {
@@ -276,7 +301,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class MethodOp does Node { }
+	class MethodOp does Node {
+		method perl6() {
+"### MethodOp"
+		}
+	}
 
 	method methodop( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< longname args >] ) {
@@ -299,7 +328,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class DottyOp does Node { }
+	class DottyOp does Node {
+		method perl6() {
+"### DottyOp"
+		}
+	}
 
 	method dottyop( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< methodop >] ) {
@@ -317,7 +350,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class OPER does Node { }
+	class OPER does Node {
+		method perl6() {
+"### OPER"
+		}
+	}
 
 	method OPER( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< sym dottyop O >] ) {
@@ -361,7 +398,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class MoreName does Node { }
+	class MoreName does Node {
+		method perl6() {
+"### MoreName"
+		}
+	}
 
 	method morename( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< identifier >] ) {
@@ -390,7 +431,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class Name does Node { }
+	class Name does Node {
+		method perl6() {
+"### Name"
+		}
+	}
 
 	method name( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< identifier morename >] ) {
@@ -430,11 +475,15 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class Longname does Node { }
+	class LongName does Node {
+		method perl6() {
+"### LongName"
+		}
+	}
 
 	method longname( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< name >], [< colonpair >] ) {
-			return Longname.new(
+			return LongName.new(
 				:content(
 					:name(
 						self.name(
@@ -449,7 +498,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class Twigil does Node { }
+	class Twigil does Node {
+		method perl6() {
+"### Twigil"
+		}
+	}
 
 	method twigil( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< sym >] ) {
@@ -467,7 +520,7 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class Sigil does Node { }
+	class Sigil does Node does Stringify { }
 
 	method sigil( Mu $parsed ) {
 		if assert-Str( $parsed ) {
@@ -477,7 +530,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class DeSigilName does Node { }
+	class DeSigilName does Node {
+		method perl6() {
+"### DeSigilName"
+		}
+	}
 
 	method desigilname( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< longname >] ) {
@@ -498,7 +555,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class Variable does Node { }
+	class Variable does Node {
+		method perl6() {
+"### Variable"
+		}
+	}
 
 	method variable( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< twigil sigil desigilname >] ) {
@@ -553,7 +614,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class RoutineDeclarator does Node { }
+	class RoutineDeclarator does Node {
+		method perl6() {
+"### RoutineDeclarator"
+		}
+	}
 
 	method routine_declarator( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< sym routine_def >] ) {
@@ -576,7 +641,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class PackageDeclarator does Node { }
+	class PackageDeclarator does Node {
+		method perl6() {
+"### PackageDeclator"
+		}
+	}
 
 	method package_declarator( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< sym package_def >] ) {
@@ -599,7 +668,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class RegexDeclarator does Node { }
+	class RegexDeclarator does Node {
+		method perl6() {
+"### RegexDeclarator"
+		}
+	}
 
 	method regex_declarator( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< sym regex_def >] ) {
@@ -622,7 +695,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class RoutineDef does Node { }
+	class RoutineDef does Node {
+		method perl6() {
+"### RoutineDef"
+		}
+	}
 
 	method routine_def( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< blockoid deflongname >],
@@ -647,7 +724,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class PackageDef does Node { }
+	class PackageDef does Node {
+		method perl6() {
+"### PackageDef"
+		}
+	}
 
 	method package_def( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< blockoid longname >],
@@ -690,7 +771,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class RegexDef does Node { }
+	class RegexDef does Node {
+		method perl6() {
+"### RegexDef"
+		}
+	}
 
 	method regex_def( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< deflongname nibble >],
@@ -716,7 +801,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class Blockoid does Node { }
+	class Blockoid does Node {
+		method perl6() {
+"### Blockoid"
+		}
+	}
 
 	method blockoid( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< statementlist >] ) {
@@ -734,7 +823,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class DefLongName does Node { }
+	class DefLongName does Node {
+		method perl6() {
+"### DefLongName"
+		}
+	}
 
 	method deflongname( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< name >], [< colonpair >] ) {
@@ -753,7 +846,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class Args does Node { }
+	class Args does Node {
+		method perl6() {
+"### Args"
+		}
+	}
 
 	method args( Mu $parsed ) {
 		if $parsed.Bool {
@@ -763,7 +860,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class Dotty does Node { }
+	class Dotty does Node {
+		method perl6() {
+"### Dotty"
+		}
+	}
 
 	method dotty( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< sym dottyop O >] ) {
@@ -791,7 +892,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class EXPR does Node { }
+	class EXPR does Node {
+		method perl6() {
+"### EXPR"
+		}
+	}
 
 	method EXPR( Mu $parsed ) {
 		if $parsed.list {
@@ -997,7 +1102,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class VariableDeclarator does Node { }
+	class VariableDeclarator does Node {
+		method perl6() {
+"### VariableDelarator"
+		}
+	}
 
 	method variable_declarator( Mu $parsed ) {
 		if assert-hash-keys(
@@ -1055,7 +1164,12 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class Doc does Node { }
+	class Doc does Node {
+		method perl6() {
+"### Doc"
+		}
+	}
+
 
 	method doc( Mu $parsed ) {
 		if assert-Bool( $parsed ) {
@@ -1065,7 +1179,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class ModuleName does Node { }
+	class ModuleName does Node {
+		method perl6() {
+"### ModuleName"
+		}
+	}
 
 	method module_name( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< longname >] ) {
@@ -1083,7 +1201,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class Version does Node { }
+	class Version does Node {
+		method perl6() {
+"### Version"
+		}
+	}
 
 	method version( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< vnum vstr >] ) {
@@ -1106,7 +1228,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class VNum does Node { }
+	class VNum does Node {
+		method perl6() {
+"### VNum"
+		}
+	}
 
 	method vnum( Mu $parsed ) {
 		if $parsed.list {
@@ -1116,7 +1242,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class VStr does Node { }
+	class VStr does Node {
+		method perl6() {
+"### VStr"
+		}
+	}
 
 	method vstr( Mu $parsed ) {
 		if $parsed.Int {
@@ -1126,7 +1256,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class StatementControl does Node { }
+	class StatementControl does Node {
+		method perl6() {
+"### StatementControl"
+		}
+	}
 
 	method statement_control( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< doc sym module_name >] ) {
@@ -1175,7 +1309,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class MultiDeclarator does Node { }
+	class MultiDeclarator does Node {
+		method perl6() {
+"### MultiDeclarator"
+		}
+	}
 
 	method multi_declarator( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< declarator >] ) {
@@ -1193,7 +1331,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class Initializer does Node { }
+	class Initializer does Node {
+		method perl6() {
+"### Initializer"
+		}
+	}
 
 	method initializer( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< sym EXPR >] ) {
@@ -1216,7 +1358,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class Declarator does Node { }
+	class Declarator does Node {
+		method perl6() {
+"### Declarator"
+		}
+	}
 
 	method declarator( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< initializer
@@ -1268,7 +1414,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class DECL does Node { }
+	class DECL does Node {
+		method perl6() {
+"### DECL"
+		}
+	}
 
 	method DECL( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< initializer
@@ -1347,9 +1497,17 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class TypeName does Node { }
+	class TypeName does Node {
+		method perl6() {
+"### TypeName"
+		}
+	}
 
-	class TypeName_INTERMEDIARY does Node { }
+	class TypeName_INTERMEDIARY does Node {
+		method perl6() {
+"### TypeName_INTERMEDIARY"
+		}
+	}
 
 	method typename( Mu $parsed ) {
 		if $parsed.list {
@@ -1458,7 +1616,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class ScopeDeclarator does Node { }
+	class ScopeDeclarator does Node {
+		method perl6() {
+"### ScopeDeclarator"
+		}
+	}
 
 	method scope_declarator( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< sym scoped >] ) {
@@ -1481,7 +1643,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class Value does Node { }
+	class Value does Node {
+		method perl6() {
+"### Value"
+		}
+	}
 
 	method value( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< number >] ) {
@@ -1510,7 +1676,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class Number does Node { }
+	class Number does Node {
+		method perl6() {
+"### Number"
+		}
+	}
 
 	method number( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< numish >] ) {
@@ -1528,7 +1698,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class Quote does Node { }
+	class Quote does Node {
+		method perl6() {
+"### Quote"
+		}
+	}
 
 	method quote( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< nibble >] ) {
@@ -1557,7 +1731,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class B does Node { }
+	class B does Node {
+		method perl6() {
+"### B"
+		}
+	}
 
 	method B( Mu $parsed ) {
 		if assert-Bool( $parsed ) {
@@ -1567,7 +1745,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class Babble does Node { }
+	class Babble does Node {
+		method perl6() {
+"### Babble"
+		}
+	}
 
 	method babble( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< B >], [< quotepair >] ) {
@@ -1586,7 +1768,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class Signature does Node { }
+	class Signature does Node {
+		method perl6() {
+"### Signature"
+		}
+	}
 
 	method signature( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [], [< param_sep parameter >] ) {
@@ -1602,7 +1788,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class FakeSignature does Node { }
+	class FakeSignature does Node {
+		method perl6() {
+"### FakeSignature"
+		}
+	}
 
 	method fakesignature( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< signature >] ) {
@@ -1620,7 +1810,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class ColonPair does Node { }
+	class ColonPair does Node {
+		method perl6() {
+"### ColonPair"
+		}
+	}
 
 	method colonpair( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< identifier >] ) {
@@ -1649,7 +1843,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class Identifier does Node { }
+	class Identifier does Node {
+		method perl6() {
+"### Identifier"
+		}
+	}
 
 	method identifier( Mu $parsed ) {
 		if $parsed.list {
@@ -1675,7 +1873,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class QuotePair does Node { }
+	class QuotePair does Node {
+		method perl6() {
+"### QuotePair"
+		}
+	}
 
 	method quotepair( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< identifier >] ) {
@@ -1693,7 +1895,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class Quibble does Node { }
+	class Quibble does Node {
+		method perl6() {
+"### Quibble"
+		}
+	}
 
 	method quibble( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< babble nibble >] ) {
@@ -1716,7 +1922,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class _0 does Node { }
+	class _0 does Node {
+		method perl6() {
+"### _0"
+		}
+	}
 
 	method _0( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< 0 >] ) {
@@ -1734,7 +1944,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class CharSpec does Node { }
+	class CharSpec does Node {
+		method perl6() {
+"### CharSpec"
+		}
+	}
 
 	method charspec( Mu $parsed ) {
 		if $parsed.list {
@@ -1765,9 +1979,17 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class CClassElem_INTERMEDIARY does Node { }
+	class CClassElem_INTERMEDIARY does Node {
+		method perl6() {
+"### CClassElem_INT"
+		}
+	}
 
-	class CClassElem does Node { }
+	class CClassElem does Node {
+		method perl6() {
+"### CClassElem"
+		}
+	}
 
 	method cclass_elem( Mu $parsed ) {
 		if $parsed.list {
@@ -1803,7 +2025,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class Assertion does Node { }
+	class Assertion does Node {
+		method perl6() {
+"### Assertion"
+		}
+	}
 
 	method assertion( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< cclass_elem >] ) {
@@ -1821,7 +2047,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class BackSlash does Node { }
+	class BackSlash does Node {
+		method perl6() {
+"### BackSlash"
+		}
+	}
 
 	method backslash( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< sym >] ) {
@@ -1839,7 +2069,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class MetaChar does Node { }
+	class MetaChar does Node {
+		method perl6() {
+"### MetaChar"
+		}
+	}
 
 	method metachar( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< sym >] ) {
@@ -1879,7 +2113,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class Atom does Node { }
+	class Atom does Node {
+		method perl6() {
+"### Atom"
+		}
+	}
 
 	method atom( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< metachar >] ) {
@@ -1900,7 +2138,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class NormSpace does Node { }
+	class NormSpace does Node {
+		method perl6() {
+"### NormSpace"
+		}
+	}
 
 	method normspace( Mu $parsed ) {
 		if $parsed.Str {
@@ -1909,7 +2151,11 @@ say $hash.perl;
 		self.debug( 'normspace', $parsed );
 		die "Uncaught type"
 	}
-	class SigFinal does Node { }
+	class SigFinal does Node {
+		method perl6() {
+"### SigFinal"
+		}
+	}
 
 	method sigfinal( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< normspace >] ) {
@@ -1927,7 +2173,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class Noun does Node { }
+	class Noun does Node {
+		method perl6() {
+"### Node"
+		}
+	}
 
 	method noun( Mu $parsed ) {
 		if $parsed.list {
@@ -1989,7 +2239,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class TermConj does Node { }
+	class TermConj does Node {
+		method perl6() {
+"### TermConj"
+		}
+	}
 
 	method termconj( Mu $parsed ) {
 		if $parsed.list {
@@ -2014,7 +2268,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class TermAlt does Node { }
+	class TermAlt does Node {
+		method perl6() {
+"### TermAlt"
+		}
+	}
 
 	method termalt( Mu $parsed ) {
 		if $parsed.list {
@@ -2039,7 +2297,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class TermConjSeq does Node { }
+	class TermConjSeq does Node {
+		method perl6() {
+"### TermConjSeq"
+		}
+	}
 
 	method termconjseq( Mu $parsed ) {
 		if $parsed.list {
@@ -2075,7 +2337,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class TermAltSeq does Node { }
+	class TermAltSeq does Node {
+		method perl6() {
+"### termAltSeq"
+		}
+	}
 
 	method termaltseq( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< termconjseq >] ) {
@@ -2093,7 +2359,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class TermSeq does Node { }
+	class TermSeq does Node {
+		method perl6() {
+"### TermSeq"
+		}
+	}
 
 	method termseq( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< termaltseq >] ) {
@@ -2111,7 +2381,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class Nibble does Node { }
+	class Nibble does Node {
+		method perl6() {
+"### Nibble"
+		}
+	}
 
 	method nibble( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< termseq >] ) {
@@ -2132,7 +2406,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class DecNumber does Node { }
+	class DecNumber does Node {
+		method perl6() {
+"### DecNumber"
+		}
+	}
 
 	method dec_number( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< int coeff frac >] ) {
@@ -2181,7 +2459,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class VALUE does Node { }
+	class VALUE does Node does Intify {
+		method perl6() {
+"### VALUE"
+		}
+	}
 
 	method VALUE( Mu $parsed ) {
 		if assert-Int( $parsed ) {
@@ -2191,7 +2473,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class Numish does Node { }
+	class Numish does Node {
+		method perl6() {
+"### Numish"
+		}
+	}
 
 	method numish( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< integer >] ) {
@@ -2232,7 +2518,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class Integer does Node { }
+	class Integer does Node {
+		method perl6() {
+"### Integer"
+		}
+	}
 
 	method integer( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< decint VALUE >] ) {
@@ -2303,7 +2593,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class Circumfix does Node { }
+	class Circumfix does Node {
+		method perl6() {
+"### Circumfix"
+		}
+	}
 
 	method circumfix( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< semilist >] ) {
@@ -2369,7 +2663,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class SemiList does Node { }
+	class SemiList does Node {
+		method perl6() {
+"### SemiList"
+		}
+	}
 
 	method semilist( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< statement >] ) {
@@ -2390,7 +2688,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class RadNumber does Node { }
+	class RadNumber does Node {
+		method perl6() {
+"### RadNumber"
+		}
+	}
 
 	method rad_number( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< circumfix radix >],
@@ -2416,7 +2718,7 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class _Int does Node { }
+	class _Int does Node does Intify { }
 
 	method int( Mu $parsed ) {
 		if assert-Int( $parsed ) {
@@ -2426,7 +2728,7 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class Radix does Node { }
+	class Radix does Node does Intify { }
 
 	method radix( Mu $parsed ) {
 		if assert-Int( $parsed ) {
@@ -2436,7 +2738,7 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class Frac does Node { }
+	class Frac does Node does Intify { }
 
 	method frac( Mu $parsed ) {
 		if assert-Int( $parsed ) {
@@ -2446,7 +2748,7 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class Coeff does Node { }
+	class Coeff does Node does Intify { }
 
 	method coeff( Mu $parsed ) {
 		if assert-Int( $parsed ) {
@@ -2456,7 +2758,11 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class EScale does Node { }
+	class EScale does Node {
+		method perl6() {
+"### EScale"
+		}
+	}
 
 	method escale( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< sign decint >] ) {
@@ -2479,7 +2785,7 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class BinInt does Node { }
+	class BinInt does Node does Intify { }
 
 	method binint( Mu $parsed ) {
 		if assert-Int( $parsed ) {
@@ -2489,7 +2795,7 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class OctInt does Node { }
+	class OctInt does Node does Intify { }
 
 	method octint( Mu $parsed ) {
 		if assert-Int( $parsed ) {
@@ -2499,7 +2805,7 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class DecInt does Node { }
+	class DecInt does Node does Intify { }
 
 	method decint( Mu $parsed ) {
 		if assert-Int( $parsed ) {
@@ -2509,7 +2815,7 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
-	class HexInt does Node { }
+	class HexInt does Node does Intify { }
 
 	method hexint( Mu $parsed ) {
 		if assert-Int( $parsed ) {

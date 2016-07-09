@@ -35,6 +35,7 @@ END
 _END_
 	isa-ok $parsed, 'Perl6::Tidy::Root';
 	is $parsed.child.elems, 1;
+say "Perl 6: " ~ $parsed.perl6;
 }, 'Empty file';
 
 # vim: ft=perl6
