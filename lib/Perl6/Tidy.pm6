@@ -843,21 +843,20 @@ class Perl6::Tidy {
 		method perl6() {
 "### Twigil"
 		}
-	}
-
-	method twigil( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< sym >] ) {
-			return Twigil.new(
-				:content(
-					:sym(
-						Sym.new(
-							$parsed.hash.<sym>
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< sym >] ) {
+				return self.bless(
+					:content(
+						:sym(
+							Sym.new(
+								$parsed.hash.<sym>
+							)
 						)
 					)
 				)
-			)
+			}
+			die debug( 'twigil', $parsed );
 		}
-		die debug( 'twigil', $parsed );
 	}
 
 	class DeSigilName does Node {
@@ -895,7 +894,7 @@ class Perl6::Tidy {
 			return Variable.new(
 				:content(
 					:twigil(
-						self.twigil(
+						Twigil.new(
 							$parsed.hash.<twigil>
 						)
 					),
@@ -2251,62 +2250,64 @@ class Perl6::Tidy {
 		method perl6() {
 "### Node"
 		}
+		method new( Mu $parsed ) {
+			if $parsed.list {
+				my @child;
+				for $parsed.list {
+					if assert-hash-keys( $_, [< atom >],
+								 [< sigfinal >] ) {
+						@child.push(
+							Atom.new(
+								$_.hash.<atom>
+							)
+						);
+						next
+					}
+					die debug( 'noun', $_ );
+				}
+				return self.bless(
+					:child( @child )
+				)
+			}
+			die debug( 'noun', $parsed );
+		}
 	}
 
-	method noun( Mu $parsed ) {
-		if $parsed.list {
-			my @child;
-			for $parsed.list {
-				if assert-hash-keys( $_, [< atom >],
-							 [< sigfinal >] ) {
-					@child.push(
-						Atom.new(
-							$_.hash.<atom>
-						)
-					);
-					next
-				}
-				die debug( 'noun', $_ );
-			}
-			return Noun.new(
-				:child( @child )
-			)
+	class TermIsh is Node {
+		method perl6() {
+"### TermIsh"
 		}
-		die debug( 'noun', $parsed );
-	}
-
-	class TermIsh is Node { }
-
-	method termish( Mu $parsed ) {
-		if $parsed.list {
-			my @child;
-			for $parsed.list {
-				if assert-hash-keys( $_, [< noun >] ) {
-					@child.push(
-						self.noun(
-							$_.hash.<noun>
-						)
-					);
-					next
+		method new( Mu $parsed ) {
+			if $parsed.list {
+				my @child;
+				for $parsed.list {
+					if assert-hash-keys( $_, [< noun >] ) {
+						@child.push(
+							Noun.new(
+								$_.hash.<noun>
+							)
+						);
+						next
+					}
+					die debug( 'termish', $_ );
 				}
-				die debug( 'termish', $_ );
+				return self.bless(
+					:child( @child )
+				)
 			}
-			return TermIsh.new(
-				:child( @child )
-			)
-		}
-		if assert-hash-keys( $parsed, [< noun >] ) {
-			return TermIsh.new(
-				:content(
-					:noun(
-						self.noun(
-							$parsed.hash.<noun>
+			if assert-hash-keys( $parsed, [< noun >] ) {
+				return self.bless(
+					:content(
+						:noun(
+							Noun.new(
+								$parsed.hash.<noun>
+							)
 						)
 					)
 				)
-			)
+			}
+			die debug( 'termish', $parsed );
 		}
-		die debug( 'termish', $parsed );
 	}
 
 	class TermConj does Node {
@@ -2321,7 +2322,7 @@ class Perl6::Tidy {
 			for $parsed.list {
 				if assert-hash-keys( $_, [< termish >] ) {
 					@child.push(
-						self.termish(
+						TermIsh.new(
 							$_.hash.<termish>
 						)
 					);
