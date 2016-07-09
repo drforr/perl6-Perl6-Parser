@@ -91,6 +91,30 @@ class Perl6::Tidy {
 		}
 	}
 
+	class Radix does Node {
+		method perl6() {
+"### Radix"
+		}
+		method new( Mu $parsed ) {
+			if assert-Int( $parsed ) {
+				return self.bless( :name( $parsed.Int ) )
+			}
+			die debug( 'radix', $parsed );
+		}
+	}
+
+	class _Int does Node {
+		method perl6() {
+"### _Int"
+		}
+		method new( Mu $parsed ) {
+			if assert-Int( $parsed ) {
+				return self.bless( :name( $parsed.Int ) )
+			}
+			die debug( 'int', $parsed );
+		}
+	}
+
 	sub debug( Str $name, Mu $parsed ) {
 		my @lines;
 		my @types;
@@ -2407,7 +2431,7 @@ class Perl6::Tidy {
 			return DecNumber.new(
 				:content(
 					:int(
-						self.int(
+						_Int.new(
 							$parsed.hash.<int>
 						)
 					),
@@ -2428,7 +2452,7 @@ class Perl6::Tidy {
 			return DecNumber.new(
 				:content(
 					:int(
-						self.int(
+						_Int.new(
 							$parsed.hash.<int>
 						)
 					),
@@ -2689,7 +2713,7 @@ class Perl6::Tidy {
 						)
 					),
 					:radix(
-						self.radix(
+						Radix.new(
 							$parsed.hash.<radix>,
 						)
 					),
@@ -2699,32 +2723,6 @@ class Perl6::Tidy {
 			)
 		}
 		die debug( 'rad_number', $parsed );
-	}
-
-	class _Int does Node {
-		method perl6() {
-"### _Int"
-		}
-	}
-
-	method int( Mu $parsed ) {
-		if assert-Int( $parsed ) {
-			return _Int.new( :name( $parsed.Int ) )
-		}
-		die debug( 'int', $parsed );
-	}
-
-	class Radix does Node {
-		method perl6() {
-"### Radix"
-		}
-	}
-
-	method radix( Mu $parsed ) {
-		if assert-Int( $parsed ) {
-			return Radix.new( :name( $parsed.Int ) )
-		}
-		die debug( 'radix', $parsed );
 	}
 
 	class EScale does Node {
