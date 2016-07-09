@@ -1591,11 +1591,11 @@ say $hash.perl;
 	method signature( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [], [< param_sep parameter >] ) {
 			return Signature.new(
-				:name(
-					$parsed.Bool
-				),
-				:param_sep(),
-				:parameter()
+				:name( $parsed.Bool ),
+				:content(
+					:param_sep(),
+					:parameter()
+				)
 			)
 		}
 		self.debug( 'signature', $parsed );
@@ -1916,51 +1916,59 @@ say $hash.perl;
 	class Noun does Node { }
 
 	method noun( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< atom sigfinal >] ) {
-			return Noun.new(
-				:content(
-					:atom(
+		if $parsed.list {
+			my @child;
+			for $parsed.list {
+				if assert-hash-keys( $_, [< atom >],
+							 [< sigfinal >] ) {
+					@child.push(
 						self.atom(
-							$parsed.hash.<atom>
+							$_.hash.<atom>
 						)
-					),
-					:sigfinal(
-						self.sigfinal(
-							$parsed.hash.<sigfinal>
-						)
-					)
-				)
-			)
-		}
-		if assert-hash-keys( $parsed, [< atom >] ) {
+					);
+					next
+				}
+				self.debug( 'noun', $_ );
+				die "Uncaught type"
+			}
 			return Noun.new(
-				:content(
-					:atom(
-						self.atom(
-							$parsed.hash.<atom>
-						)
-					)
-				)
+				:child( @child )
 			)
 		}
 		self.debug( 'noun', $parsed );
 		die "Uncaught type"
 	}
 
-	class Termish is Node { }
+	class TermIsh is Node { }
 
 	method termish( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< noun >] ) {
+		if $parsed.list {
 			my @child;
-			for $parsed.hash.<noun> {
-				@child.push(
-					self.noun(
-						$_
+			for $parsed.list {
+				if assert-hash-keys( $_, [< noun >] ) {
+					@child.push(
+						self.noun(
+							$_.hash.<noun>
+						)
+					);
+					next
+				}
+				self.debug( 'termish', $_ );
+				die "Uncaught type"
+			}
+			return TermIsh.new(
+				:child( @child )
+			)
+		}
+		if assert-hash-keys( $parsed, [< noun >] ) {
+			return TermIsh.new(
+				:content(
+					:noun(
+						self.noun(
+							$parsed.hash.<noun>
+						)
 					)
 				)
-			}
-			return Termish.new(
-				:child( @child )
 			)
 		}
 		self.debug( 'termish', $parsed );
@@ -1973,11 +1981,16 @@ say $hash.perl;
 		if assert-hash-keys( $parsed, [< termish >] ) {
 			my @child;
 			for $parsed.hash.<termish> {
-				@child.push(
-					self.termish(
-						$_
-					)
-				)
+				if assert-hash-keys( $_, [< noun >] ) {
+					@child.push(
+						self.noun(
+							$_.hash.<noun>
+						)
+					);
+					next
+				}
+				self.debug( 'termconj', $_ );
+				die "Uncaught type"
 			}
 			return TermConj.new(
 				:type( 'termconj' ),
@@ -1994,11 +2007,16 @@ say $hash.perl;
 		if assert-hash-keys( $parsed, [< termconj >] ) {
 			my @child;
 			for $parsed.hash.<termconj> {
-				@child.push(
-					self.termconj(
-						$_
-					)
-				)
+				if assert-hash-keys( $_, [< termish >] ) {
+					@child.push(
+						self.termish(
+							$_.hash.<termish>
+						)
+					);
+					next
+				}
+				self.debug( 'termalt', $_ );
+				die "Uncaught type"
 			}
 			return TermAlt.new(
 				:child( @child )
