@@ -139,6 +139,30 @@ class Perl6::Tidy {
 		}
 	}
 
+	class Sigil does Node {
+		method perl6() {
+"### sigil"
+		}
+		method new( Mu $parsed ) {
+			if assert-Str( $parsed ) {
+				return self.bless( :name( $parsed.Str ) )
+			}
+			die debug( 'sigil', $parsed );
+		}
+	}
+
+	class Sign does Node {
+		method perl6() {
+"### sigil"
+		}
+		method new( Mu $parsed ) {
+			if assert-Bool( $parsed ) {
+				return self.bless( :name( $parsed.Bool ) )
+			}
+			die debug( 'sign', $parsed );
+		}
+	}
+
 	sub debug( Str $name, Mu $parsed ) {
 		my @lines;
 		my @types;
@@ -338,7 +362,7 @@ class Perl6::Tidy {
 			return Statement.new(
 				:content(
 					:sigil(
-						self.sigil(
+						Sigil.new(
 							$parsed.hash.<sigil>
 						)
 					),
@@ -351,19 +375,6 @@ class Perl6::Tidy {
 			)
 		}
 		die debug( 'statement', $parsed );
-	}
-
-	class Sign does Node {
-		method perl6() {
-"### Sign"
-		}
-	}
-
-	method sign( Mu $parsed ) {
-		if assert-Bool( $parsed ) {
-			return Sign.new( :name( $parsed.Bool ) )
-		}
-		die debug( 'sign', $parsed );
 	}
 
 	class O does Node {
@@ -623,19 +634,6 @@ class Perl6::Tidy {
 		die debug( 'twigil', $parsed );
 	}
 
-	class Sigil does Node {
-		method perl6() {
-"### Sigil"
-		}
-	}
-
-	method sigil( Mu $parsed ) {
-		if assert-Str( $parsed ) {
-			return Sigil.new( :name( $parsed.Str ) )
-		}
-		die debug( 'sigil', $parsed );
-	}
-
 	class DeSigilName does Node {
 		method perl6() {
 "### DeSigilName"
@@ -676,7 +674,7 @@ class Perl6::Tidy {
 						)
 					),
 					:sigil(
-						self.sigil(
+						Sigil.new(
 							$parsed.hash.<sigil>
 						)
 					),
@@ -692,7 +690,7 @@ class Perl6::Tidy {
 			return Variable.new(
 				:content(
 					:sigil(
-						self.sigil(
+						Sigil.new(
 							$parsed.hash.<sigil>
 						)
 					),
@@ -708,7 +706,7 @@ class Perl6::Tidy {
 			return Variable.new(
 				:content(
 					:sigil(
-						self.sigil(
+						Sigil.new(
 							$parsed.hash.<sigil>
 						)
 					)
@@ -2058,7 +2056,7 @@ class Perl6::Tidy {
 						CClassElem_INTERMEDIARY.new(
 							:content(
 								:sign(
-									self.sign(
+									Sign.new(
 										$_.hash.<sign>
 									)
 								),
@@ -2734,7 +2732,7 @@ class Perl6::Tidy {
 			return EScale.new(
 				:content(
 					:sign(
-						self.sign(
+						Sign.new(
 							$parsed.hash.<sign>
 						)
 					),
