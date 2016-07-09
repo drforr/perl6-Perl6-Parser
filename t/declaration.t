@@ -6,7 +6,7 @@ use Perl6::Tidy;
 
 plan 3;
 
-my $pt = Perl6::Tidy.new( :debugging(True) );
+my $pt = Perl6::Tidy.new;
 
 subtest {
 	subtest {

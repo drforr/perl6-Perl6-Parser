@@ -1,8 +1,6 @@
 class Perl6::Tidy {
 	use nqp;
 
-	has $.debugging = False;
-
 	role Node {
 		has $.name;
 		has $.child;
@@ -14,8 +12,6 @@ class Perl6::Tidy {
 
 	method debug( Str $name, Mu $parsed ) {
 		my @types;
-
-		return unless $.debugging;
 
 		if $parsed.list {
 			@types.push( 'list' )
