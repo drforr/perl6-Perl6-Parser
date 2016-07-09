@@ -1978,13 +1978,13 @@ say $hash.perl;
 	class TermConj does Node { }
 
 	method termconj( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< termish >] ) {
+		if $parsed.list {
 			my @child;
-			for $parsed.hash.<termish> {
-				if assert-hash-keys( $_, [< noun >] ) {
+			for $parsed.list {
+				if assert-hash-keys( $_, [< termish >] ) {
 					@child.push(
-						self.noun(
-							$_.hash.<noun>
+						self.termish(
+							$_.hash.<termish>
 						)
 					);
 					next
@@ -1993,7 +1993,6 @@ say $hash.perl;
 				die "Uncaught type"
 			}
 			return TermConj.new(
-				:type( 'termconj' ),
 				:child( @child )
 			)
 		}
@@ -2004,13 +2003,13 @@ say $hash.perl;
 	class TermAlt does Node { }
 
 	method termalt( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< termconj >] ) {
+		if $parsed.list {
 			my @child;
-			for $parsed.hash.<termconj> {
-				if assert-hash-keys( $_, [< termish >] ) {
+			for $parsed.list {
+				if assert-hash-keys( $_, [< termconj >] ) {
 					@child.push(
-						self.termish(
-							$_.hash.<termish>
+						self.termconj(
+							$_.hash.<termconj>
 						)
 					);
 					next
@@ -2030,16 +2029,14 @@ say $hash.perl;
 
 	method termconjseq( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< termalt >] ) {
-			my @child;
-			for $parsed.hash.<termalt> {
-				@child.push(
-					self.termalt(
-						$_
+			return TermConjSeq.new(
+				:content(
+					:termalt(
+						self.termalt(
+							$parsed.hash.<termalt>
+						)
 					)
 				)
-			}
-			return TermConjSeq.new(
-				:child( @child )
 			)
 		}
 		self.debug( 'termconjseq', $parsed );
