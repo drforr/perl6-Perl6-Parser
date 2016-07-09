@@ -2028,6 +2028,24 @@ say $hash.perl;
 	class TermConjSeq does Node { }
 
 	method termconjseq( Mu $parsed ) {
+		if $parsed.list {
+			my @child;
+			for $parsed.list {
+				if assert-hash-keys( $_, [< termalt >] ) {
+					@child.push(
+						self.termalt(
+							$_.hash.<termalt>
+						)
+					);
+					next
+				}
+				self.debug( 'termconjseq', $_ );
+				die "Uncaught type"
+			}
+			return TermConjSeq.new(
+				:child( @child )
+			)
+		}
 		if assert-hash-keys( $parsed, [< termalt >] ) {
 			return TermConjSeq.new(
 				:content(
@@ -2047,16 +2065,14 @@ say $hash.perl;
 
 	method termaltseq( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< termconjseq >] ) {
-			my @child;
-			for $parsed.hash.<termconjseq> {
-				@child.push(
-					self.termconjseq(
-						$_
+			return TermAltSeq.new(
+				:content(
+					:termconjseq(
+						self.termconjseq(
+							$parsed.hash.<termconjseq>
+						)
 					)
 				)
-			}
-			return TermAltSeq.new(
-				:child( @child )
 			)
 		}
 		self.debug( 'termaltseq', $parsed );
