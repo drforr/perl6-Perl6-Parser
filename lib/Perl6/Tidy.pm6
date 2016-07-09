@@ -361,6 +361,35 @@ say $hash.perl;
 		die "Uncaught type"
 	}
 
+	class MoreName does Node { }
+
+	method morename( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< identifier >] ) {
+			return MoreName.new(
+				:content(
+					:identifier(
+						self.identifier(
+							$parsed.hash.<identifier>
+						)
+					),
+				),
+			)
+		}
+		if assert-hash-keys( $parsed, [< EXPR >] ) {
+			return MoreName.new(
+				:content(
+					:EXPR(
+						self.EXPR(
+							$parsed.hash.<EXPR>
+						)
+					),
+				),
+			)
+		}
+		self.debug( 'morename', $parsed );
+		die "Uncaught type"
+	}
+
 	class Name does Node { }
 
 	method name( Mu $parsed ) {
@@ -368,7 +397,9 @@ say $hash.perl;
 			my @child;
 			for $parsed.hash.<morename> {
 				@child.push(
-					$_
+					self.morename(
+						$_
+					)
 				)
 			}
 			return Name.new(
