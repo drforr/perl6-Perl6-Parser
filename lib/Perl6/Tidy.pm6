@@ -2138,102 +2138,99 @@ class Perl6::Tidy {
 		method perl6() {
 "### CClassElem"
 		}
-	}
-
-	method cclass_elem( Mu $parsed ) {
-		if $parsed.list {
-			my @child;
-			for $parsed.list {
-				if assert-hash-keys( $_, [< sign charspec >] ) {
-					@child.push(
-						CClassElem_INTERMEDIARY.new(
-							:content(
-								:sign(
-									Sign.new(
-										$_.hash.<sign>
-									)
-								),
-								:charspec(
-									CharSpec.new(
-										$_.hash.<charspec>
+		method new( Mu $parsed ) {
+			if $parsed.list {
+				my @child;
+				for $parsed.list {
+					if assert-hash-keys( $_, [< sign charspec >] ) {
+						@child.push(
+							CClassElem_INTERMEDIARY.new(
+								:content(
+									:sign(
+										Sign.new(
+											$_.hash.<sign>
+										)
+									),
+									:charspec(
+										CharSpec.new(
+											$_.hash.<charspec>
+										)
 									)
 								)
 							)
-						)
-					);
-					next
+						);
+						next
+					}
+					die debug( 'cclass_elem', $_ );
 				}
-				die debug( 'cclass_elem', $_ );
+				return self.bless(
+					:child( @child )
+				)
 			}
-			return CClassElem.new(
-				:child( @child )
-			)
+			die debug( 'cclass_elem', $parsed );
 		}
-		die debug( 'cclass_elem', $parsed );
 	}
 
 	class Assertion does Node {
 		method perl6() {
 "### Assertion"
 		}
-	}
-
-	method assertion( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< cclass_elem >] ) {
-			return Assertion.new(
-				:content(
-					:cclass_elem(
-						self.cclass_elem(
-							$parsed.hash.<cclass_elem>
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< cclass_elem >] ) {
+				return self.bless(
+					:content(
+						:cclass_elem(
+							CClassElem.new(
+								$parsed.hash.<cclass_elem>
+							)
 						)
 					)
 				)
-			)
+			}
+			die debug( 'assertion', $parsed );
 		}
-		die debug( 'assertion', $parsed );
 	}
 
 	class MetaChar does Node {
 		method perl6() {
 "### MetaChar"
 		}
-	}
-
-	method metachar( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< sym >] ) {
-			return MetaChar.new(
-				:content(
-					:sym(
-						Sym.new(
-							$parsed.hash.<sym>
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< sym >] ) {
+				return self.bless(
+					:content(
+						:sym(
+							Sym.new(
+								$parsed.hash.<sym>
+							)
 						)
 					)
 				)
-			)
-		}
-		if assert-hash-keys( $parsed, [< backslash >] ) {
-			return MetaChar.new(
-				:content(
-					:backslash(
-						BackSlash.new(
-							$parsed.hash.<backslash>
+			}
+			if assert-hash-keys( $parsed, [< backslash >] ) {
+				return self.bless(
+					:content(
+						:backslash(
+							BackSlash.new(
+								$parsed.hash.<backslash>
+							)
 						)
 					)
 				)
-			)
-		}
-		if assert-hash-keys( $parsed, [< assertion >] ) {
-			return MetaChar.new(
-				:content(
-					:metachar(
-						self.assertion(
-							$parsed.hash.<assertion>
+			}
+			if assert-hash-keys( $parsed, [< assertion >] ) {
+				return self.bless(
+					:content(
+						:metachar(
+							Assertion.new(
+								$parsed.hash.<assertion>
+							)
 						)
 					)
 				)
-			)
+			}
+			die debug( 'metachar', $parsed );
 		}
-		die debug( 'metachar', $parsed );
 	}
 
 	class Atom does Node {
@@ -2247,7 +2244,7 @@ class Perl6::Tidy {
 			return Atom.new(
 				:content(
 					:metachar(
-						self.metachar(
+						MetaChar.new(
 							$parsed.hash.<metachar>
 						)
 					)
