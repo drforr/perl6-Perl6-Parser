@@ -2125,31 +2125,30 @@ class Perl6::Tidy {
 		method perl6() {
 "### CharSpec"
 		}
-	}
-
-	method charspec( Mu $parsed ) {
-		if $parsed.list {
-			my @child;
-			for $parsed.list -> $list {
-				my @_child;
-				for $list.list -> $_list {
-					my @__child;
-					for $_list.list {
-						if assert-Str( $_ ) {
-							@__child.push( $_ );
-							next
+		method new( Mu $parsed ) {
+			if $parsed.list {
+				my @child;
+				for $parsed.list -> $list {
+					my @_child;
+					for $list.list -> $_list {
+						my @__child;
+						for $_list.list {
+							if assert-Str( $_ ) {
+								@__child.push( $_ );
+								next
+							}
+							die debug( 'charspec', $_ );
 						}
-						die debug( 'charspec', $_ );
+	#					die debug( 'charspec', $_list );
 					}
-#					die debug( 'charspec', $_list );
+	#				die debug( 'charspec', $list );
 				}
-#				die debug( 'charspec', $list );
+				return self.bless(
+					:child( @child )
+				)
 			}
-			return CharSpec.new(
-				:child( @child )
-			)
+			die debug( 'charspec', $parsed );
 		}
-		die debug( 'charspec', $parsed );
 	}
 
 	class CClassElem_INTERMEDIARY does Node {
@@ -2178,7 +2177,7 @@ class Perl6::Tidy {
 									)
 								),
 								:charspec(
-									self.charspec(
+									CharSpec.new(
 										$_.hash.<charspec>
 									)
 								)
