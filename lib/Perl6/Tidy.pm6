@@ -115,6 +115,30 @@ class Perl6::Tidy {
 		}
 	}
 
+	class VALUE does Node {
+		method perl6() {
+"### VALUE"
+		}
+		method new( Mu $parsed ) {
+			if assert-Int( $parsed ) {
+				return self.bless( :name( $parsed.Int ) )
+			}
+			die debug( 'VALUE', $parsed );
+		}
+	}
+
+	class Sym does Node {
+		method perl6() {
+"### sym"
+		}
+		method new( Mu $parsed ) {
+			if assert-Str( $parsed ) {
+				return self.bless( :name( $parsed.Str ) )
+			}
+			die debug( 'sym', $parsed );
+		}
+	}
+
 	sub debug( Str $name, Mu $parsed ) {
 		my @lines;
 		my @types;
@@ -329,19 +353,6 @@ class Perl6::Tidy {
 		die debug( 'statement', $parsed );
 	}
 
-	class Sym does Node {
-		method perl6() {
-"### Sym"
-		}
-	}
-
-	method sym( Mu $parsed ) {
-		if assert-Str( $parsed ) {
-			return Sym.new( :name( $parsed.Str ) )
-		}
-		die debug( 'sym', $parsed );
-	}
-
 	class Sign does Node {
 		method perl6() {
 "### Sign"
@@ -385,7 +396,7 @@ class Perl6::Tidy {
 			return Postfix.new(
 				:content(
 					:sym(
-						self.sym(
+						Sym.new(
 							$parsed.hash.<sym>
 						)
 					),
@@ -458,7 +469,7 @@ class Perl6::Tidy {
 			return OPER.new(
 				:content(
 					:sym(
-						self.sym(
+						Sym.new(
 							$parsed.hash.<sym>
 						)
 					),
@@ -479,7 +490,7 @@ class Perl6::Tidy {
 			return OPER.new(
 				:content(
 					:sym(
-						self.sym(
+						Sym.new(
 							$parsed.hash.<sym>
 						)
 					),
@@ -602,7 +613,7 @@ class Perl6::Tidy {
 			return Twigil.new(
 				:content(
 					:sym(
-						self.sym(
+						Sym.new(
 							$parsed.hash.<sym>
 						)
 					)
@@ -718,7 +729,7 @@ class Perl6::Tidy {
 			return RoutineDeclarator.new(
 				:content(
 					:sym(
-						self.sym(
+						Sym.new(
 							$parsed.hash.<sym>
 						)
 					),
@@ -744,7 +755,7 @@ class Perl6::Tidy {
 			return PackageDeclarator.new(
 				:content(
 					:sym(
-						self.sym(
+						Sym.new(
 							$parsed.hash.<sym>
 						)
 					),
@@ -770,7 +781,7 @@ class Perl6::Tidy {
 			return RegexDeclarator.new(
 				:content(
 					:sym(
-						self.sym(
+						Sym.new(
 							$parsed.hash.<sym>
 						)
 					),
@@ -955,7 +966,7 @@ class Perl6::Tidy {
 			return Dotty.new(
 				:content(
 					:sym(
-						self.sym(
+						Sym.new(
 							$parsed.hash.<sym>
 						)
 					),
@@ -1345,7 +1356,7 @@ class Perl6::Tidy {
 						)
 					),
 					:sym(
-						self.sym(
+						Sym.new(
 							$parsed.hash.<sym>
 						)
 					),
@@ -1366,7 +1377,7 @@ class Perl6::Tidy {
 						)
 					),
 					:sym(
-						self.sym(
+						Sym.new(
 							$parsed.hash.<sym>
 						)
 					),
@@ -1413,7 +1424,7 @@ class Perl6::Tidy {
 			return Initializer.new(
 				:content(
 					:sym(
-						self.sym(
+						Sym.new(
 							$parsed.hash.<sym>
 						)
 					),
@@ -1544,7 +1555,7 @@ class Perl6::Tidy {
 						)
 					),
 					:sym(
-						self.sym(
+						Sym.new(
 							$parsed.hash.<sym>
 						)
 					)
@@ -1692,7 +1703,7 @@ class Perl6::Tidy {
 			return ScopeDeclarator.new(
 				:content(
 					:sym(
-						self.sym(
+						Sym.new(
 							$parsed.hash.<sym>
 						)
 					),
@@ -2102,7 +2113,7 @@ class Perl6::Tidy {
 			return BackSlash.new(
 				:content(
 					:sym(
-						self.sym(
+						Sym.new(
 							$parsed.hash.<sym>
 						)
 					)
@@ -2123,7 +2134,7 @@ class Perl6::Tidy {
 			return MetaChar.new(
 				:content(
 					:sym(
-						self.sym(
+						Sym.new(
 							$parsed.hash.<sym>
 						)
 					)
@@ -2472,19 +2483,6 @@ class Perl6::Tidy {
 		die debug( 'dec_number', $parsed );
 	}
 
-	class VALUE does Node {
-		method perl6() {
-"### VALUE"
-		}
-	}
-
-	method VALUE( Mu $parsed ) {
-		if assert-Int( $parsed ) {
-			return VALUE.new( :name( $parsed.Int ) )
-		}
-		die debug( 'VALUE', $parsed );
-	}
-
 	class Numish does Node {
 		method perl6() {
 "### Numish"
@@ -2545,7 +2543,7 @@ class Perl6::Tidy {
 						)
 					),
 					:VALUE(
-						self.VALUE(
+						VALUE.new(
 							$parsed.hash.<VALUE>
 						)
 					)
@@ -2561,7 +2559,7 @@ class Perl6::Tidy {
 						)
 					),
 					:VALUE(
-						self.VALUE(
+						VALUE.new(
 							$parsed.hash.<VALUE>
 						)
 					)
@@ -2577,7 +2575,7 @@ class Perl6::Tidy {
 						)
 					),
 					:VALUE(
-						self.VALUE(
+						VALUE.new(
 							$parsed.hash.<VALUE>
 						)
 					)
@@ -2593,7 +2591,7 @@ class Perl6::Tidy {
 						)
 					),
 					:VALUE(
-						self.VALUE(
+						VALUE.new(
 							$parsed.hash.<VALUE>
 						)
 					)
@@ -2630,7 +2628,7 @@ class Perl6::Tidy {
 						)
 					),
 					:VALUE(
-						self.VALUE(
+						VALUE.new(
 							$parsed.hash.<VALUE>
 						)
 					)
@@ -2646,7 +2644,7 @@ class Perl6::Tidy {
 						)
 					),
 					:VALUE(
-						self.VALUE(
+						VALUE.new(
 							$parsed.hash.<VALUE>
 						)
 					)
@@ -2662,7 +2660,7 @@ class Perl6::Tidy {
 						)
 					),
 					:VALUE(
-						self.VALUE(
+						VALUE.new(
 							$parsed.hash.<VALUE>
 						)
 					)
