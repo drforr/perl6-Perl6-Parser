@@ -261,6 +261,26 @@ class Perl6::Tidy {
 		}
 	}
 
+	class BackSlash does Node {
+		method perl6() {
+"### BackSlash"
+		}
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< sym >] ) {
+				return self.bless(
+					:content(
+						:sym(
+							Sym.new(
+								$parsed.hash.<sym>
+							)
+						)
+					)
+				)
+			}
+			die debug( 'backslash', $parsed );
+		}
+	}
+
 	sub debug( Str $name, Mu $parsed ) {
 		my @lines;
 		my @types;
@@ -2198,27 +2218,6 @@ class Perl6::Tidy {
 		die debug( 'assertion', $parsed );
 	}
 
-	class BackSlash does Node {
-		method perl6() {
-"### BackSlash"
-		}
-	}
-
-	method backslash( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< sym >] ) {
-			return BackSlash.new(
-				:content(
-					:sym(
-						Sym.new(
-							$parsed.hash.<sym>
-						)
-					)
-				)
-			)
-		}
-		die debug( 'backslash', $parsed );
-	}
-
 	class MetaChar does Node {
 		method perl6() {
 "### MetaChar"
@@ -2241,7 +2240,7 @@ class Perl6::Tidy {
 			return MetaChar.new(
 				:content(
 					:backslash(
-						self.backslash(
+						BackSlash.new(
 							$parsed.hash.<backslash>
 						)
 					)
@@ -2284,27 +2283,6 @@ class Perl6::Tidy {
 			return Atom.new( :name( $parsed.Str ) )
 		}
 		die debug( 'atom', $parsed );
-	}
-
-	class SigFinal does Node {
-		method perl6() {
-"### SigFinal"
-		}
-	}
-
-	method sigfinal( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< normspace >] ) {
-			return SigFinal.new(
-				:content(
-					:normspace(
-						NormSpace.new(
-							$parsed.hash.<normspace>
-						)
-					)
-				)
-			)
-		}
-		die debug( 'sigfinal', $parsed );
 	}
 
 	class Noun does Node {
