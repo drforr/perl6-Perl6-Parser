@@ -1400,14 +1400,12 @@ class Perl6::Tidy {
 		method perl6() {
 "### Doc"
 		}
-	}
-
-
-	method doc( Mu $parsed ) {
-		if assert-Bool( $parsed ) {
-			return Doc.new( :name( $parsed.Bool ) )
+		method new( Mu $parsed ) {
+			if assert-Bool( $parsed ) {
+				return self.bless( :name( $parsed.Bool ) )
+			}
+			die debug( 'doc', $parsed );
 		}
-		die debug( 'doc', $parsed );
 	}
 
 	class ModuleName does Node {
@@ -1431,56 +1429,53 @@ class Perl6::Tidy {
 		die debug( 'module_name', $parsed );
 	}
 
-	class Version does Node {
+	class VStr does Node {
 		method perl6() {
-"### Version"
+"### VStr"
 		}
-	}
-
-	method version( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< vnum vstr >] ) {
-			return Version.new(
-				:content(
-					:vnum(
-						self.vnum(
-							$parsed.hash.<vnum>
-						)
-					),
-					:vstr(
-						self.vstr(
-							$parsed.hash.<vstr>
-						)
-					)
-				)
-			)
+		method new( Mu $parsed ) {
+			if $parsed.Int {
+				return self.bless( :name( $parsed.Int ) )
+			}
+			die debug( 'vstr', $parsed );
 		}
-		die debug( 'version', $parsed );
 	}
 
 	class VNum does Node {
 		method perl6() {
 "### VNum"
 		}
-	}
-
-	method vnum( Mu $parsed ) {
-		if $parsed.list {
-			return VNum.new( :child() )
+		method new( Mu $parsed ) {
+			if $parsed.list {
+				return self.bless( :child() )
+			}
+			die debug( 'vnum', $parsed );
 		}
-		die debug( 'vnum', $parsed );
 	}
 
-	class VStr does Node {
+	class Version does Node {
 		method perl6() {
-"### VStr"
+"### Version"
 		}
-	}
-
-	method vstr( Mu $parsed ) {
-		if $parsed.Int {
-			return VStr.new( :name( $parsed.Int ) )
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< vnum vstr >] ) {
+				return self.bless(
+					:content(
+						:vnum(
+							VNum.new(
+								$parsed.hash.<vnum>
+							)
+						),
+						:vstr(
+							VStr.new(
+								$parsed.hash.<vstr>
+							)
+						)
+					)
+				)
+			}
+			die debug( 'version', $parsed );
 		}
-		die debug( 'vstr', $parsed );
 	}
 
 	class StatementControl does Node {
@@ -1494,7 +1489,7 @@ class Perl6::Tidy {
 			return StatementControl.new(
 				:content(
 					:doc(
-						self.doc(
+						Doc.new(
 							$parsed.hash.<doc>
 						)
 					),
@@ -1515,7 +1510,7 @@ class Perl6::Tidy {
 			return StatementControl.new(
 				:content(
 					:doc(
-						self.doc(
+						Doc.new(
 							$parsed.hash.<doc>
 						)
 					),
@@ -1525,7 +1520,7 @@ class Perl6::Tidy {
 						)
 					),
 					:version(
-						self.version(
+						Version.new(
 							$parsed.hash.<version>
 						)
 					)
@@ -1962,22 +1957,21 @@ class Perl6::Tidy {
 		method perl6() {
 "### Babble"
 		}
-	}
-
-	method babble( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< B >], [< quotepair >] ) {
-			return Babble.new(
-				:content(
-					:B(
-						B.new(
-							$parsed.hash.<B>
-						)
-					),
-					:quotepair()
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< B >], [< quotepair >] ) {
+				return self.bless(
+					:content(
+						:B(
+							B.new(
+								$parsed.hash.<B>
+							)
+						),
+						:quotepair()
+					)
 				)
-			)
+			}
+			die debug( 'babble', $parsed );
 		}
-		die debug( 'babble', $parsed );
 	}
 
 	class Signature does Node {
@@ -2002,21 +1996,20 @@ class Perl6::Tidy {
 		method perl6() {
 "### FakeSignature"
 		}
-	}
-
-	method fakesignature( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< signature >] ) {
-			return FakeSignature.new(
-				:content(
-					:signature(
-						Signature.new(
-							$parsed.hash.<signature>
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< signature >] ) {
+				return self.bless(
+					:content(
+						:signature(
+							Signature.new(
+								$parsed.hash.<signature>
+							)
 						)
 					)
 				)
-			)
+			}
+			die debug( 'fakesignature', $parsed );
 		}
-		die debug( 'fakesignature', $parsed );
 	}
 
 	class ColonPair does Node {
@@ -2041,7 +2034,7 @@ class Perl6::Tidy {
 			return ColonPair.new(
 				:content(
 					:fakesignature(
-						self.fakesignature(
+						FakeSignature.new(
 							$parsed.hash.<fakesignature>
 						)
 					)
@@ -2062,7 +2055,7 @@ class Perl6::Tidy {
 			return Quibble.new(
 				:content(
 					:babble(
-						self.babble(
+						Babble.new(
 							$parsed.hash.<babble>
 						)
 					),
