@@ -1985,19 +1985,18 @@ class Perl6::Tidy {
 		method perl6() {
 "### Signature"
 		}
-	}
-
-	method signature( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [], [< param_sep parameter >] ) {
-			return Signature.new(
-				:name( $parsed.Bool ),
-				:content(
-					:param_sep(),
-					:parameter()
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [], [< param_sep parameter >] ) {
+				return self.bless(
+					:name( $parsed.Bool ),
+					:content(
+						:param_sep(),
+						:parameter()
+					)
 				)
-			)
+			}
+			die debug( 'signature', $parsed );
 		}
-		die debug( 'signature', $parsed );
 	}
 
 	class FakeSignature does Node {
@@ -2011,7 +2010,7 @@ class Perl6::Tidy {
 			return FakeSignature.new(
 				:content(
 					:signature(
-						self.signature(
+						Signature.new(
 							$parsed.hash.<signature>
 						)
 					)
@@ -2053,27 +2052,6 @@ class Perl6::Tidy {
 		die debug( 'colonpair', $parsed );
 	}
 
-	class QuotePair does Node {
-		method perl6() {
-"### QuotePair"
-		}
-	}
-
-	method quotepair( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< identifier >] ) {
-			return QuotePair.new(
-				:content(
-					:identifier(
-						Identifier.new(
-							$parsed.hash.<identifier>
-						)
-					)
-				)
-			)
-		}
-		die debug( 'quotepair', $parsed );
-	}
-
 	class Quibble does Node {
 		method perl6() {
 "### Quibble"
@@ -2111,7 +2089,7 @@ class Perl6::Tidy {
 			return _0.new(
 				:content(
 					:_0(
-						self.B(
+						self._0(
 							$parsed.hash.<0>
 						)
 					)
