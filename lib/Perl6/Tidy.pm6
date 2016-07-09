@@ -99,8 +99,6 @@ class Perl6::Tidy {
 		return False
 	}
 
-	class Root does Node { }
-
 	method tidy( Str $text ) {
 		my $*LINEPOSCACHE;
 		my $compiler := nqp::getcomp('perl6');
@@ -114,6 +112,12 @@ class Perl6::Tidy {
 			:actions( $a )
 		);
 
+		self.root( $parsed )
+	}
+
+	class Root does Node { }
+
+	method root( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< statementlist >] ) {
 			return Root.new(
 				:content(
@@ -125,7 +129,7 @@ class Perl6::Tidy {
 				)
 			);
 		}
-		self.debug( 'tidy', $parsed );
+		self.debug( 'root', $parsed );
 		die "Uncaught type"
 	}
 
@@ -133,17 +137,15 @@ class Perl6::Tidy {
 
 	method statementlist( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< statement >] ) {
-			my @child;
-			for $parsed.hash.<statement> {
-				@child.push(
-					self.statement(
-						$_
+			return StatementList.new(
+				:content(
+					:statement(
+						self.statement(
+							$parsed.hash.<statement>
+						)
 					)
 				)
-			}
-			return StatementList.new(
-				:child( @child )
-			)
+			);
 		}
 		if assert-hash-keys( $parsed, [], [< statement >] ) {
 			return StatementList.new
@@ -166,22 +168,22 @@ class Perl6::Tidy {
 					);
 					next
 				}
-				self.debug( 'EXPR', $_ );
+				if assert-hash-keys( $_, [< statement_control >] ) {
+					return Statement.new(
+						:content(
+							:statement_control(
+								self.statement_control(
+									$_.hash.<statement_control>
+								)
+							)
+						)
+					)
+				}
+				self.debug( 'statement', $_ );
 				die "Uncaught key"
 			}
 			return Statement.new(
 				:child( @child )
-			)
-		}
-		if assert-hash-keys( $parsed, [< statement_control >] ) {
-			return Statement.new(
-				:content(
-					:statement_control(
-						self.statement_control(
-							$parsed.hash.<statement_control>
-						)
-					)
-				)
 			)
 		}
 		if assert-hash-keys( $parsed, [< EXPR >] ) {
@@ -1697,7 +1699,7 @@ say $hash.perl;
 				)
 			)
 		}
-		self.debug( '0', $parsed );
+		self.debug( '_0', $parsed );
 		die "Uncaught type"
 	}
 
