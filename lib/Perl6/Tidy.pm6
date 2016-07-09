@@ -19,6 +19,78 @@ class Perl6::Tidy {
 		}
 	}
 
+	class OctInt does Node {
+		method perl6() {
+"### OctInt"
+		}
+		method new( Mu $parsed ) {
+			if assert-Int( $parsed ) {
+				return self.bless( :name( $parsed.Int ) )
+			}
+			die debug( 'octint', $parsed );
+		}
+	}
+
+	class DecInt does Node {
+		method perl6() {
+"### DecInt"
+		}
+		method new( Mu $parsed ) {
+			if assert-Int( $parsed ) {
+				return self.bless( :name( $parsed.Int ) )
+			}
+			die debug( 'decint', $parsed );
+		}
+	}
+
+	class HexInt does Node {
+		method perl6() {
+"### DecInt"
+		}
+		method new( Mu $parsed ) {
+			if assert-Int( $parsed ) {
+				return self.bless( :name( $parsed.Int ) )
+			}
+			die debug( 'hexint', $parsed );
+		}
+	}
+
+	class Coeff does Node {
+		method perl6() {
+"### Coeff"
+		}
+		method new( Mu $parsed ) {
+			if assert-Int( $parsed ) {
+				return self.bless( :name( $parsed.Int ) )
+			}
+			die debug( 'coeff', $parsed );
+		}
+	}
+
+	class Frac does Node {
+		method perl6() {
+"### Frac"
+		}
+		method new( Mu $parsed ) {
+			if assert-Int( $parsed ) {
+				return self.bless( :name( $parsed.Int ) )
+			}
+			die debug( 'frac', $parsed );
+		}
+	}
+
+	class NormSpace does Node {
+		method perl6() {
+"### NormSpace"
+		}
+		method new( Mu $parsed ) {
+			if assert-Str( $parsed ) {
+				return self.bless( :name( $parsed.Str ) )
+			}
+			die debug( 'normspace', $parsed );
+		}
+	}
+
 	sub debug( Str $name, Mu $parsed ) {
 		my @lines;
 		my @types;
@@ -2083,18 +2155,6 @@ class Perl6::Tidy {
 		die debug( 'atom', $parsed );
 	}
 
-	class NormSpace does Node {
-		method perl6() {
-"### NormSpace"
-		}
-	}
-
-	method normspace( Mu $parsed ) {
-		if $parsed.Str {
-			return NormSpace.new( :name( $parsed.Str ) )
-		}
-		die debug( 'normspace', $parsed );
-	}
 	class SigFinal does Node {
 		method perl6() {
 "### SigFinal"
@@ -2106,7 +2166,7 @@ class Perl6::Tidy {
 			return SigFinal.new(
 				:content(
 					:normspace(
-						self.normspace(
+						NormSpace.new(
 							$parsed.hash.<normspace>
 						)
 					)
@@ -2352,12 +2412,12 @@ class Perl6::Tidy {
 						)
 					),
 					:coeff(
-						self.coeff(
+						Coeff.new(
 							$parsed.hash.<coeff>
 						)
 					),
 					:frac(
-						self.frac(
+						Frac.new(
 							$parsed.hash.<frac>
 						)
 					)
@@ -2373,7 +2433,7 @@ class Perl6::Tidy {
 						)
 					),
 					:coeff(
-						self.coeff(
+						Coeff.new(
 							$parsed.hash.<coeff>
 						)
 					),
@@ -2456,7 +2516,7 @@ class Perl6::Tidy {
 			return Integer.new(
 				:content(
 					:decint(
-						decint(
+						DecInt.new(
 							$parsed.hash.<decint>
 						)
 					),
@@ -2488,7 +2548,7 @@ class Perl6::Tidy {
 			return Integer.new(
 				:content(
 					:octint(
-						octint(
+						OctInt.new(
 							$parsed.hash.<octint>
 						)
 					),
@@ -2504,7 +2564,7 @@ class Perl6::Tidy {
 			return Integer.new(
 				:content(
 					:hexint(
-						hexint(
+						HexInt.new(
 							$parsed.hash.<hexint>
 						)
 					),
@@ -2557,7 +2617,7 @@ class Perl6::Tidy {
 			return Circumfix.new(
 				:content(
 					:octint(
-						octint(
+						OctInt.new(
 							$parsed.hash.<octint>
 						)
 					),
@@ -2573,7 +2633,7 @@ class Perl6::Tidy {
 			return Circumfix.new(
 				:content(
 					:hexint(
-						hexint(
+						HexInt.new(
 							$parsed.hash.<hexint>
 						)
 					),
@@ -2667,32 +2727,6 @@ class Perl6::Tidy {
 		die debug( 'radix', $parsed );
 	}
 
-	class Frac does Node {
-		method perl6() {
-"### Frac"
-		}
-	}
-
-	method frac( Mu $parsed ) {
-		if assert-Int( $parsed ) {
-			return Frac.new( :name( $parsed.Int ) )
-		}
-		die debug( 'frac', $parsed );
-	}
-
-	class Coeff does Node {
-		method perl6() {
-"### Coeff"
-		}
-	}
-
-	method coeff( Mu $parsed ) {
-		if assert-Int( $parsed ) {
-			return Coeff.new( :name( $parsed.Int ) )
-		}
-		die debug( 'coeff', $parsed );
-	}
-
 	class EScale does Node {
 		method perl6() {
 "### EScale"
@@ -2709,7 +2743,7 @@ class Perl6::Tidy {
 						)
 					),
 					:decint(
-						decint(
+						DecInt.new(
 							$parsed.hash.<decint>
 						)
 					)
@@ -2717,44 +2751,5 @@ class Perl6::Tidy {
 			)
 		}
 		die debug( 'escale', $parsed );
-	}
-
-	class OctInt does Node {
-		method perl6() {
-"### OctInt"
-		}
-	}
-
-	sub octint( Mu $parsed ) {
-		if assert-Int( $parsed ) {
-			return OctInt.new( :name( $parsed.Int ) )
-		}
-		die debug( 'octint', $parsed );
-	}
-
-	class DecInt does Node {
-		method perl6() {
-"### DecInt"
-		}
-	}
-
-	sub decint( Mu $parsed ) {
-		if assert-Int( $parsed ) {
-			return DecInt.new( :name( $parsed.Int ) )
-		}
-		die debug( 'decint', $parsed );
-	}
-
-	class HexInt does Node {
-		method perl6() {
-"### HexInt"
-		}
-	}
-
-	sub hexint( Mu $parsed ) {
-		if assert-Int( $parsed ) {
-			return HexInt.new( :name( $parsed.Int ) )
-		}
-		die debug( 'hexint', $parsed );
 	}
 }
