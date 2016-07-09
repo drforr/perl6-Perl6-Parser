@@ -1093,6 +1093,380 @@ class Perl6::Tidy {
 		die debug( 'package_def', $parsed );
 	}
 
+	class CharSpec does Node {
+		method perl6() {
+"### CharSpec"
+		}
+		method new( Mu $parsed ) {
+			if $parsed.list {
+				my @child;
+				for $parsed.list -> $list {
+					my @_child;
+					for $list.list -> $_list {
+						my @__child;
+						for $_list.list {
+							if assert-Str( $_ ) {
+								@__child.push( $_ );
+								next
+							}
+							die debug( 'charspec', $_ );
+						}
+	#					die debug( 'charspec', $_list );
+					}
+	#				die debug( 'charspec', $list );
+				}
+				return self.bless(
+					:child( @child )
+				)
+			}
+			die debug( 'charspec', $parsed );
+		}
+	}
+
+	class CClassElem_INTERMEDIARY does Node {
+		method perl6() {
+"### CClassElem_INT"
+		}
+	}
+
+	class CClassElem does Node {
+		method perl6() {
+"### CClassElem"
+		}
+		method new( Mu $parsed ) {
+			if $parsed.list {
+				my @child;
+				for $parsed.list {
+					if assert-hash-keys( $_, [< sign charspec >] ) {
+						@child.push(
+							CClassElem_INTERMEDIARY.new(
+								:content(
+									:sign(
+										Sign.new(
+											$_.hash.<sign>
+										)
+									),
+									:charspec(
+										CharSpec.new(
+											$_.hash.<charspec>
+										)
+									)
+								)
+							)
+						);
+						next
+					}
+					die debug( 'cclass_elem', $_ );
+				}
+				return self.bless(
+					:child( @child )
+				)
+			}
+			die debug( 'cclass_elem', $parsed );
+		}
+	}
+
+	class Assertion does Node {
+		method perl6() {
+"### Assertion"
+		}
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< cclass_elem >] ) {
+				return self.bless(
+					:content(
+						:cclass_elem(
+							CClassElem.new(
+								$parsed.hash.<cclass_elem>
+							)
+						)
+					)
+				)
+			}
+			die debug( 'assertion', $parsed );
+		}
+	}
+
+	class MetaChar does Node {
+		method perl6() {
+"### MetaChar"
+		}
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< sym >] ) {
+				return self.bless(
+					:content(
+						:sym(
+							Sym.new(
+								$parsed.hash.<sym>
+							)
+						)
+					)
+				)
+			}
+			if assert-hash-keys( $parsed, [< backslash >] ) {
+				return self.bless(
+					:content(
+						:backslash(
+							BackSlash.new(
+								$parsed.hash.<backslash>
+							)
+						)
+					)
+				)
+			}
+			if assert-hash-keys( $parsed, [< assertion >] ) {
+				return self.bless(
+					:content(
+						:metachar(
+							Assertion.new(
+								$parsed.hash.<assertion>
+							)
+						)
+					)
+				)
+			}
+			die debug( 'metachar', $parsed );
+		}
+	}
+
+	class Atom does Node {
+		method perl6() {
+"### Atom"
+		}
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< metachar >] ) {
+				return self.bless(
+					:content(
+						:metachar(
+							MetaChar.new(
+								$parsed.hash.<metachar>
+							)
+						)
+					)
+				)
+			}
+			if $parsed.Str {
+				return self.bless( :name( $parsed.Str ) )
+			}
+			die debug( 'atom', $parsed );
+		}
+	}
+
+	class Noun does Node {
+		method perl6() {
+"### Node"
+		}
+		method new( Mu $parsed ) {
+			if $parsed.list {
+				my @child;
+				for $parsed.list {
+					if assert-hash-keys( $_, [< atom >],
+								 [< sigfinal >] ) {
+						@child.push(
+							Atom.new(
+								$_.hash.<atom>
+							)
+						);
+						next
+					}
+					die debug( 'noun', $_ );
+				}
+				return self.bless(
+					:child( @child )
+				)
+			}
+			die debug( 'noun', $parsed );
+		}
+	}
+
+	class TermIsh is Node {
+		method perl6() {
+"### TermIsh"
+		}
+		method new( Mu $parsed ) {
+			if $parsed.list {
+				my @child;
+				for $parsed.list {
+					if assert-hash-keys( $_, [< noun >] ) {
+						@child.push(
+							Noun.new(
+								$_.hash.<noun>
+							)
+						);
+						next
+					}
+					die debug( 'termish', $_ );
+				}
+				return self.bless(
+					:child( @child )
+				)
+			}
+			if assert-hash-keys( $parsed, [< noun >] ) {
+				return self.bless(
+					:content(
+						:noun(
+							Noun.new(
+								$parsed.hash.<noun>
+							)
+						)
+					)
+				)
+			}
+			die debug( 'termish', $parsed );
+		}
+	}
+
+	class TermConj does Node {
+		method perl6() {
+"### TermConj"
+		}
+		method new( Mu $parsed ) {
+			if $parsed.list {
+				my @child;
+				for $parsed.list {
+					if assert-hash-keys( $_, [< termish >] ) {
+						@child.push(
+							TermIsh.new(
+								$_.hash.<termish>
+							)
+						);
+						next
+					}
+					die debug( 'termconj', $_ );
+				}
+				return self.bless(
+					:child( @child )
+				)
+			}
+			die debug( 'termconj', $parsed );
+		}
+	}
+
+	class TermAlt does Node {
+		method perl6() {
+"### TermAlt"
+		}
+		method new( Mu $parsed ) {
+			if $parsed.list {
+				my @child;
+				for $parsed.list {
+					if assert-hash-keys( $_, [< termconj >] ) {
+						@child.push(
+							TermConj.new(
+								$_.hash.<termconj>
+							)
+						);
+						next
+					}
+					die debug( 'termalt', $_ );
+				}
+				return self.bless(
+					:child( @child )
+				)
+			}
+			die debug( 'termalt', $parsed );
+		}
+	}
+
+	class TermConjSeq does Node {
+		method perl6() {
+"### TermConjSeq"
+		}
+		method new( Mu $parsed ) {
+			if $parsed.list {
+				my @child;
+				for $parsed.list {
+					if assert-hash-keys( $_, [< termalt >] ) {
+						@child.push(
+							TermAlt.new(
+								$_.hash.<termalt>
+							)
+						);
+						next
+					}
+					die debug( 'termconjseq', $_ );
+				}
+				return self.bless(
+					:child( @child )
+				)
+			}
+			if assert-hash-keys( $parsed, [< termalt >] ) {
+				return self.bless(
+					:content(
+						:termalt(
+							TermAlt.new(
+								$parsed.hash.<termalt>
+							)
+						)
+					)
+				)
+			}
+			die debug( 'termconjseq', $parsed );
+		}
+	}
+
+	class TermAltSeq does Node {
+		method perl6() {
+"### termAltSeq"
+		}
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< termconjseq >] ) {
+				return self.bless(
+					:content(
+						:termconjseq(
+							TermConjSeq.new(
+								$parsed.hash.<termconjseq>
+							)
+						)
+					)
+				)
+			}
+			die debug( 'termaltseq', $parsed );
+		}
+	}
+
+	class TermSeq does Node {
+		method perl6() {
+"### TermSeq"
+		}
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< termaltseq >] ) {
+				return self.bless(
+					:content(
+						:termaltseq(
+							TermAltSeq.new(
+								$parsed.hash.<termaltseq>
+							)
+						)
+					)
+				)
+			}
+			die debug( 'termseq', $parsed );
+		}
+	}
+
+	class Nibble does Node {
+		method perl6() {
+"### Nibble"
+		}
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< termseq >] ) {
+				return self.bless(
+					:content(
+						:termseq(
+							TermSeq.new(
+								$parsed.hash.<termseq>
+							)
+						)
+					)
+				)
+			}
+			if $parsed.Str {
+				return self.bless( :name( $parsed.Str ) )
+			}
+			die debug( 'nibble', $parsed );
+		}
+	}
+
 	class RegexDef does Node {
 		method perl6() {
 "### RegexDef"
@@ -1110,7 +1484,7 @@ class Perl6::Tidy {
 						)
 					),
 					:nibble(
-						self.nibble(
+						Nibble.new(
 							$parsed.hash.<nibble>
 						)
 					),
@@ -1987,7 +2361,7 @@ class Perl6::Tidy {
 			return Quote.new(
 				:content(
 					:nibble(
-						self.nibble(
+						Nibble.new(
 							$parsed.hash.<nibble>
 						)
 					)
@@ -2057,7 +2431,7 @@ class Perl6::Tidy {
 						)
 					),
 					:nibble(
-						self.nibble(
+						Nibble.new(
 							$parsed.hash.<nibble>
 						)
 					)
@@ -2086,384 +2460,6 @@ class Perl6::Tidy {
 			)
 		}
 		die debug( '_0', $parsed );
-	}
-
-	class CharSpec does Node {
-		method perl6() {
-"### CharSpec"
-		}
-		method new( Mu $parsed ) {
-			if $parsed.list {
-				my @child;
-				for $parsed.list -> $list {
-					my @_child;
-					for $list.list -> $_list {
-						my @__child;
-						for $_list.list {
-							if assert-Str( $_ ) {
-								@__child.push( $_ );
-								next
-							}
-							die debug( 'charspec', $_ );
-						}
-	#					die debug( 'charspec', $_list );
-					}
-	#				die debug( 'charspec', $list );
-				}
-				return self.bless(
-					:child( @child )
-				)
-			}
-			die debug( 'charspec', $parsed );
-		}
-	}
-
-	class CClassElem_INTERMEDIARY does Node {
-		method perl6() {
-"### CClassElem_INT"
-		}
-	}
-
-	class CClassElem does Node {
-		method perl6() {
-"### CClassElem"
-		}
-		method new( Mu $parsed ) {
-			if $parsed.list {
-				my @child;
-				for $parsed.list {
-					if assert-hash-keys( $_, [< sign charspec >] ) {
-						@child.push(
-							CClassElem_INTERMEDIARY.new(
-								:content(
-									:sign(
-										Sign.new(
-											$_.hash.<sign>
-										)
-									),
-									:charspec(
-										CharSpec.new(
-											$_.hash.<charspec>
-										)
-									)
-								)
-							)
-						);
-						next
-					}
-					die debug( 'cclass_elem', $_ );
-				}
-				return self.bless(
-					:child( @child )
-				)
-			}
-			die debug( 'cclass_elem', $parsed );
-		}
-	}
-
-	class Assertion does Node {
-		method perl6() {
-"### Assertion"
-		}
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< cclass_elem >] ) {
-				return self.bless(
-					:content(
-						:cclass_elem(
-							CClassElem.new(
-								$parsed.hash.<cclass_elem>
-							)
-						)
-					)
-				)
-			}
-			die debug( 'assertion', $parsed );
-		}
-	}
-
-	class MetaChar does Node {
-		method perl6() {
-"### MetaChar"
-		}
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< sym >] ) {
-				return self.bless(
-					:content(
-						:sym(
-							Sym.new(
-								$parsed.hash.<sym>
-							)
-						)
-					)
-				)
-			}
-			if assert-hash-keys( $parsed, [< backslash >] ) {
-				return self.bless(
-					:content(
-						:backslash(
-							BackSlash.new(
-								$parsed.hash.<backslash>
-							)
-						)
-					)
-				)
-			}
-			if assert-hash-keys( $parsed, [< assertion >] ) {
-				return self.bless(
-					:content(
-						:metachar(
-							Assertion.new(
-								$parsed.hash.<assertion>
-							)
-						)
-					)
-				)
-			}
-			die debug( 'metachar', $parsed );
-		}
-	}
-
-	class Atom does Node {
-		method perl6() {
-"### Atom"
-		}
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< metachar >] ) {
-				return self.bless(
-					:content(
-						:metachar(
-							MetaChar.new(
-								$parsed.hash.<metachar>
-							)
-						)
-					)
-				)
-			}
-			if $parsed.Str {
-				return self.bless( :name( $parsed.Str ) )
-			}
-			die debug( 'atom', $parsed );
-		}
-	}
-
-	class Noun does Node {
-		method perl6() {
-"### Node"
-		}
-		method new( Mu $parsed ) {
-			if $parsed.list {
-				my @child;
-				for $parsed.list {
-					if assert-hash-keys( $_, [< atom >],
-								 [< sigfinal >] ) {
-						@child.push(
-							Atom.new(
-								$_.hash.<atom>
-							)
-						);
-						next
-					}
-					die debug( 'noun', $_ );
-				}
-				return self.bless(
-					:child( @child )
-				)
-			}
-			die debug( 'noun', $parsed );
-		}
-	}
-
-	class TermIsh is Node {
-		method perl6() {
-"### TermIsh"
-		}
-		method new( Mu $parsed ) {
-			if $parsed.list {
-				my @child;
-				for $parsed.list {
-					if assert-hash-keys( $_, [< noun >] ) {
-						@child.push(
-							Noun.new(
-								$_.hash.<noun>
-							)
-						);
-						next
-					}
-					die debug( 'termish', $_ );
-				}
-				return self.bless(
-					:child( @child )
-				)
-			}
-			if assert-hash-keys( $parsed, [< noun >] ) {
-				return self.bless(
-					:content(
-						:noun(
-							Noun.new(
-								$parsed.hash.<noun>
-							)
-						)
-					)
-				)
-			}
-			die debug( 'termish', $parsed );
-		}
-	}
-
-	class TermConj does Node {
-		method perl6() {
-"### TermConj"
-		}
-		method new( Mu $parsed ) {
-			if $parsed.list {
-				my @child;
-				for $parsed.list {
-					if assert-hash-keys( $_, [< termish >] ) {
-						@child.push(
-							TermIsh.new(
-								$_.hash.<termish>
-							)
-						);
-						next
-					}
-					die debug( 'termconj', $_ );
-				}
-				return self.bless(
-					:child( @child )
-				)
-			}
-			die debug( 'termconj', $parsed );
-		}
-	}
-
-	class TermAlt does Node {
-		method perl6() {
-"### TermAlt"
-		}
-		method new( Mu $parsed ) {
-			if $parsed.list {
-				my @child;
-				for $parsed.list {
-					if assert-hash-keys( $_, [< termconj >] ) {
-						@child.push(
-							TermConj.new(
-								$_.hash.<termconj>
-							)
-						);
-						next
-					}
-					die debug( 'termalt', $_ );
-				}
-				return self.bless(
-					:child( @child )
-				)
-			}
-			die debug( 'termalt', $parsed );
-		}
-	}
-
-	class TermConjSeq does Node {
-		method perl6() {
-"### TermConjSeq"
-		}
-	}
-
-	method termconjseq( Mu $parsed ) {
-		if $parsed.list {
-			my @child;
-			for $parsed.list {
-				if assert-hash-keys( $_, [< termalt >] ) {
-					@child.push(
-						TermAlt.new(
-							$_.hash.<termalt>
-						)
-					);
-					next
-				}
-				die debug( 'termconjseq', $_ );
-			}
-			return TermConjSeq.new(
-				:child( @child )
-			)
-		}
-		if assert-hash-keys( $parsed, [< termalt >] ) {
-			return TermConjSeq.new(
-				:content(
-					:termalt(
-						TermAlt.new(
-							$parsed.hash.<termalt>
-						)
-					)
-				)
-			)
-		}
-		die debug( 'termconjseq', $parsed );
-	}
-
-	class TermAltSeq does Node {
-		method perl6() {
-"### termAltSeq"
-		}
-	}
-
-	method termaltseq( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< termconjseq >] ) {
-			return TermAltSeq.new(
-				:content(
-					:termconjseq(
-						self.termconjseq(
-							$parsed.hash.<termconjseq>
-						)
-					)
-				)
-			)
-		}
-		die debug( 'termaltseq', $parsed );
-	}
-
-	class TermSeq does Node {
-		method perl6() {
-"### TermSeq"
-		}
-	}
-
-	method termseq( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< termaltseq >] ) {
-			return TermSeq.new(
-				:content(
-					:termaltseq(
-						self.termaltseq(
-							$parsed.hash.<termaltseq>
-						)
-					)
-				)
-			)
-		}
-		die debug( 'termseq', $parsed );
-	}
-
-	class Nibble does Node {
-		method perl6() {
-"### Nibble"
-		}
-	}
-
-	method nibble( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< termseq >] ) {
-			return Nibble.new(
-				:content(
-					:termseq(
-						self.termseq(
-							$parsed.hash.<termseq>
-						)
-					)
-				)
-			)
-		}
-		if $parsed.Str {
-			return Nibble.new( :name( $parsed.Str ) )
-		}
-		die debug( 'nibble', $parsed );
 	}
 
 	class DecNumber does Node {
