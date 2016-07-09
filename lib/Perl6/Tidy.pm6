@@ -2314,54 +2314,52 @@ class Perl6::Tidy {
 		method perl6() {
 "### TermConj"
 		}
-	}
-
-	method termconj( Mu $parsed ) {
-		if $parsed.list {
-			my @child;
-			for $parsed.list {
-				if assert-hash-keys( $_, [< termish >] ) {
-					@child.push(
-						TermIsh.new(
-							$_.hash.<termish>
-						)
-					);
-					next
+		method new( Mu $parsed ) {
+			if $parsed.list {
+				my @child;
+				for $parsed.list {
+					if assert-hash-keys( $_, [< termish >] ) {
+						@child.push(
+							TermIsh.new(
+								$_.hash.<termish>
+							)
+						);
+						next
+					}
+					die debug( 'termconj', $_ );
 				}
-				die debug( 'termconj', $_ );
+				return self.bless(
+					:child( @child )
+				)
 			}
-			return TermConj.new(
-				:child( @child )
-			)
+			die debug( 'termconj', $parsed );
 		}
-		die debug( 'termconj', $parsed );
 	}
 
 	class TermAlt does Node {
 		method perl6() {
 "### TermAlt"
 		}
-	}
-
-	method termalt( Mu $parsed ) {
-		if $parsed.list {
-			my @child;
-			for $parsed.list {
-				if assert-hash-keys( $_, [< termconj >] ) {
-					@child.push(
-						self.termconj(
-							$_.hash.<termconj>
-						)
-					);
-					next
+		method new( Mu $parsed ) {
+			if $parsed.list {
+				my @child;
+				for $parsed.list {
+					if assert-hash-keys( $_, [< termconj >] ) {
+						@child.push(
+							TermConj.new(
+								$_.hash.<termconj>
+							)
+						);
+						next
+					}
+					die debug( 'termalt', $_ );
 				}
-				die debug( 'termalt', $_ );
+				return self.bless(
+					:child( @child )
+				)
 			}
-			return TermAlt.new(
-				:child( @child )
-			)
+			die debug( 'termalt', $parsed );
 		}
-		die debug( 'termalt', $parsed );
 	}
 
 	class TermConjSeq does Node {
@@ -2376,7 +2374,7 @@ class Perl6::Tidy {
 			for $parsed.list {
 				if assert-hash-keys( $_, [< termalt >] ) {
 					@child.push(
-						self.termalt(
+						TermAlt.new(
 							$_.hash.<termalt>
 						)
 					);
@@ -2392,7 +2390,7 @@ class Perl6::Tidy {
 			return TermConjSeq.new(
 				:content(
 					:termalt(
-						self.termalt(
+						TermAlt.new(
 							$parsed.hash.<termalt>
 						)
 					)
