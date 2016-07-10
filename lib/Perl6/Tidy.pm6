@@ -1,3 +1,47 @@
+sub dump-parsed( Mu $parsed ) {
+	my @lines;
+	my @types;
+	@types.push( 'Bool' ) if $parsed.Bool;
+	@types.push( 'Int' ) if $parsed.Int;
+	@types.push( 'Num' ) if $parsed.Num;
+
+	@lines.push( Q[ ~:   '] ~
+		     ~$parsed.Str ~
+		     "' - Types: " ~
+		     @types.gist );
+	@lines.push( Q[{}:    ] ~ $parsed.hash.keys.gist );
+	CATCH {
+		default { .resume } # workaround for X::Hash exception
+	}
+	@lines.push( Q{[]:    } ~ $parsed.list.elems );
+
+	if $parsed.hash {
+		my @keys;
+		for $parsed.hash.keys {
+			@keys.push( $_ ) if
+				$parsed.hash:defined{$_} and not
+				$parsed.hash.{$_}
+		}
+		@lines.push( Q[{}:U: ] ~ @keys.gist );
+
+		for $parsed.hash.keys {
+			next unless $parsed.hash.{$_};
+			@lines.push( qq{  {$_}:  } );
+			@lines.append( dump-parsed( $parsed.hash.{$_} ) )
+		}
+	}
+	if $parsed.list {
+		my $i = 0;
+		for $parsed.list {
+			@lines.push( qq{  [$i]:  } );
+			@lines.append( dump-parsed( $_ ) )
+		}
+	}
+
+	my $indent-str = '  ';
+	map { $indent-str ~ $_ }, @lines
+}
+
 class Perl6::Tidy {
 	use nqp;
 
@@ -27,6 +71,11 @@ class Perl6::Tidy {
 
 	class DecInt does Node {
 		method new( Mu $parsed ) {
+#die dump-parsed($parsed);
+			if $parsed.Str and
+			   $parsed.Str eq '0' {
+				return self.bless( :name( $parsed.Str ) )
+			}
 			if assert-Int( $parsed ) {
 				return self.bless( :name( $parsed.Int ) )
 			}
@@ -90,6 +139,10 @@ class Perl6::Tidy {
 
 	class VALUE does Node {
 		method new( Mu $parsed ) {
+			if $parsed.Str and
+			   $parsed.Str eq '0' {
+				return self.bless( :name( $parsed.Str ) )
+			}
 			if assert-Int( $parsed ) {
 				return self.bless( :name( $parsed.Int ) )
 			}
@@ -338,50 +391,6 @@ class Perl6::Tidy {
 		);
 
 		self.root( $parsed )
-	}
-
-	sub dump-parsed( Mu $parsed ) {
-		my @lines;
-		my @types;
-		@types.push( 'Bool' ) if $parsed.Bool;
-		@types.push( 'Int' ) if $parsed.Int;
-		@types.push( 'Num' ) if $parsed.Num;
-
-		@lines.push( Q[ ~:   '] ~
-			     ~$parsed.Str ~
-			     "' - Types: " ~
-			     @types.gist );
-		@lines.push( Q[{}:    ] ~ $parsed.hash.keys.gist );
-		CATCH {
-			default { .resume } # workaround for X::Hash exception
-		}
-		@lines.push( Q{[]:    } ~ $parsed.list.elems );
-
-		if $parsed.hash {
-			my @keys;
-			for $parsed.hash.keys {
-				@keys.push( $_ ) if
-					$parsed.hash:defined{$_} and not
-					$parsed.hash.{$_}
-			}
-			@lines.push( Q[{}:U: ] ~ @keys.gist );
-
-			for $parsed.hash.keys {
-				next unless $parsed.hash.{$_};
-				@lines.push( qq{  {$_}:  } );
-				@lines.append( dump-parsed( $parsed.hash.{$_} ) )
-			}
-		}
-		if $parsed.list {
-			my $i = 0;
-			for $parsed.list {
-				@lines.push( qq{  [$i]:  } );
-				@lines.append( dump-parsed( $_ ) )
-			}
-		}
-
-		my $indent-str = '  ';
-		map { $indent-str ~ $_ }, @lines
 	}
 
 	method dump( Str $text ) {
@@ -672,8 +681,8 @@ class Perl6::Tidy {
 					)
 				)
 			}
-die $hash.perl;
-			die dump-parsed( $hash );
+			die $hash.perl;
+			#die dump-parsed( $hash );
 		}
 	}
 

@@ -12,16 +12,16 @@ subtest {
 	plan 9;
 
 	subtest {
-		plan 4;
+		plan 5;
 
 		ok 1, "Test zero, once the dumper is ready.";
-#		subtest {
-#			plan 2;
-#
-#			my $parsed = $pt.tidy( Q{0} );
-#			isa-ok $parsed, 'Perl6::Tidy::Root';
-#			is $parsed.child.elems, 1;
-#		}, Q{Zero};
+		subtest {
+			plan 2;
+
+			my $parsed = $pt.tidy( Q{0} );
+			isa-ok $parsed, 'Perl6::Tidy::Root';
+			is $parsed.child.elems, 1;
+		}, Q{Zero};
 
 		subtest {
 			plan 2;
