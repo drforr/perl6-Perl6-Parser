@@ -670,8 +670,6 @@ class Perl6::Tidy {
 	class O does Node {
 		method new( Mu $parsed ) {
 			if $parsed ~~ Hash {
-#say $parsed.perl if $parsed ~~ Hash;
-#say $parsed.dump unless $parsed ~~ Hash;
 				if $parsed.<prec> and
 				   $parsed.<fiddly> and
 				   $parsed.<dba> and
