@@ -16,6 +16,11 @@ use Perl6::Tidy::Sigil;
 use Perl6::Tidy::Identifier;
 use Perl6::Tidy::CharSpec;
 
+# assert-Bool
+use Perl6::Tidy::Sign;
+use Perl6::Tidy::Doc;
+use Perl6::Tidy::B;
+
 class Perl6::Tidy {
 	use nqp;
 
@@ -25,17 +30,6 @@ class Perl6::Tidy {
 		has %.content;
 	}
 
-	class Sign does _Node {
-		method perl6() {
-"### sigil"
-		}
-		method new( Mu $parsed ) {
-			if assert-Bool( $parsed ) {
-				return self.bless( :name( $parsed.Bool ) )
-			}
-			die debug( 'sign', $parsed );
-		}
-	}
 
 	class EScale does _Node {
 		method perl6() {
@@ -46,7 +40,7 @@ class Perl6::Tidy {
 				return self.bless(
 					:content(
 						:sign(
-							Sign.new(
+							Perl6::Tidy::Sign.new(
 								$parsed.hash.<sign>
 							)
 						),
@@ -959,7 +953,7 @@ class Perl6::Tidy {
 							CClassElem_INTERMEDIARY.new(
 								:content(
 									:sign(
-										Sign.new(
+										Perl6::Tidy::Sign.new(
 											$_.hash.<sign>
 										)
 									),
@@ -1654,18 +1648,6 @@ class Perl6::Tidy {
 		die debug( 'variable_declarator', $parsed );
 	}
 
-	class Doc does _Node {
-		method perl6() {
-"### Doc"
-		}
-		method new( Mu $parsed ) {
-			if assert-Bool( $parsed ) {
-				return self.bless( :name( $parsed.Bool ) )
-			}
-			die debug( 'doc', $parsed );
-		}
-	}
-
 	class ModuleName does _Node {
 		method perl6() {
 "### ModuleName"
@@ -1747,7 +1729,7 @@ class Perl6::Tidy {
 			return StatementControl.new(
 				:content(
 					:doc(
-						Doc.new(
+						Perl6::Tidy::Doc.new(
 							$parsed.hash.<doc>
 						)
 					),
@@ -1768,7 +1750,7 @@ class Perl6::Tidy {
 			return StatementControl.new(
 				:content(
 					:doc(
-						Doc.new(
+						Perl6::Tidy::Doc.new(
 							$parsed.hash.<doc>
 						)
 					),
@@ -2114,18 +2096,6 @@ class Perl6::Tidy {
 		die debug( 'scope_declarator', $parsed );
 	}
 
-	class B does _Node {
-		method perl6() {
-"### B"
-		}
-		method new( Mu $parsed ) {
-			if assert-Bool( $parsed ) {
-				return self.bless( :name( $parsed.Bool ) )
-			}
-			die debug( 'B', $parsed );
-		}
-	}
-
 	class Babble does _Node {
 		method perl6() {
 "### Babble"
@@ -2135,7 +2105,7 @@ class Perl6::Tidy {
 				return self.bless(
 					:content(
 						:B(
-							B.new(
+							Perl6::Tidy::B.new(
 								$parsed.hash.<B>
 							)
 						),
