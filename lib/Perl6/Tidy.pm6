@@ -1647,6 +1647,267 @@ class Perl6::Tidy {
 		}
 	}
 
+	class B does Node {
+		method perl6() {
+"### B"
+		}
+		method new( Mu $parsed ) {
+			if assert-Bool( $parsed ) {
+				return self.bless( :name( $parsed.Bool ) )
+			}
+			die debug( 'B', $parsed );
+		}
+	}
+
+	class Babble does Node {
+		method perl6() {
+"### Babble"
+		}
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< B >], [< quotepair >] ) {
+				return self.bless(
+					:content(
+						:B(
+							B.new(
+								$parsed.hash.<B>
+							)
+						),
+						:quotepair()
+					)
+				)
+			}
+			die debug( 'babble', $parsed );
+		}
+	}
+
+	class Quibble does Node {
+		method perl6() {
+"### Quibble"
+		}
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< babble nibble >] ) {
+				return self.bless(
+					:content(
+						:babble(
+							Babble.new(
+								$parsed.hash.<babble>
+							)
+						),
+						:nibble(
+							Nibble.new(
+								$parsed.hash.<nibble>
+							)
+						)
+					)
+				)
+			}
+			die debug( 'quibble', $parsed );
+		}
+	}
+
+	class Quote does Node {
+		method perl6() {
+"### Quote"
+		}
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< nibble >] ) {
+				return self.bless(
+					:content(
+						:nibble(
+							Nibble.new(
+								$parsed.hash.<nibble>
+							)
+						)
+					)
+				)
+			}
+			if assert-hash-keys( $parsed, [< quibble >] ) {
+				return self.bless(
+					:content(
+						:quibble(
+							Quibble.new(
+								$parsed.hash.<quibble>
+							)
+						)
+					)
+				)
+			}
+			die debug( 'quote', $parsed );
+		}
+	}
+
+	class RadNumber does Node {
+		method perl6() {
+"### RadNumber"
+		}
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< circumfix radix >],
+						      [< exp base >] ) {
+				return self.bless(
+					:content(
+						:circumfix(
+							Circumfix.new(
+								$parsed.hash.<circumfix>,
+							)
+						),
+						:radix(
+							Radix.new(
+								$parsed.hash.<radix>,
+							)
+						),
+						:exp(),
+						:base()
+					)
+				)
+			}
+			die debug( 'rad_number', $parsed );
+		}
+	}
+
+	class DecNumber does Node {
+		method perl6() {
+"### DecNumber"
+		}
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< int coeff frac >] ) {
+				return self.bless(
+					:content(
+						:int(
+							_Int.new(
+								$parsed.hash.<int>
+							)
+						),
+						:coeff(
+							Coeff.new(
+								$parsed.hash.<coeff>
+							)
+						),
+						:frac(
+							Frac.new(
+								$parsed.hash.<frac>
+							)
+						)
+					)
+				)
+			}
+			if assert-hash-keys( $parsed, [< int coeff escale >] ) {
+				return self.bless(
+					:content(
+						:int(
+							_Int.new(
+								$parsed.hash.<int>
+							)
+						),
+						:coeff(
+							Coeff.new(
+								$parsed.hash.<coeff>
+							)
+						),
+						:escale(
+							EScale.new(
+								$parsed.hash.<escale>
+							)
+						)
+					)
+				)
+			}
+			die debug( 'dec_number', $parsed );
+		}
+	}
+
+	class Numish does Node {
+		method perl6() {
+"### Numish"
+		}
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< integer >] ) {
+				return self.bless(
+					:content(
+						:integer(
+							Integer.new(
+								$parsed.hash.<integer>
+							)
+						)
+					)
+				)
+			}
+			if assert-hash-keys( $parsed, [< rad_number >] ) {
+				return self.bless(
+					:content(
+						:rad_number(
+							RadNumber.new(
+								$parsed.hash.<rad_number>
+							)
+						)
+					)
+				)
+			}
+			if assert-hash-keys( $parsed, [< dec_number >] ) {
+				return self.bless(
+					:content(
+						:dec_number(
+							DecNumber.new(
+								$parsed.hash.<dec_number>
+							)
+						)
+					)
+				)
+			}
+			die debug( 'numish', $parsed );
+		}
+	}
+
+	class Number does Node {
+		method perl6() {
+"### Number"
+		}
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< numish >] ) {
+				return self.bless(
+					:content(
+						:numish(
+							Numish.new(
+								$parsed.hash.<numish>
+							)
+						)
+					)
+				)
+			}
+			die debug( 'number', $parsed );
+		}
+	}
+
+	class Value does Node {
+		method perl6() {
+"### Value"
+		}
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< number >] ) {
+				return self.bless(
+					:content(
+						:number(
+							Number.new(
+								$parsed.hash.<number>
+							)
+						)
+					)
+				)
+			}
+			if assert-hash-keys( $parsed, [< quote >] ) {
+				return self.bless(
+					:content(
+						:quote(
+							Quote.new(
+								$parsed.hash.<quote>
+							)
+						)
+					)
+				)
+			}
+			die debug( 'value', $parsed );
+		}
+	}
+
 	class EXPR does Node {
 		method perl6() {
 "### EXPR"
@@ -1667,7 +1928,7 @@ class Perl6::Tidy {
 				}
 				if assert-hash-keys( $_, [< value >] ) {
 					@child.push(
-						self.value(
+						Value.new(
 							$_.hash.<value>
 						)
 					);
@@ -1767,7 +2028,7 @@ class Perl6::Tidy {
 			return EXPR.new(
 				:content(
 					:value(
-						self.value(
+						Value.new(
 							$parsed.hash.<value>
 						)
 					)
@@ -2391,267 +2652,5 @@ class Perl6::Tidy {
 			)
 		}
 		die debug( 'scope_declarator', $parsed );
-	}
-
-	class B does Node {
-		method perl6() {
-"### B"
-		}
-		method new( Mu $parsed ) {
-			if assert-Bool( $parsed ) {
-				return self.bless( :name( $parsed.Bool ) )
-			}
-			die debug( 'B', $parsed );
-		}
-	}
-
-	class Babble does Node {
-		method perl6() {
-"### Babble"
-		}
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< B >], [< quotepair >] ) {
-				return self.bless(
-					:content(
-						:B(
-							B.new(
-								$parsed.hash.<B>
-							)
-						),
-						:quotepair()
-					)
-				)
-			}
-			die debug( 'babble', $parsed );
-		}
-	}
-
-	class Quibble does Node {
-		method perl6() {
-"### Quibble"
-		}
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< babble nibble >] ) {
-				return self.bless(
-					:content(
-						:babble(
-							Babble.new(
-								$parsed.hash.<babble>
-							)
-						),
-						:nibble(
-							Nibble.new(
-								$parsed.hash.<nibble>
-							)
-						)
-					)
-				)
-			}
-			die debug( 'quibble', $parsed );
-		}
-	}
-
-	class Quote does Node {
-		method perl6() {
-"### Quote"
-		}
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< nibble >] ) {
-				return self.bless(
-					:content(
-						:nibble(
-							Nibble.new(
-								$parsed.hash.<nibble>
-							)
-						)
-					)
-				)
-			}
-			if assert-hash-keys( $parsed, [< quibble >] ) {
-				return self.bless(
-					:content(
-						:quibble(
-							Quibble.new(
-								$parsed.hash.<quibble>
-							)
-						)
-					)
-				)
-			}
-			die debug( 'quote', $parsed );
-		}
-	}
-
-	class RadNumber does Node {
-		method perl6() {
-"### RadNumber"
-		}
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< circumfix radix >],
-						      [< exp base >] ) {
-				return self.bless(
-					:content(
-						:circumfix(
-							Circumfix.new(
-								$parsed.hash.<circumfix>,
-							)
-						),
-						:radix(
-							Radix.new(
-								$parsed.hash.<radix>,
-							)
-						),
-						:exp(),
-						:base()
-					)
-				)
-			}
-			die debug( 'rad_number', $parsed );
-		}
-	}
-
-	class DecNumber does Node {
-		method perl6() {
-"### DecNumber"
-		}
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< int coeff frac >] ) {
-				return self.bless(
-					:content(
-						:int(
-							_Int.new(
-								$parsed.hash.<int>
-							)
-						),
-						:coeff(
-							Coeff.new(
-								$parsed.hash.<coeff>
-							)
-						),
-						:frac(
-							Frac.new(
-								$parsed.hash.<frac>
-							)
-						)
-					)
-				)
-			}
-			if assert-hash-keys( $parsed, [< int coeff escale >] ) {
-				return self.bless(
-					:content(
-						:int(
-							_Int.new(
-								$parsed.hash.<int>
-							)
-						),
-						:coeff(
-							Coeff.new(
-								$parsed.hash.<coeff>
-							)
-						),
-						:escale(
-							EScale.new(
-								$parsed.hash.<escale>
-							)
-						)
-					)
-				)
-			}
-			die debug( 'dec_number', $parsed );
-		}
-	}
-
-	class Numish does Node {
-		method perl6() {
-"### Numish"
-		}
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< integer >] ) {
-				return self.bless(
-					:content(
-						:integer(
-							Integer.new(
-								$parsed.hash.<integer>
-							)
-						)
-					)
-				)
-			}
-			if assert-hash-keys( $parsed, [< rad_number >] ) {
-				return self.bless(
-					:content(
-						:rad_number(
-							RadNumber.new(
-								$parsed.hash.<rad_number>
-							)
-						)
-					)
-				)
-			}
-			if assert-hash-keys( $parsed, [< dec_number >] ) {
-				return self.bless(
-					:content(
-						:dec_number(
-							DecNumber.new(
-								$parsed.hash.<dec_number>
-							)
-						)
-					)
-				)
-			}
-			die debug( 'numish', $parsed );
-		}
-	}
-
-	class Number does Node {
-		method perl6() {
-"### Number"
-		}
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< numish >] ) {
-				return self.bless(
-					:content(
-						:numish(
-							Numish.new(
-								$parsed.hash.<numish>
-							)
-						)
-					)
-				)
-			}
-			die debug( 'number', $parsed );
-		}
-	}
-
-	class Value does Node {
-		method perl6() {
-"### Value"
-		}
-	}
-
-	method value( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< number >] ) {
-			return Value.new(
-				:content(
-					:number(
-						Number.new(
-							$parsed.hash.<number>
-						)
-					)
-				)
-			)
-		}
-		if assert-hash-keys( $parsed, [< quote >] ) {
-			return Value.new(
-				:content(
-					:quote(
-						Quote.new(
-							$parsed.hash.<quote>
-						)
-					)
-				)
-			)
-		}
-		die debug( 'value', $parsed );
 	}
 }
