@@ -1990,52 +1990,28 @@ class Perl6::Tidy {
 	}
 
 	class VariableDeclarator does Node {
-	}
-
-	method variable_declarator( Mu $parsed ) {
-		if assert-hash-keys(
-			$parsed,
-			[< variable post_constraint >],
-			[< semilist postcircumfix signature trait >] ) {
-			return VariableDeclarator.new(
-				:content(
-					:variable(
-						Variable.new(
-							$parsed.hash.<variable>
-						)
-					),
-					:post_constraint(
-						self.post_constraint(
-							$parsed.hash.<post_constraint>
-						)
-					),
-					:semilist(),
-					:postcircumfix(),
-					:signature(),
-					:trait()
+		method new( Mu $parsed ) {
+			if assert-hash-keys(
+				$parsed,
+				[< variable >],
+				[< semilist postcircumfix signature trait post_constraint >] ) {
+				return self.bless(
+					:content(
+						:variable(
+							Variable.new(
+								$parsed.hash.<variable>
+							)
+						),
+						:semilist(),
+						:postcircumfix(),
+						:signature(),
+						:trait(),
+						:post_constraint()
+					)
 				)
-			)
+			}
+			die debug( 'variable_declarator', $parsed );
 		}
-		if assert-hash-keys(
-			$parsed,
-			[< variable >],
-			[< semilist postcircumfix signature trait post_constraint >] ) {
-			return VariableDeclarator.new(
-				:content(
-					:variable(
-						Variable.new(
-							$parsed.hash.<variable>
-						)
-					),
-					:semilist(),
-					:postcircumfix(),
-					:signature(),
-					:trait(),
-					:post_constraint()
-				)
-			)
-		}
-		die debug( 'variable_declarator', $parsed );
 	}
 
 	class MultiDeclarator does Node {
@@ -2094,7 +2070,7 @@ class Perl6::Tidy {
 						)
 					),
 					:variable_declarator(
-						self.variable_declarator(
+						VariableDeclarator.new(
 							$parsed.hash.<variable_declarator>
 						)
 					),
@@ -2107,7 +2083,7 @@ class Perl6::Tidy {
 			return Declarator.new(
 				:content(
 					:variable_declarator(
-						self.variable_declarator(
+						VariableDeclarator.new(
 							$parsed.hash.<variable_declarator>
 						)
 					),
@@ -2146,7 +2122,7 @@ class Perl6::Tidy {
 						)
 					),
 					:variable_declarator(
-						self.variable_declarator(
+						VariableDeclarator.new(
 							$parsed.hash.<variable_declarator>
 						)
 					),
@@ -2159,7 +2135,7 @@ class Perl6::Tidy {
 			return DECL.new(
 				:content(
 					:variable_declarator(
-						self.variable_declarator(
+						VariableDeclarator.new(
 							$parsed.hash.<variable_declarator>
 						)
 					),
@@ -2180,7 +2156,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		elsif assert-hash-keys( $parsed, [< package_def sym >] ) {
+		if assert-hash-keys( $parsed, [< package_def sym >] ) {
 			return DECL.new(
 				:content(
 					:package_def(
@@ -2196,7 +2172,7 @@ class Perl6::Tidy {
 				)
 			)
 		}
-		elsif assert-hash-keys( $parsed, [< declarator >] ) {
+		if assert-hash-keys( $parsed, [< declarator >] ) {
 			return DECL.new(
 				:content(
 					:declarator(
@@ -2240,22 +2216,12 @@ class Perl6::Tidy {
 					:child( @child )
 				)
 			}
-			if assert-hash-keys( $parsed, [< longname >] ) {
-				return self.bless(
-					:content(
-						:longname(
-							LongName.new(
-								$parsed.hash.<longname>
-							)
-						)
-					)
-				)
-			}
 			die debug( 'typename', $parsed );
 		}
 	}
 
-	class Scoped is Node { }
+	class Scoped is Node {
+	}
 
 	method scoped( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< declarator DECL >],
