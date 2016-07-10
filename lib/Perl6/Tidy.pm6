@@ -340,13 +340,21 @@ class Perl6::Tidy {
 		self.root( $parsed )
 	}
 
-	method dump-parsed( Mu $parsed, Int $indent = 0 ) {
+	method dump-parsed( Mu $parsed ) {
 		my @lines;
-		@lines.push( Q[ ?:    ] ~ ~?$parsed.Bool );
-		@lines.push( Q[ ~:   '] ~ ~$parsed.Str ~ "'" );
-		@lines.push( Q[ +:    ] ~ ~+$parsed.Int );
-		@lines.push( Q[++:    ] ~ ~+$parsed.Num );
+		my @types;
+		@types.push( 'Bool' ) if $parsed.Bool;
+		@types.push( 'Int' ) if $parsed.Int;
+		@types.push( 'Num' ) if $parsed.Num;
+
+		@lines.push( Q[ ~:   '] ~
+			     ~$parsed.Str ~
+			     "' - Types: " ~
+			     @types.gist );
 		@lines.push( Q[{}:    ] ~ $parsed.hash.keys.gist );
+		CATCH {
+			default { .resume } # workaround for X::Hash exception
+		}
 		@lines.push( Q{[]:    } ~ $parsed.list.elems );
 
 		if $parsed.hash {
@@ -361,11 +369,18 @@ class Perl6::Tidy {
 			for $parsed.hash.keys {
 				next unless $parsed.hash.{$_};
 				@lines.push( qq{  {$_}:  } );
-				@lines.append( self.dump-parsed( $parsed.hash.{$_}, $indent + 1 ) )
+				@lines.append( self.dump-parsed( $parsed.hash.{$_} ) )
+			}
+		}
+		if $parsed.list {
+			my $i = 0;
+			for $parsed.list {
+				@lines.push( qq{  [$i]:  } );
+				@lines.append( self.dump-parsed( $_ ) )
 			}
 		}
 
-		my $indent-str = ' ' x ( $indent * 2 );
+		my $indent-str = '  ';
 		map { $indent-str ~ $_ }, @lines
 	}
 
