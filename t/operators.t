@@ -922,11 +922,97 @@ subtest {
 #	}, Q[Xeqv];
 }, 'list infix';
 
-#`(
+subtest {
+	plan 6;
 
-List prefix 	print push say die map substr ... [+] [*] any Z=
+	subtest {
+		plan 2;
 
-)
+		my $parsed = $pt.tidy( Q{my @a; print @a} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q[print];
+
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{my @a; push @a, 1} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q[push];
+
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{my @a; say @a} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q[say];
+
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{my @a; die @a} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q[die];
+
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{my @a; map @a, {}} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q[map];
+
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{my @a; substr @a} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q[substr];
+
+#	subtest {
+#		plan 2;
+#
+#		my $parsed = $pt.tidy( Q{my @a; ... @a} );
+#		isa-ok $parsed, 'Perl6::Tidy::Root';
+#		is $parsed.child.elems, 1;
+#	}, Q[...];
+
+#	subtest {
+#		plan 2;
+#
+#		my $parsed = $pt.tidy( Q{my @a; [+] @a} );
+#		isa-ok $parsed, 'Perl6::Tidy::Root';
+#		is $parsed.child.elems, 1;
+#	}, Q[[+]];
+
+#	subtest {
+#		plan 2;
+#
+#		my $parsed = $pt.tidy( Q{my @a; [*] @a} );
+#		isa-ok $parsed, 'Perl6::Tidy::Root';
+#		is $parsed.child.elems, 1;
+#	}, Q[[*]];
+
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{my @a; any @a} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q[any];
+
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{my @a; Z= @a} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q[Z];
+}, 'list prefix';
 
 subtest {
 	plan 2;
