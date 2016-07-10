@@ -1567,6 +1567,86 @@ class Perl6::Tidy {
 		die debug( 'dotty', $parsed );
 	}
 
+	class SemiList does Node {
+		method perl6() {
+"### SemiList"
+		}
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [], [< statement >] ) {
+				return self.bless
+			}
+			die debug( 'semilist', $parsed );
+		}
+	}
+
+	class Circumfix does Node {
+		method perl6() {
+"### Circumfix"
+		}
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< semilist >] ) {
+				return self.bless(
+					:content(
+						:semilist(
+							SemiList.new(
+								$parsed.hash.<semilist>
+							)
+						)
+					)
+				)
+			}
+			if assert-hash-keys( $parsed, [< binint VALUE >] ) {
+				return self.bless(
+					:content(
+						:binint(
+							BinInt.new(
+								$parsed.hash.<binint>
+							)
+						),
+						:VALUE(
+							VALUE.new(
+								$parsed.hash.<VALUE>
+							)
+						)
+					)
+				)
+			}
+			if assert-hash-keys( $parsed, [< octint VALUE >] ) {
+				return self.bless(
+					:content(
+						:octint(
+							OctInt.new(
+								$parsed.hash.<octint>
+							)
+						),
+						:VALUE(
+							VALUE.new(
+								$parsed.hash.<VALUE>
+							)
+						)
+					)
+				)
+			}
+			if assert-hash-keys( $parsed, [< hexint VALUE >] ) {
+				return self.bless(
+					:content(
+						:hexint(
+							HexInt.new(
+								$parsed.hash.<hexint>
+							)
+						),
+						:VALUE(
+							VALUE.new(
+								$parsed.hash.<VALUE>
+							)
+						)
+					)
+				)
+			}
+			die debug( 'circumfix', $parsed );
+		}
+	}
+
 	class EXPR does Node {
 		method perl6() {
 "### EXPR"
@@ -1709,7 +1789,7 @@ class Perl6::Tidy {
 			return EXPR.new(
 				:content(
 					:circumfix(
-						self.circumfix(
+						Circumfix.new(
 							$parsed.hash.<circumfix>
 						)
 					)
@@ -2506,6 +2586,34 @@ class Perl6::Tidy {
 		}
 	}
 
+	class RadNumber does Node {
+		method perl6() {
+"### RadNumber"
+		}
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< circumfix radix >],
+						      [< exp base >] ) {
+				return self.bless(
+					:content(
+						:circumfix(
+							Circumfix.new(
+								$parsed.hash.<circumfix>,
+							)
+						),
+						:radix(
+							Radix.new(
+								$parsed.hash.<radix>,
+							)
+						),
+						:exp(),
+						:base()
+					)
+				)
+			}
+			die debug( 'rad_number', $parsed );
+		}
+	}
+
 	class Numish does Node {
 		method perl6() {
 "### Numish"
@@ -2529,7 +2637,7 @@ class Perl6::Tidy {
 				:type( 'numish' ),
 				:content(
 					:rad_number(
-						self.rad_number(
+						RadNumber.new(
 							$parsed.hash.<rad_number>
 						)
 					)
@@ -2548,115 +2656,5 @@ class Perl6::Tidy {
 			)
 		}
 		die debug( 'numish', $parsed );
-	}
-
-	class SemiList does Node {
-		method perl6() {
-"### SemiList"
-		}
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [], [< statement >] ) {
-				return self.bless
-			}
-			die debug( 'semilist', $parsed );
-		}
-	}
-
-	class Circumfix does Node {
-		method perl6() {
-"### Circumfix"
-		}
-	}
-
-	method circumfix( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< semilist >] ) {
-			return Circumfix.new(
-				:content(
-					:semilist(
-						SemiList.new(
-							$parsed.hash.<semilist>
-						)
-					)
-				)
-			)
-		}
-		if assert-hash-keys( $parsed, [< binint VALUE >] ) {
-			return Circumfix.new(
-				:content(
-					:binint(
-						BinInt.new(
-							$parsed.hash.<binint>
-						)
-					),
-					:VALUE(
-						VALUE.new(
-							$parsed.hash.<VALUE>
-						)
-					)
-				)
-			)
-		}
-		if assert-hash-keys( $parsed, [< octint VALUE >] ) {
-			return Circumfix.new(
-				:content(
-					:octint(
-						OctInt.new(
-							$parsed.hash.<octint>
-						)
-					),
-					:VALUE(
-						VALUE.new(
-							$parsed.hash.<VALUE>
-						)
-					)
-				)
-			)
-		}
-		if assert-hash-keys( $parsed, [< hexint VALUE >] ) {
-			return Circumfix.new(
-				:content(
-					:hexint(
-						HexInt.new(
-							$parsed.hash.<hexint>
-						)
-					),
-					:VALUE(
-						VALUE.new(
-							$parsed.hash.<VALUE>
-						)
-					)
-				)
-			)
-		}
-		die debug( 'circumfix', $parsed );
-	}
-
-	class RadNumber does Node {
-		method perl6() {
-"### RadNumber"
-		}
-	}
-
-	method rad_number( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< circumfix radix >],
-					      [< exp base >] ) {
-			return RadNumber.new(
-				:content(
-					:circumfix(
-						self.circumfix(
-							$parsed.hash.<circumfix>,
-						)
-					),
-					:radix(
-						Radix.new(
-							$parsed.hash.<radix>,
-						)
-					),
-					:exp(),
-					:base()
-				)
-			)
-		}
-		die debug( 'rad_number', $parsed );
 	}
 }
