@@ -21,6 +21,17 @@ use Perl6::Tidy::Sign;
 use Perl6::Tidy::Doc;
 use Perl6::Tidy::B;
 
+# assert-hash-keys
+use Perl6::Tidy::EScale;
+use Perl6::Tidy::Integer; # Seemed to add 2 CPU seconds?
+use Perl6::Tidy::BackSlash; # Seems to add 0.5 CPU seconds?
+use Perl6::Tidy::Args; # Seems to add 0.1 CPU seconds?
+use Perl6::Tidy::Signature; # Seems to add 0.14?
+use Perl6::Tidy::FakeSignature; # Seems to add 0.4?
+use Perl6::Tidy::ColonPair; # Seems to add 0.7
+use Perl6::Tidy::Twigil; # 0.2
+use Perl6::Tidy::CClassElem; # 0.4
+
 class Perl6::Tidy {
 	use nqp;
 
@@ -28,125 +39,6 @@ class Perl6::Tidy {
 		has $.name;
 		has $.child;
 		has %.content;
-	}
-
-
-	class EScale does _Node {
-		method perl6() {
-"### EScale"
-		}
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< sign decint >] ) {
-				return self.bless(
-					:content(
-						:sign(
-							Perl6::Tidy::Sign.new(
-								$parsed.hash.<sign>
-							)
-						),
-						:decint(
-							Perl6::Tidy::DecInt.new(
-								$parsed.hash.<decint>
-							)
-						)
-					)
-				)
-			}
-			die debug( 'escale', $parsed );
-		}
-	}
-
-	class Integer does _Node {
-		method perl6() {
-"### Integer"
-		}
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< decint VALUE >] ) {
-				return self.bless(
-					:content(
-						:decint(
-							Perl6::Tidy::DecInt.new(
-								$parsed.hash.<decint>
-							)
-						),
-						:VALUE(
-							Perl6::Tidy::VALUE.new(
-								$parsed.hash.<VALUE>
-							)
-						)
-					)
-				)
-			}
-			if assert-hash-keys( $parsed, [< binint VALUE >] ) {
-				return self.bless(
-					:content(
-						:binint(
-							Perl6::Tidy::BinInt.new(
-								$parsed.hash.<binint>
-							)
-						),
-						:VALUE(
-							Perl6::Tidy::VALUE.new(
-								$parsed.hash.<VALUE>
-							)
-						)
-					)
-				)
-			}
-			if assert-hash-keys( $parsed, [< octint VALUE >] ) {
-				return self.bless(
-					:content(
-						:octint(
-							Perl6::Tidy::OctInt.new(
-								$parsed.hash.<octint>
-							)
-						),
-						:VALUE(
-							Perl6::Tidy::VALUE.new(
-								$parsed.hash.<VALUE>
-							)
-						)
-					)
-				)
-			}
-			if assert-hash-keys( $parsed, [< hexint VALUE >] ) {
-				return self.bless(
-					:content(
-						:hexint(
-							Perl6::Tidy::HexInt.new(
-								$parsed.hash.<hexint>
-							)
-						),
-						:VALUE(
-							Perl6::Tidy::VALUE.new(
-								$parsed.hash.<VALUE>
-							)
-						)
-					)
-				)
-			}
-			die debug( 'integer', $parsed );
-		}
-	}
-
-	class BackSlash does _Node {
-		method perl6() {
-"### BackSlash"
-		}
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< sym >] ) {
-				return self.bless(
-					:content(
-						:sym(
-							Perl6::Tidy::Sym.new(
-								$parsed.hash.<sym>
-							)
-						)
-					)
-				)
-			}
-			die debug( 'backslash', $parsed );
-		}
 	}
 
 	sub debug( Str $name, Mu $parsed ) {
@@ -408,18 +300,6 @@ class Perl6::Tidy {
 		die debug( 'postfix', $parsed );
 	}
 
-
-	class Args does _Node {
-		method perl6() {
-"### Args"
-		}
-		method new( Mu $parsed ) {
-			if $parsed.Bool {
-				return self.bless( :name( $parsed.Bool ) )
-			}
-			die debug( 'args', $parsed );
-		}
-	}
 	class MethodOp does _Node {
 		method perl6() {
 "### MethodOp"
@@ -436,7 +316,7 @@ class Perl6::Tidy {
 						)
 					),
 					:args(
-						Args.new(
+						Perl6::Tidy::Args.new(
 							$parsed.hash.<args>
 						)
 					)
@@ -589,75 +469,6 @@ class Perl6::Tidy {
 		die debug( 'name', $parsed );
 	}
 
-	class Signature does _Node {
-		method perl6() {
-"### Signature"
-		}
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [], [< param_sep parameter >] ) {
-				return self.bless(
-					:name( $parsed.Bool ),
-					:content(
-						:param_sep(),
-						:parameter()
-					)
-				)
-			}
-			die debug( 'signature', $parsed );
-		}
-	}
-
-	class FakeSignature does _Node {
-		method perl6() {
-"### FakeSignature"
-		}
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< signature >] ) {
-				return self.bless(
-					:content(
-						:signature(
-							Signature.new(
-								$parsed.hash.<signature>
-							)
-						)
-					)
-				)
-			}
-			die debug( 'fakesignature', $parsed );
-		}
-	}
-
-	class ColonPair does _Node {
-		method perl6() {
-"### ColonPair"
-		}
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< identifier >] ) {
-				return self.bless(
-					:content(
-						:identifier(
-							Perl6::Tidy::Identifier.new(
-								$parsed.hash.<identifier>
-							)
-						)
-					)
-				)
-			}
-			if assert-hash-keys( $parsed, [< fakesignature >] ) {
-				return self.bless(
-					:content(
-						:fakesignature(
-							FakeSignature.new(
-								$parsed.hash.<fakesignature>
-							)
-						)
-					)
-				)
-			}
-			die debug( 'colonpair', $parsed );
-		}
-	}
-
 	class LongName does _Node {
 		method perl6() {
 "### LongName"
@@ -678,26 +489,6 @@ class Perl6::Tidy {
 			)
 		}
 		die debug( 'longname', $parsed );
-	}
-
-	class Twigil does _Node {
-		method perl6() {
-"### Twigil"
-		}
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< sym >] ) {
-				return self.bless(
-					:content(
-						:sym(
-							Perl6::Tidy::Sym.new(
-								$parsed.hash.<sym>
-							)
-						)
-					)
-				)
-			}
-			die debug( 'twigil', $parsed );
-		}
 	}
 
 	class DeSigilName does _Node {
@@ -735,7 +526,7 @@ class Perl6::Tidy {
 			return Variable.new(
 				:content(
 					:twigil(
-						Twigil.new(
+						Perl6::Tidy::Twigil.new(
 							$parsed.hash.<twigil>
 						)
 					),
@@ -934,49 +725,6 @@ class Perl6::Tidy {
 		die debug( 'package_def', $parsed );
 	}
 
-	class CClassElem_INTERMEDIARY does _Node {
-		method perl6() {
-"### CClassElem_INT"
-		}
-	}
-
-	class CClassElem does _Node {
-		method perl6() {
-"### CClassElem"
-		}
-		method new( Mu $parsed ) {
-			if $parsed.list {
-				my @child;
-				for $parsed.list {
-					if assert-hash-keys( $_, [< sign charspec >] ) {
-						@child.push(
-							CClassElem_INTERMEDIARY.new(
-								:content(
-									:sign(
-										Perl6::Tidy::Sign.new(
-											$_.hash.<sign>
-										)
-									),
-									:charspec(
-										Perl6::Tidy::CharSpec.new(
-											$_.hash.<charspec>
-										)
-									)
-								)
-							)
-						);
-						next
-					}
-					die debug( 'cclass_elem', $_ );
-				}
-				return self.bless(
-					:child( @child )
-				)
-			}
-			die debug( 'cclass_elem', $parsed );
-		}
-	}
-
 	class Assertion does _Node {
 		method perl6() {
 "### Assertion"
@@ -986,7 +734,7 @@ class Perl6::Tidy {
 				return self.bless(
 					:content(
 						:cclass_elem(
-							CClassElem.new(
+							Perl6::Tidy::CClassElem.new(
 								$parsed.hash.<cclass_elem>
 							)
 						)
@@ -1017,7 +765,7 @@ class Perl6::Tidy {
 				return self.bless(
 					:content(
 						:backslash(
-							BackSlash.new(
+							Perl6::Tidy::BackSlash.new(
 								$parsed.hash.<backslash>
 							)
 						)
@@ -1481,7 +1229,7 @@ class Perl6::Tidy {
 				),
 				:content(
 					:args(
-						Args.new(
+						Perl6::Tidy::Args.new(
 							$parsed.hash.<args>
 						)
 					)
@@ -1534,7 +1282,7 @@ class Perl6::Tidy {
 			return EXPR.new(
 				:content(
 					:colonpair(
-						ColonPair.new(
+						Perl6::Tidy::ColonPair.new(
 							$parsed.hash.<colonpair>
 						)
 					)
@@ -2287,7 +2035,7 @@ class Perl6::Tidy {
 							)
 						),
 						:escale(
-							EScale.new(
+							Perl6::Tidy::EScale.new(
 								$parsed.hash.<escale>
 							)
 						)
@@ -2309,7 +2057,7 @@ class Perl6::Tidy {
 			return Numish.new(
 				:content(
 					:integer(
-						Integer.new(
+						Perl6::Tidy::Integer.new(
 							$parsed.hash.<integer>
 						)
 					)
