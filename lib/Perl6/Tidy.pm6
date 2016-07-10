@@ -2455,27 +2455,6 @@ class Perl6::Tidy {
 		die debug( 'number', $parsed );
 	}
 
-	class _0 does Node {
-		method perl6() {
-"### _0"
-		}
-	}
-
-	method _0( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< 0 >] ) {
-			return _0.new(
-				:content(
-					:_0(
-						self._0(
-							$parsed.hash.<0>
-						)
-					)
-				)
-			)
-		}
-		die debug( '_0', $parsed );
-	}
-
 	class DecNumber does Node {
 		method perl6() {
 "### DecNumber"
@@ -2571,6 +2550,18 @@ class Perl6::Tidy {
 		die debug( 'numish', $parsed );
 	}
 
+	class SemiList does Node {
+		method perl6() {
+"### SemiList"
+		}
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [], [< statement >] ) {
+				return self.bless
+			}
+			die debug( 'semilist', $parsed );
+		}
+	}
+
 	class Circumfix does Node {
 		method perl6() {
 "### Circumfix"
@@ -2582,7 +2573,7 @@ class Perl6::Tidy {
 			return Circumfix.new(
 				:content(
 					:semilist(
-						self.semilist(
+						SemiList.new(
 							$parsed.hash.<semilist>
 						)
 					)
@@ -2638,30 +2629,6 @@ class Perl6::Tidy {
 			)
 		}
 		die debug( 'circumfix', $parsed );
-	}
-
-	class SemiList does Node {
-		method perl6() {
-"### SemiList"
-		}
-	}
-
-	method semilist( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< statement >] ) {
-			return SemiList.new(
-				:content(
-					:statement(
-						self.statement(
-							$parsed.hash.<statement>
-						)
-					)
-				)
-			)
-		}
-		if assert-hash-keys( $parsed, [], [< statement >] ) {
-			return SemiList.new
-		}
-		die debug( 'semilist', $parsed );
 	}
 
 	class RadNumber does Node {
