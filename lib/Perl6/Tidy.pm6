@@ -2482,36 +2482,32 @@ class Perl6::Tidy {
 		}
 	}
 
-	class Value does Node {
+	class RadNumber does Node {
 		method perl6() {
-"### Value"
+"### RadNumber"
 		}
-	}
-
-	method value( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< number >] ) {
-			return Value.new(
-				:content(
-					:number(
-						self.number(
-							$parsed.hash.<number>
-						)
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< circumfix radix >],
+						      [< exp base >] ) {
+				return self.bless(
+					:content(
+						:circumfix(
+							Circumfix.new(
+								$parsed.hash.<circumfix>,
+							)
+						),
+						:radix(
+							Radix.new(
+								$parsed.hash.<radix>,
+							)
+						),
+						:exp(),
+						:base()
 					)
 				)
-			)
+			}
+			die debug( 'rad_number', $parsed );
 		}
-		if assert-hash-keys( $parsed, [< quote >] ) {
-			return Value.new(
-				:content(
-					:quote(
-						Quote.new(
-							$parsed.hash.<quote>
-						)
-					)
-				)
-			)
-		}
-		die debug( 'value', $parsed );
 	}
 
 	class DecNumber does Node {
@@ -2565,34 +2561,6 @@ class Perl6::Tidy {
 		}
 	}
 
-	class RadNumber does Node {
-		method perl6() {
-"### RadNumber"
-		}
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< circumfix radix >],
-						      [< exp base >] ) {
-				return self.bless(
-					:content(
-						:circumfix(
-							Circumfix.new(
-								$parsed.hash.<circumfix>,
-							)
-						),
-						:radix(
-							Radix.new(
-								$parsed.hash.<radix>,
-							)
-						),
-						:exp(),
-						:base()
-					)
-				)
-			}
-			die debug( 'rad_number', $parsed );
-		}
-	}
-
 	class Numish does Node {
 		method perl6() {
 "### Numish"
@@ -2639,20 +2607,51 @@ class Perl6::Tidy {
 		method perl6() {
 "### Number"
 		}
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< numish >] ) {
+				return self.bless(
+					:content(
+						:numish(
+							Numish.new(
+								$parsed.hash.<numish>
+							)
+						)
+					)
+				)
+			}
+			die debug( 'number', $parsed );
+		}
 	}
 
-	method number( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< numish >] ) {
-			return Number.new(
+	class Value does Node {
+		method perl6() {
+"### Value"
+		}
+	}
+
+	method value( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< number >] ) {
+			return Value.new(
 				:content(
-					:numish(
-						Numish.new(
-							$parsed.hash.<numish>
+					:number(
+						Number.new(
+							$parsed.hash.<number>
 						)
 					)
 				)
 			)
 		}
-		die debug( 'number', $parsed );
+		if assert-hash-keys( $parsed, [< quote >] ) {
+			return Value.new(
+				:content(
+					:quote(
+						Quote.new(
+							$parsed.hash.<quote>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'value', $parsed );
 	}
 }
