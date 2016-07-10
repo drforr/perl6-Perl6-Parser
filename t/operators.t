@@ -1059,13 +1059,14 @@ subtest {
 		is $parsed.child.elems, 1;
 	}, Q[any];
 
-	subtest {
-		plan 2;
-
-		my $parsed = $pt.tidy( Q{my @a; Z= @a} );
-		isa-ok $parsed, 'Perl6::Tidy::Root';
-		is $parsed.child.elems, 1;
-	}, Q[Z];
+#	XXX Is Z= really list *prefix*?
+#	subtest {
+#		plan 2;
+#
+#		my $parsed = $pt.tidy( Q{my @a; my @b; @a Z= @b} );
+#		isa-ok $parsed, 'Perl6::Tidy::Root';
+#		is $parsed.child.elems, 1;
+#	}, Q[Z=];
 }, 'list prefix';
 
 subtest {
@@ -1079,13 +1080,13 @@ subtest {
 		is $parsed.child.elems, 1;
 	}, Q[and];
 
-#	subtest {
-#		plan 2;
-#
-#		my $parsed = $pt.tidy( Q{3 andthen 2} );
-#		isa-ok $parsed, 'Perl6::Tidy::Root';
-#		is $parsed.child.elems, 1;
-#	}, Q[andthen];
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{3 andthen 2} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q[andthen];
 }, 'loose and';
 
 subtest {
