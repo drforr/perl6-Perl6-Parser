@@ -576,6 +576,7 @@ class Perl6::Tidy {
 			die debug( 'args', $parsed );
 		}
 	}
+
 	class MethodOp does Node {
 		method perl6() {
 "### MethodOp"
@@ -1835,7 +1836,6 @@ class Perl6::Tidy {
 			[< variable >],
 			[< semilist postcircumfix signature trait post_constraint >] ) {
 			return VariableDeclarator.new(
-				:child(), # post_constraint
 				:content(
 					:variable(
 						self.variable(
@@ -1845,7 +1845,8 @@ class Perl6::Tidy {
 					:semilist(),
 					:postcircumfix(),
 					:signature(),
-					:trait()
+					:trait(),
+					:post_constraint()
 				)
 			)
 		}
