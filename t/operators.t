@@ -796,9 +796,36 @@ subtest {
 	}, Q[max];
 }, 'tight or';
 
+subtest {
+	plan 3;
+
+#	subtest {
+#		plan 2;
+#
+#		my $parsed = $pt.tidy( Q{3 ?? 2 !! 1} );
+#		isa-ok $parsed, 'Perl6::Tidy::Root';
+#		is $parsed.child.elems, 1;
+#	}, Q[??];
+
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{3 ff 2} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q[ff];
+
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{3 fff 2} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q[fff];
+}, 'conditional';
+
 #`(
 
-Conditional 	?? !! ff fff
 Item assignment 	= => += -= **= xx= .=
 
 )
@@ -898,8 +925,41 @@ subtest {
 	}, Q[orelse];
 }, 'loose or';
 
-#`(
-Sequencer 	<==, ==>, <<==, ==>>
-)
+
+subtest {
+	plan 4;
+
+#	subtest {
+#		plan 2;
+#
+#		my $parsed = $pt.tidy( Q{my @a; sort() <== @a} );
+#		isa-ok $parsed, 'Perl6::Tidy::Root';
+#		is $parsed.child.elems, 1;
+#	}, Q[<==];
+
+#	subtest {
+#		plan 2;
+#
+#		my $parsed = $pt.tidy( Q{my @a; @a ==> sort} );
+#		isa-ok $parsed, 'Perl6::Tidy::Root';
+#		is $parsed.child.elems, 1;
+#	}, Q[==>];
+
+#	subtest {
+#		plan 2;
+#
+#		my $parsed = $pt.tidy( Q{3 <<== 2} );
+#		isa-ok $parsed, 'Perl6::Tidy::Root';
+#		is $parsed.child.elems, 1;
+#	}, Q[<<==];
+
+#	subtest {
+#		plan 2;
+#
+#		my $parsed = $pt.tidy( Q{3 ==>> 2} );
+#		isa-ok $parsed, 'Perl6::Tidy::Root';
+#		is $parsed.child.elems, 1;
+#	}, Q[==>>];
+}, 'sequencer';
 
 # vim: ft=perl6
