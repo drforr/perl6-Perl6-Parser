@@ -677,26 +677,29 @@ class Perl6::Tidy {
 	}
 
 	method morename( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< identifier >] ) {
-			return MoreName.new(
-				:content(
-					:identifier(
+		if $parsed.list {
+			my @child;
+			for $parsed.list {
+				if assert-hash-keys( $_, [< identifier >] ) {
+					@child.push(
 						Identifier.new(
-							$parsed.hash.<identifier>
+							$_.hash.<identifier>
 						)
-					),
-				),
-			)
-		}
-		if assert-hash-keys( $parsed, [< EXPR >] ) {
-			return MoreName.new(
-				:content(
-					:EXPR(
+					);
+					next
+				}
+				if assert-hash-keys( $_, [< EXPR >] ) {
+					@child.push(
 						self.EXPR(
-							$parsed.hash.<EXPR>
+							$_.hash.<EXPR>
 						)
-					),
-				),
+					);
+					next
+				}
+				die debug( 'morename', $_ );
+			}
+			return MoreName.new(
+				:child( @child )
 			)
 		}
 		die debug( 'morename', $parsed );
@@ -710,14 +713,6 @@ class Perl6::Tidy {
 
 	method name( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< identifier morename >] ) {
-			my @child;
-			for $parsed.hash.<morename> {
-				@child.push(
-					self.morename(
-						$_
-					)
-				)
-			}
 			return Name.new(
 				:content(
 					:identifier(
@@ -725,8 +720,12 @@ class Perl6::Tidy {
 							$parsed.hash.<identifier>
 						)
 					),
-				),
-				:child( @child )
+					:morename(
+						self.morename(
+							$parsed.hash.<morename>
+						)
+					),
+				)
 			)
 		}
 		if assert-hash-keys( $parsed, [< identifier >],
@@ -1774,6 +1773,33 @@ class Perl6::Tidy {
 		die debug( 'EXPR', $parsed );
 	}
 
+	class PostConstraint does Node {
+		method perl6() {
+"### PostConstraint"
+		}
+	}
+
+	method post_constraint( Mu $parsed ) {
+		if $parsed.list {
+			my @child;
+			for $parsed.list {
+				if assert-hash-keys( $_, [< EXPR >] ) {
+					@child.push(
+						self.EXPR(
+							$_.hash.<EXPR>
+						)
+					);
+					next;
+				}
+				die debug( 'variable_declarator', $_ );
+			}
+			return PostConstraint.new(
+				:child( @child )
+			)
+		}
+		die debug( 'post_constraint', $parsed );
+	}
+
 	class VariableDeclarator does Node {
 		method perl6() {
 "### VariableDelarator"
@@ -1785,24 +1811,16 @@ class Perl6::Tidy {
 			$parsed,
 			[< variable post_constraint >],
 			[< semilist postcircumfix signature trait >] ) {
-			my @child;
-			for $parsed.hash.<post_constraint> {
-				if assert-hash-keys( $_, [< EXPR >] ) {
-					@child.push(
-						self.EXPR(
-							$_.hash.<EXPR>
-						)
-					);
-					next;
-				}
-				die debug( 'variable_declarator', $_ );
-			}
 			return VariableDeclarator.new(
-				:child( @child )
 				:content(
 					:variable(
 						self.variable(
 							$parsed.hash.<variable>
+						)
+					),
+					:post_constraint(
+						self.post_constraint(
+							$parsed.hash.<post_constraint>
 						)
 					),
 					:semilist(),
