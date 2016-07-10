@@ -4,7 +4,7 @@ use nqp;
 use Test;
 use Perl6::Tidy;
 
-plan 1;
+plan 13;
 
 my $pt = Perl6::Tidy.new;
 
@@ -149,7 +149,7 @@ subtest {
 }, 'exponentiation';
 
 subtest {
-	plan 1;
+	plan 12;
 
 	subtest {
 		plan 2;
@@ -373,7 +373,7 @@ subtest {
 }, 'multiplicative';
 
 subtest {
-	plan 15;
+	plan 8;
 
 	subtest {
 		plan 2;
@@ -441,7 +441,7 @@ subtest {
 }, 'additive';
 
 subtest {
-	plan 15;
+	plan 2;
 
 	subtest {
 		plan 2;
@@ -461,7 +461,7 @@ subtest {
 }, 'replication';
 
 subtest {
-	plan 15;
+	plan 1;
 
 	subtest {
 		plan 2;
@@ -473,7 +473,7 @@ subtest {
 }, 'concatenation';
 
 subtest {
-	plan 15;
+	plan 1;
 
 	subtest {
 		plan 2;
@@ -485,7 +485,7 @@ subtest {
 }, 'junctive and';
 
 subtest {
-	plan 15;
+	plan 2;
 
 	subtest {
 		plan 2;
@@ -504,10 +504,124 @@ subtest {
 	}, Q[^];
 }, 'junctive or';
 
+subtest {
+	plan 2;
+
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{my $x; temp $x} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q[temp];
+
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{my $x; let $x} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q[let];
+}, 'named unary';
+
+subtest {
+	plan 2;
+
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{my $x; temp $x} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q[temp];
+
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{my $x; let $x} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q[let];
+}, 'structural infix';
+
+subtest {
+	plan 9;
+
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{1 but 2} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q[but];
+
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{1 does 2} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q[does];
+
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{1 <=> 2} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q[<=>];
+
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{1 leg 2} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q[leg];
+
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{'a' cmp 'b'} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q[cmp];
+
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{1 .. 2} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q[..];
+
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{1 ..^ 2} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q[..^];
+
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{1 ^.. 2} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q[^..];
+
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{1 ^..^ 2} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q[^..^];
+}, 'structural infix';
+
 #`(
 
-Named unary 	temp let
-Structural infix 	but does <=> leg cmp .. ..^ ^.. ^..^
 Chaining infix 	!= == < <= > >= eq ne lt le gt ge ~~ === eqv !eqv =~=
 Tight and 	&&
 Tight or 	|| ^^ // min max
