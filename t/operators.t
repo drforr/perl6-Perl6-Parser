@@ -871,7 +871,7 @@ subtest {
 }, 'loose and';
 
 subtest {
-	plan 2;
+	plan 3;
 
 	subtest {
 		plan 2;
@@ -889,13 +889,13 @@ subtest {
 		is $parsed.child.elems, 1;
 	}, Q[xor];
 
-#	subtest {
-#		plan 2;
-#
-#		my $parsed = $pt.tidy( Q{3 orelse 2} );
-#		isa-ok $parsed, 'Perl6::Tidy::Root';
-#		is $parsed.child.elems, 1;
-#	}, Q[orelse];
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{3 orelse 2} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q[orelse];
 }, 'loose or';
 
 #`(
