@@ -379,81 +379,52 @@ class Perl6::Tidy {
 		die debug( 'statementlist', $parsed );
 	}
 
-	class Statement does Node {
-	}
-
-	method statement( Mu $parsed ) {
-		if $parsed.list {
-			my @child;
-			for $parsed.list {
-				if assert-hash-keys( $_, 'EXPR' ) {
-					@child.push(
-						self.EXPR(
-							$_.hash.<EXPR>
-						)
-					);
-					next
-				}
-				if assert-hash-keys( $_, [< statement_control >] ) {
-					@child.push(
-						self.statement_control(
-							$_.hash.<statement_control>
-						)
-					);
-					next
-				}
-				die debug( 'statement', $_ );
-			}
-			return Statement.new(
-				:child( @child )
-			)
-		}
-		die debug( 'statement', $parsed );
-	}
-
-	class O does Node {
-		method new( Hash $hash ) {
-			if $hash.<prec> and
-			   $hash.<fiddly> and
-			   $hash.<dba> and
-			   $hash.<assoc> {
-				return self.bless(
-					:content(
-					)
-				)
-			}
-			die debug( 'O', $hash );
-		}
-	}
-
-	class Postfix does Node {
+	class VStr does Node {
 		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< sym O >] ) {
+			if $parsed.Int {
+				return self.bless( :name( $parsed.Int ) )
+			}
+			die debug( 'vstr', $parsed );
+		}
+	}
+
+	class VNum does Node {
+		method new( Mu $parsed ) {
+			if $parsed.list {
+				return self.bless( :child() )
+			}
+			die debug( 'vnum', $parsed );
+		}
+	}
+
+	class Version does Node {
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< vnum vstr >] ) {
 				return self.bless(
 					:content(
-						:sym(
-							Sym.new(
-								$parsed.hash.<sym>
+						:vnum(
+							VNum.new(
+								$parsed.hash.<vnum>
 							)
 						),
-						:O(
-							O.new(
-								$parsed.hash.<O>
+						:vstr(
+							VStr.new(
+								$parsed.hash.<vstr>
 							)
 						)
 					)
 				)
 			}
-			die debug( 'postfix', $parsed );
+			die debug( 'version', $parsed );
 		}
 	}
 
-	class Args does Node {
+	class Doc does Node {
 		method new( Mu $parsed ) {
-			if $parsed.Bool {
+			if assert-Bool( $parsed ) {
 				return self.bless( :name( $parsed.Bool ) )
 			}
-			die debug( 'args', $parsed );
+			die debug( 'doc', $parsed );
 		}
 	}
 
@@ -515,6 +486,149 @@ class Perl6::Tidy {
 				)
 			}
 			die debug( 'longname', $parsed );
+		}
+	}
+
+	class ModuleName does Node {
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< longname >] ) {
+				return self.bless(
+					:content(
+						:longname(
+							LongName.new(
+								$parsed.hash.<longname>
+							)
+						)
+					)
+				)
+			}
+			die debug( 'module_name', $parsed );
+		}
+	}
+
+	class StatementControl does Node {
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< doc sym module_name >] ) {
+				return self.bless(
+					:content(
+						:doc(
+							Doc.new(
+								$parsed.hash.<doc>
+							)
+						),
+						:sym(
+							Sym.new(
+								$parsed.hash.<sym>
+							)
+						),
+						:module_name(
+							ModuleName.new(
+								$parsed.hash.<module_name>
+							)
+						)
+					)
+				)
+			}
+			if assert-hash-keys( $parsed, [< doc sym version >] ) {
+				return self.bless(
+					:content(
+						:doc(
+							Doc.new(
+								$parsed.hash.<doc>
+							)
+						),
+						:sym(
+							Sym.new(
+								$parsed.hash.<sym>
+							)
+						),
+						:version(
+							Version.new(
+								$parsed.hash.<version>
+							)
+						)
+					)
+				)
+			}
+			die debug( 'statement_control', $parsed );
+		}
+	}
+
+	class Statement does Node {
+	}
+
+	method statement( Mu $parsed ) {
+		if $parsed.list {
+			my @child;
+			for $parsed.list {
+				if assert-hash-keys( $_, 'EXPR' ) {
+					@child.push(
+						self.EXPR(
+							$_.hash.<EXPR>
+						)
+					);
+					next
+				}
+				if assert-hash-keys( $_, [< statement_control >] ) {
+					@child.push(
+						StatementControl.new(
+							$_.hash.<statement_control>
+						)
+					);
+					next
+				}
+				die debug( 'statement', $_ );
+			}
+			return Statement.new(
+				:child( @child )
+			)
+		}
+		die debug( 'statement', $parsed );
+	}
+
+	class O does Node {
+		method new( Hash $hash ) {
+			if $hash.<prec> and
+			   $hash.<fiddly> and
+			   $hash.<dba> and
+			   $hash.<assoc> {
+				return self.bless(
+					:content(
+					)
+				)
+			}
+			die debug( 'O', $hash );
+		}
+	}
+
+	class Postfix does Node {
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< sym O >] ) {
+				return self.bless(
+					:content(
+						:sym(
+							Sym.new(
+								$parsed.hash.<sym>
+							)
+						),
+						:O(
+							O.new(
+								$parsed.hash.<O>
+							)
+						)
+					)
+				)
+			}
+			die debug( 'postfix', $parsed );
+		}
+	}
+
+	class Args does Node {
+		method new( Mu $parsed ) {
+			if $parsed.Bool {
+				return self.bless( :name( $parsed.Bool ) )
+			}
+			die debug( 'args', $parsed );
 		}
 	}
 
@@ -1313,31 +1427,30 @@ class Perl6::Tidy {
 	}
 
 	class Dotty does Node {
-	}
-
-	method dotty( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< sym dottyop O >] ) {
-			return Dotty.new(
-				:content(
-					:sym(
-						Sym.new(
-							$parsed.hash.<sym>
-						)
-					),
-					:dottyop(
-						DottyOp.new(
-							$parsed.hash.<dottyop>
-						)
-					),
-					:O(
-						O.new(
-							$parsed.hash.<O>
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< sym dottyop O >] ) {
+				return self.bless(
+					:content(
+						:sym(
+							Sym.new(
+								$parsed.hash.<sym>
+							)
+						),
+						:dottyop(
+							DottyOp.new(
+								$parsed.hash.<dottyop>
+							)
+						),
+						:O(
+							O.new(
+								$parsed.hash.<O>
+							)
 						)
 					)
 				)
-			)
+			}
+			die debug( 'dotty', $parsed );
 		}
-		die debug( 'dotty', $parsed );
 	}
 
 	class SemiList does Node {
@@ -1686,7 +1799,7 @@ class Perl6::Tidy {
 								)
 							),
 							:dotty(
-								self.dotty(
+								Dotty.new(
 									$parsed.hash.<dotty>
 								)
 							)
@@ -1867,7 +1980,7 @@ class Perl6::Tidy {
 					);
 					next;
 				}
-				die debug( 'variable_declarator', $_ );
+				die debug( 'post_constraint', $_ );
 			}
 			return PostConstraint.new(
 				:child( @child )
@@ -1923,122 +2036,6 @@ class Perl6::Tidy {
 			)
 		}
 		die debug( 'variable_declarator', $parsed );
-	}
-
-	class Doc does Node {
-		method new( Mu $parsed ) {
-			if assert-Bool( $parsed ) {
-				return self.bless( :name( $parsed.Bool ) )
-			}
-			die debug( 'doc', $parsed );
-		}
-	}
-
-	class ModuleName does Node {
-	}
-
-	method module_name( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< longname >] ) {
-			return ModuleName.new(
-				:content(
-					:longname(
-						LongName.new(
-							$parsed.hash.<longname>
-						)
-					)
-				)
-			)
-		}
-		die debug( 'module_name', $parsed );
-	}
-
-	class VStr does Node {
-		method new( Mu $parsed ) {
-			if $parsed.Int {
-				return self.bless( :name( $parsed.Int ) )
-			}
-			die debug( 'vstr', $parsed );
-		}
-	}
-
-	class VNum does Node {
-		method new( Mu $parsed ) {
-			if $parsed.list {
-				return self.bless( :child() )
-			}
-			die debug( 'vnum', $parsed );
-		}
-	}
-
-	class Version does Node {
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< vnum vstr >] ) {
-				return self.bless(
-					:content(
-						:vnum(
-							VNum.new(
-								$parsed.hash.<vnum>
-							)
-						),
-						:vstr(
-							VStr.new(
-								$parsed.hash.<vstr>
-							)
-						)
-					)
-				)
-			}
-			die debug( 'version', $parsed );
-		}
-	}
-
-	class StatementControl does Node {
-	}
-
-	method statement_control( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< doc sym module_name >] ) {
-			return StatementControl.new(
-				:content(
-					:doc(
-						Doc.new(
-							$parsed.hash.<doc>
-						)
-					),
-					:sym(
-						Sym.new(
-							$parsed.hash.<sym>
-						)
-					),
-					:module_name(
-						self.module_name(
-							$parsed.hash.<module_name>
-						)
-					)
-				)
-			)
-		}
-		if assert-hash-keys( $parsed, [< doc sym version >] ) {
-			return StatementControl.new(
-				:content(
-					:doc(
-						Doc.new(
-							$parsed.hash.<doc>
-						)
-					),
-					:sym(
-						Sym.new(
-							$parsed.hash.<sym>
-						)
-					),
-					:version(
-						Version.new(
-							$parsed.hash.<version>
-						)
-					)
-				)
-			)
-		}
-		die debug( 'statement_control', $parsed );
 	}
 
 	class MultiDeclarator does Node {
@@ -2213,50 +2210,49 @@ class Perl6::Tidy {
 		die debug( 'DECL', $parsed );
 	}
 
-	class TypeName does Node {
-	}
-
 	class TypeName_INTERMEDIARY does Node {
 	}
 
-	method typename( Mu $parsed ) {
-		if $parsed.list {
-			my @child;
-			for $parsed.list {
-				if assert-hash-keys( $_, [< longname >],
-							 [< colonpair >] ) {
-					@child.push(
-						TypeName_INTERMEDIARY.new(
-							:content(
-								:longname(
-									LongName.new(
-										$_.hash.<longname>
-									)
-								),
-								:colonpair()
+	class TypeName does Node {
+		method new( Mu $parsed ) {
+			if $parsed.list {
+				my @child;
+				for $parsed.list {
+					if assert-hash-keys( $_, [< longname >],
+								 [< colonpair >] ) {
+						@child.push(
+							TypeName_INTERMEDIARY.new(
+								:content(
+									:longname(
+										LongName.new(
+											$_.hash.<longname>
+										)
+									),
+									:colonpair()
+								)
 							)
-						)
-					);
-					next;
+						);
+						next;
+					}
+					die debug( 'typename', $_ );
 				}
-				die debug( 'typename', $_ );
+				return self.bless(
+					:child( @child )
+				)
 			}
-			return TypeName.new(
-				:child( @child )
-			)
-		}
-		if assert-hash-keys( $parsed, [< longname >] ) {
-			return TypeName.new(
-				:content(
-					:longname(
-						LongName.new(
-							$parsed.hash.<longname>
+			if assert-hash-keys( $parsed, [< longname >] ) {
+				return self.bless(
+					:content(
+						:longname(
+							LongName.new(
+								$parsed.hash.<longname>
+							)
 						)
 					)
 				)
-			)
+			}
+			die debug( 'typename', $parsed );
 		}
-		die debug( 'typename', $parsed );
 	}
 
 	class Scoped is Node { }
@@ -2295,7 +2291,7 @@ class Perl6::Tidy {
 						)
 					),
 					:typename(
-						self.typename(
+						TypeName.new(
 							$parsed.hash.<typename>
 						)
 					)
