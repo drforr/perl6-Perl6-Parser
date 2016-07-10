@@ -4,7 +4,7 @@ use nqp;
 use Test;
 use Perl6::Tidy;
 
-plan 1;
+plan 2;
 
 my $pt = Perl6::Tidy.new;
 
@@ -61,7 +61,7 @@ subtest {
 }, Q{asmd mod exp};
 
 subtest {
-	plan 1;
+	plan 4;
 
 	subtest {
 		plan 2;
@@ -70,11 +70,43 @@ subtest {
 		isa-ok $parsed, 'Perl6::Tidy::Root';
 		is $parsed.child.elems, 1;
 	}, Q{.meth};
+
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{my $x; $x.+say} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q{.+};
+
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{my $x; $x.?say} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q{.?};
+
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{my $x; $x.*say} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q{.*};
+
+#	subtest {
+#		plan 2;
+#
+#		my $parsed = $pt.tidy( Q{my $x; $x.()} );
+#		isa-ok $parsed, 'Perl6::Tidy::Root';
+#		is $parsed.child.elems, 1;
+#	}, Q{.()};
 }, 'postfix';
 
 #`(
 
-L 	Method postfix 	.meth .+ .? .* .() .[] .{} .<> .«» .:: .= .^ .:
+L 	Method postfix 	.() .[] .{} .<> .«» .:: .= .^ .:
 N 	Autoincrement 	++ --
 R 	Exponentiation 	**
 L 	Symbolic unary 	! + - ~ ? | || +^ ~^ ?^ ^

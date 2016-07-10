@@ -156,6 +156,14 @@ class Perl6::Tidy {
 
 	class Sym does Node {
 		method new( Mu $parsed ) {
+			if $parsed.Bool and		# XXX Huh?
+			   $parsed.Str eq '+' {
+				return self.bless( :name( $parsed.Str ) )
+			}
+			if $parsed.Bool and		# XXX Huh?
+			   $parsed.Str eq '' {
+				return self.bless( :name( $parsed.Str ) )
+			}
 			if assert-Str( $parsed ) {
 				return self.bless( :name( $parsed.Str ) )
 			}
@@ -660,33 +668,37 @@ class Perl6::Tidy {
 	}
 
 	class O does Node {
-		method new( Hash $hash ) {
-			if $hash.<prec> and
-			   $hash.<fiddly> and
-			   $hash.<dba> and
-			   $hash.<assoc> {
-				return self.bless(
-					:content(
-						:prec( $hash.<prec> ),
-						:fiddly( $hash.<fiddly> ),
-						:dba( $hash.<dba> ),
-						:assoc( $hash.<assoc> )
+		method new( Mu $parsed ) {
+			if $parsed ~~ Hash {
+#say $parsed.perl if $parsed ~~ Hash;
+#say $parsed.dump unless $parsed ~~ Hash;
+				if $parsed.<prec> and
+				   $parsed.<fiddly> and
+				   $parsed.<dba> and
+				   $parsed.<assoc> {
+					return self.bless(
+						:content(
+							:prec( $parsed.<prec> ),
+							:fiddly( $parsed.<fiddly> ),
+							:dba( $parsed.<dba> ),
+							:assoc( $parsed.<assoc> )
+						)
 					)
-				)
-			}
-			if $hash.<prec> and
-			   $hash.<dba> and
-			   $hash.<assoc> {
-				return self.bless(
-					:content(
-						:prec( $hash.<prec> ),
-						:dba( $hash.<dba> ),
-						:assoc( $hash.<assoc> )
+				}
+				if $parsed.<prec> and
+				   $parsed.<dba> and
+				   $parsed.<assoc> {
+					return self.bless(
+						:content(
+							:prec( $parsed.<prec> ),
+							:dba( $parsed.<dba> ),
+							:assoc( $parsed.<assoc> )
+						)
 					)
-				)
+				}
 			}
-			die $hash.perl;
-			#die dump-parsed( $hash );
+			die $parsed.perl;
+			#die dump-parsed( $parsed );
 		}
 	}
 
@@ -798,8 +810,89 @@ class Perl6::Tidy {
 		}
 	}
 
+	class ArgList does Node {
+		method new( Mu $parsed ) {
+			if assert-Bool( $parsed ) {
+				return self.bless(
+					:name( $parsed.Bool )
+				)
+			}
+			die debug( 'arglist', $parsed );
+		}
+	}
+
+	class PostCircumfix does Node {
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< arglist O >] ) {
+				return self.bless(
+					:content(
+						:arglist(
+							ArgList.new(
+								$parsed.hash.<arglist>
+							)
+						),
+						:O(
+							O.new(
+								$parsed.hash.<O>
+							)
+						)
+					)
+				)
+			}
+			die debug( 'postcircumfix', $parsed );
+		}
+	}
+
+	class PostOp does Node {
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< sym postcircumfix O >] ) {
+				return self.bless(
+					:content(
+						:sym(
+							Sym.new(
+								$parsed.hash.<sym>
+							)
+						),
+						:postcircumfix(
+							PostCircumfix.new(
+								$parsed.hash.<postcircumfix>
+							)
+						),
+						:O(
+							O.new(
+								$parsed.hash.<O>
+							)
+						)
+					)
+				)
+			}
+			die debug( 'postop', $parsed );
+		}
+	}
+
 	class DottyOp does Node {
 		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< sym postop O >] ) {
+				return self.bless(
+					:content(
+						:sym(
+							Sym.new(
+								$parsed.hash.<sym>
+							)
+						),
+						:postop(
+							PostOp.new(
+								$parsed.hash.<postop>
+							)
+						),
+						:O(
+							O.new(
+								$parsed.hash.<O>
+							)
+						)
+					)
+				)
+			}
 			if assert-hash-keys( $parsed, [< methodop >] ) {
 				return self.bless(
 					:content(
