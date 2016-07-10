@@ -2514,27 +2514,6 @@ class Perl6::Tidy {
 		die debug( 'value', $parsed );
 	}
 
-	class Number does Node {
-		method perl6() {
-"### Number"
-		}
-	}
-
-	method number( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< numish >] ) {
-			return Number.new(
-				:content(
-					:numish(
-						self.numish(
-							$parsed.hash.<numish>
-						)
-					)
-				)
-			)
-		}
-		die debug( 'number', $parsed );
-	}
-
 	class DecNumber does Node {
 		method perl6() {
 "### DecNumber"
@@ -2618,43 +2597,62 @@ class Perl6::Tidy {
 		method perl6() {
 "### Numish"
 		}
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< integer >] ) {
+				return self.bless(
+					:content(
+						:integer(
+							Integer.new(
+								$parsed.hash.<integer>
+							)
+						)
+					)
+				)
+			}
+			if assert-hash-keys( $parsed, [< rad_number >] ) {
+				return self.bless(
+					:content(
+						:rad_number(
+							RadNumber.new(
+								$parsed.hash.<rad_number>
+							)
+						)
+					)
+				)
+			}
+			if assert-hash-keys( $parsed, [< dec_number >] ) {
+				return self.bless(
+					:content(
+						:dec_number(
+							DecNumber.new(
+								$parsed.hash.<dec_number>
+							)
+						)
+					)
+				)
+			}
+			die debug( 'numish', $parsed );
+		}
 	}
 
-	method numish( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< integer >] ) {
-			return Numish.new(
+	class Number does Node {
+		method perl6() {
+"### Number"
+		}
+	}
+
+	method number( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< numish >] ) {
+			return Number.new(
 				:content(
-					:integer(
-						Integer.new(
-							$parsed.hash.<integer>
+					:numish(
+						Numish.new(
+							$parsed.hash.<numish>
 						)
 					)
 				)
 			)
 		}
-		if assert-hash-keys( $parsed, [< rad_number >] ) {
-			return Numish.new(
-				:type( 'numish' ),
-				:content(
-					:rad_number(
-						RadNumber.new(
-							$parsed.hash.<rad_number>
-						)
-					)
-				)
-			)
-		}
-		if assert-hash-keys( $parsed, [< dec_number >] ) {
-			return Numish.new(
-				:content(
-					:dec_number(
-						DecNumber.new(
-							$parsed.hash.<dec_number>
-						)
-					)
-				)
-			)
-		}
-		die debug( 'numish', $parsed );
+		die debug( 'number', $parsed );
 	}
 }
