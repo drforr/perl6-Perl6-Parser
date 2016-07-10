@@ -558,47 +558,46 @@ class Perl6::Tidy {
 	}
 
 	class OPER does Node {
-	}
-
-	method OPER( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< sym dottyop O >] ) {
-			return OPER.new(
-				:content(
-					:sym(
-						Sym.new(
-							$parsed.hash.<sym>
-						)
-					),
-					:dottyop(
-						DottyOp.new(
-							$parsed.hash.<dottyop>
-						)
-					),
-					:O(
-						O.new(
-							$parsed.hash.<O>
-						)
-					)
-				)
-			)
-		}
-		if assert-hash-keys( $parsed, [< sym O >] ) {
-			return OPER.new(
-				:content(
-					:sym(
-						Sym.new(
-							$parsed.hash.<sym>
-						)
-					),
-					:O(
-						O.new(
-							$parsed.hash.<O>
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< sym dottyop O >] ) {
+				return self.bless(
+					:content(
+						:sym(
+							Sym.new(
+								$parsed.hash.<sym>
+							)
+						),
+						:dottyop(
+							DottyOp.new(
+								$parsed.hash.<dottyop>
+							)
+						),
+						:O(
+							O.new(
+								$parsed.hash.<O>
+							)
 						)
 					)
 				)
-			)
+			}
+			if assert-hash-keys( $parsed, [< sym O >] ) {
+				return self.bless(
+					:content(
+						:sym(
+							Sym.new(
+								$parsed.hash.<sym>
+							)
+						),
+						:O(
+							O.new(
+								$parsed.hash.<O>
+							)
+						)
+					)
+				)
+			}
+			die debug( 'OPER', $parsed );
 		}
-		die debug( 'OPER', $parsed );
 	}
 
 	class MoreName does Node {
@@ -711,79 +710,77 @@ class Perl6::Tidy {
 	}
 
 	class DeSigilName does Node {
-	}
-
-	method desigilname( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< longname >] ) {
-			return DeSigilName.new(
-				:content(
-					:longname(
-						LongName.new(
-							$parsed.hash.<longname>
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< longname >] ) {
+				return self.bless(
+					:content(
+						:longname(
+							LongName.new(
+								$parsed.hash.<longname>
+							)
 						)
 					)
 				)
-			)
+			}
+			if $parsed.Str {
+				return self.bless( :name( $parsed.Str ) )
+			}
+			die debug( 'desigilname', $parsed );
 		}
-		if $parsed.Str {
-			return DeSigilName.new( :name( $parsed.Str ) )
-		}
-		die debug( 'desigilname', $parsed );
 	}
 
 	class Variable does Node {
-	}
-
-	method variable( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< twigil sigil desigilname >] ) {
-			return Variable.new(
-				:content(
-					:twigil(
-						Twigil.new(
-							$parsed.hash.<twigil>
-						)
-					),
-					:sigil(
-						Sigil.new(
-							$parsed.hash.<sigil>
-						)
-					),
-					:desigilname(
-						self.desigilname(
-							$parsed.hash.<desigilname>
-						)
-					)
-				)
-			)
-		}
-		elsif assert-hash-keys( $parsed, [< sigil desigilname >] ) {
-			return Variable.new(
-				:content(
-					:sigil(
-						Sigil.new(
-							$parsed.hash.<sigil>
-						)
-					),
-					:desigilname(
-						self.desigilname(
-							$parsed.hash.<desigilname>
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< twigil sigil desigilname >] ) {
+				return self.bless(
+					:content(
+						:twigil(
+							Twigil.new(
+								$parsed.hash.<twigil>
+							)
+						),
+						:sigil(
+							Sigil.new(
+								$parsed.hash.<sigil>
+							)
+						),
+						:desigilname(
+							DeSigilName.new(
+								$parsed.hash.<desigilname>
+							)
 						)
 					)
 				)
-			)
-		}
-		elsif assert-hash-keys( $parsed, [< sigil >] ) {
-			return Variable.new(
-				:content(
-					:sigil(
-						Sigil.new(
-							$parsed.hash.<sigil>
+			}
+			elsif assert-hash-keys( $parsed, [< sigil desigilname >] ) {
+				return self.bless(
+					:content(
+						:sigil(
+							Sigil.new(
+								$parsed.hash.<sigil>
+							)
+						),
+						:desigilname(
+							DeSigilName.new(
+								$parsed.hash.<desigilname>
+							)
 						)
 					)
 				)
-			)
+			}
+			elsif assert-hash-keys( $parsed, [< sigil >] ) {
+				return self.bless(
+					:content(
+						:sigil(
+							Sigil.new(
+								$parsed.hash.<sigil>
+							)
+						)
+					)
+				)
+			}
+			die debug( 'variable', $parsed );
 		}
-		die debug( 'variable', $parsed );
 	}
 
 	class RoutineDeclarator does Node {
@@ -832,95 +829,22 @@ class Perl6::Tidy {
 		die debug( 'package_declarator', $parsed );
 	}
 
-	class RegexDeclarator does Node {
-	}
-
-	method regex_declarator( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< sym regex_def >] ) {
-			return RegexDeclarator.new(
-				:content(
-					:sym(
-						Sym.new(
-							$parsed.hash.<sym>
-						)
-					),
-					:regex_def(
-						self.regex_def(
-							$parsed.hash.<regex_def>
-						)
+	class DefLongName does Node {
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< name >], [< colonpair >] ) {
+				return self.bless(
+					:content(
+						:name(
+							Name.new(
+								$parsed.hash.<name>
+							)
+						),
+						:colonpair()
 					)
 				)
-			)
+			}
+			die debug( 'deflongname', $parsed );
 		}
-		die debug( 'regex_declarator', $parsed );
-	}
-
-	class RoutineDef does Node {
-	}
-
-	method routine_def( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< blockoid deflongname >],
-					      [< trait >] ) {
-			return RoutineDef.new(
-				:content(
-					:blockoid(
-						self.blockoid(
-							$parsed.hash.<blockoid>
-						)
-					),
-					:deflongname(
-						self.deflongname(
-							$parsed.hash.<deflongname>
-						)
-					),
-					:trait()
-				)
-			)
-		}
-		die debug( 'routine_def', $parsed );
-	}
-
-	class PackageDef does Node {
-	}
-
-	method package_def( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< blockoid longname >],
-					      [< trait >] ) {
-			return PackageDef.new(
-				:content(
-					:blockoid(
-						self.blockoid(
-							$parsed.hash.<blockoid>
-						)
-					),
-					:longname(
-						LongName.new(
-							$parsed.hash.<longname>
-						)
-					),
-					:trait()
-				)
-			)
-		}
-		if assert-hash-keys( $parsed, [< longname statementlist >],
-					      [< trait >] ) {
-			return PackageDef.new(
-				:content(
-					:longname(
-						LongName.new(
-							$parsed.hash.<longname>
-						)
-					),
-					:statementlist(
-						self.statementlist(
-							$parsed.hash.<statementlist>
-						)
-					),
-					:trait()
-				)
-			)
-		}
-		die debug( 'package_def', $parsed );
 	}
 
 	class CharSpec does Node {
@@ -1256,29 +1180,118 @@ class Perl6::Tidy {
 	}
 
 	class RegexDef does Node {
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< deflongname nibble >],
+						      [< signature trait >] ) {
+				return self.bless(
+					:content(
+						:deflongname(
+							DefLongName.new(
+								$parsed.hash.<deflongname>
+							)
+						),
+						:nibble(
+							Nibble.new(
+								$parsed.hash.<nibble>
+							)
+						),
+						:signature(),
+						:trait()
+					)
+				)
+			}
+			die debug( 'regex_def', $parsed );
+		}
 	}
 
-	method regex_def( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< deflongname nibble >],
-					      [< signature trait >] ) {
-			return RegexDef.new(
+	class RegexDeclarator does Node {
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< sym regex_def >] ) {
+				return self.bless(
+					:content(
+						:sym(
+							Sym.new(
+								$parsed.hash.<sym>
+							)
+						),
+						:regex_def(
+							RegexDef.new(
+								$parsed.hash.<regex_def>
+							)
+						)
+					)
+				)
+			}
+			die debug( 'regex_declarator', $parsed );
+		}
+	}
+
+	class RoutineDef does Node {
+	}
+
+	method routine_def( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< blockoid deflongname >],
+					      [< trait >] ) {
+			return RoutineDef.new(
 				:content(
+					:blockoid(
+						self.blockoid(
+							$parsed.hash.<blockoid>
+						)
+					),
 					:deflongname(
-						self.deflongname(
+						DefLongName.new(
 							$parsed.hash.<deflongname>
 						)
 					),
-					:nibble(
-						Nibble.new(
-							$parsed.hash.<nibble>
-						)
-					),
-					:signature(),
 					:trait()
 				)
 			)
 		}
-		die debug( 'regex_def', $parsed );
+		die debug( 'routine_def', $parsed );
+	}
+
+	class PackageDef does Node {
+	}
+
+	method package_def( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< blockoid longname >],
+					      [< trait >] ) {
+			return PackageDef.new(
+				:content(
+					:blockoid(
+						self.blockoid(
+							$parsed.hash.<blockoid>
+						)
+					),
+					:longname(
+						LongName.new(
+							$parsed.hash.<longname>
+						)
+					),
+					:trait()
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< longname statementlist >],
+					      [< trait >] ) {
+			return PackageDef.new(
+				:content(
+					:longname(
+						LongName.new(
+							$parsed.hash.<longname>
+						)
+					),
+					:statementlist(
+						self.statementlist(
+							$parsed.hash.<statementlist>
+						)
+					),
+					:trait()
+				)
+			)
+		}
+		die debug( 'package_def', $parsed );
 	}
 
 	class Blockoid does Node {
@@ -1297,25 +1310,6 @@ class Perl6::Tidy {
 			)
 		}
 		die debug( 'blockoid', $parsed );
-	}
-
-	class DefLongName does Node {
-	}
-
-	method deflongname( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< name >], [< colonpair >] ) {
-			return DefLongName.new(
-				:content(
-					:name(
-						Name.new(
-							$parsed.hash.<name>
-						)
-					),
-					:colonpair()
-				)
-			)
-		}
-		die debug( 'deflongname', $parsed );
 	}
 
 	class Dotty does Node {
@@ -1687,7 +1681,7 @@ class Perl6::Tidy {
 					return EXPR.new(
 						:content(
 							:OPER(
-								self.OPER(
+								OPER.new(
 									$parsed.hash.<OPER>
 								)
 							),
@@ -1713,7 +1707,7 @@ class Perl6::Tidy {
 								)
 							),
 							:OPER(
-								self.OPER(
+								OPER.new(
 									$parsed.hash.<OPER>
 								)
 							),
@@ -1782,7 +1776,7 @@ class Perl6::Tidy {
 			return EXPR.new(
 				:content(
 					:variable(
-						self.variable(
+						Variable.new(
 							$parsed.hash.<variable>
 						)
 					)
@@ -1848,7 +1842,7 @@ class Perl6::Tidy {
 			return EXPR.new(
 				:content(
 					:regex_declarator(
-						self.regex_declarator(
+						RegexDeclarator.new(
 							$parsed.hash.<regex_declarator>
 						)
 					)
@@ -1893,7 +1887,7 @@ class Perl6::Tidy {
 			return VariableDeclarator.new(
 				:content(
 					:variable(
-						self.variable(
+						Variable.new(
 							$parsed.hash.<variable>
 						)
 					),
@@ -1916,7 +1910,7 @@ class Perl6::Tidy {
 			return VariableDeclarator.new(
 				:content(
 					:variable(
-						self.variable(
+						Variable.new(
 							$parsed.hash.<variable>
 						)
 					),
@@ -2129,7 +2123,7 @@ class Perl6::Tidy {
 			return Declarator.new(
 				:content(
 					:regex_declarator(
-						self.regex_declarator(
+						RegexDeclarator.new(
 							$parsed.hash.<regex_declarator>
 						)
 					),
@@ -2181,7 +2175,7 @@ class Perl6::Tidy {
 			return DECL.new(
 				:content(
 					:regex_declarator(
-						self.regex_declarator(
+						RegexDeclarator.new(
 							$parsed.hash.<regex_declarator>
 						)
 					),
