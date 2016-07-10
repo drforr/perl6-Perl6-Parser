@@ -1,44 +1,311 @@
-# assert-Int
-use Perl6::Tidy::BinInt;
-use Perl6::Tidy::OctInt;
-use Perl6::Tidy::DecInt;
-use Perl6::Tidy::HexInt;
-use Perl6::Tidy::Coeff;
-use Perl6::Tidy::Frac;
-use Perl6::Tidy::Radix;
-use Perl6::Tidy::_Int;
-use Perl6::Tidy::VALUE;
-
-# assert-Str
-use Perl6::Tidy::NormSpace;
-use Perl6::Tidy::Sym;
-use Perl6::Tidy::Sigil;
-use Perl6::Tidy::Identifier;
-use Perl6::Tidy::CharSpec;
-
-# assert-Bool
-use Perl6::Tidy::Sign;
-use Perl6::Tidy::Doc;
-use Perl6::Tidy::B;
-
-# assert-hash-keys
-use Perl6::Tidy::EScale;
-use Perl6::Tidy::Integer; # Seemed to add 2 CPU seconds?
-use Perl6::Tidy::BackSlash; # Seems to add 0.5 CPU seconds?
-use Perl6::Tidy::Args; # Seems to add 0.1 CPU seconds?
-use Perl6::Tidy::Signature; # Seems to add 0.14?
-use Perl6::Tidy::FakeSignature; # Seems to add 0.4?
-use Perl6::Tidy::ColonPair; # Seems to add 0.7
-use Perl6::Tidy::Twigil; # 0.2
-use Perl6::Tidy::CClassElem; # 0.4
-
 class Perl6::Tidy {
 	use nqp;
 
-	role _Node {
+	role Node {
 		has $.name;
 		has $.child;
 		has %.content;
+	}
+
+	class BinInt does Node {
+		method perl6() {
+"### BinInt"
+		}
+		method new( Mu $parsed ) {
+			if assert-Int( $parsed ) {
+				return self.bless( :name( $parsed.Int ) )
+			}
+			die debug( 'binint', $parsed );
+		}
+	}
+
+	class OctInt does Node {
+		method perl6() {
+"### OctInt"
+		}
+		method new( Mu $parsed ) {
+			if assert-Int( $parsed ) {
+				return self.bless( :name( $parsed.Int ) )
+			}
+			die debug( 'octint', $parsed );
+		}
+	}
+
+	class DecInt does Node {
+		method perl6() {
+"### DecInt"
+		}
+		method new( Mu $parsed ) {
+			if assert-Int( $parsed ) {
+				return self.bless( :name( $parsed.Int ) )
+			}
+			die debug( 'decint', $parsed );
+		}
+	}
+
+	class HexInt does Node {
+		method perl6() {
+"### DecInt"
+		}
+		method new( Mu $parsed ) {
+			if assert-Int( $parsed ) {
+				return self.bless( :name( $parsed.Int ) )
+			}
+			die debug( 'hexint', $parsed );
+		}
+	}
+
+	class Coeff does Node {
+		method perl6() {
+"### Coeff"
+		}
+		method new( Mu $parsed ) {
+			if assert-Int( $parsed ) {
+				return self.bless( :name( $parsed.Int ) )
+			}
+			die debug( 'coeff', $parsed );
+		}
+	}
+
+	class Frac does Node {
+		method perl6() {
+"### Frac"
+		}
+		method new( Mu $parsed ) {
+			if assert-Int( $parsed ) {
+				return self.bless( :name( $parsed.Int ) )
+			}
+			die debug( 'frac', $parsed );
+		}
+	}
+
+	class NormSpace does Node {
+		method perl6() {
+"### NormSpace"
+		}
+		method new( Mu $parsed ) {
+			if assert-Str( $parsed ) {
+				return self.bless( :name( $parsed.Str ) )
+			}
+			die debug( 'normspace', $parsed );
+		}
+	}
+
+	class Radix does Node {
+		method perl6() {
+"### Radix"
+		}
+		method new( Mu $parsed ) {
+			if assert-Int( $parsed ) {
+				return self.bless( :name( $parsed.Int ) )
+			}
+			die debug( 'radix', $parsed );
+		}
+	}
+
+	class _Int does Node {
+		method perl6() {
+"### _Int"
+		}
+		method new( Mu $parsed ) {
+			if assert-Int( $parsed ) {
+				return self.bless( :name( $parsed.Int ) )
+			}
+			die debug( 'int', $parsed );
+		}
+	}
+
+	class VALUE does Node {
+		method perl6() {
+"### VALUE"
+		}
+		method new( Mu $parsed ) {
+			if assert-Int( $parsed ) {
+				return self.bless( :name( $parsed.Int ) )
+			}
+			die debug( 'VALUE', $parsed );
+		}
+	}
+
+	class Sym does Node {
+		method perl6() {
+"### sym"
+		}
+		method new( Mu $parsed ) {
+			if assert-Str( $parsed ) {
+				return self.bless( :name( $parsed.Str ) )
+			}
+			die debug( 'sym', $parsed );
+		}
+	}
+
+	class Sigil does Node {
+		method perl6() {
+"### sigil"
+		}
+		method new( Mu $parsed ) {
+			if assert-Str( $parsed ) {
+				return self.bless( :name( $parsed.Str ) )
+			}
+			die debug( 'sigil', $parsed );
+		}
+	}
+
+	class Sign does Node {
+		method perl6() {
+"### sigil"
+		}
+		method new( Mu $parsed ) {
+			if assert-Bool( $parsed ) {
+				return self.bless( :name( $parsed.Bool ) )
+			}
+			die debug( 'sign', $parsed );
+		}
+	}
+
+	class EScale does Node {
+		method perl6() {
+"### EScale"
+		}
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< sign decint >] ) {
+				return self.bless(
+					:content(
+						:sign(
+							Sign.new(
+								$parsed.hash.<sign>
+							)
+						),
+						:decint(
+							DecInt.new(
+								$parsed.hash.<decint>
+							)
+						)
+					)
+				)
+			}
+			die debug( 'escale', $parsed );
+		}
+	}
+
+	class Integer does Node {
+		method perl6() {
+"### Integer"
+		}
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< decint VALUE >] ) {
+				return self.bless(
+					:content(
+						:decint(
+							DecInt.new(
+								$parsed.hash.<decint>
+							)
+						),
+						:VALUE(
+							VALUE.new(
+								$parsed.hash.<VALUE>
+							)
+						)
+					)
+				)
+			}
+			if assert-hash-keys( $parsed, [< binint VALUE >] ) {
+				return self.bless(
+					:content(
+						:binint(
+							BinInt.new(
+								$parsed.hash.<binint>
+							)
+						),
+						:VALUE(
+							VALUE.new(
+								$parsed.hash.<VALUE>
+							)
+						)
+					)
+				)
+			}
+			if assert-hash-keys( $parsed, [< octint VALUE >] ) {
+				return self.bless(
+					:content(
+						:octint(
+							OctInt.new(
+								$parsed.hash.<octint>
+							)
+						),
+						:VALUE(
+							VALUE.new(
+								$parsed.hash.<VALUE>
+							)
+						)
+					)
+				)
+			}
+			if assert-hash-keys( $parsed, [< hexint VALUE >] ) {
+				return self.bless(
+					:content(
+						:hexint(
+							HexInt.new(
+								$parsed.hash.<hexint>
+							)
+						),
+						:VALUE(
+							VALUE.new(
+								$parsed.hash.<VALUE>
+							)
+						)
+					)
+				)
+			}
+			die debug( 'integer', $parsed );
+		}
+	}
+
+	class BackSlash does Node {
+		method perl6() {
+"### BackSlash"
+		}
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< sym >] ) {
+				return self.bless(
+					:content(
+						:sym(
+							Sym.new(
+								$parsed.hash.<sym>
+							)
+						)
+					)
+				)
+			}
+			die debug( 'backslash', $parsed );
+		}
+	}
+
+	class Identifier does Node {
+		method perl6() {
+"### Identifier"
+		}
+		method new( Mu $parsed ) {
+			if $parsed.list {
+				my @child;
+				for $parsed.list {
+					if assert-Str( $_ ) {
+						@child.push(
+							$_.Str
+						);
+						next
+					}
+					die debug( 'identifier', $_ );
+				}
+				return self.bless(
+					:child( @child )
+				)
+			}
+			elsif $parsed.Str {
+				return self.bless( :name( $parsed.Str ) )
+			}
+			die debug( 'identifier', $parsed );
+		}
 	}
 
 	sub debug( Str $name, Mu $parsed ) {
@@ -148,7 +415,7 @@ class Perl6::Tidy {
 		self.root( $parsed )
 	}
 
-	class Root does _Node {
+	class Root does Node {
 		method perl6() {
 "### Root"
 		}
@@ -169,7 +436,7 @@ class Perl6::Tidy {
 		die debug( 'root', $parsed );
 	}
 
-	class StatementList does _Node {
+	class StatementList does Node {
 		method perl6() {
 "### StatementList"
 		}
@@ -193,7 +460,7 @@ class Perl6::Tidy {
 		die debug( 'statementlist', $parsed );
 	}
 
-	class Statement does _Node {
+	class Statement does Node {
 		method perl6() {
 "### Statement"
 		}
@@ -240,7 +507,7 @@ class Perl6::Tidy {
 			return Statement.new(
 				:content(
 					:sigil(
-						Perl6::Tidy::Sigil.new(
+						Sigil.new(
 							$parsed.hash.<sigil>
 						)
 					),
@@ -255,52 +522,61 @@ class Perl6::Tidy {
 		die debug( 'statement', $parsed );
 	}
 
-	class O does _Node {
+	class O does Node {
 		method perl6() {
 "### O"
 		}
-	}
-
-	method O( Hash $hash ) {
-		if $hash.<prec> and
-		   $hash.<fiddly> and
-		   $hash.<dba> and
-		   $hash.<assoc> {
-			return O.new(
-				:content(
+		method new( Hash $hash ) {
+			if $hash.<prec> and
+			   $hash.<fiddly> and
+			   $hash.<dba> and
+			   $hash.<assoc> {
+				return self.bless(
+					:content(
+					)
 				)
-			)
+			}
+			die debug( 'O', $hash );
 		}
-		die debug( 'O', $hash );
 	}
 
-	class Postfix does _Node {
+	class Postfix does Node {
 		method perl6() {
 "### Postfix"
 		}
-	}
-
-	method postfix( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< sym O >] ) {
-			return Postfix.new(
-				:content(
-					:sym(
-						Perl6::Tidy::Sym.new(
-							$parsed.hash.<sym>
-						)
-					),
-					:O(
-						self.O(
-							$parsed.hash.<O>
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< sym O >] ) {
+				return self.bless(
+					:content(
+						:sym(
+							Sym.new(
+								$parsed.hash.<sym>
+							)
+						),
+						:O(
+							O.new(
+								$parsed.hash.<O>
+							)
 						)
 					)
 				)
-			)
+			}
+			die debug( 'postfix', $parsed );
 		}
-		die debug( 'postfix', $parsed );
 	}
 
-	class MethodOp does _Node {
+	class Args does Node {
+		method perl6() {
+"### Args"
+		}
+		method new( Mu $parsed ) {
+			if $parsed.Bool {
+				return self.bless( :name( $parsed.Bool ) )
+			}
+			die debug( 'args', $parsed );
+		}
+	}
+	class MethodOp does Node {
 		method perl6() {
 "### MethodOp"
 		}
@@ -316,7 +592,7 @@ class Perl6::Tidy {
 						)
 					),
 					:args(
-						Perl6::Tidy::Args.new(
+						Args.new(
 							$parsed.hash.<args>
 						)
 					)
@@ -326,7 +602,7 @@ class Perl6::Tidy {
 		die debug( 'methodop', $parsed );
 	}
 
-	class DottyOp does _Node {
+	class DottyOp does Node {
 		method perl6() {
 "### DottyOp"
 		}
@@ -347,7 +623,7 @@ class Perl6::Tidy {
 		die debug( 'dottyop', $parsed );
 	}
 
-	class OPER does _Node {
+	class OPER does Node {
 		method perl6() {
 "### OPER"
 		}
@@ -358,7 +634,7 @@ class Perl6::Tidy {
 			return OPER.new(
 				:content(
 					:sym(
-						Perl6::Tidy::Sym.new(
+						Sym.new(
 							$parsed.hash.<sym>
 						)
 					),
@@ -368,7 +644,7 @@ class Perl6::Tidy {
 						)
 					),
 					:O(
-						self.O(
+						O.new(
 							$parsed.hash.<O>
 						)
 					)
@@ -379,12 +655,12 @@ class Perl6::Tidy {
 			return OPER.new(
 				:content(
 					:sym(
-						Perl6::Tidy::Sym.new(
+						Sym.new(
 							$parsed.hash.<sym>
 						)
 					),
 					:O(
-						self.O(
+						O.new(
 							$parsed.hash.<O>
 						)
 					)
@@ -394,7 +670,7 @@ class Perl6::Tidy {
 		die debug( 'OPER', $parsed );
 	}
 
-	class MoreName does _Node {
+	class MoreName does Node {
 		method perl6() {
 "### MoreName"
 		}
@@ -405,7 +681,7 @@ class Perl6::Tidy {
 			return MoreName.new(
 				:content(
 					:identifier(
-						Perl6::Tidy::Identifier.new(
+						Identifier.new(
 							$parsed.hash.<identifier>
 						)
 					),
@@ -426,7 +702,7 @@ class Perl6::Tidy {
 		die debug( 'morename', $parsed );
 	}
 
-	class Name does _Node {
+	class Name does Node {
 		method perl6() {
 "### Name"
 		}
@@ -445,7 +721,7 @@ class Perl6::Tidy {
 			return Name.new(
 				:content(
 					:identifier(
-						Perl6::Tidy::Identifier.new(
+						Identifier.new(
 							$parsed.hash.<identifier>
 						)
 					),
@@ -458,7 +734,7 @@ class Perl6::Tidy {
 			return Name.new(
 				:content(
 					:identifier(
-						Perl6::Tidy::Identifier.new(
+						Identifier.new(
 							$parsed.hash.<identifier>
 						)
 					),
@@ -469,7 +745,76 @@ class Perl6::Tidy {
 		die debug( 'name', $parsed );
 	}
 
-	class LongName does _Node {
+	class Signature does Node {
+		method perl6() {
+"### Signature"
+		}
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [], [< param_sep parameter >] ) {
+				return self.bless(
+					:name( $parsed.Bool ),
+					:content(
+						:param_sep(),
+						:parameter()
+					)
+				)
+			}
+			die debug( 'signature', $parsed );
+		}
+	}
+
+	class FakeSignature does Node {
+		method perl6() {
+"### FakeSignature"
+		}
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< signature >] ) {
+				return self.bless(
+					:content(
+						:signature(
+							Signature.new(
+								$parsed.hash.<signature>
+							)
+						)
+					)
+				)
+			}
+			die debug( 'fakesignature', $parsed );
+		}
+	}
+
+	class ColonPair does Node {
+		method perl6() {
+"### ColonPair"
+		}
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< identifier >] ) {
+				return self.bless(
+					:content(
+						:identifier(
+							Identifier.new(
+								$parsed.hash.<identifier>
+							)
+						)
+					)
+				)
+			}
+			if assert-hash-keys( $parsed, [< fakesignature >] ) {
+				return self.bless(
+					:content(
+						:fakesignature(
+							FakeSignature.new(
+								$parsed.hash.<fakesignature>
+							)
+						)
+					)
+				)
+			}
+			die debug( 'colonpair', $parsed );
+		}
+	}
+
+	class LongName does Node {
 		method perl6() {
 "### LongName"
 		}
@@ -491,7 +836,27 @@ class Perl6::Tidy {
 		die debug( 'longname', $parsed );
 	}
 
-	class DeSigilName does _Node {
+	class Twigil does Node {
+		method perl6() {
+"### Twigil"
+		}
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< sym >] ) {
+				return self.bless(
+					:content(
+						:sym(
+							Sym.new(
+								$parsed.hash.<sym>
+							)
+						)
+					)
+				)
+			}
+			die debug( 'twigil', $parsed );
+		}
+	}
+
+	class DeSigilName does Node {
 		method perl6() {
 "### DeSigilName"
 		}
@@ -515,7 +880,7 @@ class Perl6::Tidy {
 		die debug( 'desigilname', $parsed );
 	}
 
-	class Variable does _Node {
+	class Variable does Node {
 		method perl6() {
 "### Variable"
 		}
@@ -526,12 +891,12 @@ class Perl6::Tidy {
 			return Variable.new(
 				:content(
 					:twigil(
-						Perl6::Tidy::Twigil.new(
+						Twigil.new(
 							$parsed.hash.<twigil>
 						)
 					),
 					:sigil(
-						Perl6::Tidy::Sigil.new(
+						Sigil.new(
 							$parsed.hash.<sigil>
 						)
 					),
@@ -547,7 +912,7 @@ class Perl6::Tidy {
 			return Variable.new(
 				:content(
 					:sigil(
-						Perl6::Tidy::Sigil.new(
+						Sigil.new(
 							$parsed.hash.<sigil>
 						)
 					),
@@ -563,7 +928,7 @@ class Perl6::Tidy {
 			return Variable.new(
 				:content(
 					:sigil(
-						Perl6::Tidy::Sigil.new(
+						Sigil.new(
 							$parsed.hash.<sigil>
 						)
 					)
@@ -573,7 +938,7 @@ class Perl6::Tidy {
 		die debug( 'variable', $parsed );
 	}
 
-	class RoutineDeclarator does _Node {
+	class RoutineDeclarator does Node {
 		method perl6() {
 "### RoutineDeclarator"
 		}
@@ -584,7 +949,7 @@ class Perl6::Tidy {
 			return RoutineDeclarator.new(
 				:content(
 					:sym(
-						Perl6::Tidy::Sym.new(
+						Sym.new(
 							$parsed.hash.<sym>
 						)
 					),
@@ -599,7 +964,7 @@ class Perl6::Tidy {
 		die debug( 'routine_declarator', $parsed );
 	}
 
-	class PackageDeclarator does _Node {
+	class PackageDeclarator does Node {
 		method perl6() {
 "### PackageDeclator"
 		}
@@ -610,7 +975,7 @@ class Perl6::Tidy {
 			return PackageDeclarator.new(
 				:content(
 					:sym(
-						Perl6::Tidy::Sym.new(
+						Sym.new(
 							$parsed.hash.<sym>
 						)
 					),
@@ -625,7 +990,7 @@ class Perl6::Tidy {
 		die debug( 'package_declarator', $parsed );
 	}
 
-	class RegexDeclarator does _Node {
+	class RegexDeclarator does Node {
 		method perl6() {
 "### RegexDeclarator"
 		}
@@ -636,7 +1001,7 @@ class Perl6::Tidy {
 			return RegexDeclarator.new(
 				:content(
 					:sym(
-						Perl6::Tidy::Sym.new(
+						Sym.new(
 							$parsed.hash.<sym>
 						)
 					),
@@ -651,7 +1016,7 @@ class Perl6::Tidy {
 		die debug( 'regex_declarator', $parsed );
 	}
 
-	class RoutineDef does _Node {
+	class RoutineDef does Node {
 		method perl6() {
 "### RoutineDef"
 		}
@@ -679,7 +1044,7 @@ class Perl6::Tidy {
 		die debug( 'routine_def', $parsed );
 	}
 
-	class PackageDef does _Node {
+	class PackageDef does Node {
 		method perl6() {
 "### PackageDef"
 		}
@@ -725,7 +1090,80 @@ class Perl6::Tidy {
 		die debug( 'package_def', $parsed );
 	}
 
-	class Assertion does _Node {
+	class CharSpec does Node {
+		method perl6() {
+"### CharSpec"
+		}
+		method new( Mu $parsed ) {
+			if $parsed.list {
+				my @child;
+				for $parsed.list -> $list {
+					my @_child;
+					for $list.list -> $_list {
+						my @__child;
+						for $_list.list {
+							if assert-Str( $_ ) {
+								@__child.push( $_ );
+								next
+							}
+							die debug( 'charspec', $_ );
+						}
+	#					die debug( 'charspec', $_list );
+					}
+	#				die debug( 'charspec', $list );
+				}
+				return self.bless(
+					:child( @child )
+				)
+			}
+			die debug( 'charspec', $parsed );
+		}
+	}
+
+	class CClassElem_INTERMEDIARY does Node {
+		method perl6() {
+"### CClassElem_INT"
+		}
+	}
+
+	class CClassElem does Node {
+		method perl6() {
+"### CClassElem"
+		}
+		method new( Mu $parsed ) {
+			if $parsed.list {
+				my @child;
+				for $parsed.list {
+					if assert-hash-keys( $_, [< sign charspec >] ) {
+						@child.push(
+							CClassElem_INTERMEDIARY.new(
+								:content(
+									:sign(
+										Sign.new(
+											$_.hash.<sign>
+										)
+									),
+									:charspec(
+										CharSpec.new(
+											$_.hash.<charspec>
+										)
+									)
+								)
+							)
+						);
+						next
+					}
+					die debug( 'cclass_elem', $_ );
+				}
+				return self.bless(
+					:child( @child )
+				)
+			}
+			die debug( 'cclass_elem', $parsed );
+		}
+	}
+
+	class Assertion does Node {
 		method perl6() {
 "### Assertion"
 		}
@@ -734,7 +1172,7 @@ class Perl6::Tidy {
 				return self.bless(
 					:content(
 						:cclass_elem(
-							Perl6::Tidy::CClassElem.new(
+							CClassElem.new(
 								$parsed.hash.<cclass_elem>
 							)
 						)
@@ -745,7 +1183,7 @@ class Perl6::Tidy {
 		}
 	}
 
-	class MetaChar does _Node {
+	class MetaChar does Node {
 		method perl6() {
 "### MetaChar"
 		}
@@ -754,7 +1192,7 @@ class Perl6::Tidy {
 				return self.bless(
 					:content(
 						:sym(
-							Perl6::Tidy::Sym.new(
+							Sym.new(
 								$parsed.hash.<sym>
 							)
 						)
@@ -765,7 +1203,7 @@ class Perl6::Tidy {
 				return self.bless(
 					:content(
 						:backslash(
-							Perl6::Tidy::BackSlash.new(
+							BackSlash.new(
 								$parsed.hash.<backslash>
 							)
 						)
@@ -787,7 +1225,7 @@ class Perl6::Tidy {
 		}
 	}
 
-	class Atom does _Node {
+	class Atom does Node {
 		method perl6() {
 "### Atom"
 		}
@@ -810,7 +1248,7 @@ class Perl6::Tidy {
 		}
 	}
 
-	class Noun does _Node {
+	class Noun does Node {
 		method perl6() {
 "### Node"
 		}
@@ -837,7 +1275,7 @@ class Perl6::Tidy {
 		}
 	}
 
-	class TermIsh is _Node {
+	class TermIsh is Node {
 		method perl6() {
 "### TermIsh"
 		}
@@ -874,7 +1312,7 @@ class Perl6::Tidy {
 		}
 	}
 
-	class TermConj does _Node {
+	class TermConj does Node {
 		method perl6() {
 "### TermConj"
 		}
@@ -900,7 +1338,7 @@ class Perl6::Tidy {
 		}
 	}
 
-	class TermAlt does _Node {
+	class TermAlt does Node {
 		method perl6() {
 "### TermAlt"
 		}
@@ -926,7 +1364,7 @@ class Perl6::Tidy {
 		}
 	}
 
-	class TermConjSeq does _Node {
+	class TermConjSeq does Node {
 		method perl6() {
 "### TermConjSeq"
 		}
@@ -963,7 +1401,7 @@ class Perl6::Tidy {
 		}
 	}
 
-	class TermAltSeq does _Node {
+	class TermAltSeq does Node {
 		method perl6() {
 "### termAltSeq"
 		}
@@ -983,7 +1421,7 @@ class Perl6::Tidy {
 		}
 	}
 
-	class TermSeq does _Node {
+	class TermSeq does Node {
 		method perl6() {
 "### TermSeq"
 		}
@@ -1003,7 +1441,7 @@ class Perl6::Tidy {
 		}
 	}
 
-	class Nibble does _Node {
+	class Nibble does Node {
 		method perl6() {
 "### Nibble"
 		}
@@ -1026,7 +1464,7 @@ class Perl6::Tidy {
 		}
 	}
 
-	class RegexDef does _Node {
+	class RegexDef does Node {
 		method perl6() {
 "### RegexDef"
 		}
@@ -1055,7 +1493,7 @@ class Perl6::Tidy {
 		die debug( 'regex_def', $parsed );
 	}
 
-	class Blockoid does _Node {
+	class Blockoid does Node {
 		method perl6() {
 "### Blockoid"
 		}
@@ -1076,7 +1514,7 @@ class Perl6::Tidy {
 		die debug( 'blockoid', $parsed );
 	}
 
-	class DefLongName does _Node {
+	class DefLongName does Node {
 		method perl6() {
 "### DefLongName"
 		}
@@ -1098,7 +1536,7 @@ class Perl6::Tidy {
 		die debug( 'deflongname', $parsed );
 	}
 
-	class Dotty does _Node {
+	class Dotty does Node {
 		method perl6() {
 "### Dotty"
 		}
@@ -1109,7 +1547,7 @@ class Perl6::Tidy {
 			return Dotty.new(
 				:content(
 					:sym(
-						Perl6::Tidy::Sym.new(
+						Sym.new(
 							$parsed.hash.<sym>
 						)
 					),
@@ -1119,7 +1557,7 @@ class Perl6::Tidy {
 						)
 					),
 					:O(
-						self.O(
+						O.new(
 							$parsed.hash.<O>
 						)
 					)
@@ -1129,7 +1567,7 @@ class Perl6::Tidy {
 		die debug( 'dotty', $parsed );
 	}
 
-	class EXPR does _Node {
+	class EXPR does Node {
 		method perl6() {
 "### EXPR"
 		}
@@ -1186,7 +1624,7 @@ class Perl6::Tidy {
 					return EXPR.new(
 						:content(
 							:postfix(
-								self.postfix(
+								Postfix.new(
 									$parsed.hash.<postfix>
 								)
 							),
@@ -1229,7 +1667,7 @@ class Perl6::Tidy {
 				),
 				:content(
 					:args(
-						Perl6::Tidy::Args.new(
+						Args.new(
 							$parsed.hash.<args>
 						)
 					)
@@ -1282,7 +1720,7 @@ class Perl6::Tidy {
 			return EXPR.new(
 				:content(
 					:colonpair(
-						Perl6::Tidy::ColonPair.new(
+						ColonPair.new(
 							$parsed.hash.<colonpair>
 						)
 					)
@@ -1336,7 +1774,7 @@ class Perl6::Tidy {
 		die debug( 'EXPR', $parsed );
 	}
 
-	class VariableDeclarator does _Node {
+	class VariableDeclarator does Node {
 		method perl6() {
 "### VariableDelarator"
 		}
@@ -1396,7 +1834,19 @@ class Perl6::Tidy {
 		die debug( 'variable_declarator', $parsed );
 	}
 
-	class ModuleName does _Node {
+	class Doc does Node {
+		method perl6() {
+"### Doc"
+		}
+		method new( Mu $parsed ) {
+			if assert-Bool( $parsed ) {
+				return self.bless( :name( $parsed.Bool ) )
+			}
+			die debug( 'doc', $parsed );
+		}
+	}
+
+	class ModuleName does Node {
 		method perl6() {
 "### ModuleName"
 		}
@@ -1417,7 +1867,7 @@ class Perl6::Tidy {
 		die debug( 'module_name', $parsed );
 	}
 
-	class VStr does _Node {
+	class VStr does Node {
 		method perl6() {
 "### VStr"
 		}
@@ -1429,7 +1879,7 @@ class Perl6::Tidy {
 		}
 	}
 
-	class VNum does _Node {
+	class VNum does Node {
 		method perl6() {
 "### VNum"
 		}
@@ -1441,7 +1891,7 @@ class Perl6::Tidy {
 		}
 	}
 
-	class Version does _Node {
+	class Version does Node {
 		method perl6() {
 "### Version"
 		}
@@ -1466,7 +1916,7 @@ class Perl6::Tidy {
 		}
 	}
 
-	class StatementControl does _Node {
+	class StatementControl does Node {
 		method perl6() {
 "### StatementControl"
 		}
@@ -1477,12 +1927,12 @@ class Perl6::Tidy {
 			return StatementControl.new(
 				:content(
 					:doc(
-						Perl6::Tidy::Doc.new(
+						Doc.new(
 							$parsed.hash.<doc>
 						)
 					),
 					:sym(
-						Perl6::Tidy::Sym.new(
+						Sym.new(
 							$parsed.hash.<sym>
 						)
 					),
@@ -1498,12 +1948,12 @@ class Perl6::Tidy {
 			return StatementControl.new(
 				:content(
 					:doc(
-						Perl6::Tidy::Doc.new(
+						Doc.new(
 							$parsed.hash.<doc>
 						)
 					),
 					:sym(
-						Perl6::Tidy::Sym.new(
+						Sym.new(
 							$parsed.hash.<sym>
 						)
 					),
@@ -1518,7 +1968,7 @@ class Perl6::Tidy {
 		die debug( 'statement_control', $parsed );
 	}
 
-	class MultiDeclarator does _Node {
+	class MultiDeclarator does Node {
 		method perl6() {
 "### MultiDeclarator"
 		}
@@ -1539,7 +1989,7 @@ class Perl6::Tidy {
 		die debug( 'multi_declarator', $parsed );
 	}
 
-	class Initializer does _Node {
+	class Initializer does Node {
 		method perl6() {
 "### Initializer"
 		}
@@ -1550,7 +2000,7 @@ class Perl6::Tidy {
 			return Initializer.new(
 				:content(
 					:sym(
-						Perl6::Tidy::Sym.new(
+						Sym.new(
 							$parsed.hash.<sym>
 						)
 					),
@@ -1565,7 +2015,7 @@ class Perl6::Tidy {
 		die debug( 'initializer', $parsed );
 	}
 
-	class Declarator does _Node {
+	class Declarator does Node {
 		method perl6() {
 "### Declarator"
 		}
@@ -1620,7 +2070,7 @@ class Perl6::Tidy {
 		die debug( 'declarator', $parsed );
 	}
 
-	class DECL does _Node {
+	class DECL does Node {
 		method perl6() {
 "### DECL"
 		}
@@ -1681,7 +2131,7 @@ class Perl6::Tidy {
 						)
 					),
 					:sym(
-						Perl6::Tidy::Sym.new(
+						Sym.new(
 							$parsed.hash.<sym>
 						)
 					)
@@ -1702,13 +2152,13 @@ class Perl6::Tidy {
 		die debug( 'DECL', $parsed );
 	}
 
-	class TypeName does _Node {
+	class TypeName does Node {
 		method perl6() {
 "### TypeName"
 		}
 	}
 
-	class TypeName_INTERMEDIARY does _Node {
+	class TypeName_INTERMEDIARY does Node {
 		method perl6() {
 "### TypeName_INTERMEDIARY"
 		}
@@ -1754,7 +2204,7 @@ class Perl6::Tidy {
 		die debug( 'typename', $parsed );
 	}
 
-	class Scoped is _Node { }
+	class Scoped is Node { }
 
 	method scoped( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< declarator DECL >],
@@ -1818,7 +2268,7 @@ class Perl6::Tidy {
 		die debug( 'scoped', $parsed );
 	}
 
-	class ScopeDeclarator does _Node {
+	class ScopeDeclarator does Node {
 		method perl6() {
 "### ScopeDeclarator"
 		}
@@ -1829,7 +2279,7 @@ class Perl6::Tidy {
 			return ScopeDeclarator.new(
 				:content(
 					:sym(
-						Perl6::Tidy::Sym.new(
+						Sym.new(
 							$parsed.hash.<sym>
 						)
 					),
@@ -1844,7 +2294,19 @@ class Perl6::Tidy {
 		die debug( 'scope_declarator', $parsed );
 	}
 
-	class Babble does _Node {
+	class B does Node {
+		method perl6() {
+"### B"
+		}
+		method new( Mu $parsed ) {
+			if assert-Bool( $parsed ) {
+				return self.bless( :name( $parsed.Bool ) )
+			}
+			die debug( 'B', $parsed );
+		}
+	}
+
+	class Babble does Node {
 		method perl6() {
 "### Babble"
 		}
@@ -1853,7 +2315,7 @@ class Perl6::Tidy {
 				return self.bless(
 					:content(
 						:B(
-							Perl6::Tidy::B.new(
+							B.new(
 								$parsed.hash.<B>
 							)
 						),
@@ -1865,7 +2327,7 @@ class Perl6::Tidy {
 		}
 	}
 
-	class Quibble does _Node {
+	class Quibble does Node {
 		method perl6() {
 "### Quibble"
 		}
@@ -1890,7 +2352,7 @@ class Perl6::Tidy {
 		}
 	}
 
-	class Quote does _Node {
+	class Quote does Node {
 		method perl6() {
 "### Quote"
 		}
@@ -1921,7 +2383,7 @@ class Perl6::Tidy {
 		}
 	}
 
-	class Value does _Node {
+	class Value does Node {
 		method perl6() {
 "### Value"
 		}
@@ -1953,7 +2415,7 @@ class Perl6::Tidy {
 		die debug( 'value', $parsed );
 	}
 
-	class Number does _Node {
+	class Number does Node {
 		method perl6() {
 "### Number"
 		}
@@ -1974,7 +2436,7 @@ class Perl6::Tidy {
 		die debug( 'number', $parsed );
 	}
 
-	class _0 does _Node {
+	class _0 does Node {
 		method perl6() {
 "### _0"
 		}
@@ -1995,7 +2457,7 @@ class Perl6::Tidy {
 		die debug( '_0', $parsed );
 	}
 
-	class DecNumber does _Node {
+	class DecNumber does Node {
 		method perl6() {
 "### DecNumber"
 		}
@@ -2004,17 +2466,17 @@ class Perl6::Tidy {
 				return self.bless(
 					:content(
 						:int(
-							Perl6::Tidy::_Int.new(
+							_Int.new(
 								$parsed.hash.<int>
 							)
 						),
 						:coeff(
-							Perl6::Tidy::Coeff.new(
+							Coeff.new(
 								$parsed.hash.<coeff>
 							)
 						),
 						:frac(
-							Perl6::Tidy::Frac.new(
+							Frac.new(
 								$parsed.hash.<frac>
 							)
 						)
@@ -2025,17 +2487,17 @@ class Perl6::Tidy {
 				return self.bless(
 					:content(
 						:int(
-							Perl6::Tidy::_Int.new(
+							_Int.new(
 								$parsed.hash.<int>
 							)
 						),
 						:coeff(
-							Perl6::Tidy::Coeff.new(
+							Coeff.new(
 								$parsed.hash.<coeff>
 							)
 						),
 						:escale(
-							Perl6::Tidy::EScale.new(
+							EScale.new(
 								$parsed.hash.<escale>
 							)
 						)
@@ -2046,7 +2508,7 @@ class Perl6::Tidy {
 		}
 	}
 
-	class Numish does _Node {
+	class Numish does Node {
 		method perl6() {
 "### Numish"
 		}
@@ -2057,7 +2519,7 @@ class Perl6::Tidy {
 			return Numish.new(
 				:content(
 					:integer(
-						Perl6::Tidy::Integer.new(
+						Integer.new(
 							$parsed.hash.<integer>
 						)
 					)
@@ -2090,7 +2552,7 @@ class Perl6::Tidy {
 		die debug( 'numish', $parsed );
 	}
 
-	class Circumfix does _Node {
+	class Circumfix does Node {
 		method perl6() {
 "### Circumfix"
 		}
@@ -2112,12 +2574,12 @@ class Perl6::Tidy {
 			return Circumfix.new(
 				:content(
 					:binint(
-						Perl6::Tidy::BinInt.new(
+						BinInt.new(
 							$parsed.hash.<binint>
 						)
 					),
 					:VALUE(
-						Perl6::Tidy::VALUE.new(
+						VALUE.new(
 							$parsed.hash.<VALUE>
 						)
 					)
@@ -2128,12 +2590,12 @@ class Perl6::Tidy {
 			return Circumfix.new(
 				:content(
 					:octint(
-						Perl6::Tidy::OctInt.new(
+						OctInt.new(
 							$parsed.hash.<octint>
 						)
 					),
 					:VALUE(
-						Perl6::Tidy::VALUE.new(
+						VALUE.new(
 							$parsed.hash.<VALUE>
 						)
 					)
@@ -2144,12 +2606,12 @@ class Perl6::Tidy {
 			return Circumfix.new(
 				:content(
 					:hexint(
-						Perl6::Tidy::HexInt.new(
+						HexInt.new(
 							$parsed.hash.<hexint>
 						)
 					),
 					:VALUE(
-						Perl6::Tidy::VALUE.new(
+						VALUE.new(
 							$parsed.hash.<VALUE>
 						)
 					)
@@ -2159,7 +2621,7 @@ class Perl6::Tidy {
 		die debug( 'circumfix', $parsed );
 	}
 
-	class SemiList does _Node {
+	class SemiList does Node {
 		method perl6() {
 "### SemiList"
 		}
@@ -2183,7 +2645,7 @@ class Perl6::Tidy {
 		die debug( 'semilist', $parsed );
 	}
 
-	class RadNumber does _Node {
+	class RadNumber does Node {
 		method perl6() {
 "### RadNumber"
 		}
@@ -2200,7 +2662,7 @@ class Perl6::Tidy {
 						)
 					),
 					:radix(
-						Perl6::Tidy::Radix.new(
+						Radix.new(
 							$parsed.hash.<radix>,
 						)
 					),
