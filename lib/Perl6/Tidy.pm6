@@ -730,6 +730,28 @@ class Perl6::Tidy {
 		}
 	}
 
+	class Infix does Node {
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< sym O >] ) {
+				return self.bless(
+					:content(
+						:sym(
+							Sym.new(
+								$parsed.hash.<sym>
+							)
+						),
+						:O(
+							O.new(
+								$parsed.hash.<O>
+							)
+						)
+					)
+				)
+			}
+			die debug( 'infix', $parsed );
+		}
+	}
+
 	class Args does Node {
 		method new( Mu $parsed ) {
 			if $parsed.Bool {
@@ -1932,6 +1954,27 @@ class Perl6::Tidy {
 								)
 							),
 							:postfix_prefix_meta_operator()
+						),
+						:child( @child )
+					)
+				}
+				if assert-hash-keys(
+					$parsed,
+					[< infix OPER >],
+					[< prefix_postfix_meta_operator >] ) {
+					return EXPR.new(
+						:content(
+							:infix(
+								Infix.new(
+									$parsed.hash.<infix>
+								)
+							),
+							:OPER(
+								OPER.new(
+									$parsed.hash.<OPER>
+								)
+							),
+							:infix_postfix_meta_operator()
 						),
 						:child( @child )
 					)
