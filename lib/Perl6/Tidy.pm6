@@ -340,7 +340,7 @@ class Perl6::Tidy {
 		self.root( $parsed )
 	}
 
-	method dump-parsed( Mu $parsed ) {
+	sub dump-parsed( Mu $parsed ) {
 		my @lines;
 		my @types;
 		@types.push( 'Bool' ) if $parsed.Bool;
@@ -369,14 +369,14 @@ class Perl6::Tidy {
 			for $parsed.hash.keys {
 				next unless $parsed.hash.{$_};
 				@lines.push( qq{  {$_}:  } );
-				@lines.append( self.dump-parsed( $parsed.hash.{$_} ) )
+				@lines.append( dump-parsed( $parsed.hash.{$_} ) )
 			}
 		}
 		if $parsed.list {
 			my $i = 0;
 			for $parsed.list {
 				@lines.push( qq{  [$i]:  } );
-				@lines.append( self.dump-parsed( $_ ) )
+				@lines.append( dump-parsed( $_ ) )
 			}
 		}
 
@@ -397,7 +397,7 @@ class Perl6::Tidy {
 			:actions( $a )
 		);
 
-		self.dump-parsed( $parsed ).join( "\n" )
+		dump-parsed( $parsed ).join( "\n" )
 	}
 
 	class Root does Node {
@@ -654,10 +654,26 @@ class Perl6::Tidy {
 			   $hash.<assoc> {
 				return self.bless(
 					:content(
+						:prec( $hash.<prec> ),
+						:fiddly( $hash.<fiddly> ),
+						:dba( $hash.<dba> ),
+						:assoc( $hash.<assoc> )
 					)
 				)
 			}
-			die debug( 'O', $hash );
+			if $hash.<prec> and
+			   $hash.<dba> and
+			   $hash.<assoc> {
+				return self.bless(
+					:content(
+						:prec( $hash.<prec> ),
+						:dba( $hash.<dba> ),
+						:assoc( $hash.<assoc> )
+					)
+				)
+			}
+die $hash.perl;
+			die dump-parsed( $hash );
 		}
 	}
 
@@ -680,6 +696,28 @@ class Perl6::Tidy {
 				)
 			}
 			die debug( 'postfix', $parsed );
+		}
+	}
+
+	class Prefix does Node {
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< sym O >] ) {
+				return self.bless(
+					:content(
+						:sym(
+							Sym.new(
+								$parsed.hash.<sym>
+							)
+						),
+						:O(
+							O.new(
+								$parsed.hash.<O>
+							)
+						)
+					)
+				)
+			}
+			die debug( 'prefix', $parsed );
 		}
 	}
 
@@ -1889,6 +1927,27 @@ class Perl6::Tidy {
 						:child( @child )
 					)
 				}
+				if assert-hash-keys(
+					$parsed,
+					[< prefix OPER >],
+					[< prefix_postfix_meta_operator >] ) {
+					return EXPR.new(
+						:content(
+							:prefix(
+								Prefix.new(
+									$parsed.hash.<prefix>
+								)
+							),
+							:OPER(
+								OPER.new(
+									$parsed.hash.<OPER>
+								)
+							),
+							:prefix_postfix_meta_operator()
+						),
+						:child( @child )
+					)
+				}
 				if assert-hash-keys( $parsed, [< longname >] ) {
 					return EXPR.new(
 						:content(
@@ -1901,7 +1960,7 @@ class Perl6::Tidy {
 						:child( @child )
 					)
 				}
-				die debug( 'EXPR', $parsed );
+				die debug( 'EXPR', $parsed )
 			}
 			else {
 				return EXPR.new(
