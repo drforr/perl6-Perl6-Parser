@@ -9,7 +9,7 @@ plan 13;
 my $pt = Perl6::Tidy.new;
 
 subtest {
-	plan 1;
+	plan 13;
 
 	subtest {
 		plan 2;
@@ -19,30 +19,30 @@ subtest {
 		is $parsed.child.elems, 1;
 	}, Q[.say];
 
-#	subtest {
-#		plan 2;
-#
-#		my $parsed = $pt.tidy( Q{my $x; $x.+say} );
-#		isa-ok $parsed, 'Perl6::Tidy::Root';
-#		is $parsed.child.elems, 1;
-#	}, Q[.+say];
-#
-#	subtest {
-#		plan 2;
-#
-#		my $parsed = $pt.tidy( Q{my $x; $x.?say} );
-#		isa-ok $parsed, 'Perl6::Tidy::Root';
-#		is $parsed.child.elems, 1;
-#	}, Q[.?say];
-#
-#	subtest {
-#		plan 2;
-#
-#		my $parsed = $pt.tidy( Q{my $x; $x.*say} );
-#		isa-ok $parsed, 'Perl6::Tidy::Root';
-#		is $parsed.child.elems, 1;
-#	}, Q[.*say];
-#
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{my $x; $x.+say} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q[.+say];
+
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{my $x; $x.?say} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q[.?say];
+
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{my $x; $x.*say} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q[.*say];
+
 #	subtest {
 #		plan 2;
 #
@@ -91,26 +91,26 @@ subtest {
 #		is $parsed.child.elems, 1;
 #	}, Q[.::];
 #
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{my $x; $x.=say} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q[.=];
+
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{my $x; $x.^say} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q[.^];
+
 #	subtest {
 #		plan 2;
 #
-#		my $parsed = $pt.tidy( Q{my $x; $x.=} );
-#		isa-ok $parsed, 'Perl6::Tidy::Root';
-#		is $parsed.child.elems, 1;
-#	}, Q[.=];
-#
-#	subtest {
-#		plan 2;
-#
-#		my $parsed = $pt.tidy( Q{my $x; $x.^} );
-#		isa-ok $parsed, 'Perl6::Tidy::Root';
-#		is $parsed.child.elems, 1;
-#	}, Q[.^];
-#
-#	subtest {
-#		plan 2;
-#
-#		my $parsed = $pt.tidy( Q{my $x; $x.:} );
+#		my $parsed = $pt.tidy( Q{my $x; $x.:say} );
 #		isa-ok $parsed, 'Perl6::Tidy::Root';
 #		is $parsed.child.elems, 1;
 #	}, Q[.:];
@@ -215,37 +215,37 @@ subtest {
 #		is $parsed.child.elems, 1;
 #	}, Q[||];
 #
-#	subtest {
-#		plan 2;
-#
-#		my $parsed = $pt.tidy( Q{my $x; +^$x} );
-#		isa-ok $parsed, 'Perl6::Tidy::Root';
-#		is $parsed.child.elems, 1;
-#	}, Q[+^];
-#
-#	subtest {
-#		plan 2;
-#
-#		my $parsed = $pt.tidy( Q{my $x; ~^$x} );
-#		isa-ok $parsed, 'Perl6::Tidy::Root';
-#		is $parsed.child.elems, 1;
-#	}, Q[~^];
-#
-#	subtest {
-#		plan 2;
-#
-#		my $parsed = $pt.tidy( Q{my $x; ?^$x} );
-#		isa-ok $parsed, 'Perl6::Tidy::Root';
-#		is $parsed.child.elems, 1;
-#	}, Q[?^];
-#
-#	subtest {
-#		plan 2;
-#
-#		my $parsed = $pt.tidy( Q{my $x; ?$x} );
-#		isa-ok $parsed, 'Perl6::Tidy::Root';
-#		is $parsed.child.elems, 1;
-#	}, Q[?];
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{my $x; +^$x} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q[+^];
+
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{my $x; ~^$x} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q[~^];
+
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{my $x; ?^$x} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q[?^];
+
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{my $x; ?$x} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q[?];
 }, 'symbolic unary';
 
 subtest {
@@ -601,7 +601,7 @@ subtest {
 }, 'structural infix';
 
 subtest {
-	plan 1;
+	plan 17;
 
 	subtest {
 		plan 2;
@@ -870,9 +870,60 @@ subtest {
 #	}, Q[:];
 }, 'comma operator';
 
+subtest {
+	plan 6;
+
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{my @a; my @b; @a Z @b} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q[Z];
+
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{my @a; my @b; @a minmax @b} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q[minmax];
+
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{my @a; my @b; @a X @b} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q[X];
+
+#	subtest {
+#		plan 2;
+#
+#		my $parsed = $pt.tidy( Q{my @a; my @b; @a X~ @b} );
+#		isa-ok $parsed, 'Perl6::Tidy::Root';
+#		is $parsed.child.elems, 1;
+#	}, Q[X~];
+
+#	subtest {
+#		plan 2;
+#
+#		my $parsed = $pt.tidy( Q{my @a; my @b; @a X* @b} );
+#		isa-ok $parsed, 'Perl6::Tidy::Root';
+#		is $parsed.child.elems, 1;
+#	}, Q[X*];
+
+#	subtest {
+#		plan 2;
+#
+#		my $parsed = $pt.tidy( Q{my @a; my @b; @a Xeqv @b} );
+#		isa-ok $parsed, 'Perl6::Tidy::Root';
+#		is $parsed.child.elems, 1;
+#	}, Q[Xeqv];
+}, 'list infix';
+
 #`(
 
-List infix 	Z minmax X X~ X* Xeqv ...
 List prefix 	print push say die map substr ... [+] [*] any Z=
 
 )
@@ -924,7 +975,6 @@ subtest {
 		is $parsed.child.elems, 1;
 	}, Q[orelse];
 }, 'loose or';
-
 
 subtest {
 	plan 4;
