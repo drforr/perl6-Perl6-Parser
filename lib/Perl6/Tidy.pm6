@@ -42,6 +42,10 @@ sub dump-parsed( Mu $parsed ) {
 	map { $indent-str ~ $_ }, @lines
 }
 
+sub dump( Mu $parsed ) {
+	dump-parsed( $parsed ).join( "\n" )
+}
+
 class Perl6::Tidy {
 	use nqp;
 
@@ -779,7 +783,18 @@ class Perl6::Tidy {
 					)
 				)
 			}
-			die debug( 'methodop', $parsed );
+			if assert-hash-keys( $parsed, [< longname >] ) {
+				return self.bless(
+					:content(
+						:longname(
+							LongName.new(
+								$parsed.hash.<longname>
+							)
+						)
+					)
+				)
+			}
+			die dump( $parsed );
 		}
 	}
 
@@ -1913,7 +1928,15 @@ class Perl6::Tidy {
 					);
 					next;
 				}
-				die debug( 'EXPR', $_ );
+				if assert-hash-keys( $_, [< variable >] ) {
+					@child.push(
+						Variable.new(
+							$_.hash.<variable>
+						)
+					);
+					next;
+				}
+				die dump( $_ );
 			}
 			if $parsed.hash {
 				if assert-hash-keys(

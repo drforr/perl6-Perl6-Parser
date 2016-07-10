@@ -9,7 +9,7 @@ plan 1;
 my $pt = Perl6::Tidy.new;
 
 subtest {
-	plan 4;
+	plan 6;
 
 	subtest {
 		plan 2;
@@ -42,6 +42,64 @@ subtest {
 		isa-ok $parsed, 'Perl6::Tidy::Root';
 		is $parsed.child.elems, 1;
 	}, Q{divide};
-}, Q{asmd};
+
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{1 % 1} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q{modulo};
+
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{1 ** 1} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q{exp};
+}, Q{asmd mod exp};
+
+subtest {
+	plan 1;
+
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{my $x; $x.say} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q{.meth};
+}, 'postfix';
+
+#`(
+
+L 	Method postfix 	.meth .+ .? .* .() .[] .{} .<> .«» .:: .= .^ .:
+N 	Autoincrement 	++ --
+R 	Exponentiation 	**
+L 	Symbolic unary 	! + - ~ ? | || +^ ~^ ?^ ^
+L 	Multiplicative 	* / % %% +& +< +> ~& ~< ~> ?& div mod gcd lcm
+L 	Additive 	+ - +| +^ ~| ~^ ?| ?^
+L 	Replication 	x xx
+X 	Concatenation 	~
+X 	Junctive and 	&
+X 	Junctive or 	| ^
+L 	Named unary 	temp let
+N 	Structural infix 	but does <=> leg cmp .. ..^ ^.. ^..^
+C 	Chaining infix 	!= == < <= > >= eq ne lt le gt ge ~~ === eqv !eqv =~=
+X 	Tight and 	&&
+X 	Tight or 	|| ^^ // min max
+R 	Conditional 	?? !! ff fff
+R 	Item assignment 	= => += -= **= xx= .=
+L 	Loose unary 	so not
+X 	Comma operator 	, :
+X 	List infix 	Z minmax X X~ X* Xeqv ...
+R 	List prefix 	print push say die map substr ... [+] [*] any Z=
+X 	Loose and 	and andthen
+X 	Loose or 	or xor orelse
+X 	Sequencer 	<==, ==>, <<==, ==>>
+N 	Terminator 	; {...}, unless, extra close-paren, ], }
+
+)
 
 # vim: ft=perl6
