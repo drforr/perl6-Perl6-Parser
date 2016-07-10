@@ -9,7 +9,7 @@ plan 13;
 my $pt = Perl6::Tidy.new;
 
 subtest {
-	plan 13;
+	plan 1;
 
 	subtest {
 		plan 2;
@@ -149,7 +149,7 @@ subtest {
 }, 'exponentiation';
 
 subtest {
-	plan 12;
+	plan 1;
 
 	subtest {
 		plan 2;
@@ -601,7 +601,7 @@ subtest {
 }, 'structural infix';
 
 subtest {
-	plan 17;
+	plan 1;
 
 	subtest {
 		plan 2;
@@ -797,7 +797,7 @@ subtest {
 }, 'tight or';
 
 subtest {
-	plan 3;
+	plan 1;
 
 #	subtest {
 #		plan 2;
@@ -824,11 +824,65 @@ subtest {
 	}, Q[fff];
 }, 'conditional';
 
-#`(
+subtest {
+	plan 1;
 
-Item assignment 	= => += -= **= xx= .=
+	subtest {
+		plan 2;
 
-)
+		my $parsed = $pt.tidy( Q{my $a; $a = 2} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q[=];
+
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{3 => 2} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q[=>];
+
+#	subtest {
+#		plan 2;
+#
+#		my $parsed = $pt.tidy( Q{my $a; $a += 2} );
+#		isa-ok $parsed, 'Perl6::Tidy::Root';
+#		is $parsed.child.elems, 1;
+#	}, Q[+=];
+
+#	subtest {
+#		plan 2;
+#
+#		my $parsed = $pt.tidy( Q{my $a; $a -= 2} );
+#		isa-ok $parsed, 'Perl6::Tidy::Root';
+#		is $parsed.child.elems, 1;
+#	}, Q[-=];
+
+#	subtest {
+#		plan 2;
+#
+#		my $parsed = $pt.tidy( Q{my $a; $a **= 2} );
+#		isa-ok $parsed, 'Perl6::Tidy::Root';
+#		is $parsed.child.elems, 1;
+#	}, Q[**=];
+
+#	subtest {
+#		plan 2;
+#
+#		my $parsed = $pt.tidy( Q{my $a; $a xx= 2} );
+#		isa-ok $parsed, 'Perl6::Tidy::Root';
+#		is $parsed.child.elems, 1;
+#	}, Q[xx=];
+
+#	subtest {
+#		plan 2;
+#
+#		my $parsed = $pt.tidy( Q{my $a; $a .= say} );
+#		isa-ok $parsed, 'Perl6::Tidy::Root';
+#		is $parsed.child.elems, 1;
+#	}, Q[.=];
+}, 'item assignment';
 
 subtest {
 	plan 2;
@@ -851,7 +905,7 @@ subtest {
 }, 'loose unary';
 
 subtest {
-	plan 2;
+	plan 1;
 
 	subtest {
 		plan 2;
@@ -871,7 +925,7 @@ subtest {
 }, 'comma operator';
 
 subtest {
-	plan 6;
+	plan 1;
 
 	subtest {
 		plan 2;
@@ -923,7 +977,7 @@ subtest {
 }, 'list infix';
 
 subtest {
-	plan 6;
+	plan 1;
 
 	subtest {
 		plan 2;
@@ -1015,7 +1069,7 @@ subtest {
 }, 'list prefix';
 
 subtest {
-	plan 2;
+	plan 1;
 
 	subtest {
 		plan 2;
@@ -1063,7 +1117,7 @@ subtest {
 }, 'loose or';
 
 subtest {
-	plan 4;
+	plan 1;
 
 #	subtest {
 #		plan 2;
