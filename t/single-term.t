@@ -12,7 +12,16 @@ subtest {
 	plan 9;
 
 	subtest {
-		plan 2;
+		plan 4;
+
+		ok 1, "Test zero, once the dumper is ready.";
+#		subtest {
+#			plan 2;
+#
+#			my $parsed = $pt.tidy( Q{0} );
+#			isa-ok $parsed, 'Perl6::Tidy::Root';
+#			is $parsed.child.elems, 1;
+#		}, Q{Zero};
 
 		subtest {
 			plan 2;
@@ -20,7 +29,15 @@ subtest {
 			my $parsed = $pt.tidy( Q{1} );
 			isa-ok $parsed, 'Perl6::Tidy::Root';
 			is $parsed.child.elems, 1;
-		}, Q{no underscores};
+		}, Q{positive};
+
+		subtest {
+			plan 2;
+
+			my $parsed = $pt.tidy( Q{-1} );
+			isa-ok $parsed, 'Perl6::Tidy::Root';
+			is $parsed.child.elems, 1;
+		}, Q{negative};
 
 		subtest {
 			plan 2;

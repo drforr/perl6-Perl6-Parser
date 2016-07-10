@@ -340,6 +340,51 @@ class Perl6::Tidy {
 		self.root( $parsed )
 	}
 
+	method dump-parsed( Mu $parsed, Int $indent = 0 ) {
+		my @lines;
+		@lines.push( Q[ ?:    ] ~ ~?$parsed.Bool );
+		@lines.push( Q[ ~:   '] ~ ~$parsed.Str ~ "'" );
+		@lines.push( Q[ +:    ] ~ ~+$parsed.Int );
+		@lines.push( Q[++:    ] ~ ~+$parsed.Num );
+		@lines.push( Q[{}:    ] ~ $parsed.hash.keys.gist );
+		@lines.push( Q{[]:    } ~ $parsed.list.elems );
+
+		if $parsed.hash {
+			my @keys;
+			for $parsed.hash.keys {
+				@keys.push( $_ ) if
+					$parsed.hash:defined{$_} and not
+					$parsed.hash.{$_}
+			}
+			@lines.push( Q[{}:U: ] ~ @keys.gist );
+
+			for $parsed.hash.keys {
+				next unless $parsed.hash.{$_};
+				@lines.push( qq{  {$_}:  } );
+				@lines.append( self.dump-parsed( $parsed.hash.{$_}, $indent + 1 ) )
+			}
+		}
+
+		my $indent-str = ' ' x ( $indent * 2 );
+		map { $indent-str ~ $_ }, @lines
+	}
+
+	method dump( Str $text ) {
+		my $*LINEPOSCACHE;
+		my $compiler := nqp::getcomp('perl6');
+		my $g := nqp::findmethod($compiler,'parsegrammar')($compiler);
+		#$g.HOW.trace-on($g);
+		my $a := nqp::findmethod($compiler,'parseactions')($compiler);
+
+		my $parsed = $g.parse(
+			$text,
+			:p( 0 ),
+			:actions( $a )
+		);
+
+		self.dump-parsed( $parsed ).join( "\n" )
+	}
+
 	class Root does Node {
 	}
 
