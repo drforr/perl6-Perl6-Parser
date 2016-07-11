@@ -157,6 +157,20 @@ sub assert-hash-keys( Mu $parsed, $keys, $defined-keys = [] ) {
 	return False
 }
 
+class EXPR {...}
+class Infix {...}
+class Op {...}
+class PackageDeclarator {...}
+class PrefixOPER {...}
+class RegexDeclarator {...}
+class RoutineDeclarator {...}
+class ScopeDeclarator {...}
+class SemiList {...}
+class Statement {...}
+class StatementList {...}
+class Value {...}
+
+
 class BinInt does Node {
 	method new( Mu $parsed ) {
 		if assert-Int( $parsed ) {
@@ -753,42 +767,68 @@ class PostOp does Node {
 	}
 }
 
-class InfixIsh does Node {
+class Circumfix does Node {
 	method new( Mu $parsed ) {
-		if assert-hash-keys(
-			$parsed,
-			[< infix OPER >] ) {
+		if assert-hash-keys( $parsed, [< semilist >] ) {
 			return self.bless(
 				:content(
-					:infix(
-						self.infix(
-							$parsed.hash.<infix>
-						)
-					),
-					:OPER(
-						self.OPER(
-							$parsed.hash.<OPER>
+					:semilist(
+						SemiList.new(
+							$parsed.hash.<semilist>
 						)
 					)
 				)
 			)
 		}
-		die debug( 'infixish', $parsed );
-	}
-}
-
-class Signature does Node {
-	method new( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [], [< param_sep parameter >] ) {
+		if assert-hash-keys( $parsed, [< binint VALUE >] ) {
 			return self.bless(
-				:name( $parsed.Bool ),
 				:content(
-					:param_sep(),
-					:parameter()
+					:binint(
+						BinInt.new(
+							$parsed.hash.<binint>
+						)
+					),
+					:VALUE(
+						VALUE.new(
+							$parsed.hash.<VALUE>
+						)
+					)
 				)
 			)
 		}
-		die debug( 'signature', $parsed );
+		if assert-hash-keys( $parsed, [< octint VALUE >] ) {
+			return self.bless(
+				:content(
+					:octint(
+						OctInt.new(
+							$parsed.hash.<octint>
+						)
+					),
+					:VALUE(
+						VALUE.new(
+							$parsed.hash.<VALUE>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< hexint VALUE >] ) {
+			return self.bless(
+				:content(
+					:hexint(
+						HexInt.new(
+							$parsed.hash.<hexint>
+						)
+					),
+					:VALUE(
+						VALUE.new(
+							$parsed.hash.<VALUE>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'circumfix', $parsed );
 	}
 }
 
@@ -806,6 +846,34 @@ class FakeSignature does Node {
 			)
 		}
 		die debug( 'fakesignature', $parsed );
+	}
+}
+
+class ColonPair does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< identifier >] ) {
+			return self.bless(
+				:content(
+					:identifier(
+						Identifier.new(
+							$parsed.hash.<identifier>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< fakesignature >] ) {
+			return self.bless(
+				:content(
+					:fakesignature(
+						FakeSignature.new(
+							$parsed.hash.<fakesignature>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'colonpair', $parsed );
 	}
 }
 
@@ -847,31 +915,582 @@ class DottyOp does Node {
 	}
 }
 
-class ColonPair does Node {
+class Dotty does Node {
 	method new( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< identifier >] ) {
+		if assert-hash-keys( $parsed, [< sym dottyop O >] ) {
 			return self.bless(
 				:content(
-					:identifier(
-						Identifier.new(
-							$parsed.hash.<identifier>
+					:sym(
+						Sym.new(
+							$parsed.hash.<sym>
+						)
+					),
+					:dottyop(
+						DottyOp.new(
+							$parsed.hash.<dottyop>
+						)
+					),
+					:O(
+						O.new(
+							$parsed.hash.<O>
 						)
 					)
 				)
 			)
 		}
-		if assert-hash-keys( $parsed, [< fakesignature >] ) {
+		die debug( 'dotty', $parsed );
+	}
+}
+
+# XXX This is a compound type
+class IdentifierArgs does Node {
+	method new( Mu $parsed ) {
+		return self.bless(
+			:content(
+				:identifier(
+					Identifier.new(
+						$parsed.hash.<identifier>
+					)
+				),
+				:args(
+					Args.new(
+						$parsed.hash.<args>
+					)
+				)
+			)
+		)
+	}
+}
+
+# XXX This is a compound type
+class LongNameArgs does Node {
+	method new( Mu $parsed ) {
+		return self.bless(
+			:content(
+				:longname(
+					LongName.new(
+						$parsed.hash.<longname>
+					)
+				),
+				:args(
+					Args.new(
+						$parsed.hash.<args>
+					)
+				)
+			)
+		)
+	}
+}
+
+class OPER does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< sym dottyop O >] ) {
 			return self.bless(
 				:content(
-					:fakesignature(
-						FakeSignature.new(
-							$parsed.hash.<fakesignature>
+					:sym(
+						Sym.new(
+							$parsed.hash.<sym>
+						)
+					),
+					:dottyop(
+						DottyOp.new(
+							$parsed.hash.<dottyop>
+						)
+					),
+					:O(
+						O.new(
+							$parsed.hash.<O>
 						)
 					)
 				)
 			)
 		}
-		die debug( 'colonpair', $parsed );
+		if assert-hash-keys(
+			$parsed,
+			[< sym infixish O >] ) {
+			return self.bless(
+				:content(
+					:sym(
+						Sym.new(
+							$parsed.hash.<sym>
+						)
+					),
+					:infixish(
+						Infix.new(
+							$parsed.hash.<infixish>
+						)
+					),
+					:O(
+						O.new(
+							$parsed.hash.<O>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< sym O >] ) {
+			return self.bless(
+				:content(
+					:sym(
+						Sym.new(
+							$parsed.hash.<sym>
+						)
+					),
+					:O(
+						O.new(
+							$parsed.hash.<O>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< EXPR O >] ) {
+			return self.bless(
+				:content(
+					:EXPR(
+						EXPR.new(
+							$parsed.hash.<EXPR>
+						)
+					),
+					:O(
+						O.new(
+							$parsed.hash.<O>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'OPER', $parsed );
+	}
+}
+
+class Infix {...} # Forward
+
+class EXPR does Node {
+	method new( Mu $parsed ) {
+		if $parsed.list {
+			my @child;
+			for $parsed.list {
+				if assert-hash-keys( $_, [< prefix OPER >],
+							 [< prefix_postfix_meta_operator >] ) {
+					@child.push(
+						PrefixOPER.new( $_ )
+					);
+					next;
+				}
+				if assert-hash-keys( $_, [< identifier args >] ) {
+					@child.push(
+						IdentifierArgs.new( $_ )
+					);
+					next;
+				}
+				if assert-hash-keys( $_, [< longname args >] ) {
+					@child.push(
+						LongNameArgs.new( $_ )
+					);
+					next;
+				}
+				if assert-hash-keys( $_, [< longname >] ) {
+					@child.push(
+						LongName.new(
+							$_.hash.<longname>
+						)
+					);
+					next;
+				}
+				if assert-hash-keys( $_, [< value >] ) {
+					@child.push(
+						Value.new(
+							$_.hash.<value>
+						)
+					);
+					next;
+				}
+				if assert-hash-keys( $_, [< variable >] ) {
+say $_.dump;
+					@child.push(
+						Variable.new(
+							$_.hash.<variable>
+						)
+					);
+					next;
+				}
+				die dump( $_ );
+			}
+			if $parsed.hash {
+				if assert-hash-keys(
+					$parsed,
+					[< OPER dotty >],
+					[< postfix_prefix_meta_operator >] ) {
+					return self.bless(
+						:content(
+							:OPER(
+								OPER.new(
+									$parsed.hash.<OPER>
+								)
+							),
+							:dotty(
+								Dotty.new(
+									$parsed.hash.<dotty>
+								)
+							)
+						),
+						:postfix_prefix_meta_operator(),
+						:child( @child )
+					)
+				}
+				if assert-hash-keys(
+					$parsed,
+					[< postfix OPER >],
+					[< postfix_prefix_meta_operator >] ) {
+					return self.bless(
+						:content(
+							:postfix(
+								Postfix.new(
+									$parsed.hash.<postfix>
+								)
+							),
+							:OPER(
+								OPER.new(
+									$parsed.hash.<OPER>
+								)
+							),
+							:postfix_prefix_meta_operator()
+						),
+						:child( @child )
+					)
+				}
+				if assert-hash-keys(
+					$parsed,
+					[< infix OPER >],
+					[< prefix_postfix_meta_operator >] ) {
+					return self.bless(
+						:content(
+							:infix(
+								Infix.new(
+									$parsed.hash.<infix>
+								)
+							),
+							:OPER(
+								OPER.new(
+									$parsed.hash.<OPER>
+								)
+							),
+							:infix_postfix_meta_operator()
+						),
+						:child( @child )
+					)
+				}
+				if assert-hash-keys(
+					$parsed,
+					[< prefix OPER >],
+					[< prefix_postfix_meta_operator >] ) {
+					return self.bless(
+						:content(
+							:prefix(
+								Prefix.new(
+									$parsed.hash.<prefix>
+								)
+							),
+							:OPER(
+								OPER.new(
+									$parsed.hash.<OPER>
+								)
+							),
+							:prefix_postfix_meta_operator()
+						),
+						:child( @child )
+					)
+				}
+				if assert-hash-keys(
+					$parsed,
+					[< OPER >],
+					[< infix_prefix_meta_operator >] ) {
+					return self.bless(
+						:content(
+							:OPER(
+								OPER.new(
+									$parsed.hash.<OPER>
+								)
+							),
+							:infix_prefix_meta_operator()
+						),
+						:child( @child )
+					)
+				}
+				if assert-hash-keys( $parsed, [< longname >] ) {
+					return self.bless(
+						:content(
+							:longname(
+								LongName.new(
+									$parsed.hash.<longname>
+								)
+							),
+						),
+						:child( @child )
+					)
+				}
+				die debug( 'EXPR', $parsed )
+			}
+			else {
+				return self.bless(
+					:child( @child )
+				)
+			}
+		}
+		if assert-hash-keys( $parsed, [< args op >] ) {
+			return self.bless(
+				:content(
+					:args(
+						Args.new(
+							$parsed.hash.<args>
+						)
+					),
+					:op(
+						Op.new(
+							$parsed.hash.<op>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< sym args >] ) {
+			return self.bless(
+				:child( 
+					Sym.new(
+						$parsed.hash.<sym>
+					)
+				),
+				:content(
+					:args(
+						Args.new(
+							$parsed.hash.<args>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< identifier args >] ) {
+			return self.bless(
+				:content(
+					Identifier.new(
+						$parsed.hash.<identifier>
+					),
+					:args(
+						Args.new(
+							$parsed.hash.<args>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< longname args >] ) {
+			return self.bless(
+				:content(
+					:longname(
+						LongName.new(
+							$parsed.hash.<longname>
+						)
+					),
+					:args(
+						Args.new(
+							$parsed.hash.<args>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< longname >] ) {
+			return self.bless(
+				:child( 
+					LongName.new(
+						$parsed.hash.<longname>
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< value >] ) {
+			return self.bless(
+				:content(
+					:value(
+						Value.new(
+							$parsed.hash.<value>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< variable >] ) {
+			return self.bless(
+				:content(
+#					:variable(
+#						Variable.new(
+#							$parsed.hash.<variable>
+#						)
+#					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< circumfix >] ) {
+			return self.bless(
+				:content(
+					:circumfix(
+						Circumfix.new(
+							$parsed.hash.<circumfix>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< colonpair >] ) {
+			return self.bless(
+				:content(
+					:colonpair(
+						ColonPair.new(
+							$parsed.hash.<colonpair>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< scope_declarator >] ) {
+			return self.bless(
+				:content(
+					:scope_declarator(
+						ScopeDeclarator.new(
+							$parsed.hash.<scope_declarator>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< routine_declarator >] ) {
+			return self.bless(
+				:content(
+					:routine_declarator(
+						RoutineDeclarator.new(
+							$parsed.hash.<routine_declarator>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< package_declarator >] ) {
+			return self.bless(
+				:content(
+					:package_declarator(
+						PackageDeclarator.new(
+							$parsed.hash.<package_declarator>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< regex_declarator >] ) {
+			return self.bless(
+				:content(
+					:regex_declarator(
+						RegexDeclarator.new(
+							$parsed.hash.<regex_declarator>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'EXPR', $parsed );
+	}
+}
+
+class Infix does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< EXPR O >] ) {
+			return self.bless(
+				:content(
+					:EXPR(
+						EXPR.new(
+							$parsed.hash.<EXPR>
+						)
+					),
+					:O(
+						O.new(
+							$parsed.hash.<O>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< infix OPER >] ) {
+			return self.bless(
+				:content(
+					:infix(
+						Infix.new(
+							$parsed.hash.<infix>
+						)
+					),
+					:OPER(
+						OPER.new(
+							$parsed.hash.<OPER>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< sym O >] ) {
+			return self.bless(
+				:content(
+					:sym(
+						Sym.new(
+							$parsed.hash.<sym>
+						)
+					),
+					:O(
+						O.new(
+							$parsed.hash.<O>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'infix', $parsed );
+	}
+}
+
+class InfixIsh does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys(
+			$parsed,
+			[< infix OPER >] ) {
+			return self.bless(
+				:content(
+					:infix(
+						Infix.new(
+							$parsed.hash.<infix>
+						)
+					),
+					:OPER(
+						OPER.new(
+							$parsed.hash.<OPER>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'infixish', $parsed );
+	}
+}
+
+class Signature does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [], [< param_sep parameter >] ) {
+			return self.bless(
+				:name( $parsed.Bool ),
+				:content(
+					:param_sep(),
+					:parameter()
+				)
+			)
+		}
+		die debug( 'signature', $parsed );
 	}
 }
 
@@ -996,6 +1615,7 @@ class CClassElem does Node {
 
 class Variable does Node {
 	method new( Mu $parsed ) {
+say $parsed.dump;
 		if assert-hash-keys( $parsed, [< twigil sigil desigilname >] ) {
 			return self.bless(
 				:content(
@@ -1017,7 +1637,7 @@ class Variable does Node {
 				)
 			)
 		}
-		elsif assert-hash-keys( $parsed, [< sigil desigilname >] ) {
+		if assert-hash-keys( $parsed, [< sigil desigilname >] ) {
 			return self.bless(
 				:content(
 					:sigil(
@@ -1033,7 +1653,7 @@ class Variable does Node {
 				)
 			)
 		}
-		elsif assert-hash-keys( $parsed, [< sigil >] ) {
+		if assert-hash-keys( $parsed, [< sigil >] ) {
 			return self.bless(
 				:content(
 					:sigil(
@@ -1363,104 +1983,12 @@ class RegexDeclarator does Node {
 	}
 }
 
-class Dotty does Node {
-	method new( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< sym dottyop O >] ) {
-			return self.bless(
-				:content(
-					:sym(
-						Sym.new(
-							$parsed.hash.<sym>
-						)
-					),
-					:dottyop(
-						DottyOp.new(
-							$parsed.hash.<dottyop>
-						)
-					),
-					:O(
-						O.new(
-							$parsed.hash.<O>
-						)
-					)
-				)
-			)
-		}
-		die debug( 'dotty', $parsed );
-	}
-}
-
 class SemiList does Node {
 	method new( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [], [< statement >] ) {
 			return self.bless
 		}
 		die debug( 'semilist', $parsed );
-	}
-}
-
-class Circumfix does Node {
-	method new( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< semilist >] ) {
-			return self.bless(
-				:content(
-					:semilist(
-						SemiList.new(
-							$parsed.hash.<semilist>
-						)
-					)
-				)
-			)
-		}
-		if assert-hash-keys( $parsed, [< binint VALUE >] ) {
-			return self.bless(
-				:content(
-					:binint(
-						BinInt.new(
-							$parsed.hash.<binint>
-						)
-					),
-					:VALUE(
-						VALUE.new(
-							$parsed.hash.<VALUE>
-						)
-					)
-				)
-			)
-		}
-		if assert-hash-keys( $parsed, [< octint VALUE >] ) {
-			return self.bless(
-				:content(
-					:octint(
-						OctInt.new(
-							$parsed.hash.<octint>
-						)
-					),
-					:VALUE(
-						VALUE.new(
-							$parsed.hash.<VALUE>
-						)
-					)
-				)
-			)
-		}
-		if assert-hash-keys( $parsed, [< hexint VALUE >] ) {
-			return self.bless(
-				:content(
-					:hexint(
-						HexInt.new(
-							$parsed.hash.<hexint>
-						)
-					),
-					:VALUE(
-						VALUE.new(
-							$parsed.hash.<VALUE>
-						)
-					)
-				)
-			)
-		}
-		die debug( 'circumfix', $parsed );
 	}
 }
 
@@ -1698,46 +2226,6 @@ class Value does Node {
 	}
 }
 
-# XXX This is a compound type
-class IdentifierArgs does Node {
-	method new( Mu $parsed ) {
-		return self.bless(
-			:content(
-				:identifier(
-					Identifier.new(
-						$parsed.hash.<identifier>
-					)
-				),
-				:args(
-					Args.new(
-						$parsed.hash.<args>
-					)
-				)
-			)
-		)
-	}
-}
-
-# XXX This is a compound type
-class LongNameArgs does Node {
-	method new( Mu $parsed ) {
-		return self.bless(
-			:content(
-				:longname(
-					LongName.new(
-						$parsed.hash.<longname>
-					)
-				),
-				:args(
-					Args.new(
-						$parsed.hash.<args>
-					)
-				)
-			)
-		)
-	}
-}
-
 class VariableDeclarator does Node {
 	method new( Mu $parsed ) {
 		if assert-hash-keys(
@@ -1794,6 +2282,551 @@ class TypeName does Node {
 			)
 		}
 		die debug( 'typename', $parsed );
+	}
+}
+
+class Blockoid does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< statementlist >] ) {
+			return self.bless(
+				:content(
+					:statementlist(
+						StatementList.new(
+							$parsed.hash.<statementlist>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'blockoid', $parsed );
+	}
+}
+
+class Initializer does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< sym EXPR >] ) {
+			return self.bless(
+				:content(
+					:sym(
+						Sym.new(
+							$parsed.hash.<sym>
+						)
+					),
+					:EXPR(
+						EXPR.new(
+							$parsed.hash.<EXPR>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'initializer', $parsed );
+	}
+}
+
+class Declarator does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< initializer
+						 variable_declarator >],
+					      [< trait >] ) {
+			return self.bless(
+				:content(
+					:initializer(
+						Initializer.new(
+							$parsed.hash.<initializer>
+						)
+					),
+					:variable_declarator(
+						VariableDeclarator.new(
+							$parsed.hash.<variable_declarator>
+						)
+					),
+					:trait()
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< variable_declarator >],
+					      [< trait >] ) {
+			return self.bless(
+				:content(
+					:variable_declarator(
+						VariableDeclarator.new(
+							$parsed.hash.<variable_declarator>
+						)
+					),
+					:trait()
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< regex_declarator >],
+					      [< trait >] ) {
+			return self.bless(
+				:content(
+					:regex_declarator(
+						RegexDeclarator.new(
+							$parsed.hash.<regex_declarator>
+						)
+					),
+					:trait()
+				)
+			)
+		}
+		die debug( 'declarator', $parsed );
+	}
+}
+
+class PackageDef does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< blockoid longname >],
+					      [< trait >] ) {
+			return self.bless(
+				:content(
+					:blockoid(
+						Blockoid.new(
+							$parsed.hash.<blockoid>
+						)
+					),
+					:longname(
+						LongName.new(
+							$parsed.hash.<longname>
+						)
+					),
+					:trait()
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< longname statementlist >],
+					      [< trait >] ) {
+			return self.bless(
+				:content(
+					:longname(
+						LongName.new(
+							$parsed.hash.<longname>
+						)
+					),
+					:statementlist(
+						StatementList.new(
+							$parsed.hash.<statementlist>
+						)
+					),
+					:trait()
+				)
+			)
+		}
+		die debug( 'package_def', $parsed );
+	}
+}
+
+# XXX This is a compound type
+class PrefixOPER does Node {
+	method new( Mu $parsed ) {
+		return self.bless(
+			:content(
+				:prefix(
+					Prefix.new(
+						$parsed.hash.<prefix>
+					)
+				),
+				:OPER(
+					OPER.new(
+						$parsed.hash.<OPER>
+					)
+				)
+			)
+		)
+	}
+}
+
+class PostConstraint does Node {
+	method new( Mu $parsed ) {
+		if $parsed.list {
+			my @child;
+			for $parsed.list {
+				if assert-hash-keys( $_, [< EXPR >] ) {
+					@child.push(
+						EXPR.new(
+							$_.hash.<EXPR>
+						)
+					);
+					next;
+				}
+				die debug( 'post_constraint', $_ );
+			}
+			return self.bless(
+				:child( @child )
+			)
+		}
+		die debug( 'post_constraint', $parsed );
+	}
+}
+
+class MultiDeclarator does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< declarator >] ) {
+			return self.bless(
+				:content(
+					:declarator(
+						Declarator.new(
+							$parsed.hash.<declarator>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'multi_declarator', $parsed );
+	}
+}
+
+class RoutineDef does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< blockoid deflongname >],
+					      [< trait >] ) {
+			return self.bless(
+				:content(
+					:blockoid(
+						Blockoid.new(
+							$parsed.hash.<blockoid>
+						)
+					),
+					:deflongname(
+						DefLongName.new(
+							$parsed.hash.<deflongname>
+						)
+					),
+					:trait()
+				)
+			)
+		}
+		die debug( 'routine_def', $parsed );
+	}
+}
+
+class DECL does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< initializer
+						 variable_declarator >],
+					      [< trait >] ) {
+			return self.bless(
+				:content(
+					:initializer(
+						Initializer.new(
+							$parsed.hash.<initializer>
+						)
+					),
+					:variable_declarator(
+						VariableDeclarator.new(
+							$parsed.hash.<variable_declarator>
+						)
+					),
+					:trait()
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< variable_declarator >],
+					      [< trait >] ) {
+			return self.bless(
+				:content(
+					:variable_declarator(
+						VariableDeclarator.new(
+							$parsed.hash.<variable_declarator>
+						)
+					),
+					:trait()
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< regex_declarator >],
+					      [< trait >] ) {
+			return self.bless(
+				:content(
+					:regex_declarator(
+						RegexDeclarator.new(
+							$parsed.hash.<regex_declarator>
+						)
+					),
+					:trait()
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< package_def sym >] ) {
+			return self.bless(
+				:content(
+					:package_def(
+						PackageDef.new(
+							$parsed.hash.<package_def>
+						)
+					),
+					:sym(
+						Sym.new(
+							$parsed.hash.<sym>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< declarator >] ) {
+			return self.bless(
+				:content(
+					:declarator(
+						Declarator.new(
+							$parsed.hash.<declarator>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'DECL', $parsed );
+	}
+}
+
+class Scoped is Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< declarator DECL >],
+					      [< typename >] ) {
+			return self.bless(
+				:content(
+					:declarator(
+						Declarator.new(
+							$parsed.hash.<declarator>
+						)
+					),
+					:DECL(
+						DECL.new(
+							$parsed.hash.<DECL>
+						)
+					),
+					:typename()
+				)
+			)
+		}
+		if assert-hash-keys( $parsed,
+					[< multi_declarator DECL typename >] ) {
+			return self.bless(
+				:content(
+					:multi_declarator(
+						MultiDeclarator.new(
+							$parsed.hash.<multi_declarator>
+						)
+					),
+					:DECL(
+						DECL.new(
+							$parsed.hash.<DECL>
+						)
+					),
+					:typename(
+						TypeName.new(
+							$parsed.hash.<typename>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< package_declarator DECL >],
+					      [< typename >] ) {
+			return self.bless(
+				:content(
+					:package_declarator(
+						PackageDeclarator.new(
+							$parsed.hash.<package_declarator>
+						)
+					),
+					:DECL(
+						DECL.new(
+							$parsed.hash.<DECL>
+						)
+					),
+					:typename()
+				)
+			)
+		}
+		die debug( 'scoped', $parsed );
+	}
+}
+
+class ScopeDeclarator does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< sym scoped >] ) {
+			return self.bless(
+				:content(
+					:sym(
+						Sym.new(
+							$parsed.hash.<sym>
+						)
+					),
+					:scoped(
+						Scoped.new(
+							$parsed.hash.<scoped>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'scope_declarator', $parsed );
+	}
+}
+
+class RoutineDeclarator does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< sym routine_def >] ) {
+			return self.bless(
+				:content(
+					:sym(
+						Sym.new(
+							$parsed.hash.<sym>
+						)
+					),
+					:routine_def(
+						RoutineDef.new(
+							$parsed.hash.<routine_def>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'routine_declarator', $parsed );
+	}
+}
+
+class Perl6::Tidy::Root does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< statementlist >] ) {
+			return self.bless(
+				:content(
+					:statementlist(
+						StatementList.new(
+							$parsed.hash.<statementlist>
+						)
+					)
+				)
+			);
+		}
+		die debug( 'root', $parsed );
+	}
+}
+
+class StatementList does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< statement >] ) {
+			return self.bless(
+				:content(
+					:statement(
+						Statement.new(
+							$parsed.hash.<statement>
+						)
+					)
+				)
+			);
+		}
+		if assert-hash-keys( $parsed, [], [< statement >] ) {
+			return self.bless
+		}
+		die debug( 'statementlist', $parsed );
+	}
+}
+
+class Statement does Node {
+	method new( Mu $parsed ) {
+		if $parsed.list {
+			my @child;
+			for $parsed.list {
+				if assert-hash-keys( $_, [< EXPR >] ) {
+					@child.push(
+						EXPR.new(
+							$_.hash.<EXPR>
+						)
+					);
+					next
+				}
+				if assert-hash-keys( $_, [< statement_control >] ) {
+					@child.push(
+						StatementControl.new(
+							$_.hash.<statement_control>
+						)
+					);
+					next
+				}
+				die debug( 'statement', $_ );
+			}
+			return self.bless(
+				:child( @child )
+			)
+		}
+		die debug( 'statement', $parsed );
+	}
+}
+
+class Op does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< infix OPER >] ) {
+			return self.bless(
+				:content(
+					:infix(
+						Infix.new(
+							$parsed.hash.<infix>
+						)
+					),
+					:OPER(
+						OPER.new(
+							$parsed.hash.<OPER>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'op', $parsed );
+	}
+}
+
+class MoreName does Node {
+	method new( Mu $parsed ) {
+		if $parsed.list {
+			my @child;
+			for $parsed.list {
+				if assert-hash-keys( $_, [< identifier >] ) {
+					@child.push(
+						Identifier.new(
+							$_.hash.<identifier>
+						)
+					);
+					next
+				}
+				if assert-hash-keys( $_, [< EXPR >] ) {
+					@child.push(
+						EXPR.new(
+							$_.hash.<EXPR>
+						)
+					);
+					next
+				}
+				die debug( 'morename', $_ );
+			}
+			return self.bless(
+				:child( @child )
+			)
+		}
+		die debug( 'morename', $parsed );
+	}
+}
+
+class PackageDeclarator does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< sym package_def >] ) {
+			return self.bless(
+				:content(
+					:sym(
+						Sym.new(
+							$parsed.hash.<sym>
+						)
+					),
+					:package_def(
+						PackageDef.new(
+							$parsed.hash.<package_def>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'package_declarator', $parsed );
 	}
 }
 
@@ -1885,7 +2918,7 @@ class Perl6::Tidy {
 			:actions( $a )
 		);
 
-		self.root( $parsed )
+		Perl6::Tidy::Root.new( $parsed )
 	}
 
 	method dump( Str $text ) {
@@ -1902,1041 +2935,5 @@ class Perl6::Tidy {
 		);
 
 		dump-parsed( $parsed ).join( "\n" )
-	}
-
-	class Root does Node {
-	}
-
-	method root( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< statementlist >] ) {
-			return Root.new(
-				:content(
-					:statementlist(
-						self.statementlist(
-							$parsed.hash.<statementlist>
-						)
-					)
-				)
-			);
-		}
-		die debug( 'root', $parsed );
-	}
-
-	class StatementList does Node {
-	}
-
-	method statementlist( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< statement >] ) {
-			return StatementList.new(
-				:content(
-					:statement(
-						self.statement(
-							$parsed.hash.<statement>
-						)
-					)
-				)
-			);
-		}
-		if assert-hash-keys( $parsed, [], [< statement >] ) {
-			return StatementList.new
-		}
-		die debug( 'statementlist', $parsed );
-	}
-
-	class Statement does Node {
-	}
-
-	method statement( Mu $parsed ) {
-		if $parsed.list {
-			my @child;
-			for $parsed.list {
-				if assert-hash-keys( $_, 'EXPR' ) {
-					@child.push(
-						self.EXPR(
-							$_.hash.<EXPR>
-						)
-					);
-					next
-				}
-				if assert-hash-keys( $_, [< statement_control >] ) {
-					@child.push(
-						StatementControl.new(
-							$_.hash.<statement_control>
-						)
-					);
-					next
-				}
-				die debug( 'statement', $_ );
-			}
-			return Statement.new(
-				:child( @child )
-			)
-		}
-		die debug( 'statement', $parsed );
-	}
-
-	class Infix does Node {
-	}
-
-	method infix( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< EXPR O >] ) {
-			return Infix.new(
-				:content(
-					:EXPR(
-						self.EXPR(
-							$parsed.hash.<EXPR>
-						)
-					),
-					:O(
-						O.new(
-							$parsed.hash.<O>
-						)
-					)
-				)
-			)
-		}
-		if assert-hash-keys( $parsed, [< infix OPER >] ) {
-			return Infix.new(
-				:content(
-					:infix(
-						self.infix(
-							$parsed.hash.<infix>
-						)
-					),
-					:OPER(
-						self.OPER(
-							$parsed.hash.<OPER>
-						)
-					)
-				)
-			)
-		}
-		if assert-hash-keys( $parsed, [< sym O >] ) {
-			return Infix.new(
-				:content(
-					:sym(
-						Sym.new(
-							$parsed.hash.<sym>
-						)
-					),
-					:O(
-						O.new(
-							$parsed.hash.<O>
-						)
-					)
-				)
-			)
-		}
-		die debug( 'infix', $parsed );
-	}
-
-	class OPER does Node {
-	}
-
-	method OPER( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< sym dottyop O >] ) {
-			return OPER.new(
-				:content(
-					:sym(
-						Sym.new(
-							$parsed.hash.<sym>
-						)
-					),
-					:dottyop(
-						DottyOp.new(
-							$parsed.hash.<dottyop>
-						)
-					),
-					:O(
-						O.new(
-							$parsed.hash.<O>
-						)
-					)
-				)
-			)
-		}
-		if assert-hash-keys(
-			$parsed,
-			[< sym infixish O >] ) {
-			return OPER.new(
-				:content(
-					:sym(
-						Sym.new(
-							$parsed.hash.<sym>
-						)
-					),
-					:infixish(
-						self.infix(
-							$parsed.hash.<infixish>
-						)
-					),
-					:O(
-						O.new(
-							$parsed.hash.<O>
-						)
-					)
-				)
-			)
-		}
-		if assert-hash-keys( $parsed, [< sym O >] ) {
-			return OPER.new(
-				:content(
-					:sym(
-						Sym.new(
-							$parsed.hash.<sym>
-						)
-					),
-					:O(
-						O.new(
-							$parsed.hash.<O>
-						)
-					)
-				)
-			)
-		}
-		if assert-hash-keys( $parsed, [< EXPR O >] ) {
-			return OPER.new(
-				:content(
-					:EXPR(
-						self.EXPR(
-							$parsed.hash.<EXPR>
-						)
-					),
-					:O(
-						O.new(
-							$parsed.hash.<O>
-						)
-					)
-				)
-			)
-		}
-		die debug( 'OPER', $parsed );
-	}
-
-	class Op does Node {
-	}
-
-	method op( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< infix OPER >] ) {
-			return self.bless(
-				:content(
-					:infix(
-						self.infix(
-							$parsed.hash.<infix>
-						)
-					),
-					:OPER(
-						self.OPER(
-							$parsed.hash.<OPER>
-						)
-					)
-				)
-			)
-		}
-		die debug( 'op', $parsed );
-	}
-
-	class MoreName does Node {
-	}
-
-	method morename( Mu $parsed ) {
-		if $parsed.list {
-			my @child;
-			for $parsed.list {
-				if assert-hash-keys( $_, [< identifier >] ) {
-					@child.push(
-						Identifier.new(
-							$_.hash.<identifier>
-						)
-					);
-					next
-				}
-				if assert-hash-keys( $_, [< EXPR >] ) {
-					@child.push(
-						self.EXPR(
-							$_.hash.<EXPR>
-						)
-					);
-					next
-				}
-				die debug( 'morename', $_ );
-			}
-			return MoreName.new(
-				:child( @child )
-			)
-		}
-		die debug( 'morename', $parsed );
-	}
-
-	class RoutineDeclarator does Node {
-	}
-
-	method routine_declarator( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< sym routine_def >] ) {
-			return RoutineDeclarator.new(
-				:content(
-					:sym(
-						Sym.new(
-							$parsed.hash.<sym>
-						)
-					),
-					:routine_def(
-						self.routine_def(
-							$parsed.hash.<routine_def>
-						)
-					)
-				)
-			)
-		}
-		die debug( 'routine_declarator', $parsed );
-	}
-
-	class PackageDeclarator does Node {
-	}
-
-	method package_declarator( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< sym package_def >] ) {
-			return PackageDeclarator.new(
-				:content(
-					:sym(
-						Sym.new(
-							$parsed.hash.<sym>
-						)
-					),
-					:package_def(
-						self.package_def(
-							$parsed.hash.<package_def>
-						)
-					)
-				)
-			)
-		}
-		die debug( 'package_declarator', $parsed );
-	}
-
-	class RoutineDef does Node {
-	}
-
-	method routine_def( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< blockoid deflongname >],
-					      [< trait >] ) {
-			return RoutineDef.new(
-				:content(
-					:blockoid(
-						self.blockoid(
-							$parsed.hash.<blockoid>
-						)
-					),
-					:deflongname(
-						DefLongName.new(
-							$parsed.hash.<deflongname>
-						)
-					),
-					:trait()
-				)
-			)
-		}
-		die debug( 'routine_def', $parsed );
-	}
-
-	class PackageDef does Node {
-	}
-
-	method package_def( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< blockoid longname >],
-					      [< trait >] ) {
-			return PackageDef.new(
-				:content(
-					:blockoid(
-						self.blockoid(
-							$parsed.hash.<blockoid>
-						)
-					),
-					:longname(
-						LongName.new(
-							$parsed.hash.<longname>
-						)
-					),
-					:trait()
-				)
-			)
-		}
-		if assert-hash-keys( $parsed, [< longname statementlist >],
-					      [< trait >] ) {
-			return PackageDef.new(
-				:content(
-					:longname(
-						LongName.new(
-							$parsed.hash.<longname>
-						)
-					),
-					:statementlist(
-						self.statementlist(
-							$parsed.hash.<statementlist>
-						)
-					),
-					:trait()
-				)
-			)
-		}
-		die debug( 'package_def', $parsed );
-	}
-
-	class Blockoid does Node {
-	}
-
-	method blockoid( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< statementlist >] ) {
-			return Blockoid.new(
-				:content(
-					:statementlist(
-						self.statementlist(
-							$parsed.hash.<statementlist>
-						)
-					)
-				)
-			)
-		}
-		die debug( 'blockoid', $parsed );
-	}
-
-	# XXX This is a compound type
-	class PrefixOPER does Node {
-	}
-
-	method prefix_OPER( Mu $parsed ) {
-		return PrefixOPER.new(
-			:content(
-				:prefix(
-					Prefix.new(
-						$parsed.hash.<prefix>
-					)
-				),
-				:OPER(
-					self.OPER(
-						$parsed.hash.<OPER>
-					)
-				)
-			)
-		)
-	}
-
-	class EXPR does Node {
-	}
-
-	method EXPR( Mu $parsed ) {
-		if $parsed.list {
-			my @child;
-			for $parsed.list {
-				if assert-hash-keys( $_, [< prefix OPER >],
-							 [< prefix_postfix_meta_operator >] ) {
-					@child.push(
-						self.prefix_OPER( $_ )
-					);
-					next;
-				}
-				if assert-hash-keys( $_, [< identifier args >] ) {
-					@child.push(
-						IdentifierArgs.new( $_ )
-					);
-					next;
-				}
-				if assert-hash-keys( $_, [< longname args >] ) {
-					@child.push(
-						LongNameArgs.new( $_ )
-					);
-					next;
-				}
-				if assert-hash-keys( $_, [< longname >] ) {
-					@child.push(
-						LongName.new(
-							$_.hash.<longname>
-						)
-					);
-					next;
-				}
-				if assert-hash-keys( $_, [< value >] ) {
-					@child.push(
-						Value.new(
-							$_.hash.<value>
-						)
-					);
-					next;
-				}
-				if assert-hash-keys( $_, [< variable >] ) {
-					@child.push(
-						Variable.new(
-							$_.hash.<variable>
-						)
-					);
-					next;
-				}
-				die dump( $_ );
-			}
-			if $parsed.hash {
-				if assert-hash-keys(
-					$parsed,
-					[< OPER dotty >],
-					[< postfix_prefix_meta_operator >] ) {
-					return EXPR.new(
-						:content(
-							:OPER(
-								self.OPER(
-									$parsed.hash.<OPER>
-								)
-							),
-							:dotty(
-								Dotty.new(
-									$parsed.hash.<dotty>
-								)
-							)
-						),
-						:postfix_prefix_meta_operator(),
-						:child( @child )
-					)
-				}
-				if assert-hash-keys(
-					$parsed,
-					[< postfix OPER >],
-					[< postfix_prefix_meta_operator >] ) {
-					return EXPR.new(
-						:content(
-							:postfix(
-								Postfix.new(
-									$parsed.hash.<postfix>
-								)
-							),
-							:OPER(
-								self.OPER(
-									$parsed.hash.<OPER>
-								)
-							),
-							:postfix_prefix_meta_operator()
-						),
-						:child( @child )
-					)
-				}
-				if assert-hash-keys(
-					$parsed,
-					[< infix OPER >],
-					[< prefix_postfix_meta_operator >] ) {
-					return EXPR.new(
-						:content(
-							:infix(
-								self.infix(
-									$parsed.hash.<infix>
-								)
-							),
-							:OPER(
-								self.OPER(
-									$parsed.hash.<OPER>
-								)
-							),
-							:infix_postfix_meta_operator()
-						),
-						:child( @child )
-					)
-				}
-				if assert-hash-keys(
-					$parsed,
-					[< prefix OPER >],
-					[< prefix_postfix_meta_operator >] ) {
-					return EXPR.new(
-						:content(
-							:prefix(
-								Prefix.new(
-									$parsed.hash.<prefix>
-								)
-							),
-							:OPER(
-								self.OPER(
-									$parsed.hash.<OPER>
-								)
-							),
-							:prefix_postfix_meta_operator()
-						),
-						:child( @child )
-					)
-				}
-				if assert-hash-keys(
-					$parsed,
-					[< OPER >],
-					[< infix_prefix_meta_operator >] ) {
-					return EXPR.new(
-						:content(
-							:OPER(
-								self.OPER(
-									$parsed.hash.<OPER>
-								)
-							),
-							:infix_prefix_meta_operator()
-						),
-						:child( @child )
-					)
-				}
-				if assert-hash-keys( $parsed, [< longname >] ) {
-					return EXPR.new(
-						:content(
-							:longname(
-								LongName.new(
-									$parsed.hash.<longname>
-								)
-							),
-						),
-						:child( @child )
-					)
-				}
-				die debug( 'EXPR', $parsed )
-			}
-			else {
-				return EXPR.new(
-					:child( @child )
-				)
-			}
-		}
-		if assert-hash-keys( $parsed, [< args op >] ) {
-			return EXPR.new(
-				:content(
-					:args(
-						Args.new(
-							$parsed.hash.<args>
-						)
-					),
-					:op(
-						self.op(
-							$parsed.hash.<op>
-						)
-					)
-				)
-			)
-		}
-		if assert-hash-keys( $parsed, [< sym args >] ) {
-			return EXPR.new(
-				:child( 
-					Sym.new(
-						$parsed.hash.<sym>
-					)
-				),
-				:content(
-					:args(
-						Args.new(
-							$parsed.hash.<args>
-						)
-					)
-				)
-			)
-		}
-		if assert-hash-keys( $parsed, [< identifier args >] ) {
-			return EXPR.new(
-				:content(
-					Identifier.new(
-						$parsed.hash.<identifier>
-					),
-					:args(
-						Args.new(
-							$parsed.hash.<args>
-						)
-					)
-				)
-			)
-		}
-		if assert-hash-keys( $parsed, [< longname args >] ) {
-			return EXPR.new(
-				:content(
-					:longname(
-						LongName.new(
-							$parsed.hash.<longname>
-						)
-					),
-					:args(
-						Args.new(
-							$parsed.hash.<args>
-						)
-					)
-				)
-			)
-		}
-		if assert-hash-keys( $parsed, [< longname >] ) {
-			return EXPR.new(
-				:child( 
-					LongName.new(
-						$parsed.hash.<longname>
-					)
-				)
-			)
-		}
-		if assert-hash-keys( $parsed, [< value >] ) {
-			return EXPR.new(
-				:content(
-					:value(
-						Value.new(
-							$parsed.hash.<value>
-						)
-					)
-				)
-			)
-		}
-		if assert-hash-keys( $parsed, [< variable >] ) {
-			return EXPR.new(
-				:content(
-					:variable(
-						Variable.new(
-							$parsed.hash.<variable>
-						)
-					)
-				)
-			)
-		}
-		if assert-hash-keys( $parsed, [< circumfix >] ) {
-			return EXPR.new(
-				:content(
-					:circumfix(
-						Circumfix.new(
-							$parsed.hash.<circumfix>
-						)
-					)
-				)
-			)
-		}
-		if assert-hash-keys( $parsed, [< colonpair >] ) {
-			return EXPR.new(
-				:content(
-					:colonpair(
-						ColonPair.new(
-							$parsed.hash.<colonpair>
-						)
-					)
-				)
-			)
-		}
-		if assert-hash-keys( $parsed, [< scope_declarator >] ) {
-			return EXPR.new(
-				:content(
-					:scope_declarator(
-						self.scope_declarator(
-							$parsed.hash.<scope_declarator>
-						)
-					)
-				)
-			)
-		}
-		if assert-hash-keys( $parsed, [< routine_declarator >] ) {
-			return EXPR.new(
-				:content(
-					:routine_declarator(
-						self.routine_declarator(
-							$parsed.hash.<routine_declarator>
-						)
-					)
-				)
-			)
-		}
-		if assert-hash-keys( $parsed, [< package_declarator >] ) {
-			return EXPR.new(
-				:content(
-					:package_declarator(
-						self.package_declarator(
-							$parsed.hash.<package_declarator>
-						)
-					)
-				)
-			)
-		}
-		if assert-hash-keys( $parsed, [< regex_declarator >] ) {
-			return EXPR.new(
-				:content(
-					:regex_declarator(
-						RegexDeclarator.new(
-							$parsed.hash.<regex_declarator>
-						)
-					)
-				)
-			)
-		}
-		die debug( 'EXPR', $parsed );
-	}
-
-	class PostConstraint does Node {
-	}
-
-	method post_constraint( Mu $parsed ) {
-		if $parsed.list {
-			my @child;
-			for $parsed.list {
-				if assert-hash-keys( $_, [< EXPR >] ) {
-					@child.push(
-						self.EXPR(
-							$_.hash.<EXPR>
-						)
-					);
-					next;
-				}
-				die debug( 'post_constraint', $_ );
-			}
-			return PostConstraint.new(
-				:child( @child )
-			)
-		}
-		die debug( 'post_constraint', $parsed );
-	}
-
-	class MultiDeclarator does Node {
-	}
-
-	method multi_declarator( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< declarator >] ) {
-			return MultiDeclarator.new(
-				:content(
-					:declarator(
-						self.declarator(
-							$parsed.hash.<declarator>
-						)
-					)
-				)
-			)
-		}
-		die debug( 'multi_declarator', $parsed );
-	}
-
-	class Initializer does Node {
-	}
-
-	method initializer( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< sym EXPR >] ) {
-			return Initializer.new(
-				:content(
-					:sym(
-						Sym.new(
-							$parsed.hash.<sym>
-						)
-					),
-					:EXPR(
-						self.EXPR(
-							$parsed.hash.<EXPR>
-						)
-					)
-				)
-			)
-		}
-		die debug( 'initializer', $parsed );
-	}
-
-	class Declarator does Node {
-	}
-
-	method declarator( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< initializer
-						 variable_declarator >],
-					      [< trait >] ) {
-			return Declarator.new(
-				:content(
-					:initializer(
-						self.initializer(
-							$parsed.hash.<initializer>
-						)
-					),
-					:variable_declarator(
-						VariableDeclarator.new(
-							$parsed.hash.<variable_declarator>
-						)
-					),
-					:trait()
-				)
-			)
-		}
-		if assert-hash-keys( $parsed, [< variable_declarator >],
-					      [< trait >] ) {
-			return Declarator.new(
-				:content(
-					:variable_declarator(
-						VariableDeclarator.new(
-							$parsed.hash.<variable_declarator>
-						)
-					),
-					:trait()
-				)
-			)
-		}
-		if assert-hash-keys( $parsed, [< regex_declarator >],
-					      [< trait >] ) {
-			return Declarator.new(
-				:content(
-					:regex_declarator(
-						RegexDeclarator.new(
-							$parsed.hash.<regex_declarator>
-						)
-					),
-					:trait()
-				)
-			)
-		}
-		die debug( 'declarator', $parsed );
-	}
-
-	class DECL does Node {
-	}
-
-	method DECL( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< initializer
-						 variable_declarator >],
-					      [< trait >] ) {
-			return Declarator.new(
-				:content(
-					:initializer(
-						self.initializer(
-							$parsed.hash.<initializer>
-						)
-					),
-					:variable_declarator(
-						VariableDeclarator.new(
-							$parsed.hash.<variable_declarator>
-						)
-					),
-					:trait()
-				)
-			)
-		}
-		if assert-hash-keys( $parsed, [< variable_declarator >],
-					      [< trait >] ) {
-			return DECL.new(
-				:content(
-					:variable_declarator(
-						VariableDeclarator.new(
-							$parsed.hash.<variable_declarator>
-						)
-					),
-					:trait()
-				)
-			)
-		}
-		if assert-hash-keys( $parsed, [< regex_declarator >],
-					      [< trait >] ) {
-			return DECL.new(
-				:content(
-					:regex_declarator(
-						RegexDeclarator.new(
-							$parsed.hash.<regex_declarator>
-						)
-					),
-					:trait()
-				)
-			)
-		}
-		if assert-hash-keys( $parsed, [< package_def sym >] ) {
-			return DECL.new(
-				:content(
-					:package_def(
-						self.package_def(
-							$parsed.hash.<package_def>
-						)
-					),
-					:sym(
-						Sym.new(
-							$parsed.hash.<sym>
-						)
-					)
-				)
-			)
-		}
-		if assert-hash-keys( $parsed, [< declarator >] ) {
-			return DECL.new(
-				:content(
-					:declarator(
-						self.declarator(
-							$parsed.hash.<declarator>
-						)
-					)
-				)
-			)
-		}
-		die debug( 'DECL', $parsed );
-	}
-
-	class Scoped is Node {
-	}
-
-	method scoped( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< declarator DECL >],
-					      [< typename >] ) {
-			return Scoped.new(
-				:content(
-					:declarator(
-						self.declarator(
-							$parsed.hash.<declarator>
-						)
-					),
-					:DECL(
-						self.DECL(
-							$parsed.hash.<DECL>
-						)
-					),
-					:typename()
-				)
-			)
-		}
-		if assert-hash-keys( $parsed,
-					[< multi_declarator DECL typename >] ) {
-			return Scoped.new(
-				:content(
-					:multi_declarator(
-						self.multi_declarator(
-							$parsed.hash.<multi_declarator>
-						)
-					),
-					:DECL(
-						self.DECL(
-							$parsed.hash.<DECL>
-						)
-					),
-					:typename(
-						TypeName.new(
-							$parsed.hash.<typename>
-						)
-					)
-				)
-			)
-		}
-		if assert-hash-keys( $parsed, [< package_declarator DECL >],
- 					      [< typename >] ) {
-			return Scoped.new(
-				:content(
-					:package_declarator(
-						self.package_declarator(
-							$parsed.hash.<package_declarator>
-						)
-					),
-					:DECL(
-						self.DECL(
-							$parsed.hash.<DECL>
-						)
-					),
-					:typename()
-				)
-			)
-		}
-		die debug( 'scoped', $parsed );
-	}
-
-	class ScopeDeclarator does Node {
-	}
-
-	method scope_declarator( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< sym scoped >] ) {
-			return ScopeDeclarator.new(
-				:content(
-					:sym(
-						Sym.new(
-							$parsed.hash.<sym>
-						)
-					),
-					:scoped(
-						self.scoped(
-							$parsed.hash.<scoped>
-						)
-					)
-				)
-			)
-		}
-		die debug( 'scope_declarator', $parsed );
 	}
 }
