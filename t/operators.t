@@ -905,7 +905,7 @@ subtest {
 }, 'loose unary';
 
 subtest {
-	plan 1;
+	plan 2;
 
 	subtest {
 		plan 2;
@@ -915,13 +915,13 @@ subtest {
 		is $parsed.child.elems, 1;
 	}, Q[,];
 
-#	subtest {
-#		plan 2;
-#
-#		my $parsed = $pt.tidy( Q{'a': 2} );
-#		isa-ok $parsed, 'Perl6::Tidy::Root';
-#		is $parsed.child.elems, 1;
-#	}, Q[:];
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{substr('a': 2)} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q[:];
 }, 'comma operator';
 
 subtest {
