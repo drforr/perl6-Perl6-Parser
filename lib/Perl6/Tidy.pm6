@@ -2304,6 +2304,22 @@ class Perl6::Tidy {
 				)
 			)
 		}
+		if assert-hash-keys( $parsed, [< sym args >] ) {
+			return EXPR.new(
+				:child( 
+					Sym.new(
+						$parsed.hash.<sym>
+					)
+				),
+				:content(
+					:args(
+						Args.new(
+							$parsed.hash.<args>
+						)
+					)
+				)
+			)
+		}
 		if assert-hash-keys( $parsed, [< longname args >] ) {
 			return EXPR.new(
 				:child( 

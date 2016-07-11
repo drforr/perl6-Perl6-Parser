@@ -4,7 +4,7 @@ use nqp;
 use Test;
 use Perl6::Tidy;
 
-plan 13;
+plan 24;
 
 my $pt = Perl6::Tidy.new;
 
@@ -925,7 +925,7 @@ subtest {
 }, 'comma operator';
 
 subtest {
-	plan 1;
+	plan 6;
 
 	subtest {
 		plan 2;
@@ -951,33 +951,33 @@ subtest {
 		is $parsed.child.elems, 1;
 	}, Q[X];
 
-#	subtest {
-#		plan 2;
-#
-#		my $parsed = $pt.tidy( Q{my @a; my @b; @a X~ @b} );
-#		isa-ok $parsed, 'Perl6::Tidy::Root';
-#		is $parsed.child.elems, 1;
-#	}, Q[X~];
+	subtest {
+		plan 2;
 
-#	subtest {
-#		plan 2;
-#
-#		my $parsed = $pt.tidy( Q{my @a; my @b; @a X* @b} );
-#		isa-ok $parsed, 'Perl6::Tidy::Root';
-#		is $parsed.child.elems, 1;
-#	}, Q[X*];
+		my $parsed = $pt.tidy( Q{my @a; my @b; @a X~ @b} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q[X~];
 
-#	subtest {
-#		plan 2;
-#
-#		my $parsed = $pt.tidy( Q{my @a; my @b; @a Xeqv @b} );
-#		isa-ok $parsed, 'Perl6::Tidy::Root';
-#		is $parsed.child.elems, 1;
-#	}, Q[Xeqv];
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{my @a; my @b; @a X* @b} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q[X*];
+
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{my @a; my @b; @a Xeqv @b} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q[Xeqv];
 }, 'list infix';
 
 subtest {
-	plan 1;
+	plan 11;
 
 	subtest {
 		plan 2;
@@ -1027,21 +1027,21 @@ subtest {
 		is $parsed.child.elems, 1;
 	}, Q[substr];
 
-#	subtest {
-#		plan 2;
-#
-#		my $parsed = $pt.tidy( Q{my @a; ... @a} );
-#		isa-ok $parsed, 'Perl6::Tidy::Root';
-#		is $parsed.child.elems, 1;
-#	}, Q[...];
+	subtest {
+		plan 2;
 
-#	subtest {
-#		plan 2;
-#
-#		my $parsed = $pt.tidy( Q{my @a; [+] @a} );
-#		isa-ok $parsed, 'Perl6::Tidy::Root';
-#		is $parsed.child.elems, 1;
-#	}, Q[[+]];
+		my $parsed = $pt.tidy( Q{my @a; ... @a} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q[...];
+
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{my @a; [+] @a} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q[[+]];
 
 	subtest {
 		plan 2;
