@@ -1996,6 +1996,46 @@ class Perl6::Tidy {
 		}
 	}
 
+	# XXX This is a compound type
+	class IdentifierArgs does Node {
+		method new( Mu $parsed ) {
+			return self.bless(
+				:content(
+					:identifier(
+						Identifier.new(
+							$parsed.hash.<identifier>
+						)
+					),
+					:args(
+						Args.new(
+							$parsed.hash.<args>
+						)
+					)
+				)
+			)
+		}
+	}
+
+	# XXX This is a compound type
+	class LongNameArgs does Node {
+		method new( Mu $parsed ) {
+			return self.bless(
+				:content(
+					:longname(
+						LongName.new(
+							$parsed.hash.<longname>
+						)
+					),
+					:args(
+						Args.new(
+							$parsed.hash.<args>
+						)
+					)
+				)
+			)
+		}
+	}
+
 	class EXPR does Node {
 	}
 
@@ -2003,6 +2043,18 @@ class Perl6::Tidy {
 		if $parsed.list {
 			my @child;
 			for $parsed.list {
+				if assert-hash-keys( $_, [< identifier args >] ) {
+					@child.push(
+						IdentifierArgs.new( $_ )
+					);
+					next;
+				}
+				if assert-hash-keys( $_, [< longname args >] ) {
+					@child.push(
+						LongNameArgs.new( $_ )
+					);
+					next;
+				}
 				if assert-hash-keys( $_, [< longname >] ) {
 					@child.push(
 						LongName.new(
