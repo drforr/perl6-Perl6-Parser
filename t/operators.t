@@ -207,14 +207,14 @@ subtest {
 		is $parsed.child.elems, 1;
 	}, Q[|];
 
-#	subtest {
-#		plan 2;
-#
-#		my $parsed = $pt.tidy( Q{my $x; ||$x} );
-#		isa-ok $parsed, 'Perl6::Tidy::Root';
-#		is $parsed.child.elems, 1;
-#	}, Q[||];
-#
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{my $x; ||$x} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q[||];
+
 	subtest {
 		plan 2;
 
@@ -799,13 +799,13 @@ subtest {
 subtest {
 	plan 1;
 
-#	subtest {
-#		plan 2;
-#
-#		my $parsed = $pt.tidy( Q{3 ?? 2 !! 1} );
-#		isa-ok $parsed, 'Perl6::Tidy::Root';
-#		is $parsed.child.elems, 1;
-#	}, Q[??];
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{3 ?? 2 !! 1} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q[??];
 
 	subtest {
 		plan 2;

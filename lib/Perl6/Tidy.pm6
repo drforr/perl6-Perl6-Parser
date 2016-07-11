@@ -759,25 +759,58 @@ class Perl6::Tidy {
 	}
 
 	class Infix does Node {
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< sym O >] ) {
-				return self.bless(
-					:content(
-						:sym(
-							Sym.new(
-								$parsed.hash.<sym>
-							)
-						),
-						:O(
-							O.new(
-								$parsed.hash.<O>
-							)
+	}
+
+	method infix( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< EXPR O >] ) {
+			return Infix.new(
+				:content(
+					:EXPR(
+						self.EXPR(
+							$parsed.hash.<EXPR>
+						)
+					),
+					:O(
+						O.new(
+							$parsed.hash.<O>
 						)
 					)
 				)
-			}
-			die debug( 'infix', $parsed );
+			)
 		}
+		if assert-hash-keys( $parsed, [< infix OPER >] ) {
+			return Infix.new(
+				:content(
+					:infix(
+						self.infix(
+							$parsed.hash.<infix>
+						)
+					),
+					:OPER(
+						self.OPER(
+							$parsed.hash.<OPER>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< sym O >] ) {
+			return Infix.new(
+				:content(
+					:sym(
+						Sym.new(
+							$parsed.hash.<sym>
+						)
+					),
+					:O(
+						O.new(
+							$parsed.hash.<O>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'infix', $parsed );
 	}
 
 	class Args does Node {
@@ -924,91 +957,109 @@ class Perl6::Tidy {
 	class InfixIsh {...}
 
 	class OPER does Node {
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< sym dottyop O >] ) {
-				return self.bless(
-					:content(
-						:sym(
-							Sym.new(
-								$parsed.hash.<sym>
-							)
-						),
-						:dottyop(
-							DottyOp.new(
-								$parsed.hash.<dottyop>
-							)
-						),
-						:O(
-							O.new(
-								$parsed.hash.<O>
-							)
+	}
+
+	method OPER( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< sym dottyop O >] ) {
+			return OPER.new(
+				:content(
+					:sym(
+						Sym.new(
+							$parsed.hash.<sym>
+						)
+					),
+					:dottyop(
+						DottyOp.new(
+							$parsed.hash.<dottyop>
+						)
+					),
+					:O(
+						O.new(
+							$parsed.hash.<O>
 						)
 					)
 				)
-			}
-			if assert-hash-keys(
-				$parsed,
-				[< sym infixish O >] ) {
-				return self.bless(
-					:content(
-						:sym(
-							Sym.new(
-								$parsed.hash.<sym>
-							)
-						),
-						:infixish(
-							InfixIsh.new(
-								$parsed.hash.<infixish>
-							)
-						),
-						:O(
-							O.new(
-								$parsed.hash.<O>
-							)
-						)
-					)
-				)
-			}
-			if assert-hash-keys( $parsed, [< sym O >] ) {
-				return self.bless(
-					:content(
-						:sym(
-							Sym.new(
-								$parsed.hash.<sym>
-							)
-						),
-						:O(
-							O.new(
-								$parsed.hash.<O>
-							)
-						)
-					)
-				)
-			}
-			die debug( 'OPER', $parsed );
+			)
 		}
+		if assert-hash-keys(
+			$parsed,
+			[< sym infixish O >] ) {
+			return OPER.new(
+				:content(
+					:sym(
+						Sym.new(
+							$parsed.hash.<sym>
+						)
+					),
+					:infixish(
+						self.infix(
+							$parsed.hash.<infixish>
+						)
+					),
+					:O(
+						O.new(
+							$parsed.hash.<O>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< sym O >] ) {
+			return OPER.new(
+				:content(
+					:sym(
+						Sym.new(
+							$parsed.hash.<sym>
+						)
+					),
+					:O(
+						O.new(
+							$parsed.hash.<O>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< EXPR O >] ) {
+			return OPER.new(
+				:content(
+					:EXPR(
+						self.EXPR(
+							$parsed.hash.<EXPR>
+						)
+					),
+					:O(
+						O.new(
+							$parsed.hash.<O>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'OPER', $parsed );
 	}
 
 	class Op does Node {
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< infix OPER >] ) {
-				return self.bless(
-					:content(
-						:infix(
-							Infix.new(
-								$parsed.hash.<infix>
-							)
-						),
-						:OPER(
-							OPER.new(
-								$parsed.hash.<OPER>
-							)
+	}
+
+	method op( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< infix OPER >] ) {
+			return self.bless(
+				:content(
+					:infix(
+						self.infix(
+							$parsed.hash.<infix>
+						)
+					),
+					:OPER(
+						self.OPER(
+							$parsed.hash.<OPER>
 						)
 					)
 				)
-			}
-			die debug( 'op', $parsed );
+			)
 		}
+		die debug( 'op', $parsed );
 	}
 
 	class InfixIsh does Node {
@@ -1019,12 +1070,12 @@ class Perl6::Tidy {
 				return self.bless(
 					:content(
 						:infix(
-							Infix.new(
+							self.infix(
 								$parsed.hash.<infix>
 							)
 						),
 						:OPER(
-							OPER.new(
+							self.OPER(
 								$parsed.hash.<OPER>
 							)
 						)
@@ -2122,6 +2173,27 @@ class Perl6::Tidy {
 		}
 	}
 
+	# XXX This is a compound type
+	class PrefixOPER does Node {
+	}
+
+	method prefix_OPER( Mu $parsed ) {
+		return PrefixOPER.new(
+			:content(
+				:prefix(
+					Prefix.new(
+						$parsed.hash.<prefix>
+					)
+				),
+				:OPER(
+					self.OPER(
+						$parsed.hash.<OPER>
+					)
+				)
+			)
+		)
+	}
+
 	class EXPR does Node {
 	}
 
@@ -2129,6 +2201,13 @@ class Perl6::Tidy {
 		if $parsed.list {
 			my @child;
 			for $parsed.list {
+				if assert-hash-keys( $_, [< prefix OPER >],
+							 [< prefix_postfix_meta_operator >] ) {
+					@child.push(
+						self.prefix_OPER( $_ )
+					);
+					next;
+				}
 				if assert-hash-keys( $_, [< identifier args >] ) {
 					@child.push(
 						IdentifierArgs.new( $_ )
@@ -2175,7 +2254,7 @@ class Perl6::Tidy {
 					return EXPR.new(
 						:content(
 							:OPER(
-								OPER.new(
+								self.OPER(
 									$parsed.hash.<OPER>
 								)
 							),
@@ -2201,7 +2280,7 @@ class Perl6::Tidy {
 								)
 							),
 							:OPER(
-								OPER.new(
+								self.OPER(
 									$parsed.hash.<OPER>
 								)
 							),
@@ -2217,12 +2296,12 @@ class Perl6::Tidy {
 					return EXPR.new(
 						:content(
 							:infix(
-								Infix.new(
+								self.infix(
 									$parsed.hash.<infix>
 								)
 							),
 							:OPER(
-								OPER.new(
+								self.OPER(
 									$parsed.hash.<OPER>
 								)
 							),
@@ -2243,7 +2322,7 @@ class Perl6::Tidy {
 								)
 							),
 							:OPER(
-								OPER.new(
+								self.OPER(
 									$parsed.hash.<OPER>
 								)
 							),
@@ -2259,7 +2338,7 @@ class Perl6::Tidy {
 					return EXPR.new(
 						:content(
 							:OPER(
-								OPER.new(
+								self.OPER(
 									$parsed.hash.<OPER>
 								)
 							),
@@ -2297,7 +2376,7 @@ class Perl6::Tidy {
 						)
 					),
 					:op(
-						Op.new(
+						self.op(
 							$parsed.hash.<op>
 						)
 					)
