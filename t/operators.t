@@ -149,7 +149,7 @@ subtest {
 }, 'exponentiation';
 
 subtest {
-	plan 1;
+	plan 12;
 
 	subtest {
 		plan 2;
@@ -601,7 +601,7 @@ subtest {
 }, 'structural infix';
 
 subtest {
-	plan 1;
+	plan 17;
 
 	subtest {
 		plan 2;
@@ -797,7 +797,7 @@ subtest {
 }, 'tight or';
 
 subtest {
-	plan 1;
+	plan 3;
 
 	subtest {
 		plan 2;
@@ -1070,7 +1070,7 @@ subtest {
 }, 'list prefix';
 
 subtest {
-	plan 1;
+	plan 2;
 
 	subtest {
 		plan 2;
