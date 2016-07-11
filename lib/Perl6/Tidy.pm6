@@ -989,6 +989,28 @@ class Perl6::Tidy {
 		}
 	}
 
+	class Op does Node {
+		method new( Mu $parsed ) {
+			if assert-hash-keys( $parsed, [< infix OPER >] ) {
+				return self.bless(
+					:content(
+						:infix(
+							Infix.new(
+								$parsed.hash.<infix>
+							)
+						),
+						:OPER(
+							OPER.new(
+								$parsed.hash.<OPER>
+							)
+						)
+					)
+				)
+			}
+			die debug( 'op', $parsed );
+		}
+	}
+
 	class InfixIsh does Node {
 		method new( Mu $parsed ) {
 			if assert-hash-keys(
@@ -2265,6 +2287,22 @@ class Perl6::Tidy {
 					:child( @child )
 				)
 			}
+		}
+		if assert-hash-keys( $parsed, [< args op >] ) {
+			return EXPR.new(
+				:content(
+					:args(
+						Args.new(
+							$parsed.hash.<args>
+						)
+					),
+					:op(
+						Op.new(
+							$parsed.hash.<op>
+						)
+					)
+				)
+			)
 		}
 		if assert-hash-keys( $parsed, [< longname args >] ) {
 			return EXPR.new(
