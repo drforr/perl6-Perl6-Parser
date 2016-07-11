@@ -46,6 +46,220 @@ sub dump( Mu $parsed ) {
 	dump-parsed( $parsed ).join( "\n" )
 }
 
+sub debug( Str $name, Mu $parsed ) {
+	my @lines;
+	my @types;
+
+	if $parsed.list {
+		@types.push( 'list' )
+	}
+	if $parsed.hash {
+		@types.push( 'hash' )
+	}
+	@types.push( 'Int'  ) if $parsed.Int;
+	@types.push( 'Str'  ) if $parsed.Str;
+	@types.push( 'Bool' ) if $parsed.Bool;
+
+	die "$name: Unknown type" unless @types;
+
+	@lines.push( "$name ({@types})" );
+
+	@lines.push( "\+$name: "    ~   $parsed.Int       ) if $parsed.Int;
+	@lines.push( "\~$name: '"   ~   $parsed.Str ~ "'" ) if $parsed.Str;
+	@lines.push( "\?$name: "    ~ ~?$parsed.Bool      ) if $parsed.Bool;
+	if $parsed.list {
+		for $parsed.list {
+			@lines.push( "$name\[\]:\n" ~ $_.dump )
+		}
+		return;
+	}
+	elsif $parsed.hash() {
+		@lines.push( "$name\{\} keys: " ~ $parsed.hash.keys );
+		@lines.push( "$name\{\}:\n" ~   $parsed.dump );
+	}
+
+	@lines.push( "" );
+	return @lines.join("\n");
+}
+
+role Node {
+	has $.name;
+	has $.child;
+	has %.content;
+}
+
+# $parsed can only be Int, by extension Str, by extension Bool.
+#
+sub assert-Int( Mu $parsed ) {
+	die "hash" if $parsed.hash;
+	die "list" if $parsed.list;
+
+	if $parsed.Int {
+		return True
+	}
+	die "Uncaught type"
+}
+
+# $parsed can only be Str, by extension Bool
+#
+sub assert-Str( Mu $parsed ) {
+	die "hash" if $parsed.hash;
+	die "list" if $parsed.list;
+	die "Int"  if $parsed.Int;
+
+	if $parsed.Str {
+		return True
+	}
+	die "Uncaught type"
+}
+
+# $parsed can only be Bool
+#
+sub assert-Bool( Mu $parsed ) {
+	die "hash" if $parsed.hash;
+	die "list" if $parsed.list;
+	die "Int"  if $parsed.Int;
+	die "Str"  if $parsed.Str;
+
+	if $parsed.Bool {
+		return True
+	}
+	die "Uncaught type"
+}
+
+class BinInt does Node {
+	method new( Mu $parsed ) {
+		if assert-Int( $parsed ) {
+			return self.bless( :name( $parsed.Int ) )
+		}
+		die debug( 'binint', $parsed );
+	}
+}
+
+class OctInt does Node {
+	method new( Mu $parsed ) {
+		if assert-Int( $parsed ) {
+			return self.bless( :name( $parsed.Int ) )
+		}
+		die debug( 'octint', $parsed );
+	}
+}
+
+class DecInt does Node {
+	method new( Mu $parsed ) {
+		if $parsed.Str and
+		   $parsed.Str eq '0' {
+			return self.bless( :name( $parsed.Str ) )
+		}
+		if assert-Int( $parsed ) {
+			return self.bless( :name( $parsed.Int ) )
+		}
+		die debug( 'decint', $parsed );
+	}
+}
+
+class HexInt does Node {
+	method new( Mu $parsed ) {
+		if assert-Int( $parsed ) {
+			return self.bless( :name( $parsed.Int ) )
+		}
+		die debug( 'hexint', $parsed );
+	}
+}
+
+class Coeff does Node {
+	method new( Mu $parsed ) {
+		if assert-Int( $parsed ) {
+			return self.bless( :name( $parsed.Int ) )
+		}
+		die debug( 'coeff', $parsed );
+	}
+}
+
+class Frac does Node {
+	method new( Mu $parsed ) {
+		if assert-Int( $parsed ) {
+			return self.bless( :name( $parsed.Int ) )
+		}
+		die debug( 'frac', $parsed );
+	}
+}
+
+class Radix does Node {
+	method new( Mu $parsed ) {
+		if assert-Int( $parsed ) {
+			return self.bless( :name( $parsed.Int ) )
+		}
+		die debug( 'radix', $parsed );
+	}
+}
+
+class _Int does Node {
+	method new( Mu $parsed ) {
+		if assert-Int( $parsed ) {
+			return self.bless( :name( $parsed.Int ) )
+		}
+		die debug( 'int', $parsed );
+	}
+}
+
+class NormSpace does Node {
+	method new( Mu $parsed ) {
+		if assert-Str( $parsed ) {
+			return self.bless( :name( $parsed.Str ) )
+		}
+		die debug( 'normspace', $parsed );
+	}
+}
+
+class Sigil does Node {
+	method new( Mu $parsed ) {
+		if assert-Str( $parsed ) {
+			return self.bless( :name( $parsed.Str ) )
+		}
+		die debug( 'sigil', $parsed );
+	}
+}
+
+class VALUE does Node {
+	method new( Mu $parsed ) {
+		if $parsed.Str and
+		   $parsed.Str eq '0' {
+			return self.bless( :name( $parsed.Str ) )
+		}
+		if assert-Int( $parsed ) {
+			return self.bless( :name( $parsed.Int ) )
+		}
+		die debug( 'VALUE', $parsed );
+	}
+}
+
+class Sym does Node {
+	method new( Mu $parsed ) {
+		if $parsed.Bool and		# XXX Huh?
+		   $parsed.Str eq '+' {
+			return self.bless( :name( $parsed.Str ) )
+		}
+		if $parsed.Bool and		# XXX Huh?
+		   $parsed.Str eq '' {
+			return self.bless( :name( $parsed.Str ) )
+		}
+		if assert-Str( $parsed ) {
+			return self.bless( :name( $parsed.Str ) )
+		}
+		die debug( 'sym', $parsed );
+	}
+}
+
+class Sign does Node {
+	method new( Mu $parsed ) {
+		if assert-Bool( $parsed ) {
+			return self.bless( :name( $parsed.Bool ) )
+		}
+		die debug( 'sign', $parsed );
+	}
+}
+
 class Perl6::Tidy {
 	use nqp;
 
@@ -53,140 +267,6 @@ class Perl6::Tidy {
 		has $.name;
 		has $.child;
 		has %.content;
-	}
-
-	class BinInt does Node {
-		method new( Mu $parsed ) {
-			if assert-Int( $parsed ) {
-				return self.bless( :name( $parsed.Int ) )
-			}
-			die debug( 'binint', $parsed );
-		}
-	}
-
-	class OctInt does Node {
-		method new( Mu $parsed ) {
-			if assert-Int( $parsed ) {
-				return self.bless( :name( $parsed.Int ) )
-			}
-			die debug( 'octint', $parsed );
-		}
-	}
-
-	class DecInt does Node {
-		method new( Mu $parsed ) {
-#die dump-parsed($parsed);
-			if $parsed.Str and
-			   $parsed.Str eq '0' {
-				return self.bless( :name( $parsed.Str ) )
-			}
-			if assert-Int( $parsed ) {
-				return self.bless( :name( $parsed.Int ) )
-			}
-			die debug( 'decint', $parsed );
-		}
-	}
-
-	class HexInt does Node {
-		method new( Mu $parsed ) {
-			if assert-Int( $parsed ) {
-				return self.bless( :name( $parsed.Int ) )
-			}
-			die debug( 'hexint', $parsed );
-		}
-	}
-
-	class Coeff does Node {
-		method new( Mu $parsed ) {
-			if assert-Int( $parsed ) {
-				return self.bless( :name( $parsed.Int ) )
-			}
-			die debug( 'coeff', $parsed );
-		}
-	}
-
-	class Frac does Node {
-		method new( Mu $parsed ) {
-			if assert-Int( $parsed ) {
-				return self.bless( :name( $parsed.Int ) )
-			}
-			die debug( 'frac', $parsed );
-		}
-	}
-
-	class NormSpace does Node {
-		method new( Mu $parsed ) {
-			if assert-Str( $parsed ) {
-				return self.bless( :name( $parsed.Str ) )
-			}
-			die debug( 'normspace', $parsed );
-		}
-	}
-
-	class Radix does Node {
-		method new( Mu $parsed ) {
-			if assert-Int( $parsed ) {
-				return self.bless( :name( $parsed.Int ) )
-			}
-			die debug( 'radix', $parsed );
-		}
-	}
-
-	class _Int does Node {
-		method new( Mu $parsed ) {
-			if assert-Int( $parsed ) {
-				return self.bless( :name( $parsed.Int ) )
-			}
-			die debug( 'int', $parsed );
-		}
-	}
-
-	class VALUE does Node {
-		method new( Mu $parsed ) {
-			if $parsed.Str and
-			   $parsed.Str eq '0' {
-				return self.bless( :name( $parsed.Str ) )
-			}
-			if assert-Int( $parsed ) {
-				return self.bless( :name( $parsed.Int ) )
-			}
-			die debug( 'VALUE', $parsed );
-		}
-	}
-
-	class Sym does Node {
-		method new( Mu $parsed ) {
-			if $parsed.Bool and		# XXX Huh?
-			   $parsed.Str eq '+' {
-				return self.bless( :name( $parsed.Str ) )
-			}
-			if $parsed.Bool and		# XXX Huh?
-			   $parsed.Str eq '' {
-				return self.bless( :name( $parsed.Str ) )
-			}
-			if assert-Str( $parsed ) {
-				return self.bless( :name( $parsed.Str ) )
-			}
-			die debug( 'sym', $parsed );
-		}
-	}
-
-	class Sigil does Node {
-		method new( Mu $parsed ) {
-			if assert-Str( $parsed ) {
-				return self.bless( :name( $parsed.Str ) )
-			}
-			die debug( 'sigil', $parsed );
-		}
-	}
-
-	class Sign does Node {
-		method new( Mu $parsed ) {
-			if assert-Bool( $parsed ) {
-				return self.bless( :name( $parsed.Bool ) )
-			}
-			die debug( 'sign', $parsed );
-		}
 	}
 
 	class EScale does Node {
@@ -354,20 +434,6 @@ class Perl6::Tidy {
 		die "Int"  if $parsed.Int;
 
 		if $parsed.Str {
-			return True
-		}
-		die "Uncaught type"
-	}
-
-	# $parsed can only be Bool
-	#
-	sub assert-Bool( Mu $parsed ) {
-		die "hash" if $parsed.hash;
-		die "list" if $parsed.list;
-		die "Int"  if $parsed.Int;
-		die "Str"  if $parsed.Str;
-
-		if $parsed.Bool {
 			return True
 		}
 		die "Uncaught type"
