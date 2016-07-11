@@ -127,6 +127,36 @@ sub assert-Bool( Mu $parsed ) {
 	die "Uncaught type"
 }
 
+sub assert-hash-keys( Mu $parsed, $keys, $defined-keys = [] ) {
+	if $parsed.hash {
+		my @keys;
+		my @defined-keys;
+		for $parsed.hash.keys {
+			if $parsed.hash.{$_} {
+				@keys.push( $_ );
+			}
+			elsif $parsed.hash:defined{$_} {
+				@defined-keys.push( $_ );
+			}
+		}
+
+		die "Too many keys " ~ @keys.gist ~
+				       ", " ~
+				       @defined-keys.gist
+			if $parsed.hash.keys.elems >
+				$keys.elems + $defined-keys.elems;
+		
+		for @( $keys ) -> $key {
+			return False unless $parsed.hash.{$key}
+		}
+		for @( $defined-keys ) -> $key {
+			return False unless $parsed.hash:defined{$key}
+		}
+		return True
+	}
+	return False
+}
+
 class BinInt does Node {
 	method new( Mu $parsed ) {
 		if assert-Int( $parsed ) {
@@ -260,6 +290,1513 @@ class Sign does Node {
 	}
 }
 
+class EScale does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< sign decint >] ) {
+			return self.bless(
+				:content(
+					:sign(
+						Sign.new(
+							$parsed.hash.<sign>
+						)
+					),
+					:decint(
+						DecInt.new(
+							$parsed.hash.<decint>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'escale', $parsed );
+	}
+}
+
+class Integer does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< decint VALUE >] ) {
+			return self.bless(
+				:content(
+					:decint(
+						DecInt.new(
+							$parsed.hash.<decint>
+						)
+					),
+					:VALUE(
+						VALUE.new(
+							$parsed.hash.<VALUE>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< binint VALUE >] ) {
+			return self.bless(
+				:content(
+					:binint(
+						BinInt.new(
+							$parsed.hash.<binint>
+						)
+					),
+					:VALUE(
+						VALUE.new(
+							$parsed.hash.<VALUE>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< octint VALUE >] ) {
+			return self.bless(
+				:content(
+					:octint(
+						OctInt.new(
+							$parsed.hash.<octint>
+						)
+					),
+					:VALUE(
+						VALUE.new(
+							$parsed.hash.<VALUE>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< hexint VALUE >] ) {
+			return self.bless(
+				:content(
+					:hexint(
+						HexInt.new(
+							$parsed.hash.<hexint>
+						)
+					),
+					:VALUE(
+						VALUE.new(
+							$parsed.hash.<VALUE>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'integer', $parsed );
+	}
+}
+
+class BackSlash does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< sym >] ) {
+			return self.bless(
+				:content(
+					:sym(
+						Sym.new(
+							$parsed.hash.<sym>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'backslash', $parsed );
+	}
+}
+
+class VStr does Node {
+	method new( Mu $parsed ) {
+		if $parsed.Int {
+			return self.bless( :name( $parsed.Int ) )
+		}
+		die debug( 'vstr', $parsed );
+	}
+}
+
+class VNum does Node {
+	method new( Mu $parsed ) {
+		if $parsed.list {
+			return self.bless( :child() )
+		}
+		die debug( 'vnum', $parsed );
+	}
+}
+
+class Version does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< vnum vstr >] ) {
+			return self.bless(
+				:content(
+					:vnum(
+						VNum.new(
+							$parsed.hash.<vnum>
+						)
+					),
+					:vstr(
+						VStr.new(
+							$parsed.hash.<vstr>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'version', $parsed );
+	}
+}
+
+class Doc does Node {
+	method new( Mu $parsed ) {
+		if assert-Bool( $parsed ) {
+			return self.bless( :name( $parsed.Bool ) )
+		}
+		die debug( 'doc', $parsed );
+	}
+}
+
+class Identifier does Node {
+	method new( Mu $parsed ) {
+		if $parsed.list {
+			my @child;
+			for $parsed.list {
+				if assert-Str( $_ ) {
+					@child.push(
+						$_.Str
+					);
+					next
+				}
+				die debug( 'identifier', $_ );
+			}
+			return self.bless(
+				:child( @child )
+			)
+		}
+		elsif $parsed.Str {
+			return self.bless( :name( $parsed.Str ) )
+		}
+		die debug( 'identifier', $parsed );
+	}
+}
+
+class Name does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< identifier >],
+					      [< morename >] ) {
+			return self.bless(
+				:content(
+					:identifier(
+						Identifier.new(
+							$parsed.hash.<identifier>
+						)
+					),
+				),
+				:child()
+			)
+		}
+		die debug( 'name', $parsed );
+	}
+}
+
+class LongName does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< name >], [< colonpair >] ) {
+			return self.bless(
+				:content(
+					:name(
+						Name.new(
+							$parsed.hash.<name>
+						)
+					),
+					:colonpair()
+				)
+			)
+		}
+		die debug( 'longname', $parsed );
+	}
+}
+
+class ModuleName does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< longname >] ) {
+			return self.bless(
+				:content(
+					:longname(
+						LongName.new(
+							$parsed.hash.<longname>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'module_name', $parsed );
+	}
+}
+
+class StatementControl does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< doc sym module_name >] ) {
+			return self.bless(
+				:content(
+					:doc(
+						Doc.new(
+							$parsed.hash.<doc>
+						)
+					),
+					:sym(
+						Sym.new(
+							$parsed.hash.<sym>
+						)
+					),
+					:module_name(
+						ModuleName.new(
+							$parsed.hash.<module_name>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< doc sym version >] ) {
+			return self.bless(
+				:content(
+					:doc(
+						Doc.new(
+							$parsed.hash.<doc>
+						)
+					),
+					:sym(
+						Sym.new(
+							$parsed.hash.<sym>
+						)
+					),
+					:version(
+						Version.new(
+							$parsed.hash.<version>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'statement_control', $parsed );
+	}
+}
+
+class O does Node {
+	method new( Mu $parsed ) {
+		if $parsed ~~ Hash {
+			if $parsed.<prec> and
+			   $parsed.<fiddly> and
+			   $parsed.<dba> and
+			   $parsed.<assoc> {
+				return self.bless(
+					:content(
+						:prec( $parsed.<prec> ),
+						:fiddly( $parsed.<fiddly> ),
+						:dba( $parsed.<dba> ),
+						:assoc( $parsed.<assoc> )
+					)
+				)
+			}
+			if $parsed.<prec> and
+			   $parsed.<dba> and
+			   $parsed.<assoc> {
+				return self.bless(
+					:content(
+						:prec( $parsed.<prec> ),
+						:dba( $parsed.<dba> ),
+						:assoc( $parsed.<assoc> )
+					)
+				)
+			}
+		}
+		die $parsed.perl;
+		#die dump-parsed( $parsed );
+	}
+}
+
+class Postfix does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< sym O >] ) {
+			return self.bless(
+				:content(
+					:sym(
+						Sym.new(
+							$parsed.hash.<sym>
+						)
+					),
+					:O(
+						O.new(
+							$parsed.hash.<O>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'postfix', $parsed );
+	}
+}
+
+class Prefix does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< sym O >] ) {
+			return self.bless(
+				:content(
+					:sym(
+						Sym.new(
+							$parsed.hash.<sym>
+						)
+					),
+					:O(
+						O.new(
+							$parsed.hash.<O>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'prefix', $parsed );
+	}
+}
+
+class Args does Node {
+	method new( Mu $parsed ) {
+		if $parsed.Bool {
+			return self.bless( :name( $parsed.Bool ) )
+		}
+		die debug( 'args', $parsed );
+	}
+}
+
+class MethodOp does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< longname args >] ) {
+			return self.bless(
+				:content(
+					:longname(
+						LongName.new(
+							$parsed.hash.<longname>
+						)
+					),
+					:args(
+						Args.new(
+							$parsed.hash.<args>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< longname >] ) {
+			return self.bless(
+				:content(
+					:longname(
+						LongName.new(
+							$parsed.hash.<longname>
+						)
+					)
+				)
+			)
+		}
+		die dump( $parsed );
+	}
+}
+
+class ArgList does Node {
+	method new( Mu $parsed ) {
+		if assert-Bool( $parsed ) {
+			return self.bless(
+				:name( $parsed.Bool )
+			)
+		}
+		die debug( 'arglist', $parsed );
+	}
+}
+
+class PostCircumfix does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< arglist O >] ) {
+			return self.bless(
+				:content(
+					:arglist(
+						ArgList.new(
+							$parsed.hash.<arglist>
+						)
+					),
+					:O(
+						O.new(
+							$parsed.hash.<O>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'postcircumfix', $parsed );
+	}
+}
+
+class PostOp does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< sym postcircumfix O >] ) {
+			return self.bless(
+				:content(
+					:sym(
+						Sym.new(
+							$parsed.hash.<sym>
+						)
+					),
+					:postcircumfix(
+						PostCircumfix.new(
+							$parsed.hash.<postcircumfix>
+						)
+					),
+					:O(
+						O.new(
+							$parsed.hash.<O>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'postop', $parsed );
+	}
+}
+
+class InfixIsh does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys(
+			$parsed,
+			[< infix OPER >] ) {
+			return self.bless(
+				:content(
+					:infix(
+						self.infix(
+							$parsed.hash.<infix>
+						)
+					),
+					:OPER(
+						self.OPER(
+							$parsed.hash.<OPER>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'infixish', $parsed );
+	}
+}
+
+class Signature does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [], [< param_sep parameter >] ) {
+			return self.bless(
+				:name( $parsed.Bool ),
+				:content(
+					:param_sep(),
+					:parameter()
+				)
+			)
+		}
+		die debug( 'signature', $parsed );
+	}
+}
+
+class FakeSignature does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< signature >] ) {
+			return self.bless(
+				:content(
+					:signature(
+						Signature.new(
+							$parsed.hash.<signature>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'fakesignature', $parsed );
+	}
+}
+
+class DottyOp does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< sym postop O >] ) {
+			return self.bless(
+				:content(
+					:sym(
+						Sym.new(
+							$parsed.hash.<sym>
+						)
+					),
+					:postop(
+						PostOp.new(
+							$parsed.hash.<postop>
+						)
+					),
+					:O(
+						O.new(
+							$parsed.hash.<O>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< methodop >] ) {
+			return self.bless(
+				:content(
+					:methodop(
+						MethodOp.new(
+							$parsed.hash.<methodop>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'dottyop', $parsed );
+	}
+}
+
+class ColonPair does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< identifier >] ) {
+			return self.bless(
+				:content(
+					:identifier(
+						Identifier.new(
+							$parsed.hash.<identifier>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< fakesignature >] ) {
+			return self.bless(
+				:content(
+					:fakesignature(
+						FakeSignature.new(
+							$parsed.hash.<fakesignature>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'colonpair', $parsed );
+	}
+}
+
+class Twigil does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< sym >] ) {
+			return self.bless(
+				:content(
+					:sym(
+						Sym.new(
+							$parsed.hash.<sym>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'twigil', $parsed );
+	}
+}
+
+class DeSigilName does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< longname >] ) {
+			return self.bless(
+				:content(
+					:longname(
+						LongName.new(
+							$parsed.hash.<longname>
+						)
+					)
+				)
+			)
+		}
+		if $parsed.Str {
+			return self.bless( :name( $parsed.Str ) )
+		}
+		die debug( 'desigilname', $parsed );
+	}
+}
+
+class DefLongName does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< name >], [< colonpair >] ) {
+			return self.bless(
+				:content(
+					:name(
+						Name.new(
+							$parsed.hash.<name>
+						)
+					),
+					:colonpair()
+				)
+			)
+		}
+		die debug( 'deflongname', $parsed );
+	}
+}
+
+class CharSpec does Node {
+	method new( Mu $parsed ) {
+		if $parsed.list {
+			my @child;
+			for $parsed.list -> $list {
+				my @_child;
+				for $list.list -> $_list {
+					my @__child;
+					for $_list.list {
+						if assert-Str( $_ ) {
+							@__child.push( $_ );
+							next
+						}
+						die debug( 'charspec', $_ );
+					}
+#					die debug( 'charspec', $_list );
+				}
+#				die debug( 'charspec', $list );
+			}
+			return self.bless(
+				:child( @child )
+			)
+		}
+		die debug( 'charspec', $parsed );
+	}
+}
+
+class CClassElem_INTERMEDIARY does Node {
+}
+
+class CClassElem does Node {
+	method new( Mu $parsed ) {
+		if $parsed.list {
+			my @child;
+			for $parsed.list {
+				if assert-hash-keys( $_, [< sign charspec >] ) {
+					@child.push(
+						CClassElem_INTERMEDIARY.new(
+							:content(
+								:sign(
+									Sign.new(
+										$_.hash.<sign>
+									)
+								),
+								:charspec(
+									CharSpec.new(
+										$_.hash.<charspec>
+									)
+								)
+							)
+						)
+					);
+					next
+				}
+				die debug( 'cclass_elem', $_ );
+			}
+			return self.bless(
+				:child( @child )
+			)
+		}
+		die debug( 'cclass_elem', $parsed );
+	}
+}
+
+class Variable does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< twigil sigil desigilname >] ) {
+			return self.bless(
+				:content(
+					:twigil(
+						Twigil.new(
+							$parsed.hash.<twigil>
+						)
+					),
+					:sigil(
+						Sigil.new(
+							$parsed.hash.<sigil>
+						)
+					),
+					:desigilname(
+						DeSigilName.new(
+							$parsed.hash.<desigilname>
+						)
+					)
+				)
+			)
+		}
+		elsif assert-hash-keys( $parsed, [< sigil desigilname >] ) {
+			return self.bless(
+				:content(
+					:sigil(
+						Sigil.new(
+							$parsed.hash.<sigil>
+						)
+					),
+					:desigilname(
+						DeSigilName.new(
+							$parsed.hash.<desigilname>
+						)
+					)
+				)
+			)
+		}
+		elsif assert-hash-keys( $parsed, [< sigil >] ) {
+			return self.bless(
+				:content(
+					:sigil(
+						Sigil.new(
+							$parsed.hash.<sigil>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'variable', $parsed );
+	}
+}
+
+class Assertion does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< cclass_elem >] ) {
+			return self.bless(
+				:content(
+					:cclass_elem(
+						CClassElem.new(
+							$parsed.hash.<cclass_elem>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'assertion', $parsed );
+	}
+}
+
+class MetaChar does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< sym >] ) {
+			return self.bless(
+				:content(
+					:sym(
+						Sym.new(
+							$parsed.hash.<sym>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< backslash >] ) {
+			return self.bless(
+				:content(
+					:backslash(
+						BackSlash.new(
+							$parsed.hash.<backslash>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< assertion >] ) {
+			return self.bless(
+				:content(
+					:metachar(
+						Assertion.new(
+							$parsed.hash.<assertion>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'metachar', $parsed );
+	}
+}
+
+class Atom does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< metachar >] ) {
+			return self.bless(
+				:content(
+					:metachar(
+						MetaChar.new(
+							$parsed.hash.<metachar>
+						)
+					)
+				)
+			)
+		}
+		if $parsed.Str {
+			return self.bless( :name( $parsed.Str ) )
+		}
+		die debug( 'atom', $parsed );
+	}
+}
+
+class Noun does Node {
+	method new( Mu $parsed ) {
+		if $parsed.list {
+			my @child;
+			for $parsed.list {
+				if assert-hash-keys( $_, [< atom >],
+							 [< sigfinal >] ) {
+					@child.push(
+						Atom.new(
+							$_.hash.<atom>
+						)
+					);
+					next
+				}
+				die debug( 'noun', $_ );
+			}
+			return self.bless(
+				:child( @child )
+			)
+		}
+		die debug( 'noun', $parsed );
+	}
+}
+
+class TermIsh is Node {
+	method new( Mu $parsed ) {
+		if $parsed.list {
+			my @child;
+			for $parsed.list {
+				if assert-hash-keys( $_, [< noun >] ) {
+					@child.push(
+						Noun.new(
+							$_.hash.<noun>
+						)
+					);
+					next
+				}
+				die debug( 'termish', $_ );
+			}
+			return self.bless(
+				:child( @child )
+			)
+		}
+		if assert-hash-keys( $parsed, [< noun >] ) {
+			return self.bless(
+				:content(
+					:noun(
+						Noun.new(
+							$parsed.hash.<noun>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'termish', $parsed );
+	}
+}
+
+class TermConj does Node {
+	method new( Mu $parsed ) {
+		if $parsed.list {
+			my @child;
+			for $parsed.list {
+				if assert-hash-keys( $_, [< termish >] ) {
+					@child.push(
+						TermIsh.new(
+							$_.hash.<termish>
+						)
+					);
+					next
+				}
+				die debug( 'termconj', $_ );
+			}
+			return self.bless(
+				:child( @child )
+			)
+		}
+		die debug( 'termconj', $parsed );
+	}
+}
+
+class TermAlt does Node {
+	method new( Mu $parsed ) {
+		if $parsed.list {
+			my @child;
+			for $parsed.list {
+				if assert-hash-keys( $_, [< termconj >] ) {
+					@child.push(
+						TermConj.new(
+							$_.hash.<termconj>
+						)
+					);
+					next
+				}
+				die debug( 'termalt', $_ );
+			}
+			return self.bless(
+				:child( @child )
+			)
+		}
+		die debug( 'termalt', $parsed );
+	}
+}
+
+class TermConjSeq does Node {
+	method new( Mu $parsed ) {
+		if $parsed.list {
+			my @child;
+			for $parsed.list {
+				if assert-hash-keys( $_, [< termalt >] ) {
+					@child.push(
+						TermAlt.new(
+							$_.hash.<termalt>
+						)
+					);
+					next
+				}
+				die debug( 'termconjseq', $_ );
+			}
+			return self.bless(
+				:child( @child )
+			)
+		}
+		if assert-hash-keys( $parsed, [< termalt >] ) {
+			return self.bless(
+				:content(
+					:termalt(
+						TermAlt.new(
+							$parsed.hash.<termalt>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'termconjseq', $parsed );
+	}
+}
+
+class TermAltSeq does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< termconjseq >] ) {
+			return self.bless(
+				:content(
+					:termconjseq(
+						TermConjSeq.new(
+							$parsed.hash.<termconjseq>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'termaltseq', $parsed );
+	}
+}
+
+class TermSeq does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< termaltseq >] ) {
+			return self.bless(
+				:content(
+					:termaltseq(
+						TermAltSeq.new(
+							$parsed.hash.<termaltseq>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'termseq', $parsed );
+	}
+}
+
+class Nibble does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< termseq >] ) {
+			return self.bless(
+				:content(
+					:termseq(
+						TermSeq.new(
+							$parsed.hash.<termseq>
+						)
+					)
+				)
+			)
+		}
+		if $parsed.Str {
+			return self.bless( :name( $parsed.Str ) )
+		}
+		die debug( 'nibble', $parsed );
+	}
+}
+
+class RegexDef does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< deflongname nibble >],
+					      [< signature trait >] ) {
+			return self.bless(
+				:content(
+					:deflongname(
+						DefLongName.new(
+							$parsed.hash.<deflongname>
+						)
+					),
+					:nibble(
+						Nibble.new(
+							$parsed.hash.<nibble>
+						)
+					),
+					:signature(),
+					:trait()
+				)
+			)
+		}
+		die debug( 'regex_def', $parsed );
+	}
+}
+
+class RegexDeclarator does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< sym regex_def >] ) {
+			return self.bless(
+				:content(
+					:sym(
+						Sym.new(
+							$parsed.hash.<sym>
+						)
+					),
+					:regex_def(
+						RegexDef.new(
+							$parsed.hash.<regex_def>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'regex_declarator', $parsed );
+	}
+}
+
+class Dotty does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< sym dottyop O >] ) {
+			return self.bless(
+				:content(
+					:sym(
+						Sym.new(
+							$parsed.hash.<sym>
+						)
+					),
+					:dottyop(
+						DottyOp.new(
+							$parsed.hash.<dottyop>
+						)
+					),
+					:O(
+						O.new(
+							$parsed.hash.<O>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'dotty', $parsed );
+	}
+}
+
+class SemiList does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [], [< statement >] ) {
+			return self.bless
+		}
+		die debug( 'semilist', $parsed );
+	}
+}
+
+class Circumfix does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< semilist >] ) {
+			return self.bless(
+				:content(
+					:semilist(
+						SemiList.new(
+							$parsed.hash.<semilist>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< binint VALUE >] ) {
+			return self.bless(
+				:content(
+					:binint(
+						BinInt.new(
+							$parsed.hash.<binint>
+						)
+					),
+					:VALUE(
+						VALUE.new(
+							$parsed.hash.<VALUE>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< octint VALUE >] ) {
+			return self.bless(
+				:content(
+					:octint(
+						OctInt.new(
+							$parsed.hash.<octint>
+						)
+					),
+					:VALUE(
+						VALUE.new(
+							$parsed.hash.<VALUE>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< hexint VALUE >] ) {
+			return self.bless(
+				:content(
+					:hexint(
+						HexInt.new(
+							$parsed.hash.<hexint>
+						)
+					),
+					:VALUE(
+						VALUE.new(
+							$parsed.hash.<VALUE>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'circumfix', $parsed );
+	}
+}
+
+class B does Node {
+	method new( Mu $parsed ) {
+		if assert-Bool( $parsed ) {
+			return self.bless( :name( $parsed.Bool ) )
+		}
+		die debug( 'B', $parsed );
+	}
+}
+
+class Babble does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< B >], [< quotepair >] ) {
+			return self.bless(
+				:content(
+					:B(
+						B.new(
+							$parsed.hash.<B>
+						)
+					),
+					:quotepair()
+				)
+			)
+		}
+		die debug( 'babble', $parsed );
+	}
+}
+
+class Quibble does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< babble nibble >] ) {
+			return self.bless(
+				:content(
+					:babble(
+						Babble.new(
+							$parsed.hash.<babble>
+						)
+					),
+					:nibble(
+						Nibble.new(
+							$parsed.hash.<nibble>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'quibble', $parsed );
+	}
+}
+
+class Quote does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< nibble >] ) {
+			return self.bless(
+				:content(
+					:nibble(
+						Nibble.new(
+							$parsed.hash.<nibble>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< quibble >] ) {
+			return self.bless(
+				:content(
+					:quibble(
+						Quibble.new(
+							$parsed.hash.<quibble>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'quote', $parsed );
+	}
+}
+
+class RadNumber does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< circumfix radix >],
+					      [< exp base >] ) {
+			return self.bless(
+				:content(
+					:circumfix(
+						Circumfix.new(
+							$parsed.hash.<circumfix>,
+						)
+					),
+					:radix(
+						Radix.new(
+							$parsed.hash.<radix>,
+						)
+					),
+					:exp(),
+					:base()
+				)
+			)
+		}
+		die debug( 'rad_number', $parsed );
+	}
+}
+
+class DecNumber does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< int coeff frac >] ) {
+			return self.bless(
+				:content(
+					:int(
+						_Int.new(
+							$parsed.hash.<int>
+						)
+					),
+					:coeff(
+						Coeff.new(
+							$parsed.hash.<coeff>
+						)
+					),
+					:frac(
+						Frac.new(
+							$parsed.hash.<frac>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< int coeff escale >] ) {
+			return self.bless(
+				:content(
+					:int(
+						_Int.new(
+							$parsed.hash.<int>
+						)
+					),
+					:coeff(
+						Coeff.new(
+							$parsed.hash.<coeff>
+						)
+					),
+					:escale(
+						EScale.new(
+							$parsed.hash.<escale>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'dec_number', $parsed );
+	}
+}
+
+class Numish does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< integer >] ) {
+			return self.bless(
+				:content(
+					:integer(
+						Integer.new(
+							$parsed.hash.<integer>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< rad_number >] ) {
+			return self.bless(
+				:content(
+					:rad_number(
+						RadNumber.new(
+							$parsed.hash.<rad_number>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< dec_number >] ) {
+			return self.bless(
+				:content(
+					:dec_number(
+						DecNumber.new(
+							$parsed.hash.<dec_number>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'numish', $parsed );
+	}
+}
+
+class Number does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< numish >] ) {
+			return self.bless(
+				:content(
+					:numish(
+						Numish.new(
+							$parsed.hash.<numish>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'number', $parsed );
+	}
+}
+
+class Value does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< number >] ) {
+			return self.bless(
+				:content(
+					:number(
+						Number.new(
+							$parsed.hash.<number>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< quote >] ) {
+			return self.bless(
+				:content(
+					:quote(
+						Quote.new(
+							$parsed.hash.<quote>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'value', $parsed );
+	}
+}
+
+# XXX This is a compound type
+class IdentifierArgs does Node {
+	method new( Mu $parsed ) {
+		return self.bless(
+			:content(
+				:identifier(
+					Identifier.new(
+						$parsed.hash.<identifier>
+					)
+				),
+				:args(
+					Args.new(
+						$parsed.hash.<args>
+					)
+				)
+			)
+		)
+	}
+}
+
+# XXX This is a compound type
+class LongNameArgs does Node {
+	method new( Mu $parsed ) {
+		return self.bless(
+			:content(
+				:longname(
+					LongName.new(
+						$parsed.hash.<longname>
+					)
+				),
+				:args(
+					Args.new(
+						$parsed.hash.<args>
+					)
+				)
+			)
+		)
+	}
+}
+
+class VariableDeclarator does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys(
+			$parsed,
+			[< variable >],
+			[< semilist postcircumfix signature trait post_constraint >] ) {
+			return self.bless(
+				:content(
+					:variable(
+						Variable.new(
+							$parsed.hash.<variable>
+						)
+					),
+					:semilist(),
+					:postcircumfix(),
+					:signature(),
+					:trait(),
+					:post_constraint()
+				)
+			)
+		}
+		die debug( 'variable_declarator', $parsed );
+	}
+} 
+
+class TypeName_INTERMEDIARY does Node {
+}
+
+class TypeName does Node {
+	method new( Mu $parsed ) {
+		if $parsed.list {
+			my @child;
+			for $parsed.list {
+				if assert-hash-keys( $_, [< longname >],
+							 [< colonpair >] ) {
+					@child.push(
+						TypeName_INTERMEDIARY.new(
+							:content(
+								:longname(
+									LongName.new(
+										$_.hash.<longname>
+									)
+								),
+								:colonpair()
+							)
+						)
+					);
+					next;
+				}
+				die debug( 'typename', $_ );
+			}
+			return self.bless(
+				:child( @child )
+			)
+		}
+		die debug( 'typename', $parsed );
+	}
+}
+
 class Perl6::Tidy {
 	use nqp;
 
@@ -267,115 +1804,6 @@ class Perl6::Tidy {
 		has $.name;
 		has $.child;
 		has %.content;
-	}
-
-	class EScale does Node {
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< sign decint >] ) {
-				return self.bless(
-					:content(
-						:sign(
-							Sign.new(
-								$parsed.hash.<sign>
-							)
-						),
-						:decint(
-							DecInt.new(
-								$parsed.hash.<decint>
-							)
-						)
-					)
-				)
-			}
-			die debug( 'escale', $parsed );
-		}
-	}
-
-	class Integer does Node {
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< decint VALUE >] ) {
-				return self.bless(
-					:content(
-						:decint(
-							DecInt.new(
-								$parsed.hash.<decint>
-							)
-						),
-						:VALUE(
-							VALUE.new(
-								$parsed.hash.<VALUE>
-							)
-						)
-					)
-				)
-			}
-			if assert-hash-keys( $parsed, [< binint VALUE >] ) {
-				return self.bless(
-					:content(
-						:binint(
-							BinInt.new(
-								$parsed.hash.<binint>
-							)
-						),
-						:VALUE(
-							VALUE.new(
-								$parsed.hash.<VALUE>
-							)
-						)
-					)
-				)
-			}
-			if assert-hash-keys( $parsed, [< octint VALUE >] ) {
-				return self.bless(
-					:content(
-						:octint(
-							OctInt.new(
-								$parsed.hash.<octint>
-							)
-						),
-						:VALUE(
-							VALUE.new(
-								$parsed.hash.<VALUE>
-							)
-						)
-					)
-				)
-			}
-			if assert-hash-keys( $parsed, [< hexint VALUE >] ) {
-				return self.bless(
-					:content(
-						:hexint(
-							HexInt.new(
-								$parsed.hash.<hexint>
-							)
-						),
-						:VALUE(
-							VALUE.new(
-								$parsed.hash.<VALUE>
-							)
-						)
-					)
-				)
-			}
-			die debug( 'integer', $parsed );
-		}
-	}
-
-	class BackSlash does Node {
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< sym >] ) {
-				return self.bless(
-					:content(
-						:sym(
-							Sym.new(
-								$parsed.hash.<sym>
-							)
-						)
-					)
-				)
-			}
-			die debug( 'backslash', $parsed );
-		}
 	}
 
 	sub debug( Str $name, Mu $parsed ) {
@@ -412,31 +1840,6 @@ class Perl6::Tidy {
 
 		@lines.push( "" );
 		return @lines.join("\n");
-	}
-
-	# $parsed can only be Int, by extension Str, by extension Bool.
-	#
-	sub assert-Int( Mu $parsed ) {
-		die "hash" if $parsed.hash;
-		die "list" if $parsed.list;
-
-		if $parsed.Int {
-			return True
-		}
-		die "Uncaught type"
-	}
-
-	# $parsed can only be Str, by extension Bool
-	#
-	sub assert-Str( Mu $parsed ) {
-		die "hash" if $parsed.hash;
-		die "list" if $parsed.list;
-		die "Int"  if $parsed.Int;
-
-		if $parsed.Str {
-			return True
-		}
-		die "Uncaught type"
 	}
 
 	sub assert-hash-keys( Mu $parsed, $keys, $defined-keys = [] ) {
@@ -540,181 +1943,6 @@ class Perl6::Tidy {
 		die debug( 'statementlist', $parsed );
 	}
 
-	class VStr does Node {
-		method new( Mu $parsed ) {
-			if $parsed.Int {
-				return self.bless( :name( $parsed.Int ) )
-			}
-			die debug( 'vstr', $parsed );
-		}
-	}
-
-	class VNum does Node {
-		method new( Mu $parsed ) {
-			if $parsed.list {
-				return self.bless( :child() )
-			}
-			die debug( 'vnum', $parsed );
-		}
-	}
-
-	class Version does Node {
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< vnum vstr >] ) {
-				return self.bless(
-					:content(
-						:vnum(
-							VNum.new(
-								$parsed.hash.<vnum>
-							)
-						),
-						:vstr(
-							VStr.new(
-								$parsed.hash.<vstr>
-							)
-						)
-					)
-				)
-			}
-			die debug( 'version', $parsed );
-		}
-	}
-
-	class Doc does Node {
-		method new( Mu $parsed ) {
-			if assert-Bool( $parsed ) {
-				return self.bless( :name( $parsed.Bool ) )
-			}
-			die debug( 'doc', $parsed );
-		}
-	}
-
-	class Identifier does Node {
-		method new( Mu $parsed ) {
-			if $parsed.list {
-				my @child;
-				for $parsed.list {
-					if assert-Str( $_ ) {
-						@child.push(
-							$_.Str
-						);
-						next
-					}
-					die debug( 'identifier', $_ );
-				}
-				return self.bless(
-					:child( @child )
-				)
-			}
-			elsif $parsed.Str {
-				return self.bless( :name( $parsed.Str ) )
-			}
-			die debug( 'identifier', $parsed );
-		}
-	}
-
-	class Name does Node {
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< identifier >],
-						      [< morename >] ) {
-				return self.bless(
-					:content(
-						:identifier(
-							Identifier.new(
-								$parsed.hash.<identifier>
-							)
-						),
-					),
-					:child()
-				)
-			}
-			die debug( 'name', $parsed );
-		}
-	}
-
-	class LongName does Node {
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< name >], [< colonpair >] ) {
-				return self.bless(
-					:content(
-						:name(
-							Name.new(
-								$parsed.hash.<name>
-							)
-						),
-						:colonpair()
-					)
-				)
-			}
-			die debug( 'longname', $parsed );
-		}
-	}
-
-	class ModuleName does Node {
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< longname >] ) {
-				return self.bless(
-					:content(
-						:longname(
-							LongName.new(
-								$parsed.hash.<longname>
-							)
-						)
-					)
-				)
-			}
-			die debug( 'module_name', $parsed );
-		}
-	}
-
-	class StatementControl does Node {
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< doc sym module_name >] ) {
-				return self.bless(
-					:content(
-						:doc(
-							Doc.new(
-								$parsed.hash.<doc>
-							)
-						),
-						:sym(
-							Sym.new(
-								$parsed.hash.<sym>
-							)
-						),
-						:module_name(
-							ModuleName.new(
-								$parsed.hash.<module_name>
-							)
-						)
-					)
-				)
-			}
-			if assert-hash-keys( $parsed, [< doc sym version >] ) {
-				return self.bless(
-					:content(
-						:doc(
-							Doc.new(
-								$parsed.hash.<doc>
-							)
-						),
-						:sym(
-							Sym.new(
-								$parsed.hash.<sym>
-							)
-						),
-						:version(
-							Version.new(
-								$parsed.hash.<version>
-							)
-						)
-					)
-				)
-			}
-			die debug( 'statement_control', $parsed );
-		}
-	}
-
 	class Statement does Node {
 	}
 
@@ -745,83 +1973,6 @@ class Perl6::Tidy {
 			)
 		}
 		die debug( 'statement', $parsed );
-	}
-
-	class O does Node {
-		method new( Mu $parsed ) {
-			if $parsed ~~ Hash {
-				if $parsed.<prec> and
-				   $parsed.<fiddly> and
-				   $parsed.<dba> and
-				   $parsed.<assoc> {
-					return self.bless(
-						:content(
-							:prec( $parsed.<prec> ),
-							:fiddly( $parsed.<fiddly> ),
-							:dba( $parsed.<dba> ),
-							:assoc( $parsed.<assoc> )
-						)
-					)
-				}
-				if $parsed.<prec> and
-				   $parsed.<dba> and
-				   $parsed.<assoc> {
-					return self.bless(
-						:content(
-							:prec( $parsed.<prec> ),
-							:dba( $parsed.<dba> ),
-							:assoc( $parsed.<assoc> )
-						)
-					)
-				}
-			}
-			die $parsed.perl;
-			#die dump-parsed( $parsed );
-		}
-	}
-
-	class Postfix does Node {
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< sym O >] ) {
-				return self.bless(
-					:content(
-						:sym(
-							Sym.new(
-								$parsed.hash.<sym>
-							)
-						),
-						:O(
-							O.new(
-								$parsed.hash.<O>
-							)
-						)
-					)
-				)
-			}
-			die debug( 'postfix', $parsed );
-		}
-	}
-
-	class Prefix does Node {
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< sym O >] ) {
-				return self.bless(
-					:content(
-						:sym(
-							Sym.new(
-								$parsed.hash.<sym>
-							)
-						),
-						:O(
-							O.new(
-								$parsed.hash.<O>
-							)
-						)
-					)
-				)
-			}
-			die debug( 'prefix', $parsed );
-		}
 	}
 
 	class Infix does Node {
@@ -878,149 +2029,6 @@ class Perl6::Tidy {
 		}
 		die debug( 'infix', $parsed );
 	}
-
-	class Args does Node {
-		method new( Mu $parsed ) {
-			if $parsed.Bool {
-				return self.bless( :name( $parsed.Bool ) )
-			}
-			die debug( 'args', $parsed );
-		}
-	}
-
-	class MethodOp does Node {
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< longname args >] ) {
-				return self.bless(
-					:content(
-						:longname(
-							LongName.new(
-								$parsed.hash.<longname>
-							)
-						),
-						:args(
-							Args.new(
-								$parsed.hash.<args>
-							)
-						)
-					)
-				)
-			}
-			if assert-hash-keys( $parsed, [< longname >] ) {
-				return self.bless(
-					:content(
-						:longname(
-							LongName.new(
-								$parsed.hash.<longname>
-							)
-						)
-					)
-				)
-			}
-			die dump( $parsed );
-		}
-	}
-
-	class ArgList does Node {
-		method new( Mu $parsed ) {
-			if assert-Bool( $parsed ) {
-				return self.bless(
-					:name( $parsed.Bool )
-				)
-			}
-			die debug( 'arglist', $parsed );
-		}
-	}
-
-	class PostCircumfix does Node {
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< arglist O >] ) {
-				return self.bless(
-					:content(
-						:arglist(
-							ArgList.new(
-								$parsed.hash.<arglist>
-							)
-						),
-						:O(
-							O.new(
-								$parsed.hash.<O>
-							)
-						)
-					)
-				)
-			}
-			die debug( 'postcircumfix', $parsed );
-		}
-	}
-
-	class PostOp does Node {
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< sym postcircumfix O >] ) {
-				return self.bless(
-					:content(
-						:sym(
-							Sym.new(
-								$parsed.hash.<sym>
-							)
-						),
-						:postcircumfix(
-							PostCircumfix.new(
-								$parsed.hash.<postcircumfix>
-							)
-						),
-						:O(
-							O.new(
-								$parsed.hash.<O>
-							)
-						)
-					)
-				)
-			}
-			die debug( 'postop', $parsed );
-		}
-	}
-
-	class DottyOp does Node {
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< sym postop O >] ) {
-				return self.bless(
-					:content(
-						:sym(
-							Sym.new(
-								$parsed.hash.<sym>
-							)
-						),
-						:postop(
-							PostOp.new(
-								$parsed.hash.<postop>
-							)
-						),
-						:O(
-							O.new(
-								$parsed.hash.<O>
-							)
-						)
-					)
-				)
-			}
-			if assert-hash-keys( $parsed, [< methodop >] ) {
-				return self.bless(
-					:content(
-						:methodop(
-							MethodOp.new(
-								$parsed.hash.<methodop>
-							)
-						)
-					)
-				)
-			}
-			die debug( 'dottyop', $parsed );
-		}
-	}
-
-	# "forward" declaration, sigh.
-	class InfixIsh {...}
 
 	class OPER does Node {
 	}
@@ -1128,30 +2136,6 @@ class Perl6::Tidy {
 		die debug( 'op', $parsed );
 	}
 
-	class InfixIsh does Node {
-		method new( Mu $parsed ) {
-			if assert-hash-keys(
-				$parsed,
-				[< infix OPER >] ) {
-				return self.bless(
-					:content(
-						:infix(
-							self.infix(
-								$parsed.hash.<infix>
-							)
-						),
-						:OPER(
-							self.OPER(
-								$parsed.hash.<OPER>
-							)
-						)
-					)
-				)
-			}
-			die debug( 'infixish', $parsed );
-		}
-	}
-
 	class MoreName does Node {
 	}
 
@@ -1182,157 +2166,6 @@ class Perl6::Tidy {
 			)
 		}
 		die debug( 'morename', $parsed );
-	}
-
-	class Signature does Node {
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [], [< param_sep parameter >] ) {
-				return self.bless(
-					:name( $parsed.Bool ),
-					:content(
-						:param_sep(),
-						:parameter()
-					)
-				)
-			}
-			die debug( 'signature', $parsed );
-		}
-	}
-
-	class FakeSignature does Node {
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< signature >] ) {
-				return self.bless(
-					:content(
-						:signature(
-							Signature.new(
-								$parsed.hash.<signature>
-							)
-						)
-					)
-				)
-			}
-			die debug( 'fakesignature', $parsed );
-		}
-	}
-
-	class ColonPair does Node {
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< identifier >] ) {
-				return self.bless(
-					:content(
-						:identifier(
-							Identifier.new(
-								$parsed.hash.<identifier>
-							)
-						)
-					)
-				)
-			}
-			if assert-hash-keys( $parsed, [< fakesignature >] ) {
-				return self.bless(
-					:content(
-						:fakesignature(
-							FakeSignature.new(
-								$parsed.hash.<fakesignature>
-							)
-						)
-					)
-				)
-			}
-			die debug( 'colonpair', $parsed );
-		}
-	}
-
-	class Twigil does Node {
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< sym >] ) {
-				return self.bless(
-					:content(
-						:sym(
-							Sym.new(
-								$parsed.hash.<sym>
-							)
-						)
-					)
-				)
-			}
-			die debug( 'twigil', $parsed );
-		}
-	}
-
-	class DeSigilName does Node {
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< longname >] ) {
-				return self.bless(
-					:content(
-						:longname(
-							LongName.new(
-								$parsed.hash.<longname>
-							)
-						)
-					)
-				)
-			}
-			if $parsed.Str {
-				return self.bless( :name( $parsed.Str ) )
-			}
-			die debug( 'desigilname', $parsed );
-		}
-	}
-
-	class Variable does Node {
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< twigil sigil desigilname >] ) {
-				return self.bless(
-					:content(
-						:twigil(
-							Twigil.new(
-								$parsed.hash.<twigil>
-							)
-						),
-						:sigil(
-							Sigil.new(
-								$parsed.hash.<sigil>
-							)
-						),
-						:desigilname(
-							DeSigilName.new(
-								$parsed.hash.<desigilname>
-							)
-						)
-					)
-				)
-			}
-			elsif assert-hash-keys( $parsed, [< sigil desigilname >] ) {
-				return self.bless(
-					:content(
-						:sigil(
-							Sigil.new(
-								$parsed.hash.<sigil>
-							)
-						),
-						:desigilname(
-							DeSigilName.new(
-								$parsed.hash.<desigilname>
-							)
-						)
-					)
-				)
-			}
-			elsif assert-hash-keys( $parsed, [< sigil >] ) {
-				return self.bless(
-					:content(
-						:sigil(
-							Sigil.new(
-								$parsed.hash.<sigil>
-							)
-						)
-					)
-				)
-			}
-			die debug( 'variable', $parsed );
-		}
 	}
 
 	class RoutineDeclarator does Node {
@@ -1379,403 +2212,6 @@ class Perl6::Tidy {
 			)
 		}
 		die debug( 'package_declarator', $parsed );
-	}
-
-	class DefLongName does Node {
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< name >], [< colonpair >] ) {
-				return self.bless(
-					:content(
-						:name(
-							Name.new(
-								$parsed.hash.<name>
-							)
-						),
-						:colonpair()
-					)
-				)
-			}
-			die debug( 'deflongname', $parsed );
-		}
-	}
-
-	class CharSpec does Node {
-		method new( Mu $parsed ) {
-			if $parsed.list {
-				my @child;
-				for $parsed.list -> $list {
-					my @_child;
-					for $list.list -> $_list {
-						my @__child;
-						for $_list.list {
-							if assert-Str( $_ ) {
-								@__child.push( $_ );
-								next
-							}
-							die debug( 'charspec', $_ );
-						}
-	#					die debug( 'charspec', $_list );
-					}
-	#				die debug( 'charspec', $list );
-				}
-				return self.bless(
-					:child( @child )
-				)
-			}
-			die debug( 'charspec', $parsed );
-		}
-	}
-
-	class CClassElem_INTERMEDIARY does Node {
-	}
-
-	class CClassElem does Node {
-		method new( Mu $parsed ) {
-			if $parsed.list {
-				my @child;
-				for $parsed.list {
-					if assert-hash-keys( $_, [< sign charspec >] ) {
-						@child.push(
-							CClassElem_INTERMEDIARY.new(
-								:content(
-									:sign(
-										Sign.new(
-											$_.hash.<sign>
-										)
-									),
-									:charspec(
-										CharSpec.new(
-											$_.hash.<charspec>
-										)
-									)
-								)
-							)
-						);
-						next
-					}
-					die debug( 'cclass_elem', $_ );
-				}
-				return self.bless(
-					:child( @child )
-				)
-			}
-			die debug( 'cclass_elem', $parsed );
-		}
-	}
-
-	class Assertion does Node {
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< cclass_elem >] ) {
-				return self.bless(
-					:content(
-						:cclass_elem(
-							CClassElem.new(
-								$parsed.hash.<cclass_elem>
-							)
-						)
-					)
-				)
-			}
-			die debug( 'assertion', $parsed );
-		}
-	}
-
-	class MetaChar does Node {
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< sym >] ) {
-				return self.bless(
-					:content(
-						:sym(
-							Sym.new(
-								$parsed.hash.<sym>
-							)
-						)
-					)
-				)
-			}
-			if assert-hash-keys( $parsed, [< backslash >] ) {
-				return self.bless(
-					:content(
-						:backslash(
-							BackSlash.new(
-								$parsed.hash.<backslash>
-							)
-						)
-					)
-				)
-			}
-			if assert-hash-keys( $parsed, [< assertion >] ) {
-				return self.bless(
-					:content(
-						:metachar(
-							Assertion.new(
-								$parsed.hash.<assertion>
-							)
-						)
-					)
-				)
-			}
-			die debug( 'metachar', $parsed );
-		}
-	}
-
-	class Atom does Node {
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< metachar >] ) {
-				return self.bless(
-					:content(
-						:metachar(
-							MetaChar.new(
-								$parsed.hash.<metachar>
-							)
-						)
-					)
-				)
-			}
-			if $parsed.Str {
-				return self.bless( :name( $parsed.Str ) )
-			}
-			die debug( 'atom', $parsed );
-		}
-	}
-
-	class Noun does Node {
-		method new( Mu $parsed ) {
-			if $parsed.list {
-				my @child;
-				for $parsed.list {
-					if assert-hash-keys( $_, [< atom >],
-								 [< sigfinal >] ) {
-						@child.push(
-							Atom.new(
-								$_.hash.<atom>
-							)
-						);
-						next
-					}
-					die debug( 'noun', $_ );
-				}
-				return self.bless(
-					:child( @child )
-				)
-			}
-			die debug( 'noun', $parsed );
-		}
-	}
-
-	class TermIsh is Node {
-		method new( Mu $parsed ) {
-			if $parsed.list {
-				my @child;
-				for $parsed.list {
-					if assert-hash-keys( $_, [< noun >] ) {
-						@child.push(
-							Noun.new(
-								$_.hash.<noun>
-							)
-						);
-						next
-					}
-					die debug( 'termish', $_ );
-				}
-				return self.bless(
-					:child( @child )
-				)
-			}
-			if assert-hash-keys( $parsed, [< noun >] ) {
-				return self.bless(
-					:content(
-						:noun(
-							Noun.new(
-								$parsed.hash.<noun>
-							)
-						)
-					)
-				)
-			}
-			die debug( 'termish', $parsed );
-		}
-	}
-
-	class TermConj does Node {
-		method new( Mu $parsed ) {
-			if $parsed.list {
-				my @child;
-				for $parsed.list {
-					if assert-hash-keys( $_, [< termish >] ) {
-						@child.push(
-							TermIsh.new(
-								$_.hash.<termish>
-							)
-						);
-						next
-					}
-					die debug( 'termconj', $_ );
-				}
-				return self.bless(
-					:child( @child )
-				)
-			}
-			die debug( 'termconj', $parsed );
-		}
-	}
-
-	class TermAlt does Node {
-		method new( Mu $parsed ) {
-			if $parsed.list {
-				my @child;
-				for $parsed.list {
-					if assert-hash-keys( $_, [< termconj >] ) {
-						@child.push(
-							TermConj.new(
-								$_.hash.<termconj>
-							)
-						);
-						next
-					}
-					die debug( 'termalt', $_ );
-				}
-				return self.bless(
-					:child( @child )
-				)
-			}
-			die debug( 'termalt', $parsed );
-		}
-	}
-
-	class TermConjSeq does Node {
-		method new( Mu $parsed ) {
-			if $parsed.list {
-				my @child;
-				for $parsed.list {
-					if assert-hash-keys( $_, [< termalt >] ) {
-						@child.push(
-							TermAlt.new(
-								$_.hash.<termalt>
-							)
-						);
-						next
-					}
-					die debug( 'termconjseq', $_ );
-				}
-				return self.bless(
-					:child( @child )
-				)
-			}
-			if assert-hash-keys( $parsed, [< termalt >] ) {
-				return self.bless(
-					:content(
-						:termalt(
-							TermAlt.new(
-								$parsed.hash.<termalt>
-							)
-						)
-					)
-				)
-			}
-			die debug( 'termconjseq', $parsed );
-		}
-	}
-
-	class TermAltSeq does Node {
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< termconjseq >] ) {
-				return self.bless(
-					:content(
-						:termconjseq(
-							TermConjSeq.new(
-								$parsed.hash.<termconjseq>
-							)
-						)
-					)
-				)
-			}
-			die debug( 'termaltseq', $parsed );
-		}
-	}
-
-	class TermSeq does Node {
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< termaltseq >] ) {
-				return self.bless(
-					:content(
-						:termaltseq(
-							TermAltSeq.new(
-								$parsed.hash.<termaltseq>
-							)
-						)
-					)
-				)
-			}
-			die debug( 'termseq', $parsed );
-		}
-	}
-
-	class Nibble does Node {
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< termseq >] ) {
-				return self.bless(
-					:content(
-						:termseq(
-							TermSeq.new(
-								$parsed.hash.<termseq>
-							)
-						)
-					)
-				)
-			}
-			if $parsed.Str {
-				return self.bless( :name( $parsed.Str ) )
-			}
-			die debug( 'nibble', $parsed );
-		}
-	}
-
-	class RegexDef does Node {
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< deflongname nibble >],
-						      [< signature trait >] ) {
-				return self.bless(
-					:content(
-						:deflongname(
-							DefLongName.new(
-								$parsed.hash.<deflongname>
-							)
-						),
-						:nibble(
-							Nibble.new(
-								$parsed.hash.<nibble>
-							)
-						),
-						:signature(),
-						:trait()
-					)
-				)
-			}
-			die debug( 'regex_def', $parsed );
-		}
-	}
-
-	class RegexDeclarator does Node {
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< sym regex_def >] ) {
-				return self.bless(
-					:content(
-						:sym(
-							Sym.new(
-								$parsed.hash.<sym>
-							)
-						),
-						:regex_def(
-							RegexDef.new(
-								$parsed.hash.<regex_def>
-							)
-						)
-					)
-				)
-			}
-			die debug( 'regex_declarator', $parsed );
-		}
 	}
 
 	class RoutineDef does Node {
@@ -1862,381 +2298,6 @@ class Perl6::Tidy {
 			)
 		}
 		die debug( 'blockoid', $parsed );
-	}
-
-	class Dotty does Node {
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< sym dottyop O >] ) {
-				return self.bless(
-					:content(
-						:sym(
-							Sym.new(
-								$parsed.hash.<sym>
-							)
-						),
-						:dottyop(
-							DottyOp.new(
-								$parsed.hash.<dottyop>
-							)
-						),
-						:O(
-							O.new(
-								$parsed.hash.<O>
-							)
-						)
-					)
-				)
-			}
-			die debug( 'dotty', $parsed );
-		}
-	}
-
-	class SemiList does Node {
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [], [< statement >] ) {
-				return self.bless
-			}
-			die debug( 'semilist', $parsed );
-		}
-	}
-
-	class Circumfix does Node {
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< semilist >] ) {
-				return self.bless(
-					:content(
-						:semilist(
-							SemiList.new(
-								$parsed.hash.<semilist>
-							)
-						)
-					)
-				)
-			}
-			if assert-hash-keys( $parsed, [< binint VALUE >] ) {
-				return self.bless(
-					:content(
-						:binint(
-							BinInt.new(
-								$parsed.hash.<binint>
-							)
-						),
-						:VALUE(
-							VALUE.new(
-								$parsed.hash.<VALUE>
-							)
-						)
-					)
-				)
-			}
-			if assert-hash-keys( $parsed, [< octint VALUE >] ) {
-				return self.bless(
-					:content(
-						:octint(
-							OctInt.new(
-								$parsed.hash.<octint>
-							)
-						),
-						:VALUE(
-							VALUE.new(
-								$parsed.hash.<VALUE>
-							)
-						)
-					)
-				)
-			}
-			if assert-hash-keys( $parsed, [< hexint VALUE >] ) {
-				return self.bless(
-					:content(
-						:hexint(
-							HexInt.new(
-								$parsed.hash.<hexint>
-							)
-						),
-						:VALUE(
-							VALUE.new(
-								$parsed.hash.<VALUE>
-							)
-						)
-					)
-				)
-			}
-			die debug( 'circumfix', $parsed );
-		}
-	}
-
-	class B does Node {
-		method new( Mu $parsed ) {
-			if assert-Bool( $parsed ) {
-				return self.bless( :name( $parsed.Bool ) )
-			}
-			die debug( 'B', $parsed );
-		}
-	}
-
-	class Babble does Node {
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< B >], [< quotepair >] ) {
-				return self.bless(
-					:content(
-						:B(
-							B.new(
-								$parsed.hash.<B>
-							)
-						),
-						:quotepair()
-					)
-				)
-			}
-			die debug( 'babble', $parsed );
-		}
-	}
-
-	class Quibble does Node {
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< babble nibble >] ) {
-				return self.bless(
-					:content(
-						:babble(
-							Babble.new(
-								$parsed.hash.<babble>
-							)
-						),
-						:nibble(
-							Nibble.new(
-								$parsed.hash.<nibble>
-							)
-						)
-					)
-				)
-			}
-			die debug( 'quibble', $parsed );
-		}
-	}
-
-	class Quote does Node {
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< nibble >] ) {
-				return self.bless(
-					:content(
-						:nibble(
-							Nibble.new(
-								$parsed.hash.<nibble>
-							)
-						)
-					)
-				)
-			}
-			if assert-hash-keys( $parsed, [< quibble >] ) {
-				return self.bless(
-					:content(
-						:quibble(
-							Quibble.new(
-								$parsed.hash.<quibble>
-							)
-						)
-					)
-				)
-			}
-			die debug( 'quote', $parsed );
-		}
-	}
-
-	class RadNumber does Node {
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< circumfix radix >],
-						      [< exp base >] ) {
-				return self.bless(
-					:content(
-						:circumfix(
-							Circumfix.new(
-								$parsed.hash.<circumfix>,
-							)
-						),
-						:radix(
-							Radix.new(
-								$parsed.hash.<radix>,
-							)
-						),
-						:exp(),
-						:base()
-					)
-				)
-			}
-			die debug( 'rad_number', $parsed );
-		}
-	}
-
-	class DecNumber does Node {
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< int coeff frac >] ) {
-				return self.bless(
-					:content(
-						:int(
-							_Int.new(
-								$parsed.hash.<int>
-							)
-						),
-						:coeff(
-							Coeff.new(
-								$parsed.hash.<coeff>
-							)
-						),
-						:frac(
-							Frac.new(
-								$parsed.hash.<frac>
-							)
-						)
-					)
-				)
-			}
-			if assert-hash-keys( $parsed, [< int coeff escale >] ) {
-				return self.bless(
-					:content(
-						:int(
-							_Int.new(
-								$parsed.hash.<int>
-							)
-						),
-						:coeff(
-							Coeff.new(
-								$parsed.hash.<coeff>
-							)
-						),
-						:escale(
-							EScale.new(
-								$parsed.hash.<escale>
-							)
-						)
-					)
-				)
-			}
-			die debug( 'dec_number', $parsed );
-		}
-	}
-
-	class Numish does Node {
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< integer >] ) {
-				return self.bless(
-					:content(
-						:integer(
-							Integer.new(
-								$parsed.hash.<integer>
-							)
-						)
-					)
-				)
-			}
-			if assert-hash-keys( $parsed, [< rad_number >] ) {
-				return self.bless(
-					:content(
-						:rad_number(
-							RadNumber.new(
-								$parsed.hash.<rad_number>
-							)
-						)
-					)
-				)
-			}
-			if assert-hash-keys( $parsed, [< dec_number >] ) {
-				return self.bless(
-					:content(
-						:dec_number(
-							DecNumber.new(
-								$parsed.hash.<dec_number>
-							)
-						)
-					)
-				)
-			}
-			die debug( 'numish', $parsed );
-		}
-	}
-
-	class Number does Node {
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< numish >] ) {
-				return self.bless(
-					:content(
-						:numish(
-							Numish.new(
-								$parsed.hash.<numish>
-							)
-						)
-					)
-				)
-			}
-			die debug( 'number', $parsed );
-		}
-	}
-
-	class Value does Node {
-		method new( Mu $parsed ) {
-			if assert-hash-keys( $parsed, [< number >] ) {
-				return self.bless(
-					:content(
-						:number(
-							Number.new(
-								$parsed.hash.<number>
-							)
-						)
-					)
-				)
-			}
-			if assert-hash-keys( $parsed, [< quote >] ) {
-				return self.bless(
-					:content(
-						:quote(
-							Quote.new(
-								$parsed.hash.<quote>
-							)
-						)
-					)
-				)
-			}
-			die debug( 'value', $parsed );
-		}
-	}
-
-	# XXX This is a compound type
-	class IdentifierArgs does Node {
-		method new( Mu $parsed ) {
-			return self.bless(
-				:content(
-					:identifier(
-						Identifier.new(
-							$parsed.hash.<identifier>
-						)
-					),
-					:args(
-						Args.new(
-							$parsed.hash.<args>
-						)
-					)
-				)
-			)
-		}
-	}
-
-	# XXX This is a compound type
-	class LongNameArgs does Node {
-		method new( Mu $parsed ) {
-			return self.bless(
-				:content(
-					:longname(
-						LongName.new(
-							$parsed.hash.<longname>
-						)
-					),
-					:args(
-						Args.new(
-							$parsed.hash.<args>
-						)
-					)
-				)
-			)
-		}
 	}
 
 	# XXX This is a compound type
@@ -2619,31 +2680,6 @@ class Perl6::Tidy {
 		die debug( 'post_constraint', $parsed );
 	}
 
-	class VariableDeclarator does Node {
-		method new( Mu $parsed ) {
-			if assert-hash-keys(
-				$parsed,
-				[< variable >],
-				[< semilist postcircumfix signature trait post_constraint >] ) {
-				return self.bless(
-					:content(
-						:variable(
-							Variable.new(
-								$parsed.hash.<variable>
-							)
-						),
-						:semilist(),
-						:postcircumfix(),
-						:signature(),
-						:trait(),
-						:post_constraint()
-					)
-				)
-			}
-			die debug( 'variable_declarator', $parsed );
-		}
-	}
-
 	class MultiDeclarator does Node {
 	}
 
@@ -2814,40 +2850,6 @@ class Perl6::Tidy {
 			)
 		}
 		die debug( 'DECL', $parsed );
-	}
-
-	class TypeName_INTERMEDIARY does Node {
-	}
-
-	class TypeName does Node {
-		method new( Mu $parsed ) {
-			if $parsed.list {
-				my @child;
-				for $parsed.list {
-					if assert-hash-keys( $_, [< longname >],
-								 [< colonpair >] ) {
-						@child.push(
-							TypeName_INTERMEDIARY.new(
-								:content(
-									:longname(
-										LongName.new(
-											$_.hash.<longname>
-										)
-									),
-									:colonpair()
-								)
-							)
-						);
-						next;
-					}
-					die debug( 'typename', $_ );
-				}
-				return self.bless(
-					:child( @child )
-				)
-			}
-			die debug( 'typename', $parsed );
-		}
 	}
 
 	class Scoped is Node {
