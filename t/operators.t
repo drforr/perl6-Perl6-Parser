@@ -1059,14 +1059,14 @@ subtest {
 		is $parsed.child.elems, 1;
 	}, Q[any];
 
-#	XXX Is Z= really list *prefix*?
-#	subtest {
-#		plan 2;
-#
-#		my $parsed = $pt.tidy( Q{my @a; my @b; @a Z= @b} );
-#		isa-ok $parsed, 'Perl6::Tidy::Root';
-#		is $parsed.child.elems, 1;
-#	}, Q[Z=];
+	# XXX Is Z= really list *prefix*?
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{my @a; my @b; @a Z= @b} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q[Z=];
 }, 'list prefix';
 
 subtest {

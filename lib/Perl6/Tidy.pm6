@@ -375,9 +375,23 @@ class Perl6::Tidy {
 
 	sub assert-hash-keys( Mu $parsed, $keys, $defined-keys = [] ) {
 		if $parsed.hash {
-			die "Too many keys " ~ $parsed.hash.keys.gist
+			my @keys;
+			my @defined-keys;
+			for $parsed.hash.keys {
+				if $parsed.hash.{$_} {
+					@keys.push( $_ );
+				}
+				elsif $parsed.hash:defined{$_} {
+					@defined-keys.push( $_ );
+				}
+			}
+
+			die "Too many keys " ~ @keys.gist ~
+					       ", " ~
+				               @defined-keys.gist
 				if $parsed.hash.keys.elems >
 					$keys.elems + $defined-keys.elems;
+			
 			for @( $keys ) -> $key {
 				return False unless $parsed.hash.{$key}
 			}
@@ -906,6 +920,9 @@ class Perl6::Tidy {
 		}
 	}
 
+	# "forward" declaration, sigh.
+	class InfixIsh {...}
+
 	class OPER does Node {
 		method new( Mu $parsed ) {
 			if assert-hash-keys( $parsed, [< sym dottyop O >] ) {
@@ -919,6 +936,29 @@ class Perl6::Tidy {
 						:dottyop(
 							DottyOp.new(
 								$parsed.hash.<dottyop>
+							)
+						),
+						:O(
+							O.new(
+								$parsed.hash.<O>
+							)
+						)
+					)
+				)
+			}
+			if assert-hash-keys(
+				$parsed,
+				[< sym infixish O >] ) {
+				return self.bless(
+					:content(
+						:sym(
+							Sym.new(
+								$parsed.hash.<sym>
+							)
+						),
+						:infixish(
+							InfixIsh.new(
+								$parsed.hash.<infixish>
 							)
 						),
 						:O(
@@ -946,6 +986,30 @@ class Perl6::Tidy {
 				)
 			}
 			die debug( 'OPER', $parsed );
+		}
+	}
+
+	class InfixIsh does Node {
+		method new( Mu $parsed ) {
+			if assert-hash-keys(
+				$parsed,
+				[< infix OPER >] ) {
+				return self.bless(
+					:content(
+						:infix(
+							Infix.new(
+								$parsed.hash.<infix>
+							)
+						),
+						:OPER(
+							OPER.new(
+								$parsed.hash.<OPER>
+							)
+						)
+					)
+				)
+			}
+			die debug( 'infixish', $parsed );
 		}
 	}
 
@@ -2162,6 +2226,22 @@ class Perl6::Tidy {
 								)
 							),
 							:prefix_postfix_meta_operator()
+						),
+						:child( @child )
+					)
+				}
+				if assert-hash-keys(
+					$parsed,
+					[< OPER >],
+					[< infix_prefix_meta_operator >] ) {
+					return EXPR.new(
+						:content(
+							:OPER(
+								OPER.new(
+									$parsed.hash.<OPER>
+								)
+							),
+							:infix_prefix_meta_operator()
 						),
 						:child( @child )
 					)
