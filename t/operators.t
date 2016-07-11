@@ -723,21 +723,21 @@ subtest {
 		is $parsed.child.elems, 1;
 	}, Q[eqv];
 
-#	subtest {
-#		plan 2;
-#
-#		my $parsed = $pt.tidy( Q{3 !eqv 2} );
-#		isa-ok $parsed, 'Perl6::Tidy::Root';
-#		is $parsed.child.elems, 1;
-#	}, Q[!eqv];
-#
-#	subtest {
-#		plan 2;
-#
-#		my $parsed = $pt.tidy( Q{3 =~= 2} );
-#		isa-ok $parsed, 'Perl6::Tidy::Root';
-#		is $parsed.child.elems, 1;
-#	}, Q[=~=];
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{3 !eqv 2} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q[!eqv];
+
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{3 =~= 2} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q[=~=];
 }, 'chaining infix';
 
 subtest {

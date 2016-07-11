@@ -169,6 +169,8 @@ class SemiList {...}
 class Statement {...}
 class StatementList {...}
 class Value {...}
+class _Signature {...} # Sort these out later.
+class _Variable {...}
 
 
 class BinInt does Node {
@@ -838,7 +840,7 @@ class FakeSignature does Node {
 			return self.bless(
 				:content(
 					:signature(
-						Signature.new(
+						_Signature.new(
 							$parsed.hash.<signature>
 						)
 					)
@@ -1107,9 +1109,8 @@ class EXPR does Node {
 					next;
 				}
 				if assert-hash-keys( $_, [< variable >] ) {
-say $_.dump;
 					@child.push(
-						Variable.new(
+						_Variable.new(
 							$_.hash.<variable>
 						)
 					);
@@ -1323,11 +1324,11 @@ say $_.dump;
 		if assert-hash-keys( $parsed, [< variable >] ) {
 			return self.bless(
 				:content(
-#					:variable(
-#						Variable.new(
-#							$parsed.hash.<variable>
-#						)
-#					)
+					:variable(
+						_Variable.new(
+							$parsed.hash.<variable>
+						)
+					)
 				)
 			)
 		}
@@ -1479,7 +1480,7 @@ class InfixIsh does Node {
 	}
 }
 
-class Signature does Node {
+class _Signature does Node {
 	method new( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [], [< param_sep parameter >] ) {
 			return self.bless(
@@ -1613,9 +1614,8 @@ class CClassElem does Node {
 	}
 }
 
-class Variable does Node {
+class _Variable does Node {
 	method new( Mu $parsed ) {
-say $parsed.dump;
 		if assert-hash-keys( $parsed, [< twigil sigil desigilname >] ) {
 			return self.bless(
 				:content(
@@ -2235,7 +2235,7 @@ class VariableDeclarator does Node {
 			return self.bless(
 				:content(
 					:variable(
-						Variable.new(
+						_Variable.new(
 							$parsed.hash.<variable>
 						)
 					),

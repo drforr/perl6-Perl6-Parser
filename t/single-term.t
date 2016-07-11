@@ -375,13 +375,13 @@ subtest {
 subtest {
 	plan 1;
 
-#	subtest {
-#		plan 2;
-#
-#		my $parsed = $pt.tidy( Q{:()} );
-#		isa-ok $parsed, 'Perl6::Tidy::Root';
-#		is $parsed.child.elems, 1;
-#	}, Q{:()};
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{:()} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q{:()};
 }, Q{signature};
 
 # vim: ft=perl6
