@@ -1999,7 +1999,7 @@ class MetaChar does Node {
 		if assert-hash-keys( $parsed, [< assertion >] ) {
 			return self.bless(
 				:content(
-					:metachar(
+					:assertion(
 						Assertion.new(
 							$parsed.hash.<assertion>
 						)
@@ -2371,12 +2371,12 @@ class RadNumber does Node {
 				:content(
 					:circumfix(
 						Circumfix.new(
-							$parsed.hash.<circumfix>,
+							$parsed.hash.<circumfix>
 						)
 					),
 					:radix(
 						Radix.new(
-							$parsed.hash.<radix>,
+							$parsed.hash.<radix>
 						)
 					),
 					:exp(),
