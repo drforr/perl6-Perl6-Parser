@@ -171,6 +171,10 @@ class StatementList {...}
 class Value {...}
 class _Signature {...} # Sort these out later.
 class _Variable {...}
+class DeSigilName {...}
+class Blockoid {...}
+class PBlock {...}
+class Nibble {...}
 
 
 class BinInt does Node {
@@ -246,6 +250,15 @@ class _Int does Node {
 			return self.bless( :name( $parsed.Int ) )
 		}
 		die debug( 'int', $parsed );
+	}
+}
+
+class Key does Node {
+	method new( Mu $parsed ) {
+		if assert-Str( $parsed ) {
+			return self.bless( :name( $parsed.Str ) )
+		}
+		die debug( 'key', $parsed );
 	}
 }
 
@@ -722,6 +735,38 @@ class ArgList does Node {
 
 class PostCircumfix does Node {
 	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< nibble O >] ) {
+			return self.bless(
+				:content(
+					:nibble(
+						Nibble.new(
+							$parsed.hash.<nibble>
+						)
+					),
+					:O(
+						O.new(
+							$parsed.hash.<O>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< semilist O >] ) {
+			return self.bless(
+				:content(
+					:semilist(
+						SemiList.new(
+							$parsed.hash.<semilist>
+						)
+					),
+					:O(
+						O.new(
+							$parsed.hash.<O>
+						)
+					)
+				)
+			)
+		}
 		if assert-hash-keys( $parsed, [< arglist O >] ) {
 			return self.bless(
 				:content(
@@ -771,6 +816,28 @@ class PostOp does Node {
 
 class Circumfix does Node {
 	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< nibble >] ) {
+			return self.bless(
+				:content(
+					:nibble(
+						Nibble.new(
+							$parsed.hash.<nibble>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< pblock >] ) {
+			return self.bless(
+				:content(
+					:pblock(
+						PBlock.new(
+							$parsed.hash.<pblock>
+						)
+					)
+				)
+			)
+		}
 		if assert-hash-keys( $parsed, [< semilist >] ) {
 			return self.bless(
 				:content(
@@ -851,8 +918,82 @@ class FakeSignature does Node {
 	}
 }
 
+class Var does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< sigil desigilname >] ) {
+			return self.bless(
+				:content(
+					:sigil(
+						Sigil.new(
+							$parsed.hash.<sigil>
+						)
+					),
+					:desigilname(
+						DeSigilName.new(
+							$parsed.hash.<desigilname>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'var', $parsed );
+	}
+}
+
+class PBlock does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< blockoid >] ) {
+			return self.bless(
+				:content(
+					:blockoid(
+						Blockoid.new(
+							$parsed.hash.<blockoid>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'circumfix', $parsed );
+	}
+}
+
+class ColonCircumfix does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed,
+				     [< circumfix >] ) {
+			return self.bless(
+				:content(
+					:circumfix(
+						Circumfix.new(
+							$parsed.hash.<circumfix>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'coloncicumfix', $parsed );
+	}
+}
+
 class ColonPair does Node {
 	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed,
+				     [< identifier coloncircumfix >] ) {
+			return self.bless(
+				:content(
+					:identifier(
+						Identifier.new(
+							$parsed.hash.<identifier>
+						)
+					),
+					:coloncircumfix(
+						ColonCircumfix.new(
+							$parsed.hash.<coloncircumfix>
+						)
+					)
+				)
+			)
+		}
 		if assert-hash-keys( $parsed, [< identifier >] ) {
 			return self.bless(
 				:content(
@@ -870,6 +1011,17 @@ class ColonPair does Node {
 					:fakesignature(
 						FakeSignature.new(
 							$parsed.hash.<fakesignature>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< var >] ) {
+			return self.bless(
+				:content(
+					:var(
+						Var.new(
+							$parsed.hash.<var>
 						)
 					)
 				)
@@ -908,6 +1060,17 @@ class DottyOp does Node {
 					:methodop(
 						MethodOp.new(
 							$parsed.hash.<methodop>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< colonpair >] ) {
+			return self.bless(
+				:content(
+					:colonpair(
+						ColonPair.new(
+							$parsed.hash.<colonpair>
 						)
 					)
 				)
@@ -1062,11 +1225,91 @@ class OPER does Node {
 				)
 			)
 		}
+		if assert-hash-keys( $parsed, [< semilist O >] ) {
+			return self.bless(
+				:content(
+					:semilist(
+						SemiList.new(
+							$parsed.hash.<semilist>)
+					),
+					:O(
+						O.new(
+							$parsed.hash.<O>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< nibble O >] ) {
+			return self.bless(
+				:content(
+					:nibble(
+						Nibble.new(
+							$parsed.hash.<nibble>)
+					),
+					:O(
+						O.new(
+							$parsed.hash.<O>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< O >] ) {
+			return self.bless(
+				:content(
+					:O(
+						O.new(
+							$parsed.hash.<O>
+						)
+					)
+				)
+			)
+		}
 		die debug( 'OPER', $parsed );
 	}
 }
 
 class Infix {...} # Forward
+
+class Val does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< value >] ) {
+			return self.bless(
+				:content(
+					:value(
+						Value.new(
+							$parsed.hash.<value>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'val', $parsed );
+	}
+}
+
+class FatArrow does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< val key >] ) {
+			return self.bless(
+				:content(
+					:val(
+						Val.new(
+							$parsed.hash.<val>
+						)
+					),
+					:key(
+						Key.new(
+							$parsed.hash.<key>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'fatarrow', $parsed );
+	}
+}
 
 class EXPR does Node {
 	method new( Mu $parsed ) {
@@ -1112,6 +1355,14 @@ class EXPR does Node {
 					@child.push(
 						_Variable.new(
 							$_.hash.<variable>
+						)
+					);
+					next;
+				}
+				if assert-hash-keys( $_, [< methodop >] ) {
+					@child.push(
+						MethodOp.new(
+							$_.hash.<methodop>
 						)
 					);
 					next;
@@ -1199,6 +1450,27 @@ class EXPR does Node {
 								)
 							),
 							:prefix_postfix_meta_operator()
+						),
+						:child( @child )
+					)
+				}
+				if assert-hash-keys(
+					$parsed,
+					[< postcircumfix OPER >],
+					[< postfix_prefix_meta_operator >] ) {
+					return self.bless(
+						:content(
+							:postcircumfix(
+								PostCircumfix.new(
+									$parsed.hash.<postcircumfix>
+								)
+							),
+							:OPER(
+								OPER.new(
+									$parsed.hash.<OPER>
+								)
+							),
+							:postfix_prefix_meta_operator()
 						),
 						:child( @child )
 					)
@@ -1393,6 +1665,17 @@ class EXPR does Node {
 					:regex_declarator(
 						RegexDeclarator.new(
 							$parsed.hash.<regex_declarator>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< fatarrow >] ) {
+			return self.bless(
+				:content(
+					:fatarrow(
+						FatArrow.new(
+							$parsed.hash.<fatarrow>
 						)
 					)
 				)
@@ -1932,6 +2215,9 @@ class Nibble does Node {
 		if $parsed.Str {
 			return self.bless( :name( $parsed.Str ) )
 		}
+		if $parsed.Bool {
+			return self.bless( :name( $parsed.Bool ) )
+		}
 		die debug( 'nibble', $parsed );
 	}
 }
@@ -1986,6 +2272,10 @@ class RegexDeclarator does Node {
 class SemiList does Node {
 	method new( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [], [< statement >] ) {
+			return self.bless
+		}
+		# XXX danger, Will Robinson!
+		if $parsed ~~ Any {
 			return self.bless
 		}
 		die debug( 'semilist', $parsed );

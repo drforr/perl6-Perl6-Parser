@@ -28,14 +28,7 @@ subtest {
 			is $parsed.child.elems, 1;
 		}, Q{our $a};
 
-		todo Q{'anon $a' not implemented yet};
-	#	subtest {
-	#		plan 2;
-	#
-	#		my $parsed = $pt.tidy( Q{anon $a} );
-	#		isa-ok $parsed, 'Perl6::Tidy::Root';
-	#		is $parsed.child.elems, 1;
-	#	}, Q{anon $a};
+		todo Q{'anon $a' not implemented yet, maybe not ever.};
 
 		subtest {
 			plan 2;
@@ -45,23 +38,9 @@ subtest {
 			is $parsed.child.elems, 1;
 		}, Q{state $a};
 
-		todo Q{'augment $a' not implemented yet};
-	#	subtest {
-	#		plan 2;
-	#
-	#		my $parsed = $pt.tidy( Q{augment $a} );
-	#		isa-ok $parsed, 'Perl6::Tidy::Root';
-	#		is $parsed.child.elems, 1;
-	#	}, Q{augment $a};
+		todo Q{'augment $a' not implemented yet, maybe not ever.};
 
-		todo Q{'supersede $a' not implemented yet};
-	#	subtest {
-	#		plan 2;
-	#
-	#		my $parsed = $pt.tidy( Q{supersede $a} );
-	#		isa-ok $parsed, 'Perl6::Tidy::Root';
-	#		is $parsed.child.elems, 1;
-	#	}, Q{supersede $a};
+		todo Q{'supersede $a' not implemented yet, maybe not ever.};
 	}, Q{untyped};
 
 	subtest {
@@ -105,7 +84,6 @@ subtest {
 		is $parsed.child.elems, 1;
 	}, Q{sub foo returns Int {}};
 }, Q{subroutine};
-
 
 subtest {
 	plan 7;
