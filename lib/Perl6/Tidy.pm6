@@ -175,6 +175,7 @@ class DeSigilName {...}
 class Blockoid {...}
 class PBlock {...}
 class Nibble {...}
+class InfixIsh {...}
 
 
 class BinInt does Node {
@@ -790,6 +791,7 @@ class PostCircumfix does Node {
 class PostOp does Node {
 	method new( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< sym postcircumfix O >] ) {
+say "pper: " ~ $parsed.dump;
 			return self.bless(
 				:content(
 					:sym(
@@ -1181,7 +1183,7 @@ class OPER does Node {
 						)
 					),
 					:infixish(
-						Infix.new(
+						InfixIsh.new(
 							$parsed.hash.<infixish>
 						)
 					),
@@ -1529,12 +1531,12 @@ class EXPR does Node {
 		}
 		if assert-hash-keys( $parsed, [< sym args >] ) {
 			return self.bless(
-				:child( 
-					Sym.new(
-						$parsed.hash.<sym>
-					)
-				),
 				:content(
+					:sym( 
+						Sym.new(
+							$parsed.hash.<sym>
+						)
+					),
 					:args(
 						Args.new(
 							$parsed.hash.<args>
@@ -1546,8 +1548,10 @@ class EXPR does Node {
 		if assert-hash-keys( $parsed, [< identifier args >] ) {
 			return self.bless(
 				:content(
-					Identifier.new(
-						$parsed.hash.<identifier>
+					:identifier(
+						Identifier.new(
+							$parsed.hash.<identifier>
+						)
 					),
 					:args(
 						Args.new(
