@@ -1,3 +1,46 @@
+=begin pod
+
+=begin NAME
+
+Perl6::Tidy - Extract a Perl 6 AST from the NQP Perl 6 Parser
+
+=end NAME
+
+=begin SYNOPSIS
+
+    my $pt = Perl6::Tidy.new;
+    my $parsed = $pt.tidy( Q:to[_END_] );
+    say $parsed.perl6($format-settings); 
+    my $other = $pt.tidy-file( 't/clean-me.t' );
+
+=end SYNOPSIS
+
+=begin DESCRIPTION
+
+Uses the built-in Perl 6 parser exposed by the nqp module in order to parse Perl 6 from within Perl 6. If this scares you, well, it probably should. Once this is finished, you should be able to call C<.perl6> on the tidied output, along with a so-far-unspecified formatting object, and get back nicely-formatted Perl 6 code.
+
+As it stands, the C<.tidy> method returns a deeply-nested object representation of the Perl 6 code it's given. It handles the regex language, but not the other braided languages such as embedded blocks in strings. It will do so eventually, but for the moment I'm busy getting the grammar rules covered.
+
+While classes like L<EClass> won't go away, their parent classes like L<DecInteger> will remove them from the tree once their validation job has been done. For example, while the internals need to know that L<< $/<eclass> >> (the exponent for a scientific-notation number) hasn't been renamed or moved elsewhere in the tree, you as a consumer of the L<DecInteger> class don't need to know that. The C<DecInteger.perl6> method will delete the child classes so that we don't end up with a B<horribly> cluttered tree.
+
+Classes representing Perl 6 object code are currently in the same file as the main L<Perl6::Tidy> class, as moving them to separate files caused a severe performance penalty. When the time is right I'll look at moving these to another location, but as shuffling out 20 classes increased my runtime on my little ol' VM from 6 to 20 seconds, it's not worth my time to break them out. And besides, having them all in one file makes editing en masse easier.
+
+=end DESCRIPTION
+
+=begin METHODS
+
+=item tidy( Str $perl-code ) returns Perl6::Tidy::Root
+
+Given a Perl 6 code string, return the class structure, so you can see the parse tree in action. This is mostly because the internal L<Perl6::Tidy> objects are poorly named.
+
+=item perl6( Hash %format-settings ) returns Str
+
+Given a so-far undefined hash of format settings, return formatted Perl 6 code to meet the user's expectations.
+
+=end METHODS
+
+=end pod
+
 sub dump-parsed( Mu $parsed ) {
 	my @lines;
 	my @types;
@@ -10,6 +53,7 @@ sub dump-parsed( Mu $parsed ) {
 		     "' - Types: " ~
 		     @types.gist );
 	@lines.push( Q[{}:    ] ~ $parsed.hash.keys.gist );
+	# XXX
 	CATCH {
 		default { .resume } # workaround for X::Hash exception
 	}
@@ -606,6 +650,8 @@ class StatementControl does Node {
 
 class O does Node {
 	method new( Mu $parsed ) {
+		# XXX There has to be a better way to handle this NoMatch case
+		CATCH { when X::Multi::NoMatch {  } }
 		if $parsed ~~ Hash {
 			if $parsed.<prec> and
 			   $parsed.<fiddly> and
@@ -791,7 +837,6 @@ class PostCircumfix does Node {
 class PostOp does Node {
 	method new( Mu $parsed ) {
 		if assert-hash-keys( $parsed, [< sym postcircumfix O >] ) {
-say "pper: " ~ $parsed.dump;
 			return self.bless(
 				:content(
 					:sym(

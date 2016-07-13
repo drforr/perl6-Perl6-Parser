@@ -7,16 +7,25 @@ hard to put together.
 
 This module aims to fix that.
 
-The code is *BY NO MEANS READY FOR PRIME TIME*. The API basically isn't even
-started, the methods used to walk the grammar are primitive in the extreme.
-I desperately want to be able to use macros on this code, and it's already
-given me an idea for how I want to write Perl 6 macros.
+*THIS IS NOT READY FOR PRIME TIME*. This is very much a work in progress. At
+the moment I'm working on covering the grammar rules. The code is very much
+paranoid, for good reason, as it relies on the underlying match tree, in the
+murky area of NQP, or /Not Quite Perl/. It's pretty stable, but slow and
+relentlessly checks the details of the match object.
 
-Its test suite is noisy, because this is very much *still* in author debugging
-mode, and effectively spits back the match tree at every level.
-The code is woefully unoptimized, and I am very much aware that it could be
-written in something approximating proper Perl 6 style, but doing so at the
-moment would impede progress.
+Next steps will be to properly populate the whitespace in between tokens, and
+after that I'll take the time to make the classes behave more sanely.
+
+If you want to play with it, then the only thing to do right now is dump the
+$parsed output from a test suite, and I hope you have a pretty-printer. It
+currently handles non-trivial code as you can see by running the t/inception.t
+test, where the test suite parses itself.
+
+I make no guarantees that any of the tokens in the code are present in the
+final output, although it is my sincere hope that I haven't missed anything. In
+point of fact you'll note that the test suite only checks that the top-level
+object exists. I do intend to do some deeper tests shortly, but getting full
+coverage of the grammar is my current priority.
 
 PLEASE DO NOT ASSUME THIS IS STABLE OR IN ANY WAY REPRESENTATIVE OF THE FINAL
 PRODUCT. Doing so will void your warranty, and may cause demons to fly from

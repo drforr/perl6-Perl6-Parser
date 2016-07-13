@@ -1,6 +1,5 @@
 use v6;
 
-use nqp;
 use Test;
 use Perl6::Tidy;
 
@@ -14,7 +13,6 @@ subtest {
 	my $parsed = $pt.tidy( Q:to[_END_] );
 use v6;
 
-use nqp;
 use Test;
 use Perl6::Tidy;
 

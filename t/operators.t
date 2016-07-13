@@ -1,6 +1,5 @@
 use v6;
 
-use nqp;
 use Test;
 use Perl6::Tidy;
 
@@ -9,7 +8,7 @@ plan 24;
 my $pt = Perl6::Tidy.new;
 
 subtest {
-	plan 1;
+	plan 13;
 
 	subtest {
 		plan 2;
@@ -43,13 +42,13 @@ subtest {
 		is $parsed.child.elems, 1;
 	}, Q[.*say];
 
-#	subtest {
-#		plan 2;
-#
-#		my $parsed = $pt.tidy( Q{my $x; $x.()} );
-#		isa-ok $parsed, 'Perl6::Tidy::Root';
-#		is $parsed.child.elems, 1;
-#	}, Q[.()];
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{my $x; $x.()} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q[.()];
 
 	subtest {
 		plan 2;
@@ -75,21 +74,21 @@ subtest {
 		is $parsed.child.elems, 1;
 	}, Q[.<>];
 
-#	subtest {
-#		plan 2;
-#
-#		my $parsed = $pt.tidy( Q{my $x; $x.«»} );
-#		isa-ok $parsed, 'Perl6::Tidy::Root';
-#		is $parsed.child.elems, 1;
-#	}, Q[.«»];
+	subtest {
+		plan 2;
 
-#	subtest {
-#		plan 2;
-#
-#		my $parsed = $pt.tidy( Q{my $x; $x.::} );
-#		isa-ok $parsed, 'Perl6::Tidy::Root';
-#		is $parsed.child.elems, 1;
-#	}, Q[.::];
+		my $parsed = $pt.tidy( Q{my $x; $x.«»} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q[.«»];
+
+	subtest {
+		plan 2;
+
+		my $parsed = $pt.tidy( Q{my $x; $x.Foo::Bar} );
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+		is $parsed.child.elems, 1;
+	}, Q[.::];
 
 	subtest {
 		plan 2;
