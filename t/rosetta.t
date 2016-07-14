@@ -146,9 +146,9 @@ sub slide (@c is copy) {
     @c;
 }
 
-#multi sub move('up') {
+multi sub move('up') {
     map { @board[*;$_] = reverse slide reverse @board[*;$_] }, ^n;
-#}
+}
  
 #multi sub move('down') {
     map { @board[*;$_] = slide @board[*;$_] }, ^n;

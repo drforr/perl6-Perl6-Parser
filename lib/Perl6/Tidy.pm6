@@ -2061,6 +2061,17 @@ class _EXPR does Node {
 				)
 			)
 		}
+		if assert-hash-keys( $parsed, [< multi_declarator >] ) {
+			return self.bless(
+				:content(
+					:multi_declarator(
+						_MultiDeclarator.new(
+							$parsed.hash.<multi_declarator>
+						)
+					)
+				)
+			)
+		}
 		die debug( 'EXPR', $parsed );
 	}
 }
@@ -3119,6 +3130,19 @@ class _Declarator does Node {
 				)
 			)
 		}
+		if assert-hash-keys( $parsed, [< routine_declarator >],
+					      [< trait >] ) {
+			return self.bless(
+				:content(
+					:routine_declarator(
+						_RoutineDeclarator.new(
+							$parsed.hash.<routine_declarator>
+						)
+					),
+					:trait()
+				)
+			)
+		}
 		die debug( 'declarator', $parsed );
 	}
 }
@@ -3295,6 +3319,22 @@ class _MultiSig does Node {
 class _MultiDeclarator does Node {
 	method new( Mu $parsed ) {
 		trace "MultiDeclarator";
+		if assert-hash-keys( $parsed, [< sym declarator >] ) {
+			return self.bless(
+				:content(
+					:sym(
+						_Sym.new(
+							$parsed.hash.<sym>
+						)
+					),
+					:declarator(
+						_Declarator.new(
+							$parsed.hash.<declarator>
+						)
+					)
+				)
+			)
+		}
 		if assert-hash-keys( $parsed, [< declarator >] ) {
 			return self.bless(
 				:content(
