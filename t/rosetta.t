@@ -54,20 +54,6 @@ END
 subtest {
 	plan 1;
 
-#my @solved = [1,2,3,4],[5,6,7,8];
-# vs.
-#my @solved = [1,2,3,4];
-# The shorter version is fine, longer version locks up.
-
-#	subtest {
-#		plan 1;
-#
-#		my $parsed = $pt.tidy( Q:to[_END_] );
-#my @solved = [1,2,3,4],[5,6,7,8],[9,10,11,12],[13,14,15,' '];
-#my @solved = [1,2,3,4],[5,6,7,8];
-#_END_
-#	}, 'locks up';
-
 	subtest {
 		plan 1;
 
@@ -100,14 +86,11 @@ my %dir = (
    "\e[D" => 'left',
 );
 
+my @solved = [1,2,3,4],[5,6,7,8],[9,10,11,12],[13,14,15,' '];
+my @board;
 _END_
 
-#my @solved = [1,2,3,4],[5,6,7,8],[9,10,11,12],[13,14,15,' ']; LOCKS UP
-
 #`(
-my @solved = [1,2,3,4],[5,6,7,8],[9,10,11,12],[13,14,15,' ']; LOCKS UP
-
-my @board;
 new();
  
 sub new () {

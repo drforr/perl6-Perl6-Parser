@@ -1692,23 +1692,10 @@ class EXPR does Node {
 					);
 					next
 				}
-				if assert-hash-keys( $_, [< postfix OPER >],
-							 [< postfix_prefix_meta_operator >] ) {
-					@child.push(
-						PostfixOPER.new( $_ )
-					);
-					next
-				}
 				if assert-hash-keys( $_, [< prefix OPER >],
 							 [< prefix_postfix_meta_operator >] ) {
 					@child.push(
 						PrefixOPER.new( $_ )
-					);
-					next
-				}
-				if assert-hash-keys( $_, [< infix OPER >] ) {
-					@child.push(
-						InfixOPER.new( $_ )
 					);
 					next
 				}
@@ -1718,193 +1705,129 @@ class EXPR does Node {
 					);
 					next
 				}
-				if assert-hash-keys( $_, [< longname args >] ) {
-					@child.push(
-						LongNameArgs.new( $_ )
-					);
-					next
-				}
-				if assert-hash-keys( $_, [< statement_prefix >] ) {
-					@child.push(
-						StatementPrefix.new( $_ )
-					);
-					next
-				}
-				if assert-hash-keys( $_, [< longname >] ) {
-					@child.push(
-						LongName.new(
-							$_.hash.<longname>
-						)
-					);
-					next
-				}
-				if assert-hash-keys( $_, [< value >] ) {
-					@child.push(
-						Value.new(
-							$_.hash.<value>
-						)
-					);
-					next
-				}
-				if assert-hash-keys( $_, [< variable >] ) {
-					@child.push(
-						_Variable.new(
-							$_.hash.<variable>
-						)
-					);
-					next
-				}
-				if assert-hash-keys( $_, [< methodop >] ) {
-					@child.push(
-						MethodOp.new(
-							$_.hash.<methodop>
-						)
-					);
-					next
-				}
-				die dump( $_ );
 			}
-			if $parsed.hash {
-				if assert-hash-keys(
-					$parsed,
-					[< OPER dotty >],
-					[< postfix_prefix_meta_operator >] ) {
-					return self.bless(
-						:content(
-							:OPER(
-								OPER.new(
-									$parsed.hash.<OPER>
-								)
-							),
-							:dotty(
-								Dotty.new(
-									$parsed.hash.<dotty>
-								)
+			if assert-hash-keys(
+				$parsed,
+				[< OPER dotty >],
+				[< postfix_prefix_meta_operator >] ) {
+				return self.bless(
+					:content(
+						:OPER(
+							OPER.new(
+								$parsed.hash.<OPER>
 							)
 						),
-						:postfix_prefix_meta_operator(),
-						:child( @child )
-					)
-				}
-				if assert-hash-keys(
-					$parsed,
-					[< postfix OPER >],
-					[< postfix_prefix_meta_operator >] ) {
-					return self.bless(
-						:content(
-							:postfix(
-								Postfix.new(
-									$parsed.hash.<postfix>
-								)
-							),
-							:OPER(
-								OPER.new(
-									$parsed.hash.<OPER>
-								)
-							),
-							:postfix_prefix_meta_operator()
-						),
-						:child( @child )
-					)
-				}
-				if assert-hash-keys(
-					$parsed,
-					[< infix OPER >],
-					[< prefix_postfix_meta_operator >] ) {
-					return self.bless(
-						:content(
-							:infix(
-								Infix.new(
-									$parsed.hash.<infix>
-								)
-							),
-							:OPER(
-								OPER.new(
-									$parsed.hash.<OPER>
-								)
-							),
-							:infix_postfix_meta_operator()
-						),
-						:child( @child )
-					)
-				}
-				if assert-hash-keys(
-					$parsed,
-					[< prefix OPER >],
-					[< prefix_postfix_meta_operator >] ) {
-					return self.bless(
-						:content(
-							:prefix(
-								Prefix.new(
-									$parsed.hash.<prefix>
-								)
-							),
-							:OPER(
-								OPER.new(
-									$parsed.hash.<OPER>
-								)
-							),
-							:prefix_postfix_meta_operator()
-						),
-						:child( @child )
-					)
-				}
-				if assert-hash-keys(
-					$parsed,
-					[< postcircumfix OPER >],
-					[< postfix_prefix_meta_operator >] ) {
-					return self.bless(
-						:content(
-							:postcircumfix(
-								PostCircumfix.new(
-									$parsed.hash.<postcircumfix>
-								)
-							),
-							:OPER(
-								OPER.new(
-									$parsed.hash.<OPER>
-								)
-							),
-							:postfix_prefix_meta_operator()
-						),
-						:child( @child )
-					)
-				}
-				if assert-hash-keys(
-					$parsed,
-					[< OPER >],
-					[< infix_prefix_meta_operator >] ) {
-					return self.bless(
-						:content(
-							:OPER(
-								OPER.new(
-									$parsed.hash.<OPER>
-								)
-							),
-							:infix_prefix_meta_operator()
-						),
-						:child( @child )
-					)
-				}
-				if assert-hash-keys( $parsed, [< longname >] ) {
-					return self.bless(
-						:content(
-							:longname(
-								LongName.new(
-									$parsed.hash.<longname>
-								)
-							),
-						),
-						:child( @child )
-					)
-				}
-				die debug( 'EXPR', $parsed )
-			}
-			else {
-				return self.bless(
+						:dotty(
+							Dotty.new(
+								$parsed.hash.<dotty>
+							)
+						)
+					),
+					:postfix_prefix_meta_operator(),
 					:child( @child )
 				)
 			}
+			if assert-hash-keys(
+				$parsed,
+				[< postfix OPER >],
+				[< postfix_prefix_meta_operator >] ) {
+				return self.bless(
+					:content(
+						:postfix(
+							Postfix.new(
+								$parsed.hash.<postfix>
+							)
+						),
+						:OPER(
+							OPER.new(
+								$parsed.hash.<OPER>
+							)
+						),
+						:postfix_prefix_meta_operator()
+					),
+					:child( @child )
+				)
+			}
+			if assert-hash-keys(
+				$parsed,
+				[< infix OPER >],
+				[< prefix_postfix_meta_operator >] ) {
+				return self.bless(
+					:content(
+						:infix(
+							Infix.new(
+								$parsed.hash.<infix>
+							)
+						),
+						:OPER(
+							OPER.new(
+								$parsed.hash.<OPER>
+							)
+						),
+						:infix_postfix_meta_operator()
+					),
+					:child( @child )
+				)
+			}
+			if assert-hash-keys(
+				$parsed,
+				[< prefix OPER >],
+				[< prefix_postfix_meta_operator >] ) {
+				return self.bless(
+					:content(
+						:prefix(
+							Prefix.new(
+								$parsed.hash.<prefix>
+							)
+						),
+						:OPER(
+							OPER.new(
+								$parsed.hash.<OPER>
+							)
+						),
+						:prefix_postfix_meta_operator()
+					),
+					:child( @child )
+				)
+			}
+			if assert-hash-keys(
+				$parsed,
+				[< postcircumfix OPER >],
+				[< postfix_prefix_meta_operator >] ) {
+				return self.bless(
+					:content(
+						:postcircumfix(
+							PostCircumfix.new(
+								$parsed.hash.<postcircumfix>
+							)
+						),
+						:OPER(
+							OPER.new(
+								$parsed.hash.<OPER>
+							)
+						),
+						:postfix_prefix_meta_operator()
+					),
+					:child( @child )
+				)
+			}
+			if assert-hash-keys(
+				$parsed,
+				[< OPER >],
+				[< infix_prefix_meta_operator >] ) {
+				return self.bless(
+					:content(
+						:OPER(
+							OPER.new(
+								$parsed.hash.<OPER>
+							)
+						),
+						:infix_prefix_meta_operator()
+					),
+					:child( @child )
+				)
+			}
+			die debug( 'EXPR', $parsed )
 		}
 		if assert-hash-keys( $parsed, [< longname args >] ) {
 			return self.bless(
@@ -1976,22 +1899,6 @@ class EXPR does Node {
 					:statement_prefix(
 						StatementPrefix.new(
 							$parsed.hash.<statement_prefix>
-						)
-					)
-				)
-			)
-		}
-		if assert-hash-keys( $parsed, [< longname args >] ) {
-			return self.bless(
-				:content(
-					:longname(
-						LongName.new(
-							$parsed.hash.<longname>
-						)
-					),
-					:args(
-						Args.new(
-							$parsed.hash.<args>
 						)
 					)
 				)
@@ -2089,17 +1996,6 @@ class EXPR does Node {
 					:package_declarator(
 						PackageDeclarator.new(
 							$parsed.hash.<package_declarator>
-						)
-					)
-				)
-			)
-		}
-		if assert-hash-keys( $parsed, [< regex_declarator >] ) {
-			return self.bless(
-				:content(
-					:regex_declarator(
-						RegexDeclarator.new(
-							$parsed.hash.<regex_declarator>
 						)
 					)
 				)
