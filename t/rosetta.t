@@ -3,7 +3,7 @@ use v6;
 use Test;
 use Perl6::Tidy;
 
-plan 1;
+plan 2;
 
 my $pt = Perl6::Tidy.new;
 
