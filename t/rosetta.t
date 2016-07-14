@@ -57,6 +57,8 @@ subtest {
 	subtest {
 		plan 1;
 
+# The parser also recursively parses use'd classes, so since Term::termios might
+# not be present on all systems, stub it out.
 		my $parsed = $pt.tidy( Q:to[_END_] );
 class Term::termios { has $fd; method getattr {}; method unset_lflags { }; method unset_iflags { }; method setattr { } }
 #use Term::termios;
@@ -140,24 +142,24 @@ END
 sub slide (@c is copy) {
     my $t = (grep { /' '/ }, :k, @c)[0];
     return @c unless $t and $t > 0;
-#    @c[$t,$t-1] = @c[$t-1,$t];
+    @c[$t,$t-1] = @c[$t-1,$t];
     @c;
 }
 
 #multi sub move('up') {
-#    map { @board[*;$_] = reverse slide reverse @board[*;$_] }, ^n;
+    map { @board[*;$_] = reverse slide reverse @board[*;$_] }, ^n;
 #}
  
 #multi sub move('down') {
-#    map { @board[*;$_] = slide @board[*;$_] }, ^n;
+    map { @board[*;$_] = slide @board[*;$_] }, ^n;
 #}
  
 #multi sub move('left') {
-#    map { @board[$_] = reverse slide reverse @board[$_] }, ^n;
+    map { @board[$_] = reverse slide reverse @board[$_] }, ^n;
 #}
  
 #multi sub move('right') {
-#    map { @board[$_] = slide @board[$_] }, ^n;
+    map { @board[$_] = slide @board[$_] }, ^n;
 #}
  
 loop {

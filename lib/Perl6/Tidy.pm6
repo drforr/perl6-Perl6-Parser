@@ -143,6 +143,8 @@ class _InfixOPER {...}
 class _DottyOPER {...}
 class _PostfixOPER {...}
 class _PrefixOPER {...}
+class _PostfixOPER {...}
+class _PostCircumfixOPER {...}
 class _PostConstraint {...}
 class _MultiDeclarator {...}
 class _MultiSig {...}
@@ -1001,6 +1003,27 @@ class _ArgList does Node {
 	}
 }
 
+class _PostCircumfixOPER does Node {
+	method new( Mu $parsed ) {
+		trace "PostCircumfixOPER";
+		return self.bless(
+			:content(
+				:postcircumfix(
+					_PostCircumfix.new(
+						$parsed.hash.<postcircumfix>
+					)
+				),
+				:OPER(
+					_OPER.new(
+						$parsed.hash.<OPER>
+					)
+				),
+				:postfix_prefix_meta_operator()
+			)
+		)
+	}
+}
+
 class _PostCircumfix does Node {
 	method new( Mu $parsed ) {
 		trace "PostCircumfix";
@@ -1707,6 +1730,14 @@ class _EXPR does Node {
 							 [< postfix_prefix_meta_operator >] ) {
 					@child.push(
 						_DottyOPER.new( $_ )
+					);
+					next
+				}
+				if assert-hash-keys( $_,
+					[< postcircumfix OPER >],
+					[< postfix_prefix_meta_operator >] ) {
+					@child.push(
+						_PrefixOPER.new( $_ )
 					);
 					next
 				}
