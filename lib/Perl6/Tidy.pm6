@@ -68,6 +68,7 @@ class _Identifier {...}
 class _Name {...}
 class _LongName {...}
 class _ModuleName {...}
+class _ModifierExpr {...}
 class _Block {...}
 class _Blorst {...}
 class _StatementPrefix {...}
@@ -155,6 +156,8 @@ class _StatementList {...}
 class _SMExpr {...}
 class _StatementModLoop {...}
 class _StatementModLoopEXPR {...}
+class _StatementModCond {...}
+class _StatementModCondEXPR {...}
 class _Statement {...}
 class _Op {...}
 class _MoreName {...}
@@ -3588,6 +3591,47 @@ class _SMExpr does Node {
 	}
 }
 
+class _ModifierExpr does Node {
+	method new( Mu $parsed ) {
+		trace "ModifierExpr";
+		if assert-hash-keys( $parsed, [< EXPR >] ) {
+			return self.bless(
+				:content(
+					:EXPR(
+						_EXPR.new(
+							$parsed.hash.<EXPR>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'modifier_expr', $parsed );
+	}
+}
+
+class _StatementModCond does Node {
+	method new( Mu $parsed ) {
+		trace "StatementModCond";
+		if assert-hash-keys( $parsed, [< sym modifier_expr >] ) {
+			return self.bless(
+				:content(
+					:sym(
+						_Sym.new(
+							$parsed.hash.<sym>
+						)
+					),
+					:modifier_expr(
+						_ModifierExpr.new(
+							$parsed.hash.<modifier_expr>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'statement_mod_cond', $parsed );
+	}
+}
+
 class _StatementModLoop does Node {
 	method new( Mu $parsed ) {
 		trace "StatementModLoop";
@@ -3608,6 +3652,27 @@ class _StatementModLoop does Node {
 			)
 		}
 		die debug( 'statement_mod_loop', $parsed );
+	}
+}
+
+# XXX This is a compound type
+class _StatementModCondEXPR does Node {
+	method new( Mu $parsed ) {
+		trace "StatementModCondEXPR";
+		return self.bless(
+			:content(
+				:statement_mod_cond(
+					_StatementModCond.new(
+						$parsed.hash.<statement_mod_cond>
+					)
+				),
+				:EXPR(
+					_EXPR.new(
+						$parsed.hash.<EXPR>
+					)
+				)
+			)
+		)
 	}
 }
 
@@ -3641,6 +3706,14 @@ class _Statement does Node {
 				if assert-hash-keys( $_, [< statement_mod_loop EXPR >] ) {
 					@child.push(
 						_StatementModLoopEXPR.new(
+							$_
+						)
+					);
+					next
+				}
+				if assert-hash-keys( $_, [< statement_mod_cond EXPR >] ) {
+					@child.push(
+						_StatementModCondEXPR.new(
 							$_
 						)
 					);

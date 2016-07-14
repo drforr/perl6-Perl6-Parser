@@ -93,44 +93,33 @@ new();
 sub new () {
     loop {
 #        @board = shuffle();
-#        last if parity-ok(@board);
-    }
-}
-_END_
-
-#`(
-new();
- 
-sub new () {
-    loop {
-        @board = shuffle();
         last if parity-ok(@board);
     }
 }
  
-sub shuffle () {
-    my @c = [1,2,3,4],[5,6,7,8],[9,10,11,12],[13,14,15,' '];
-    for (^16).pick(*) -> $y, $x {
-        my ($yd, $ym, $xd, $xm) = ($y div n, $y mod n, $x div n, $x mod n);
-        my $temp    = @c[$ym;$yd];
-        @c[$ym;$yd] = @c[$xm;$xd];
-        @c[$xm;$xd] = $temp;
-    }
-    @c;
-}
- 
+#sub shuffle () {
+#    my @c = [1,2,3,4],[5,6,7,8],[9,10,11,12],[13,14,15,' '];
+#    for (^16).pick(*) -> $y, $x {
+#        my ($yd, $ym, $xd, $xm) = ($y div n, $y mod n, $x div n, $x mod n);
+#        my $temp    = @c[$ym;$yd];
+#        @c[$ym;$yd] = @c[$xm;$xd];
+#        @c[$xm;$xd] = $temp;
+#    }
+#    @c;
+#}
+
 sub parity-ok (@b) {
     so (sum @b».grep(/' '/,:k).grep(/\d/, :kv)) %% 2;
 }
- 
+
 sub row (@row) { '│' ~ (join '│', @row».&center) ~ '│' }
- 
+
 sub center ($s){
     my $c   = cell - $s.chars;
     my $pad = ' ' x ceiling($c/2);
     sprintf "%{cell}s", "$s$pad";
 }
- 
+
 sub draw-board {
     run('clear');
     print qq:to/END/;
@@ -147,45 +136,44 @@ sub draw-board {
 	{ (so @board ~~ @solved) ?? 'Solved!!' !! '' }
 END
 }
+
+#sub slide (@c is copy) {
+#    my $t = (grep { /' '/ }, :k, @c)[0];
+#    return @c unless $t and $t > 0;
+#    @c[$t,$t-1] = @c[$t-1,$t];
+#    @c;
+#}
+
+#multi sub move('up') {
+#    map { @board[*;$_] = reverse slide reverse @board[*;$_] }, ^n;
+#}
  
-sub slide (@c is copy) {
-    my $t = (grep { /' '/ }, :k, @c)[0];
-    return @c unless $t and $t > 0;
-    @c[$t,$t-1] = @c[$t-1,$t];
-    @c;
-}
+#multi sub move('down') {
+#    map { @board[*;$_] = slide @board[*;$_] }, ^n;
+#}
  
-multi sub move('up') {
-    map { @board[*;$_] = reverse slide reverse @board[*;$_] }, ^n;
-}
+#multi sub move('left') {
+#    map { @board[$_] = reverse slide reverse @board[$_] }, ^n;
+#}
  
-multi sub move('down') {
-    map { @board[*;$_] = slide @board[*;$_] }, ^n;
-}
+#multi sub move('right') {
+#    map { @board[$_] = slide @board[$_] }, ^n;
+#}
  
-multi sub move('left') {
-    map { @board[$_] = reverse slide reverse @board[$_] }, ^n;
-}
- 
-multi sub move('right') {
-    map { @board[$_] = slide @board[$_] }, ^n;
-}
- 
-loop {
-    draw-board;
- 
-    # Read up to 4 bytes from keyboard buffer.
-    # Page navigation keys are 3-4 bytes each.
-    # Specifically, arrow keys are 3.
-    my $key = $*IN.read(4).decode;
- 
-    move %dir{$key} if so %dir{$key};
-    last if $key eq 'q'; # (q)uit
-    new() if $key eq 'n';
-}
+#loop {
+#    draw-board;
+# 
+#    # Read up to 4 bytes from keyboard buffer.
+#    # Page navigation keys are 3-4 bytes each.
+#    # Specifically, arrow keys are 3.
+#    my $key = $*IN.read(4).decode;
+# 
+#    move %dir{$key} if so %dir{$key};
+#    last if $key eq 'q'; # (q)uit
+#    new() if $key eq 'n';
+#}
 _END_
 
-)
 		isa-ok $parsed, 'Perl6::Tidy::Root';
 	}, Q[version 1];
 }, '15 Puzzle';
