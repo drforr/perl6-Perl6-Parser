@@ -69,7 +69,9 @@ class _Name {...}
 class _LongName {...}
 class _ModuleName {...}
 class _ModifierExpr {...}
+class _CodeBlock {...}
 class _Block {...}
+class _XBlock {...}
 class _Blorst {...}
 class _StatementPrefix {...}
 class _StatementControl {...}
@@ -736,6 +738,58 @@ class _ModuleName does Node {
 	}
 }
 
+class _CodeBlock does Node {
+	method new( Mu $parsed ) {
+		trace "Block";
+		if assert-hash-keys( $parsed, [< block >] ) {
+			return self.bless(
+				:content(
+					:block(
+						_Block.new(
+							$parsed.hash.<block>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'block', $parsed );
+	}
+}
+
+class _XBlock does Node {
+	method new( Mu $parsed ) {
+		trace "Block";
+		if assert-hash-keys( $parsed, [< pblock EXPR >] ) {
+			return self.bless(
+				:content(
+					:pblock(
+						_PBlock.new(
+							$parsed.hash.<pblock>
+						)
+					),
+					:EXPR(
+						_EXPR.new(
+							$parsed.hash.<EXPR>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< blockoid >] ) {
+			return self.bless(
+				:content(
+					:blockoid(
+						_Blockoid.new(
+							$parsed.hash.<blockoid>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'block', $parsed );
+	}
+}
+
 class _Block does Node {
 	method new( Mu $parsed ) {
 		trace "Block";
@@ -835,6 +889,22 @@ class _StatementControl does Node {
 					:version(
 						_Version.new(
 							$parsed.hash.<version>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< xblock sym >] ) {
+			return self.bless(
+				:content(
+					:xblock(
+						_XBlock.new(
+							$parsed.hash.<xblock>
+						)
+					),
+					:sym(
+						_Sym.new(
+							$parsed.hash.<sym>
 						)
 					)
 				)
@@ -2072,6 +2142,17 @@ class _EXPR does Node {
 				)
 			)
 		}
+		if assert-hash-keys( $parsed, [< regex_declarator >] ) {
+			return self.bless(
+				:content(
+					:regex_declarator(
+						_RegexDeclarator.new(
+							$parsed.hash.<regex_declarator>
+						)
+					)
+				)
+			)
+		}
 		die debug( 'EXPR', $parsed );
 	}
 }
@@ -2354,6 +2435,17 @@ class _Variable does Node {
 class _Assertion does Node {
 	method new( Mu $parsed ) {
 		trace "Assertion";
+		if assert-hash-keys( $parsed, [< longname >] ) {
+			return self.bless(
+				:content(
+					:longname(
+						_LongName.new(
+							$parsed.hash.<longname>
+						)
+					)
+				)
+			)
+		}
 		if assert-hash-keys( $parsed, [< cclass_elem >] ) {
 			return self.bless(
 				:content(
@@ -2378,6 +2470,17 @@ class _MetaChar does Node {
 					:sym(
 						_Sym.new(
 							$parsed.hash.<sym>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< codeblock >] ) {
+			return self.bless(
+				:content(
+					:codeblock(
+						_CodeBlock.new(
+							$parsed.hash.<codeblock>
 						)
 					)
 				)
