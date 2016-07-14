@@ -144,6 +144,7 @@ class _PostfixOPER {...}
 class _PrefixOPER {...}
 class _PostConstraint {...}
 class _MultiDeclarator {...}
+class _MultiSig {...}
 class _RoutineDef {...}
 class _DECL {...}
 class _Scoped {...}
@@ -168,8 +169,8 @@ sub dump-parsed( Mu $parsed ) {
 	my @lines;
 	my @types;
 	@types.push( 'Bool' ) if $parsed.Bool;
-	@types.push( 'Int' ) if $parsed.Int;
-	@types.push( 'Num' ) if $parsed.Num;
+	@types.push( 'Int' )  if $parsed.Int;
+	@types.push( 'Num' )  if $parsed.Num;
 
 	@lines.push( Q[ ~:   '] ~
 		     ~$parsed.Str ~
@@ -829,6 +830,22 @@ class _StatementControl does Node {
 					:version(
 						_Version.new(
 							$parsed.hash.<version>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< block sym >] ) {
+			return self.bless(
+				:content(
+					:block(
+						_Block.new(
+							$parsed.hash.<block>
+						)
+					),
+					:sym(
+						_Sym.new(
+							$parsed.hash.<sym>
 						)
 					)
 				)
@@ -3223,6 +3240,24 @@ class _PostConstraint does Node {
 	}
 }
 
+class _MultiSig does Node {
+	method new( Mu $parsed ) {
+		trace "MultiSig";
+		if assert-hash-keys( $parsed, [< signature >] ) {
+			return self.bless(
+				:content(
+					:signature(
+						_Signature.new(
+							$parsed.hash.<signature>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'multi_sig', $parsed );
+	}
+}
+
 class _MultiDeclarator does Node {
 	method new( Mu $parsed ) {
 		trace "MultiDeclarator";
@@ -3244,6 +3279,30 @@ class _MultiDeclarator does Node {
 class _RoutineDef does Node {
 	method new( Mu $parsed ) {
 		trace "RoutineDef";
+		if assert-hash-keys( $parsed,
+				     [< blockoid deflongname multisig >],
+				     [< trait >] ) {
+			return self.bless(
+				:content(
+					:blockoid(
+						_Blockoid.new(
+							$parsed.hash.<blockoid>
+						)
+					),
+					:deflongname(
+						_DefLongName.new(
+							$parsed.hash.<deflongname>
+						)
+					),
+					:multisig(
+						_MultiSig.new(
+							$parsed.hash.<multisig>
+						)
+					),
+					:trait()
+				)
+			)
+		}
 		if assert-hash-keys( $parsed, [< blockoid deflongname >],
 					      [< trait >] ) {
 			return self.bless(
