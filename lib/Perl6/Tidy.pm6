@@ -41,6 +41,129 @@ Given a so-far undefined hash of format settings, return formatted Perl 6 code t
 
 =end pod
 
+# Bulk forward declarations.
+
+class BinInt {...}
+class OctInt {...}
+class DecInt {...}
+class HexInt {...}
+class Coeff {...}
+class Frac {...}
+class Radix {...}
+class _Int {...}
+class Key {...}
+class NormSpace {...}
+class Sigil {...}
+class VALUE {...}
+class Sym {...}
+class Sign {...}
+class EScale {...}
+class Integer {...}
+class BackSlash {...}
+class VStr {...}
+class VNum {...}
+class Version {...}
+class Doc {...}
+class Identifier {...}
+class Name {...}
+class LongName {...}
+class ModuleName {...}
+class Block {...}
+class Blorst {...}
+class StatementPrefix {...}
+class StatementControl {...}
+class O {...}
+class Postfix {...}
+class Prefix {...}
+class Args {...}
+class MethodOp {...}
+class ArgList {...}
+class PostCircumfix {...}
+class PostOp {...}
+class Circumfix {...}
+class FakeSignature {...}
+class Var {...}
+class PBlock {...}
+class ColonCircumfix {...}
+class ColonPair {...}
+class DottyOp {...}
+class Dotty {...}
+class IdentifierArgs {...}
+class LongNameArgs {...}
+class OPER {...}
+class Val {...}
+class DefTerm {...}
+class TypeDeclarator {...}
+class FatArrow {...}
+class EXPR {...}
+class Infix {...}
+class InfixIsh {...}
+class _Signature {...}
+class Twigil {...}
+class DeSigilName {...}
+class DefLongName {...}
+class CharSpec {...}
+class CClassElem_INTERMEDIARY {...}
+class CClassElem {...}
+class _Variable {...}
+class Assertion {...}
+class MetaChar {...}
+class Atom {...}
+class Noun {...}
+class TermIsh {...}
+class TermConj {...}
+class TermAlt {...}
+class TermConjSeq {...}
+class TermAltSeq {...}
+class TermSeq {...}
+class Nibble {...}
+class MethodDef {...}
+class Specials {...}
+class RegexDef {...}
+class RegexDeclarator {...}
+class SemiList {...}
+class B {...}
+class Babble {...}
+class Quibble {...}
+class Quote {...}
+class RadNumber {...}
+class DecNumber {...}
+class Numish {...}
+class Number {...}
+class Value {...}
+class VariableDeclarator {...}
+class TypeName_INTERMEDIARY {...}
+class TypeName {...}
+class Blockoid {...}
+class Initializer {...}
+class Declarator {...}
+class PackageDef {...}
+class InfixOPER {...}
+class DottyOPER {...}
+class PostfixOPER {...}
+class PrefixOPER {...}
+class PostConstraint {...}
+class MultiDeclarator {...}
+class RoutineDef {...}
+class DECL {...}
+class Scoped {...}
+class ScopeDeclarator {...}
+class RoutineDeclarator {...}
+class Perl6::Tidy::Root {...}
+class StatementList {...}
+class SMExpr {...}
+class StatementModLoop {...}
+class StatementModLoopEXPR {...}
+class Statement {...}
+class Op {...}
+class MoreName {...}
+class PackageDeclarator {...}
+class PackageDeclarator {...}
+
+sub trace( Str $name ) {
+	say $name if $*TRACE
+}
+
 sub dump-parsed( Mu $parsed ) {
 	my @lines;
 	my @types;
@@ -128,15 +251,15 @@ sub debug( Str $name, Mu $parsed ) {
 
 role Node {
 	has $.name;
-	has $.child;
+	has @.child;
 	has %.content;
 }
 
 # $parsed can only be Int, by extension Str, by extension Bool.
 #
 sub assert-Int( Mu $parsed ) {
-	die "hash" if $parsed.hash;
-	die "list" if $parsed.list;
+	return False if $parsed.hash;
+	return False if $parsed.list;
 
 	if $parsed.Int {
 		return True
@@ -147,9 +270,9 @@ sub assert-Int( Mu $parsed ) {
 # $parsed can only be Str, by extension Bool
 #
 sub assert-Str( Mu $parsed ) {
-	die "hash" if $parsed.hash;
-	die "list" if $parsed.list;
-	die "Int"  if $parsed.Int;
+	return False if $parsed.hash;
+	return False if $parsed.list;
+	return False if $parsed.Int;
 
 	if $parsed.Str {
 		return True
@@ -160,10 +283,10 @@ sub assert-Str( Mu $parsed ) {
 # $parsed can only be Bool
 #
 sub assert-Bool( Mu $parsed ) {
-	die "hash" if $parsed.hash;
-	die "list" if $parsed.list;
-	die "Int"  if $parsed.Int;
-	die "Str"  if $parsed.Str;
+	return False if $parsed.hash;
+	return False if $parsed.list;
+	return False if $parsed.Int;
+	return False if $parsed.Str;
 
 	if $parsed.Bool {
 		return True
@@ -184,11 +307,14 @@ sub assert-hash-keys( Mu $parsed, $keys, $defined-keys = [] ) {
 			}
 		}
 
-		die "Too many keys " ~ @keys.gist ~
-				       ", " ~
-				       @defined-keys.gist
-			if $parsed.hash.keys.elems >
-				$keys.elems + $defined-keys.elems;
+		if $parsed.hash.keys.elems >
+			$keys.elems + $defined-keys.elems {
+			warn "Too many keys " ~ @keys.gist ~
+					       ", " ~
+					       @defined-keys.gist;
+			CONTROL { when CX::Warn { warn .message ~ "\n" ~ .backtrace.Str } }
+			return False
+		}
 		
 		for @( $keys ) -> $key {
 			return False unless $parsed.hash.{$key}
@@ -201,29 +327,9 @@ sub assert-hash-keys( Mu $parsed, $keys, $defined-keys = [] ) {
 	return False
 }
 
-class EXPR {...}
-class Infix {...}
-class Op {...}
-class PackageDeclarator {...}
-class PrefixOPER {...}
-class RegexDeclarator {...}
-class RoutineDeclarator {...}
-class ScopeDeclarator {...}
-class SemiList {...}
-class Statement {...}
-class StatementList {...}
-class Value {...}
-class _Signature {...} # Sort these out later.
-class _Variable {...}
-class DeSigilName {...}
-class Blockoid {...}
-class PBlock {...}
-class Nibble {...}
-class InfixIsh {...}
-
-
 class BinInt does Node {
 	method new( Mu $parsed ) {
+		trace "BinInt";
 		if assert-Int( $parsed ) {
 			return self.bless( :name( $parsed.Int ) )
 		}
@@ -233,6 +339,7 @@ class BinInt does Node {
 
 class OctInt does Node {
 	method new( Mu $parsed ) {
+		trace "OctInt";
 		if assert-Int( $parsed ) {
 			return self.bless( :name( $parsed.Int ) )
 		}
@@ -242,6 +349,7 @@ class OctInt does Node {
 
 class DecInt does Node {
 	method new( Mu $parsed ) {
+		trace "DecInt";
 		if $parsed.Str and
 		   $parsed.Str eq '0' {
 			return self.bless( :name( $parsed.Str ) )
@@ -255,6 +363,7 @@ class DecInt does Node {
 
 class HexInt does Node {
 	method new( Mu $parsed ) {
+		trace "HexInt";
 		if assert-Int( $parsed ) {
 			return self.bless( :name( $parsed.Int ) )
 		}
@@ -264,6 +373,7 @@ class HexInt does Node {
 
 class Coeff does Node {
 	method new( Mu $parsed ) {
+		trace "Coeff";
 		if assert-Int( $parsed ) {
 			return self.bless( :name( $parsed.Int ) )
 		}
@@ -273,6 +383,7 @@ class Coeff does Node {
 
 class Frac does Node {
 	method new( Mu $parsed ) {
+		trace "Frac";
 		if assert-Int( $parsed ) {
 			return self.bless( :name( $parsed.Int ) )
 		}
@@ -282,6 +393,7 @@ class Frac does Node {
 
 class Radix does Node {
 	method new( Mu $parsed ) {
+		trace "Radix";
 		if assert-Int( $parsed ) {
 			return self.bless( :name( $parsed.Int ) )
 		}
@@ -291,6 +403,7 @@ class Radix does Node {
 
 class _Int does Node {
 	method new( Mu $parsed ) {
+		trace "_Int";
 		if assert-Int( $parsed ) {
 			return self.bless( :name( $parsed.Int ) )
 		}
@@ -300,6 +413,7 @@ class _Int does Node {
 
 class Key does Node {
 	method new( Mu $parsed ) {
+		trace "Key";
 		if assert-Str( $parsed ) {
 			return self.bless( :name( $parsed.Str ) )
 		}
@@ -309,6 +423,7 @@ class Key does Node {
 
 class NormSpace does Node {
 	method new( Mu $parsed ) {
+		trace "NormSpace";
 		if assert-Str( $parsed ) {
 			return self.bless( :name( $parsed.Str ) )
 		}
@@ -318,6 +433,7 @@ class NormSpace does Node {
 
 class Sigil does Node {
 	method new( Mu $parsed ) {
+		trace "Sigil";
 		if assert-Str( $parsed ) {
 			return self.bless( :name( $parsed.Str ) )
 		}
@@ -327,6 +443,7 @@ class Sigil does Node {
 
 class VALUE does Node {
 	method new( Mu $parsed ) {
+		trace "VALUE";
 		if $parsed.Str and
 		   $parsed.Str eq '0' {
 			return self.bless( :name( $parsed.Str ) )
@@ -340,6 +457,7 @@ class VALUE does Node {
 
 class Sym does Node {
 	method new( Mu $parsed ) {
+		trace "Sym";
 		if $parsed.Bool and		# XXX Huh?
 		   $parsed.Str eq '+' {
 			return self.bless( :name( $parsed.Str ) )
@@ -357,6 +475,7 @@ class Sym does Node {
 
 class Sign does Node {
 	method new( Mu $parsed ) {
+		trace "Sign";
 		if assert-Bool( $parsed ) {
 			return self.bless( :name( $parsed.Bool ) )
 		}
@@ -366,6 +485,7 @@ class Sign does Node {
 
 class EScale does Node {
 	method new( Mu $parsed ) {
+		trace "EScale";
 		if assert-hash-keys( $parsed, [< sign decint >] ) {
 			return self.bless(
 				:content(
@@ -388,6 +508,7 @@ class EScale does Node {
 
 class Integer does Node {
 	method new( Mu $parsed ) {
+		trace "Integer";
 		if assert-hash-keys( $parsed, [< decint VALUE >] ) {
 			return self.bless(
 				:content(
@@ -458,6 +579,7 @@ class Integer does Node {
 
 class BackSlash does Node {
 	method new( Mu $parsed ) {
+		trace "BackSlash";
 		if assert-hash-keys( $parsed, [< sym >] ) {
 			return self.bless(
 				:content(
@@ -475,6 +597,7 @@ class BackSlash does Node {
 
 class VStr does Node {
 	method new( Mu $parsed ) {
+		trace "VStr";
 		if $parsed.Int {
 			return self.bless( :name( $parsed.Int ) )
 		}
@@ -484,6 +607,7 @@ class VStr does Node {
 
 class VNum does Node {
 	method new( Mu $parsed ) {
+		trace "VNum";
 		if $parsed.list {
 			return self.bless( :child() )
 		}
@@ -493,6 +617,7 @@ class VNum does Node {
 
 class Version does Node {
 	method new( Mu $parsed ) {
+		trace "Version";
 		if assert-hash-keys( $parsed, [< vnum vstr >] ) {
 			return self.bless(
 				:content(
@@ -515,6 +640,7 @@ class Version does Node {
 
 class Doc does Node {
 	method new( Mu $parsed ) {
+		trace "Doc";
 		if assert-Bool( $parsed ) {
 			return self.bless( :name( $parsed.Bool ) )
 		}
@@ -524,6 +650,7 @@ class Doc does Node {
 
 class Identifier does Node {
 	method new( Mu $parsed ) {
+		trace "Identifier";
 		if $parsed.list {
 			my @child;
 			for $parsed.list {
@@ -548,6 +675,7 @@ class Identifier does Node {
 
 class Name does Node {
 	method new( Mu $parsed ) {
+		trace "Name";
 		if assert-hash-keys( $parsed, [< identifier >],
 					      [< morename >] ) {
 			return self.bless(
@@ -567,6 +695,7 @@ class Name does Node {
 
 class LongName does Node {
 	method new( Mu $parsed ) {
+		trace "LongName";
 		if assert-hash-keys( $parsed, [< name >], [< colonpair >] ) {
 			return self.bless(
 				:content(
@@ -585,6 +714,7 @@ class LongName does Node {
 
 class ModuleName does Node {
 	method new( Mu $parsed ) {
+		trace "ModuleName";
 		if assert-hash-keys( $parsed, [< longname >] ) {
 			return self.bless(
 				:content(
@@ -600,8 +730,68 @@ class ModuleName does Node {
 	}
 }
 
+class Block does Node {
+	method new( Mu $parsed ) {
+		trace "Block";
+		if assert-hash-keys( $parsed, [< blockoid >] ) {
+			return self.bless(
+				:content(
+					:blockoid(
+						Blockoid.new(
+							$parsed.hash.<blockoid>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'block', $parsed );
+	}
+}
+
+class Blorst does Node {
+	method new( Mu $parsed ) {
+		trace "Blorst";
+		if assert-hash-keys( $parsed, [< block >] ) {
+			return self.bless(
+				:content(
+					:block(
+						Block.new(
+							$parsed.hash.<block>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'blorst', $parsed );
+	}
+}
+
+class StatementPrefix does Node {
+	method new( Mu $parsed ) {
+		trace "StatementPrefix";
+		if assert-hash-keys( $parsed, [< sym blorst >] ) {
+			return self.bless(
+				:content(
+					:sym(
+						Sym.new(
+							$parsed.hash.<sym>
+						)
+					),
+					:blorst(
+						Blorst.new(
+							$parsed.hash.<blorst>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'statement_prefix', $parsed );
+	}
+}
+
 class StatementControl does Node {
 	method new( Mu $parsed ) {
+		trace "StatementControl";
 		if assert-hash-keys( $parsed, [< doc sym module_name >] ) {
 			return self.bless(
 				:content(
@@ -650,6 +840,7 @@ class StatementControl does Node {
 
 class O does Node {
 	method new( Mu $parsed ) {
+		trace "O";
 		# XXX There has to be a better way to handle this NoMatch case
 		CATCH { when X::Multi::NoMatch {  } }
 		if $parsed ~~ Hash {
@@ -685,6 +876,7 @@ class O does Node {
 
 class Postfix does Node {
 	method new( Mu $parsed ) {
+		trace "Postfix";
 		if assert-hash-keys( $parsed, [< sym O >] ) {
 			return self.bless(
 				:content(
@@ -707,21 +899,27 @@ class Postfix does Node {
 
 class Prefix does Node {
 	method new( Mu $parsed ) {
-		if assert-hash-keys( $parsed, [< sym O >] ) {
-			return self.bless(
-				:content(
-					:sym(
-						Sym.new(
-							$parsed.hash.<sym>
-						)
-					),
-					:O(
-						O.new(
-							$parsed.hash.<O>
+		trace "Prefix";
+		if $parsed {
+			if assert-hash-keys( $parsed, [< sym O >] ) {
+				return self.bless(
+					:content(
+						:sym(
+							Sym.new(
+								$parsed.hash.<sym>
+							)
+						),
+						:O(
+							O.new(
+								$parsed.hash.<O>
+							)
 						)
 					)
 				)
-			)
+			}
+		}
+		else {
+			return self.bless
 		}
 		die debug( 'prefix', $parsed );
 	}
@@ -729,6 +927,7 @@ class Prefix does Node {
 
 class Args does Node {
 	method new( Mu $parsed ) {
+		trace "Args";
 		if $parsed.Bool {
 			return self.bless( :name( $parsed.Bool ) )
 		}
@@ -738,6 +937,7 @@ class Args does Node {
 
 class MethodOp does Node {
 	method new( Mu $parsed ) {
+		trace "MethodOp";
 		if assert-hash-keys( $parsed, [< longname args >] ) {
 			return self.bless(
 				:content(
@@ -771,6 +971,7 @@ class MethodOp does Node {
 
 class ArgList does Node {
 	method new( Mu $parsed ) {
+		trace "ArgList";
 		if assert-Bool( $parsed ) {
 			return self.bless(
 				:name( $parsed.Bool )
@@ -782,6 +983,7 @@ class ArgList does Node {
 
 class PostCircumfix does Node {
 	method new( Mu $parsed ) {
+		trace "PostCircumfix";
 		if assert-hash-keys( $parsed, [< nibble O >] ) {
 			return self.bless(
 				:content(
@@ -836,6 +1038,7 @@ class PostCircumfix does Node {
 
 class PostOp does Node {
 	method new( Mu $parsed ) {
+		trace "PostOp";
 		if assert-hash-keys( $parsed, [< sym postcircumfix O >] ) {
 			return self.bless(
 				:content(
@@ -863,6 +1066,7 @@ class PostOp does Node {
 
 class Circumfix does Node {
 	method new( Mu $parsed ) {
+		trace "Circumfix";
 		if assert-hash-keys( $parsed, [< nibble >] ) {
 			return self.bless(
 				:content(
@@ -950,6 +1154,7 @@ class Circumfix does Node {
 
 class FakeSignature does Node {
 	method new( Mu $parsed ) {
+		trace "FakeSignature";
 		if assert-hash-keys( $parsed, [< signature >] ) {
 			return self.bless(
 				:content(
@@ -967,6 +1172,7 @@ class FakeSignature does Node {
 
 class Var does Node {
 	method new( Mu $parsed ) {
+		trace "Var";
 		if assert-hash-keys( $parsed, [< sigil desigilname >] ) {
 			return self.bless(
 				:content(
@@ -989,6 +1195,7 @@ class Var does Node {
 
 class PBlock does Node {
 	method new( Mu $parsed ) {
+		trace "PBlock";
 		if assert-hash-keys( $parsed, [< blockoid >] ) {
 			return self.bless(
 				:content(
@@ -1006,6 +1213,7 @@ class PBlock does Node {
 
 class ColonCircumfix does Node {
 	method new( Mu $parsed ) {
+		trace "ColonCircumfix";
 		if assert-hash-keys( $parsed,
 				     [< circumfix >] ) {
 			return self.bless(
@@ -1024,6 +1232,7 @@ class ColonCircumfix does Node {
 
 class ColonPair does Node {
 	method new( Mu $parsed ) {
+		trace "ColonPair";
 		if assert-hash-keys( $parsed,
 				     [< identifier coloncircumfix >] ) {
 			return self.bless(
@@ -1080,6 +1289,7 @@ class ColonPair does Node {
 
 class DottyOp does Node {
 	method new( Mu $parsed ) {
+		trace "DottyOp";
 		if assert-hash-keys( $parsed, [< sym postop O >] ) {
 			return self.bless(
 				:content(
@@ -1129,6 +1339,7 @@ class DottyOp does Node {
 
 class Dotty does Node {
 	method new( Mu $parsed ) {
+		trace "Dotty";
 		if assert-hash-keys( $parsed, [< sym dottyop O >] ) {
 			return self.bless(
 				:content(
@@ -1157,6 +1368,7 @@ class Dotty does Node {
 # XXX This is a compound type
 class IdentifierArgs does Node {
 	method new( Mu $parsed ) {
+		trace "IdentifierArgs";
 		return self.bless(
 			:content(
 				:identifier(
@@ -1177,6 +1389,7 @@ class IdentifierArgs does Node {
 # XXX This is a compound type
 class LongNameArgs does Node {
 	method new( Mu $parsed ) {
+		trace "LongNameArgs";
 		return self.bless(
 			:content(
 				:longname(
@@ -1196,6 +1409,7 @@ class LongNameArgs does Node {
 
 class OPER does Node {
 	method new( Mu $parsed ) {
+		trace "OPER";
 		if assert-hash-keys( $parsed, [< sym dottyop O >] ) {
 			return self.bless(
 				:content(
@@ -1321,6 +1535,7 @@ class Infix {...} # Forward
 
 class Val does Node {
 	method new( Mu $parsed ) {
+		trace "Val";
 		if assert-hash-keys( $parsed, [< value >] ) {
 			return self.bless(
 				:content(
@@ -1336,8 +1551,114 @@ class Val does Node {
 	}
 }
 
+class DefTerm does Node {
+	method new( Mu $parsed ) {
+		trace "DefTerm";
+		if assert-hash-keys( $parsed, [< identifier colonpair >] ) {
+			return self.bless(
+				:content(
+					:identifier(
+						Identifier.new(
+							$parsed.hash.<identifier>
+						)
+					),
+					:colonpair(
+						ColonPair.new(
+							$parsed.hash.<colonpair>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< identifier >], [< colonpair >] ) {
+			return self.bless(
+				:content(
+					:identifier(
+						Identifier.new(
+							$parsed.hash.<identifier>
+						)
+					),
+					:colonpair()
+				)
+			)
+		}
+		die debug( 'defterm', $parsed );
+	}
+}
+
+class TypeDeclarator does Node {
+	method new( Mu $parsed ) {
+		trace "TypeDeclarator";
+		CATCH { when X::Multi::NoMatch {  } }
+		if assert-hash-keys( $parsed, [< sym initializer variable >],
+					      [< trait >] ) {
+			return self.bless(
+				:content(
+					:sym(
+						Sym.new(
+							$parsed.hash.<sym>
+						)
+					),
+					:initializer(
+						Initializer.new(
+							$parsed.hash.<initializer>
+						)
+					),
+					:variable(
+						_Variable.new(
+							$parsed.hash.<variable>
+						)
+					),
+					:trait()
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< sym initializer defterm >],
+					      [< trait >] ) {
+			return self.bless(
+				:content(
+					:sym(
+						Sym.new(
+							$parsed.hash.<sym>
+						)
+					),
+					:initializer(
+						Initializer.new(
+							$parsed.hash.<initializer>
+						)
+					),
+					:defterm(
+						DefTerm.new(
+							$parsed.hash.<defterm>
+						)
+					),
+					:trait()
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< sym initializer >] ) {
+			return self.bless(
+				:content(
+					:sym(
+						Sym.new(
+							$parsed.hash.<sym>
+						)
+					),
+					:initializer(
+						Initializer.new(
+							$parsed.hash.<initializer>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'type_declarator', $parsed );
+	}
+}
+
 class FatArrow does Node {
 	method new( Mu $parsed ) {
+		trace "FatArrow";
 		if assert-hash-keys( $parsed, [< val key >] ) {
 			return self.bless(
 				:content(
@@ -1360,27 +1681,54 @@ class FatArrow does Node {
 
 class EXPR does Node {
 	method new( Mu $parsed ) {
+		trace "EXPR";
 		if $parsed.list {
 			my @child;
 			for $parsed.list {
+				if assert-hash-keys( $_, [< OPER dotty >],
+							 [< postfix_prefix_meta_operator >] ) {
+					@child.push(
+						DottyOPER.new( $_ )
+					);
+					next
+				}
+				if assert-hash-keys( $_, [< postfix OPER >],
+							 [< postfix_prefix_meta_operator >] ) {
+					@child.push(
+						PostfixOPER.new( $_ )
+					);
+					next
+				}
 				if assert-hash-keys( $_, [< prefix OPER >],
 							 [< prefix_postfix_meta_operator >] ) {
 					@child.push(
 						PrefixOPER.new( $_ )
 					);
-					next;
+					next
+				}
+				if assert-hash-keys( $_, [< infix OPER >] ) {
+					@child.push(
+						InfixOPER.new( $_ )
+					);
+					next
 				}
 				if assert-hash-keys( $_, [< identifier args >] ) {
 					@child.push(
 						IdentifierArgs.new( $_ )
 					);
-					next;
+					next
 				}
 				if assert-hash-keys( $_, [< longname args >] ) {
 					@child.push(
 						LongNameArgs.new( $_ )
 					);
-					next;
+					next
+				}
+				if assert-hash-keys( $_, [< statement_prefix >] ) {
+					@child.push(
+						StatementPrefix.new( $_ )
+					);
+					next
 				}
 				if assert-hash-keys( $_, [< longname >] ) {
 					@child.push(
@@ -1388,7 +1736,7 @@ class EXPR does Node {
 							$_.hash.<longname>
 						)
 					);
-					next;
+					next
 				}
 				if assert-hash-keys( $_, [< value >] ) {
 					@child.push(
@@ -1396,7 +1744,7 @@ class EXPR does Node {
 							$_.hash.<value>
 						)
 					);
-					next;
+					next
 				}
 				if assert-hash-keys( $_, [< variable >] ) {
 					@child.push(
@@ -1404,7 +1752,7 @@ class EXPR does Node {
 							$_.hash.<variable>
 						)
 					);
-					next;
+					next
 				}
 				if assert-hash-keys( $_, [< methodop >] ) {
 					@child.push(
@@ -1412,7 +1760,7 @@ class EXPR does Node {
 							$_.hash.<methodop>
 						)
 					);
-					next;
+					next
 				}
 				die dump( $_ );
 			}
@@ -1558,6 +1906,38 @@ class EXPR does Node {
 				)
 			}
 		}
+		if assert-hash-keys( $parsed, [< longname args >] ) {
+			return self.bless(
+				:content(
+					:longname(
+						LongName.new(
+							$parsed.hash.<longname>
+						)
+					),
+					:args(
+						Args.new(
+							$parsed.hash.<args>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< identifier args >] ) {
+			return self.bless(
+				:content(
+					:identifier(
+						Identifier.new(
+							$parsed.hash.<identifier>
+						)
+					),
+					:args(
+						Args.new(
+							$parsed.hash.<args>
+						)
+					)
+				)
+			)
+		}
 		if assert-hash-keys( $parsed, [< args op >] ) {
 			return self.bless(
 				:content(
@@ -1590,17 +1970,12 @@ class EXPR does Node {
 				)
 			)
 		}
-		if assert-hash-keys( $parsed, [< identifier args >] ) {
+		if assert-hash-keys( $parsed, [< statement_prefix >] ) {
 			return self.bless(
 				:content(
-					:identifier(
-						Identifier.new(
-							$parsed.hash.<identifier>
-						)
-					),
-					:args(
-						Args.new(
-							$parsed.hash.<args>
+					:statement_prefix(
+						StatementPrefix.new(
+							$parsed.hash.<statement_prefix>
 						)
 					)
 				)
@@ -1617,6 +1992,17 @@ class EXPR does Node {
 					:args(
 						Args.new(
 							$parsed.hash.<args>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< type_declarator >] ) {
+			return self.bless(
+				:content(
+					:type_declarator(
+						TypeDeclarator.new(
+							$parsed.hash.<type_declarator>
 						)
 					)
 				)
@@ -1736,6 +2122,7 @@ class EXPR does Node {
 
 class Infix does Node {
 	method new( Mu $parsed ) {
+		trace "Infix";
 		if assert-hash-keys( $parsed, [< EXPR O >] ) {
 			return self.bless(
 				:content(
@@ -1790,6 +2177,7 @@ class Infix does Node {
 
 class InfixIsh does Node {
 	method new( Mu $parsed ) {
+		trace "InfixIsh";
 		if assert-hash-keys(
 			$parsed,
 			[< infix OPER >] ) {
@@ -1814,6 +2202,7 @@ class InfixIsh does Node {
 
 class _Signature does Node {
 	method new( Mu $parsed ) {
+		trace "_Signature";
 		if assert-hash-keys( $parsed, [], [< param_sep parameter >] ) {
 			return self.bless(
 				:name( $parsed.Bool ),
@@ -1829,6 +2218,7 @@ class _Signature does Node {
 
 class Twigil does Node {
 	method new( Mu $parsed ) {
+		trace "Twigil";
 		if assert-hash-keys( $parsed, [< sym >] ) {
 			return self.bless(
 				:content(
@@ -1846,6 +2236,7 @@ class Twigil does Node {
 
 class DeSigilName does Node {
 	method new( Mu $parsed ) {
+		trace "DeSigilName";
 		if assert-hash-keys( $parsed, [< longname >] ) {
 			return self.bless(
 				:content(
@@ -1866,6 +2257,7 @@ class DeSigilName does Node {
 
 class DefLongName does Node {
 	method new( Mu $parsed ) {
+		trace "DefLongName";
 		if assert-hash-keys( $parsed, [< name >], [< colonpair >] ) {
 			return self.bless(
 				:content(
@@ -1884,6 +2276,7 @@ class DefLongName does Node {
 
 class CharSpec does Node {
 	method new( Mu $parsed ) {
+		trace "CharSpec";
 		if $parsed.list {
 			my @child;
 			for $parsed.list -> $list {
@@ -1914,6 +2307,7 @@ class CClassElem_INTERMEDIARY does Node {
 
 class CClassElem does Node {
 	method new( Mu $parsed ) {
+		trace "CClassElem";
 		if $parsed.list {
 			my @child;
 			for $parsed.list {
@@ -1948,6 +2342,7 @@ class CClassElem does Node {
 
 class _Variable does Node {
 	method new( Mu $parsed ) {
+		trace "_Variable";
 		if assert-hash-keys( $parsed, [< twigil sigil desigilname >] ) {
 			return self.bless(
 				:content(
@@ -2002,6 +2397,7 @@ class _Variable does Node {
 
 class Assertion does Node {
 	method new( Mu $parsed ) {
+		trace "Assertion";
 		if assert-hash-keys( $parsed, [< cclass_elem >] ) {
 			return self.bless(
 				:content(
@@ -2019,6 +2415,7 @@ class Assertion does Node {
 
 class MetaChar does Node {
 	method new( Mu $parsed ) {
+		trace "MetaChar";
 		if assert-hash-keys( $parsed, [< sym >] ) {
 			return self.bless(
 				:content(
@@ -2058,6 +2455,7 @@ class MetaChar does Node {
 
 class Atom does Node {
 	method new( Mu $parsed ) {
+		trace "Atom";
 		if assert-hash-keys( $parsed, [< metachar >] ) {
 			return self.bless(
 				:content(
@@ -2078,6 +2476,7 @@ class Atom does Node {
 
 class Noun does Node {
 	method new( Mu $parsed ) {
+		trace "Noun";
 		if $parsed.list {
 			my @child;
 			for $parsed.list {
@@ -2100,8 +2499,9 @@ class Noun does Node {
 	}
 }
 
-class TermIsh is Node {
+class TermIsh does Node {
 	method new( Mu $parsed ) {
+		trace "TermIsh";
 		if $parsed.list {
 			my @child;
 			for $parsed.list {
@@ -2136,6 +2536,7 @@ class TermIsh is Node {
 
 class TermConj does Node {
 	method new( Mu $parsed ) {
+		trace "TermConj";
 		if $parsed.list {
 			my @child;
 			for $parsed.list {
@@ -2159,6 +2560,7 @@ class TermConj does Node {
 
 class TermAlt does Node {
 	method new( Mu $parsed ) {
+		trace "TermAlt";
 		if $parsed.list {
 			my @child;
 			for $parsed.list {
@@ -2182,6 +2584,7 @@ class TermAlt does Node {
 
 class TermConjSeq does Node {
 	method new( Mu $parsed ) {
+		trace "TermConjSeq";
 		if $parsed.list {
 			my @child;
 			for $parsed.list {
@@ -2216,6 +2619,7 @@ class TermConjSeq does Node {
 
 class TermAltSeq does Node {
 	method new( Mu $parsed ) {
+		trace "TermAltSeq";
 		if assert-hash-keys( $parsed, [< termconjseq >] ) {
 			return self.bless(
 				:content(
@@ -2233,6 +2637,7 @@ class TermAltSeq does Node {
 
 class TermSeq does Node {
 	method new( Mu $parsed ) {
+		trace "TermSeq";
 		if assert-hash-keys( $parsed, [< termaltseq >] ) {
 			return self.bless(
 				:content(
@@ -2250,6 +2655,7 @@ class TermSeq does Node {
 
 class Nibble does Node {
 	method new( Mu $parsed ) {
+		trace "Nibble";
 		if assert-hash-keys( $parsed, [< termseq >] ) {
 			return self.bless(
 				:content(
@@ -2271,8 +2677,50 @@ class Nibble does Node {
 	}
 }
 
+class MethodDef does Node {
+	method new( Mu $parsed ) {
+		trace "MethodDef";
+		if assert-hash-keys( $parsed,
+				     [< specials longname blockoid >],
+				     [< trait >] ) {
+			return self.bless(
+				:content(
+					:specials(
+						Specials.new(
+							$parsed.hash.<specials>
+						)
+					),
+					:longname(
+						LongName.new(
+							$parsed.hash.<longname>
+						)
+					),
+					:blockoid(
+						Blockoid.new(
+							$parsed.hash.<blockoid>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'method_def', $parsed );
+	}
+}
+
+class Specials does Node {
+	method new( Mu $parsed ) {
+		trace "Specials";
+		CATCH { when X::Multi::NoMatch {  } }
+		if assert-Bool( $parsed ) {
+			return self.bless( :name( $parsed.Bool ) )
+		}
+		die debug( 'specials', $parsed );
+	}
+}
+
 class RegexDef does Node {
 	method new( Mu $parsed ) {
+		trace "RegexDef";
 		if assert-hash-keys( $parsed, [< deflongname nibble >],
 					      [< signature trait >] ) {
 			return self.bless(
@@ -2298,6 +2746,7 @@ class RegexDef does Node {
 
 class RegexDeclarator does Node {
 	method new( Mu $parsed ) {
+		trace "RegexDeclarator";
 		if assert-hash-keys( $parsed, [< sym regex_def >] ) {
 			return self.bless(
 				:content(
@@ -2320,6 +2769,7 @@ class RegexDeclarator does Node {
 
 class SemiList does Node {
 	method new( Mu $parsed ) {
+		trace "SemiList";
 		if assert-hash-keys( $parsed, [], [< statement >] ) {
 			return self.bless
 		}
@@ -2333,6 +2783,7 @@ class SemiList does Node {
 
 class B does Node {
 	method new( Mu $parsed ) {
+		trace "B";
 		if assert-Bool( $parsed ) {
 			return self.bless( :name( $parsed.Bool ) )
 		}
@@ -2342,6 +2793,7 @@ class B does Node {
 
 class Babble does Node {
 	method new( Mu $parsed ) {
+		trace "Babble";
 		if assert-hash-keys( $parsed, [< B >], [< quotepair >] ) {
 			return self.bless(
 				:content(
@@ -2360,6 +2812,7 @@ class Babble does Node {
 
 class Quibble does Node {
 	method new( Mu $parsed ) {
+		trace "Quibble";
 		if assert-hash-keys( $parsed, [< babble nibble >] ) {
 			return self.bless(
 				:content(
@@ -2382,6 +2835,7 @@ class Quibble does Node {
 
 class Quote does Node {
 	method new( Mu $parsed ) {
+		trace "Quote";
 		if assert-hash-keys( $parsed, [< nibble >] ) {
 			return self.bless(
 				:content(
@@ -2410,6 +2864,7 @@ class Quote does Node {
 
 class RadNumber does Node {
 	method new( Mu $parsed ) {
+		trace "RadNumber";
 		if assert-hash-keys( $parsed, [< circumfix radix >],
 					      [< exp base >] ) {
 			return self.bless(
@@ -2435,6 +2890,7 @@ class RadNumber does Node {
 
 class DecNumber does Node {
 	method new( Mu $parsed ) {
+		trace "DecNumber";
 		if assert-hash-keys( $parsed, [< int coeff frac >] ) {
 			return self.bless(
 				:content(
@@ -2483,6 +2939,7 @@ class DecNumber does Node {
 
 class Numish does Node {
 	method new( Mu $parsed ) {
+		trace "Numish";
 		if assert-hash-keys( $parsed, [< integer >] ) {
 			return self.bless(
 				:content(
@@ -2522,6 +2979,7 @@ class Numish does Node {
 
 class Number does Node {
 	method new( Mu $parsed ) {
+		trace "Number";
 		if assert-hash-keys( $parsed, [< numish >] ) {
 			return self.bless(
 				:content(
@@ -2539,6 +2997,7 @@ class Number does Node {
 
 class Value does Node {
 	method new( Mu $parsed ) {
+		trace "Value";
 		if assert-hash-keys( $parsed, [< number >] ) {
 			return self.bless(
 				:content(
@@ -2567,6 +3026,7 @@ class Value does Node {
 
 class VariableDeclarator does Node {
 	method new( Mu $parsed ) {
+		trace "VariableDeclarator";
 		if assert-hash-keys(
 			$parsed,
 			[< variable >],
@@ -2595,6 +3055,7 @@ class TypeName_INTERMEDIARY does Node {
 
 class TypeName does Node {
 	method new( Mu $parsed ) {
+		trace "TypeName";
 		if $parsed.list {
 			my @child;
 			for $parsed.list {
@@ -2612,7 +3073,7 @@ class TypeName does Node {
 							)
 						)
 					);
-					next;
+					next
 				}
 				die debug( 'typename', $_ );
 			}
@@ -2626,6 +3087,7 @@ class TypeName does Node {
 
 class Blockoid does Node {
 	method new( Mu $parsed ) {
+		trace "Blockoid";
 		if assert-hash-keys( $parsed, [< statementlist >] ) {
 			return self.bless(
 				:content(
@@ -2643,6 +3105,7 @@ class Blockoid does Node {
 
 class Initializer does Node {
 	method new( Mu $parsed ) {
+		trace "Initializer";
 		if assert-hash-keys( $parsed, [< sym EXPR >] ) {
 			return self.bless(
 				:content(
@@ -2665,6 +3128,7 @@ class Initializer does Node {
 
 class Declarator does Node {
 	method new( Mu $parsed ) {
+		trace "Declarator";
 		if assert-hash-keys( $parsed, [< initializer
 						 variable_declarator >],
 					      [< trait >] ) {
@@ -2716,6 +3180,7 @@ class Declarator does Node {
 
 class PackageDef does Node {
 	method new( Mu $parsed ) {
+		trace "PackageDef";
 		if assert-hash-keys( $parsed, [< blockoid longname >],
 					      [< trait >] ) {
 			return self.bless(
@@ -2757,8 +3222,72 @@ class PackageDef does Node {
 }
 
 # XXX This is a compound type
+class InfixOPER does Node {
+	method new( Mu $parsed ) {
+		trace "InfixOPER";
+		return self.bless(
+			:content(
+				:infix(
+					Infix.new(
+						$parsed.hash.<infix>
+					)
+				),
+				:OPER(
+					OPER.new(
+						$parsed.hash.<OPER>
+					)
+				)
+			)
+		)
+	}
+}
+
+# XXX This is a compound type
+class DottyOPER does Node {
+	method new( Mu $parsed ) {
+		trace "DottyOPER";
+		return self.bless(
+			:content(
+				:dotty(
+					Dotty.new(
+						$parsed.hash.<dotty>
+					)
+				),
+				:OPER(
+					OPER.new(
+						$parsed.hash.<OPER>
+					)
+				)
+			)
+		)
+	}
+}
+
+# XXX This is a compound type
+class PostfixOPER does Node {
+	method new( Mu $parsed ) {
+		trace "PostfixOPER";
+		return self.bless(
+			:content(
+				:postfix(
+					Postfix.new(
+						$parsed.hash.<postfix>
+					)
+				),
+				:OPER(
+					OPER.new(
+						$parsed.hash.<OPER>
+					)
+				)
+			)
+		)
+	}
+}
+
+# XXX This is a compound type
 class PrefixOPER does Node {
 	method new( Mu $parsed ) {
+		trace "PrefixOPER";
 		return self.bless(
 			:content(
 				:prefix(
@@ -2778,6 +3307,7 @@ class PrefixOPER does Node {
 
 class PostConstraint does Node {
 	method new( Mu $parsed ) {
+		trace "PostConstraint";
 		if $parsed.list {
 			my @child;
 			for $parsed.list {
@@ -2787,7 +3317,7 @@ class PostConstraint does Node {
 							$_.hash.<EXPR>
 						)
 					);
-					next;
+					next
 				}
 				die debug( 'post_constraint', $_ );
 			}
@@ -2801,6 +3331,7 @@ class PostConstraint does Node {
 
 class MultiDeclarator does Node {
 	method new( Mu $parsed ) {
+		trace "MultiDeclarator";
 		if assert-hash-keys( $parsed, [< declarator >] ) {
 			return self.bless(
 				:content(
@@ -2818,6 +3349,7 @@ class MultiDeclarator does Node {
 
 class RoutineDef does Node {
 	method new( Mu $parsed ) {
+		trace "RoutineDef";
 		if assert-hash-keys( $parsed, [< blockoid deflongname >],
 					      [< trait >] ) {
 			return self.bless(
@@ -2842,6 +3374,7 @@ class RoutineDef does Node {
 
 class DECL does Node {
 	method new( Mu $parsed ) {
+		trace "DECL";
 		if assert-hash-keys( $parsed, [< initializer
 						 variable_declarator >],
 					      [< trait >] ) {
@@ -2918,8 +3451,9 @@ class DECL does Node {
 	}
 }
 
-class Scoped is Node {
+class Scoped does Node {
 	method new( Mu $parsed ) {
+		trace "Scoped";
 		if assert-hash-keys( $parsed, [< declarator DECL >],
 					      [< typename >] ) {
 			return self.bless(
@@ -2984,6 +3518,7 @@ class Scoped is Node {
 
 class ScopeDeclarator does Node {
 	method new( Mu $parsed ) {
+		trace "ScopeDeclarator";
 		if assert-hash-keys( $parsed, [< sym scoped >] ) {
 			return self.bless(
 				:content(
@@ -3006,6 +3541,23 @@ class ScopeDeclarator does Node {
 
 class RoutineDeclarator does Node {
 	method new( Mu $parsed ) {
+		trace "RoutineDeclarator";
+		if assert-hash-keys( $parsed, [< sym method_def >] ) {
+			return self.bless(
+				:content(
+					:sym(
+						Sym.new(
+							$parsed.hash.<sym>
+						)
+					),
+					:method_def(
+						MethodDef.new(
+							$parsed.hash.<method_def>
+						)
+					)
+				)
+			)
+		}
 		if assert-hash-keys( $parsed, [< sym routine_def >] ) {
 			return self.bless(
 				:content(
@@ -3028,6 +3580,7 @@ class RoutineDeclarator does Node {
 
 class Perl6::Tidy::Root does Node {
 	method new( Mu $parsed ) {
+		trace "Root";
 		if assert-hash-keys( $parsed, [< statementlist >] ) {
 			return self.bless(
 				:content(
@@ -3045,6 +3598,7 @@ class Perl6::Tidy::Root does Node {
 
 class StatementList does Node {
 	method new( Mu $parsed ) {
+		trace "StatementList";
 		if assert-hash-keys( $parsed, [< statement >] ) {
 			return self.bless(
 				:content(
@@ -3054,7 +3608,7 @@ class StatementList does Node {
 						)
 					)
 				)
-			);
+			)
 		}
 		if assert-hash-keys( $parsed, [], [< statement >] ) {
 			return self.bless
@@ -3063,11 +3617,82 @@ class StatementList does Node {
 	}
 }
 
+class SMExpr does Node {
+	method new( Mu $parsed ) {
+		trace "SMExpr";
+		if assert-hash-keys( $parsed, [< EXPR >] ) {
+			return self.bless(
+				:content(
+					:EXPR(
+						EXPR.new(
+							$parsed.hash.<EXPR>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'smexpr', $parsed );
+	}
+}
+
+class StatementModLoop does Node {
+	method new( Mu $parsed ) {
+		trace "StatementModLoop";
+		if assert-hash-keys( $parsed, [< sym smexpr >] ) {
+			return self.bless(
+				:content(
+					:sym(
+						Sym.new(
+							$parsed.hash.<sym>
+						)
+					),
+					:smexpr(
+						SMExpr.new(
+							$parsed.hash.<smexpr>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'statement_mod_loop', $parsed );
+	}
+}
+
+# XXX This is a compound type
+class StatementModLoopEXPR does Node {
+	method new( Mu $parsed ) {
+		trace "StatementModLoopEXPR";
+		return self.bless(
+			:content(
+				:statement_mod_loop(
+					StatementModLoop.new(
+						$parsed.hash.<statement_mod_loop>
+					)
+				),
+				:EXPR(
+					EXPR.new(
+						$parsed.hash.<EXPR>
+					)
+				)
+			)
+		)
+	}
+}
+
 class Statement does Node {
 	method new( Mu $parsed ) {
+		trace "Statement";
 		if $parsed.list {
 			my @child;
 			for $parsed.list {
+				if assert-hash-keys( $_, [< statement_mod_loop EXPR >] ) {
+					@child.push(
+						StatementModLoopEXPR.new(
+							$_
+						)
+					);
+					next
+				}
 				if assert-hash-keys( $_, [< EXPR >] ) {
 					@child.push(
 						EXPR.new(
@@ -3096,6 +3721,7 @@ class Statement does Node {
 
 class Op does Node {
 	method new( Mu $parsed ) {
+		trace "Op";
 		if assert-hash-keys( $parsed, [< infix OPER >] ) {
 			return self.bless(
 				:content(
@@ -3118,6 +3744,7 @@ class Op does Node {
 
 class MoreName does Node {
 	method new( Mu $parsed ) {
+		trace "MoreName";
 		if $parsed.list {
 			my @child;
 			for $parsed.list {
@@ -3149,6 +3776,7 @@ class MoreName does Node {
 
 class PackageDeclarator does Node {
 	method new( Mu $parsed ) {
+		trace  "PackageDeclarator";
 		if assert-hash-keys( $parsed, [< sym package_def >] ) {
 			return self.bless(
 				:content(
