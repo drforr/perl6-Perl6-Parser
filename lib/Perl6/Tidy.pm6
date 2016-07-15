@@ -55,7 +55,6 @@ class _Block {...}
 class _Blockoid {...}
 class _Blorst {...}
 class _CClassElem {...}
-class _CClassElem_INTERMEDIARY {...}
 class _CharSpec {...}
 class _Circumfix {...}
 class _CodeBlock {...}
@@ -95,6 +94,7 @@ class _Integer {...}
 class _Key {...}
 class _Lambda {...}
 class _LongName {...}
+class _LongName_ColonPair {...}
 class _MetaChar {...}
 class _MethodDef {...}
 class _MethodOp {...}
@@ -141,6 +141,7 @@ class _Separator {...}
 class _SigFinal {...}
 class _Sigil {...}
 class _Sign {...}
+class _Sign_CharSpec {...}
 class _Signature {...}
 class _SMExpr {...}
 class _Specials {...}
@@ -162,7 +163,6 @@ class _TermSeq {...}
 class _Twigil {...}
 class _TypeDeclarator {...}
 class _TypeName {...}
-class _TypeName_INTERMEDIARY {...}
 class _Val {...}
 class _Value {...}
 class _VALUE {...}
@@ -491,8 +491,13 @@ class _Sym does Node {
 class _Sign does Node {
 	method new( Mu $parsed ) {
 		trace "Sign";
-		if assert-Bool( $parsed ) {
-			return self.bless( :name( $parsed.Bool ) )
+		if $parsed {
+			if assert-Bool( $parsed ) {
+				return self.bless( :name( $parsed.Bool ) )
+			}
+		}
+		else {
+			return self.bless
 		}
 		die debug( $parsed );
 	}
@@ -711,19 +716,24 @@ class _Name does Node {
 class _LongName does Node {
 	method new( Mu $parsed ) {
 		trace "LongName";
-		if assert-hash-keys( $parsed, [< name >], [< colonpair >] ) {
-			return self.bless(
-				:content(
-					:name(
-						_Name.new(
-							$parsed.hash.<name>
-						)
-					),
-					:colonpair()
+		if $parsed {
+			if assert-hash-keys( $parsed, [< name >], [< colonpair >] ) {
+				return self.bless(
+					:content(
+						:name(
+							_Name.new(
+								$parsed.hash.<name>
+							)
+						),
+						:colonpair()
+					)
 				)
-			)
+			}
 		}
-		die debug( $parsed );
+		else {
+			return self.bless
+		}
+		die debug( $parsed )
 	}
 }
 
@@ -1122,8 +1132,7 @@ class _O does Node {
 				)
 			}
 		}
-		die $parsed.perl;
-		#die dump-parsed( $parsed );
+		die debug( $parsed );
 	}
 }
 
@@ -1248,9 +1257,7 @@ class _ArgList does Node {
 			)
 		}
 		if assert-Bool( $parsed ) {
-			return self.bless(
-				:name( $parsed.Bool )
-			)
+			return self.bless( :name( $parsed.Bool ) )
 		}
 		die debug( $parsed );
 	}
@@ -1509,9 +1516,7 @@ class _Lambda does Node {
 	method new( Mu $parsed ) {
 		trace "Lambda";
 		if assert-Str( $parsed ) {
-			return self.bless(
-				:name( $parsed.Str )
-			)
+			return self.bless( :name( $parsed.Str ) )
 		}
 		die debug( $parsed );
 	}
@@ -2551,8 +2556,13 @@ class _CharSpec does Node {
 				for $list.list -> $_list {
 					my @__child;
 					for $_list.list {
-						if assert-Str( $_ ) {
-							@__child.push( $_ );
+						if $_ {
+							if assert-Str( $_ ) {
+								@__child.push( $_ );
+								next
+							}
+						}
+						else {
 							next
 						}
 						die debug( $_ );
@@ -2569,7 +2579,26 @@ class _CharSpec does Node {
 	}
 }
 
-class _CClassElem_INTERMEDIARY does Node {
+class _Sign_CharSpec does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< sign charspec >] ) {
+			return self.bless(
+				:content(
+					:sign(
+						_Sign.new(
+							$_.hash.<sign>
+						)
+					),
+					:charspec(
+						_CharSpec.new(
+							$_.hash.<charspec>
+						)
+					)
+				)
+			)
+		}
+		die debug( $parsed );
+	}
 }
 
 class _CClassElem does Node {
@@ -2580,19 +2609,8 @@ class _CClassElem does Node {
 			for $parsed.list {
 				if assert-hash-keys( $_, [< sign charspec >] ) {
 					@child.push(
-						_CClassElem_INTERMEDIARY.new(
-							:content(
-								:sign(
-									_Sign.new(
-										$_.hash.<sign>
-									)
-								),
-								:charspec(
-									_CharSpec.new(
-										$_.hash.<charspec>
-									)
-								)
-							)
+						_Sign_CharSpec.new(
+							$_
 						)
 					);
 					next
@@ -2939,6 +2957,7 @@ class _SigFinal_Quantifier_Separator_Atom does Node {
 				)
 			)
 		}
+		die debug( $parsed );
 	}
 }
 
@@ -3556,7 +3575,23 @@ class _VariableDeclarator does Node {
 	}
 } 
 
-class _TypeName_INTERMEDIARY does Node {
+class _LongName_ColonPair does Node {
+	method new( Mu $parsed ) {
+		if assert-hash-keys( $parsed, [< longname >],
+					      [< colonpair >] ) {
+			return self.bless(
+				:content(
+					:longname(
+						_LongName.new(
+							$_.hash.<longname>
+						)
+					),
+					:colonpair()
+				)
+			)
+		}
+		die debug( $parsed );
+	}
 }
 
 class _TypeName does Node {
@@ -3568,15 +3603,8 @@ class _TypeName does Node {
 				if assert-hash-keys( $_, [< longname >],
 							 [< colonpair >] ) {
 					@child.push(
-						_TypeName_INTERMEDIARY.new(
-							:content(
-								:longname(
-									_LongName.new(
-										$_.hash.<longname>
-									)
-								),
-								:colonpair()
-							)
+						_LongName_ColonPair.new(
+							$_
 						)
 					);
 					next
