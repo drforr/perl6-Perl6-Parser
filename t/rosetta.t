@@ -451,7 +451,7 @@ my $b = 99;
 ###    say "{b $b}";
     say "Take one down, pass it around";
 ###    say "{b $b-1} on the wall";
-###    say "";
+    say "";
 ###}
 
 sub b($b) {
@@ -534,8 +534,8 @@ _END_
 		plan 1;
 
 		my $parsed = $pt.tidy( Q:to[_END_] );
-###my ($a, $b) = $*IN.get.split(" ");
-###say $a + $b;
+my ($a, $b) = $*IN.get.split(" ");
+say $a + $b;
 _END_
 		isa-ok $parsed, 'Perl6::Tidy::Root';
 	}, Q[version 3];
@@ -558,7 +558,7 @@ multi can-spell-word([$head,*@tail], @regex) {
 ###        if $head ~~ $re {
             return True unless @tail;
             return False if @regex == 1;
-###            return True if can-spell-word @tail, list @regex.grep: * !=== $re;
+            return True if can-spell-word @tail, list @regex.grep: * !=== $re;
 ###        }
     }
     False;
@@ -567,7 +567,7 @@ multi can-spell-word([$head,*@tail], @regex) {
 my @b = <BO XK DQ CP NA GT RE TG QD FS JW HU VI AN OB ER FS LY PC ZM>;
 
 for <A BaRK BOoK tREaT COmMOn SqUAD CoNfuSE> {
-###    say "$_     &can-spell-word($_, @b)";
+    say "$_     &can-spell-word($_, @b)";
 }
 _END_
 		isa-ok $parsed, 'Perl6::Tidy::Root';
