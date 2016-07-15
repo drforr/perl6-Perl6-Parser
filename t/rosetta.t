@@ -3,7 +3,7 @@ use v6;
 use Test;
 use Perl6::Tidy;
 
-plan 5;
+plan 7;
 
 my $pt = Perl6::Tidy.new;
 
@@ -341,6 +341,8 @@ _END_
 }, '24 game';
 
 subtest {
+	plan 1;
+
 	subtest {
 		plan 1;
 
@@ -393,5 +395,118 @@ _END_
 		isa-ok $parsed, 'Perl6::Tidy::Root';
 	}, Q[version 1];
 }, '24 game/Solve';
+
+subtest {
+	plan 1;
+
+	subtest {
+		plan 1;
+
+		my $parsed = $pt.tidy( Q:to[_END_] );
+###my @todo = $[1];
+my @sums = 0;
+sub nextrow($n) {
+###    for +@todo .. $n -> $l {
+###        @sums[$l] = 0;
+###        print $l,"\r" if $l < $n;
+        my $r = [];
+###        for reverse ^$l -> $x {
+###            my @x := @todo[$x];
+###            if @x {
+###                $r.push: @sums[$x] += @x.shift;
+###            }
+###            else {
+###                $r.push: @sums[$x];
+###            }
+###        }
+###        @todo.push($r);
+###    }
+###    @todo[$n];
+}
+
+say "rows:";
+say .fmt('%2d'), ": ", nextrow($_)[] for 1..10;
+
+
+say "\nsums:";
+for 23, 123, 1234, 10000 {
+    say $_, "\t", [+] nextrow($_)[];
+}
+_END_
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+	}, Q[version 1];
+}, '9 billion names of God';
+
+subtest {
+	plan 3;
+
+	subtest {
+		plan 1;
+
+		my $parsed = $pt.tidy( Q:to[_END_] );
+my $b = 99;
+
+###repeat while --$b {
+###    say "{b $b} on the wall";
+###    say "{b $b}";
+    say "Take one down, pass it around";
+###    say "{b $b-1} on the wall";
+###    say "";
+###}
+
+sub b($b) {
+    "$b bottle{'s' if $b != 1} of beer";
+}
+_END_
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+	}, Q[version 1];
+
+	subtest {
+		plan 1;
+
+		my $parsed = $pt.tidy( Q:to[_END_] );
+for 99...1 -> $bottles {
+    sing $bottles, :wall;
+###    sing $bottles;
+    say  "Take one down, pass it around";
+###    sing $bottles - 1, :wall;
+    say  "";
+}
+
+#| Prints a verse about a certain number of beers, possibly on a wall.
+sub sing(
+    Int $number, #= Number of bottles of beer.
+    Bool :$wall, #= Mention that the beers are on a wall?
+) {
+    my $quantity = $number == 0 ?? "No more"      !! $number;
+    my $plural   = $number == 1 ?? ""             !! "s";
+    my $location = $wall        ?? " on the wall" !! "";
+    say "$quantity bottle$plural of beer$location"
+}
+_END_
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+	}, Q[version 2];
+
+	subtest {
+		plan 1;
+
+		my $parsed = $pt.tidy( Q:to[_END_] );
+my @quantities = flat (99 ... 1), 'No more', 99;
+my @bottles = flat 'bottles' xx 98, 'bottle', 'bottles' xx 2;
+my @actions = flat 'Take one down, pass it around' xx 99,
+              'Go to the store, buy some more';
+
+for @quantities Z @bottles Z @actions Z
+    @quantities[1 .. *] Z @bottles[1 .. *]
+    -> ($a, $b, $c, $d, $e) {
+    say "$a $b of beer on the wall";
+    say "$a $b of beer";
+    say $c;
+    say "$d $e of beer on the wall\n";
+}
+_END_
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+	}, Q[version 3];
+}, '99 bottles of beeer';
 
 # vim: ft=perl6

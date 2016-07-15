@@ -827,6 +827,29 @@ class _Blorst does Node {
 	}
 }
 
+class _Else does Node {
+	method new( Mu $parsed ) {
+		trace "StatementPrefix";
+		if assert-hash-keys( $parsed, [< sym blorst >] ) {
+			return self.bless(
+				:content(
+					:sym(
+						_Sym.new(
+							$parsed.hash.<sym>
+						)
+					),
+					:blorst(
+						_Blorst.new(
+							$parsed.hash.<blorst>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'statement_prefix', $parsed );
+	}
+}
+
 class _StatementPrefix does Node {
 	method new( Mu $parsed ) {
 		trace "StatementPrefix";
@@ -890,6 +913,27 @@ class _StatementControl does Node {
 					:version(
 						_Version.new(
 							$parsed.hash.<version>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< xblock else sym >] ) {
+			return self.bless(
+				:content(
+					:xblock(
+						_XBlock.new(
+							$parsed.hash.<xblock>
+						)
+					),
+					:else(
+						_Else.new(
+							$parsed.hash.<else>
+						)
+					),
+					:sym(
+						_Sym.new(
+							$parsed.hash.<sym>
 						)
 					)
 				)
