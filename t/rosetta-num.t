@@ -507,6 +507,6 @@ for @quantities Z @bottles Z @actions Z
 _END_
 		isa-ok $parsed, 'Perl6::Tidy::Root';
 	}, Q[version 3];
-}, '99 bottles of beeer';
+}, '99 bottles of beer';
 
 # vim: ft=perl6

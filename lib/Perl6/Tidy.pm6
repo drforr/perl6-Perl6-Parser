@@ -2388,6 +2388,17 @@ class _EXPR does Node {
 				)
 			)
 		}
+		if assert-hash-keys( $parsed, [< dotty >] ) {
+			return self.bless(
+				:content(
+					:dotty(
+						_Dotty.new(
+							$parsed.hash.<dotty>
+						)
+					)
+				)
+			)
+		}
 		die debug( $parsed );
 	}
 }
