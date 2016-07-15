@@ -467,9 +467,9 @@ _END_
 		my $parsed = $pt.tidy( Q:to[_END_] );
 for 99...1 -> $bottles {
     sing $bottles, :wall;
-###    sing $bottles;
+    sing $bottles;
     say  "Take one down, pass it around";
-###    sing $bottles - 1, :wall;
+    sing $bottles - 1, :wall;
     say  "";
 }
 
