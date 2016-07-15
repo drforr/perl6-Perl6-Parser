@@ -8,6 +8,8 @@ plan 7;
 my $pt = Perl6::Tidy.new;
 
 subtest {
+	plan 4;
+
 	subtest {
 		plan 1;
 
@@ -54,12 +56,9 @@ END
 subtest {
 	plan 1;
 
-	subtest {
-		plan 1;
-
 # The parser also recursively parses use'd classes, so since Term::termios might
 # not be present on all systems, stub it out.
-		my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.tidy( Q:to[_END_] );
 class Term::termios { has $fd; method getattr {}; method unset_lflags { }; method unset_iflags { }; method setattr { } }
 #use Term::termios;
 
@@ -176,15 +175,13 @@ loop {
 }
 _END_
 
-		isa-ok $parsed, 'Perl6::Tidy::Root';
-	}, Q[version 1];
+	isa-ok $parsed, 'Perl6::Tidy::Root';
 }, '15 Puzzle';
 
 subtest {
-	subtest {
-		plan 1;
+	plan 1;
 
-		my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.tidy( Q:to[_END_] );
 class Term::termios { has $fd; method getattr {}; method unset_lflags { }; method unset_iflags { }; method setattr { } }
 #use Term::termios;
  
@@ -300,15 +297,13 @@ loop {
     last if $key eq 'q'; # (q)uit
 }
 _END_
-		isa-ok $parsed, 'Perl6::Tidy::Root';
-	}, Q[version 1];
+	isa-ok $parsed, 'Perl6::Tidy::Root';
 }, '2048';
 
 subtest {
-	subtest {
-		plan 1;
+	plan 1;
 
-		my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.tidy( Q:to[_END_] );
 use MONKEY-SEE-NO-EVAL;
  
 say "Here are your digits: ", 
@@ -336,17 +331,13 @@ while my $exp = prompt "\n24? " {
 ###    }
 }
 _END_
-		isa-ok $parsed, 'Perl6::Tidy::Root';
-	}, Q[version 1];
+	isa-ok $parsed, 'Perl6::Tidy::Root';
 }, '24 game';
 
 subtest {
 	plan 1;
 
-	subtest {
-		plan 1;
-
-		my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.tidy( Q:to[_END_] );
 use MONKEY-SEE-NO-EVAL;
 
 my @digits;
@@ -392,17 +383,13 @@ sub unique (@array) {
     %h.values;
 }
 _END_
-		isa-ok $parsed, 'Perl6::Tidy::Root';
-	}, Q[version 1];
+	isa-ok $parsed, 'Perl6::Tidy::Root';
 }, '24 game/Solve';
 
 subtest {
 	plan 1;
 
-	subtest {
-		plan 1;
-
-		my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.tidy( Q:to[_END_] );
 my @todo = $[1];
 my @sums = 0;
 sub nextrow($n) {
@@ -433,8 +420,7 @@ for 23, 123, 1234, 10000 {
     say $_, "\t", [+] nextrow($_)[];
 }
 _END_
-		isa-ok $parsed, 'Perl6::Tidy::Root';
-	}, Q[version 1];
+	isa-ok $parsed, 'Perl6::Tidy::Root';
 }, '9 billion names of God';
 
 subtest {

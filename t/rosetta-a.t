@@ -3,7 +3,7 @@ use v6;
 use Test;
 use Perl6::Tidy;
 
-plan 16;
+plan 18;
 
 my $pt = Perl6::Tidy.new;
 
@@ -42,10 +42,7 @@ _END_
 subtest {
 	plan 1;
 
-	subtest {
-		plan 1;
-
-		my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.tidy( Q:to[_END_] );
 multi can-spell-word(Str $word, @blocks) {
     my @regex = @blocks.map({ my @c = .comb; rx/<@c>/ }).grep: { .ACCEPTS($word.uc) }
     can-spell-word $word.uc.comb.list, @regex;
@@ -68,17 +65,13 @@ for <A BaRK BOoK tREaT COmMOn SqUAD CoNfuSE> {
     say "$_     &can-spell-word($_, @b)";
 }
 _END_
-		isa-ok $parsed, 'Perl6::Tidy::Root';
-	}, Q[version 1];
+	isa-ok $parsed, 'Perl6::Tidy::Root';
 }, 'ABC Problem';
 
 subtest {
 	plan 1;
 
-	subtest {
-		plan 1;
-
-		my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.tidy( Q:to[_END_] );
 use v6;
 
 role A {
@@ -99,17 +92,13 @@ my $obj = SomeClass.new;
 $obj.abstract();
 $obj.concrete();
 _END_
-		isa-ok $parsed, 'Perl6::Tidy::Root';
-	}, Q[version 1];
+	isa-ok $parsed, 'Perl6::Tidy::Root';
 }, 'Abstract Class';
 
 subtest {
 	plan 1;
 
-	subtest {
-		plan 1;
-
-		my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.tidy( Q:to[_END_] );
 sub propdivsum (\x) {
     [+] flat(x > 1, gather for 2 .. x.sqrt.floor -> \d {
         my \y = x div d;
@@ -119,21 +108,16 @@ sub propdivsum (\x) {
 
 say bag map { propdivsum($_) <=> $_ }, 1..20000
 _END_
-		isa-ok $parsed, 'Perl6::Tidy::Root';
-	}, Q[version 1];
+	isa-ok $parsed, 'Perl6::Tidy::Root';
 }, 'Abundant, Deficient and Perfect numbers';
 
 subtest {
 	plan 1;
 
-	subtest {
-		plan 1;
-
-		my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.tidy( Q:to[_END_] );
 sub accum ($n is copy) { sub { $n += $^x } }
 _END_
-		isa-ok $parsed, 'Perl6::Tidy::Root';
-	}, Q[version 1];
+	isa-ok $parsed, 'Perl6::Tidy::Root';
 }, 'Accumulator factory';
 
 subtest {
@@ -246,10 +230,7 @@ _END_
 subtest {
 	plan 1;
 
-	subtest {
-		plan 1;
-
-		my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.tidy( Q:to[_END_] );
 my $x;
 say $x.WHERE;
  
@@ -260,17 +241,13 @@ say "Same variable" if $y =:= $x;
 $x = 42;
 say $y;  # 42
 _END_
-		isa-ok $parsed, 'Perl6::Tidy::Root';
-	}, Q[version 1];
+	isa-ok $parsed, 'Perl6::Tidy::Root';
 }, 'Address of a variable';
 
 subtest {
 	plan 1;
 
-	subtest {
-		plan 1;
-
-		my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.tidy( Q:to[_END_] );
 constant expansions = [1], [1,-1], -> @prior { [|@prior,0 Z- 0,|@prior] } ... *;
  
 sub polyprime($p where 2..*) { so expansions[$p].[1 ..^ */2].all %% $p }
@@ -297,8 +274,7 @@ for ^13 -> $d {
     )
 }
 _END_
-		isa-ok $parsed, 'Perl6::Tidy::Root';
-	}, Q[version 2];
+	isa-ok $parsed, 'Perl6::Tidy::Root';
 }, 'AKS test for primality';
 
 subtest {
@@ -392,10 +368,7 @@ _END_
 subtest {
 	plan 1;
 
-	subtest {
-		plan 1;
-
-		my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.tidy( Q:to[_END_] );
 sub propdivsum (\x) {
     my @l = x > 1, gather for 2 .. x.sqrt.floor -> \d {
         my \y = x div d;
@@ -432,8 +405,7 @@ aliquotidian($_).say for flat
     790, 909, 562, 1064, 1488,
     15355717786080;
 _END_
-		isa-ok $parsed, 'Perl6::Tidy::Root';
-	}, Q[version 1];
+	isa-ok $parsed, 'Perl6::Tidy::Root';
 }, 'Aliquot sequence';
 
 subtest {
@@ -580,10 +552,7 @@ _END_
 subtest {
 	plan 1;
 
-	subtest {
-		plan 1;
-
-		my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.tidy( Q:to[_END_] );
 sub propdivsum (\x) {
     my @l = x > 1, gather for 2 .. x.sqrt.floor -> \d {
         my \y = x div d;
@@ -597,8 +566,7 @@ for 1..20000 -> $i {
     say "$i $j" if $j > $i and $i == propdivsum($j);
 }
 _END_
-		isa-ok $parsed, 'Perl6::Tidy::Root';
-	}, Q[version 1];
+	isa-ok $parsed, 'Perl6::Tidy::Root';
 }, 'Amicable pairs';
 
 subtest {
@@ -636,10 +604,7 @@ _END_
 subtest {
 	plan 1;
 
-	subtest {
-		plan 1;
-
-		my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.tidy( Q:to[_END_] );
 my %anagram = slurp('dict.ie').words.map({[.comb]}).classify({ .sort.join });
 
 for %anagram.values.sort({ -@($_[0]) }) -> @aset {
@@ -653,8 +618,52 @@ for %anagram.values.sort({ -@($_[0]) }) -> @aset {
     }
 }
 _END_
-		isa-ok $parsed, 'Perl6::Tidy::Root';
-	}, Q[version 1];
+	isa-ok $parsed, 'Perl6::Tidy::Root';
 }, 'Anagrams / Derangements';
+
+subtest {
+	plan 1;
+
+	my $parsed = $pt.tidy( Q:to[_END_] );
+sub fib($n) {
+    die "Naughty fib" if $n < 0;
+    return {
+        $_ < 2
+            ?? $_
+            !!  &?BLOCK($_-1) + &?BLOCK($_-2);
+    }($n);
+}
+ 
+say fib(10);
+_END_
+	isa-ok $parsed, 'Perl6::Tidy::Root';
+}, 'Anonymous recursion';
+
+subtest {
+	plan 1;
+
+	my $parsed = $pt.tidy( Q:to[_END_] );
+sub function { 2 * $^x + 3 };
+my @array = 1 .. 5;
+ 
+# via map function
+.say for map &function, @array;
+ 
+# via map method
+.say for @array.map(&function);
+ 
+# via for loop
+for @array {
+    say function($_);
+}
+ 
+# via the "hyper" metaoperator and method indirection
+say @array».&function;
+ 
+# we neither need a variable for the array nor for the function
+say [1,2,3]>>.&({ $^x + 1});
+_END_
+	isa-ok $parsed, 'Perl6::Tidy::Root';
+}, 'Apply a callback to an array';
 
 # vim: ft=perl6

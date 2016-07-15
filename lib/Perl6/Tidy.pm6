@@ -268,6 +268,42 @@ role Node {
 	has $.name;
 	has @.child;
 	has %.content;
+
+	method debug( Mu $parsed ) {
+		my @lines;
+		my @types;
+
+		if $parsed.list {
+			@types.push( 'list' )
+		}
+		if $parsed.hash {
+			@types.push( 'hash' )
+		}
+		@types.push( 'Int'  ) if $parsed.Int;
+		@types.push( 'Str'  ) if $parsed.Str;
+		@types.push( 'Bool' ) if $parsed.Bool;
+
+		die "Unknown type" unless @types;
+
+		@lines.push( "{@types})" );
+
+		@lines.push( "\+: "    ~   $parsed.Int       ) if $parsed.Int;
+		@lines.push( "\~: '"   ~   $parsed.Str ~ "'" ) if $parsed.Str;
+		@lines.push( "\?: "    ~ ~?$parsed.Bool      ) if $parsed.Bool;
+		if $parsed.list {
+			for $parsed.list {
+				@lines.push( "\[\]:\n" ~ $_.dump )
+			}
+			return;
+		}
+		elsif $parsed.hash() {
+			@lines.push( "\{\} keys: " ~ $parsed.hash.keys );
+			@lines.push( "\{\}:\n" ~   $parsed.dump );
+		}
+
+		@lines.push( "" );
+		return @lines.join("\n");
+	}
 }
 
 # $parsed can only be Int, by extension Str, by extension Bool.
@@ -348,7 +384,7 @@ class _BinInt does Node {
 		if assert-Int( $parsed ) {
 			return self.bless( :name( $parsed.Int ) )
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -358,7 +394,7 @@ class _OctInt does Node {
 		if assert-Int( $parsed ) {
 			return self.bless( :name( $parsed.Int ) )
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -372,7 +408,7 @@ class _DecInt does Node {
 		if assert-Int( $parsed ) {
 			return self.bless( :name( $parsed.Int ) )
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -382,7 +418,7 @@ class _HexInt does Node {
 		if assert-Int( $parsed ) {
 			return self.bless( :name( $parsed.Int ) )
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -392,7 +428,7 @@ class _Coeff does Node {
 		if assert-Int( $parsed ) {
 			return self.bless( :name( $parsed.Int ) )
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -402,7 +438,7 @@ class _Frac does Node {
 		if assert-Int( $parsed ) {
 			return self.bless( :name( $parsed.Int ) )
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -412,7 +448,7 @@ class _Radix does Node {
 		if assert-Int( $parsed ) {
 			return self.bless( :name( $parsed.Int ) )
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -422,7 +458,7 @@ class _Int does Node {
 		if assert-Int( $parsed ) {
 			return self.bless( :name( $parsed.Int ) )
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -432,7 +468,7 @@ class _Key does Node {
 		if assert-Str( $parsed ) {
 			return self.bless( :name( $parsed.Str ) )
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -442,7 +478,7 @@ class _NormSpace does Node {
 		if assert-Str( $parsed ) {
 			return self.bless( :name( $parsed.Str ) )
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -452,7 +488,7 @@ class _Sigil does Node {
 		if assert-Str( $parsed ) {
 			return self.bless( :name( $parsed.Str ) )
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -466,7 +502,7 @@ class _VALUE does Node {
 		if assert-Int( $parsed ) {
 			return self.bless( :name( $parsed.Int ) )
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -484,7 +520,7 @@ class _Sym does Node {
 		if assert-Str( $parsed ) {
 			return self.bless( :name( $parsed.Str ) )
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -499,7 +535,7 @@ class _Sign does Node {
 		else {
 			return self.bless
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -522,7 +558,7 @@ class _EScale does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -593,7 +629,7 @@ class _Integer does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -611,7 +647,7 @@ class _BackSlash does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -621,7 +657,7 @@ class _VStr does Node {
 		if $parsed.Int {
 			return self.bless( :name( $parsed.Int ) )
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -631,7 +667,7 @@ class _VNum does Node {
 		if $parsed.list {
 			return self.bless( :child() )
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -654,7 +690,7 @@ class _Version does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -664,7 +700,7 @@ class _Doc does Node {
 		if assert-Bool( $parsed ) {
 			return self.bless( :name( $parsed.Bool ) )
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -680,7 +716,7 @@ class _Identifier does Node {
 					);
 					next
 				}
-				die debug( $_ );
+				die self.debug( $_ );
 			}
 			return self.bless(
 				:child( @child )
@@ -689,7 +725,7 @@ class _Identifier does Node {
 		elsif $parsed.Str {
 			return self.bless( :name( $parsed.Str ) )
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -709,7 +745,7 @@ class _Name does Node {
 				:child()
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -733,7 +769,7 @@ class _LongName does Node {
 		else {
 			return self.bless
 		}
-		die debug( $parsed )
+		die self.debug( $parsed )
 	}
 }
 
@@ -751,7 +787,7 @@ class _ModuleName does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -769,7 +805,7 @@ class _CodeBlock does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -803,7 +839,7 @@ class _XBlock does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -821,7 +857,7 @@ class _Block does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -850,7 +886,7 @@ class _Blorst does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -873,7 +909,7 @@ class _Else does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -896,7 +932,7 @@ class _StatementPrefix does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -919,21 +955,21 @@ class _E1 does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
 class _E2 does Node {
 	method new( Mu $parsed ) {
 		trace "E2";
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
 class _E3 does Node {
 	method new( Mu $parsed ) {
 		trace "E3";
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -943,7 +979,7 @@ class _Wu does Node {
 		if assert-Str( $parsed ) {
 			return self.bless( :naem( $parsed.Str ) )
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -1097,7 +1133,7 @@ class _StatementControl does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -1132,7 +1168,7 @@ class _O does Node {
 				)
 			}
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -1155,7 +1191,7 @@ class _Postfix does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -1183,7 +1219,7 @@ class _Prefix does Node {
 		else {
 			return self.bless
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -1193,7 +1229,7 @@ class _Args does Node {
 		if $parsed.Bool {
 			return self.bless( :name( $parsed.Bool ) )
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -1259,7 +1295,7 @@ class _ArgList does Node {
 		if assert-Bool( $parsed ) {
 			return self.bless( :name( $parsed.Bool ) )
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -1285,7 +1321,7 @@ class _PostCircumfixOPER does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -1340,7 +1376,7 @@ class _PostCircumfix does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -1368,7 +1404,7 @@ class _PostOp does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -1456,7 +1492,7 @@ class _Circumfix does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -1474,7 +1510,7 @@ class _FakeSignature does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -1508,7 +1544,7 @@ class _Var does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -1518,7 +1554,7 @@ class _Lambda does Node {
 		if assert-Str( $parsed ) {
 			return self.bless( :name( $parsed.Str ) )
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -1558,7 +1594,7 @@ class _PBlock does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -1576,7 +1612,7 @@ class _ColonCircumfix does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -1633,7 +1669,7 @@ class _ColonPair does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -1683,7 +1719,7 @@ class _DottyOp does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -1711,7 +1747,7 @@ class _Dotty does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -1735,7 +1771,7 @@ class _Identifier_Args does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -1875,7 +1911,7 @@ class _OPER does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -1893,7 +1929,7 @@ class _Val does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -1928,7 +1964,7 @@ class _DefTerm does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -1998,7 +2034,7 @@ class _TypeDeclarator does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -2021,7 +2057,7 @@ class _FatArrow does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -2181,7 +2217,7 @@ class _EXPR does Node {
 					:child( @child )
 				)
 			}
-			die debug( $parsed )
+			die self.debug( $parsed )
 		}
 		if assert-hash-keys( $parsed, [< longname args >] ) {
 			return self.bless(
@@ -2399,7 +2435,7 @@ class _EXPR does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -2454,7 +2490,7 @@ class _Infix does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -2479,7 +2515,7 @@ class _InfixIsh does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -2495,7 +2531,7 @@ class _Signature does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -2513,7 +2549,7 @@ class _Twigil does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -2534,7 +2570,7 @@ class _DeSigilName does Node {
 		if $parsed.Str {
 			return self.bless( :name( $parsed.Str ) )
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -2553,7 +2589,7 @@ class _DefLongName does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -2576,17 +2612,17 @@ class _CharSpec does Node {
 						else {
 							next
 						}
-						die debug( $_ );
+						die self.debug( $_ );
 					}
-#					die debug( $_list );
+#					die self.debug( $_list );
 				}
-#				die debug( $list );
+#				die self.debug( $list );
 			}
 			return self.bless(
 				:child( @child )
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -2608,7 +2644,7 @@ class _Sign_CharSpec does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -2626,13 +2662,13 @@ class _CClassElem does Node {
 					);
 					next
 				}
-				die debug( $_ );
+				die self.debug( $_ );
 			}
 			return self.bless(
 				:child( @child )
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -2650,7 +2686,7 @@ class _Coercee does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -2678,7 +2714,7 @@ class _Contextualizer does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -2744,7 +2780,7 @@ class _Variable does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -2784,7 +2820,7 @@ class _Assertion does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -2857,7 +2893,7 @@ class _MetaChar does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -2878,7 +2914,7 @@ class _Atom does Node {
 		if $parsed.Str {
 			return self.bless( :name( $parsed.Str ) )
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -2896,7 +2932,7 @@ class _Quantifier does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -2914,7 +2950,7 @@ class _SigFinal does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -2932,7 +2968,7 @@ class _Separator does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -2968,7 +3004,7 @@ class _SigFinal_Quantifier_Separator_Atom does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -2997,13 +3033,13 @@ class _Noun does Node {
 					);
 					next
 				}
-				die debug( $_ );
+				die self.debug( $_ );
 			}
 			return self.bless(
 				:child( @child )
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -3021,7 +3057,7 @@ class _TermIsh does Node {
 					);
 					next
 				}
-				die debug( $_ );
+				die self.debug( $_ );
 			}
 			return self.bless(
 				:child( @child )
@@ -3038,7 +3074,7 @@ class _TermIsh does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -3056,13 +3092,13 @@ class _TermConj does Node {
 					);
 					next
 				}
-				die debug( $_ );
+				die self.debug( $_ );
 			}
 			return self.bless(
 				:child( @child )
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -3080,13 +3116,13 @@ class _TermAlt does Node {
 					);
 					next
 				}
-				die debug( $_ );
+				die self.debug( $_ );
 			}
 			return self.bless(
 				:child( @child )
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -3104,7 +3140,7 @@ class _TermConjSeq does Node {
 					);
 					next
 				}
-				die debug( $_ );
+				die self.debug( $_ );
 			}
 			return self.bless(
 				:child( @child )
@@ -3121,7 +3157,7 @@ class _TermConjSeq does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -3139,7 +3175,7 @@ class _TermAltSeq does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -3157,7 +3193,7 @@ class _TermSeq does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -3181,7 +3217,7 @@ class _Nibble does Node {
 		if $parsed.Bool {
 			return self.bless( :name( $parsed.Bool ) )
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -3239,7 +3275,7 @@ class _MethodDef does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -3250,7 +3286,7 @@ class _Specials does Node {
 		if assert-Bool( $parsed ) {
 			return self.bless( :name( $parsed.Bool ) )
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -3276,7 +3312,7 @@ class _RegexDef does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -3299,7 +3335,7 @@ class _RegexDeclarator does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -3313,7 +3349,7 @@ class _SemiList does Node {
 		if $parsed ~~ Any {
 			return self.bless
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -3323,7 +3359,7 @@ class _B does Node {
 		if assert-Bool( $parsed ) {
 			return self.bless( :name( $parsed.Bool ) )
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -3342,7 +3378,7 @@ class _Babble does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -3365,7 +3401,7 @@ class _Quibble does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -3394,7 +3430,7 @@ class _Quote does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -3420,7 +3456,7 @@ class _RadNumber does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -3469,7 +3505,7 @@ class _DecNumber does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -3509,7 +3545,7 @@ class _Numish does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -3527,7 +3563,7 @@ class _Number does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -3556,7 +3592,7 @@ class _Value does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -3582,7 +3618,7 @@ class _VariableDeclarator does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 } 
 
@@ -3601,7 +3637,7 @@ class _LongName_ColonPair does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -3620,13 +3656,13 @@ class _TypeName does Node {
 					);
 					next
 				}
-				die debug( $_ );
+				die self.debug( $_ );
 			}
 			return self.bless(
 				:child( @child )
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -3644,7 +3680,7 @@ class _Blockoid does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -3667,7 +3703,7 @@ class _Initializer does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -3751,7 +3787,7 @@ class _Declarator does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -3794,7 +3830,7 @@ class _PackageDef does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -3854,13 +3890,13 @@ class _PostConstraint does Node {
 					);
 					next
 				}
-				die debug( $_ );
+				die self.debug( $_ );
 			}
 			return self.bless(
 				:child( @child )
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -3878,7 +3914,7 @@ class _MultiSig does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -3928,7 +3964,7 @@ class _MultiDeclarator does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -3990,7 +4026,7 @@ class _RoutineDef does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -4088,7 +4124,7 @@ class _DECL does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -4153,7 +4189,7 @@ class _Scoped does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -4176,7 +4212,7 @@ class _ScopeDeclarator does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -4215,7 +4251,7 @@ class _RoutineDeclarator does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -4233,7 +4269,7 @@ class Perl6::Tidy::Root does Node {
 				)
 			);
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -4254,7 +4290,7 @@ class _StatementList does Node {
 		if assert-hash-keys( $parsed, [], [< statement >] ) {
 			return self.bless
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -4272,7 +4308,7 @@ class _SMExpr does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -4290,7 +4326,7 @@ class _ModifierExpr does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -4313,7 +4349,7 @@ class _StatementModCond does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -4336,7 +4372,7 @@ class _StatementModLoop does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -4360,7 +4396,7 @@ class _StatementModCond_EXPR does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -4384,7 +4420,7 @@ class _StatementModLoop_EXPR does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -4426,7 +4462,7 @@ class _Statement does Node {
 					);
 					next
 				}
-				die debug( $_ );
+				die self.debug( $_ );
 			}
 			return self.bless(
 				:child( @child )
@@ -4454,7 +4490,7 @@ class _Statement does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -4483,7 +4519,7 @@ class _InfixPrefixMetaOperator does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -4523,7 +4559,7 @@ class _Op does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -4549,13 +4585,13 @@ class _MoreName does Node {
 					);
 					next
 				}
-				die debug( $_ );
+				die self.debug( $_ );
 			}
 			return self.bless(
 				:child( @child )
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
@@ -4578,7 +4614,7 @@ class _PackageDeclarator does Node {
 				)
 			)
 		}
-		die debug( $parsed );
+		die self.debug( $parsed );
 	}
 }
 
