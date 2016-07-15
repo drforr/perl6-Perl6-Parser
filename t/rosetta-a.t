@@ -50,11 +50,11 @@ multi can-spell-word(Str $word, @blocks) {
 
 multi can-spell-word([$head,*@tail], @regex) {
     for @regex -> $re {
-###        if $head ~~ $re {
+        if $head ~~ $re {
             return True unless @tail;
             return False if @regex == 1;
             return True if can-spell-word @tail, list @regex.grep: * !=== $re;
-###        }
+        }
     }
     False;
 }
@@ -128,9 +128,9 @@ subtest {
 
 		my $parsed = $pt.tidy( Q:to[_END_] );
 sub A(Int $m, Int $n) {
-###    if    $m == 0 { $n + 1 } 
+    if    $m == 0 { $n + 1 } 
 ###    elsif $n == 0 { A($m - 1, 1) }
-###    else          { A($m - 1, A($m, $n - 1)) }
+    else          { A($m - 1, A($m, $n - 1)) }
 }
 _END_
 		isa-ok $parsed, 'Perl6::Tidy::Root';

@@ -317,10 +317,10 @@ grammar Exp24 {
 }
 
 while my $exp = prompt "\n24? " {
-###    if try Exp24.parse: $exp {
+    if try Exp24.parse: $exp {
         say "You win :)";
         last;
-###    } else {
+    } else {
         say (
             'Sorry.  Try again.' xx 20,
             'Try harder.' xx 5,
@@ -328,7 +328,7 @@ while my $exp = prompt "\n24? " {
             'Are you five or something?',
             'Come on, you can do better than that.'
         ).flat.pick
-###    }
+    }
 }
 _END_
 	isa-ok $parsed, 'Perl6::Tidy::Root';
@@ -399,12 +399,12 @@ sub nextrow($n) {
         my $r = [];
         for reverse ^$l -> $x {
             my @x := @todo[$x];
-###            if @x {
+            if @x {
                 $r.push: @sums[$x] += @x.shift;
-###            }
-###            else {
+            }
+            else {
                 $r.push: @sums[$x];
-###            }
+            }
         }
         @todo.push($r);
     }
