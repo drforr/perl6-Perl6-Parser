@@ -1009,14 +1009,14 @@ my @a =
 (all «slowly quickly»);
 
 sub test (Str $l, Str $r) {
-###    $l.ends-with($r.substr(0,1))
+    $l.ends-with($r.substr(0,1))
 }
 
 (sub ($w1, $w2, $w3, $w4){
-###  # return if the values are false
-###  return unless [and] test($w1, $w2), test($w2, $w3),test($w3, $w4);
-###  # say the results. If there is one more Container layer around them this doesn't work, this is why we need the arguments here.
-###  say "$w1 $w2 $w3 $w4"
+  # return if the values are false
+  return unless [and] test($w1, $w2), test($w2, $w3),test($w3, $w4);
+  # say the results. If there is one more Container layer around them this doesn't work, this is why we need the arguments here.
+  say "$w1 $w2 $w3 $w4"
 })(|@a); # supply the array as argumetns
 _END_
 		isa-ok $parsed, 'Perl6::Tidy::Root';
@@ -1034,7 +1034,7 @@ sub infix:<lf> ($a,$b) {
 multi dethunk(Callable $x) { try take $x() }
 multi dethunk(     Any $x) {     take $x   }
 
-###sub amb (*@c) { gather @c».&dethunk }
+sub amb (*@c) { gather @c».&dethunk }
 
 ###say first *, do
 ###    amb(<the that a>, { die 'oops'}) Xlf

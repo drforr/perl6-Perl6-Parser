@@ -1104,6 +1104,17 @@ class _MethodOp does Node {
 				)
 			)
 		}
+		if assert-hash-keys( $parsed, [< variable >] ) {
+			return self.bless(
+				:content(
+					:variable(
+						_Variable.new(
+							$parsed.hash.<variable>
+						)
+					)
+				)
+			)
+		}
 		if assert-hash-keys( $parsed, [< longname >] ) {
 			return self.bless(
 				:content(
