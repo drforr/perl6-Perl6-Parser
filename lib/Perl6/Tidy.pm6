@@ -121,6 +121,7 @@ class _PackageDef {...}
 class _PBlock {...}
 class Perl6::Tidy::Root {...}
 class _PostCircumfix {...}
+class _PostCircumfix_OPER {...}
 class _PostConstraint {...}
 class _Postfix {...}
 class _PostOp {...}
@@ -742,6 +743,7 @@ class _Name does Node {
 							$parsed.hash.<identifier>
 						)
 					),
+					:morename()
 				),
 				:child()
 			)
@@ -1295,6 +1297,31 @@ class _ArgList does Node {
 		}
 		if self.assert-Bool( $parsed ) {
 			return self.bless( :name( $parsed.Bool ) )
+		}
+		die self.debug( $parsed );
+	}
+}
+
+class _PostCircumfix_OPER does Node {
+	method new( Mu $parsed ) {
+		self.trace( "PostCircumfix_OPER" );
+		if assert-hash-keys( $parsed,
+				     [< postcircumfix OPER >],
+				     [< postfix_prefix_meta_operator >] ) {
+			return self.bless(
+				:content(
+					:postcircumfix(
+						_PostCircumfix.new(
+							$parsed.hash.<postcircumfix>
+						)
+					),
+					:OPER(
+						_OPER.new(
+							$parsed.hash.<OPER>
+						)
+					)
+				)
+			)
 		}
 		die self.debug( $parsed );
 	}
@@ -2053,7 +2080,7 @@ class _EXPR does Node {
 					[< postcircumfix OPER >],
 					[< postfix_prefix_meta_operator >] ) {
 					@child.push(
-						_Prefix_OPER.new( $_ )
+						_PostCircumfix_OPER.new( $_ )
 					);
 					next
 				}
@@ -3412,6 +3439,9 @@ class _SemiList does Node {
 		self.trace( "SemiList" );
 		if assert-hash-keys( $parsed, [], [< statement >] ) {
 			return self.bless(
+				:content(
+					:statement()
+				)
 			)
 		}
 		# XXX danger, Will Robinson!
@@ -3671,7 +3701,8 @@ class _VariableDeclarator does Node {
 		if assert-hash-keys(
 			$parsed,
 			[< variable >],
-			[< semilist postcircumfix signature trait post_constraint >] ) {
+			[< semilist postcircumfix signature
+			   trait post_constraint >] ) {
 			return self.bless(
 				:content(
 					:variable(
@@ -3907,20 +3938,26 @@ class _PackageDef does Node {
 class _Dotty_OPER does Node {
 	method new( Mu $parsed ) {
 		self.trace( "Dotty_OPER" );
-		return self.bless(
-			:content(
-				:dotty(
-					_Dotty.new(
-						$parsed.hash.<dotty>
-					)
-				),
-				:OPER(
-					_OPER.new(
-						$parsed.hash.<OPER>
-					)
+		if assert-hash-keys( $parsed,
+				     [< dotty OPER >],
+				     [< postfix_prefix_meta_operator >] ) {
+			return self.bless(
+				:content(
+					:dotty(
+						_Dotty.new(
+							$parsed.hash.<dotty>
+						)
+					),
+					:OPER(
+						_OPER.new(
+							$parsed.hash.<OPER>
+						)
+					),
+					:postfix_prefix_meta_operator()
 				)
 			)
-		)
+		}
+		die self.debug( $parsed );
 	}
 }
 
