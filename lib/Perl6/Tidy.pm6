@@ -1319,7 +1319,8 @@ class _PostCircumfix_OPER does Node {
 						_OPER.new(
 							$parsed.hash.<OPER>
 						)
-					)
+					),
+					:postfix_prefix_meta_operator()
 				)
 			)
 		}
@@ -2523,7 +2524,7 @@ class _InfixIsh does Node {
 
 class _Signature does Node {
 	method new( Mu $parsed ) {
-		self.trace( "_Signature" );
+		self.trace( "Signature" );
 		if assert-hash-keys( $parsed, [], [< param_sep parameter >] ) {
 			return self.bless(
 				:name( $parsed.Bool ),
@@ -3965,20 +3966,26 @@ class _Dotty_OPER does Node {
 class _Prefix_OPER does Node {
 	method new( Mu $parsed ) {
 		self.trace( "Prefix_OPER" );
-		return self.bless(
-			:content(
-				:prefix(
-					_Prefix.new(
-						$parsed.hash.<prefix>
-					)
-				),
-				:OPER(
-					_OPER.new(
-						$parsed.hash.<OPER>
-					)
+		if assert-hash-keys( $parsed,
+				     [< prefix OPER >],
+				     [< prefix_postfix_meta_operator >] ) {
+			return self.bless(
+				:content(
+					:prefix(
+						_Prefix.new(
+							$parsed.hash.<prefix>
+						)
+					),
+					:OPER(
+						_OPER.new(
+							$parsed.hash.<OPER>
+						)
+					),
+					:prefix_postfix_meta_operator()
 				)
 			)
-		)
+		}
+		die self.debug( $parsed );
 	}
 }
 
