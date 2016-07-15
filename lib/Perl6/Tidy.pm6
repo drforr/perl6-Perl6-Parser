@@ -814,6 +814,17 @@ class _Block does Node {
 class _Blorst does Node {
 	method new( Mu $parsed ) {
 		trace "Blorst";
+		if assert-hash-keys( $parsed, [< statement >] ) {
+			return self.bless(
+				:content(
+					:statement(
+						_Statement.new(
+							$parsed.hash.<statement>
+						)
+					)
+				)
+			)
+		}
 		if assert-hash-keys( $parsed, [< block >] ) {
 			return self.bless(
 				:content(
@@ -1111,6 +1122,17 @@ class _MethodOp does Node {
 class _ArgList does Node {
 	method new( Mu $parsed ) {
 		trace "ArgList";
+		if assert-hash-keys( $parsed, [< EXPR >] ) {
+			return self.bless(
+				:content(
+					:EXPR(
+						_EXPR.new(
+							$parsed.hash.<EXPR>
+						)
+					)
+				)
+			)
+		}
 		if assert-Bool( $parsed ) {
 			return self.bless(
 				:name( $parsed.Bool )
@@ -1691,6 +1713,22 @@ class _OPER does Node {
 					:nibble(
 						_Nibble.new(
 							$parsed.hash.<nibble>)
+					),
+					:O(
+						_O.new(
+							$parsed.hash.<O>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< arglist O >] ) {
+			return self.bless(
+				:content(
+					:arglist(
+						_ArgList.new(
+							$parsed.hash.<arglist>
+						)
 					),
 					:O(
 						_O.new(
@@ -4222,6 +4260,28 @@ class _Statement does Node {
 			}
 			return self.bless(
 				:child( @child )
+			)
+		}
+		if assert-hash-keys( $parsed, [< statement_control >] ) {
+			return self.bless(
+				:content(
+					:statement_control(
+						_StatementControl.new(
+							$parsed.hash.<statement_control>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< EXPR >] ) {
+			return self.bless(
+				:content(
+					:EXPR(
+						_EXPR.new(
+							$parsed.hash.<EXPR>
+						)
+					)
+				)
 			)
 		}
 		die debug( 'statement', $parsed );

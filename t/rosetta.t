@@ -3,7 +3,7 @@ use v6;
 use Test;
 use Perl6::Tidy;
 
-plan 18;
+plan 20;
 
 my $pt = Perl6::Tidy.new;
 
@@ -936,6 +936,147 @@ aliquotidian($_).say for flat
 _END_
 		isa-ok $parsed, 'Perl6::Tidy::Root';
 	}, Q[version 1];
-}, 'Align columns';
+}, 'Aliquot sequence';
+
+subtest {
+	plan 2;
+
+	subtest {
+		plan 1;
+
+		my $parsed = $pt.tidy( Q:to[_END_] );
+sub is-k-almost-prime($n is copy, $k) returns Bool {
+###    loop (my ($p, $f) = 2, 0; $f < $k && $p*$p <= $n; $p++) {
+###        $n /= $p, $f++ while $n %% $p;
+###    }
+###    $f + ($n > 1) == $k;
+}
+
+for 1 .. 5 -> $k {
+    say ~.[^10]
+        given grep { is-k-almost-prime($_, $k) }, 2 .. *
+}
+_END_
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+	}, Q[version 1];
+
+	subtest {
+		plan 1;
+
+		# 'factor^2' was superscript-2
+		my $parsed = $pt.tidy( Q:to[_END_] );
+constant @primes = 2, |(3, 5, 7 ... *).grep: *.is-prime;
+
+multi sub factors(1) { 1 }
+multi sub factors(Int $remainder is copy) {
+    gather for @primes -> $factor {
+        # if remainder < factor^2, we're done
+###        if $factor * $factor > $remainder {
+            take $remainder if $remainder > 1;
+            last;
+###        }
+        # How many times can we divide by this prime?
+        while $remainder %% $factor {
+            take $factor;
+            last if ($remainder div= $factor) === 1;
+        }
+    }
+}
+
+constant @factory = lazy 0..* Z=> flat (0, 0, map { +factors($_) }, 2..*);
+
+sub almost($n) { map *.key, grep *.value == $n, @factory }
+
+put almost($_)[^10] for 1..5;
+_END_
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+	}, Q[version 2];
+}, 'Almost prime';
+
+subtest {
+	plan 3;
+
+	subtest {
+		plan 1;
+
+		my $parsed = $pt.tidy( Q:to[_END_] );
+#| an array of four words, that have more possible values. 
+#| Normally we would want `any' to signify we want any of the values, but well negate later and thus we need `all'
+my @a =
+(all «the that a»),
+(all «frog elephant thing»),
+(all «walked treaded grows»),
+(all «slowly quickly»);
+
+sub test (Str $l, Str $r) {
+###    $l.ends-with($r.substr(0,1))
+}
+
+(sub ($w1, $w2, $w3, $w4){
+###  # return if the values are false
+###  return unless [and] test($w1, $w2), test($w2, $w3),test($w3, $w4);
+###  # say the results. If there is one more Container layer around them this doesn't work, this is why we need the arguments here.
+###  say "$w1 $w2 $w3 $w4"
+})(|@a); # supply the array as argumetns
+_END_
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+	}, Q[version 1];
+ 
+	subtest {
+		plan 1;
+
+		my $parsed = $pt.tidy( Q:to[_END_] );
+sub infix:<lf> ($a,$b) {
+    next unless try $a.substr(*-1,1) eq $b.substr(0,1);
+    "$a $b";
+}
+
+multi dethunk(Callable $x) { try take $x() }
+multi dethunk(     Any $x) {     take $x   }
+
+###sub amb (*@c) { gather @c».&dethunk }
+
+###say first *, do
+###    amb(<the that a>, { die 'oops'}) Xlf
+###    amb('frog',{'elephant'},'thing') Xlf
+###    amb(<walked treaded grows>)      Xlf
+###    amb { die 'poison dart' },
+###        {'slowly'},
+###        {'quickly'},
+###        { die 'fire' };
+_END_
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+	}, Q[version 2];
+
+	subtest {
+		plan 1;
+
+		my $parsed = $pt.tidy( Q:to[_END_] );
+sub amb($var,*@a) {
+    "[{
+        @a.pick(*).map: {"||\{ $var = '$_' }"}
+     }]";
+}
+
+sub joins ($word1, $word2) {
+    substr($word1,*-1,1) eq substr($word2,0,1)
+}
+
+'' ~~ m/
+    :my ($a,$b,$c,$d);
+    <{ amb '$a', <the that a> }>
+    <{ amb '$b', <frog elephant thing> }>
+    <?{ joins $a, $b }>
+    <{ amb '$c', <walked treaded grows> }>
+    <?{ joins $b, $c }>
+    <{ amb '$d', <slowly quickly> }>
+    <?{ joins $c, $d }>
+    { say "$a $b $c $d" }
+    <!>
+/;
+_END_
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+	}, Q[version 3];
+}, 'Almost prime';
 
 # vim: ft=perl6
