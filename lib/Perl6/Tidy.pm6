@@ -47,9 +47,11 @@ class _ArgList {...}
 class _Args {...}
 class _Assertion {...}
 class _Atom {...}
+class _Atom_SigFinal {...}
 class _B {...}
 class _Babble {...}
 class _BackSlash {...}
+class _BackMod {...}
 class _BinInt {...}
 class _Block {...}
 class _Blockoid {...}
@@ -124,6 +126,7 @@ class _Postfix {...}
 class _PostOp {...}
 class _Prefix {...}
 class _Prefix_OPER {...}
+class _QuantifiedAtom {...}
 class _Quantifier {...}
 class _Quibble {...}
 class _Quote {...}
@@ -137,6 +140,7 @@ class _Scoped {...}
 class _ScopeDeclarator {...}
 class _SemiList {...}
 class _Separator {...}
+class _SepType {...}
 class _SigFinal {...}
 class _Sigil {...}
 class _Sign {...}
@@ -2798,67 +2802,106 @@ class _Assertion does Node {
 class _MetaChar does Node {
 	method new( Mu $parsed ) {
 		self.trace( "MetaChar" );
-		if assert-hash-keys( $parsed, [< sym >] ) {
+		if $parsed {
+			if assert-hash-keys( $parsed, [< sym >] ) {
+				return self.bless(
+					:content(
+						:sym(
+							_Sym.new(
+								$parsed.hash.<sym>
+							)
+						)
+					)
+				)
+			}
+			if assert-hash-keys( $parsed, [< codeblock >] ) {
+				return self.bless(
+					:content(
+						:codeblock(
+							_CodeBlock.new(
+								$parsed.hash.<codeblock>
+							)
+						)
+					)
+				)
+			}
+			if assert-hash-keys( $parsed, [< backslash >] ) {
+				return self.bless(
+					:content(
+						:backslash(
+							_BackSlash.new(
+								$parsed.hash.<backslash>
+							)
+						)
+					)
+				)
+			}
+			if assert-hash-keys( $parsed, [< assertion >] ) {
+				return self.bless(
+					:content(
+						:assertion(
+							_Assertion.new(
+								$parsed.hash.<assertion>
+							)
+						)
+					)
+				)
+			}
+			if assert-hash-keys( $parsed, [< nibble >] ) {
+				return self.bless(
+					:content(
+						:nibble(
+							_Nibble.new(
+								$parsed.hash.<nibble>
+							)
+						)
+					)
+				)
+			}
+			if assert-hash-keys( $parsed, [< quote >] ) {
+				return self.bless(
+					:content(
+						:quote(
+							_Quote.new(
+								$parsed.hash.<quote>
+							)
+						)
+					)
+				)
+			}
+		}
+		else {
+			return self.bless
+		}
+		die self.debug( $parsed );
+	}
+}
+
+class _Atom_SigFinal does Node {
+	method new( Mu $parsed ) {
+		self.trace( "Atom_SigFinal" );
+		if assert-hash-keys( $parsed, [< atom sigfinal >] ) {
 			return self.bless(
 				:content(
-					:sym(
-						_Sym.new(
-							$parsed.hash.<sym>
+					:atom(
+						_Atom.new(
+							$parsed.hash.<atom>
+						)
+					),
+					:sigfinal(
+						_SigFinal.new(
+							$parsed.hash.<sigfinal>
 						)
 					)
 				)
 			)
 		}
-		if assert-hash-keys( $parsed, [< codeblock >] ) {
+		if assert-hash-keys( $parsed, [< atom >] ) {
 			return self.bless(
 				:content(
-					:codeblock(
-						_CodeBlock.new(
-							$parsed.hash.<codeblock>
-						)
-					)
-				)
-			)
-		}
-		if assert-hash-keys( $parsed, [< backslash >] ) {
-			return self.bless(
-				:content(
-					:backslash(
-						_BackSlash.new(
-							$parsed.hash.<backslash>
-						)
-					)
-				)
-			)
-		}
-		if assert-hash-keys( $parsed, [< assertion >] ) {
-			return self.bless(
-				:content(
-					:assertion(
-						_Assertion.new(
-							$parsed.hash.<assertion>
-						)
-					)
-				)
-			)
-		}
-		if assert-hash-keys( $parsed, [< nibble >] ) {
-			return self.bless(
-				:content(
-					:nibble(
-						_Nibble.new(
-							$parsed.hash.<nibble>
-						)
-					)
-				)
-			)
-		}
-		if assert-hash-keys( $parsed, [< quote >] ) {
-			return self.bless(
-				:content(
-					:quote(
-						_Quote.new(
-							$parsed.hash.<quote>
+					:atom(
+						_Atom.new(
+							$parsed.hash.<atom>
 						)
 					)
 				)
@@ -2892,6 +2935,57 @@ class _Atom does Node {
 class _Quantifier does Node {
 	method new( Mu $parsed ) {
 		self.trace( "Quantifier" );
+		if assert-hash-keys( $parsed, [< sym backmod >] ) {
+			return self.bless(
+				:content(
+					:sym(
+						_Sym.new(
+							$parsed.hash.<sym>
+						)
+					),
+					:backmod(
+						_BackMod.new(
+							$parsed.hash.<backmod>
+						)
+					)
+				)
+			)
+		}
+		die self.debug( $parsed );
+	}
+}
+
+class _BackMod does Node {
+	method new( Mu $parsed ) {
+		self.trace( "BackMod" );
+		if self.assert-Bool( $parsed ) {
+			return self.bless( :name( $parsed.Bool ) )
+		}
+		die self.debug( $parsed );
+	}
+}
+
+class _SigFinal does Node {
+	method new( Mu $parsed ) {
+		self.trace( "SigFinal" );
+		if assert-hash-keys( $parsed, [< normspace >] ) {
+			return self.bless(
+				:content(
+					:normspace(
+						_NormSpace.new(
+							$parsed.hash.<normspace>
+						)
+					)
+				)
+			)
+		}
+		die self.debug( $parsed );
+	}
+}
+
+class _QuantifiedAtom does Node {
+	method new( Mu $parsed ) {
+		self.trace( "QuantifiedAtom" );
 		if assert-hash-keys( $parsed, [< XXX >] ) {
 			return self.bless(
 				:content(
@@ -2907,9 +3001,9 @@ class _Quantifier does Node {
 	}
 }
 
-class _SigFinal does Node {
+class _SepType does Node {
 	method new( Mu $parsed ) {
-		self.trace( "SigFinal" );
+		self.trace( "SepType" );
 		if assert-hash-keys( $parsed, [< XXX >] ) {
 			return self.bless(
 				:content(
@@ -2928,7 +3022,7 @@ class _SigFinal does Node {
 class _Separator does Node {
 	method new( Mu $parsed ) {
 		self.trace( "Separator" );
-		if assert-hash-keys( $parsed, [< XXX >] ) {
+		if assert-hash-keys( $parsed, [< septype quantified_atom >] ) {
 			return self.bless(
 				:content(
 					:metachar(
@@ -2943,7 +3037,6 @@ class _Separator does Node {
 	}
 }
 
-# XXX This is a compound type
 class _SigFinal_Quantifier_Separator_Atom does Node {
 	method new( Mu $parsed ) {
 		self.trace( "SigFinal_Quantifier_Separator_Atom" );
@@ -2989,8 +3082,8 @@ class _Noun does Node {
 						     [< sigfinal quantifier
 							separator atom >] ) {
 					@child.push(
-						_Atom.new(
-							$_.hash.<atom>
+						_SigFinal_Quantifier_Separator_Atom.new(
+							$_
 						)
 					);
 					next
@@ -2998,8 +3091,8 @@ class _Noun does Node {
 				if assert-hash-keys( $_, [< atom >],
 							 [< sigfinal >] ) {
 					@child.push(
-						_Atom.new(
-							$_.hash.<atom>
+						_Atom_SigFinal.new(
+							$_
 						)
 					);
 					next
@@ -3219,7 +3312,8 @@ class _MethodDef does Node {
 						_MultiSig.new(
 							$parsed.hash.<multisig>
 						)
-					)
+					),
+					:trait()
 				)
 			)
 		}
@@ -3242,7 +3336,8 @@ class _MethodDef does Node {
 						_Blockoid.new(
 							$parsed.hash.<blockoid>
 						)
-					)
+					),
+					:trait()
 				)
 			)
 		}
@@ -3314,7 +3409,8 @@ class _SemiList does Node {
 	method new( Mu $parsed ) {
 		self.trace( "SemiList" );
 		if assert-hash-keys( $parsed, [], [< statement >] ) {
-			return self.bless
+			return self.bless(
+			)
 		}
 		# XXX danger, Will Robinson!
 		if $parsed ~~ Any {
