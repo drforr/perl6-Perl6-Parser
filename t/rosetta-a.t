@@ -129,7 +129,7 @@ subtest {
 		my $parsed = $pt.tidy( Q:to[_END_] );
 sub A(Int $m, Int $n) {
     if    $m == 0 { $n + 1 } 
-###    elsif $n == 0 { A($m - 1, 1) }
+    elsif $n == 0 { A($m - 1, 1) }
     else          { A($m - 1, A($m, $n - 1)) }
 }
 _END_
@@ -313,9 +313,9 @@ for @filelines -> $line {
       my $gap =  @maxcolwidths[$i] - @words[$i].chars + 1 ;
       if $justification eq "left" {
 	 print @words[ $i ] ~ " " x $gap ;
-###      } elsif $justification eq "right" {
+      } elsif $justification eq "right" {
 	 print  " " x $gap ~ @words[$i] ;
-###      } elsif $justification eq "center" {
+      } elsif $justification eq "center" {
 	 $gap = ( @maxcolwidths[ $i ] + 2 - @words[$i].chars ) div 2 ;
 	 print " " x $gap ~ @words[$i] ~ " " x $gap ;
       }

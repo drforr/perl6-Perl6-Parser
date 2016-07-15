@@ -511,7 +511,9 @@ class _VALUE does Node {
 class _Sym does Node {
 	method new( Mu $parsed ) {
 		self.trace( "Sym" );
-		CATCH { when X::Hash::Store::OddNumber { } }
+		CATCH { when X::Hash::Store::OddNumber { }
+when X::Multi::NoMatch { }
+}
 		if $parsed.Bool and		# XXX Huh?
 		   $parsed.Str eq '+' {
 			return self.bless( :name( $parsed.Str ) )
@@ -811,7 +813,9 @@ class _CodeBlock does Node {
 class _XBlock does Node {
 	method new( Mu $parsed ) {
 		self.trace( "XBlock" );
-		CATCH { when X::Hash::Store::OddNumber { } }
+		CATCH { when X::Hash::Store::OddNumber { }
+when X::Multi::NoMatch { }
+	}
 		if assert-hash-keys( $parsed, [< pblock EXPR >] ) {
 			return self.bless(
 				:content(
