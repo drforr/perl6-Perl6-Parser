@@ -1306,6 +1306,17 @@ class _Var does Node {
 				)
 			)
 		}
+		if assert-hash-keys( $parsed, [< variable >] ) {
+			return self.bless(
+				:content(
+					:variable(
+						_Variable.new(
+							$parsed.hash.<variable>
+						)
+					)
+				)
+			)
+		}
 		die debug( 'var', $parsed );
 	}
 }
@@ -2473,6 +2484,17 @@ class _Variable does Node {
 class _Assertion does Node {
 	method new( Mu $parsed ) {
 		trace "Assertion";
+		if assert-hash-keys( $parsed, [< var >] ) {
+			return self.bless(
+				:content(
+					:var(
+						_Var.new(
+							$parsed.hash.<var>
+						)
+					)
+				)
+			)
+		}
 		if assert-hash-keys( $parsed, [< longname >] ) {
 			return self.bless(
 				:content(
@@ -2552,6 +2574,17 @@ class _MetaChar does Node {
 					:nibble(
 						_Nibble.new(
 							$parsed.hash.<nibble>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< quote >] ) {
+			return self.bless(
+				:content(
+					:quote(
+						_Quote.new(
+							$parsed.hash.<quote>
 						)
 					)
 				)

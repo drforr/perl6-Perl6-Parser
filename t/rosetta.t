@@ -101,12 +101,12 @@ sub new () {
  
 sub shuffle () {
     my @c = [1,2,3,4],[5,6,7,8],[9,10,11,12],[13,14,15,' '];
-###    for (^16).pick(*) -> $y, $x {
+    for (^16).pick(*) -> $y, $x {
 ###        my ($yd, $ym, $xd, $xm) = ($y div n, $y mod n, $x div n, $x mod n);
 ###        my $temp    = @c[$ym;$yd];
 ###        @c[$ym;$yd] = @c[$xm;$xd];
 ###        @c[$xm;$xd] = $temp;
-###    }
+    }
     @c;
 }
 
@@ -278,7 +278,7 @@ multi sub move('right') {
 sub another {
     my @empties;
     for @board.kv -> $r, @row {
-###        @empties.push(($r, $_)) for @row.grep(:k, '');
+        @empties.push(($r, $_)) for @row.grep(:k, '');
     }
 ###    my ( $x, $y ) = @empties.roll;
 ###    @board[$x; $y] = (flat 2 xx 9, 4).roll;
@@ -317,7 +317,7 @@ constant @digits = (1..9).roll(4)».Str;
 grammar Exp24 {
     token TOP { ^ <exp> $ { fail unless EVAL($/) == 24 } }
     rule exp { <term>+ % <op> }
-###    rule term { '(' <exp> ')' | <@digits> }
+    rule term { '(' <exp> ')' | <@digits> }
     token op { < + - * / > }
 }
 
