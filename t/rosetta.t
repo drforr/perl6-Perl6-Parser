@@ -3,7 +3,7 @@ use v6;
 use Test;
 use Perl6::Tidy;
 
-plan 7;
+plan 11;
 
 my $pt = Perl6::Tidy.new;
 
@@ -540,5 +540,89 @@ _END_
 		isa-ok $parsed, 'Perl6::Tidy::Root';
 	}, Q[version 3];
 }, 'A + B';
+
+subtest {
+	plan 1;
+
+	subtest {
+		plan 1;
+
+		my $parsed = $pt.tidy( Q:to[_END_] );
+###multi can-spell-word(Str $word, @blocks) {
+###    my @regex = @blocks.map({ my @c = .comb; rx/<@c>/ }).grep: { .ACCEPTS($word.uc) }
+###    can-spell-word $word.uc.comb.list, @regex;
+###}
+
+###multi can-spell-word([$head,*@tail], @regex) {
+###    for @regex -> $re {
+###        if $head ~~ $re {
+###            return True unless @tail;
+###            return False if @regex == 1;
+###            return True if can-spell-word @tail, list @regex.grep: * !=== $re;
+###        }
+###    }
+    False;
+###}
+
+my @b = <BO XK DQ CP NA GT RE TG QD FS JW HU VI AN OB ER FS LY PC ZM>;
+
+for <A BaRK BOoK tREaT COmMOn SqUAD CoNfuSE> {
+###    say "$_     &can-spell-word($_, @b)";
+}
+_END_
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+	}, Q[version 1];
+}, 'ABC Problem';
+
+subtest {
+	plan 1;
+
+	subtest {
+		plan 1;
+
+		my $parsed = $pt.tidy( Q:to[_END_] );
+use v6;
+
+role A {
+    # must be filled in by the class it is composed into
+###    method abstract() { ... };
+
+    # can be overridden in the class, but that's not mandatory
+###    method concrete() { say '# 42' };
+}
+
+class SomeClass does A {
+###    method abstract() {
+        say "# made concrete in class"
+###    }
+}
+
+my $obj = SomeClass.new;
+$obj.abstract();
+$obj.concrete();
+_END_
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+	}, Q[version 1];
+}, 'Abstract Class';
+
+subtest {
+	plan 1;
+
+	subtest {
+		plan 1;
+
+		my $parsed = $pt.tidy( Q:to[_END_] );
+sub propdivsum (\x) {
+    [+] flat(x > 1, gather for 2 .. x.sqrt.floor -> \d {
+        my \y = x div d;
+        if y * d == x { take d; take y unless y == d }
+    })
+}
+
+say bag map { propdivsum($_) <=> $_ }, 1..20000
+_END_
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+	}, Q[version 1];
+}, 'Abundant, Deficient and Perfect numbers';
 
 # vim: ft=perl6
