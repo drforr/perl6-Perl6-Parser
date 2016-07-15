@@ -2278,9 +2278,11 @@ class _EXPR does Node {
 		}
 		if assert-hash-keys( $parsed, [< longname >] ) {
 			return self.bless(
-				:child( 
-					_LongName.new(
-						$parsed.hash.<longname>
+				:content( 
+					:longname(
+						_LongName.new(
+							$parsed.hash.<longname>
+						)
 					)
 				)
 			)
@@ -2468,9 +2470,7 @@ class _Infix does Node {
 class _InfixIsh does Node {
 	method new( Mu $parsed ) {
 		self.trace( "InfixIsh" );
-		if assert-hash-keys(
-			$parsed,
-			[< infix OPER >] ) {
+		if assert-hash-keys( $parsed, [< infix OPER >] ) {
 			return self.bless(
 				:content(
 					:infix(
@@ -2576,7 +2576,7 @@ class _CharSpec does Node {
 					for $_list.list {
 						if $_ {
 							if self.assert-Str( $_ ) {
-								@__child.push( $_ );
+								@__child.push( $_.Str );
 								next
 							}
 						}
@@ -2604,12 +2604,12 @@ class _Sign_CharSpec does Node {
 				:content(
 					:sign(
 						_Sign.new(
-							$_.hash.<sign>
+							$parsed.hash.<sign>
 						)
 					),
 					:charspec(
 						_CharSpec.new(
-							$_.hash.<charspec>
+							$parsed.hash.<charspec>
 						)
 					)
 				)
