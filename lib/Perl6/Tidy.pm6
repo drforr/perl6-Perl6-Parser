@@ -43,130 +43,134 @@ Given a so-far undefined hash of format settings, return formatted Perl 6 code t
 
 # Bulk forward declarations.
 
-class _BinInt {...}
-class _OctInt {...}
-class _DecInt {...}
-class _HexInt {...}
-class _Coeff {...}
-class _Frac {...}
-class _Radix {...}
-class _Int {...}
-class _Key {...}
-class _NormSpace {...}
-class _Sigil {...}
-class _VALUE {...}
-class _Sym {...}
-class _Sign {...}
-class _EScale {...}
-class _Integer {...}
-class _BackSlash {...}
-class _VStr {...}
-class _VNum {...}
-class _Version {...}
-class _Doc {...}
-class _Identifier {...}
-class _Name {...}
-class _LongName {...}
-class _ModuleName {...}
-class _ModifierExpr {...}
-class _CodeBlock {...}
-class _Block {...}
-class _XBlock {...}
-class _Blorst {...}
-class _StatementPrefix {...}
-class _StatementControl {...}
-class _O {...}
-class _Postfix {...}
-class _Prefix {...}
-class _Args {...}
-class _MethodOp {...}
 class _ArgList {...}
-class _PostCircumfix {...}
-class _PostOp {...}
-class _Circumfix {...}
-class _FakeSignature {...}
-class _Var {...}
-class _PBlock {...}
-class _ColonCircumfix {...}
-class _ColonPair {...}
-class _DottyOp {...}
-class _Dotty {...}
-class _IdentifierArgs {...}
-class _LongNameArgs {...}
-class _OPER {...}
-class _Val {...}
-class _DefTerm {...}
-class _TypeDeclarator {...}
-class _FatArrow {...}
-class _EXPR {...}
-class _Infix {...}
-class _InfixIsh {...}
-class _Signature {...}
-class _Twigil {...}
-class _DeSigilName {...}
-class _DefLongName {...}
-class _CharSpec {...}
-class _CClassElem_INTERMEDIARY {...}
-class _CClassElem {...}
-class _Variable {...}
+class _Args {...}
 class _Assertion {...}
-class _MetaChar {...}
 class _Atom {...}
-class _Noun {...}
-class _TermIsh {...}
-class _TermConj {...}
-class _TermAlt {...}
-class _TermConjSeq {...}
-class _TermAltSeq {...}
-class _TermSeq {...}
-class _Nibble {...}
-class _MethodDef {...}
-class _Specials {...}
-class _RegexDef {...}
-class _RegexDeclarator {...}
-class _SemiList {...}
 class _B {...}
 class _Babble {...}
-class _Quibble {...}
-class _Quote {...}
-class _RadNumber {...}
-class _DecNumber {...}
-class _Numish {...}
-class _Number {...}
-class _Value {...}
-class _VariableDeclarator {...}
-class _TypeName_INTERMEDIARY {...}
-class _TypeName {...}
+class _BackSlash {...}
+class _BinInt {...}
+class _Block {...}
 class _Blockoid {...}
-class _Initializer {...}
+class _Blorst {...}
+class _CClassElem {...}
+class _CClassElem_INTERMEDIARY {...}
+class _CharSpec {...}
+class _Circumfix {...}
+class _CodeBlock {...}
+class _Coeff {...}
+class _ColonCircumfix {...}
+class _ColonPair {...}
+class _DecInt {...}
+class _DECL {...}
 class _Declarator {...}
-class _PackageDef {...}
-class _InfixOPER {...}
+class _DecNumber {...}
+class _DefLongName {...}
+class _DefTerm {...}
+class _DeSigilName {...}
+class _Doc {...}
+class _Dotty {...}
+class _DottyOp {...}
 class _DottyOPER {...}
-class _PostfixOPER {...}
-class _PrefixOPER {...}
-class _PostfixOPER {...}
-class _PostCircumfixOPER {...}
-class _PostConstraint {...}
+class _EScale {...}
+class _EXPR {...}
+class _FakeSignature {...}
+class _FatArrow {...}
+class _Frac {...}
+class _HexInt {...}
+class _Identifier {...}
+class _IdentifierArgs {...}
+class _Infix {...}
+class _InfixIsh {...}
+class _InfixOPER {...}
+class _Initializer {...}
+class _Int {...}
+class _Integer {...}
+class _Key {...}
+class _Lambda {...}
+class _LongName {...}
+class _LongNameArgs {...}
+class _MetaChar {...}
+class _MethodDef {...}
+class _MethodOp {...}
+class _ModifierExpr {...}
+class _ModuleName {...}
+class _MoreName {...}
 class _MultiDeclarator {...}
 class _MultiSig {...}
+class _Name {...}
+class _Nibble {...}
+class _NormSpace {...}
+class _Noun {...}
+class _Number {...}
+class _Numish {...}
+class _O {...}
+class _OctInt {...}
+class _Op {...}
+class _OPER {...}
+class _PackageDeclarator {...}
+class _PackageDeclarator {...}
+class _PackageDef {...}
+class _PBlock {...}
+class Perl6::Tidy::Root {...}
+class _PostCircumfix {...}
+class _PostCircumfixOPER {...}
+class _PostConstraint {...}
+class _Postfix {...}
+class _PostfixOPER {...}
+class _PostfixOPER {...}
+class _PostOp {...}
+class _Prefix {...}
+class _PrefixOPER {...}
+class _Quantifier {...}
+class _Quibble {...}
+class _Quote {...}
+class _Radix {...}
+class _RadNumber {...}
+class _RegexDeclarator {...}
+class _RegexDef {...}
+class _RoutineDeclarator {...}
 class _RoutineDef {...}
-class _DECL {...}
 class _Scoped {...}
 class _ScopeDeclarator {...}
-class _RoutineDeclarator {...}
-class Perl6::Tidy::Root {...}
-class _StatementList {...}
+class _SemiList {...}
+class _Separator {...}
+class _SigFinal {...}
+class _Sigil {...}
+class _Sign {...}
+class _Signature {...}
 class _SMExpr {...}
-class _StatementModLoop {...}
-class _StatementModLoopEXPR {...}
+class _Specials {...}
+class _Statement {...}
+class _StatementControl {...}
+class _StatementList {...}
 class _StatementModCond {...}
 class _StatementModCondEXPR {...}
-class _Statement {...}
-class _Op {...}
-class _MoreName {...}
-class _PackageDeclarator {...}
-class _PackageDeclarator {...}
+class _StatementModLoop {...}
+class _StatementModLoopEXPR {...}
+class _StatementPrefix {...}
+class _Sym {...}
+class _TermAlt {...}
+class _TermAltSeq {...}
+class _TermConj {...}
+class _TermConjSeq {...}
+class _TermIsh {...}
+class _TermSeq {...}
+class _Twigil {...}
+class _TypeDeclarator {...}
+class _TypeName {...}
+class _TypeName_INTERMEDIARY {...}
+class _Val {...}
+class _Value {...}
+class _VALUE {...}
+class _Var {...}
+class _Variable {...}
+class _VariableDeclarator {...}
+class _Version {...}
+class _VNum {...}
+class _VStr {...}
+class _XBlock {...}
 
 sub trace( Str $name ) {
 	say $name if $*TRACE
@@ -1306,9 +1310,43 @@ class _Var does Node {
 	}
 }
 
+class _Lambda does Node {
+	method new( Mu $parsed ) {
+		trace "Lambda";
+		if assert-Str( $parsed ) {
+			return self.bless(
+				:name( $parsed.Str )
+			)
+		}
+		die debug( 'lambda', $parsed );
+	}
+}
+
 class _PBlock does Node {
 	method new( Mu $parsed ) {
 		trace "PBlock";
+		if assert-hash-keys( $parsed,
+				     [< lambda blockoid signature >] ) {
+			return self.bless(
+				:content(
+					:lambda(
+						_Lambda.new(
+							$parsed.hash.<lambda>
+						)
+					),
+					:blockoid(
+						_Blockoid.new(
+							$parsed.hash.<blockoid>
+						)
+					),
+					:signature(
+						_Signature.new(
+							$parsed.hash.<signature>
+						)
+					),
+				)
+			)
+		}
 		if assert-hash-keys( $parsed, [< blockoid >] ) {
 			return self.bless(
 				:content(
@@ -2508,6 +2546,17 @@ class _MetaChar does Node {
 				)
 			)
 		}
+		if assert-hash-keys( $parsed, [< nibble >] ) {
+			return self.bless(
+				:content(
+					:nibble(
+						_Nibble.new(
+							$parsed.hash.<nibble>
+						)
+					)
+				)
+			)
+		}
 		die debug( 'metachar', $parsed );
 	}
 }
@@ -2533,12 +2582,107 @@ class _Atom does Node {
 	}
 }
 
+class _Quantifier does Node {
+	method new( Mu $parsed ) {
+		trace "Quantifier";
+		if assert-hash-keys( $parsed, [< XXX >] ) {
+			return self.bless(
+				:content(
+					:metachar(
+						_MetaChar.new(
+							$parsed.hash.<metachar>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'quantifier', $parsed );
+	}
+}
+
+class _SigFinal does Node {
+	method new( Mu $parsed ) {
+		trace "SigFinal";
+		if assert-hash-keys( $parsed, [< XXX >] ) {
+			return self.bless(
+				:content(
+					:metachar(
+						_MetaChar.new(
+							$parsed.hash.<metachar>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'sigfinal', $parsed );
+	}
+}
+
+class _Separator does Node {
+	method new( Mu $parsed ) {
+		trace "Separator";
+		if assert-hash-keys( $parsed, [< XXX >] ) {
+			return self.bless(
+				:content(
+					:metachar(
+						_MetaChar.new(
+							$parsed.hash.<metachar>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'separator', $parsed );
+	}
+}
+
+# XXX This is a compound type
+class _SigFinal_Quantifier_Separator_Atom does Node {
+	method new( Mu $parsed ) {
+		trace "SigFinal_Quantifier_Separator_Atom";
+		return self.bless(
+			:content(
+				:sigfinal(
+					_SigFinal.new(
+						$parsed.hash.<sigfinal>
+					)
+				),
+				:quantifier(
+					_Quantifier.new(
+						$parsed.hash.<quantifier>
+					)
+				),
+				:separator(
+					_Separator.new(
+						$parsed.hash.<separator>
+					)
+				)
+				:Atom(
+					_Atom.new(
+						$parsed.hash.<atom>
+					)
+				)
+			)
+		)
+	}
+}
+
 class _Noun does Node {
 	method new( Mu $parsed ) {
 		trace "Noun";
 		if $parsed.list {
 			my @child;
 			for $parsed.list {
+				if assert-hash-keys( $_,
+						     [< sigfinal quantifier
+							separator atom >] ) {
+					@child.push(
+						_Atom.new(
+							$_.hash.<atom>
+						)
+					);
+					next
+				}
 				if assert-hash-keys( $_, [< atom >],
 							 [< sigfinal >] ) {
 					@child.push(
