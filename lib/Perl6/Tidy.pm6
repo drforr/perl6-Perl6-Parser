@@ -72,7 +72,7 @@ class _DeSigilName {...}
 class _Doc {...}
 class _Dotty {...}
 class _DottyOp {...}
-class _DottyOPER {...}
+class _Dotty_OPER {...}
 class _EScale {...}
 class _EXPR {...}
 class _FakeSignature {...}
@@ -80,10 +80,9 @@ class _FatArrow {...}
 class _Frac {...}
 class _HexInt {...}
 class _Identifier {...}
-class _IdentifierArgs {...}
+class _Identifier_Args {...}
 class _Infix {...}
 class _InfixIsh {...}
-class _InfixOPER {...}
 class _InfixPrefixMetaOperator {...}
 class _Initializer {...}
 class _Int {...}
@@ -91,7 +90,6 @@ class _Integer {...}
 class _Key {...}
 class _Lambda {...}
 class _LongName {...}
-class _LongNameArgs {...}
 class _MetaChar {...}
 class _MethodDef {...}
 class _MethodOp {...}
@@ -119,11 +117,9 @@ class _PostCircumfix {...}
 class _PostCircumfixOPER {...}
 class _PostConstraint {...}
 class _Postfix {...}
-class _PostfixOPER {...}
-class _PostfixOPER {...}
 class _PostOp {...}
 class _Prefix {...}
-class _PrefixOPER {...}
+class _Prefix_OPER {...}
 class _Quantifier {...}
 class _Quibble {...}
 class _Quote {...}
@@ -147,9 +143,9 @@ class _Statement {...}
 class _StatementControl {...}
 class _StatementList {...}
 class _StatementModCond {...}
-class _StatementModCondEXPR {...}
+class _StatementModCond_EXPR {...}
 class _StatementModLoop {...}
-class _StatementModLoopEXPR {...}
+class _StatementModLoop_EXPR {...}
 class _StatementPrefix {...}
 class _Sym {...}
 class _TermAlt {...}
@@ -1529,35 +1525,14 @@ class _Dotty does Node {
 }
 
 # XXX This is a compound type
-class _IdentifierArgs does Node {
+class _Identifier_Args does Node {
 	method new( Mu $parsed ) {
-		trace "IdentifierArgs";
+		trace "Identifier_Args";
 		return self.bless(
 			:content(
 				:identifier(
 					_Identifier.new(
 						$parsed.hash.<identifier>
-					)
-				),
-				:args(
-					_Args.new(
-						$parsed.hash.<args>
-					)
-				)
-			)
-		)
-	}
-}
-
-# XXX This is a compound type
-class _LongNameArgs does Node {
-	method new( Mu $parsed ) {
-		trace "LongNameArgs";
-		return self.bless(
-			:content(
-				:longname(
-					_LongName.new(
-						$parsed.hash.<longname>
 					)
 				),
 				:args(
@@ -1849,7 +1824,7 @@ class _EXPR does Node {
 				if assert-hash-keys( $_, [< OPER dotty >],
 							 [< postfix_prefix_meta_operator >] ) {
 					@child.push(
-						_DottyOPER.new( $_ )
+						_Dotty_OPER.new( $_ )
 					);
 					next
 				}
@@ -1857,20 +1832,20 @@ class _EXPR does Node {
 					[< postcircumfix OPER >],
 					[< postfix_prefix_meta_operator >] ) {
 					@child.push(
-						_PrefixOPER.new( $_ )
+						_Prefix_OPER.new( $_ )
 					);
 					next
 				}
 				if assert-hash-keys( $_, [< prefix OPER >],
 							 [< prefix_postfix_meta_operator >] ) {
 					@child.push(
-						_PrefixOPER.new( $_ )
+						_Prefix_OPER.new( $_ )
 					);
 					next
 				}
 				if assert-hash-keys( $_, [< identifier args >] ) {
 					@child.push(
-						_IdentifierArgs.new( $_ )
+						_Identifier_Args.new( $_ )
 					);
 					next
 				}
@@ -3472,30 +3447,9 @@ class _PackageDef does Node {
 }
 
 # XXX This is a compound type
-class _InfixOPER does Node {
+class _Dotty_OPER does Node {
 	method new( Mu $parsed ) {
-		trace "InfixOPER";
-		return self.bless(
-			:content(
-				:infix(
-					_Infix.new(
-						$parsed.hash.<infix>
-					)
-				),
-				:OPER(
-					_OPER.new(
-						$parsed.hash.<OPER>
-					)
-				)
-			)
-		)
-	}
-}
-
-# XXX This is a compound type
-class _DottyOPER does Node {
-	method new( Mu $parsed ) {
-		trace "DottyOPER";
+		trace "Dotty_OPER";
 		return self.bless(
 			:content(
 				:dotty(
@@ -3514,30 +3468,9 @@ class _DottyOPER does Node {
 }
 
 # XXX This is a compound type
-class _PostfixOPER does Node {
+class _Prefix_OPER does Node {
 	method new( Mu $parsed ) {
-		trace "PostfixOPER";
-		return self.bless(
-			:content(
-				:postfix(
-					_Postfix.new(
-						$parsed.hash.<postfix>
-					)
-				),
-				:OPER(
-					_OPER.new(
-						$parsed.hash.<OPER>
-					)
-				)
-			)
-		)
-	}
-}
-
-# XXX This is a compound type
-class _PrefixOPER does Node {
-	method new( Mu $parsed ) {
-		trace "PrefixOPER";
+		trace "Prefix_OPER";
 		return self.bless(
 			:content(
 				:prefix(
@@ -4008,9 +3941,9 @@ class _StatementModLoop does Node {
 }
 
 # XXX This is a compound type
-class _StatementModCondEXPR does Node {
+class _StatementModCond_EXPR does Node {
 	method new( Mu $parsed ) {
-		trace "StatementModCondEXPR";
+		trace "StatementModCond_EXPR";
 		return self.bless(
 			:content(
 				:statement_mod_cond(
@@ -4029,9 +3962,9 @@ class _StatementModCondEXPR does Node {
 }
 
 # XXX This is a compound type
-class _StatementModLoopEXPR does Node {
+class _StatementModLoop_EXPR does Node {
 	method new( Mu $parsed ) {
-		trace "StatementModLoopEXPR";
+		trace "StatementModLoop_EXPR";
 		return self.bless(
 			:content(
 				:statement_mod_loop(
@@ -4057,7 +3990,7 @@ class _Statement does Node {
 			for $parsed.list {
 				if assert-hash-keys( $_, [< statement_mod_loop EXPR >] ) {
 					@child.push(
-						_StatementModLoopEXPR.new(
+						_StatementModLoop_EXPR.new(
 							$_
 						)
 					);
@@ -4065,7 +3998,7 @@ class _Statement does Node {
 				}
 				if assert-hash-keys( $_, [< statement_mod_cond EXPR >] ) {
 					@child.push(
-						_StatementModCondEXPR.new(
+						_StatementModCond_EXPR.new(
 							$_
 						)
 					);
