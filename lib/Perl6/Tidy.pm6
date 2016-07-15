@@ -529,13 +529,8 @@ class _Sym does Node {
 class _Sign does Node {
 	method new( Mu $parsed ) {
 		self.trace( "Sign" );
-		if $parsed {
-			if self.assert-Bool( $parsed ) {
-				return self.bless( :name( $parsed.Bool ) )
-			}
-		}
-		else {
-			return self.bless
+		if self.assert-Bool( $parsed ) {
+			return self.bless( :name( $parsed.Bool ) )
 		}
 		die self.debug( $parsed );
 	}
@@ -1201,26 +1196,21 @@ class _Postfix does Node {
 class _Prefix does Node {
 	method new( Mu $parsed ) {
 		self.trace( "Prefix" );
-		if $parsed {
-			if assert-hash-keys( $parsed, [< sym O >] ) {
-				return self.bless(
-					:content(
-						:sym(
-							_Sym.new(
-								$parsed.hash.<sym>
-							)
-						),
-						:O(
-							_O.new(
-								$parsed.hash.<O>
-							)
+		if assert-hash-keys( $parsed, [< sym O >] ) {
+			return self.bless(
+				:content(
+					:sym(
+						_Sym.new(
+							$parsed.hash.<sym>
+						)
+					),
+					:O(
+						_O.new(
+							$parsed.hash.<O>
 						)
 					)
 				)
-			}
-		}
-		else {
-			return self.bless
+			)
 		}
 		die self.debug( $parsed );
 	}
@@ -2830,76 +2820,71 @@ class _Assertion does Node {
 class _MetaChar does Node {
 	method new( Mu $parsed ) {
 		self.trace( "MetaChar" );
-		if $parsed {
-			if assert-hash-keys( $parsed, [< sym >] ) {
-				return self.bless(
-					:content(
-						:sym(
-							_Sym.new(
-								$parsed.hash.<sym>
-							)
+		if assert-hash-keys( $parsed, [< sym >] ) {
+			return self.bless(
+				:content(
+					:sym(
+						_Sym.new(
+							$parsed.hash.<sym>
 						)
 					)
 				)
-			}
-			if assert-hash-keys( $parsed, [< codeblock >] ) {
-				return self.bless(
-					:content(
-						:codeblock(
-							_CodeBlock.new(
-								$parsed.hash.<codeblock>
-							)
-						)
-					)
-				)
-			}
-			if assert-hash-keys( $parsed, [< backslash >] ) {
-				return self.bless(
-					:content(
-						:backslash(
-							_BackSlash.new(
-								$parsed.hash.<backslash>
-							)
-						)
-					)
-				)
-			}
-			if assert-hash-keys( $parsed, [< assertion >] ) {
-				return self.bless(
-					:content(
-						:assertion(
-							_Assertion.new(
-								$parsed.hash.<assertion>
-							)
-						)
-					)
-				)
-			}
-			if assert-hash-keys( $parsed, [< nibble >] ) {
-				return self.bless(
-					:content(
-						:nibble(
-							_Nibble.new(
-								$parsed.hash.<nibble>
-							)
-						)
-					)
-				)
-			}
-			if assert-hash-keys( $parsed, [< quote >] ) {
-				return self.bless(
-					:content(
-						:quote(
-							_Quote.new(
-								$parsed.hash.<quote>
-							)
-						)
-					)
-				)
-			}
+			)
 		}
-		else {
-			return self.bless
+		if assert-hash-keys( $parsed, [< codeblock >] ) {
+			return self.bless(
+				:content(
+					:codeblock(
+						_CodeBlock.new(
+							$parsed.hash.<codeblock>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< backslash >] ) {
+			return self.bless(
+				:content(
+					:backslash(
+						_BackSlash.new(
+							$parsed.hash.<backslash>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< assertion >] ) {
+			return self.bless(
+				:content(
+					:assertion(
+						_Assertion.new(
+							$parsed.hash.<assertion>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< nibble >] ) {
+			return self.bless(
+				:content(
+					:nibble(
+						_Nibble.new(
+							$parsed.hash.<nibble>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< quote >] ) {
+			return self.bless(
+				:content(
+					:quote(
+						_Quote.new(
+							$parsed.hash.<quote>
+						)
+					)
+				)
+			)
 		}
 		die self.debug( $parsed );
 	}
@@ -3444,10 +3429,6 @@ class _SemiList does Node {
 					:statement()
 				)
 			)
-		}
-		# XXX danger, Will Robinson!
-		if $parsed ~~ Any {
-			return self.bless
 		}
 		die self.debug( $parsed );
 	}
