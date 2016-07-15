@@ -84,6 +84,7 @@ class _IdentifierArgs {...}
 class _Infix {...}
 class _InfixIsh {...}
 class _InfixOPER {...}
+class _InfixPrefixMetaOperator {...}
 class _Initializer {...}
 class _Int {...}
 class _Integer {...}
@@ -4096,9 +4097,55 @@ class _Statement does Node {
 	}
 }
 
+class _InfixPrefixMetaOperator does Node {
+	method new( Mu $parsed ) {
+		trace "InfixPrefixMetaOperator";
+		if assert-hash-keys( $parsed,
+				     [< sym infixish O >] ) {
+			return self.bless(
+				:content(
+					:sym(
+						_Sym.new(
+							$parsed.hash.<sym>
+						)
+					),
+					:infixish(
+						_InfixIsh.new(
+							$parsed.hash.<infixish>
+						)
+					),
+					:O(
+						_O.new(
+							$parsed.hash.<O>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'infix_prefix_meta_operator', $parsed );
+	}
+}
+
 class _Op does Node {
 	method new( Mu $parsed ) {
 		trace "Op";
+		if assert-hash-keys( $parsed,
+				     [< infix_prefix_meta_operator OPER >] ) {
+			return self.bless(
+				:content(
+					:infix_prefix_meta_operator(
+						_InfixPrefixMetaOperator.new(
+							$parsed.hash.<infix_prefix_meta_operator>
+						)
+					),
+					:OPER(
+						_OPER.new(
+							$parsed.hash.<OPER>
+						)
+					)
+				)
+			)
+		}
 		if assert-hash-keys( $parsed, [< infix OPER >] ) {
 			return self.bless(
 				:content(
