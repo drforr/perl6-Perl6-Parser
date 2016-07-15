@@ -2937,6 +2937,34 @@ class _MethodDef does Node {
 	method new( Mu $parsed ) {
 		trace "MethodDef";
 		if assert-hash-keys( $parsed,
+				     [< specials longname blockoid multisig >],
+				     [< trait >] ) {
+			return self.bless(
+				:content(
+					:specials(
+						_Specials.new(
+							$parsed.hash.<specials>
+						)
+					),
+					:longname(
+						_LongName.new(
+							$parsed.hash.<longname>
+						)
+					),
+					:blockoid(
+						_Blockoid.new(
+							$parsed.hash.<blockoid>
+						)
+					),
+					:multisig(
+						_MultiSig.new(
+							$parsed.hash.<multisig>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed,
 				     [< specials longname blockoid >],
 				     [< trait >] ) {
 			return self.bless(
@@ -3386,6 +3414,25 @@ class _Declarator does Node {
 	method new( Mu $parsed ) {
 		trace "Declarator";
 		if assert-hash-keys( $parsed, [< initializer
+						 signature >],
+					      [< trait >] ) {
+			return self.bless(
+				:content(
+					:initializer(
+						_Initializer.new(
+							$parsed.hash.<initializer>
+						)
+					),
+					:signature(
+						_Signature.new(
+							$parsed.hash.<signature>
+						)
+					),
+					:trait()
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< initializer
 						 variable_declarator >],
 					      [< trait >] ) {
 			return self.bless(
@@ -3577,6 +3624,22 @@ class _MultiSig does Node {
 class _MultiDeclarator does Node {
 	method new( Mu $parsed ) {
 		trace "MultiDeclarator";
+		if assert-hash-keys( $parsed, [< sym routine_def >] ) {
+			return self.bless(
+				:content(
+					:sym(
+						_Sym.new(
+							$parsed.hash.<sym>
+						)
+					),
+					:routine_def(
+						_RoutineDef.new(
+							$parsed.hash.<routine_def>
+						)
+					)
+				)
+			)
+		}
 		if assert-hash-keys( $parsed, [< sym declarator >] ) {
 			return self.bless(
 				:content(
@@ -3653,6 +3716,19 @@ class _RoutineDef does Node {
 				)
 			)
 		}
+		if assert-hash-keys( $parsed, [< blockoid >],
+					      [< trait >] ) {
+			return self.bless(
+				:content(
+					:blockoid(
+						_Blockoid.new(
+							$parsed.hash.<blockoid>
+						)
+					),
+					:trait()
+				)
+			)
+		}
 		die debug( 'routine_def', $parsed );
 	}
 }
@@ -3660,6 +3736,25 @@ class _RoutineDef does Node {
 class _DECL does Node {
 	method new( Mu $parsed ) {
 		trace "DECL";
+		if assert-hash-keys( $parsed, [< initializer
+						 signature >],
+					      [< trait >] ) {
+			return self.bless(
+				:content(
+					:initializer(
+						_Initializer.new(
+							$parsed.hash.<initializer>
+						)
+					),
+					:signature(
+						_Signature.new(
+							$parsed.hash.<signature>
+						)
+					),
+					:trait()
+				)
+			)
+		}
 		if assert-hash-keys( $parsed, [< initializer
 						 variable_declarator >],
 					      [< trait >] ) {

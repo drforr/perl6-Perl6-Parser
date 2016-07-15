@@ -3,7 +3,7 @@ use v6;
 use Test;
 use Perl6::Tidy;
 
-plan 11;
+plan 16;
 
 my $pt = Perl6::Tidy.new;
 
@@ -102,10 +102,10 @@ sub new () {
 sub shuffle () {
     my @c = [1,2,3,4],[5,6,7,8],[9,10,11,12],[13,14,15,' '];
     for (^16).pick(*) -> $y, $x {
-###        my ($yd, $ym, $xd, $xm) = ($y div n, $y mod n, $x div n, $x mod n);
-###        my $temp    = @c[$ym;$yd];
-###        @c[$ym;$yd] = @c[$xm;$xd];
-###        @c[$xm;$xd] = $temp;
+        my ($yd, $ym, $xd, $xm) = ($y div n, $y mod n, $x div n, $x mod n);
+        my $temp    = @c[$ym;$yd];
+        @c[$ym;$yd] = @c[$xm;$xd];
+        @c[$xm;$xd] = $temp;
     }
     @c;
 }
@@ -280,8 +280,8 @@ sub another {
     for @board.kv -> $r, @row {
         @empties.push(($r, $_)) for @row.grep(:k, '');
     }
-###    my ( $x, $y ) = @empties.roll;
-###    @board[$x; $y] = (flat 2 xx 9, 4).roll;
+    my ( $x, $y ) = @empties.roll;
+    @board[$x; $y] = (flat 2 xx 9, 4).roll;
 }
  
 sub save () { join '|', flat @board».list }
@@ -548,21 +548,21 @@ subtest {
 		plan 1;
 
 		my $parsed = $pt.tidy( Q:to[_END_] );
-###multi can-spell-word(Str $word, @blocks) {
-###    my @regex = @blocks.map({ my @c = .comb; rx/<@c>/ }).grep: { .ACCEPTS($word.uc) }
-###    can-spell-word $word.uc.comb.list, @regex;
-###}
+multi can-spell-word(Str $word, @blocks) {
+    my @regex = @blocks.map({ my @c = .comb; rx/<@c>/ }).grep: { .ACCEPTS($word.uc) }
+    can-spell-word $word.uc.comb.list, @regex;
+}
 
-###multi can-spell-word([$head,*@tail], @regex) {
-###    for @regex -> $re {
+multi can-spell-word([$head,*@tail], @regex) {
+    for @regex -> $re {
 ###        if $head ~~ $re {
-###            return True unless @tail;
-###            return False if @regex == 1;
+            return True unless @tail;
+            return False if @regex == 1;
 ###            return True if can-spell-word @tail, list @regex.grep: * !=== $re;
 ###        }
-###    }
+    }
     False;
-###}
+}
 
 my @b = <BO XK DQ CP NA GT RE TG QD FS JW HU VI AN OB ER FS LY PC ZM>;
 
@@ -585,16 +585,16 @@ use v6;
 
 role A {
     # must be filled in by the class it is composed into
-###    method abstract() { ... };
+    method abstract() { ... };
 
     # can be overridden in the class, but that's not mandatory
-###    method concrete() { say '# 42' };
+    method concrete() { say '# 42' };
 }
 
 class SomeClass does A {
-###    method abstract() {
+    method abstract() {
         say "# made concrete in class"
-###    }
+    }
 }
 
 my $obj = SomeClass.new;
@@ -624,5 +624,183 @@ _END_
 		isa-ok $parsed, 'Perl6::Tidy::Root';
 	}, Q[version 1];
 }, 'Abundant, Deficient and Perfect numbers';
+
+subtest {
+	plan 1;
+
+	subtest {
+		plan 1;
+
+		my $parsed = $pt.tidy( Q:to[_END_] );
+sub accum ($n is copy) { sub { $n += $^x } }
+_END_
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+	}, Q[version 1];
+}, 'Accumulator factory';
+
+subtest {
+	plan 3;
+
+	subtest {
+		plan 1;
+
+		my $parsed = $pt.tidy( Q:to[_END_] );
+sub A(Int $m, Int $n) {
+###    if    $m == 0 { $n + 1 } 
+###    elsif $n == 0 { A($m - 1, 1) }
+###    else          { A($m - 1, A($m, $n - 1)) }
+}
+_END_
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+	}, Q[version 1];
+
+	subtest {
+		plan 1;
+
+		my $parsed = $pt.tidy( Q:to[_END_] );
+multi sub A(0,      Int $n) { $n + 1                   }
+multi sub A(Int $m, 0     ) { A($m - 1, 1)             }
+multi sub A(Int $m, Int $n) { A($m - 1, A($m, $n - 1)) }
+_END_
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+	}, Q[version 2];
+
+	subtest {
+		plan 1;
+
+		my $parsed = $pt.tidy( Q:to[_END_] );
+proto A(Int \𝑚, Int \𝑛) { (state @)[𝑚][𝑛] //= {*} }
+
+multi A(0,      Int \𝑛) { 𝑛 + 1 }
+multi A(1,      Int \𝑛) { 𝑛 + 2 }
+multi A(2,      Int \𝑛) { 3 + 2 * 𝑛 }
+multi A(3,      Int \𝑛) { 5 + 8 * (2 ** 𝑛 - 1) }
+
+multi A(Int \𝑚, 0     ) { A(𝑚 - 1, 1) }
+multi A(Int \𝑚, Int \𝑛) { A(𝑚 - 1, A(𝑚, 𝑛 - 1)) }
+
+say A(4,1);
+say .chars, " digits starting with ", .substr(0,50), "..." given A(4,2);
+_END_
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+	}, Q[version 4];
+}, 'Ackermann Function';
+
+subtest {
+	plan 3;
+
+	subtest {
+		plan 1;
+
+		my $parsed = $pt.tidy( Q:to[_END_] );
+class Bar { }             # an empty class
+ 
+my $object = Bar.new;     # new instance
+ 
+role a_role {             # role to add a variable: foo,
+   has $.foo is rw = 2;   # with an initial value of 2
+}
+ 
+$object does a_role;      # compose in the role
+ 
+say $object.foo;          # prints: 2
+$object.foo = 5;          # change the variable
+say $object.foo;          # prints: 5
+ 
+my $ohno = Bar.new;       # new Bar object
+#say $ohno.foo;           # runtime error, base Bar class doesn't have the variable foo
+ 
+my $this = $object.new;   # instantiate a new Bar derived from $object
+say $this.foo;            # prints: 2 - original role value
+ 
+my $that = $object.clone; # instantiate a new Bar derived from $object copying any variables
+say $that.foo;            # 5 - value from the cloned object
+_END_
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+	}, Q[version 1];
+
+	subtest {
+		plan 1;
+
+		my $parsed = $pt.tidy( Q:to[_END_] );
+my $lue = 42 but role { has $.answer = "Life, the Universe, and Everything" }
+ 
+say $lue;          # 42
+say $lue.answer;   # Life, the Universe, and Everything
+_END_
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+	}, Q[version 2];
+
+	subtest {
+		plan 1;
+
+		my $parsed = $pt.tidy( Q:to[_END_] );
+use MONKEY-TYPING;
+augment class Int {
+    method answer { "Life, the Universe, and Everything" }
+}
+say 42.answer;     # Life, the Universe, and Everything
+_END_
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+	}, Q[version 3];
+}, 'Add a variable to a class at runtime';
+
+subtest {
+	plan 1;
+
+	subtest {
+		plan 1;
+
+		my $parsed = $pt.tidy( Q:to[_END_] );
+my $x;
+say $x.WHERE;
+ 
+my $y := $x;   # alias
+say $y.WHERE;  # same address as $x
+ 
+say "Same variable" if $y =:= $x;
+$x = 42;
+say $y;  # 42
+_END_
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+	}, Q[version 1];
+}, 'Address of a variable';
+
+subtest {
+	plan 1;
+
+	subtest {
+		plan 1;
+
+		my $parsed = $pt.tidy( Q:to[_END_] );
+constant expansions = [1], [1,-1], -> @prior { [|@prior,0 Z- 0,|@prior] } ... *;
+ 
+sub polyprime($p where 2..*) { so expansions[$p].[1 ..^ */2].all %% $p }
+
+say ' p: (x-1)ᵖ';
+say '-----------';
+ 
+sub super ($n) {
+    $n.trans: '0123456789'
+           => '⁰¹²³⁴⁵⁶⁷⁸⁹';
+}
+ 
+for ^13 -> $d {
+    say $d.fmt('%2i: '), (
+        expansions[$d].kv.map: -> $i, $n {
+            my $p = $d - $i;
+            [~] gather {
+                take < + - >[$n < 0] ~ ' ' unless $p == $d;
+                take $n.abs                unless $p == $d > 0;
+                take 'x'                   if $p > 0;
+                take super $p - $i         if $p > 1;
+            }
+        }
+    )
+}
+_END_
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+	}, Q[version 2];
+}, 'AKS test for primality';
 
 # vim: ft=perl6
