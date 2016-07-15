@@ -60,8 +60,10 @@ class _CharSpec {...}
 class _Circumfix {...}
 class _CodeBlock {...}
 class _Coeff {...}
+class _Coercee {...}
 class _ColonCircumfix {...}
 class _ColonPair {...}
+class _Contextualizer {...}
 class _DecInt {...}
 class _DECL {...}
 class _Declarator {...}
@@ -2446,6 +2448,52 @@ class _CClassElem does Node {
 	}
 }
 
+class _Coercee does Node {
+	method new( Mu $parsed ) {
+		trace "_Coercee";
+		if assert-hash-keys( $parsed, [< semilist >] ) {
+			return self.bless(
+				:content(
+					:semilist(
+						_SemiList.new(
+							$parsed.hash.<semilist>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'coercee', $parsed );
+	}
+}
+
+class _Contextualizer does Node {
+	method new( Mu $parsed ) {
+		trace "_Contextualizer";
+		if assert-hash-keys( $parsed, [< coercee circumfix sigil >] ) {
+			return self.bless(
+				:content(
+					:coercee(
+						_Coercee.new(
+							$parsed.hash.<coercee>
+						)
+					),
+					:circumfix(
+						_Circumfix.new(
+							$parsed.hash.<circumfix>
+						)
+					),
+					:sigil(
+						_Sigil.new(
+							$parsed.hash.<sigil>
+						)
+					)
+				)
+			)
+		}
+		die debug( 'contextualizer', $parsed );
+	}
+}
+
 class _Variable does Node {
 	method new( Mu $parsed ) {
 		trace "_Variable";
@@ -2492,6 +2540,17 @@ class _Variable does Node {
 					:sigil(
 						_Sigil.new(
 							$parsed.hash.<sigil>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< contextualizer >] ) {
+			return self.bless(
+				:content(
+					:contextualizer(
+						_Contextualizer.new(
+							$parsed.hash.<contextualizer>
 						)
 					)
 				)

@@ -3,7 +3,7 @@ use v6;
 use Test;
 use Perl6::Tidy;
 
-plan 17;
+plan 18;
 
 my $pt = Perl6::Tidy.new;
 
@@ -403,25 +403,25 @@ subtest {
 		plan 1;
 
 		my $parsed = $pt.tidy( Q:to[_END_] );
-###my @todo = $[1];
+my @todo = $[1];
 my @sums = 0;
 sub nextrow($n) {
-###    for +@todo .. $n -> $l {
-###        @sums[$l] = 0;
-###        print $l,"\r" if $l < $n;
+    for +@todo .. $n -> $l {
+        @sums[$l] = 0;
+        print $l,"\r" if $l < $n;
         my $r = [];
-###        for reverse ^$l -> $x {
-###            my @x := @todo[$x];
+        for reverse ^$l -> $x {
+            my @x := @todo[$x];
 ###            if @x {
-###                $r.push: @sums[$x] += @x.shift;
+                $r.push: @sums[$x] += @x.shift;
 ###            }
 ###            else {
-###                $r.push: @sums[$x];
+                $r.push: @sums[$x];
 ###            }
-###        }
-###        @todo.push($r);
-###    }
-###    @todo[$n];
+        }
+        @todo.push($r);
+    }
+    @todo[$n];
 }
 
 say "rows:";
@@ -447,10 +447,10 @@ subtest {
 my $b = 99;
 
 ###repeat while --$b {
-###    say "{b $b} on the wall";
-###    say "{b $b}";
+    say "{b $b} on the wall";
+    say "{b $b}";
     say "Take one down, pass it around";
-###    say "{b $b-1} on the wall";
+    say "{b $b-1} on the wall";
     say "";
 ###}
 
@@ -889,6 +889,53 @@ sub MAIN ($alignment where 'left'|'right', $file) {
 _END_
 		isa-ok $parsed, 'Perl6::Tidy::Root';
 	}, Q[version 3];
+}, 'Align columns';
+
+subtest {
+	plan 1;
+
+	subtest {
+		plan 1;
+
+		my $parsed = $pt.tidy( Q:to[_END_] );
+sub propdivsum (\x) {
+    my @l = x > 1, gather for 2 .. x.sqrt.floor -> \d {
+        my \y = x div d;
+        if y * d == x { take d; take y unless y == d }
+    }
+    [+] gather @l.deepmap(*.take);
+}
+
+multi quality (0,1)  { 'perfect ' }
+multi quality (0,2)  { 'amicable' }
+multi quality (0,$n) { "sociable-$n" }
+multi quality ($,1)  { 'aspiring' }
+multi quality ($,$n) { "cyclic-$n" }
+
+sub aliquotidian ($x) {
+    my %seen;
+    my @seq = $x, &propdivsum ... *;
+    for 0..16 -> $to {
+        my $this = @seq[$to] or return "$x\tterminating\t[@seq[^$to]]";
+        last if $this > 140737488355328;
+###        if %seen{$this}:exists {
+            my $from = %seen{$this};
+            return "$x\t&quality($from, $to-$from)\t[@seq[^$to]]";
+###        }
+        %seen{$this} = $to;
+    }
+    "$x non-terminating";
+
+}
+
+aliquotidian($_).say for flat
+    1..10,
+    11, 12, 28, 496, 220, 1184, 12496, 1264460,
+    790, 909, 562, 1064, 1488,
+    15355717786080;
+_END_
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+	}, Q[version 1];
 }, 'Align columns';
 
 # vim: ft=perl6
