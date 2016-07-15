@@ -294,14 +294,14 @@ my @maxcolwidths ; #array of the longest words per column
 for @filelines -> $line {
    my @words = $line.split( "\$" ) ;
    for 0..@words.elems - 1 -> $i {
-###      if @maxcolwidths[ $i ] {
-###	 if @words[ $i ].chars > @maxcolwidths[$i] {
+      if @maxcolwidths[ $i ] {
+	 if @words[ $i ].chars > @maxcolwidths[$i] {
 	    @maxcolwidths[ $i ] = @words[ $i ].chars ;
-###	 }
-###      }
-###      else {
+	 }
+      }
+      else {
 	 @maxcolwidths.push( @words[ $i ].chars ) ;
-###      }
+      }
    }
 }
 my $justification = @*ARGS[ 0 ] || "left" ;
@@ -311,14 +311,14 @@ for @filelines -> $line {
    my @words = $line.split( "\$" ) ;
    for 0 ..^ @words -> $i {
       my $gap =  @maxcolwidths[$i] - @words[$i].chars + 1 ;
-###      if $justification eq "left" {
+      if $justification eq "left" {
 	 print @words[ $i ] ~ " " x $gap ;
 ###      } elsif $justification eq "right" {
 	 print  " " x $gap ~ @words[$i] ;
 ###      } elsif $justification eq "center" {
 	 $gap = ( @maxcolwidths[ $i ] + 2 - @words[$i].chars ) div 2 ;
 	 print " " x $gap ~ @words[$i] ~ " " x $gap ;
-###      }
+      }
    }
    say ''; #for the newline
 }
@@ -389,10 +389,10 @@ sub aliquotidian ($x) {
     for 0..16 -> $to {
         my $this = @seq[$to] or return "$x\tterminating\t[@seq[^$to]]";
         last if $this > 140737488355328;
-###        if %seen{$this}:exists {
+        if %seen{$this}:exists {
             my $from = %seen{$this};
             return "$x\t&quality($from, $to-$from)\t[@seq[^$to]]";
-###        }
+        }
         %seen{$this} = $to;
     }
     "$x non-terminating";
@@ -441,10 +441,10 @@ multi sub factors(1) { 1 }
 multi sub factors(Int $remainder is copy) {
     gather for @primes -> $factor {
         # if remainder < factor^2, we're done
-###        if $factor * $factor > $remainder {
+        if $factor * $factor > $remainder {
             take $remainder if $remainder > 1;
             last;
-###        }
+        }
         # How many times can we divide by this prime?
         while $remainder %% $factor {
             take $factor;
@@ -610,10 +610,10 @@ my %anagram = slurp('dict.ie').words.map({[.comb]}).classify({ .sort.join });
 for %anagram.values.sort({ -@($_[0]) }) -> @aset {
     for     0   ..^ @aset.end -> $i {
         for $i ^..  @aset.end -> $j {
-###            if none(  @aset[$i].list Zeq @aset[$j].list ) {
+            if none(  @aset[$i].list Zeq @aset[$j].list ) {
                 say "{@aset[$i].join}   {@aset[$j].join}";
                 exit;
-###            }
+            }
         }
     }
 }
