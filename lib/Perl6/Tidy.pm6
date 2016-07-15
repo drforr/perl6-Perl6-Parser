@@ -2986,12 +2986,17 @@ class _SigFinal does Node {
 class _QuantifiedAtom does Node {
 	method new( Mu $parsed ) {
 		self.trace( "QuantifiedAtom" );
-		if assert-hash-keys( $parsed, [< XXX >] ) {
+		if assert-hash-keys( $parsed, [< sigfinal atom >] ) {
 			return self.bless(
 				:content(
-					:metachar(
-						_MetaChar.new(
-							$parsed.hash.<metachar>
+					:sigfinal(
+						_SigFinal.new(
+							$parsed.hash.<sigfinal>
+						)
+					),
+					:atom(
+						_Atom.new(
+							$parsed.hash.<atom>
 						)
 					)
 				)
@@ -3004,16 +3009,8 @@ class _QuantifiedAtom does Node {
 class _SepType does Node {
 	method new( Mu $parsed ) {
 		self.trace( "SepType" );
-		if assert-hash-keys( $parsed, [< XXX >] ) {
-			return self.bless(
-				:content(
-					:metachar(
-						_MetaChar.new(
-							$parsed.hash.<metachar>
-						)
-					)
-				)
-			)
+		if self.assert-Str( $parsed ) {
+			return self.bless( :name( $parsed.Str ) )
 		}
 		die self.debug( $parsed );
 	}
@@ -3025,9 +3022,14 @@ class _Separator does Node {
 		if assert-hash-keys( $parsed, [< septype quantified_atom >] ) {
 			return self.bless(
 				:content(
-					:metachar(
-						_MetaChar.new(
-							$parsed.hash.<metachar>
+					:septype(
+						_SepType.new(
+							$parsed.hash.<septype>
+						)
+					),
+					:quantified_atom(
+						_QuantifiedAtom.new(
+							$parsed.hash.<quantified_atom>
 						)
 					)
 				)
