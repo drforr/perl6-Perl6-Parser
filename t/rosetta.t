@@ -102,7 +102,7 @@ sub new () {
 sub shuffle () {
     my @c = [1,2,3,4],[5,6,7,8],[9,10,11,12],[13,14,15,' '];
     for (^16).pick(*) -> $y, $x {
-        my ($yd, $ym, $xd, $xm) = ($y div n, $y mod n, $x div n, $x mod n);
+###        my ($yd, $ym, $xd, $xm) = ($y div n, $y mod n, $x div n, $x mod n);
 ###        my $temp    = @c[$ym;$yd];
 ###        @c[$ym;$yd] = @c[$xm;$xd];
 ###        @c[$xm;$xd] = $temp;
