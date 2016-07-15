@@ -509,4 +509,36 @@ _END_
 	}, Q[version 3];
 }, '99 bottles of beeer';
 
+subtest {
+	plan 3;
+
+	subtest {
+		plan 1;
+
+		my $parsed = $pt.tidy( Q:to[_END_] );
+get.words.sum.say;
+_END_
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+	}, Q[version 1];
+
+	subtest {
+		plan 1;
+
+		my $parsed = $pt.tidy( Q:to[_END_] );
+say [+] get.words;
+_END_
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+	}, Q[version 2];
+
+	subtest {
+		plan 1;
+
+		my $parsed = $pt.tidy( Q:to[_END_] );
+###my ($a, $b) = $*IN.get.split(" ");
+###say $a + $b;
+_END_
+		isa-ok $parsed, 'Perl6::Tidy::Root';
+	}, Q[version 3];
+}, 'A + B';
+
 # vim: ft=perl6
