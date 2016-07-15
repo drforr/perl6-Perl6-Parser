@@ -169,6 +169,7 @@ class _VariableDeclarator {...}
 class _Version {...}
 class _VNum {...}
 class _VStr {...}
+class _Wu {...}
 class _XBlock {...}
 
 sub trace( Str $name ) {
@@ -886,6 +887,16 @@ class _StatementPrefix does Node {
 	}
 }
 
+class _Wu does Node {
+	method new( Mu $parsed ) {
+		trace "Wu";
+		if assert-Str( $parsed ) {
+			return self.bless( :naem( $parsed.Str ) )
+		}
+		die debug( 'Wu', $parsed );
+	}
+}
+
 class _StatementControl does Node {
 	method new( Mu $parsed ) {
 		trace "StatementControl";
@@ -947,6 +958,27 @@ class _StatementControl does Node {
 					:sym(
 						_Sym.new(
 							$parsed.hash.<sym>
+						)
+					)
+				)
+			)
+		}
+		if assert-hash-keys( $parsed, [< xblock sym wu >] ) {
+			return self.bless(
+				:content(
+					:xblock(
+						_XBlock.new(
+							$parsed.hash.<xblock>
+						)
+					),
+					:sym(
+						_Sym.new(
+							$parsed.hash.<sym>
+						)
+					)
+					:wu(
+						_Wu.new(
+							$parsed.hash.<wu>
 						)
 					)
 				)

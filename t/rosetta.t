@@ -446,13 +446,13 @@ subtest {
 		my $parsed = $pt.tidy( Q:to[_END_] );
 my $b = 99;
 
-###repeat while --$b {
+repeat while --$b {
     say "{b $b} on the wall";
     say "{b $b}";
     say "Take one down, pass it around";
     say "{b $b-1} on the wall";
     say "";
-###}
+}
 
 sub b($b) {
     "$b bottle{'s' if $b != 1} of beer";
@@ -1036,14 +1036,14 @@ multi dethunk(     Any $x) {     take $x   }
 
 sub amb (*@c) { gather @c».&dethunk }
 
-###say first *, do
-###    amb(<the that a>, { die 'oops'}) Xlf
-###    amb('frog',{'elephant'},'thing') Xlf
-###    amb(<walked treaded grows>)      Xlf
-###    amb { die 'poison dart' },
-###        {'slowly'},
-###        {'quickly'},
-###        { die 'fire' };
+say first *, do
+    amb(<the that a>, { die 'oops'}) Xlf
+    amb('frog',{'elephant'},'thing') Xlf
+    amb(<walked treaded grows>)      Xlf
+    amb { die 'poison dart' },
+        {'slowly'},
+        {'quickly'},
+        { die 'fire' };
 _END_
 		isa-ok $parsed, 'Perl6::Tidy::Root';
 	}, Q[version 2];
