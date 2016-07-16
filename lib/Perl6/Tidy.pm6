@@ -228,42 +228,6 @@ sub dump( Mu $parsed ) {
 	dump-parsed( $parsed ).join( "\n" )
 }
 
-sub debug( Mu $parsed ) {
-	my @lines;
-	my @types;
-
-	if $parsed.list {
-		@types.push( 'list' )
-	}
-	if $parsed.hash {
-		@types.push( 'hash' )
-	}
-	@types.push( 'Int'  ) if $parsed.Int;
-	@types.push( 'Str'  ) if $parsed.Str;
-	@types.push( 'Bool' ) if $parsed.Bool;
-
-	die "Unknown type" unless @types;
-
-	@lines.push( "{@types})" );
-
-	@lines.push( "\+: "    ~   $parsed.Int       ) if $parsed.Int;
-	@lines.push( "\~: '"   ~   $parsed.Str ~ "'" ) if $parsed.Str;
-	@lines.push( "\?: "    ~ ~?$parsed.Bool      ) if $parsed.Bool;
-	if $parsed.list {
-		for $parsed.list {
-			@lines.push( "\[\]:\n" ~ $_.dump )
-		}
-		return;
-	}
-	elsif $parsed.hash() {
-		@lines.push( "\{\} keys: " ~ $parsed.hash.keys );
-		@lines.push( "\{\}:\n" ~   $parsed.dump );
-	}
-
-	@lines.push( "" );
-	return @lines.join("\n");
-}
-
 role Node {
 	has $.name;
 	has @.child;
@@ -383,6 +347,10 @@ sub assert-hash-keys( Mu $parsed, $keys, $defined-keys = [] ) {
 class _BinInt does Node {
 	method new( Mu $parsed ) {
 		self.trace( "BinInt" );
+		if $parsed.Str and
+		   $parsed.Str eq '0' {
+			return self.bless( :name( $parsed.Str ) )
+		}
 		if self.assert-Int( $parsed ) {
 			return self.bless( :name( $parsed.Int ) )
 		}
@@ -393,6 +361,10 @@ class _BinInt does Node {
 class _OctInt does Node {
 	method new( Mu $parsed ) {
 		self.trace( "OctInt" );
+		if $parsed.Str and
+		   $parsed.Str eq '0' {
+			return self.bless( :name( $parsed.Str ) )
+		}
 		if self.assert-Int( $parsed ) {
 			return self.bless( :name( $parsed.Int ) )
 		}
@@ -417,6 +389,10 @@ class _DecInt does Node {
 class _HexInt does Node {
 	method new( Mu $parsed ) {
 		self.trace( "HexInt" );
+		if $parsed.Str and
+		   $parsed.Str eq '0' {
+			return self.bless( :name( $parsed.Str ) )
+		}
 		if self.assert-Int( $parsed ) {
 			return self.bless( :name( $parsed.Int ) )
 		}
@@ -427,6 +403,11 @@ class _HexInt does Node {
 class _Coeff does Node {
 	method new( Mu $parsed ) {
 		self.trace( "Coeff" );
+		if $parsed.Str and
+		   ( $parsed.Str eq '0.0' or
+		     $parsed.Str eq '0' ) {
+			return self.bless( :name( $parsed.Str ) )
+		}
 		if self.assert-Int( $parsed ) {
 			return self.bless( :name( $parsed.Int ) )
 		}
@@ -437,6 +418,10 @@ class _Coeff does Node {
 class _Frac does Node {
 	method new( Mu $parsed ) {
 		self.trace( "Frac" );
+		if $parsed.Str and
+		   $parsed.Str eq '0' {
+			return self.bless( :name( $parsed.Str ) )
+		}
 		if self.assert-Int( $parsed ) {
 			return self.bless( :name( $parsed.Int ) )
 		}
@@ -457,6 +442,10 @@ class _Radix does Node {
 class _Int does Node {
 	method new( Mu $parsed ) {
 		self.trace( "_Int" );
+		if $parsed.Str and
+		   $parsed.Str eq '0' {
+			return self.bless( :name( $parsed.Str ) )
+		}
 		if self.assert-Int( $parsed ) {
 			return self.bless( :name( $parsed.Int ) )
 		}

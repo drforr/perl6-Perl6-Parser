@@ -8,7 +8,7 @@ plan 9;
 my $pt = Perl6::Tidy.new;
 
 subtest {
-	plan 9;
+	plan 10;
 
 	subtest {
 		plan 5;
@@ -44,59 +44,165 @@ subtest {
 	}, Q{decimal};
 
 	subtest {
-		plan 1;
+		plan 2;
 
-		my $parsed = $pt.tidy( Q{0b1} );
-		isa-ok $parsed, 'Perl6::Tidy::Root';
+		subtest {
+			plan 1;
+
+			my $parsed = $pt.tidy( Q{0b0} );
+			isa-ok $parsed, 'Perl6::Tidy::Root';
+		}, Q{zero};
+
+		subtest {
+			plan 1;
+
+			my $parsed = $pt.tidy( Q{0b1} );
+			isa-ok $parsed, 'Perl6::Tidy::Root';
+		}, Q{1};
 	}, Q{binary};
 
 	subtest {
-		plan 1;
+		plan 2;
 
-		my $parsed = $pt.tidy( Q{0o1} );
-		isa-ok $parsed, 'Perl6::Tidy::Root';
+		subtest {
+			plan 1;
+
+			my $parsed = $pt.tidy( Q{0o0} );
+			isa-ok $parsed, 'Perl6::Tidy::Root';
+		}, Q{zero};
+
+		subtest {
+			plan 1;
+
+			my $parsed = $pt.tidy( Q{0o1} );
+			isa-ok $parsed, 'Perl6::Tidy::Root';
+		}, Q{1};
 	}, Q{octal};
 
 	subtest {
-		plan 1;
+		plan 2;
 
-		my $parsed = $pt.tidy( Q{0o1} );
-		isa-ok $parsed, 'Perl6::Tidy::Root';
-	}, Q{octal};
+		subtest {
+			plan 1;
+
+			my $parsed = $pt.tidy( Q{0d0} );
+			isa-ok $parsed, 'Perl6::Tidy::Root';
+		}, Q{zero};
+
+		subtest {
+			plan 1;
+
+			my $parsed = $pt.tidy( Q{0d1} );
+			isa-ok $parsed, 'Perl6::Tidy::Root';
+		}, Q{1};
+	}, Q{explicit decimal};
 
 	subtest {
-		plan 1;
+		plan 2;
 
-		my $parsed = $pt.tidy( Q{0x1} );
-		isa-ok $parsed, 'Perl6::Tidy::Root';
-	}, Q{hex};
+		subtest {
+			plan 1;
+
+			my $parsed = $pt.tidy( Q{0} );
+			isa-ok $parsed, 'Perl6::Tidy::Root';
+		}, Q{zero};
+
+		subtest {
+			plan 1;
+
+			my $parsed = $pt.tidy( Q{1} );
+			isa-ok $parsed, 'Perl6::Tidy::Root';
+		}, Q{1};
+	}, Q{implicit decimal};
 
 	subtest {
-		plan 1;
+		plan 2;
 
-		my $parsed = $pt.tidy( Q{:13(1)} );
-		isa-ok $parsed, 'Perl6::Tidy::Root';
+		subtest {
+			plan 1;
+
+			my $parsed = $pt.tidy( Q{0x0} );
+			isa-ok $parsed, 'Perl6::Tidy::Root';
+		}, Q{zero};
+
+		subtest {
+			plan 1;
+
+			my $parsed = $pt.tidy( Q{0x1} );
+			isa-ok $parsed, 'Perl6::Tidy::Root';
+		}, Q{1};
+	}, Q{hexadecimal};
+
+	subtest {
+		plan 2;
+
+		subtest {
+			plan 1;
+
+			my $parsed = $pt.tidy( Q{:13(0)} );
+			isa-ok $parsed, 'Perl6::Tidy::Root';
+		}, Q{zero};
+
+		subtest {
+			plan 1;
+
+			my $parsed = $pt.tidy( Q{:13(1)} );
+			isa-ok $parsed, 'Perl6::Tidy::Root';
+		}, Q{1};
 	}, Q{base-13};
 
 	subtest {
-		plan 1;
+		plan 2;
 
-		my $parsed = $pt.tidy( Q{1.3} );
-		isa-ok $parsed, 'Perl6::Tidy::Root';
+		subtest {
+			plan 1;
+
+			my $parsed = $pt.tidy( Q{0.0} );
+			isa-ok $parsed, 'Perl6::Tidy::Root';
+		}, Q{zero};
+
+		subtest {
+			plan 1;
+
+			my $parsed = $pt.tidy( Q{1.0} );
+			isa-ok $parsed, 'Perl6::Tidy::Root';
+		}, Q{1.0};
 	}, Q{rational};
 
 	subtest {
-		plan 1;
+		plan 2;
 
-		my $parsed = $pt.tidy( Q{1e3} );
-		isa-ok $parsed, 'Perl6::Tidy::Root';
+		subtest {
+			plan 1;
+
+			my $parsed = $pt.tidy( Q{0e0} );
+			isa-ok $parsed, 'Perl6::Tidy::Root';
+		}, Q{zero};
+
+		subtest {
+			plan 1;
+
+			my $parsed = $pt.tidy( Q{1e0} );
+			isa-ok $parsed, 'Perl6::Tidy::Root';
+		}, Q{1.0};
 	}, Q{Num};
 
 	subtest {
-		plan 1;
+		plan 2;
 
-		my $parsed = $pt.tidy( Q{2i} );
-		isa-ok $parsed, 'Perl6::Tidy::Root';
+		subtest {
+			plan 1;
+
+			my $parsed = $pt.tidy( Q{0i} );
+			isa-ok $parsed, 'Perl6::Tidy::Root';
+		}, Q{0i};
+
+		subtest {
+			plan 1;
+
+			my $parsed = $pt.tidy( Q{1i} );
+			isa-ok $parsed, 'Perl6::Tidy::Root';
+		}, Q{11};
 	}, Q{imaginary};
 }, Q{integer};
 
