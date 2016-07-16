@@ -20,8 +20,8 @@ my @doors = False xx 101;
  
 say "Door $_ is ", <closed open>[ @doors[$_] ] for 1..100;
 END
-		isa-ok $parsed, 'Perl6::Tidy::Root';
-	}, Q[version 1];
+		isa-ok $parsed, Q{Perl6::Tidy::Root};
+	}, Q{version 1};
 
 	subtest {
 		plan 1;
@@ -29,8 +29,8 @@ END
 		my $parsed = $pt.tidy( Q:to[END] );
 say "Door $_ is open" for map {$^n ** 2}, 1..10;
 END
-		isa-ok $parsed, 'Perl6::Tidy::Root';
-	}, Q[version 2];
+		isa-ok $parsed, Q{Perl6::Tidy::Root};
+	}, Q{version 2};
 	
 
 	subtest {
@@ -39,8 +39,8 @@ END
 		my $parsed = $pt.tidy( Q:to[END] );
 say "Door $_ is open" for 1..10 X** 2;
 END
-		isa-ok $parsed, 'Perl6::Tidy::Root';
-	}, Q[version 3];
+		isa-ok $parsed, Q{Perl6::Tidy::Root};
+	}, Q{version 3};
 
 	subtest {
 		plan 1;
@@ -48,9 +48,9 @@ END
 		my $parsed = $pt.tidy( Q:to[END] );
 say "Door $_ is ", <closed open>[.sqrt == .sqrt.floor] for 1..100;
 END
-		isa-ok $parsed, 'Perl6::Tidy::Root';
-	}, Q[version 4];
-}, '100 doors';
+		isa-ok $parsed, Q{Perl6::Tidy::Root};
+	}, Q{version 4};
+}, Q{100 doors};
 
 #my $*TRACE = 1;
 subtest {
@@ -175,8 +175,8 @@ loop {
 }
 _END_
 
-	isa-ok $parsed, 'Perl6::Tidy::Root';
-}, '15 Puzzle';
+	isa-ok $parsed, Q{Perl6::Tidy::Root};
+}, Q{15 Puzzle};
 
 subtest {
 	plan 1;
@@ -297,8 +297,8 @@ loop {
     last if $key eq 'q'; # (q)uit
 }
 _END_
-	isa-ok $parsed, 'Perl6::Tidy::Root';
-}, '2048';
+	isa-ok $parsed, Q{Perl6::Tidy::Root};
+}, Q{2048};
 
 subtest {
 	plan 1;
@@ -331,8 +331,8 @@ while my $exp = prompt "\n24? " {
     }
 }
 _END_
-	isa-ok $parsed, 'Perl6::Tidy::Root';
-}, '24 game';
+	isa-ok $parsed, Q{Perl6::Tidy::Root};
+}, Q{24 game};
 
 subtest {
 	plan 1;
@@ -383,8 +383,8 @@ sub unique (@array) {
     %h.values;
 }
 _END_
-	isa-ok $parsed, 'Perl6::Tidy::Root';
-}, '24 game/Solve';
+	isa-ok $parsed, Q{Perl6::Tidy::Root};
+}, Q{24 game/Solve};
 
 subtest {
 	plan 1;
@@ -420,8 +420,8 @@ for 23, 123, 1234, 10000 {
     say $_, "\t", [+] nextrow($_)[];
 }
 _END_
-	isa-ok $parsed, 'Perl6::Tidy::Root';
-}, '9 billion names of God';
+	isa-ok $parsed, Q{Perl6::Tidy::Root};
+}, Q{9 billion names of God};
 
 subtest {
 	plan 3;
@@ -444,8 +444,8 @@ sub b($b) {
     "$b bottle{'s' if $b != 1} of beer";
 }
 _END_
-		isa-ok $parsed, 'Perl6::Tidy::Root';
-	}, Q[version 1];
+		isa-ok $parsed, Q{Perl6::Tidy::Root};
+	}, Q{version 1};
 
 	subtest {
 		plan 1;
@@ -470,8 +470,8 @@ sub sing(
     say "$quantity bottle$plural of beer$location"
 }
 _END_
-		isa-ok $parsed, 'Perl6::Tidy::Root';
-	}, Q[version 2];
+		isa-ok $parsed, Q{Perl6::Tidy::Root};
+	}, Q{version 2};
 
 	subtest {
 		plan 1;
@@ -491,8 +491,8 @@ for @quantities Z @bottles Z @actions Z
     say "$d $e of beer on the wall\n";
 }
 _END_
-		isa-ok $parsed, 'Perl6::Tidy::Root';
-	}, Q[version 3];
-}, '99 bottles of beer';
+		isa-ok $parsed, Q{Perl6::Tidy::Root};
+	}, Q{version 3};
+}, Q{99 bottles of beer};
 
 # vim: ft=perl6

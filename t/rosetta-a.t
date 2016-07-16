@@ -3,7 +3,7 @@ use v6;
 use Test;
 use Perl6::Tidy;
 
-plan 18;
+plan 20;
 
 my $pt = Perl6::Tidy.new;
 
@@ -16,8 +16,8 @@ subtest {
 		my $parsed = $pt.tidy( Q:to[_END_] );
 get.words.sum.say;
 _END_
-		isa-ok $parsed, 'Perl6::Tidy::Root';
-	}, Q[version 1];
+		isa-ok $parsed, Q{Perl6::Tidy::Root};
+	}, Q{version 1};
 
 	subtest {
 		plan 1;
@@ -25,8 +25,8 @@ _END_
 		my $parsed = $pt.tidy( Q:to[_END_] );
 say [+] get.words;
 _END_
-		isa-ok $parsed, 'Perl6::Tidy::Root';
-	}, Q[version 2];
+		isa-ok $parsed, Q{Perl6::Tidy::Root};
+	}, Q{version 2};
 
 	subtest {
 		plan 1;
@@ -35,9 +35,9 @@ _END_
 my ($a, $b) = $*IN.get.split(" ");
 say $a + $b;
 _END_
-		isa-ok $parsed, 'Perl6::Tidy::Root';
-	}, Q[version 3];
-}, 'A + B';
+		isa-ok $parsed, Q{Perl6::Tidy::Root};
+	}, Q{version 3};
+}, Q{A + B};
 
 subtest {
 	plan 1;
@@ -65,8 +65,8 @@ for <A BaRK BOoK tREaT COmMOn SqUAD CoNfuSE> {
     say "$_     &can-spell-word($_, @b)";
 }
 _END_
-	isa-ok $parsed, 'Perl6::Tidy::Root';
-}, 'ABC Problem';
+	isa-ok $parsed, Q{Perl6::Tidy::Root};
+}, Q{ABC Problem};
 
 subtest {
 	plan 1;
@@ -92,8 +92,8 @@ my $obj = SomeClass.new;
 $obj.abstract();
 $obj.concrete();
 _END_
-	isa-ok $parsed, 'Perl6::Tidy::Root';
-}, 'Abstract Class';
+	isa-ok $parsed, Q{Perl6::Tidy::Root};
+}, Q{Abstract Class};
 
 subtest {
 	plan 1;
@@ -108,8 +108,8 @@ sub propdivsum (\x) {
 
 say bag map { propdivsum($_) <=> $_ }, 1..20000
 _END_
-	isa-ok $parsed, 'Perl6::Tidy::Root';
-}, 'Abundant, Deficient and Perfect numbers';
+	isa-ok $parsed, Q{Perl6::Tidy::Root};
+}, Q{Abundant, Deficient and Perfect numbers};
 
 subtest {
 	plan 1;
@@ -117,8 +117,8 @@ subtest {
 	my $parsed = $pt.tidy( Q:to[_END_] );
 sub accum ($n is copy) { sub { $n += $^x } }
 _END_
-	isa-ok $parsed, 'Perl6::Tidy::Root';
-}, 'Accumulator factory';
+	isa-ok $parsed, Q{Perl6::Tidy::Root};
+}, Q{Accumulator factory};
 
 subtest {
 	plan 3;
@@ -133,8 +133,8 @@ sub A(Int $m, Int $n) {
     else          { A($m - 1, A($m, $n - 1)) }
 }
 _END_
-		isa-ok $parsed, 'Perl6::Tidy::Root';
-	}, Q[version 1];
+		isa-ok $parsed, Q{Perl6::Tidy::Root};
+	}, Q{version 1};
 
 	subtest {
 		plan 1;
@@ -144,8 +144,8 @@ multi sub A(0,      Int $n) { $n + 1                   }
 multi sub A(Int $m, 0     ) { A($m - 1, 1)             }
 multi sub A(Int $m, Int $n) { A($m - 1, A($m, $n - 1)) }
 _END_
-		isa-ok $parsed, 'Perl6::Tidy::Root';
-	}, Q[version 2];
+		isa-ok $parsed, Q{Perl6::Tidy::Root};
+	}, Q{version 2};
 
 	subtest {
 		plan 1;
@@ -164,9 +164,9 @@ multi A(Int \𝑚, Int \𝑛) { A(𝑚 - 1, A(𝑚, 𝑛 - 1)) }
 say A(4,1);
 say .chars, " digits starting with ", .substr(0,50), "..." given A(4,2);
 _END_
-		isa-ok $parsed, 'Perl6::Tidy::Root';
-	}, Q[version 4];
-}, 'Ackermann Function';
+		isa-ok $parsed, Q{Perl6::Tidy::Root};
+	}, Q{version 4};
+}, Q{Ackermann Function};
 
 subtest {
 	plan 3;
@@ -198,8 +198,8 @@ say $this.foo;            # prints: 2 - original role value
 my $that = $object.clone; # instantiate a new Bar derived from $object copying any variables
 say $that.foo;            # 5 - value from the cloned object
 _END_
-		isa-ok $parsed, 'Perl6::Tidy::Root';
-	}, Q[version 1];
+		isa-ok $parsed, Q{Perl6::Tidy::Root};
+	}, Q{version 1};
 
 	subtest {
 		plan 1;
@@ -210,8 +210,8 @@ my $lue = 42 but role { has $.answer = "Life, the Universe, and Everything" }
 say $lue;          # 42
 say $lue.answer;   # Life, the Universe, and Everything
 _END_
-		isa-ok $parsed, 'Perl6::Tidy::Root';
-	}, Q[version 2];
+		isa-ok $parsed, Q{Perl6::Tidy::Root};
+	}, Q{version 2};
 
 	subtest {
 		plan 1;
@@ -223,9 +223,9 @@ augment class Int {
 }
 say 42.answer;     # Life, the Universe, and Everything
 _END_
-		isa-ok $parsed, 'Perl6::Tidy::Root';
-	}, Q[version 3];
-}, 'Add a variable to a class at runtime';
+		isa-ok $parsed, Q{Perl6::Tidy::Root};
+	}, Q{version 3};
+}, Q{Add a variable to a class at runtime};
 
 subtest {
 	plan 1;
@@ -241,8 +241,8 @@ say "Same variable" if $y =:= $x;
 $x = 42;
 say $y;  # 42
 _END_
-	isa-ok $parsed, 'Perl6::Tidy::Root';
-}, 'Address of a variable';
+	isa-ok $parsed, Q{Perl6::Tidy::Root};
+}, Q{Address of a variable};
 
 subtest {
 	plan 1;
@@ -274,8 +274,8 @@ for ^13 -> $d {
     )
 }
 _END_
-	isa-ok $parsed, 'Perl6::Tidy::Root';
-}, 'AKS test for primality';
+	isa-ok $parsed, Q{Perl6::Tidy::Root};
+}, Q{AKS test for primality};
 
 subtest {
 	plan 3;
@@ -323,8 +323,8 @@ for @filelines -> $line {
    say ''; #for the newline
 }
 _END_
-		isa-ok $parsed, 'Perl6::Tidy::Root';
-	}, Q[version 1];
+		isa-ok $parsed, Q{Perl6::Tidy::Root};
+	}, Q{version 1};
 
 	subtest {
 		plan 1;
@@ -346,8 +346,8 @@ sub align($column_width, $word, $aligment = @*ARGS[0]) {
         }
 }
 _END_
-		isa-ok $parsed, 'Perl6::Tidy::Root';
-	}, Q[version 2];
+		isa-ok $parsed, Q{Perl6::Tidy::Root};
+	}, Q{version 2};
 
 	subtest {
 		plan 1;
@@ -361,9 +361,9 @@ sub MAIN ($alignment where 'left'|'right', $file) {
     printf $format, |$_ for @lines;
 }
 _END_
-		isa-ok $parsed, 'Perl6::Tidy::Root';
-	}, Q[version 3];
-}, 'Align columns';
+		isa-ok $parsed, Q{Perl6::Tidy::Root};
+	}, Q{version 3};
+}, Q{Align columns};
 
 subtest {
 	plan 1;
@@ -405,8 +405,8 @@ aliquotidian($_).say for flat
     790, 909, 562, 1064, 1488,
     15355717786080;
 _END_
-	isa-ok $parsed, 'Perl6::Tidy::Root';
-}, 'Aliquot sequence';
+	isa-ok $parsed, Q{Perl6::Tidy::Root};
+}, Q{Aliquot sequence};
 
 subtest {
 	plan 2;
@@ -427,8 +427,8 @@ for 1 .. 5 -> $k {
         given grep { is-k-almost-prime($_, $k) }, 2 .. *
 }
 _END_
-		isa-ok $parsed, 'Perl6::Tidy::Root';
-	}, Q[version 1];
+		isa-ok $parsed, Q{Perl6::Tidy::Root};
+	}, Q{version 1};
 
 	subtest {
 		plan 1;
@@ -459,9 +459,9 @@ sub almost($n) { map *.key, grep *.value == $n, @factory }
 
 put almost($_)[^10] for 1..5;
 _END_
-		isa-ok $parsed, 'Perl6::Tidy::Root';
+		isa-ok $parsed, Q{Perl6::Tidy::Root};
 	}, Q[version 2];
-}, 'Almost prime';
+}, Q{Almost prime};
 
 subtest {
 	plan 3;
@@ -489,8 +489,8 @@ sub test (Str $l, Str $r) {
   say "$w1 $w2 $w3 $w4"
 })(|@a); # supply the array as argumetns
 _END_
-		isa-ok $parsed, 'Perl6::Tidy::Root';
-	}, Q[version 1];
+		isa-ok $parsed, Q{Perl6::Tidy::Root};
+	}, Q{version 1};
  
 	subtest {
 		plan 1;
@@ -515,8 +515,8 @@ say first *, do
         {'quickly'},
         { die 'fire' };
 _END_
-		isa-ok $parsed, 'Perl6::Tidy::Root';
-	}, Q[version 2];
+		isa-ok $parsed, Q{Perl6::Tidy::Root};
+	}, Q{version 2};
 
 	subtest {
 		plan 1;
@@ -545,9 +545,9 @@ sub joins ($word1, $word2) {
     <!>
 /;
 _END_
-		isa-ok $parsed, 'Perl6::Tidy::Root';
-	}, Q[version 3];
-}, 'Almost prime';
+		isa-ok $parsed, Q{Perl6::Tidy::Root};
+	}, Q{version 3};
+}, Q{Almost prime};
 
 subtest {
 	plan 1;
@@ -566,8 +566,8 @@ for 1..20000 -> $i {
     say "$i $j" if $j > $i and $i == propdivsum($j);
 }
 _END_
-	isa-ok $parsed, 'Perl6::Tidy::Root';
-}, 'Amicable pairs';
+	isa-ok $parsed, Q{Perl6::Tidy::Root};
+}, Q{Amicable pairs};
 
 subtest {
 	plan 2;
@@ -582,8 +582,8 @@ my $max = [max] map { +@($_) }, %anagram.values;
  
 %anagram.values.grep( { +@($_) >= $max } )».join(' ')».say;
 _END_
-		isa-ok $parsed, 'Perl6::Tidy::Root';
-	}, Q[version 1];
+		isa-ok $parsed, Q{Perl6::Tidy::Root};
+	}, Q{version 1};
 
 	subtest {
 		plan 1;
@@ -597,9 +597,9 @@ slurp('unixdict.txt')\               # load file in memory
 .max( :by(*.key) ).value\            # get the group with highest number of anagrams
 .flat».value                         # get all groups of anagrams in the group just selected
 _END_
-		isa-ok $parsed, 'Perl6::Tidy::Root';
-	}, Q[version 2];
-}, 'Anagrams';
+		isa-ok $parsed, Q{Perl6::Tidy::Root};
+	}, Q{version 2};
+}, Q{Anagrams};
 
 subtest {
 	plan 1;
@@ -618,8 +618,8 @@ for %anagram.values.sort({ -@($_[0]) }) -> @aset {
     }
 }
 _END_
-	isa-ok $parsed, 'Perl6::Tidy::Root';
-}, 'Anagrams / Derangements';
+	isa-ok $parsed, Q{Perl6::Tidy::Root};
+}, Q{Anagrams / Derangements};
 
 subtest {
 	plan 1;
@@ -636,8 +636,8 @@ sub fib($n) {
  
 say fib(10);
 _END_
-	isa-ok $parsed, 'Perl6::Tidy::Root';
-}, 'Anonymous recursion';
+	isa-ok $parsed, Q{Perl6::Tidy::Root};
+}, Q{Anonymous recursion};
 
 subtest {
 	plan 1;
@@ -663,7 +663,40 @@ say @array».&function;
 # we neither need a variable for the array nor for the function
 say [1,2,3]>>.&({ $^x + 1});
 _END_
-	isa-ok $parsed, 'Perl6::Tidy::Root';
-}, 'Apply a callback to an array';
+	isa-ok $parsed, Q{Perl6::Tidy::Root};
+}, Q{Apply a callback to an array};
+
+subtest {
+	plan 1;
+
+	my $parsed = $pt.tidy( Q:to[_END_] );
+given ~[**] 5, 4, 3, 2 {
+   say "5**4**3**2 = {.substr: 0,20}...{.substr: *-20} and has {.chars} digits";
+}
+_END_
+	isa-ok $parsed, Q{Perl6::Tidy::Root};
+}, Q{Arbitrary-precision integers};
+
+subtest {
+	plan 1;
+
+my $*TRACE = 1;
+	# XXX Make up a 'Image::PNG::Portable' class
+	my $parsed = $pt.tidy( Q:to[_END_] );
+###class Image::PNG::Portable { has ( $.width, $.height ); method set { }; method write { } }
+####use Image::PNG::Portable;
+
+###my ($w, $h) = (400, 400);
+
+###my $png = Image::PNG::Portable.new: :width($w), :height($h);
+
+###for 0, .025 ... 52*π -> \Θ {
+###    $png.set: |((cis( Θ / π ) * Θ).reals »+« ($w/2, $h/2))».Int, 255, 0, 255;
+###}
+
+###$png.write: 'Archimedean-spiral-perl6.png';
+_END_
+	isa-ok $parsed, Q{Perl6::Tidy::Root};
+}, Q{Archimedean spiral};
 
 # vim: ft=perl6

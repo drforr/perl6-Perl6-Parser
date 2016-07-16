@@ -191,9 +191,7 @@ sub dump-parsed( Mu $parsed ) {
 	@lines.push( Q[ ~:   '] ~ ~$parsed.Str ~ "' - Types: " ~ @types.gist );
 	@lines.push( Q[{}:    ] ~ $parsed.hash.keys.gist );
 	# XXX
-	CATCH {
-		default { .resume } # workaround for X::Hash exception
-	}
+	CATCH { default { .resume } } # workaround for X::Hash exception
 	@lines.push( Q{[]:    } ~ $parsed.list.elems );
 
 	if $parsed.hash {
@@ -499,9 +497,10 @@ class _VALUE does Node {
 class _Sym does Node {
 	method new( Mu $parsed ) {
 		self.trace( "Sym" );
-		CATCH { when X::Hash::Store::OddNumber { }
-when X::Multi::NoMatch { }
-}
+		CATCH {
+			when X::Hash::Store::OddNumber { }
+			when X::Multi::NoMatch { }
+		}
 		if $parsed.Bool and		# XXX Huh?
 		   $parsed.Str eq '+' {
 			return self.bless( :name( $parsed.Str ) )
@@ -801,9 +800,10 @@ class _CodeBlock does Node {
 class _XBlock does Node {
 	method new( Mu $parsed ) {
 		self.trace( "XBlock" );
-		CATCH { when X::Hash::Store::OddNumber { }
-when X::Multi::NoMatch { }
-	}
+		CATCH {
+			when X::Hash::Store::OddNumber { }
+			when X::Multi::NoMatch { }
+		}
 		if self.assert-hash-keys( $parsed, [< pblock EXPR >] ) {
 			return self.bless(
 				:content(
@@ -1147,7 +1147,7 @@ class _O does Node {
 	method new( Mu $parsed ) {
 		self.trace( "O" );
 		# XXX There has to be a better way to handle this NoMatch case
-		CATCH { when X::Multi::NoMatch {  } }
+		CATCH { when X::Multi::NoMatch { } }
 		if $parsed ~~ Hash {
 			if $parsed.<prec> and
 			   $parsed.<fiddly> and
@@ -1972,7 +1972,7 @@ class _DefTerm does Node {
 class _TypeDeclarator does Node {
 	method new( Mu $parsed ) {
 		self.trace( "TypeDeclarator" );
-		CATCH { when X::Multi::NoMatch {  } }
+		CATCH { when X::Multi::NoMatch { } }
 		if self.assert-hash-keys( $parsed, [< sym initializer variable >],
 					      [< trait >] ) {
 			return self.bless(
@@ -3385,7 +3385,7 @@ class _MethodDef does Node {
 class _Specials does Node {
 	method new( Mu $parsed ) {
 		self.trace( "Specials" );
-		CATCH { when X::Multi::NoMatch {  } }
+		CATCH { when X::Multi::NoMatch { } }
 		if self.assert-Bool( $parsed ) {
 			return self.bless( :name( $parsed.Bool ) )
 		}
@@ -3814,9 +3814,8 @@ class _Initializer does Node {
 class _Declarator does Node {
 	method new( Mu $parsed ) {
 		self.trace( "Declarator" );
-		if self.assert-hash-keys( $parsed, [< initializer
-						 signature >],
-					      [< trait >] ) {
+		if self.assert-hash-keys( $parsed, [< initializer signature >],
+						   [< trait >] ) {
 			return self.bless(
 				:content(
 					:initializer(
@@ -3833,9 +3832,9 @@ class _Declarator does Node {
 				)
 			)
 		}
-		if self.assert-hash-keys( $parsed, [< initializer
-						 variable_declarator >],
-					      [< trait >] ) {
+		if self.assert-hash-keys( $parsed,
+					  [< initializer variable_declarator >],
+					  [< trait >] ) {
 			return self.bless(
 				:content(
 					:initializer(
@@ -3853,7 +3852,7 @@ class _Declarator does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< variable_declarator >],
-					      [< trait >] ) {
+						   [< trait >] ) {
 			return self.bless(
 				:content(
 					:variable_declarator(
@@ -4222,9 +4221,9 @@ class _DECL does Node {
 				)
 			)
 		}
-		if self.assert-hash-keys( $parsed, [< initializer
-						 variable_declarator >],
-					      [< trait >] ) {
+		if self.assert-hash-keys( $parsed,
+					  [< initializer variable_declarator >],
+					  [< trait >] ) {
 			return self.bless(
 				:content(
 					:initializer(
@@ -4242,7 +4241,7 @@ class _DECL does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< variable_declarator >],
-					      [< trait >] ) {
+						   [< trait >] ) {
 			return self.bless(
 				:content(
 					:variable_declarator(
@@ -4255,7 +4254,7 @@ class _DECL does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< regex_declarator >],
-					      [< trait >] ) {
+						   [< trait >] ) {
 			return self.bless(
 				:content(
 					:regex_declarator(
@@ -4341,8 +4340,9 @@ class _Scoped does Node {
 				)
 			)
 		}
-		if self.assert-hash-keys( $parsed, [< package_declarator DECL >],
-					      [< typename >] ) {
+		if self.assert-hash-keys( $parsed,
+					  [< package_declarator DECL >],
+					  [< typename >] ) {
 			return self.bless(
 				:content(
 					:package_declarator(
