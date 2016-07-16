@@ -88,6 +88,7 @@ class _HexInt {...}
 class _Identifier {...}
 class _Identifier_Args {...}
 class _Infix {...}
+class _Infix_OPER {...}
 class _InfixIsh {...}
 class _InfixPrefixMetaOperator {...}
 class _Initializer {...}
@@ -124,6 +125,7 @@ class _PostCircumfix {...}
 class _PostCircumfix_OPER {...}
 class _PostConstraint {...}
 class _Postfix {...}
+class _Postfix_OPER {...}
 class _PostOp {...}
 class _Prefix {...}
 class _Prefix_OPER {...}
@@ -988,6 +990,7 @@ class _StatementControl does Node {
 	method new( Mu $parsed ) {
 		self.trace( "StatementControl" );
 		if self.assert-hash-keys( $parsed, [< block sym e1 e2 e3 >] ) {
+#return "foo";
 			return self.bless(
 				:content(
 					:block(
@@ -1001,20 +1004,22 @@ class _StatementControl does Node {
 						)
 					),
 					:e1(
-						_E1.new(
-							$parsed.hash.<e1>
-						)
+# XXX Add e1 later...
+						'Not implemented yet'
+#						_E1.new(
+#							$parsed.hash.<e1>
+#						)
 					),
 					:e2(
-						_E2.new(
-							$parsed.hash.<e2>
-						)
+#						_E2.new(
+#							$parsed.hash.<e2>
+#						)
 					),
-					:e3(
-						_E3.new(
-							$parsed.hash.<e3>
-						)
-					)
+#					:e3(
+#						_E3.new(
+#							$parsed.hash.<e3>
+#						)
+#					)
 				)
 			)
 		}
@@ -2078,10 +2083,24 @@ class _EXPR does Node {
 					);
 					next
 				}
+				if self.assert-hash-keys( $_, [< infix OPER >],
+							 [< infix_postfix_meta_operator >] ) {
+					@child.push(
+						_Infix_OPER.new( $_ )
+					);
+					next
+				}
 				if self.assert-hash-keys( $_, [< prefix OPER >],
 							 [< prefix_postfix_meta_operator >] ) {
 					@child.push(
 						_Prefix_OPER.new( $_ )
+					);
+					next
+				}
+				if self.assert-hash-keys( $_, [< postfix OPER >],
+							 [< postfix_prefix_meta_operator >] ) {
+					@child.push(
+						_Postfix_OPER.new( $_ )
 					);
 					next
 				}
@@ -3966,6 +3985,60 @@ class _Prefix_OPER does Node {
 						)
 					),
 					:prefix_postfix_meta_operator()
+				)
+			)
+		}
+		die self.debug( $parsed );
+	}
+}
+
+# XXX This is a compound type
+class _Postfix_OPER does Node {
+	method new( Mu $parsed ) {
+		self.trace( "Postfix_OPER" );
+		if self.assert-hash-keys( $parsed,
+				     [< postfix OPER >],
+				     [< postfix_prefix_meta_operator >] ) {
+			return self.bless(
+				:content(
+					:postfix(
+						_Postfix.new(
+							$parsed.hash.<postfix>
+						)
+					),
+					:OPER(
+						_OPER.new(
+							$parsed.hash.<OPER>
+						)
+					),
+					:postfix_prefix_meta_operator()
+				)
+			)
+		}
+		die self.debug( $parsed );
+	}
+}
+
+# XXX This is a compound type
+class _Infix_OPER does Node {
+	method new( Mu $parsed ) {
+		self.trace( "Infix_OPER" );
+		if self.assert-hash-keys( $parsed,
+				     [< infix OPER >],
+				     [< infix_postfix_meta_operator >] ) {
+			return self.bless(
+				:content(
+					:infix(
+						_Infix.new(
+							$parsed.hash.<infix>
+						)
+					),
+					:OPER(
+						_OPER.new(
+							$parsed.hash.<OPER>
+						)
+					),
+					:infix_postfix_meta_operator()
 				)
 			)
 		}

@@ -284,13 +284,13 @@ subtest {
 		plan 1;
 
 		my $parsed = $pt.tidy( Q:to[_END_] );
-###to be called with perl6 columnaligner.pl <orientation>(left, center , right )
-###with left as default
+#to be called with perl6 columnaligner.pl <orientation>(left, center , right )
+#with left as default
 my $fh = open  "example.txt" , :r  or die "Can't read text file!\n" ;
 my @filelines = $fh.lines ;
 close $fh ;
 my @maxcolwidths ; #array of the longest words per column
-#########fill the array with values#####################
+#--------fill the array with values-------------------
 for @filelines -> $line {
    my @words = $line.split( "\$" ) ;
    for 0..@words.elems - 1 -> $i {
@@ -416,10 +416,10 @@ subtest {
 
 		my $parsed = $pt.tidy( Q:to[_END_] );
 sub is-k-almost-prime($n is copy, $k) returns Bool {
-###    loop (my ($p, $f) = 2, 0; $f < $k && $p*$p <= $n; $p++) {
-###        $n /= $p, $f++ while $n %% $p;
-###    }
-###    $f + ($n > 1) == $k;
+    loop (my ($p, $f) = 2, 0; $f < $k && $p*$p <= $n; $p++) {
+        $n /= $p, $f++ while $n %% $p;
+    }
+    $f + ($n > 1) == $k;
 }
 
 for 1 .. 5 -> $k {
