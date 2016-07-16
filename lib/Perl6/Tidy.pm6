@@ -103,7 +103,6 @@ class _MethodDef {...}
 class _MethodOp {...}
 class _ModifierExpr {...}
 class _ModuleName {...}
-class _MoreName {...}
 class _MultiDeclarator {...}
 class _MultiSig {...}
 class _Name {...}
@@ -117,13 +116,11 @@ class _OctInt {...}
 class _Op {...}
 class _OPER {...}
 class _PackageDeclarator {...}
-class _PackageDeclarator {...}
 class _PackageDef {...}
 class _PBlock {...}
 class Perl6::Tidy::Root {...}
 class _PostCircumfix {...}
 class _PostCircumfix_OPER {...}
-class _PostConstraint {...}
 class _Postfix {...}
 class _Postfix_OPER {...}
 class _PostOp {...}
@@ -4045,30 +4042,6 @@ class _Infix_OPER does Node {
 	}
 }
 
-class _PostConstraint does Node {
-	method new( Mu $parsed ) {
-		self.trace( "PostConstraint" );
-		if $parsed.list {
-			my @child;
-			for $parsed.list {
-				if self.assert-hash-keys( $_, [< EXPR >] ) {
-					@child.push(
-						_EXPR.new(
-							$_.hash.<EXPR>
-						)
-					);
-					next
-				}
-				die self.debug( $_ );
-			}
-			return self.bless(
-				:child( @child )
-			)
-		}
-		die self.debug( $parsed );
-	}
-}
-
 class _MultiSig does Node {
 	method new( Mu $parsed ) {
 		self.trace( "MultiSig" );
@@ -4301,7 +4274,7 @@ class _Scoped does Node {
 	method new( Mu $parsed ) {
 		self.trace( "Scoped" );
 		if self.assert-hash-keys( $parsed, [< declarator DECL >],
-					      [< typename >] ) {
+						   [< typename >] ) {
 			return self.bless(
 				:content(
 					:declarator(
@@ -4602,9 +4575,7 @@ class _Statement does Node {
 			for $parsed.list {
 				if self.assert-hash-keys( $_, [< statement_mod_loop EXPR >] ) {
 					@child.push(
-						_StatementModLoop_EXPR.new(
-							$_
-						)
+						_StatementModLoop_EXPR.new( $_ )
 					);
 					next
 				}
@@ -4727,38 +4698,6 @@ class _Op does Node {
 						)
 					)
 				)
-			)
-		}
-		die self.debug( $parsed );
-	}
-}
-
-class _MoreName does Node {
-	method new( Mu $parsed ) {
-		self.trace( "MoreName" );
-		if $parsed.list {
-			my @child;
-			for $parsed.list {
-				if self.assert-hash-keys( $_, [< identifier >] ) {
-					@child.push(
-						_Identifier.new(
-							$_.hash.<identifier>
-						)
-					);
-					next
-				}
-				if self.assert-hash-keys( $_, [< EXPR >] ) {
-					@child.push(
-						_EXPR.new(
-							$_.hash.<EXPR>
-						)
-					);
-					next
-				}
-				die self.debug( $_ );
-			}
-			return self.bless(
-				:child( @child )
 			)
 		}
 		die self.debug( $parsed );
