@@ -3,7 +3,7 @@ use v6;
 use Test;
 use Perl6::Tidy;
 
-plan 20;
+plan 22;
 
 my $pt = Perl6::Tidy.new;
 
@@ -680,23 +680,191 @@ _END_
 subtest {
 	plan 1;
 
-my $*TRACE = 1;
 	# XXX Make up a 'Image::PNG::Portable' class
 	my $parsed = $pt.tidy( Q:to[_END_] );
-###class Image::PNG::Portable { has ( $.width, $.height ); method set { }; method write { } }
-####use Image::PNG::Portable;
+class Image::PNG::Portable { has ( $.width, $.height ); method set { }; method write { } }
+#use Image::PNG::Portable;
 
-###my ($w, $h) = (400, 400);
+my ($w, $h) = (400, 400);
 
-###my $png = Image::PNG::Portable.new: :width($w), :height($h);
+my $png = Image::PNG::Portable.new: :width($w), :height($h);
 
-###for 0, .025 ... 52*π -> \Θ {
-###    $png.set: |((cis( Θ / π ) * Θ).reals »+« ($w/2, $h/2))».Int, 255, 0, 255;
-###}
+for 0, .025 ... 52*π -> \Θ {
+    $png.set: |((cis( Θ / π ) * Θ).reals »+« ($w/2, $h/2))».Int, 255, 0, 255;
+}
 
-###$png.write: 'Archimedean-spiral-perl6.png';
+$png.write: 'Archimedean-spiral-perl6.png';
 _END_
 	isa-ok $parsed, Q{Perl6::Tidy::Root};
 }, Q{Archimedean spiral};
+
+subtest {
+	plan 1;
+
+	my $parsed = $pt.tidy( Q:to[_END_] );
+sub cumulative_freq(%freq) {
+    my %cf;
+    my $total = 0;
+    for %freq.keys.sort -> $c {
+        %cf{$c} = $total;
+        $total += %freq{$c};
+    }
+    return %cf;
+}
+ 
+sub arithmethic_coding($str, $radix) {
+    my @chars = $str.comb;
+ 
+    # The frequency characters
+    my %freq;
+    %freq{$_}++ for @chars;
+ 
+    # The cumulative frequency table
+    my %cf = cumulative_freq(%freq);
+ 
+    # Base
+    my $base = @chars.elems;
+ 
+    # Lower bound
+    my $L = 0;
+ 
+    # Product of all frequencies
+    my $pf = 1;
+ 
+    # Each term is multiplied by the product of the
+    # frequencies of all previously occurring symbols
+    for @chars -> $c {
+        $L = $L*$base + %cf{$c}*$pf;
+        $pf *= %freq{$c};
+    }
+ 
+    # Upper bound
+    my $U = $L + $pf;
+ 
+    my $pow = 0;
+    loop {
+        $pf div= $radix;
+        last if $pf == 0;
+        ++$pow;
+    }
+ 
+    my $enc = ($U - 1) div ($radix ** $pow);
+    ($enc, $pow, %freq);
+}
+ 
+sub arithmethic_decoding($encoding, $radix, $pow, %freq) {
+ 
+    # Multiply encoding by radix^pow
+    my $enc = $encoding * $radix**$pow;
+ 
+    # Base
+    my $base = [+] %freq.values;
+ 
+    # Create the cumulative frequency table
+    my %cf = cumulative_freq(%freq);
+ 
+    # Create the dictionary
+    my %dict;
+    for %cf.kv -> $k,$v {
+        %dict{$v} = $k;
+    }
+ 
+    # Fill the gaps in the dictionary
+    my $lchar;
+    for ^$base -> $i {
+        if (%dict{$i}:exists) {
+            $lchar = %dict{$i};
+        }
+        elsif (defined $lchar) {
+            %dict{$i} = $lchar;
+        }
+    }
+ 
+    # Decode the input number
+    my $decoded = '';
+    for reverse(^$base) -> $i {
+ 
+        my $pow = $base**$i;
+        my $div = $enc div $pow;
+ 
+        my $c  = %dict{$div};
+        my $fv = %freq{$c};
+        my $cv = %cf{$c};
+ 
+        my $rem = ($enc - $pow*$cv) div $fv;
+ 
+        $enc = $rem;
+        $decoded ~= $c;
+    }
+ 
+    # Return the decoded output
+    return $decoded;
+}
+ 
+my $radix = 10;    # can be any integer greater or equal with 2
+ 
+for <DABDDB DABDDBBDDBA ABRACADABRA TOBEORNOTTOBEORTOBEORNOT> -> $str {
+    my ($enc, $pow, %freq) = arithmethic_coding($str, $radix);
+    my $dec = arithmethic_decoding($enc, $radix, $pow, %freq);
+ 
+    printf("%-25s=> %19s * %d^%s\n", $str, $enc, $radix, $pow);
+ 
+    if ($str ne $dec) {
+        die "\tHowever that is incorrect!";
+    }
+}
+_END_
+	isa-ok $parsed, Q{Perl6::Tidy::Root};
+}, Q{Arithmetic coding};
+
+subtest {
+	plan 1;
+
+	my $parsed = $pt.tidy( Q:to[_END_] );
+sub ev (Str $s --> Num) {
+ 
+    grammar expr {
+        token TOP { ^ <sum> $ }
+        token sum { <product> (('+' || '-') <product>)* }
+        token product { <factor> (('*' || '/') <factor>)* }
+        token factor { <unary_minus>? [ <parens> || <literal> ] }
+        token unary_minus { '-' }
+        token parens { '(' <sum> ')' }
+        token literal { \d+ ['.' \d+]? || '.' \d+ }
+    }
+ 
+    my sub minus ($b) { $b ?? -1 !! +1 }
+ 
+    my sub sum ($x) {
+        [+] flat product($x<product>), map
+            { minus($^y[0] eq '-') * product $^y<product> },
+            |($x[0] or [])
+    }
+ 
+    my sub product ($x) {
+        [*] flat factor($x<factor>), map
+            { factor($^y<factor>) ** minus($^y[0] eq '/') },
+            |($x[0] or [])
+    }
+ 
+    my sub factor ($x) {
+        minus($x<unary_minus>) * ($x<parens>
+          ?? sum $x<parens><sum>
+          !! $x<literal>)
+    }
+ 
+    expr.parse([~] split /\s+/, $s);
+    $/ or fail 'No parse.';
+    sum $/<sum>;
+ 
+}
+
+say ev '5';                                    #   5
+say ev '1 + 2 - 3 * 4 / 5';                    #   0.6
+say ev '1 + 5*3.4 - .5  -4 / -2 * (3+4) -6';   #  25.5
+say ev '((11+15)*15)* 2 + (3) * -4 *1';        # 768
+_END_
+	isa-ok $parsed, Q{Perl6::Tidy::Root};
+}, Q{Arithmetic evaluation};
 
 # vim: ft=perl6

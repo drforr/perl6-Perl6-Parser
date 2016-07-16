@@ -48,6 +48,7 @@ class _Args {...}
 class _Assertion {...}
 class _Atom {...}
 class _Atom_SigFinal {...}
+class _Atom_SigFinal_Quantifier {...}
 class _B {...}
 class _Babble {...}
 class _BackSlash {...}
@@ -107,6 +108,7 @@ class _MultiDeclarator {...}
 class _MultiSig {...}
 class _Name {...}
 class _Nibble {...}
+class _Nibbler {...}
 class _NormSpace {...}
 class _Noun {...}
 class _Number {...}
@@ -117,6 +119,8 @@ class _Op {...}
 class _OPER {...}
 class _PackageDeclarator {...}
 class _PackageDef {...}
+class _ParamVar {...}
+class _ParamVar_TypeConstraint_Quant {...}
 class _PBlock {...}
 class Perl6::Tidy::Root {...}
 class _PostCircumfix {...}
@@ -127,6 +131,7 @@ class _PostOp {...}
 class _Prefix {...}
 class _Prefix_OPER {...}
 class _QuantifiedAtom {...}
+class _Quant {...}
 class _Quantifier {...}
 class _Quibble {...}
 class _Quote {...}
@@ -164,6 +169,7 @@ class _TermConjSeq {...}
 class _TermIsh {...}
 class _TermSeq {...}
 class _Twigil {...}
+class _TypeConstraint {...}
 class _TypeDeclarator {...}
 class _TypeName {...}
 class _Val {...}
@@ -247,7 +253,7 @@ role Node {
 
 		die "Unknown type" unless @types;
 
-		@lines.push( "{@types})" );
+		@lines.push( @types.gist );
 
 		@lines.push( "\+: "    ~   $parsed.Int       ) if $parsed.Int;
 		@lines.push( "\~: '"   ~   $parsed.Str ~ "'" ) if $parsed.Str;
@@ -716,8 +722,35 @@ class _Identifier does Node {
 class _Name does Node {
 	method new( Mu $parsed ) {
 		self.trace( "Name" );
+		if self.assert-hash-keys( $parsed,
+			[< param_var type_constraint quant >],
+			[< default_value modifier trait post_constraint >] ) {
+			return self.bless(
+				:content(
+					:param_var(
+						_ParamVar.new(
+							$parsed.hash.<param_var>
+						)
+					),
+					:type_constraint(
+						_TypeConstraint.new(
+							$parsed.hash.<type_constraint>
+						)
+					),
+					:quant(
+						_Quant.new(
+							$parsed.hash.<quant>
+						)
+					),
+					:default_value(),
+					:modifier(),
+					:trait(),
+					:post_constraint()
+				)
+			)
+		}
 		if self.assert-hash-keys( $parsed, [< identifier >],
-					      [< morename >] ) {
+						   [< morename >] ) {
 			return self.bless(
 				:content(
 					:identifier(
@@ -729,6 +762,9 @@ class _Name does Node {
 				),
 				:child()
 			)
+		}
+		if self.assert-Str( $parsed ) {
+			return self.bless( :name( $parsed.Str ) )
 		}
 		die self.debug( $parsed );
 	}
@@ -987,7 +1023,6 @@ class _StatementControl does Node {
 	method new( Mu $parsed ) {
 		self.trace( "StatementControl" );
 		if self.assert-hash-keys( $parsed, [< block sym e1 e2 e3 >] ) {
-#return "foo";
 			return self.bless(
 				:content(
 					:block(
@@ -2531,9 +2566,129 @@ class _InfixIsh does Node {
 	}
 }
 
+class _TypeConstraint does Node {
+	method new( Mu $parsed ) {
+		self.trace( "TypeConstraint" );
+		CATCH {
+			when X::Hash::Store::OddNumber { }
+		}
+		if self.assert-hash-keys( $parsed, [< typename >] ) {
+			return self.bless(
+				:content(
+					:typename(
+						_TypeName.new(
+							$parsed.hash.<typename>
+						)
+					)
+				)
+			)
+		}
+		die self.debug( $parsed );
+	}
+}
+
+class _ParamVar does Node {
+	method new( Mu $parsed ) {
+		self.trace( "ParamVar" );
+		if self.assert-hash-keys( $parsed, [< name sigil >] ) {
+			return self.bless(
+				:content(
+					:name(
+						_Name.new(
+							$parsed.hash.<name>
+						)
+					)
+					:sigil(
+						_Sigil.new(
+							$parsed.hash.<sigil>
+						)
+					)
+				)
+			)
+		}
+		die self.debug( $parsed );
+	}
+}
+
+class _ParamVar_TypeConstraint_Quant does Node {
+	method new( Mu $parsed ) {
+		self.trace( "ParamVar_TypeConstraint_Quant" );
+		if self.assert-hash-keys(
+				$parsed,
+				[< param_var type_constraint quant >],
+				[< default_value modifier trait post_constraint >] ) {
+			return self.bless(
+				:content(
+					:param_var(
+						_ParamVar.new(
+							$parsed.hash.<param_var>
+						)
+					)
+					:type_constraint(
+						_TypeConstraint.new(
+							$parsed.hash.<type_constraint>
+						)
+					),
+					:quant(
+						_Quant.new(
+							$parsed.hash.<quant>
+						)
+					)
+				)
+			)
+		}
+		die self.debug( $parsed );
+	}
+}
+
+class _Parameter does Node {
+	method new( Mu $parsed ) {
+		self.trace( "Parameter" );
+		if $parsed.list {
+			my @child;
+			for $parsed.list {
+				if self.assert-hash-keys( $_,
+					[< param_var type_constraint quant >],
+					[< default_value modifier trait post_constraint >] ) {
+					@child.push(
+						_ParamVar_TypeConstraint_Quant.new(
+							$_
+						)
+					);
+					next
+				}
+				die self.debug( $_ );
+			}
+			return self.bless(
+				:child( @child )
+			)
+		}
+		die self.debug( $parsed );
+	}
+}
+
 class _Signature does Node {
 	method new( Mu $parsed ) {
 		self.trace( "Signature" );
+		if self.assert-hash-keys( $parsed,
+				[< parameter typename >],
+				[< param_sep >] ) {
+			return self.bless(
+				:content(
+					:parameter(
+						_Parameter.new(
+							$parsed.hash.<parameter>
+						)
+					),
+					:typename(
+						_TypeName.new(
+							$parsed.hash.<typename>
+						)
+					),
+					:param_sep()
+				)
+			)
+		}
 		if self.assert-hash-keys( $parsed, [], [< param_sep parameter >] ) {
 			return self.bless(
 				:name( $parsed.Bool ),
@@ -2905,6 +3060,17 @@ class _MetaChar does Node {
 				)
 			)
 		}
+		if self.assert-hash-keys( $parsed, [< nibbler >] ) {
+			return self.bless(
+				:content(
+					:nibbler(
+						_Nibbler.new(
+							$parsed.hash.<nibbler>
+						)
+					)
+				)
+			)
+		}
 		die self.debug( $parsed );
 	}
 }
@@ -2928,12 +3094,57 @@ class _Atom_SigFinal does Node {
 				)
 			)
 		}
+		if self.assert-hash-keys( $parsed, [< atom quantifier >] ) {
+			return self.bless(
+				:content(
+					:atom(
+						_Atom.new(
+							$parsed.hash.<atom>
+						)
+					),
+					:quantifier(
+						_Quantifier.new(
+							$parsed.hash.<quantifier>
+						)
+					)
+				)
+			)
+		}
 		if self.assert-hash-keys( $parsed, [< atom >] ) {
 			return self.bless(
 				:content(
 					:atom(
 						_Atom.new(
 							$parsed.hash.<atom>
+						)
+					)
+				)
+			)
+		}
+		die self.debug( $parsed );
+	}
+}
+
+class _Atom_SigFinal_Quantifier does Node {
+	method new( Mu $parsed ) {
+		self.trace( "Atom_SigFinal_Quantifier" );
+		if self.assert-hash-keys( $parsed,
+			[< atom sigfinal quantifier >] ) {
+			return self.bless(
+				:content(
+					:atom(
+						_Atom.new(
+							$parsed.hash.<atom>
+						)
+					),
+					:sigfinal(
+						_SigFinal.new(
+							$parsed.hash.<sigfinal>
+						)
+					),
+					:quantifier(
+						_Quantifier.new(
+							$parsed.hash.<quantifier>
 						)
 					)
 				)
@@ -2959,6 +3170,16 @@ class _Atom does Node {
 		}
 		if $parsed.Str {
 			return self.bless( :name( $parsed.Str ) )
+		}
+		die self.debug( $parsed );
+	}
+}
+
+class _Quant does Node {
+	method new( Mu $parsed ) {
+		self.trace( "Quant" );
+		if self.assert-Bool( $parsed ) {
+			return self.bless( :name( $parsed.Bool ) )
 		}
 		die self.debug( $parsed );
 	}
@@ -3113,8 +3334,8 @@ class _Noun does Node {
 			my @child;
 			for $parsed.list {
 				if self.assert-hash-keys( $_,
-						     [< sigfinal quantifier
-							separator atom >] ) {
+					[< sigfinal quantifier
+					   separator atom >] ) {
 					@child.push(
 						_SigFinal_Quantifier_Separator_Atom.new(
 							$_
@@ -3122,8 +3343,17 @@ class _Noun does Node {
 					);
 					next
 				}
+				if self.assert-hash-keys( $_,
+					[< atom sigfinal quantifier >] ) {
+					@child.push(
+						_Atom_SigFinal_Quantifier.new(
+							$_
+						)
+					);
+					next
+				}
 				if self.assert-hash-keys( $_, [< atom >],
-							 [< sigfinal >] ) {
+							      [< sigfinal >] ) {
 					@child.push(
 						_Atom_SigFinal.new(
 							$_
@@ -3286,6 +3516,24 @@ class _TermSeq does Node {
 					:termaltseq(
 						_TermAltSeq.new(
 							$parsed.hash.<termaltseq>
+						)
+					)
+				)
+			)
+		}
+		die self.debug( $parsed );
+	}
+}
+
+class _Nibbler does Node {
+	method new( Mu $parsed ) {
+		self.trace( "Nibbler" );
+		if self.assert-hash-keys( $parsed, [< termseq >] ) {
+			return self.bless(
+				:content(
+					:termseq(
+						_TermSeq.new(
+							$parsed.hash.<termseq>
 						)
 					)
 				)
@@ -3761,6 +4009,18 @@ class _TypeName does Node {
 			}
 			return self.bless(
 				:child( @child )
+			)
+		}
+		if self.assert-hash-keys( $parsed, [< longname >],
+						   [< colonpair >] ) {
+			return self.bless(
+				:content(
+					:longname(
+						_LongName.new(
+							$parsed.hash.<longname>
+						)
+					)
+				)
 			)
 		}
 		die self.debug( $parsed );
@@ -4268,6 +4528,19 @@ class _DECL does Node {
 					:regex_declarator(
 						_RegexDeclarator.new(
 							$parsed.hash.<regex_declarator>
+						)
+					),
+					:trait()
+				)
+			)
+		}
+		if self.assert-hash-keys( $parsed, [< routine_declarator >],
+						   [< trait >] ) {
+			return self.bless(
+				:content(
+					:routine_declarator(
+						_RoutineDeclarator.new(
+							$parsed.hash.<routine_declarator>
 						)
 					),
 					:trait()
