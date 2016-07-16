@@ -3788,21 +3788,26 @@ class _Blockoid does Node {
 class _Initializer does Node {
 	method new( Mu $parsed ) {
 		self.trace( "Initializer" );
-		if self.assert-hash-keys( $parsed, [< sym EXPR >] ) {
-			return self.bless(
-				:content(
-					:sym(
-						_Sym.new(
-							$parsed.hash.<sym>
-						)
-					),
-					:EXPR(
-						_EXPR.new(
-							$parsed.hash.<EXPR>
+		if $parsed {
+			if self.assert-hash-keys( $parsed, [< sym EXPR >] ) {
+				return self.bless(
+					:content(
+						:sym(
+							_Sym.new(
+								$parsed.hash.<sym>
+							)
+						),
+						:EXPR(
+							_EXPR.new(
+								$parsed.hash.<EXPR>
+							)
 						)
 					)
 				)
-			)
+			}
+		}
+		else {
+			return self.bless
 		}
 		die self.debug( $parsed );
 	}
@@ -3881,6 +3886,19 @@ class _Declarator does Node {
 					:routine_declarator(
 						_RoutineDeclarator.new(
 							$parsed.hash.<routine_declarator>
+						)
+					),
+					:trait()
+				)
+			)
+		}
+		if self.assert-hash-keys( $parsed, [< signature >],
+					      [< trait >] ) {
+			return self.bless(
+				:content(
+					:routine_declarator(
+						_Signature.new(
+							$parsed.hash.<signature>
 						)
 					),
 					:trait()
@@ -4175,9 +4193,8 @@ class _RoutineDef does Node {
 class _DECL does Node {
 	method new( Mu $parsed ) {
 		self.trace( "DECL" );
-		if self.assert-hash-keys( $parsed, [< initializer
-						 signature >],
-					      [< trait >] ) {
+		if self.assert-hash-keys( $parsed, [< initializer signature >],
+						   [< trait >] ) {
 			return self.bless(
 				:content(
 					:initializer(
@@ -4207,6 +4224,24 @@ class _DECL does Node {
 					:variable_declarator(
 						_VariableDeclarator.new(
 							$parsed.hash.<variable_declarator>
+						)
+					),
+					:trait()
+				)
+			)
+		}
+		if self.assert-hash-keys( $parsed, [< signature >],
+						   [< trait >] ) {
+			return self.bless(
+				:content(
+					:initializer(
+						_Initializer.new(
+							$parsed.hash.<initializer>
+						)
+					),
+					:signature(
+						_Signature.new(
+							$parsed.hash.<signature>
 						)
 					),
 					:trait()
