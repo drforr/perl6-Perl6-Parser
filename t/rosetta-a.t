@@ -3,7 +3,7 @@ use v6;
 use Test;
 use Perl6::Tidy;
 
-plan 30;
+plan 33;
 
 my $pt = Perl6::Tidy.new;
 
@@ -1066,5 +1066,112 @@ say join ', ', sort grep( {$_<name>.lc ~~ /'m'/}, @$cities )»<name>; # Dar Es S
 _END_
 	isa-ok $parsed, Q{Root};
 }, Q{Array search};
+
+subtest {
+	plan 1;
+
+	my $parsed = $pt.tidy( Q:to[_END_] );
+my @arr;
+ 
+push @arr, 1;
+push @arr, 3;
+ 
+@arr[0] = 2;
+ 
+say @arr[0];
+_END_
+	isa-ok $parsed, Q{Root};
+}, Q{Arrays};
+
+subtest {
+	plan 6;
+
+	subtest {
+		plan 1;
+
+		my $parsed = $pt.tidy( Q:to[_END_] );
+my %h1 = key1 => 'val1', 'key-2' => 2, three => -238.83, 4 => 'val3';
+my %h2 = 'key1', 'val1', 'key-2', 2, 'three', -238.83, 4, 'val3';
+_END_
+		isa-ok $parsed, Q{Root};
+	}, Q{version 1};
+
+	subtest {
+		plan 1;
+
+		my $parsed = $pt.tidy( Q:to[_END_] );
+my @a = 1..5;
+my @b = 'a'..'e';
+my %h = @a Z=> @b;
+_END_
+		isa-ok $parsed, Q{Root};
+	}, Q{version 2};
+
+	subtest {
+		plan 1;
+
+		my $parsed = $pt.tidy( Q:to[_END_] );
+my %h1;
+say %h1{'key1'};
+say %h1<key1>;
+%h1<key1> = 'val1';
+%h1<key1 three> = 'val1', -238.83;
+_END_
+		isa-ok $parsed, Q{Root};
+	}, Q{version 3};
+
+	subtest {
+		plan 1;
+
+		my $parsed = $pt.tidy( Q:to[_END_] );
+my $h = {key1 => 'val1', 'key-2' => 2, three => -238.83, 4 => 'val3'};
+say $h<key1>;
+_END_
+		isa-ok $parsed, Q{Root};
+	}, Q{version 4};
+
+	subtest {
+		plan 1;
+
+		my $parsed = $pt.tidy( Q:to[_END_] );
+my %hash{Any}; # same as %hash{*}
+class C {};
+my %cash{C};
+%cash{C.new} = 1;
+_END_
+		isa-ok $parsed, Q{Root};
+	}, Q{version 5};
+
+	subtest {
+		plan 1;
+
+		my $parsed = $pt.tidy( Q:to[_END_] );
+my @infinite = 1 .. Inf;  # 1, 2, 3, 4, ...
+ 
+say @infinite[5000];  # 5001
+say @infinite.elems;  # Throws exception "Cannot .elems a lazy list"
+_END_
+		isa-ok $parsed, Q{Root};
+	}, Q{version 6};
+}, Q{Associative array/creation};
+
+subtest {
+	plan 1;
+
+	my $parsed = $pt.tidy( Q:to[_END_] );
+my %pairs = hello => 13, world => 31, '!' => 71;
+ 
+for %pairs.kv -> $k, $v {
+    say "(k,v) = ($k, $v)";
+}
+ 
+{ say "$^a => $^b" } for %pairs.kv;
+ 
+say "key = $_" for %pairs.keys;
+ 
+say "value = $_" for %pairs.values;
+_END_
+	isa-ok $parsed, Q{Root};
+}, Q{Associative array/iteration};
 
 # vim: ft=perl6

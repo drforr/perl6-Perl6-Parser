@@ -105,6 +105,7 @@ class _ScopeDeclarator {...}
 class _SemiList {...}
 class _Separator {...}
 class _SepType {...}
+class _Shape {...}
 class _SigFinal {...}
 class _Sigil {...}
 class _Sign {...}
@@ -3229,6 +3230,16 @@ class _QuantifiedAtom does Node {
 	}
 }
 
+class _Shape does Node {
+	method new( Mu $parsed ) {
+		self.trace;
+		if self.assert-Str( $parsed ) {
+			return self.bless( :name( $parsed.Str ) )
+		}
+		die self.new-term
+	}
+}
+
 class _SepType does Node {
 	method new( Mu $parsed ) {
 		self.trace;
@@ -3660,6 +3671,7 @@ class _RegexDeclarator does Node {
 class _SemiList does Node {
 	method new( Mu $parsed ) {
 		self.trace;
+		CATCH { when X::Hash::Store::OddNumber { } }
 		if self.assert-hash-keys( $parsed, [], [< statement >] ) {
 			return self.bless(
 				:content(
@@ -3981,6 +3993,34 @@ class _Value does Node {
 class _VariableDeclarator does Node {
 	method new( Mu $parsed ) {
 		self.trace;
+		if self.assert-hash-keys(
+			$parsed,
+			[< semilist variable shape >],
+			[< postcircumfix signature trait post_constraint >] ) {
+			return self.bless(
+				:content(
+					:semilist(
+						_SemiList.new(
+							$parsed.hash.<semilist>
+						)
+					),
+					:variable(
+						_Variable.new(
+							$parsed.hash.<variable>
+						)
+					),
+					:shape(
+						_Shape.new(
+							$parsed.hash.<shape>
+						)
+					),
+					:postcircumfix(),
+					:signature(),
+					:trait(),
+					:post_constraint()
+				)
+			)
+		}
 		if self.assert-hash-keys(
 			$parsed,
 			[< variable >],
