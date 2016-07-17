@@ -3,7 +3,7 @@ use v6;
 use Test;
 use Perl6::Tidy;
 
-plan 22;
+plan 23;
 
 my $pt = Perl6::Tidy.new;
 
@@ -865,6 +865,40 @@ say ev '1 + 5*3.4 - .5  -4 / -2 * (3+4) -6';   #  25.5
 say ev '((11+15)*15)* 2 + (3) * -4 *1';        # 768
 _END_
 	isa-ok $parsed, Q{Perl6::Tidy::Root};
+}, Q{Arithmetic evaluation};
+
+subtest {
+	plan 2;
+
+	subtest {
+		plan 1;
+
+    		#($a, $g) = ($a + $g)/2, sqrt $a * $g until $a ≅ $g;
+		my $parsed = $pt.tidy( Q:to[_END_] );
+sub agm( $a is copy, $g is copy ) {
+    ($a, $g) = ($a + $g)/2, sqrt $a * $g until $a = $g;
+    return $a;
+}
+ 
+say agm 1, 1/sqrt 2;
+_END_
+		isa-ok $parsed, Q{Perl6::Tidy::Root};
+	}, Q{version 1};
+
+	subtest {
+		plan 1;
+
+    #$a ≅ $g ?? $a !! agm(|@$_)
+		my $parsed = $pt.tidy( Q:to[_END_] );
+sub agm( $a, $g ) {
+    $a = $g ?? $a !! agm(|@$_)
+        given ($a + $g)/2, sqrt $a * $g;
+}
+ 
+say agm 1, 1/sqrt 2;
+_END_
+		isa-ok $parsed, Q{Perl6::Tidy::Root};
+	}, Q{version 2};
 }, Q{Arithmetic evaluation};
 
 # vim: ft=perl6
