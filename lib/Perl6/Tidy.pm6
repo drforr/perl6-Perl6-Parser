@@ -65,6 +65,7 @@ class _Coeff {...}
 class _Coercee {...}
 class _ColonCircumfix {...}
 class _ColonPair {...}
+class _ColonPairs {...}
 class _Contextualizer {...}
 class _DecInt {...}
 class _DECL {...}
@@ -99,6 +100,7 @@ class _Key {...}
 class _Lambda {...}
 class _LongName {...}
 class _LongName_ColonPair {...}
+class _LongName_ColonPairs {...}
 class _MetaChar {...}
 class _MethodDef {...}
 class _MethodOp {...}
@@ -1701,6 +1703,18 @@ class _ColonPair does Node {
 					)
 				)
 			)
+		}
+		die self.debug( $parsed );
+	}
+}
+
+class _ColonPairs does Node {
+	method new( Mu $parsed ) {
+		self.trace;
+		if $parsed {
+		}
+		else {
+			return self.bless
 		}
 		die self.debug( $parsed );
 	}
@@ -4037,13 +4051,55 @@ class _VariableDeclarator does Node {
 
 class _LongName_ColonPair does Node {
 	method new( Mu $parsed ) {
-		if self.assert-hash-keys( $parsed, [< longname >],
-					      [< colonpair >] ) {
+		if self.assert-hash-keys( $parsed, [< longname colonpairs >],
+						   [< colonpair >] ) {
 			return self.bless(
 				:content(
 					:longname(
 						_LongName.new(
 							$_.hash.<longname>
+						)
+					),
+					:colonpairs(
+						_ColonPairs.new(
+							$_.hash.<colonpairs>
+						)
+					),
+					:colonpair()
+				)
+			)
+		}
+		if self.assert-hash-keys( $parsed, [< longname >],
+						   [< colonpair >] ) {
+			return self.bless(
+				:content(
+					:longname(
+						_LongName.new(
+							$_.hash.<longname>
+						)
+					),
+					:colonpair()
+				)
+			)
+		}
+		die self.debug( $parsed );
+	}
+}
+
+class _LongName_ColonPairs does Node {
+	method new( Mu $parsed ) {
+		if self.assert-hash-keys( $parsed, [< longname colonpairs >],
+						   [< colonpair >] ) {
+			return self.bless(
+				:content(
+					:longname(
+						_LongName.new(
+							$_.hash.<longname>
+						)
+					),
+					:colonpairs(
+						_ColonPairs.new(
+							$_.hash.<colonpairs>
 						)
 					),
 					:colonpair()
@@ -4060,8 +4116,19 @@ class _TypeName does Node {
 		if $parsed.list {
 			my @child;
 			for $parsed.list {
-				if self.assert-hash-keys( $_, [< longname >],
-							 [< colonpair >] ) {
+				if self.assert-hash-keys( $_,
+					[< longname colonpairs >],
+					[< colonpair >] ) {
+					@child.push(
+						_LongName_ColonPairs.new(
+							$_
+						)
+					);
+					next
+				}
+				if self.assert-hash-keys( $_,
+					[< longname >],
+					[< colonpair >] ) {
 					@child.push(
 						_LongName_ColonPair.new(
 							$_

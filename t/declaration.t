@@ -42,12 +42,28 @@ subtest {
 	}, Q{untyped};
 
 	subtest {
+		plan 3;
+
 		subtest {
 			plan 1;
 
 			my $parsed = $pt.tidy( Q{my Int $a} );
 			isa-ok $parsed, Q{Perl6::Tidy::Root};
-		}, Q{my Int $a};
+		}, Q{regular};
+
+		subtest {
+			plan 1;
+
+			my $parsed = $pt.tidy( Q{my Int:D $a = 0} );
+			isa-ok $parsed, Q{Perl6::Tidy::Root};
+		}, Q{defined};
+
+		subtest {
+			plan 1;
+
+			my $parsed = $pt.tidy( Q{my Int:U $a} );
+			isa-ok $parsed, Q{Perl6::Tidy::Root};
+		}, Q{undefined};
 	}, Q{typed};
 
 	subtest {
