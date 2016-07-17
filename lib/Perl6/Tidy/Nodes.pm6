@@ -4560,6 +4560,24 @@ class _RoutineDef does Node {
 				)
 			)
 		}
+		if self.assert-hash-keys( $parsed, [< blockoid multisig >],
+						   [< trait >] ) {
+			return self.bless(
+				:content(
+					:blockoid(
+						_Blockoid.new(
+							$parsed.hash.<blockoid>
+						)
+					),
+					:multisig(
+						_MultiSig.new(
+							$parsed.hash.<multisig>
+						)
+					),
+					:trait()
+				)
+			)
+		}
 		if self.assert-hash-keys( $parsed, [< blockoid >],
 					      [< trait >] ) {
 			return self.bless(

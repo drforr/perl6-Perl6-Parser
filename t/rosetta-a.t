@@ -3,7 +3,7 @@ use v6;
 use Test;
 use Perl6::Tidy;
 
-plan 33;
+plan 42;
 
 my $pt = Perl6::Tidy.new;
 
@@ -1173,5 +1173,167 @@ say "value = $_" for %pairs.values;
 _END_
 	isa-ok $parsed, Q{Root};
 }, Q{Associative array/iteration};
+
+subtest {
+	plan 1;
+
+	my $parsed = $pt.tidy( Q:to[_END_] );
+constant MAX_N  = 20;
+constant TRIALS = 100;
+ 
+for 1 .. MAX_N -> $N {
+    my $empiric = TRIALS R/ [+] find-loop(random-mapping($N)).elems xx TRIALS;
+    my $theoric = [+]
+        map -> $k { $N ** ($k + 1) R/ [*] $k**2, $N - $k + 1 .. $N }, 1 .. $N;
+ 
+    FIRST say " N    empiric      theoric      (error)";
+    FIRST say "===  =========  ============  =========";
+ 
+    printf "%3d  %9.4f  %12.4f    (%4.2f%%)\n",
+            $N,  $empiric,
+                        $theoric, 100 * abs($theoric - $empiric) / $theoric;
+}
+ 
+sub random-mapping { hash .list Z=> .roll given ^$^size }
+sub find-loop { 0, %^mapping{*} ...^ { (state %){$_}++ } }
+_END_
+	isa-ok $parsed, Q{Root};
+}, Q{Average loop length};
+
+subtest {
+	plan 1;
+
+	my $parsed = $pt.tidy( Q:to[_END_] );
+multi mean([]){ Failure.new('mean on empty list is not defined') }; # Failure-objects are lazy exceptions
+multi mean (@a) { ([+] @a) / @a }
+_END_
+	isa-ok $parsed, Q{Root};
+}, Q{Averages/arithmetic mean};
+
+subtest {
+	plan 1;
+
+	my $parsed = $pt.tidy( Q:to[_END_] );
+# Of course, you can still use pi and 180.
+sub deg2rad { $^d * tau / 360 }
+sub rad2deg { $^r * 360 / tau }
+ 
+sub phase ($c)  {
+    my ($mag,$ang) = $c.polar;
+    return NaN if $mag < 1e-16;
+    $ang;
+}
+ 
+sub meanAngle { rad2deg phase [+] map { cis deg2rad $_ }, @^angles }
+ 
+say meanAngle($_).fmt("%.2f\tis the mean angle of "), $_ for
+    [350, 10],
+    [90, 180, 270, 360],
+    [10, 20, 30];
+_END_
+	isa-ok $parsed, Q{Root};
+}, Q{Averages/mean angle};
+
+subtest {
+	plan 1;
+
+	my $parsed = $pt.tidy( Q:to[_END_] );
+sub tod2rad($_) { [+](.comb(/\d+/) Z* 3600,60,1) * tau / 86400 }
+ 
+sub rad2tod ($r) {
+    my $x = $r * 86400 / tau;
+    (($x xx 3 Z/ 3600,60,1) Z% 24,60,60).fmt('%02d',':');
+}
+ 
+sub phase ($c) { $c.polar[1] }
+ 
+sub mean-time (@t) { rad2tod phase [+] map { cis tod2rad $_ }, @t }
+ 
+my @times = ["23:00:17", "23:40:20", "00:12:45", "00:17:19"];
+ 
+say "{ mean-time(@times) } is the mean time of @times[]";
+_END_
+	isa-ok $parsed, Q{Root};
+}, Q{Averages/mean time of day};
+
+subtest {
+	plan 1;
+
+	my $parsed = $pt.tidy( Q:to[_END_] );
+sub median {
+  my @a = sort @_;
+  return (@a[@a.end / 2] + @a[@a / 2]) / 2;
+}
+_END_
+	isa-ok $parsed, Q{Root};
+}, Q{Averages/median};
+
+subtest {
+	plan 1;
+
+	my $parsed = $pt.tidy( Q:to[_END_] );
+sub mode (*@a) {
+    my %counts;
+    ++%counts{$_} for @a;
+    my $max = [max] values %counts;
+    return |map { .key }, grep { .value == $max }, %counts.pairs;
+}
+_END_
+	isa-ok $parsed, Q{Root};
+}, Q{Averages/mode};
+
+subtest {
+	plan 1;
+
+	my $parsed = $pt.tidy( Q:to[_END_] );
+sub A { ([+] @_) / @_ }
+sub G { ([*] @_) ** (1 / @_) }
+sub H { @_ / [+] 1 X/ @_ }
+ 
+say "A(1,...,10) = ", A(1..10);
+say "G(1,...,10) = ", G(1..10);
+say "H(1,...,10) = ", H(1..10);
+_END_
+	isa-ok $parsed, Q{Root};
+}, Q{Averages/Pythagorean means};
+
+subtest {
+	plan 2;
+
+	subtest {
+		plan 1;
+
+		my $parsed = $pt.tidy( Q:to[_END_] );
+sub rms(*@nums) { sqrt [+](@nums X** 2) / @nums }
+ 
+say rms 1..10;
+_END_
+		isa-ok $parsed, Q{Root};
+	}, Q{version 1};
+
+	subtest {
+		plan 1;
+
+		my $parsed = $pt.tidy( Q:to[_END_] );
+sub rms { sqrt @_ R/ [+] @_ X** 2 }
+_END_
+		isa-ok $parsed, Q{Root};
+	}, Q{version 2};
+}, Q{Averages/root mean square};
+
+subtest {
+	plan 1;
+
+	my $parsed = $pt.tidy( Q:to[_END_] );
+sub sma(Int \P where * > 0) returns Sub {
+    sub ($x) {
+        state @a = 0 xx P;
+        @a.push($x).shift;
+        P R/ [+] @a;
+    }
+}
+_END_
+	isa-ok $parsed, Q{Root};
+}, Q{Averages/simple moving average};
 
 # vim: ft=perl6
