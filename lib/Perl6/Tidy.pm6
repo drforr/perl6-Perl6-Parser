@@ -1001,9 +1001,7 @@ class _E1 does Node {
 class _E2 does Node {
 	method new( Mu $parsed ) {
 		self.trace;
-#		die self.debug( $parsed );
-say $parsed.hash.keys;
-		die
+		die self.new-term
 	}
 }
 
