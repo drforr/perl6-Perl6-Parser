@@ -3,7 +3,7 @@ use v6;
 use Test;
 use Perl6::Tidy;
 
-plan 24;
+plan 30;
 
 my $pt = Perl6::Tidy.new;
 
@@ -932,5 +932,139 @@ for ^10 {
 _END_
 	isa-ok $parsed, Q{Perl6::Tidy::Root};
 }, Q{Arithmetic-geometric mean/Calculate pi};
+
+subtest {
+	plan 1;
+
+	my $parsed = $pt.tidy( Q:to[_END_] );
+my $a = 1 + i;
+my $b = pi + 1.25i;
+ 
+.say for $a + $b, $a * $b, -$a, 1 / $a, $a.conj;
+.say for $a.abs, $a.sqrt, $a.re, $a.im;
+_END_
+	isa-ok $parsed, Q{Perl6::Tidy::Root};
+}, Q{Arithmetic/complex};
+
+subtest {
+	plan 1;
+
+	my $parsed = $pt.tidy( Q:to[_END_] );
+my Int $a = get.floor;
+my Int $b = get.floor;
+ 
+say 'sum:              ', $a + $b;
+say 'difference:       ', $a - $b;
+say 'product:          ', $a * $b;
+say 'integer quotient: ', $a div $b;
+say 'remainder:        ', $a % $b;
+say 'exponentiation:   ', $a**$b;
+_END_
+	isa-ok $parsed, Q{Perl6::Tidy::Root};
+}, Q{Arithmetic/integer};
+
+subtest {
+	plan 2;
+
+	subtest {
+		plan 1;
+
+		my $parsed = $pt.tidy( Q:to[_END_] );
+for 2..2**19 -> $candidate {
+    my $sum = 1 / $candidate;
+    for 2 .. ceiling(sqrt($candidate)) -> $factor {
+        if $candidate %% $factor {
+            $sum += 1 / $factor + 1 / ($candidate / $factor);
+        }
+    }
+    if $sum.denominator == 1 {
+        say "Sum of reciprocal factors of $candidate = $sum exactly", ($sum == 1 ?? ", perfect!" !! ".");
+    }
+}
+_END_
+		isa-ok $parsed, Q{Perl6::Tidy::Root};
+	}, Q{version 1};
+
+	subtest {
+		plan 1;
+
+		my $parsed = $pt.tidy( Q:to[_END_] );
+for 1.0, 1.1, 1.2 ... 10 { .say }
+_END_
+		isa-ok $parsed, Q{Perl6::Tidy::Root};
+	}, Q{version 2};
+}, Q{Arithmetic/rational};
+
+subtest {
+	plan 1;
+
+	my $parsed = $pt.tidy( Q:to[_END_] );
+# the prefix:<|> operator (called "slip") can be used to interpolate arrays into a list:
+sub cat-arrays(@a, @b) { 
+	|@a, |@b 
+}
+ 
+my @a1 = (1,2,3);
+my @a2 = (2,3,4);
+cat-arrays(@a1,@a2).join(", ").say;
+_END_
+	isa-ok $parsed, Q{Perl6::Tidy::Root};
+}, Q{Array concatenation};
+
+subtest {
+	plan 2;
+
+	subtest {
+		plan 1;
+
+		my $parsed = $pt.tidy( Q:to[_END_] );
+my @array = <apple orange banana>;
+ 
+say @array.elems;  # 3
+say elems @array;  # 3
+say +@array;       # 3
+say @array + 1;    # 4
+_END_
+		isa-ok $parsed, Q{Perl6::Tidy::Root};
+	}, Q{version 1};
+
+	subtest {
+		plan 1;
+
+		my $parsed = $pt.tidy( Q:to[_END_] );
+my @infinite = 1 .. Inf;  # 1, 2, 3, 4, ...
+ 
+say @infinite[5000];  # 5001
+say @infinite.elems;  # Throws exception "Cannot .elems a lazy list"
+_END_
+		isa-ok $parsed, Q{Perl6::Tidy::Root};
+	}, Q{version 2};
+}, Q{Array length};
+
+subtest {
+	plan 1;
+
+	# XXX Synthesize JSON::Tiny
+	my $parsed = $pt.tidy( Q:to[_END_] );
+class JSON::Tiny { sub from-json is export { } }
+#use JSON::Tiny;
+ 
+my $cities = from-json('
+[{"name":"Lagos", "population":21}, {"name":"Cairo", "population":15.2}, {"name":"Kinshasa-Brazzaville", "population":11.3}, {"name":"Greater Johannesburg", "population":7.55}, {"name":"Mogadishu", "population":5.85}, {"name":"Khartoum-Omdurman", "population":4.98}, {"name":"Dar Es Salaam", "population":4.7}, {"name":"Alexandria", "population":4.58}, {"name":"Abidjan", "population":4.4}, {"name":"Casablanca", "population":3.98}]
+');
+ 
+# Find the indicies of the cities named 'Dar Es Salaam'.
+say grep { $_<name> eq 'Dar Es Salaam'}, :k, @$cities; # (6)
+ 
+# Find the name of the first city with a population less
+# than 5 when sorted by population, largest to smallest.
+say ($cities.sort( -*.<population> ).first: *.<population> < 5)<name>; # Khartoum-Omdurman
+ 
+ 
+# Find all of the city names that contain an 'm' 
+say join ', ', sort grep( {$_<name>.lc ~~ /'m'/}, @$cities )»<name>; # Dar Es Salaam, Khartoum-Omdurman, Mogadishu
+_END_
+	isa-ok $parsed, Q{Perl6::Tidy::Root};
+}, Q{Array search};
 
 # vim: ft=perl6
