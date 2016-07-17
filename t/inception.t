@@ -25,13 +25,13 @@ subtest {
 
 	my $parsed = $pt.tidy( Q:to[END] );
 END
-	isa-ok $parsed, {Perl6::Tidy::Root};
+	isa-ok $parsed, {Root};
 	is $parsed.child.elems, 1;
 }, 'Empty file';
 
 # vim: ft=perl6
 _END_
-	isa-ok $parsed, Q{Perl6::Tidy::Root};
+	isa-ok $parsed, Q{Root};
 }, Q{Empty file};
 
 # vim: ft=perl6

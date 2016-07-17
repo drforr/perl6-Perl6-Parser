@@ -7,6 +7,7 @@
 	],
 	"provides"     : {
 		"Perl6::Tidy"        : "lib/Perl6/Tidy.pm6"
+		"Perl6::Tidy::Nodes" : "lib/Perl6/Tidy/Nodes.pm6"
 	},
 	"source-url"   : "git://github.com/drforr/perl6-Perl6-Tidy.git"
 }
