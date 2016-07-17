@@ -10,7 +10,7 @@ my $pt = Perl6::Tidy.new;
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q[sub unqualified { }] );
+	my $parsed = $pt.tidy( Q[sub foo { }] );
 	isa-ok $parsed, Q{Perl6::Tidy::Root};
 }, Q{empty};
 
@@ -23,14 +23,18 @@ subtest {
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.tidy( Q[sub unqualified( 0 ) { }] );
+			my $parsed = $pt.tidy( Q:to[_END_] );
+sub foo( 0 ) { }
+_END_
 			isa-ok $parsed, Q{Perl6::Tidy::Root};
 		}, Q{constant};
 
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.tidy( Q[sub unqualified( $a ) { }] );
+			my $parsed = $pt.tidy( Q:to[_END_] );
+sub foo( $a ) { }
+_END_
 			isa-ok $parsed, Q{Perl6::Tidy::Root};
 		}, Q{untyped};
 
@@ -41,7 +45,7 @@ subtest {
 				plan 1;
 
 				my $parsed = $pt.tidy( Q:to[_END_] );
-sub unqualified( Str $a ) { }
+sub foo( Str $a ) { }
 _END_
 				isa-ok $parsed, Q{Perl6::Tidy::Root};
 			}, Q{typed};
@@ -50,7 +54,7 @@ _END_
 				plan 1;
 
 				my $parsed = $pt.tidy( Q:to[_END_] );
-sub unqualified( ::T $a ) { }
+sub foo( ::T $a ) { }
 _END_
 				isa-ok $parsed, Q{Perl6::Tidy::Root};
 			}, Q{type-capture};
@@ -59,7 +63,7 @@ _END_
 				plan 1;
 
 				my $parsed = $pt.tidy( Q:to[_END_] );
-sub unqualified( Str ) { }
+sub foo( Str ) { }
 _END_
 				isa-ok $parsed, Q{Perl6::Tidy::Root};
 			}, Q{type-only};
@@ -68,7 +72,7 @@ _END_
 				plan 1;
 
 				my $parsed = $pt.tidy( Q:to[_END_] );
-sub unqualified( Str $a where "foo" ) { }
+sub foo( Str $a where "foo" ) { }
 _END_
 				isa-ok $parsed, Q{Perl6::Tidy::Root};
 			}, Q{type-constrained};
@@ -78,7 +82,7 @@ _END_
 			plan 1;
 
 			my $parsed = $pt.tidy( Q:to[_END_] );
-sub unqualified( $a = 0 ) { }
+sub foo( $a = 0 ) { }
 _END_
 			isa-ok $parsed, Q{Perl6::Tidy::Root};
 		}, Q{default};
@@ -87,7 +91,7 @@ _END_
 			plan 1;
 
 			my $parsed = $pt.tidy( Q:to[_END_] );
-sub unqualified( :$a ) { }
+sub foo( :$a ) { }
 _END_
 			isa-ok $parsed, Q{Perl6::Tidy::Root};
 		}, Q{optional};
@@ -96,7 +100,9 @@ _END_
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q[sub unqualified( $a, $b ) { }] );
+		my $parsed = $pt.tidy( Q:to[_END_] );
+sub foo( $a, $b ) { }
+_END_
 		isa-ok $parsed, Q{Perl6::Tidy::Root};
 	}, Q{multiple};
 }, Q{scalar arguments};

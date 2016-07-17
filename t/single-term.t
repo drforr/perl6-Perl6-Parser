@@ -152,7 +152,7 @@ subtest {
 	}, Q{base-13};
 
 	subtest {
-		plan 2;
+		plan 4;
 
 		subtest {
 			plan 1;
@@ -164,13 +164,27 @@ subtest {
 		subtest {
 			plan 1;
 
+			my $parsed = $pt.tidy( Q{0.1} );
+			isa-ok $parsed, Q{Perl6::Tidy::Root};
+		}, Q{0.1};
+
+		subtest {
+			plan 1;
+
+			my $parsed = $pt.tidy( Q{.1} );
+			isa-ok $parsed, Q{Perl6::Tidy::Root};
+		}, Q{.1};
+
+		subtest {
+			plan 1;
+
 			my $parsed = $pt.tidy( Q{1.0} );
 			isa-ok $parsed, Q{Perl6::Tidy::Root};
 		}, Q{1.0};
 	}, Q{rational};
 
 	subtest {
-		plan 2;
+		plan 5;
 
 		subtest {
 			plan 1;
@@ -182,9 +196,30 @@ subtest {
 		subtest {
 			plan 1;
 
+			my $parsed = $pt.tidy( Q{0.0e0} );
+			isa-ok $parsed, Q{Perl6::Tidy::Root};
+		}, Q{rational zero};
+
+		subtest {
+			plan 1;
+
+			my $parsed = $pt.tidy( Q{.1e0} );
+			isa-ok $parsed, Q{Perl6::Tidy::Root};
+		}, Q{rational .1};
+
+		subtest {
+			plan 1;
+
+			my $parsed = $pt.tidy( Q{0.1e0} );
+			isa-ok $parsed, Q{Perl6::Tidy::Root};
+		}, Q{rational 0.1};
+
+		subtest {
+			plan 1;
+
 			my $parsed = $pt.tidy( Q{1e0} );
 			isa-ok $parsed, Q{Perl6::Tidy::Root};
-		}, Q{1.0};
+		}, Q{1.0e0};
 	}, Q{Num};
 
 	subtest {

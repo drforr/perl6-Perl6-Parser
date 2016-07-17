@@ -3,7 +3,7 @@ use v6;
 use Test;
 use Perl6::Tidy;
 
-plan 23;
+plan 24;
 
 my $pt = Perl6::Tidy.new;
 
@@ -899,6 +899,38 @@ say agm 1, 1/sqrt 2;
 _END_
 		isa-ok $parsed, Q{Perl6::Tidy::Root};
 	}, Q{version 2};
-}, Q{Arithmetic evaluation};
+}, Q{Arithmetic-geometric mean};
+
+subtest {
+	plan 1;
+
+	my $parsed = $pt.tidy( Q:to[_END_] );
+constant number-of-decimals = 100;
+ 
+multi sqrt(Int $n) {
+    .[*-1] given
+    1, { ($_ + $n div $_) div 2 } ... * == *
+}
+multi sqrt(FatRat $r --> FatRat) {
+    return FatRat.new:
+    sqrt($r.nude[0] * 10**(number-of-decimals*2) div $r.nude[1]),
+    10**number-of-decimals;
+}
+ 
+my FatRat ($a, $n) = 1.FatRat xx 2;
+my FatRat $g = sqrt(1/2.FatRat);
+my $z = .25;
+ 
+for ^10 {
+    given [ ($a + $g)/2, sqrt($a * $g) ] {
+	$z -= (.[0] - $a)**2 * $n;
+	$n += $n;
+	($a, $g) = @$_;
+	say ($a ** 2 / $z).substr: 0, 2 + number-of-decimals;
+    }
+}
+_END_
+	isa-ok $parsed, Q{Perl6::Tidy::Root};
+}, Q{Arithmetic-geometric mean/Calculate pi};
 
 # vim: ft=perl6

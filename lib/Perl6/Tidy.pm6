@@ -3811,6 +3811,54 @@ class _RadNumber does Node {
 class _DecNumber does Node {
 	method new( Mu $parsed ) {
 		self.trace;
+		if self.assert-hash-keys( $parsed,
+					  [< int coeff frac escale >] ) {
+			return self.bless(
+				:content(
+					:int(
+						_Int.new(
+							$parsed.hash.<int>
+						)
+					),
+					:coeff(
+						_Coeff.new(
+							$parsed.hash.<coeff>
+						)
+					),
+					:frac(
+						_Frac.new(
+							$parsed.hash.<frac>
+						)
+					),
+					:escale(
+						_EScale.new(
+							$parsed.hash.<escale>
+						)
+					)
+				)
+			)
+		}
+		if self.assert-hash-keys( $parsed, [< coeff frac escale >] ) {
+			return self.bless(
+				:content(
+					:coeff(
+						_Coeff.new(
+							$parsed.hash.<coeff>
+						)
+					),
+					:frac(
+						_Frac.new(
+							$parsed.hash.<frac>
+						)
+					),
+					:escale(
+						_EScale.new(
+							$parsed.hash.<escale>
+						)
+					)
+				)
+			)
+		}
 		if self.assert-hash-keys( $parsed, [< int coeff frac >] ) {
 			return self.bless(
 				:content(
@@ -3848,6 +3896,22 @@ class _DecNumber does Node {
 					:escale(
 						_EScale.new(
 							$parsed.hash.<escale>
+						)
+					)
+				)
+			)
+		}
+		if self.assert-hash-keys( $parsed, [< coeff frac >] ) {
+			return self.bless(
+				:content(
+					:coeff(
+						_Coeff.new(
+							$parsed.hash.<coeff>
+						)
+					),
+					:frac(
+						_Frac.new(
+							$parsed.hash.<frac>
 						)
 					)
 				)
