@@ -48,7 +48,7 @@ class _Identifier {...}
 class _Identifier_Args {...}
 class _Infix {...}
 class _Infix_OPER {...}
-class _InfixIsh {...}
+class _Infixish {...}
 class _InfixPrefixMetaOperator {...}
 class _Initializer {...}
 class _Int {...}
@@ -126,7 +126,7 @@ class _TermAlt {...}
 class _TermAltSeq {...}
 class _TermConj {...}
 class _TermConjSeq {...}
-class _TermIsh {...}
+class _Termish {...}
 class _TermSeq {...}
 class _Twigil {...}
 class _TypeConstraint {...}
@@ -1856,6 +1856,25 @@ class _Circumfix does Node {
 		}
 		die self.new-term
 	}
+	method validate( Mu $parsed ) {
+		self.trace;
+		return if self.assert-hash-keys( $parsed, [< nibble >] )
+			and _Nibble.new.validate( $parsed.hash.<nibble> );
+		return if self.assert-hash-keys( $parsed, [< pblock >] )
+			and _PBlock.new.validate( $parsed.hash.<pblock> );
+		return if self.assert-hash-keys( $parsed, [< semilist >] )
+			and _SemiList.new.validate( $parsed.hash.<semilist> );
+		return if self.assert-hash-keys( $parsed, [< binint VALUE >] )
+			and _BinInt.new.validate( $parsed.hash.<binint> )
+			and _VALUE.new( $parsed.hash.<VALUE> );
+		return if self.assert-hash-keys( $parsed, [< octint VALUE >] )
+			and _OctInt.new.validate( $parsed.hash.<octint> )
+			and _VALUE.new( $parsed.hash.<VALUE> );
+		return if self.assert-hash-keys( $parsed, [< hexint VALUE >] )
+			and _HexInt.new.validate( $parsed.hash.<hexint> )
+			and _VALUE.new( $parsed.hash.<VALUE> );
+		die self.new-term
+	}
 }
 
 class _FakeSignature does Node {
@@ -1872,6 +1891,12 @@ class _FakeSignature does Node {
 				)
 			)
 		}
+		die self.new-term
+	}
+	method validate( Mu $parsed ) {
+		self.trace;
+		return if self.assert-hash-keys( $parsed, [< signature >] )
+			and _Signature.new.validate( $parsed.hash.<signature> );
 		die self.new-term
 	}
 }
@@ -1908,6 +1933,15 @@ class _Var does Node {
 		}
 		die self.new-term
 	}
+	method validate( Mu $parsed ) {
+		self.trace;
+		return if self.assert-hash-keys( $parsed, [< sigil desigilname >] )
+			and _Sigil.new.validate( $parsed.hash.<sigil> )
+			and _DeSigilName.new.validate( $parsed.hash.<desigilname> );
+		return if self.assert-hash-keys( $parsed, [< variable >] )
+			and _Variable.new.validate( $parsed.hash.<variable> );
+		die self.new-term
+	}
 }
 
 class _Lambda does Node {
@@ -1916,6 +1950,11 @@ class _Lambda does Node {
 		if self.assert-Str( $parsed ) {
 			return self.bless( :name( $parsed.Str ) )
 		}
+		die self.new-term
+	}
+	method validate( Mu $parsed ) {
+		self.trace;
+		return if self.assert-Str( $parsed );
 		die self.new-term
 	}
 }
@@ -1958,6 +1997,17 @@ class _PBlock does Node {
 		}
 		die self.new-term
 	}
+	method validate( Mu $parsed ) {
+		self.trace;
+		return if self.assert-hash-keys( $parsed,
+				     [< lambda blockoid signature >] )
+			and _Lambda.new.validate( $parsed.hash.<lambda> )
+			and _Blockoid.new.validate( $parsed.hash.<blockoid> )
+			and _Signature.new.validate( $parsed.hash.<signature> );
+		return if self.assert-hash-keys( $parsed, [< blockoid >] )
+			and _Blockoid.new.validate( $parsed.hash.<blockoid> );
+		die self.new-term
+	}
 }
 
 class _ColonCircumfix does Node {
@@ -1974,6 +2024,12 @@ class _ColonCircumfix does Node {
 				)
 			)
 		}
+		die self.new-term
+	}
+	method validate( Mu $parsed ) {
+		self.trace;
+		return if self.assert-hash-keys( $parsed, [< circumfix >] )
+			and _Circumfix.new.validate( $parsed.hash.<circumfix> );
 		die self.new-term
 	}
 }
@@ -2033,6 +2089,20 @@ class _ColonPair does Node {
 		}
 		die self.new-term
 	}
+	method validate( Mu $parsed ) {
+		self.trace;
+		return if self.assert-hash-keys( $parsed,
+				     [< identifier coloncircumfix >] )
+			and _Identifier.new.validate( $parsed.hash.<identifier> )
+			and _ColonCircumfix.new.validate( $parsed.hash.<coloncircumfix> );
+		return if self.assert-hash-keys( $parsed, [< identifier >] )
+			and _Identifier.new.validate( $parsed.hash.<identifier> );
+		return if self.assert-hash-keys( $parsed, [< fakesignature >] )
+			and _FakeSignature.new.validate( $parsed.hash.<fakesignature> );
+		return if self.assert-hash-keys( $parsed, [< var >] )
+			and _Var.new.validate( $parsed.hash.<var> );
+		die self.new-term
+	}
 }
 
 class _ColonPairs does Node {
@@ -2043,6 +2113,11 @@ class _ColonPairs does Node {
 		else {
 			return self.bless
 		}
+		die self.new-term
+	}
+	method validate( Mu $parsed ) {
+		self.trace;
+die "No validation done";
 		die self.new-term
 	}
 }
@@ -2095,6 +2170,18 @@ class _DottyOp does Node {
 		}
 		die self.new-term
 	}
+	method validate( Mu $parsed ) {
+		self.trace;
+		return if self.assert-hash-keys( $parsed, [< sym postop O >] )
+			and _Sym.new.validate( $parsed.hash.<sym> )
+			and _PostOp.new.validate( $parsed.hash.<postop> )
+			and _O.new.validate( $parsed.hash.<O> );
+		return if self.assert-hash-keys( $parsed, [< methodop >] )
+			and _MethodOp.new.validate( $parsed.hash.<methodop> );
+		return if self.assert-hash-keys( $parsed, [< colonpair >] )
+			and _ColonPair.new.validate( $parsed.hash.<colonpair> );
+		die self.new-term
+	}
 }
 
 class _Dotty does Node {
@@ -2123,6 +2210,14 @@ class _Dotty does Node {
 		}
 		die self.new-term
 	}
+	method validate( Mu $parsed ) {
+		self.trace;
+		return if self.assert-hash-keys( $parsed, [< sym dottyop O >] )
+			and _Sym.new.validate( $parsed.hash.<sym> )
+			and _DottyOp.new.validate( $parsed.hash.<dottyop> )
+			and _O.new.validate( $parsed.hash.<O> );
+		die self.new-term
+	}
 }
 
 # XXX This is a compound type
@@ -2145,6 +2240,14 @@ class _Identifier_Args does Node {
 				)
 			)
 		}
+		die self.new-term
+	}
+	method validate( Mu $parsed ) {
+		self.trace;
+		return if self.assert-hash-keys( $parsed,
+				[< identifier args >] )
+			and _Identifier.new.validate( $parsed.hash.<identifier> )
+			and _Args.new.validate( $parsed.hash.<args> );
 		die self.new-term
 	}
 }
@@ -2184,7 +2287,7 @@ class _OPER does Node {
 						)
 					),
 					:infixish(
-						_InfixIsh.new(
+						_Infixish.new(
 							$parsed.hash.<infixish>
 						)
 					),
@@ -2287,6 +2390,35 @@ class _OPER does Node {
 		}
 		die self.new-term
 	}
+	method validate( Mu $parsed ) {
+		self.trace;
+		return if self.assert-hash-keys( $parsed, [< sym dottyop O >] )
+			and _Sym.new.validate( $parsed.hash.<sym> )
+			and _DottyOp.new.validate( $parsed.hash.<dottyop> )
+			and _O.new.validate( $parsed.hash.<O> );
+		return if self.assert-hash-keys( $parsed, [< sym infixish O >] )
+			and _Sym.new.validate( $parsed.hash.<sym> )
+			and _Infixish.new.validate( $parsed.hash.<infixish> )
+			and _O.new.validate( $parsed.hash.<O> );
+		return if self.assert-hash-keys( $parsed, [< sym O >] )
+			and _Sym.new.validate( $parsed.hash.<sym> )
+			and _O.new.validate( $parsed.hash.<O> );
+		return if self.assert-hash-keys( $parsed, [< EXPR O >] )
+			and _EXPR.new.validate( $parsed.hash.<EXPR> )
+			and _O.new.validate( $parsed.hash.<O> );
+		return if self.assert-hash-keys( $parsed, [< semilist O >] )
+			and _SemiList.new.validate( $parsed.hash.<semilist> )
+			and _O.new.validate( $parsed.hash.<O> );
+		return if self.assert-hash-keys( $parsed, [< nibble O >] )
+			and _Nibble.new.validate( $parsed.hash.<nibble> )
+			and _O.new.validate( $parsed.hash.<O> );
+		return if self.assert-hash-keys( $parsed, [< arglist O >] )
+			and _ArgList.new.validate( $parsed.hash.<arglist> )
+			and _O.new.validate( $parsed.hash.<O> );
+		return if self.assert-hash-keys( $parsed, [< O >] )
+			and _O.new.validate( $parsed.hash.<O> );
+		die self.new-term
+	}
 }
 
 class _Val does Node {
@@ -2303,6 +2435,12 @@ class _Val does Node {
 				)
 			)
 		}
+		die self.new-term
+	}
+	method validate( Mu $parsed ) {
+		self.trace;
+		return if self.assert-hash-keys( $parsed, [< value >] )
+			and _Value.new.validate( $parsed.hash.<value> );
 		die self.new-term
 	}
 }
@@ -2338,6 +2476,17 @@ class _DefTerm does Node {
 				)
 			)
 		}
+		die self.new-term
+	}
+	method validate( Mu $parsed ) {
+		self.trace;
+		return if self.assert-hash-keys( $parsed,
+				[< identifier colonpair >] )
+			and _Identifier.new.validate( $parsed.hash.<identifier> )
+			and _ColonPair.new.validate( $parsed.hash.<colonpair> );
+		return if self.assert-hash-keys( $parsed,
+				[< identifier >], [< colonpair >] )
+			and _Identifier.new.validate( $parsed.hash.<identifier> );
 		die self.new-term
 	}
 }
@@ -2408,6 +2557,24 @@ class _TypeDeclarator does Node {
 				)
 			)
 		}
+		die self.new-term
+	}
+	method validate( Mu $parsed ) {
+		self.trace;
+		CATCH { when X::Multi::NoMatch { } }
+		return if self.assert-hash-keys( $parsed,
+				[< sym initalizer variable >] )
+			and _Sym.new.validate( $parsed.hash.<sym> )
+			and _Initializer.new.validate( $parsed.hash.<initializer> )
+			and _Variable.new.validate( $parsed.hash.<variable> );
+		return if self.assert-hash-keys( $parsed,
+				[< sym initalizer defterm >], [< trait >] )
+			and _Sym.new.validate( $parsed.hash.<sym> )
+			and _Initializer.new.validate( $parsed.hash.<initializer> )
+			and _DefTerm.new.validate( $parsed.hash.<defterm> );
+		return if self.assert-hash-keys( $parsed, [< sym initalizer >] )
+			and _Sym.new.validate( $parsed.hash.<sym> )
+			and _Initializer.new.validate( $parsed.hash.<initializer> );
 		die self.new-term
 	}
 }
@@ -2884,7 +3051,7 @@ class _Infix does Node {
 	}
 }
 
-class _InfixIsh does Node {
+class _Infixish does Node {
 	method new( Mu $parsed ) {
 		self.trace;
 		if self.assert-hash-keys( $parsed, [< infix OPER >] ) {
@@ -3722,7 +3889,7 @@ class _Noun does Node {
 	}
 }
 
-class _TermIsh does Node {
+class _Termish does Node {
 	method new( Mu $parsed ) {
 		self.trace;
 		if $parsed.list {
@@ -3765,7 +3932,7 @@ class _TermConj does Node {
 			for $parsed.list {
 				if self.assert-hash-keys( $_, [< termish >] ) {
 					@child.push(
-						_TermIsh.new(
+						_Termish.new(
 							$_.hash.<termish>
 						)
 					);
@@ -5471,7 +5638,7 @@ class _InfixPrefixMetaOperator does Node {
 						)
 					),
 					:infixish(
-						_InfixIsh.new(
+						_Infixish.new(
 							$parsed.hash.<infixish>
 						)
 					),
