@@ -102,7 +102,9 @@ class Perl6::Tidy {
 			:actions( $a )
 		);
 
-		Root.new( $parsed )
+		my $rv = Root.new( $parsed );
+#		$rv.validate( $parsed );
+		return $rv;
 	}
 
 	method dump( Str $text ) {
