@@ -2600,6 +2600,13 @@ class _FatArrow does Node {
 		}
 		die self.new-term
 	}
+	method validate( Mu $parsed ) {
+		self.trace;
+		return if self.assert-hash-keys( $parsed, [< val key >] )
+			and _Val.new.validate( $parsed.hash.<val> )
+			and _Key.new.validate( $parsed.hash.<key> );
+		die self.new-term
+	}
 }
 
 class _EXPR does Node {
@@ -2992,6 +2999,132 @@ class _EXPR does Node {
 				)
 			)
 		}
+		die self.new-term
+	}
+	method validate( Mu $parsed ) {
+		self.trace;
+		if $parsed.list {
+			my @child;
+			for $parsed.list {
+				if self.assert-hash-keys( $_, [< OPER dotty >],
+							 [< postfix_prefix_meta_operator >] ) {
+					@child.push(
+						_Dotty_OPER.new( $_ )
+					);
+					next
+				}
+				if self.assert-hash-keys( $_,
+					[< postcircumfix OPER >],
+					[< postfix_prefix_meta_operator >] ) {
+					@child.push(
+						_PostCircumfix_OPER.new( $_ )
+					);
+					next
+				}
+				if self.assert-hash-keys( $_, [< infix OPER >],
+							 [< infix_postfix_meta_operator >] ) {
+					@child.push(
+						_Infix_OPER.new( $_ )
+					);
+					next
+				}
+				if self.assert-hash-keys( $_, [< prefix OPER >],
+							 [< prefix_postfix_meta_operator >] ) {
+					@child.push(
+						_Prefix_OPER.new( $_ )
+					);
+					next
+				}
+				if self.assert-hash-keys( $_, [< postfix OPER >],
+							 [< postfix_prefix_meta_operator >] ) {
+					@child.push(
+						_Postfix_OPER.new( $_ )
+					);
+					next
+				}
+				if self.assert-hash-keys( $_, [< identifier args >] ) {
+					@child.push(
+						_Identifier_Args.new( $_ )
+					);
+					next
+				}
+			}
+			return if self.assert-hash-keys(
+					$parsed,
+					[< OPER dotty >],
+					[< postfix_prefix_meta_operator >] )
+				and _OPER.new.validate( $parsed.hash.<OPER> )
+				and _Dotty.new.validate( $parsed.hash.<dotty> );
+			return if self.assert-hash-keys(
+					$parsed,
+					[< postfix OPER >],
+					[< postfix_prefix_meta_operator >] )
+				and _Postfix.new.validate( $parsed.hash.<postfix> )
+				and _OPER.new.validate( $parsed.hash.<OPER> );
+			return if self.assert-hash-keys(
+					$parsed,
+					[< infix OPER >],
+					[< prefix_postfix_meta_operator >] )
+				and _Infix.new.validate( $parsed.hash.<infix> )
+				and _OPER.new.validate( $parsed.hash.<OPER> );
+			return if self.assert-hash-keys(
+					$parsed,
+					[< prefix OPER >],
+					[< prefix_postfix_meta_operator >] )
+				and _Prefix.new.validate( $parsed.hash.<prefix> )
+				and _OPER.new.validate( $parsed.hash.<OPER> );
+			return if self.assert-hash-keys(
+					$parsed,
+					[< postcircumfix OPER >],
+					[< postfix_prefix_meta_operator >] )
+				and _PostCircumfix.new.validate( $parsed.hash.<postcircumfix> )
+				and _OPER.new( $parsed.hash.<OPER> );
+			return if self.assert-hash-keys( $parsed,
+					[< OPER >],
+					[< infix_prefix_meta_operator >] )
+				and _OPER.new.validate( $parsed.hash.<OPER> );
+			die self.new-term
+		}
+		return if self.assert-hash-keys( $parsed, [< longname args >] )
+			and _LongName.new.validate( $parsed.hash.<longname> )
+			and _Args.new.validate( $parsed.hash.<args> );
+		return if self.assert-hash-keys( $parsed, [< identifier args >] )
+			and _Identifier.new.validate( $parsed.hash.<identifier> )
+			and _Args.new.validate( $parsed.hash.<args> );
+		return if self.assert-hash-keys( $parsed, [< args op >] )
+			and _Args.new.validate( $parsed.hash.<args> )
+			and _Op.new.validate( $parsed.hash.<op> );
+		return if self.assert-hash-keys( $parsed, [< sym args >] )
+			and _Sym.new.validate( $parsed.hash.<sym> )
+			and _Args.new.validate( $parsed.hash.<args> );
+		return if self.assert-hash-keys( $parsed, [< statement_prefix >] )
+			and _StatementPrefix.new.validate( $parsed.hash.<statement_prefix> );
+		return if self.assert-hash-keys( $parsed, [< type_declarator >] )
+			and _TypeDeclarator.new.validate( $parsed.hash.<type_declarator> );
+		return if self.assert-hash-keys( $parsed, [< longname >] )
+			and _LongName.new.validate( $parsed.hash.<longname> );
+		return if self.assert-hash-keys( $parsed, [< value >] )
+			and _Value.new.validate( $parsed.hash.<value> );
+		return if self.assert-hash-keys( $parsed, [< variable >] )
+			and _Variable.new.validate( $parsed.hash.<variable> );
+		return if self.assert-hash-keys( $parsed, [< circumfix >] )
+			and _Circumfix.new.validate( $parsed.hash.<circumfix> );
+		return if self.assert-hash-keys( $parsed, [< colonpair >] )
+			and _ColonPair.new.validate( $parsed.hash.<colonpair> );
+		return if self.assert-hash-keys( $parsed, [< scope_declarator >] )
+			and _ScopeDeclarator.new.validate( $parsed.hash.<scope_declarator> );
+		return if self.assert-hash-keys( $parsed, [< routine_declarator >] )
+			and _RoutineDeclarator.new.validate( $parsed.hash.<routine_declarator> );
+		return if self.assert-hash-keys( $parsed, [< package_declarator >] )
+			and _PackageDeclarator.new.validate( $parsed.hash.<package_declarator> );
+		return if self.assert-hash-keys( $parsed, [< fatarrow >] )
+			and _FatArrow.new.validate( $parsed.hash.<fatarrow> );
+		return if self.assert-hash-keys( $parsed, [< multi_declarator >] )
+			and _MultiDeclarator.new.validate( $parsed.hash.<multi_declarator> );
+		return if self.assert-hash-keys( $parsed, [< regex_declarator >] )
+			and _RegexDeclarator.new.validate( $parsed.hash.<regex_declarator> );
+		return if self.assert-hash-keys( $parsed, [< dotty >] )
+			and _Dotty.new.validate( $parsed.hash.<dotty> );
 		die self.new-term
 	}
 }
