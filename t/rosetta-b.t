@@ -3,7 +3,7 @@ use v6;
 use Test;
 use Perl6::Tidy;
 
-plan 7;
+plan 27;
 
 my $pt = Perl6::Tidy.new;
 
@@ -619,5 +619,488 @@ subtest {
 _END_
 	isa-ok $parsed, Q{Root};
 }, Q{Bitcoin public point to address};
+
+subtest {
+	plan 1;
+
+	my $parsed = $pt.tidy( Q:to[_END_] );
+###class Pixel { has UInt ($.R, $.G, $.B) }
+###class Bitmap {
+###    has UInt ($.width, $.height);
+###    has Pixel @!data;
+### 
+###    method fill(Pixel $p) {
+###        @!data = $p.clone xx ($!width*$!height)
+###    }
+###    method pixel(
+###	$i where ^$!width,
+###	$j where ^$!height
+###	--> Pixel
+###    ) is rw { @!data[$i*$!height + $j] }
+### 
+###    method set-pixel ($i, $j, Pixel $p) {
+###	self.pixel($i, $j) = $p.clone;
+###    }
+###    method get-pixel ($i, $j) returns Pixel {
+###	self.pixel($i, $j);
+###    }
+###}
+### 
+###my Bitmap $b = Bitmap.new( width => 10, height => 10);
+### 
+###$b.fill( Pixel.new( R => 0, G => 0, B => 200) );
+### 
+###$b.set-pixel( 7, 5, Pixel.new( R => 100, G => 200, B => 0) );
+### 
+###say $b.perl;
+_END_
+	isa-ok $parsed, Q{Root};
+}, Q{Bitmap};
+
+subtest {
+	plan 1;
+
+	my $parsed = $pt.tidy( Q:to[_END_] );
+###sub line(Bitmap $bitmap, $x0 is copy, $x1 is copy, $y0 is copy, $y1 is copy) {
+###    my $steep = abs($y1 - $y0) > abs($x1 - $x0);
+###    if $steep {
+###        ($x0, $y0) = ($y0, $x0);
+###        ($x1, $y1) = ($y1, $x1);
+###    } 
+###    if $x0 > $x1 {
+###        ($x0, $x1) = ($x1, $x0);
+###        ($y0, $y1) = ($y1, $y0);
+###    }
+###    my $Δx = $x1 - $x0;
+###    my $Δy = abs($y1 - $y0);
+###    my $error = 0;
+###    my $Δerror = $Δy / $Δx;
+###    my $y-step = $y0 < $y1 ?? 1 !! -1;
+###    my $y = $y0;
+###    for $x0 .. $x1 -> $x {
+###        my $pix = Pixel.new(R => 100, G => 200, B => 0); 
+###        if $steep {
+###            $bitmap.set-pixel($y, $x, $pix);
+###        } else {
+###            $bitmap.set-pixel($x, $y, $pix);
+###        } 
+###        $error += $Δerror;
+###        if $error >= 0.5 {
+###            $y += $y-step;
+###            $error -= 1.0;
+###        } 
+###    } 
+###}
+_END_
+	isa-ok $parsed, Q{Root};
+}, Q{Bitmap / Bresenham's line algorithm};
+
+subtest {
+	plan 1;
+
+	my $parsed = $pt.tidy( Q:to[_END_] );
+###use MONKEY_TYPING;
+###augment class Pixel { method Str { "$.R $.G $.B" } }
+###augment class Bitmap {
+###    method P3 {
+###        join "\n", «P3 "$.width $.height" 255»,
+###        do for ^$.height { join ' ', @.data[]»[$_] }
+###    }
+###    method raster-circle ( $x0, $y0, $r, Pixel $value ) {
+###        my $f = 1 - $r;
+###        my $ddF_x = 0;
+###        my $ddF_y = -2 * $r;
+###        my ($x, $y) = 0, $r;
+###        self.set-pixel($x0, $y0 + $r, $value);
+###        self.set-pixel($x0, $y0 - $r, $value);
+###        self.set-pixel($x0 + $r, $y0, $value);
+###        self.set-pixel($x0 - $r, $y0, $value);
+###        while $x < $y {
+###            if $f >= 0 {
+###                $y--;
+###                $ddF_y += 2;
+###                $f += $ddF_y;
+###            }
+###            $x++;
+###            $ddF_x += 2;
+###            $f += $ddF_x + 1;    
+###            self.set-pixel($x0 + $x, $y0 + $y, $value);
+###            self.set-pixel($x0 - $x, $y0 + $y, $value);
+###            self.set-pixel($x0 + $x, $y0 - $y, $value);
+###            self.set-pixel($x0 - $x, $y0 - $y, $value);
+###            self.set-pixel($x0 + $y, $y0 + $x, $value);
+###            self.set-pixel($x0 - $y, $y0 + $x, $value);
+###            self.set-pixel($x0 + $y, $y0 - $x, $value);
+###            self.set-pixel($x0 - $y, $y0 - $x, $value);
+###        }
+###    }
+###}
+_END_
+	isa-ok $parsed, Q{Root};
+}, Q{Bitmap / midpoint circle algorithm};
+
+subtest {
+	plan 1;
+
+	my $parsed = $pt.tidy( Q:to[_END_] );
+###class Pixel { has uint8 ($.R, $.G, $.B) }
+###class Bitmap {
+###    has UInt ($.width, $.height);
+###    has Pixel @!data;
+### 
+###    method fill(Pixel $p) {
+###        @!data = $p.clone xx ($!width*$!height)
+###    }
+###    method pixel(
+###	  $i where ^$!width,
+###	  $j where ^$!height
+###	  --> Pixel
+###      ) is rw { @!data[$i*$!height + $j] }
+### 
+###    method data { @!data }
+###}
+### 
+###role PPM {
+###    method P6 returns Blob {
+###	"P6\n{self.width} {self.height}\n255\n".encode('ascii')
+###	~ Blob.new: flat map { .R, .G, .B }, self.data
+###    }
+###}
+### 
+###my Bitmap $b = Bitmap.new(width => 125, height => 125) but PPM;
+###for flat ^$b.height X ^$b.width -> $i, $j {
+###    $b.pixel($i, $j) = Pixel.new: :R($i*2), :G($j*2), :B(255-$i*2);
+###}
+### 
+###$*OUT.write: $b.P6;
+_END_
+	isa-ok $parsed, Q{Root};
+}, Q{Bitmap / write a PPM file};
+
+subtest {
+	plan 1;
+
+	my $parsed = $pt.tidy( Q:to[_END_] );
+###sub encode-ascii(Str $s) {
+###    my @b = $s.ords».fmt("%07b")».comb;
+###    @b.push(0) until @b %% 8;   # padding
+###    Buf.new: gather while @b { take reduce * *2+*, (@b.pop for ^8) }
+###}
+### 
+###sub decode-ascii(Buf $b) {
+###    my @b = $b.list».fmt("%08b")».comb;
+###    @b.shift until @b %% 7;   # remove padding
+###    @b = gather while @b { take reduce * *2+*, (@b.pop for ^7) }
+###    return [~] @b».chr;
+###}
+###say my $encode = encode-ascii 'STRING';
+###say decode-ascii $encode;
+_END_
+	isa-ok $parsed, Q{Root};
+}, Q{Bitwise I/O};
+
+subtest {
+	plan 1;
+
+	my $parsed = $pt.tidy( Q:to[_END_] );
+###constant MAXINT = uint.Range.max;
+###constant BITS = MAXINT.base(2).chars;
+### 
+#### define rotate ops for the fun of it
+###multi sub infix:<⥁>(Int:D \a, Int:D \b) { :2[(a +& MAXINT).polymod(2 xx BITS-1).list.rotate(b).reverse] }
+###multi sub infix:<⥀>(Int:D \a, Int:D \b) { :2[(a +& MAXINT).polymod(2 xx BITS-1).reverse.rotate(b)] }
+### 
+###sub int-bits (Int $a, Int $b) {
+###    say '';
+###    say_bit "$a", $a;
+###    say '';
+###    say_bit "2's complement $a", +^$a;
+###    say_bit "$a and $b", $a +& $b;
+###    say_bit "$a or $b",  $a +| $b;
+###    say_bit "$a xor $b", $a +^ $b;
+###    say_bit "$a unsigned shift right $b", ($a +& MAXINT) +> $b;
+###    say_bit "$a signed shift right $b", $a +> $b;
+###    say_bit "$a rotate right $b", $a ⥁ $b;
+###    say_bit "$a shift left $b", $a +< $b;
+###    say_bit "$a rotate left $b", $a ⥀ $b;
+###}
+### 
+###int-bits(7,2);
+###int-bits(-65432,31);
+### 
+###sub say_bit ($message, $value) {
+###    printf("%30s: %{'0' ~ BITS}b\n", $message, $value +& MAXINT);
+###}
+_END_
+	isa-ok $parsed, Q{Root};
+}, Q{Bitwise operations};
+
+subtest {
+	plan 1;
+
+	my $parsed = $pt.tidy( Q:to[_END_] );
+###my Bool $crashed = False;
+###my $val = 0 but True;
+_END_
+	isa-ok $parsed, Q{Root};
+}, Q{Boolean types};
+
+subtest {
+	plan 1;
+
+	my $parsed = $pt.tidy( Q:to[_END_] );
+###sub point (Int $index) {
+###    my $ix = $index % 32;
+###    if $ix +& 1
+###        { "&point(($ix + 1) +& 28) by &point(((2 - ($ix +& 2)) * 4) + $ix +& 24)" }
+###    elsif $ix +& 2
+###        { "&point(($ix + 2) +& 24)-&point(($ix +| 4) +& 28)" }
+###    elsif $ix +& 4
+###        { "&point(($ix + 8) +& 16)&point(($ix +| 8) +& 24)" }
+###    else
+###        { <north east south west>[$ix div 8]; }
+###}
+### 
+###sub test-angle ($ix) { $ix * 11.25 + (0, 5.62, -5.62)[ $ix % 3 ] }
+###sub angle-to-point(\𝜽) { floor 𝜽 / 360 * 32 + 0.5 }
+### 
+###for 0 .. 32 -> $ix {
+###    my \𝜽 = test-angle($ix);
+###    printf "  %2d %6.2f° %s\n",
+###              $ix % 32 + 1,
+###                  𝜽,
+###                         tc point angle-to-point 𝜽;
+###}
+_END_
+	isa-ok $parsed, Q{Root};
+}, Q{Box the compass};
+
+subtest {
+	plan 1;
+
+	my $parsed = $pt.tidy( Q:to[_END_] );
+###grammar BraceExpansion {
+###    token TOP  { ( <meta> | . )* }
+###    token meta { '{' <alts> '}' | \\ .  }
+###    token alts { <alt>+ % ',' }
+###    token alt  { ( <meta> | <-[ , } ]> )* }
+###}
+### 
+###sub crosswalk($/) {
+###    [X~] '', $0.map: -> $/ { ([$<meta><alts><alt>.&alternatives]) or ~$/ }
+###}
+### 
+###sub alternatives($_) {
+###    when :not { () }
+###    when 1    { '{' X~ $_».&crosswalk X~ '}' }
+###    default   { $_».&crosswalk }
+###}
+### 
+###sub brace-expand($s) { crosswalk BraceExpansion.parse($s) }
+###
+###sub bxtest(*@s) {
+###    for @s -> $s {
+###        say "\n$s";
+###        for brace-expand($s) {
+###            say "    ", $_;
+###        }
+###    }
+###}
+### 
+###bxtest Q:to/END/.lines;
+###    ~/{Downloads,Pictures}/*.{jpg,gif,png}
+###    It{{em,alic}iz,erat}e{d,}, please.
+###    {,{,gotta have{ ,\, again\, }}more }cowbell!
+###    {}} some {\\{edge,edgy} }{ cases, here\\\}
+###    a{b{1,2}c
+###    a{1,2}b}c
+###    a{1,{2},3}b
+###    a{b{1,2}c{}}
+###    more{ darn{ cowbell,},}
+###    ab{c,d\,e{f,g\h},i\,j{k,l\,m}n,o\,p}qr
+###    {a,{\,b}c
+###    a{b,{{c}}
+###    {a{\}b,c}d
+###    {a,b{{1,2}e}f
+###    END
+_END_
+	isa-ok $parsed, Q{Root};
+}, Q{Brace expansion};
+
+subtest {
+	plan 1;
+
+	my $parsed = $pt.tidy( Q:to[_END_] );
+###class Foo {
+###    has $!shyguy = 42;
+###}
+###my Foo $foo .= new;
+### 
+###say $foo.^attributes.first('$!shyguy').get_value($foo);
+_END_
+	isa-ok $parsed, Q{Root};
+}, Q{Break OO privacy};
+
+subtest {
+	plan 1;
+
+	my $parsed = $pt.tidy( Q:to[_END_] );
+###constant size = 100;
+###constant particlenum = 1_000;
+### 
+### 
+###constant mid = size div 2;
+### 
+###my $spawnradius = 5;
+###my @map;
+### 
+###sub set($x, $y) {
+###    @map[$x][$y] = True;
+###}
+### 
+###sub get($x, $y) {
+###    return @map[$x][$y] || False;
+###}
+### 
+###set(mid, mid);
+###my @blocks = " ","\c[UPPER HALF BLOCK]", "\c[LOWER HALF BLOCK]","\c[FULL BLOCK]";
+### 
+###sub infix:<█>($a, $b) {
+###    @blocks[$a + 2 * $b]
+###}
+### 
+###sub display {
+###    my $start = 0;
+###    my $end = size;
+###    say (for $start, $start + 2 ... $end -> $y {
+###        (for $start..$end -> $x {
+###            if abs(($x&$y) - mid) < $spawnradius {
+###                get($x, $y) █ get($x, $y+1);
+###            } else {
+###                " "
+###            }
+###        }).join
+###    }).join("\n")
+###}
+### 
+###for ^particlenum -> $progress {
+###    my Int $x;
+###    my Int $y;
+###    my &reset = {
+###        repeat {
+###            ($x, $y) = (mid - $spawnradius..mid + $spawnradius).pick, (mid - $spawnradius, mid + $spawnradius).pick;
+###            ($x, $y) = ($y, $x) if (True, False).pick();
+###        } while get($x,$y);
+###    }
+###    reset;
+### 
+###    while not get($x-1|$x|$x+1, $y-1|$y|$y+1) {
+###        $x = ($x-1, $x, $x+1).pick;
+###        $y = ($y-1, $y, $y+1).pick;
+###        if (False xx 3, True).pick {
+###            $x = $x >= mid ?? $x - 1 !! $x + 1;
+###            $y = $y >= mid ?? $y - 1 !! $y + 1;
+###        }
+###        if abs(($x | $y) - mid) > $spawnradius {
+###            reset;
+###        }
+###    }
+###    set($x,$y);
+###    display if $progress %% 50;
+###    if $spawnradius < mid && abs(($x|$y) - mid) > $spawnradius - 5 {
+###        $spawnradius = $spawnradius + 1;
+###    }
+###}
+### 
+###say "";
+###display;
+###say "";
+###say "time elapsed: ", (now - BEGIN { now }).Num.fmt("%.2f"), " seconds";
+###say "";
+_END_
+	isa-ok $parsed, Q{Root};
+}, Q{Brownian tree};
+
+subtest {
+	plan 1;
+
+	my $parsed = $pt.tidy( Q:to[_END_] );
+###my $size = 4;
+###my @secret = pick $size, '1' .. '9';
+### 
+###for 1..* -> $guesses {
+###    my @guess;
+###    loop {
+###        @guess = (prompt("Guess $guesses: ") // exit).comb;
+###        last if @guess == $size and
+###            all(@guess) eq one(@guess) & any('1' .. '9');
+###        say 'Malformed guess; try again.';
+###    }
+###    my ($bulls, $cows) = 0, 0;
+###    for ^$size {
+###        when @guess[$_] eq @secret[$_] { ++$bulls; }
+###        when @guess[$_] eq any @secret { ++$cows; }
+###    }
+###    last if $bulls == $size;
+###    say "$bulls bulls, $cows cows.";
+###}
+### 
+###say 'A winner is you!';
+_END_
+	isa-ok $parsed, Q{Root};
+}, Q{Bulls and cows};
+
+subtest {
+	plan 1;
+
+	my $parsed = $pt.tidy( Q:to[_END_] );
+#### we use the [] reduction meta operator along with the Cartesian Product
+#### operator X to create the Cartesian Product of four times [1..9] and then get
+#### all the elements where the number of unique digits is four.
+###my @candidates = ([X] [1..9] xx 4).tree.grep: *.uniq == 4;
+### 
+###repeat {
+###	my $guess = @candidates.pick;
+###	my ($bulls, $cows) = read-score;
+###	@candidates .= grep: &score-correct;
+### 
+###	# note how we declare our two subroutines within the repeat block. This
+###	# limits the scope in which the routines are known to the scope in which
+###	# they are needed and saves us a lot of arguments to our two routines.
+###	sub score-correct($a) {
+###		# use the Z (zip) meta operator along with == to construct the
+###		# list ($a[0] == $b[0], $a[1] == $b[1], ...) and then add it up
+###		# using the reduction meta operator [] and +.
+###		my $exact = [+] $a Z== $guess;
+### 
+###		# number of elements of $a that match any element of $b
+###		my $loose = +$a.grep: any @$guess;
+### 
+###		return $bulls == $exact && $cows == $loose - $exact;
+###	}
+### 
+###	sub read-score() {
+###		loop {
+###			my $score = prompt "My guess: {$guess.join}.\n";
+### 
+###			# use the :s modifier to tell Perl 6 to handle spaces
+###			# automatically and save the first digit in $<bulls> and
+###			# the second digit in $<cows>
+###			if $score ~~ m:s/^ $<bulls>=(\d) $<cows>=(\d) $/
+###				and $<bulls> + $<cows> <= 4 {
+###				return +$<bulls>, +$<cows>;
+###			}
+### 
+###			say "Please specify the number of bulls and cows";
+###		}
+###	}
+###} while @candidates > 1;
+### 
+###say @candidates
+###	?? "Your secret number is {@candidates[0].join}!"
+###	!! "I think you made a mistake with your scoring.";
+_END_
+	isa-ok $parsed, Q{Root};
+}, Q{Bulls and cows / player};
 
 # vim: ft=perl6
