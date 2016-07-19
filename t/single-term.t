@@ -7,6 +7,7 @@ plan 9;
 
 my $pt = Perl6::Tidy.new;
 
+#my $*TRACE = 1;
 subtest {
 	plan 10;
 

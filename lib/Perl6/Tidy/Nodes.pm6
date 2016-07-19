@@ -200,7 +200,7 @@ sub dump( Mu $parsed ) {
 role IsString {
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if $parsed.Str;
+		return True if $parsed.Str;
 		die self.new-term
 	}
 }
@@ -208,7 +208,7 @@ role IsString {
 role IsInteger {
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if $parsed.Int;
+		return True if $parsed.Int;
 		die self.new-term
 	}
 }
@@ -216,7 +216,7 @@ role IsInteger {
 role IsBoolean {
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if $parsed.Bool;
+		return True if $parsed.Bool;
 		die self.new-term
 	}
 }
@@ -278,9 +278,7 @@ role Node {
 		return False if $parsed.Int;
 		return False if $parsed.Str;
 
-		if $parsed.Bool {
-			return True
-		}
+		return True if $parsed.Bool;
 		die "Uncaught type"
 	}
 
@@ -290,9 +288,7 @@ role Node {
 		return False if $parsed.hash;
 		return False if $parsed.list;
 
-		if $parsed.Int {
-			return True
-		}
+		return True if $parsed.Int;
 		die "Uncaught type"
 	}
 
@@ -303,9 +299,7 @@ role Node {
 		return False if $parsed.list;
 		return False if $parsed.Int;
 
-		if $parsed.Str {
-			return True
-		}
+		return True if $parsed.Str;
 		die "Uncaught type"
 	}
 
@@ -364,9 +358,9 @@ class _ArgList does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< EXPR >] )
-			and _EXPR.new.is-valid( $parsed.hash.<EXPR> );
-		return if self.assert-Bool( $parsed );
+		return True if self.assert-hash-keys( $parsed, [< EXPR >] )
+			and _EXPR.is-valid( $parsed.hash.<EXPR> );
+		return True if self.assert-Bool( $parsed );
 		die self.new-term
 	}
 }
@@ -421,12 +415,12 @@ class _Assertion does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< var >] )
-			and _Var.new.is-valid( $parsed.hash.<var> );
-		return if self.assert-hash-keys( $parsed, [< longname >] )
-			and _LongName.new.is-valid( $parsed.hash.<longname> );
-		return if self.assert-hash-keys( $parsed, [< cclass_elem >] )
-			and _CClassElem.new.is-valid( $parsed.hash.<cclass_elem> );
+		return True if self.assert-hash-keys( $parsed, [< var >] )
+			and _Var.is-valid( $parsed.hash.<var> );
+		return True if self.assert-hash-keys( $parsed, [< longname >] )
+			and _LongName.is-valid( $parsed.hash.<longname> );
+		return True if self.assert-hash-keys( $parsed, [< cclass_elem >] )
+			and _CClassElem.is-valid( $parsed.hash.<cclass_elem> );
 		die self.new-term
 	}
 }
@@ -452,9 +446,9 @@ class _Atom does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< metachar >] )
-			and _MetaChar.new.is-valid( $parsed.hash.<metachar> );
-		return if $parsed.Str;
+		return True if self.assert-hash-keys( $parsed, [< metachar >] )
+			and _MetaChar.is-valid( $parsed.hash.<metachar> );
+		return True if $parsed.Str;
 		die self.new-term
 	}
 }
@@ -509,14 +503,14 @@ class _Atom_SigFinal does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< atom sigfinal >] )
-			and _Atom.new.is-valid( $parsed.hash.<atom> )
-			and _SigFinal.new.is-valid( $parsed.hash.<sigfinal> );
-		return if self.assert-hash-keys( $parsed, [< atom quantifier >] )
-			and _Atom.new.is-valid( $parsed.hash.<atom> )
-			and _Quantifier.new.is-valid( $parsed.hash.<quantifier> );
-		return if self.assert-hash-keys( $parsed, [< atom >] )
-			and _Atom.new.is-valid( $parsed.hash.<atom> );
+		return True if self.assert-hash-keys( $parsed, [< atom sigfinal >] )
+			and _Atom.is-valid( $parsed.hash.<atom> )
+			and _SigFinal.is-valid( $parsed.hash.<sigfinal> );
+		return True if self.assert-hash-keys( $parsed, [< atom quantifier >] )
+			and _Atom.is-valid( $parsed.hash.<atom> )
+			and _Quantifier.is-valid( $parsed.hash.<quantifier> );
+		return True if self.assert-hash-keys( $parsed, [< atom >] )
+			and _Atom.is-valid( $parsed.hash.<atom> );
 		die self.new-term
 	}
 }
@@ -550,11 +544,11 @@ class _Atom_SigFinal_Quantifier does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $parsed,
 				[< atom sigfinal quantifier >] )
-			and _Atom.new.is-valid( $parsed.hash.<atom> )
-			and _SigFinal.new.is-valid( $parsed.hash.<sigfinal> )
-			and _Quantifier.new.is-valid( $parsed.hash.<quantifier> );
+			and _Atom.is-valid( $parsed.hash.<atom> )
+			and _SigFinal.is-valid( $parsed.hash.<sigfinal> )
+			and _Quantifier.is-valid( $parsed.hash.<quantifier> );
 		die self.new-term
 	}
 }
@@ -578,8 +572,8 @@ class _Babble does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< B >], [< quotepair >] )
-			and _B.new.is-valid( $parsed.hash.<B> );
+		return True if self.assert-hash-keys( $parsed, [< B >], [< quotepair >] )
+			and _B.is-valid( $parsed.hash.<B> );
 		die self.new-term
 	}
 }
@@ -612,8 +606,8 @@ class _BackSlash does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< sym >] )
-			and _Sym.new.is-valid( $parsed.hash.<sym> );
+		return True if self.assert-hash-keys( $parsed, [< sym >] )
+			and _Sym.is-valid( $parsed.hash.<sym> );
 		die self.new-term
 	}
 }
@@ -642,8 +636,8 @@ class _BinInt does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if $parsed.Str and $parsed.Str eq '0';
-		return if self.assert-Int( $parsed );
+		return True if $parsed.Str and $parsed.Str eq '0';
+		return True if self.assert-Int( $parsed );
 		die self.new-term
 	}
 }
@@ -666,8 +660,8 @@ class _Block does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< blockoid >] )
-			and _Blockoid.new.is-valid( $parsed.hash.<blockoid> );
+		return True if self.assert-hash-keys( $parsed, [< blockoid >] )
+			and _Blockoid.is-valid( $parsed.hash.<blockoid> );
 		die self.new-term
 	}
 }
@@ -690,8 +684,8 @@ class _Blockoid does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< statementlist >] )
-			and _StatementList.new.is-valid( $parsed.hash.<statementlist> );
+		return True if self.assert-hash-keys( $parsed, [< statementlist >] )
+			and _StatementList.is-valid( $parsed.hash.<statementlist> );
 		die self.new-term
 	}
 }
@@ -725,10 +719,10 @@ class _Blorst does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< statement >] )
-			and _Statement.new.is-valid( $parsed.hash.<statement> );
-		return if self.assert-hash-keys( $parsed, [< block >] )
-			and _Block.new.is-valid( $parsed.hash.<block> );
+		return True if self.assert-hash-keys( $parsed, [< statement >] )
+			and _Statement.is-valid( $parsed.hash.<statement> );
+		return True if self.assert-hash-keys( $parsed, [< block >] )
+			and _Block.is-valid( $parsed.hash.<block> );
 		die self.new-term
 	}
 }
@@ -758,11 +752,10 @@ class _CClassElem does Node {
 	method is-valid( Mu $parsed ) {
 		self.trace;
 		if $parsed.list {
-			my @child;
 			for $parsed.list {
-				if self.assert-hash-keys( $_, [< sign charspec >] ) {
-					next if _Sign_CharSpec.new.is-valid( $_ )
-				}
+				next if self.assert-hash-keys( $_,
+						[< sign charspec >] )
+					and _Sign_CharSpec.is-valid( $_ );
 				die self.new-term
 			}
 			return 
@@ -805,7 +798,7 @@ class _CharSpec does Node {
 	method is-valid( Mu $parsed ) {
 		self.trace;
 # XXX work on this, of course.
-		return if $parsed.list;
+		return True if $parsed.list;
 		die self.new-term
 	}
 }
@@ -898,21 +891,21 @@ class _Circumfix does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< nibble >] )
-			and _Nibble.new.is-valid( $parsed.hash.<nibble> );
-		return if self.assert-hash-keys( $parsed, [< pblock >] )
-			and _PBlock.new.is-valid( $parsed.hash.<pblock> );
-		return if self.assert-hash-keys( $parsed, [< semilist >] )
-			and _SemiList.new.is-valid( $parsed.hash.<semilist> );
-		return if self.assert-hash-keys( $parsed, [< binint VALUE >] )
-			and _BinInt.new.is-valid( $parsed.hash.<binint> )
-			and _VALUE.new.is-valid( $parsed.hash.<VALUE> );
-		return if self.assert-hash-keys( $parsed, [< octint VALUE >] )
-			and _OctInt.new.is-valid( $parsed.hash.<octint> )
-			and _VALUE.new.is-valid( $parsed.hash.<VALUE> );
-		return if self.assert-hash-keys( $parsed, [< hexint VALUE >] )
-			and _HexInt.new.is-valid( $parsed.hash.<hexint> )
-			and _VALUE.new.is-valid( $parsed.hash.<VALUE> );
+		return True if self.assert-hash-keys( $parsed, [< nibble >] )
+			and _Nibble.is-valid( $parsed.hash.<nibble> );
+		return True if self.assert-hash-keys( $parsed, [< pblock >] )
+			and _PBlock.is-valid( $parsed.hash.<pblock> );
+		return True if self.assert-hash-keys( $parsed, [< semilist >] )
+			and _SemiList.is-valid( $parsed.hash.<semilist> );
+		return True if self.assert-hash-keys( $parsed, [< binint VALUE >] )
+			and _BinInt.is-valid( $parsed.hash.<binint> )
+			and _VALUE.is-valid( $parsed.hash.<VALUE> );
+		return True if self.assert-hash-keys( $parsed, [< octint VALUE >] )
+			and _OctInt.is-valid( $parsed.hash.<octint> )
+			and _VALUE.is-valid( $parsed.hash.<VALUE> );
+		return True if self.assert-hash-keys( $parsed, [< hexint VALUE >] )
+			and _HexInt.is-valid( $parsed.hash.<hexint> )
+			and _VALUE.is-valid( $parsed.hash.<VALUE> );
 		die self.new-term
 	}
 }
@@ -935,8 +928,8 @@ class _CodeBlock does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< block >] )
-			and _Block.new.is-valid( $parsed.hash.<block> );
+		return True if self.assert-hash-keys( $parsed, [< block >] )
+			and _Block.is-valid( $parsed.hash.<block> );
 		die self.new-term
 	}
 }
@@ -956,10 +949,10 @@ class _Coeff does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if $parsed.Str and
+		return True if $parsed.Str and
 		   ( $parsed.Str eq '0.0' or
 		     $parsed.Str eq '0' );
-		return if self.assert-Int( $parsed );
+		return True if self.assert-Int( $parsed );
 		die self.new-term
 	}
 }
@@ -982,8 +975,8 @@ class _Coercee does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< semilist >] )
-			and _SemiList.new.is-valid( $parsed.hash.<semilist> );
+		return True if self.assert-hash-keys( $parsed, [< semilist >] )
+			and _SemiList.is-valid( $parsed.hash.<semilist> );
 		die self.new-term
 	}
 }
@@ -1006,8 +999,8 @@ class _ColonCircumfix does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< circumfix >] )
-			and _Circumfix.new.is-valid( $parsed.hash.<circumfix> );
+		return True if self.assert-hash-keys( $parsed, [< circumfix >] )
+			and _Circumfix.is-valid( $parsed.hash.<circumfix> );
 		die self.new-term
 	}
 }
@@ -1069,16 +1062,16 @@ class _ColonPair does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $parsed,
 				     [< identifier coloncircumfix >] )
-			and _Identifier.new.is-valid( $parsed.hash.<identifier> )
-			and _ColonCircumfix.new.is-valid( $parsed.hash.<coloncircumfix> );
-		return if self.assert-hash-keys( $parsed, [< identifier >] )
-			and _Identifier.new.is-valid( $parsed.hash.<identifier> );
-		return if self.assert-hash-keys( $parsed, [< fakesignature >] )
-			and _FakeSignature.new.is-valid( $parsed.hash.<fakesignature> );
-		return if self.assert-hash-keys( $parsed, [< var >] )
-			and _Var.new.is-valid( $parsed.hash.<var> );
+			and _Identifier.is-valid( $parsed.hash.<identifier> )
+			and _ColonCircumfix.is-valid( $parsed.hash.<coloncircumfix> );
+		return True if self.assert-hash-keys( $parsed, [< identifier >] )
+			and _Identifier.is-valid( $parsed.hash.<identifier> );
+		return True if self.assert-hash-keys( $parsed, [< fakesignature >] )
+			and _FakeSignature.is-valid( $parsed.hash.<fakesignature> );
+		return True if self.assert-hash-keys( $parsed, [< var >] )
+			and _Var.is-valid( $parsed.hash.<var> );
 		die self.new-term
 	}
 }
@@ -1096,7 +1089,8 @@ class _ColonPairs does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-die "No validation done";
+warn "No validation done";
+return True;
 		die self.new-term
 	}
 }
@@ -1129,11 +1123,11 @@ class _Contextualizer does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $parsed,
 				[< coercee circumfix sigil >] )
-			and _Coercee.new.is-valid( $parsed.hash.<coercee> )
-			and _Circumfix.new.is-valid( $parsed.hash.<circumfix> )
-			and _Sigil.new.is-valid( $parsed.hash.<sigil> );
+			and _Coercee.is-valid( $parsed.hash.<coercee> )
+			and _Circumfix.is-valid( $parsed.hash.<circumfix> )
+			and _Sigil.is-valid( $parsed.hash.<sigil> );
 		die self.new-term
 	}
 }
@@ -1152,8 +1146,8 @@ class _DecInt does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if $parsed.Str and $parsed.Str eq '0';
-		return if self.assert-Int( $parsed );
+		return True if $parsed.Str and $parsed.Str eq '0';
+		return True if self.assert-Int( $parsed );
 		die self.new-term
 	}
 }
@@ -1254,27 +1248,27 @@ class _Declarator does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $parsed,
 				[< initializer signature >], [< trait >] )
-			and _Initializer.new.is-valid( $parsed.hash.<initializer> )
-			and _Signature.new.is-valid( $parsed.hash.<signature> );
-		return if self.assert-hash-keys( $parsed,
+			and _Initializer.is-valid( $parsed.hash.<initializer> )
+			and _Signature.is-valid( $parsed.hash.<signature> );
+		return True if self.assert-hash-keys( $parsed,
 				  [< initializer variable_declarator >],
 				  [< trait >] )
-			and _Initializer.new.is-valid( $parsed.hash.<initializer> )
-			and _VariableDeclarator.new.is-valid( $parsed.hash.<variable_declarator> );
-		return if self.assert-hash-keys( $parsed,
+			and _Initializer.is-valid( $parsed.hash.<initializer> )
+			and _VariableDeclarator.is-valid( $parsed.hash.<variable_declarator> );
+		return True if self.assert-hash-keys( $parsed,
 				[< variable_declarator >], [< trait >] )
-			and _VariableDeclarator.new.is-valid( $parsed.hash.<variable_declarator> );
-		return if self.assert-hash-keys( $parsed,
+			and _VariableDeclarator.is-valid( $parsed.hash.<variable_declarator> );
+		return True if self.assert-hash-keys( $parsed,
 				[< regex_declarator >], [< trait >] )
-			and _RegexDeclarator.new.is-valid( $parsed.hash.<regex_declarator> );
-		return if self.assert-hash-keys( $parsed,
+			and _RegexDeclarator.is-valid( $parsed.hash.<regex_declarator> );
+		return True if self.assert-hash-keys( $parsed,
 				[< routine_declarator >], [< trait >] )
-			and _RoutineDeclarator.new.is-valid( $parsed.hash.<routine_declarator> );
-		return if self.assert-hash-keys( $parsed,
+			and _RoutineDeclarator.is-valid( $parsed.hash.<routine_declarator> );
+		return True if self.assert-hash-keys( $parsed,
 				[< signature >], [< trait >] )
-			and _Signature.new.is-valid( $parsed.hash.<signature> );
+			and _Signature.is-valid( $parsed.hash.<signature> );
 		die self.new-term
 	}
 }
@@ -1407,113 +1401,37 @@ class _DECL does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $parsed,
 				[< initializer signature >], [< trait >] )
-			and _Initializer.new.is-valid( $parsed.hash.<initializer> )
-			and _Signature.new.is-valid( $parsed.hash.<signature> );
-		if self.assert-hash-keys( $parsed,
+			and _Initializer.is-valid( $parsed.hash.<initializer> )
+			and _Signature.is-valid( $parsed.hash.<signature> );
+		return True if self.assert-hash-keys( $parsed,
 					  [< initializer variable_declarator >],
-					  [< trait >] ) {
-			return self.bless(
-				:content(
-					:initializer(
-						_Initializer.new(
-							$parsed.hash.<initializer>
-						)
-					),
-					:variable_declarator(
-						_VariableDeclarator.new(
-							$parsed.hash.<variable_declarator>
-						)
-					),
-					:trait()
-				)
-			)
-		}
-		if self.assert-hash-keys( $parsed, [< signature >],
-						   [< trait >] ) {
-			return self.bless(
-				:content(
-					:initializer(
-						_Initializer.new(
-							$parsed.hash.<initializer>
-						)
-					),
-					:signature(
-						_Signature.new(
-							$parsed.hash.<signature>
-						)
-					),
-					:trait()
-				)
-			)
-		}
-		if self.assert-hash-keys( $parsed, [< variable_declarator >],
-						   [< trait >] ) {
-			return self.bless(
-				:content(
-					:variable_declarator(
-						_VariableDeclarator.new(
-							$parsed.hash.<variable_declarator>
-						)
-					),
-					:trait()
-				)
-			)
-		}
-		if self.assert-hash-keys( $parsed, [< regex_declarator >],
-						   [< trait >] ) {
-			return self.bless(
-				:content(
-					:regex_declarator(
-						_RegexDeclarator.new(
-							$parsed.hash.<regex_declarator>
-						)
-					),
-					:trait()
-				)
-			)
-		}
-		if self.assert-hash-keys( $parsed, [< routine_declarator >],
-						   [< trait >] ) {
-			return self.bless(
-				:content(
-					:routine_declarator(
-						_RoutineDeclarator.new(
-							$parsed.hash.<routine_declarator>
-						)
-					),
-					:trait()
-				)
-			)
-		}
-		if self.assert-hash-keys( $parsed, [< package_def sym >] ) {
-			return self.bless(
-				:content(
-					:package_def(
-						_PackageDef.new(
-							$parsed.hash.<package_def>
-						)
-					),
-					:sym(
-						_Sym.new(
-							$parsed.hash.<sym>
-						)
-					)
-				)
-			)
-		}
-		if self.assert-hash-keys( $parsed, [< declarator >] ) {
-			return self.bless(
-				:content(
-					:declarator(
-						_Declarator.new(
-							$parsed.hash.<declarator>
-						)
-					)
-				)
-			)
-		}
+					  [< trait >] )
+			and _Initializer.is-valid( $parsed.hash.<initializer> )
+			and _VariableDeclarator.is-valid( $parsed.hash.<variable_declarator> );
+		return True if self.assert-hash-keys( $parsed,
+				[< signature >], [< trait >] )
+			and _Signature.is-valid( $parsed.hash.<signature> );
+		return True if self.assert-hash-keys( $parsed,
+					  [< variable_declarator >],
+					  [< trait >] )
+			and _VariableDeclarator.is-valid( $parsed.hash.<variable_declarator> );
+		return True if self.assert-hash-keys( $parsed,
+					  [< regex_declarator >],
+					  [< trait >] )
+			and _RegexDeclarator.is-valid( $parsed.hash.<regex_declarator> );
+		return True if self.assert-hash-keys( $parsed,
+					  [< routine_declarator >],
+					  [< trait >] )
+			and _RoutineDeclarator.is-valid( $parsed.hash.<routine_declarator> );
+		return True if self.assert-hash-keys( $parsed,
+					  [< package_def sym >] )
+			and _PackageDef.is-valid( $parsed.hash.<package_def> )
+			and _Sym.is-valid( $parsed.hash.<sym> );
+		return True if self.assert-hash-keys( $parsed,
+					  [< declarator >] )
+			and _Declarator.is-valid( $parsed.hash.<declarator> );
 		die self.new-term
 	}
 }
@@ -1631,31 +1549,31 @@ class _DecNumber does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $parsed,
 				  [< int coeff frac escale >] )
-			and _Int.new.is-valid( $parsed.hash.<int> )
-			and _Coeff.new.is-valid( $parsed.hash.<coeff> )
-			and _Frac.new.is-valid( $parsed.hash.<frac> )
-			and _EScale.new.is-valid( $parsed.hash.<escale> );
-		return if self.assert-hash-keys( $parsed,
+			and _Int.is-valid( $parsed.hash.<int> )
+			and _Coeff.is-valid( $parsed.hash.<coeff> )
+			and _Frac.is-valid( $parsed.hash.<frac> )
+			and _EScale.is-valid( $parsed.hash.<escale> );
+		return True if self.assert-hash-keys( $parsed,
 				  [< coeff frac escale >] )
-			and _Coeff.new.is-valid( $parsed.hash.<coeff> )
-			and _Frac.new.is-valid( $parsed.hash.<frac> )
-			and _EScale.new.is-valid( $parsed.hash.<escale> );
-		return if self.assert-hash-keys( $parsed,
+			and _Coeff.is-valid( $parsed.hash.<coeff> )
+			and _Frac.is-valid( $parsed.hash.<frac> )
+			and _EScale.is-valid( $parsed.hash.<escale> );
+		return True if self.assert-hash-keys( $parsed,
 				  [< int coeff frac >] )
-			and _Int.new.is-valid( $parsed.hash.<int> )
-			and _Coeff.new.is-valid( $parsed.hash.<coeff> )
-			and _Frac.new.is-valid( $parsed.hash.<frac> );
-		return if self.assert-hash-keys( $parsed,
+			and _Int.is-valid( $parsed.hash.<int> )
+			and _Coeff.is-valid( $parsed.hash.<coeff> )
+			and _Frac.is-valid( $parsed.hash.<frac> );
+		return True if self.assert-hash-keys( $parsed,
 				  [< int coeff escale >] )
-			and _Int.new.is-valid( $parsed.hash.<int> )
-			and _Coeff.new.is-valid( $parsed.hash.<coeff> )
-			and _EScale.new.is-valid( $parsed.hash.<escale> );
-		return if self.assert-hash-keys( $parsed,
+			and _Int.is-valid( $parsed.hash.<int> )
+			and _Coeff.is-valid( $parsed.hash.<coeff> )
+			and _EScale.is-valid( $parsed.hash.<escale> );
+		return True if self.assert-hash-keys( $parsed,
 				  [< coeff frac >] )
-			and _Coeff.new.is-valid( $parsed.hash.<coeff> )
-			and _Frac.new.is-valid( $parsed.hash.<frac> );
+			and _Coeff.is-valid( $parsed.hash.<coeff> )
+			and _Frac.is-valid( $parsed.hash.<frac> );
 		die self.new-term
 	}
 }
@@ -1679,9 +1597,9 @@ class _DefLongName does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $parsed,
 				[< name >], [< colonpair >] )
-			and _Name.new.is-valid( $parsed.hash.<name> );
+			and _Name.is-valid( $parsed.hash.<name> );
 		die self.new-term
 	}
 }
@@ -1721,13 +1639,13 @@ class _DefTerm does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $parsed,
 				[< identifier colonpair >] )
-			and _Identifier.new.is-valid( $parsed.hash.<identifier> )
-			and _ColonPair.new.is-valid( $parsed.hash.<colonpair> );
-		return if self.assert-hash-keys( $parsed,
+			and _Identifier.is-valid( $parsed.hash.<identifier> )
+			and _ColonPair.is-valid( $parsed.hash.<colonpair> );
+		return True if self.assert-hash-keys( $parsed,
 				[< identifier >], [< colonpair >] )
-			and _Identifier.new.is-valid( $parsed.hash.<identifier> );
+			and _Identifier.is-valid( $parsed.hash.<identifier> );
 		die self.new-term
 	}
 }
@@ -1753,8 +1671,9 @@ class _DeSigilName does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< longname >] )
-			and _LongName.new.is-valid( $parsed.hash.<longname> );
+		return True if self.assert-hash-keys( $parsed, [< longname >] )
+			and _LongName.is-valid( $parsed.hash.<longname> );
+		return True if $parsed.Str;
 		die self.new-term
 	}
 }
@@ -1781,7 +1700,6 @@ class _Dig does Node {
 	method is-valid( Mu $parsed ) {
 		self.trace;
 		if $parsed.list {
-			my @child;
 			for $parsed.list {
 				if $_ {
 					# XXX
@@ -1792,7 +1710,7 @@ class _Dig does Node {
 				}
 				die self.new-term
 			}
-			return
+			return True
 		}
 		die self.new-term
 	}
@@ -1836,10 +1754,10 @@ class _Dotty does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< sym dottyop O >] )
-			and _Sym.new.is-valid( $parsed.hash.<sym> )
-			and _DottyOp.new.is-valid( $parsed.hash.<dottyop> )
-			and _O.new.is-valid( $parsed.hash.<O> );
+		return True if self.assert-hash-keys( $parsed, [< sym dottyop O >] )
+			and _Sym.is-valid( $parsed.hash.<sym> )
+			and _DottyOp.is-valid( $parsed.hash.<dottyop> )
+			and _O.is-valid( $parsed.hash.<O> );
 		die self.new-term
 	}
 }
@@ -1894,14 +1812,14 @@ class _DottyOp does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< sym postop O >] )
-			and _Sym.new.is-valid( $parsed.hash.<sym> )
-			and _PostOp.new.is-valid( $parsed.hash.<postop> )
-			and _O.new.is-valid( $parsed.hash.<O> );
-		return if self.assert-hash-keys( $parsed, [< methodop >] )
-			and _MethodOp.new.is-valid( $parsed.hash.<methodop> );
-		return if self.assert-hash-keys( $parsed, [< colonpair >] )
-			and _ColonPair.new.is-valid( $parsed.hash.<colonpair> );
+		return True if self.assert-hash-keys( $parsed, [< sym postop O >] )
+			and _Sym.is-valid( $parsed.hash.<sym> )
+			and _PostOp.is-valid( $parsed.hash.<postop> )
+			and _O.is-valid( $parsed.hash.<O> );
+		return True if self.assert-hash-keys( $parsed, [< methodop >] )
+			and _MethodOp.is-valid( $parsed.hash.<methodop> );
+		return True if self.assert-hash-keys( $parsed, [< colonpair >] )
+			and _ColonPair.is-valid( $parsed.hash.<colonpair> );
 		die self.new-term
 	}
 }
@@ -1933,11 +1851,11 @@ class _Dotty_OPER does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $parsed,
 			     [< dotty OPER >],
 			     [< postfix_prefix_meta_operator >] )
-			and _Dotty.new.is-valid( $parsed.hash.<dotty> )
-			and _OPER.new.is-valid( $parsed.hash.<OPER> );
+			and _Dotty.is-valid( $parsed.hash.<dotty> )
+			and _OPER.is-valid( $parsed.hash.<OPER> );
 		die self.new-term
 	}
 }
@@ -1960,9 +1878,9 @@ class _E1 does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $parsed,
 				[< scope_declarator >] )
-			and _ScopeDeclarator.new.is-valid( $parsed.hash.<scope_declarator> );
+			and _ScopeDeclarator.is-valid( $parsed.hash.<scope_declarator> );
 		die self.new-term
 	}
 }
@@ -2023,11 +1941,11 @@ class _Else does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< sym blorst >] )
-			and _Sym.new.is-valid( $parsed.hash.<sym> )
-			and _Blorst.new.is-valid( $parsed.hash.<blorst> );
-		return if self.assert-hash-keys( $parsed, [< blockoid >] )
-			and _Blockoid.new.is-valid( $parsed.hash.<blockoid> );
+		return True if self.assert-hash-keys( $parsed, [< sym blorst >] )
+			and _Sym.is-valid( $parsed.hash.<sym> )
+			and _Blorst.is-valid( $parsed.hash.<blorst> );
+		return True if self.assert-hash-keys( $parsed, [< blockoid >] )
+			and _Blockoid.is-valid( $parsed.hash.<blockoid> );
 		die self.new-term
 	}
 }
@@ -2055,9 +1973,9 @@ class _EScale does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< sign decint >] )
-			and _Sign.new.is-valid( $parsed.hash.<sign> )
-			and _DecInt.new.is-valid( $parsed.hash.<decint> );
+		return True if self.assert-hash-keys( $parsed, [< sign decint >] )
+			and _Sign.is-valid( $parsed.hash.<sign> )
+			and _DecInt.is-valid( $parsed.hash.<decint> );
 		die self.new-term
 	}
 }
@@ -2068,8 +1986,9 @@ class _EXPR does Node {
 		if $parsed.list {
 			my @child;
 			for $parsed.list {
-				if self.assert-hash-keys( $_, [< OPER dotty >],
-							 [< postfix_prefix_meta_operator >] ) {
+				if self.assert-hash-keys( $_,
+						[< dotty OPER >],
+						[< postfix_prefix_meta_operator >] ) {
 					@child.push(
 						_Dotty_OPER.new( $_ )
 					);
@@ -2084,7 +2003,7 @@ class _EXPR does Node {
 					next
 				}
 				if self.assert-hash-keys( $_, [< infix OPER >],
-							 [< infix_postfix_meta_operator >] ) {
+ 						[< infix_postfix_meta_operator >] ) {
 					@child.push(
 						_Infix_OPER.new( $_ )
 					);
@@ -2110,6 +2029,25 @@ class _EXPR does Node {
 					);
 					next
 				}
+				if self.assert-hash-keys( $_, [< value >] ) {
+					@child.push(
+						_Value.new( $_.hash.<value> )
+					);
+					next
+				}
+				if self.assert-hash-keys( $_, [< longname >] ) {
+					@child.push(
+						_LongName.new( $_.hash.<longname> )
+					);
+					next
+				}
+				if self.assert-hash-keys( $_, [< variable >] ) {
+					@child.push(
+						_Variable.new( $_.hash.<variable> )
+					);
+					next
+				}
+				die self.new-term
 			}
 			if self.assert-hash-keys(
 				$parsed,
@@ -2478,110 +2416,125 @@ class _EXPR does Node {
 	method is-valid( Mu $parsed ) {
 		self.trace;
 		if $parsed.list {
-			my @child;
 			for $parsed.list {
-				if self.assert-hash-keys( $_, [< OPER dotty >],
-							 [< postfix_prefix_meta_operator >] ) {
-					next if _Dotty_OPER.new.is-valid( $_ )
-				}
-				if self.assert-hash-keys( $_,
+				next if self.assert-hash-keys( $_,
+						[< dotty OPER >],
+						[< postfix_prefix_meta_operator >] )
+					and _Dotty_OPER.is-valid( $_ );
+				next if self.assert-hash-keys( $_,
 					[< postcircumfix OPER >],
-					[< postfix_prefix_meta_operator >] ) {
-					next if _PostCircumfix_OPER.new.is-valid( $_ )
-				}
-				if self.assert-hash-keys( $_, [< infix OPER >],
-							 [< infix_postfix_meta_operator >] ) {
-					next if _Infix_OPER.new.is-valid( $_ )
-				}
-				if self.assert-hash-keys( $_, [< prefix OPER >],
-							 [< prefix_postfix_meta_operator >] ) {
-					next if _Prefix_OPER.new.is-valid( $_ )
-				}
-				if self.assert-hash-keys( $_, [< postfix OPER >],
-							 [< postfix_prefix_meta_operator >] ) {
-					next if _Postfix_OPER.new.is-valid( $_ )
-				}
-				if self.assert-hash-keys( $_, [< identifier args >] ) {
-					next if _Identifier_Args.new.is-valid( $_ )
-				}
+					[< postfix_prefix_meta_operator >] )
+					and _PostCircumfix_OPER.is-valid( $_ );
+				next if self.assert-hash-keys( $_,
+						[< infix OPER >],
+						[< infix_postfix_meta_operator >] )
+					and _Infix_OPER.is-valid( $_ );
+				next if self.assert-hash-keys( $_,
+						[< prefix OPER >],
+						[< prefix_postfix_meta_operator >] )
+					and _Prefix_OPER.is-valid( $_ );
+				next if self.assert-hash-keys( $_,
+						[< postfix OPER >],
+						[< postfix_prefix_meta_operator >] )
+					and _Postfix_OPER.is-valid( $_ );
+				next if self.assert-hash-keys( $_,
+						[< identifier args >] )
+					and _Identifier_Args.is-valid( $_ );
+				# XXX The *hell*?...
+				# Actually it's just a consequence of how the
+				# compound terms are structured.
+				#
+				# They really need to be singularized, but
+				# until that happens, what's happening here
+				# really is a hash access.
+				#
+				# But I'm wondering why it took breaking out
+				# the validation into a separate method
+				# in order to find the bug.
+				next if self.assert-hash-keys( $_, [< value >] )
+					and _Value.is-valid( $_.hash.<value> );
+				next if self.assert-hash-keys( $_, [< longname >] )
+					and _LongName.is-valid( $_.hash.<longname> );
+				next if self.assert-hash-keys( $_, [< variable >] )
+					and _Variable.is-valid( $_.hash.<variable> );
 				die self.new-term
 			}
-			return if self.assert-hash-keys(
+			return True if self.assert-hash-keys(
 					$parsed,
 					[< OPER dotty >],
 					[< postfix_prefix_meta_operator >] )
-				and _OPER.new.is-valid( $parsed.hash.<OPER> )
-				and _Dotty.new.is-valid( $parsed.hash.<dotty> );
-			return if self.assert-hash-keys(
+				and _OPER.is-valid( $parsed.hash.<OPER> )
+				and _Dotty.is-valid( $parsed.hash.<dotty> );
+			return True if self.assert-hash-keys(
 					$parsed,
 					[< postfix OPER >],
 					[< postfix_prefix_meta_operator >] )
-				and _Postfix.new.is-valid( $parsed.hash.<postfix> )
-				and _OPER.new.is-valid( $parsed.hash.<OPER> );
-			return if self.assert-hash-keys(
+				and _Postfix.is-valid( $parsed.hash.<postfix> )
+				and _OPER.is-valid( $parsed.hash.<OPER> );
+			return True if self.assert-hash-keys(
 					$parsed,
 					[< infix OPER >],
 					[< prefix_postfix_meta_operator >] )
-				and _Infix.new.is-valid( $parsed.hash.<infix> )
-				and _OPER.new.is-valid( $parsed.hash.<OPER> );
-			return if self.assert-hash-keys(
+				and _Infix.is-valid( $parsed.hash.<infix> )
+				and _OPER.is-valid( $parsed.hash.<OPER> );
+			return True if self.assert-hash-keys(
 					$parsed,
 					[< prefix OPER >],
 					[< prefix_postfix_meta_operator >] )
-				and _Prefix.new.is-valid( $parsed.hash.<prefix> )
-				and _OPER.new.is-valid( $parsed.hash.<OPER> );
-			return if self.assert-hash-keys(
+				and _Prefix.is-valid( $parsed.hash.<prefix> )
+				and _OPER.is-valid( $parsed.hash.<OPER> );
+			return True if self.assert-hash-keys(
 					$parsed,
 					[< postcircumfix OPER >],
 					[< postfix_prefix_meta_operator >] )
-				and _PostCircumfix.new.is-valid( $parsed.hash.<postcircumfix> )
-				and _OPER.new.is-valid( $parsed.hash.<OPER> );
-			return if self.assert-hash-keys( $parsed,
+				and _PostCircumfix.is-valid( $parsed.hash.<postcircumfix> )
+				and _OPER.is-valid( $parsed.hash.<OPER> );
+			return True if self.assert-hash-keys( $parsed,
 					[< OPER >],
 					[< infix_prefix_meta_operator >] )
-				and _OPER.new.is-valid( $parsed.hash.<OPER> );
+				and _OPER.is-valid( $parsed.hash.<OPER> );
 			die self.new-term
 		}
-		return if self.assert-hash-keys( $parsed, [< longname args >] )
-			and _LongName.new.is-valid( $parsed.hash.<longname> )
-			and _Args.new.is-valid( $parsed.hash.<args> );
-		return if self.assert-hash-keys( $parsed, [< identifier args >] )
-			and _Identifier.new.is-valid( $parsed.hash.<identifier> )
-			and _Args.new.is-valid( $parsed.hash.<args> );
-		return if self.assert-hash-keys( $parsed, [< args op >] )
-			and _Args.new.is-valid( $parsed.hash.<args> )
-			and _Op.new.is-valid( $parsed.hash.<op> );
-		return if self.assert-hash-keys( $parsed, [< sym args >] )
-			and _Sym.new.is-valid( $parsed.hash.<sym> )
-			and _Args.new.is-valid( $parsed.hash.<args> );
-		return if self.assert-hash-keys( $parsed, [< statement_prefix >] )
-			and _StatementPrefix.new.is-valid( $parsed.hash.<statement_prefix> );
-		return if self.assert-hash-keys( $parsed, [< type_declarator >] )
-			and _TypeDeclarator.new.is-valid( $parsed.hash.<type_declarator> );
-		return if self.assert-hash-keys( $parsed, [< longname >] )
-			and _LongName.new.is-valid( $parsed.hash.<longname> );
-		return if self.assert-hash-keys( $parsed, [< value >] )
-			and _Value.new.is-valid( $parsed.hash.<value> );
-		return if self.assert-hash-keys( $parsed, [< variable >] )
-			and _Variable.new.is-valid( $parsed.hash.<variable> );
-		return if self.assert-hash-keys( $parsed, [< circumfix >] )
-			and _Circumfix.new.is-valid( $parsed.hash.<circumfix> );
-		return if self.assert-hash-keys( $parsed, [< colonpair >] )
-			and _ColonPair.new.is-valid( $parsed.hash.<colonpair> );
-		return if self.assert-hash-keys( $parsed, [< scope_declarator >] )
-			and _ScopeDeclarator.new.is-valid( $parsed.hash.<scope_declarator> );
-		return if self.assert-hash-keys( $parsed, [< routine_declarator >] )
-			and _RoutineDeclarator.new.is-valiis-valid( $parsed.hash.<routine_declarator> );
-		return if self.assert-hash-keys( $parsed, [< package_declarator >] )
-			and _PackageDeclarator.new.is-valid( $parsed.hash.<package_declarator> );
-		return if self.assert-hash-keys( $parsed, [< fatarrow >] )
-			and _FatArrow.new.is-valid( $parsed.hash.<fatarrow> );
-		return if self.assert-hash-keys( $parsed, [< multi_declarator >] )
-			and _MultiDeclarator.new.is-valid( $parsed.hash.<multi_declarator> );
-		return if self.assert-hash-keys( $parsed, [< regex_declarator >] )
-			and _RegexDeclarator.new.is-valid( $parsed.hash.<regex_declarator> );
-		return if self.assert-hash-keys( $parsed, [< dotty >] )
-			and _Dotty.new.is-valid( $parsed.hash.<dotty> );
+		return True if self.assert-hash-keys( $parsed, [< longname args >] )
+			and _LongName.is-valid( $parsed.hash.<longname> )
+			and _Args.is-valid( $parsed.hash.<args> );
+		return True if self.assert-hash-keys( $parsed, [< identifier args >] )
+			and _Identifier.is-valid( $parsed.hash.<identifier> )
+			and _Args.is-valid( $parsed.hash.<args> );
+		return True if self.assert-hash-keys( $parsed, [< args op >] )
+			and _Args.is-valid( $parsed.hash.<args> )
+			and _Op.is-valid( $parsed.hash.<op> );
+		return True if self.assert-hash-keys( $parsed, [< sym args >] )
+			and _Sym.is-valid( $parsed.hash.<sym> )
+			and _Args.is-valid( $parsed.hash.<args> );
+		return True if self.assert-hash-keys( $parsed, [< statement_prefix >] )
+			and _StatementPrefix.is-valid( $parsed.hash.<statement_prefix> );
+		return True if self.assert-hash-keys( $parsed, [< type_declarator >] )
+			and _TypeDeclarator.is-valid( $parsed.hash.<type_declarator> );
+		return True if self.assert-hash-keys( $parsed, [< longname >] )
+			and _LongName.is-valid( $parsed.hash.<longname> );
+		return True if self.assert-hash-keys( $parsed, [< value >] )
+			and _Value.is-valid( $parsed.hash.<value> );
+		return True if self.assert-hash-keys( $parsed, [< variable >] )
+			and _Variable.is-valid( $parsed.hash.<variable> );
+		return True if self.assert-hash-keys( $parsed, [< circumfix >] )
+			and _Circumfix.is-valid( $parsed.hash.<circumfix> );
+		return True if self.assert-hash-keys( $parsed, [< colonpair >] )
+			and _ColonPair.is-valid( $parsed.hash.<colonpair> );
+		return True if self.assert-hash-keys( $parsed, [< scope_declarator >] )
+			and _ScopeDeclarator.is-valid( $parsed.hash.<scope_declarator> );
+		return True if self.assert-hash-keys( $parsed, [< routine_declarator >] )
+			and _RoutineDeclarator.is-valid( $parsed.hash.<routine_declarator> );
+		return True if self.assert-hash-keys( $parsed, [< package_declarator >] )
+			and _PackageDeclarator.is-valid( $parsed.hash.<package_declarator> );
+		return True if self.assert-hash-keys( $parsed, [< fatarrow >] )
+			and _FatArrow.is-valid( $parsed.hash.<fatarrow> );
+		return True if self.assert-hash-keys( $parsed, [< multi_declarator >] )
+			and _MultiDeclarator.is-valid( $parsed.hash.<multi_declarator> );
+		return True if self.assert-hash-keys( $parsed, [< regex_declarator >] )
+			and _RegexDeclarator.is-valid( $parsed.hash.<regex_declarator> );
+		return True if self.assert-hash-keys( $parsed, [< dotty >] )
+			and _Dotty.is-valid( $parsed.hash.<dotty> );
 		die self.new-term
 	}
 }
@@ -2604,8 +2557,8 @@ class _FakeSignature does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< signature >] )
-			and _Signature.new.is-valid( $parsed.hash.<signature> );
+		return True if self.assert-hash-keys( $parsed, [< signature >] )
+			and _Signature.is-valid( $parsed.hash.<signature> );
 		die self.new-term
 	}
 }
@@ -2633,9 +2586,9 @@ class _FatArrow does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< val key >] )
-			and _Val.new.is-valid( $parsed.hash.<val> )
-			and _Key.new.is-valid( $parsed.hash.<key> );
+		return True if self.assert-hash-keys( $parsed, [< val key >] )
+			and _Val.is-valid( $parsed.hash.<val> )
+			and _Key.is-valid( $parsed.hash.<key> );
 		die self.new-term
 	}
 }
@@ -2654,8 +2607,8 @@ class _Frac does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if $parsed.Str and $parsed.Str eq '0';
-		return if self.assert-Int( $parsed );
+		return True if $parsed.Str and $parsed.Str eq '0';
+		return True if self.assert-Int( $parsed );
 		die self.new-term
 	}
 }
@@ -2674,8 +2627,8 @@ class _HexInt does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if $parsed.Str and $parsed.Str eq '0';
-		return if self.assert-Int( $parsed );
+		return True if $parsed.Str and $parsed.Str eq '0';
+		return True if self.assert-Int( $parsed );
 		die self.new-term
 	}
 }
@@ -2704,10 +2657,10 @@ class _Identifier_Args does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $parsed,
 				[< identifier args >] )
-			and _Identifier.new.is-valid( $parsed.hash.<identifier> )
-			and _Args.new.is-valid( $parsed.hash.<args> );
+			and _Identifier.is-valid( $parsed.hash.<identifier> )
+			and _Args.is-valid( $parsed.hash.<args> );
 		die self.new-term
 	}
 }
@@ -2742,10 +2695,10 @@ class _Identifier does Node {
 				next if self.assert-Str( $_ );
 				die self.new-term
 			}
-			return 
+			return True
 		}
 		elsif $parsed.Str {
-			return
+			return True
 		}
 		die self.new-term
 	}
@@ -2806,15 +2759,15 @@ class _Infix does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< EXPR O >] )
-			and _EXPR.new.is-valid( $parsed.hash.<EXPR> )
-			and _O.new.is-valid( $parsed.hash.<O> );
-		return if self.assert-hash-keys( $parsed, [< infix OPER >] )
-			and _Infix.new.is-valid( $parsed.hash.<infix> )
-			and _OPER.new.is-valid( $parsed.hash.<OPER> );
-		return if self.assert-hash-keys( $parsed, [< sym O >] )
-			and _Sym.new.is-valid( $parsed.hash.<sym> )
-			and _O.new.is-valid( $parsed.hash.<O> );
+		return True if self.assert-hash-keys( $parsed, [< EXPR O >] )
+			and _EXPR.is-valid( $parsed.hash.<EXPR> )
+			and _O.is-valid( $parsed.hash.<O> );
+		return True if self.assert-hash-keys( $parsed, [< infix OPER >] )
+			and _Infix.is-valid( $parsed.hash.<infix> )
+			and _OPER.is-valid( $parsed.hash.<OPER> );
+		return True if self.assert-hash-keys( $parsed, [< sym O >] )
+			and _Sym.is-valid( $parsed.hash.<sym> )
+			and _O.is-valid( $parsed.hash.<O> );
 		die self.new-term
 	}
 }
@@ -2842,9 +2795,9 @@ class _Infixish does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< infix OPER >] )
-			and _Infix.new.is-valid( $parsed.hash.<infix> )
-			and _OPER.new.is-valid( $parsed.hash.<OPER> );
+		return True if self.assert-hash-keys( $parsed, [< infix OPER >] )
+			and _Infix.is-valid( $parsed.hash.<infix> )
+			and _OPER.is-valid( $parsed.hash.<OPER> );
 		die self.new-term
 	}
 }
@@ -2876,11 +2829,11 @@ class _Infix_OPER does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $parsed,
 			     [< infix OPER >],
 			     [< infix_postfix_meta_operator >] )
-			and _Infix.new.is-valid( $parsed.hash.<infix> )
-			and _OPER.new.is-valid( $parsed.hash.<OPER> );
+			and _Infix.is-valid( $parsed.hash.<infix> )
+			and _OPER.is-valid( $parsed.hash.<OPER> );
 		die self.new-term
 	}
 }
@@ -2914,10 +2867,10 @@ class _InfixPrefixMetaOperator does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< sym infixish O >] )
-			and _Sym.new.is-valid( $parsed.hash.<sym> )
-			and _Infixish.new.is-valid( $parsed.hash.<infixish> )
-			and _O.new.is-valid( $parsed.hash.<O> );
+		return True if self.assert-hash-keys( $parsed, [< sym infixish O >] )
+			and _Sym.is-valid( $parsed.hash.<sym> )
+			and _Infixish.is-valid( $parsed.hash.<infixish> )
+			and _O.is-valid( $parsed.hash.<O> );
 		die self.new-term
 	}
 }
@@ -2951,12 +2904,12 @@ class _Initializer does Node {
 	method is-valid( Mu $parsed ) {
 		self.trace;
 		if $parsed {
-			return if self.assert-hash-keys( $parsed, [< sym EXPR >] )
-				and _Sym.new.is-valid( $parsed.hash.<sym> )
-				and _EXPR.new.is-valid( $parsed.hash.<EXPR> );
+			return True if self.assert-hash-keys( $parsed, [< sym EXPR >] )
+				and _Sym.is-valid( $parsed.hash.<sym> )
+				and _EXPR.is-valid( $parsed.hash.<EXPR> );
 		}
 		else {
-			return
+			return True
 		}
 		die self.new-term
 	}
@@ -2976,8 +2929,8 @@ class _Int does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if $parsed.Str and $parsed.Str eq '0';
-		return if self.assert-Int( $parsed );
+		return True if $parsed.Str and $parsed.Str eq '0';
+		return True if self.assert-Int( $parsed );
 		die self.new-term
 	}
 }
@@ -3053,18 +3006,18 @@ class _Integer does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< decint VALUE >] )
-			and _DecInt.new.is-valid( $parsed.hash.<decint> )
-			and _VALUE.new.is-valid( $parsed.hash.<VALUE> );
-		return if self.assert-hash-keys( $parsed, [< binint VALUE >] )
-			and _BinInt.new.is-valid( $parsed.hash.<binint> )
-			and _VALUE.new.is-valid( $parsed.hash.<VALUE> );
-		return if self.assert-hash-keys( $parsed, [< octint VALUE >] )
-			and _OctInt.new.is-valid( $parsed.hash.<octint> )
-			and _VALUE.new.is-valid( $parsed.hash.<VALUE> );
-		return if self.assert-hash-keys( $parsed, [< hexint VALUE >] )
-			and _HexInt.new.is-valid( $parsed.hash.<hexint> )
-			and _VALUE.new.is-valid( $parsed.hash.<VALUE> );
+		return True if self.assert-hash-keys( $parsed, [< decint VALUE >] )
+			and _DecInt.is-valid( $parsed.hash.<decint> )
+			and _VALUE.is-valid( $parsed.hash.<VALUE> );
+		return True if self.assert-hash-keys( $parsed, [< binint VALUE >] )
+			and _BinInt.is-valid( $parsed.hash.<binint> )
+			and _VALUE.is-valid( $parsed.hash.<VALUE> );
+		return True if self.assert-hash-keys( $parsed, [< octint VALUE >] )
+			and _OctInt.is-valid( $parsed.hash.<octint> )
+			and _VALUE.is-valid( $parsed.hash.<VALUE> );
+		return True if self.assert-hash-keys( $parsed, [< hexint VALUE >] )
+			and _HexInt.is-valid( $parsed.hash.<hexint> )
+			and _VALUE.is-valid( $parsed.hash.<VALUE> );
 		die self.new-term
 	}
 }
@@ -3107,8 +3060,8 @@ class _Left does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< termseq >] )
-			and _TermSeq.new.is-valid( $parsed.hash.<termseq> );
+		return True if self.assert-hash-keys( $parsed, [< termseq >] )
+			and _TermSeq.is-valid( $parsed.hash.<termseq> );
 		die self.new-term
 	}
 }
@@ -3150,13 +3103,13 @@ class _LongName_ColonPair does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $parsed,
 				[< longname colonpairs >], [< colonpair >] )
-			and _LongName.new.is-valid( $_.hash.<longname> )
-			and _ColonPairs.new.is-valid( $_.hash.<colonpairs> );
-		return if self.assert-hash-keys( $parsed,
+			and _LongName.is-valid( $parsed.hash.<longname> )
+			and _ColonPairs.is-valid( $parsed.hash.<colonpairs> );
+		return True if self.assert-hash-keys( $parsed,
 				[< longname >], [< colonpair >] )
-			and _LongName.new.is-valid( $_.hash.<longname> );
+			and _LongName.is-valid( $parsed.hash.<longname> );
 		die self.new-term
 	}
 }
@@ -3186,10 +3139,10 @@ class _LongName_ColonPairs does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $parsed,
 				[< longname colonpairs >], [< colonpair >] )
-			and _LongName.new.is-valid( $_.hash.<longname> )
-			and _ColonPairs.new.is-valid( $_.hash.<colonpairs> );
+			and _LongName.is-valid( $parsed.hash.<longname> )
+			and _ColonPairs.is-valid( $parsed.hash.<colonpairs> );
 		die self.new-term
 	}
 }
@@ -3221,14 +3174,14 @@ class _LongName does Node {
 	method is-valid( Mu $parsed ) {
 		self.trace;
 		if $parsed {
-			return if self.assert-hash-keys( $parsed,
-						  [< name >],
-						  [< colonpair >] )
-				and _Name.new.is-valid( $parsed.hash.<name> );
+			return True if self.assert-hash-keys( $parsed,
+					[< name >],
+					[< colonpair >] )
+				and _Name.is-valid( $parsed.hash.<name> );
 		}
 		else {
 			# XXX Hardly seems fair this way, doesn't it?
-			return
+			return True
 		}
 		die self.new-term
 	}
@@ -3318,20 +3271,20 @@ class _MetaChar does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< sym >] )
-			and _Sym.new.is-valid( $parsed.hash.<sym> );
-		return if self.assert-hash-keys( $parsed, [< codeblock >] )
-			and _CodeBlock.new.is-valid( $parsed.hash.<codeblock> );
-		return if self.assert-hash-keys( $parsed, [< backslash >] )
-			and _BackSlash.new.is-valid( $parsed.hash.<backslash> );
-		return if self.assert-hash-keys( $parsed, [< assertion >] )
-			and _Assertion.new.is-valid( $parsed.hash.<assertion> );
-		return if self.assert-hash-keys( $parsed, [< nibble >] )
-			and _Nibble.new.is-valid( $parsed.hash.<nibble> );
-		return if self.assert-hash-keys( $parsed, [< quote >] )
-			and _Quote.new.is-valid( $parsed.hash.<quote> );
-		return if self.assert-hash-keys( $parsed, [< nibbler >] )
-			and _Nibbler.new.is-valid( $parsed.hash.<nibbler> );
+		return True if self.assert-hash-keys( $parsed, [< sym >] )
+			and _Sym.is-valid( $parsed.hash.<sym> );
+		return True if self.assert-hash-keys( $parsed, [< codeblock >] )
+			and _CodeBlock.is-valid( $parsed.hash.<codeblock> );
+		return True if self.assert-hash-keys( $parsed, [< backslash >] )
+			and _BackSlash.is-valid( $parsed.hash.<backslash> );
+		return True if self.assert-hash-keys( $parsed, [< assertion >] )
+			and _Assertion.is-valid( $parsed.hash.<assertion> );
+		return True if self.assert-hash-keys( $parsed, [< nibble >] )
+			and _Nibble.is-valid( $parsed.hash.<nibble> );
+		return True if self.assert-hash-keys( $parsed, [< quote >] )
+			and _Quote.is-valid( $parsed.hash.<quote> );
+		return True if self.assert-hash-keys( $parsed, [< nibbler >] )
+			and _Nibbler.is-valid( $parsed.hash.<nibbler> );
 		die self.new-term
 	}
 }
@@ -3396,19 +3349,19 @@ class _MethodDef does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $parsed,
 			     [< specials longname blockoid multisig >],
 			     [< trait >] )
-			and _Specials.new.is-valid( $parsed.hash.<specials> )
-			and _LongName.new.is-valid( $parsed.hash.<longname> )
-			and _Blockoid.new.is-valid( $parsed.hash.<blockoid> )
-			and _MultiSig.new.is-valid( $parsed.hash.<multisig> );
-		return if self.assert-hash-keys( $parsed,
+			and _Specials.is-valid( $parsed.hash.<specials> )
+			and _LongName.is-valid( $parsed.hash.<longname> )
+			and _Blockoid.is-valid( $parsed.hash.<blockoid> )
+			and _MultiSig.is-valid( $parsed.hash.<multisig> );
+		return True if self.assert-hash-keys( $parsed,
 			     [< specials longname blockoid >],
 			     [< trait >] )
-			and _Specials.new.is-valid( $parsed.hash.<specials> )
-			and _LongName.new.is-valid( $parsed.hash.<longname> )
-			and _Blockoid.new.is-valid( $parsed.hash.<blockoid> );
+			and _Specials.is-valid( $parsed.hash.<specials> )
+			and _LongName.is-valid( $parsed.hash.<longname> )
+			and _Blockoid.is-valid( $parsed.hash.<blockoid> );
 		die self.new-term
 	}
 }
@@ -3458,13 +3411,13 @@ class _MethodOp does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< longname args >] )
-			and _LongName.new.is-valid( $parsed.hash.<longname> )
-			and _Args.new.is-valid( $parsed.hash.<args> );
-		return if self.assert-hash-keys( $parsed, [< variable >] )
-			and _Variable.new.is-valid( $parsed.hash.<variable> );
-		return if self.assert-hash-keys( $parsed, [< longname >] )
-			and _LongName.new.is-valid( $parsed.hash.<longname> );
+		return True if self.assert-hash-keys( $parsed, [< longname args >] )
+			and _LongName.is-valid( $parsed.hash.<longname> )
+			and _Args.is-valid( $parsed.hash.<args> );
+		return True if self.assert-hash-keys( $parsed, [< variable >] )
+			and _Variable.is-valid( $parsed.hash.<variable> );
+		return True if self.assert-hash-keys( $parsed, [< longname >] )
+			and _LongName.is-valid( $parsed.hash.<longname> );
 		die dump( $parsed );
 	}
 }
@@ -3487,8 +3440,8 @@ class _ModifierExpr does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< EXPR >] )
-			and _EXPR.new.is-valid( $parsed.hash.<EXPR> );
+		return True if self.assert-hash-keys( $parsed, [< EXPR >] )
+			and _EXPR.is-valid( $parsed.hash.<EXPR> );
 		die self.new-term
 	}
 }
@@ -3511,8 +3464,8 @@ class _ModuleName does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< longname >] )
-			and _LongName.new.is-valid( $parsed.hash.<longname> );
+		return True if self.assert-hash-keys( $parsed, [< longname >] )
+			and _LongName.is-valid( $parsed.hash.<longname> );
 		die self.new-term
 	}
 }
@@ -3567,16 +3520,16 @@ class _MultiDeclarator does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $parsed,
 				[< sym routine_def >] )
-			and _Sym.new.is-valid( $parsed.hash.<sym> )
-			and _RoutineDef.new.is-valid( $parsed.hash.<routine_def> );
-		return if self.assert-hash-keys( $parsed,
+			and _Sym.is-valid( $parsed.hash.<sym> )
+			and _RoutineDef.is-valid( $parsed.hash.<routine_def> );
+		return True if self.assert-hash-keys( $parsed,
 				[< sym declarator >] )
-			and _Sym.new.is-valid( $parsed.hash.<sym> )
-			and _Declarator.new.is-valid( $parsed.hash.<declarator> );
-		return if self.assert-hash-keys( $parsed, [< declarator >] )
-			and _Declarator.new.is-valid( $parsed.hash.<declarator> );
+			and _Sym.is-valid( $parsed.hash.<sym> )
+			and _Declarator.is-valid( $parsed.hash.<declarator> );
+		return True if self.assert-hash-keys( $parsed, [< declarator >] )
+			and _Declarator.is-valid( $parsed.hash.<declarator> );
 		die self.new-term
 	}
 }
@@ -3599,8 +3552,8 @@ class _MultiSig does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< signature >] )
-			and _Signature.new.is-valid( $parsed.hash.<signature> );
+		return True if self.assert-hash-keys( $parsed, [< signature >] )
+			and _Signature.is-valid( $parsed.hash.<signature> );
 		die self.new-term
 	}
 }
@@ -3656,16 +3609,16 @@ class _Name does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $parsed,
 			[< param_var type_constraint quant >],
 			[< default_value modifier trait post_constraint >] )
-			and _ParamVar.new.is-valid( $parsed.hash.<param_var> )
-			and _TypeConstraint.new.is-valid( $parsed.hash.<type_constraint> )
-			and _Quant.new.is-valid( $parsed.hash.<quant> );
-		return if self.assert-hash-keys( $parsed, [< identifier >],
-						   [< morename >] )
-			and _Identifier.new.is-valid( $parsed.hash.<identifier> );
-		return if self.assert-Str( $parsed );
+			and _ParamVar.is-valid( $parsed.hash.<param_var> )
+			and _TypeConstraint.is-valid( $parsed.hash.<type_constraint> )
+			and _Quant.is-valid( $parsed.hash.<quant> );
+		return True if self.assert-hash-keys( $parsed,
+				[< identifier >], [< morename >] )
+			and _Identifier.is-valid( $parsed.hash.<identifier> );
+		return True if self.assert-Str( $parsed );
 		die self.new-term
 	}
 }
@@ -3694,8 +3647,10 @@ class _Nibble does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< termseq >] )
-			and _TermSeq.new.is-valid( $parsed.hash.<termseq> );
+		return True if self.assert-hash-keys( $parsed, [< termseq >] )
+			and _TermSeq.is-valid( $parsed.hash.<termseq> );
+		return True if $parsed.Str;
+		return True if $parsed.Bool;
 		die self.new-term
 	}
 }
@@ -3718,8 +3673,8 @@ class _Nibbler does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< termseq >] )
-			and _TermSeq.new.is-valid( $parsed.hash.<termseq> );
+		return True if self.assert-hash-keys( $parsed, [< termseq >] )
+			and _TermSeq.is-valid( $parsed.hash.<termseq> );
 		die self.new-term
 	}
 }
@@ -3783,16 +3738,16 @@ class _Noun does Node {
 				next if self.assert-hash-keys( $_,
 					[< sigfinal quantifier
 					   separator atom >] )
-					and _SigFinal_Quantifier_Separator_Atom.new.is-valid( $_ );
+					and _SigFinal_Quantifier_Separator_Atom.is-valid( $_ );
 				next if self.assert-hash-keys( $_,
 					[< atom sigfinal quantifier >] )
-					and _Atom_SigFinal_Quantifier.new.is-valid( $_ );
+					and _Atom_SigFinal_Quantifier.is-valid( $_ );
 				next if self.assert-hash-keys( $_,
 						[< atom >], [< sigfinal >] )
-					and _Atom_SigFinal.new.is-valid( $_ );
+					and _Atom_SigFinal.is-valid( $_ );
 				die self.new-term
 			}
-			return 
+			return True
 		}
 		die self.new-term
 	}
@@ -3816,8 +3771,8 @@ class _Number does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< numish >] )
-			and _Number.new.is-valid( $parsed.hash.<numish> );
+		return True if self.assert-hash-keys( $parsed, [< numish >] )
+			and _Numish.is-valid( $parsed.hash.<numish> );
 		die self.new-term
 	}
 }
@@ -3862,12 +3817,12 @@ class _Numish does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< integer >] )
-			and _Integer.new.is-valid( $parsed.hash.<integer> );
-		return if self.assert-hash-keys( $parsed, [< rad_number >] )
-			and _RadNumber.new.is-valid( $parsed.hash.<rad_number> );
-		return if self.assert-hash-keys( $parsed, [< dec_number >] )
-			and _DecNumber.new.is-valid( $parsed.hash.<dec_number> );
+		return True if self.assert-hash-keys( $parsed, [< integer >] )
+			and _Integer.is-valid( $parsed.hash.<integer> );
+		return True if self.assert-hash-keys( $parsed, [< rad_number >] )
+			and _RadNumber.is-valid( $parsed.hash.<rad_number> );
+		return True if self.assert-hash-keys( $parsed, [< dec_number >] )
+			and _DecNumber.is-valid( $parsed.hash.<dec_number> );
 		die self.new-term
 	}
 }
@@ -3886,8 +3841,8 @@ class _OctInt does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if $parsed.Str and $parsed.Str eq '0';
-		return if self.assert-Int( $parsed );
+		return True if $parsed.Str and $parsed.Str eq '0';
+		return True if self.assert-Int( $parsed );
 		die self.new-term
 	}
 }
@@ -3929,14 +3884,20 @@ class _O does Node {
 		self.trace;
 		# XXX There has to be a better way to handle this NoMatch case
 		CATCH { when X::Multi::NoMatch { } }
-		if $parsed ~~ Hash {
-			return if $parsed.<prec>
-				and $parsed.<fiddly>
-				and $parsed.<dba>
-				and $parsed.<assoc>;
-			return if $parsed.<prec>
-				and $parsed.<dba>
-				and $parsed.<assoc>;
+		if $parsed {
+			if $parsed ~~ Hash {
+				return True if $parsed.<prec>
+					and $parsed.<fiddly>
+					and $parsed.<dba>
+					and $parsed.<assoc>;
+				return True if $parsed.<prec>
+					and $parsed.<dba>
+					and $parsed.<assoc>;
+			}
+		}
+		else {
+warn "Bypassing _O possibly";
+			return True
 		}
 		die self.new-term
 	}
@@ -3982,14 +3943,13 @@ class _Op does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $parsed,
 			     [< infix_prefix_meta_operator OPER >] )
-			and _InfixPrefixMetaOperator.new.is-valid( $parsed.hash.<infix_prefix_meta_operator> )
-			and _OPER.new.is-valid( $parsed.hash.<OPER> );
-		return if self.assert-hash-keys( $parsed,
-			     [< infix OPER >] )
-			and _Infix.new.is-valid( $parsed.hash.<infix> )
-			and _OPER.new.is-valid( $parsed.hash.<OPER> );
+			and _InfixPrefixMetaOperator.is-valid( $parsed.hash.<infix_prefix_meta_operator> )
+			and _OPER.is-valid( $parsed.hash.<OPER> );
+		return True if self.assert-hash-keys( $parsed, [< infix OPER >] )
+			and _Infix.is-valid( $parsed.hash.<infix> )
+			and _OPER.is-valid( $parsed.hash.<OPER> );
 		die self.new-term
 	}
 }
@@ -4150,31 +4110,31 @@ class _OPER does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< sym dottyop O >] )
-			and _Sym.new.is-valid( $parsed.hash.<sym> )
-			and _DottyOp.new.is-valid( $parsed.hash.<dottyop> )
-			and _O.new.is-valid( $parsed.hash.<O> );
-		return if self.assert-hash-keys( $parsed, [< sym infixish O >] )
-			and _Sym.new.is-valid( $parsed.hash.<sym> )
-			and _Infixish.new.is-valid( $parsed.hash.<infixish> )
-			and _O.new.is-valid( $parsed.hash.<O> );
-		return if self.assert-hash-keys( $parsed, [< sym O >] )
-			and _Sym.new.is-valid( $parsed.hash.<sym> )
-			and _O.new.is-valid( $parsed.hash.<O> );
-		return if self.assert-hash-keys( $parsed, [< EXPR O >] )
-			and _EXPR.new.is-valid( $parsed.hash.<EXPR> )
-			and _O.new.is-valid( $parsed.hash.<O> );
-		return if self.assert-hash-keys( $parsed, [< semilist O >] )
-			and _SemiList.new.is-valid( $parsed.hash.<semilist> )
-			and _O.new.is-valid( $parsed.hash.<O> );
-		return if self.assert-hash-keys( $parsed, [< nibble O >] )
-			and _Nibble.new.is-valid( $parsed.hash.<nibble> )
-			and _O.new.is-valid( $parsed.hash.<O> );
-		return if self.assert-hash-keys( $parsed, [< arglist O >] )
-			and _ArgList.new.is-valid( $parsed.hash.<arglist> )
-			and _O.new.is-valid( $parsed.hash.<O> );
-		return if self.assert-hash-keys( $parsed, [< O >] )
-			and _O.new.is-valid( $parsed.hash.<O> );
+		return True if self.assert-hash-keys( $parsed, [< sym dottyop O >] )
+			and _Sym.is-valid( $parsed.hash.<sym> )
+			and _DottyOp.is-valid( $parsed.hash.<dottyop> )
+			and _O.is-valid( $parsed.hash.<O> );
+		return True if self.assert-hash-keys( $parsed, [< sym infixish O >] )
+			and _Sym.is-valid( $parsed.hash.<sym> )
+			and _Infixish.is-valid( $parsed.hash.<infixish> )
+			and _O.is-valid( $parsed.hash.<O> );
+		return True if self.assert-hash-keys( $parsed, [< sym O >] )
+			and _Sym.is-valid( $parsed.hash.<sym> )
+			and _O.is-valid( $parsed.hash.<O> );
+		return True if self.assert-hash-keys( $parsed, [< EXPR O >] )
+			and _EXPR.is-valid( $parsed.hash.<EXPR> )
+			and _O.is-valid( $parsed.hash.<O> );
+		return True if self.assert-hash-keys( $parsed, [< semilist O >] )
+			and _SemiList.is-valid( $parsed.hash.<semilist> )
+			and _O.is-valid( $parsed.hash.<O> );
+		return True if self.assert-hash-keys( $parsed, [< nibble O >] )
+			and _Nibble.is-valid( $parsed.hash.<nibble> )
+			and _O.is-valid( $parsed.hash.<O> );
+		return True if self.assert-hash-keys( $parsed, [< arglist O >] )
+			and _ArgList.is-valid( $parsed.hash.<arglist> )
+			and _O.is-valid( $parsed.hash.<O> );
+		return True if self.assert-hash-keys( $parsed, [< O >] )
+			and _O.is-valid( $parsed.hash.<O> );
 		die self.new-term
 	}
 }
@@ -4202,10 +4162,10 @@ class _PackageDeclarator does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $parsed,
 				[< sym package_def >] )
-			and _Sym.new.is-valid( $parsed.hash.<sym> )
-			and _PackageDef.new.is-valid( $parsed.hash.<package_def> );
+			and _Sym.is-valid( $parsed.hash.<sym> )
+			and _PackageDef.is-valid( $parsed.hash.<package_def> );
 		die self.new-term
 	}
 }
@@ -4253,14 +4213,14 @@ class _PackageDef does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $parsed,
 				[< blockoid longname >], [< trait >] )
-			and _Blockoid.new.is-valid( $parsed.hash.<blockoid> )
-			and _LongName.new.is-valid( $parsed.hash.<longname> );
-		return if self.assert-hash-keys( $parsed,
+			and _Blockoid.is-valid( $parsed.hash.<blockoid> )
+			and _LongName.is-valid( $parsed.hash.<longname> );
+		return True if self.assert-hash-keys( $parsed,
 				[< longname statementlist >], [< trait >] )
-			and _LongName.new.is-valid( $parsed.hash.<longname> )
-			and _StatementList.new.is-valid( $parsed.hash.<statementlist> );
+			and _LongName.is-valid( $parsed.hash.<longname> )
+			and _StatementList.is-valid( $parsed.hash.<statementlist> );
 		die self.new-term
 	}
 }
@@ -4294,15 +4254,13 @@ class _Parameter does Node {
 		if $parsed.list {
 			my @child;
 			for $parsed.list {
-				if self.assert-hash-keys( $_,
+				next if self.assert-hash-keys( $_,
 					[< param_var type_constraint quant >],
-					[< default_value modifier trait post_constraint >] ) {
-					next if
-						_ParamVar_TypeConstraint_Quant.new.is-valid( $_ )
-				}
+					[< default_value modifier trait post_constraint >] )
+					and _ParamVar_TypeConstraint_Quant.is-valid( $_ );
 				die self.new-term
 			}
-			return
+			return True
 		}
 		die self.new-term
 	}
@@ -4331,9 +4289,9 @@ class _ParamVar does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< name sigil >] )
-			and _Name.new.is-valid( $parsed.hash.<name> )
-			and _Sigil.new.is-valid( $parsed.hash.<sigil> );
+		return True if self.assert-hash-keys( $parsed, [< name sigil >] )
+			and _Name.is-valid( $parsed.hash.<name> )
+			and _Sigil.is-valid( $parsed.hash.<sigil> );
 		die self.new-term
 	}
 }
@@ -4369,11 +4327,11 @@ class _ParamVar_TypeConstraint_Quant does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $parsed,
 				[< param_var type_constraint quant >] )
-			and _ParamVar.new.is-valid( $parsed.hash.<param_var> )
-			and _TypeConstraint.new.is-valid( $parsed.hash.<type_constraint> )
-			and _Quant.new.is-valid( $parsed.hash.<quant> );
+			and _ParamVar.is-valid( $parsed.hash.<param_var> )
+			and _TypeConstraint.is-valid( $parsed.hash.<type_constraint> )
+			and _Quant.is-valid( $parsed.hash.<quant> );
 		die self.new-term
 	}
 }
@@ -4418,13 +4376,13 @@ class _PBlock does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $parsed,
 				     [< lambda blockoid signature >] )
-			and _Lambda.new.is-valid( $parsed.hash.<lambda> )
-			and _Blockoid.new.is-valid( $parsed.hash.<blockoid> )
-			and _Signature.new.is-valid( $parsed.hash.<signature> );
-		return if self.assert-hash-keys( $parsed, [< blockoid >] )
-			and _Blockoid.new.is-valid( $parsed.hash.<blockoid> );
+			and _Lambda.is-valid( $parsed.hash.<lambda> )
+			and _Blockoid.is-valid( $parsed.hash.<blockoid> )
+			and _Signature.is-valid( $parsed.hash.<signature> );
+		return True if self.assert-hash-keys( $parsed, [< blockoid >] )
+			and _Blockoid.is-valid( $parsed.hash.<blockoid> );
 		die self.new-term
 	}
 }
@@ -4484,15 +4442,15 @@ class _PostCircumfix does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< nibble O >] )
-			and _Nibble.new.is-valid( $parsed.hash.<nibble> )
-			and _O.new.is-valid( $parsed.hash.<O> );
-		return if self.assert-hash-keys( $parsed, [< semilist O >] )
-			and _SemiList.new.is-valid( $parsed.hash.<semilist> )
-			and _O.new.is-valid( $parsed.hash.<O> );
-		return if self.assert-hash-keys( $parsed, [< arglist O >] )
-			and _ArgList.new.is-valid( $parsed.hash.<arglist> )
-			and _O.new.is-valid( $parsed.hash.<O> );
+		return True if self.assert-hash-keys( $parsed, [< nibble O >] )
+			and _Nibble.is-valid( $parsed.hash.<nibble> )
+			and _O.is-valid( $parsed.hash.<O> );
+		return True if self.assert-hash-keys( $parsed, [< semilist O >] )
+			and _SemiList.is-valid( $parsed.hash.<semilist> )
+			and _O.is-valid( $parsed.hash.<O> );
+		return True if self.assert-hash-keys( $parsed, [< arglist O >] )
+			and _ArgList.is-valid( $parsed.hash.<arglist> )
+			and _O.is-valid( $parsed.hash.<O> );
 		die self.new-term
 	}
 }
@@ -4523,11 +4481,11 @@ class _PostCircumfix_OPER does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $parsed,
 				     [< postcircumfix OPER >],
 				     [< postfix_prefix_meta_operator >] )
-			and _PostCircumfix.new.is-valid( $parsed.hash.<postcircumfix> )
-			and _OPER.new.is-valid( $parsed.hash.<OPER> );
+			and _PostCircumfix.is-valid( $parsed.hash.<postcircumfix> )
+			and _OPER.is-valid( $parsed.hash.<OPER> );
 		die self.new-term
 	}
 }
@@ -4567,14 +4525,13 @@ class _Postfix does Node {
 				)
 			)
 		}
-warn $parsed.hash.keys;
 		die self.new-term
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< sym O >] )
-			and _Sym.new.is-valid( $parsed.hash.<sym> )
-			and _O.new.is-valid( $parsed.hash.<O> );
+		return True if self.assert-hash-keys( $parsed, [< sym O >] )
+			and _Sym.is-valid( $parsed.hash.<sym> )
+			and _O.is-valid( $parsed.hash.<O> );
 		die self.new-term
 	}
 }
@@ -4606,10 +4563,10 @@ class _Postfix_OPER does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< postfix OPER >],
+		return True if self.assert-hash-keys( $parsed, [< postfix OPER >],
 				     [< postfix_prefix_meta_operator >] )
-			and _Postfix.new.is-valid( $parsed.hash.<postfix> )
-			and _OPER.new.is-valid( $parsed.hash.<OPER> );
+			and _Postfix.is-valid( $parsed.hash.<postfix> )
+			and _OPER.is-valid( $parsed.hash.<OPER> );
 		die self.new-term
 	}
 }
@@ -4642,11 +4599,17 @@ class _PostOp does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< sym postcircumfix O >] )
-			and _Sym.new.is-valid( $parsed.hash.<sym> )
-			and _PostCircumfix.new.is-valid( $parsed.hash.<postcircumfix> )
-			and _O.new.is-valid( $parsed.hash.<O> );
-			
+		return True if self.assert-hash-keys( $parsed,
+				[< sym postcircumfix O >] )
+			and _Sym.is-valid( $parsed.hash.<sym> )
+			and _PostCircumfix.is-valid( $parsed.hash.<postcircumfix> )
+			and _O.is-valid( $parsed.hash.<O> );
+		return True if self.assert-hash-keys( $parsed,
+				[< sym postcircumfix >], [< O >] )
+			and _Sym.is-valid( $parsed.hash.<sym> )
+			and _PostCircumfix.is-valid( $parsed.hash.<postcircumfix> );
+warn $parsed.dump;
+warn "Pass 3" if _O.is-valid( $parsed.hash.<O> );;
 		die self.new-term
 	}
 }
@@ -4674,9 +4637,9 @@ class _Prefix does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< sym O >] )
-			and _Sym.new.is-valid( $parsed.hash.<sym> )
-			and _O.new.is-valid( $parsed.hash.<O> );
+		return True if self.assert-hash-keys( $parsed, [< sym O >] )
+			and _Sym.is-valid( $parsed.hash.<sym> )
+			and _O.is-valid( $parsed.hash.<O> );
 		die self.new-term
 	}
 }
@@ -4708,11 +4671,11 @@ class _Prefix_OPER does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $parsed,
 			     [< prefix OPER >],
 			     [< prefix_postfix_meta_operator >] )
-			and _Prefix.new.is-valid( $parsed.hash.<prefix> )
-			and _OPER.new.is-valid( $parsed.hash.<OPER> );
+			and _Prefix.is-valid( $parsed.hash.<prefix> )
+			and _OPER.is-valid( $parsed.hash.<OPER> );
 		die self.new-term
 	}
 }
@@ -4750,9 +4713,9 @@ class _QuantifiedAtom does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< sigfinal atom >] )
-			and _SigFinal.new.is-valid( $parsed.hash.<sigfinal> )
-			and _Atom.new.is-valid( $parsed.hash.<atom> );
+		return True if self.assert-hash-keys( $parsed, [< sigfinal atom >] )
+			and _SigFinal.is-valid( $parsed.hash.<sigfinal> )
+			and _Atom.is-valid( $parsed.hash.<atom> );
 		die self.new-term
 	}
 }
@@ -4780,9 +4743,9 @@ class _Quantifier does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< sym backmod >] )
-			and _Sym.new.is-valid( $parsed.hash.<sym> )
-			and _BackMod.new.is-valid( $parsed.hash.<backmod> );
+		return True if self.assert-hash-keys( $parsed, [< sym backmod >] )
+			and _Sym.is-valid( $parsed.hash.<sym> )
+			and _BackMod.is-valid( $parsed.hash.<backmod> );
 		die self.new-term
 	}
 }
@@ -4810,9 +4773,9 @@ class _Quibble does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< babble nibble >] )
-			and _Babble.new.is-valid( $parsed.hash.<babble> )
-			and _Nibble.new.is-valid( $parsed.hash.<nibble> );
+		return True if self.assert-hash-keys( $parsed, [< babble nibble >] )
+			and _Babble.is-valid( $parsed.hash.<babble> )
+			and _Nibble.is-valid( $parsed.hash.<nibble> );
 		die self.new-term
 	}
 }
@@ -4868,16 +4831,15 @@ class _Quote does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $parsed,
 				[< sym rx_adverbs sibble >] )
-			and _Sym.new.is-valid( $parsed.hash.<sym> )
-			and _RxAdverbs.new.is-valid( $parsed.hash.<rx_adverbs> )
-			and _Sibble.new.is-valid( $parsed.hash.<sibble> );
-		return if self.assert-hash-keys( $parsed,
-				[< nibble >] )
-			and _Nibble.new.is-valid( $parsed.hash.<nibble> );
-		return if self.assert-hash-keys( $parsed, [< quibble >] )
-			and _Quibble.new.is-valid( $parsed.hash.<quibble> );
+			and _Sym.is-valid( $parsed.hash.<sym> )
+			and _RxAdverbs.is-valid( $parsed.hash.<rx_adverbs> )
+			and _Sibble.is-valid( $parsed.hash.<sibble> );
+		return True if self.assert-hash-keys( $parsed, [< nibble >] )
+			and _Nibble.is-valid( $parsed.hash.<nibble> );
+		return True if self.assert-hash-keys( $parsed, [< quibble >] )
+			and _Quibble.is-valid( $parsed.hash.<quibble> );
 		die self.new-term
 	}
 }
@@ -4902,8 +4864,8 @@ class _QuotePair does Node {
 	method is-valid( Mu $parsed ) {
 		self.trace;
 		CATCH { when X::Hash::Store::OddNumber { } }
-		return if self.assert-hash-keys( $parsed, [< identifier >] )
-			and _Identifier.new.is-valid( $parsed.hash.<identifier> );
+		return True if self.assert-hash-keys( $parsed, [< identifier >] )
+			and _Identifier.is-valid( $parsed.hash.<identifier> );
 		die self.new-term
 	}
 }
@@ -4944,10 +4906,10 @@ class _RadNumber does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $parsed,
 				[< circumfix radix >], [< exp base >] )
-			and _Circumfix.new.is-valid( $parsed.hash.<circumfix> )
-			and _Radix.new.is-valid( $parsed.hash.<radix> );
+			and _Circumfix.is-valid( $parsed.hash.<circumfix> )
+			and _Radix.is-valid( $parsed.hash.<radix> );
 		die self.new-term
 	}
 }
@@ -4975,9 +4937,9 @@ class _RegexDeclarator does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< sym regex_def >] )
-			and _Sym.new.is-valid( $parsed.hash.<sym> )
-			and _RegexDef.new.is-valid( $parsed.hash.<regx_def> );
+		return True if self.assert-hash-keys( $parsed, [< sym regex_def >] )
+			and _Sym.is-valid( $parsed.hash.<sym> )
+			and _RegexDef.is-valid( $parsed.hash.<regex_def> );
 		die self.new-term
 	}
 }
@@ -5008,11 +4970,11 @@ class _RegexDef does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $parsed,
 				[< deflongname nibble >],
 				[< signature trait >] )
-			and _DefLongName.new.is-valid( $parsed.hash.<deflongnamej> )
-			and _Nibble.new.is-valid( $parsed.hash.<nibble> );
+			and _DefLongName.is-valid( $parsed.hash.<deflongname> )
+			and _Nibble.is-valid( $parsed.hash.<nibble> );
 		die self.new-term
 	}
 }
@@ -5033,10 +4995,10 @@ class _Right does Node {
 		self.trace;
 		if $parsed {
 # XXX
-			return
+			return True
 		}
 		else {
-			return
+			return True
 		}
 		die self.new-term
 	}
@@ -5060,8 +5022,8 @@ class Root does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< statementlist >] )
-			and _StatementList.new.is-valid( $parsed.hash.<statementlist> );
+		return True if self.assert-hash-keys( $parsed, [< statementlist >] )
+			and _StatementList.is-valid( $parsed.hash.<statementlist> );
 		die self.new-term
 	}
 }
@@ -5105,13 +5067,13 @@ class _RoutineDeclarator does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< sym method_def >] )
-			and _Sym.new.is-valid( $parsed.hash.<sym> )
-			and _MethodDef.new.is-valid( $parsed.hash.<method_def> );
-		return if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $parsed, [< sym method_def >] )
+			and _Sym.is-valid( $parsed.hash.<sym> )
+			and _MethodDef.is-valid( $parsed.hash.<method_def> );
+		return True if self.assert-hash-keys( $parsed,
 				[< sym routine_def >] )
-			and _Sym.new.is-valid( $parsed.hash.<sym> )
-			and _RoutineDef.new.is-valid( $parsed.hash.<routine_def> );
+			and _Sym.is-valid( $parsed.hash.<sym> )
+			and _RoutineDef.is-valid( $parsed.hash.<routine_def> );
 		die self.new-term
 	}
 }
@@ -5196,25 +5158,25 @@ class _RoutineDef does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $parsed,
 				[< blockoid deflongname multisig >],
 				[< trait >] )
-			and _Blockoid.new.is-valid( $parsed.hash.<blockoid> )
-			and _DefLongName.new.is-valid( $parsed.hash.<deflongname> )
-			and _MultiSig.new.is-valid( $parsed.hash.<multisig> );
-		return if self.assert-hash-keys( $parsed,
+			and _Blockoid.is-valid( $parsed.hash.<blockoid> )
+			and _DefLongName.is-valid( $parsed.hash.<deflongname> )
+			and _MultiSig.is-valid( $parsed.hash.<multisig> );
+		return True if self.assert-hash-keys( $parsed,
 				[< blockoid deflongname >],
 				[< trait >] )
-			and _Blockoid.new.is-valid( $parsed.hash.<blockoid> )
-			and _DefLongName.new.is-valid( $parsed.hash.<deflongname> );
-		return if self.assert-hash-keys( $parsed,
+			and _Blockoid.is-valid( $parsed.hash.<blockoid> )
+			and _DefLongName.is-valid( $parsed.hash.<deflongname> );
+		return True if self.assert-hash-keys( $parsed,
 				[< blockoid multisig >],
 				[< trait >] )
-			and _Blockoid.new.is-valid( $parsed.hash.<blockoid> )
-			and _MultiSig.new.is-valid( $parsed.hash.<multisig> );
-		return if self.assert-hash-keys( $parsed,
+			and _Blockoid.is-valid( $parsed.hash.<blockoid> )
+			and _MultiSig.is-valid( $parsed.hash.<multisig> );
+		return True if self.assert-hash-keys( $parsed,
 				[< blockoid >], [< trait >] )
-			and _Blockoid.new.is-valid( $parsed.hash.<blockoid> );
+			and _Blockoid.is-valid( $parsed.hash.<blockoid> );
 		die self.new-term
 	}
 }
@@ -5237,8 +5199,8 @@ class _RxAdverbs does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< quotepair >] )
-			and _QuotePair.new.is-valid( $parsed.hash.<quotepair> );
+		return True if self.assert-hash-keys( $parsed, [< quotepair >] )
+			and _QuotePair.is-valid( $parsed.hash.<quotepair> );
 		die self.new-term
 	}
 }
@@ -5309,20 +5271,20 @@ class _Scoped does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $parsed,
 				[< declarator DECL >], [< typename >] )
-			and _Declarator.new.is-valid( $parsed.hash.<declarator> )
-			and _DECL.new.is-valid( $parsed.hash.<DECL> );
-		return if self.assert-hash-keys( $parsed,
+			and _Declarator.is-valid( $parsed.hash.<declarator> )
+			and _DECL.is-valid( $parsed.hash.<DECL> );
+		return True if self.assert-hash-keys( $parsed,
 					[< multi_declarator DECL typename >] )
-			and _MultiDeclarator.new.is-valid( $parsed.hash.<multi_declarator> )
-			and _DECL.new.is-valid( $parsed.hash.<DECL> )
-			and _TypeName.new.is-valid( $parsed.hash.<typename> );
-		return if self.assert-hash-keys( $parsed,
+			and _MultiDeclarator.is-valid( $parsed.hash.<multi_declarator> )
+			and _DECL.is-valid( $parsed.hash.<DECL> )
+			and _TypeName.is-valid( $parsed.hash.<typename> );
+		return True if self.assert-hash-keys( $parsed,
 				[< package_declarator DECL >],
 				[< typename >] )
-			and _PackageDeclarator.new.is-valid( $parsed.hash.<package_declarator> )
-			and _DECL.new.is-valid( $parsed.hash.<DECL> );
+			and _PackageDeclarator.is-valid( $parsed.hash.<package_declarator> )
+			and _DECL.is-valid( $parsed.hash.<DECL> );
 		die self.new-term
 	}
 }
@@ -5350,9 +5312,9 @@ class _ScopeDeclarator does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< sym scoped >] )
-			and _Sym.new.is-valid( $parsed.hash.<sym> )
-			and _Scoped.new.is-valid( $parsed.hash.<scoped> );
+		return True if self.assert-hash-keys( $parsed, [< sym scoped >] )
+			and _Sym.is-valid( $parsed.hash.<sym> )
+			and _Scoped.is-valid( $parsed.hash.<scoped> );
 		die self.new-term
 	}
 }
@@ -5373,7 +5335,7 @@ class _SemiList does Node {
 	method is-valid( Mu $parsed ) {
 		self.trace;
 		CATCH { when X::Hash::Store::OddNumber { } }
-		return if self.assert-hash-keys( $parsed, [ ], [< statement >] );
+		return True if self.assert-hash-keys( $parsed, [ ], [< statement >] );
 		die self.new-term
 	}
 }
@@ -5401,9 +5363,9 @@ class _Separator does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< septyep quantified_atom >] )
-			and _SepType.new.is-valid( $parsed.hash.<septype> )
-			and _QuantifiedAtom.new.is-valid( $parsed.hash.<quantified_atom> );
+		return True if self.assert-hash-keys( $parsed, [< septyep quantified_atom >] )
+			and _SepType.is-valid( $parsed.hash.<septype> )
+			and _QuantifiedAtom.is-valid( $parsed.hash.<quantified_atom> );
 		die self.new-term
 	}
 }
@@ -5456,11 +5418,11 @@ class _Sibble does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $parsed,
 				[< right babble left >] )
-			and _Right.new.is-valid( $parsed.hash.<right> )
-			and _Babble.new.is-valid( $parsed.hash.<babble> )
-			and _Left.new.is-valid( $parsed.hash.<left> );
+			and _Right.is-valid( $parsed.hash.<right> )
+			and _Babble.is-valid( $parsed.hash.<babble> )
+			and _Left.is-valid( $parsed.hash.<left> );
 		die self.new-term
 	}
 }
@@ -5483,8 +5445,8 @@ class _SigFinal does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< normspace >] )
-			and _NormSpace.new.is-valid( $parsed.hash.<normspace> );
+		return True if self.assert-hash-keys( $parsed, [< normspace >] )
+			and _NormSpace.is-valid( $parsed.hash.<normspace> );
 		die self.new-term
 	}
 }
@@ -5523,12 +5485,12 @@ class _SigFinal_Quantifier_Separator_Atom does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $parsed,
 				[< sigfinal quantifier separator atom >] )
-			and _SigFinal.new.is-valid( $parsed.hash.<sigfinal> )
-			and _Quantifier.new.is-valid( $parsed.hash.<quantifier> )
-			and _Separator.new.is-valid( $parsed.hash.<separator> )
-			and _Atom.new.is-valid( $parsed.hash.<atom> );
+			and _SigFinal.is-valid( $parsed.hash.<sigfinal> )
+			and _Quantifier.is-valid( $parsed.hash.<quantifier> )
+			and _Separator.is-valid( $parsed.hash.<separator> )
+			and _Atom.is-valid( $parsed.hash.<atom> );
 		die self.new-term
 	}
 }
@@ -5578,13 +5540,12 @@ class _Signature does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $parsed,
 				[< parameter typename >],
 				[< param_sep >] )
-			and _Parameter.new.is-valid( $parsed.hash.<parameter> )
-			and _TypeName.new.is-valid( $parsed.hash.<typename> );
-		return
-			if self.assert-hash-keys( $parsed, [],
+			and _Parameter.is-valid( $parsed.hash.<parameter> )
+			and _TypeName.is-valid( $parsed.hash.<typename> );
+		return True if self.assert-hash-keys( $parsed, [],
 				[< param_sep parameter >] );
 		die self.new-term
 	}
@@ -5612,9 +5573,9 @@ class _Sign_CharSpec does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< sign charspec >] )
-			and _Sign.new.is-valid( $parsed.hash.<sign> )
-			and _CharSpec.new.is-valid( $parsed.hash.<charspec> );
+		return True if self.assert-hash-keys( $parsed, [< sign charspec >] )
+			and _Sign.is-valid( $parsed.hash.<sign> )
+			and _CharSpec.is-valid( $parsed.hash.<charspec> );
 		die self.new-term
 	}
 }
@@ -5647,8 +5608,8 @@ class _SMExpr does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< EXPR >] )
-			and _EXPR.new.is-valid( $parsed.hash.<EXPR> );
+		return True if self.assert-hash-keys( $parsed, [< EXPR >] )
+			and _EXPR.is-valid( $parsed.hash.<EXPR> );
 		die self.new-term
 	}
 }
@@ -5665,7 +5626,7 @@ class _Specials does Node {
 	method is-valid( Mu $parsed ) {
 		self.trace;
 		CATCH { when X::Multi::NoMatch { } }
-		return if self.assert-Bool( $parsed );
+		return True if self.assert-Bool( $parsed );
 		die self.new-term
 	}
 }
@@ -5824,34 +5785,34 @@ class _StatementControl does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< block sym e1 e2 e3 >] )
-			and _Block.new.is-valid( $parsed.hash.<block> )
-			and _Sym.new.is-valid( $parsed.hash.<sym> )
-			and _E1.new.is-valid( $parsed.hash.<e1> )
-			and _E2.new.is-valid( $parsed.hash.<e2> )
-			and _E3.new.is-valid( $parsed.hash.<e3> );
-		return if self.assert-hash-keys( $parsed, [< doc sym module_name >] )
-			and _Doc.new.is-valid( $parsed.hash.<doc> )
-			and _Sym.new.is-valid( $parsed.hash.<sym> )
-			and _ModuleName.new.is-valid( $parsed.hash.<modulename> );
-		return if self.assert-hash-keys( $parsed, [< doc sym version >] )
-			and _Doc.new.is-valid( $parsed.hash.<doc> )
-			and _Sym.new.is-valid( $parsed.hash.<sym> )
-			and _Version.new.is-valid( $parsed.hash.<version> );
-		return if self.assert-hash-keys( $parsed, [< xblock else sym >] )
-			and _XBlock.new.is-valid( $parsed.hash.<xblock> )
-			and _Else.new.is-valid( $parsed.hash.<else> )
-			and _Sym.new.is-valid( $parsed.hash.<sym> );
-		return if self.assert-hash-keys( $parsed, [< xblock sym wu >] )
-			and _XBlock.new.is-valid( $parsed.hash.<xblock> )
-			and _Sym.new.is-valid( $parsed.hash.<sym> )
-			and _Wu.new.is-valid( $parsed.hash.<wu> );
-		return if self.assert-hash-keys( $parsed, [< xblock sym >] )
-			and _XBlock.new.is-valid( $parsed.hash.<xblock> )
-			and _Sym.new.is-valid( $parsed.hash.<sym> );
-		return if self.assert-hash-keys( $parsed, [< block sym >] )
-			and _Block.new.is-valid( $parsed.hash.<block> )
-			and _Sym.new.is-valid( $parsed.hash.<sym> );
+		return True if self.assert-hash-keys( $parsed, [< block sym e1 e2 e3 >] )
+			and _Block.is-valid( $parsed.hash.<block> )
+			and _Sym.is-valid( $parsed.hash.<sym> )
+			and _E1.is-valid( $parsed.hash.<e1> )
+			and _E2.is-valid( $parsed.hash.<e2> )
+			and _E3.is-valid( $parsed.hash.<e3> );
+		return True if self.assert-hash-keys( $parsed, [< doc sym module_name >] )
+			and _Doc.is-valid( $parsed.hash.<doc> )
+			and _Sym.is-valid( $parsed.hash.<sym> )
+			and _ModuleName.is-valid( $parsed.hash.<module_name> );
+		return True if self.assert-hash-keys( $parsed, [< doc sym version >] )
+			and _Doc.is-valid( $parsed.hash.<doc> )
+			and _Sym.is-valid( $parsed.hash.<sym> )
+			and _Version.is-valid( $parsed.hash.<version> );
+		return True if self.assert-hash-keys( $parsed, [< xblock else sym >] )
+			and _XBlock.is-valid( $parsed.hash.<xblock> )
+			and _Else.is-valid( $parsed.hash.<else> )
+			and _Sym.is-valid( $parsed.hash.<sym> );
+		return True if self.assert-hash-keys( $parsed, [< xblock sym wu >] )
+			and _XBlock.is-valid( $parsed.hash.<xblock> )
+			and _Sym.is-valid( $parsed.hash.<sym> )
+			and _Wu.is-valid( $parsed.hash.<wu> );
+		return True if self.assert-hash-keys( $parsed, [< xblock sym >] )
+			and _XBlock.is-valid( $parsed.hash.<xblock> )
+			and _Sym.is-valid( $parsed.hash.<sym> );
+		return True if self.assert-hash-keys( $parsed, [< block sym >] )
+			and _Block.is-valid( $parsed.hash.<block> )
+			and _Sym.is-valid( $parsed.hash.<sym> );
 		die self.new-term
 	}
 }
@@ -5927,22 +5888,22 @@ class _Statement does Node {
 		if $parsed.list {
 			for $parsed.list {
 				next if self.assert-hash-keys( $_, [< statement_mod_loop EXPR >] )
-					and _StatementModLoop_EXPR.new.is-valid( $_ );
+					and _StatementModLoop_EXPR.is-valid( $_ );
 				next if self.assert-hash-keys( $_, [< statement_mod_cond EXPR >] )
-					and _StatementModCond_EXPR.new.is-valid( $_ );
+					and _StatementModCond_EXPR.is-valid( $_ );
 				next if self.assert-hash-keys( $_, [< EXPR >] )
-					and _EXPR.new.is-valid( $_.hash.<EXPR> );
+					and _EXPR.is-valid( $_.hash.<EXPR> );
 				next if self.assert-hash-keys( $_, [< statement_control >] )
-					and _StatementControl.new.is-valid( $_.hash.<statement_control> );
+					and _StatementControl.is-valid( $_.hash.<statement_control> );
 				die self.new-term
 			}
-			return
+			return True
 		}
-		return if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $parsed,
 				[< statement_control >] )
-			and _StatementControl.new.is-valid( $parsed.hash.<statement_control> );
-		return if self.assert-hash-keys( $parsed, [< EXPR >] )
-			and _EXPR.new.is-valid( $parsed.hash.<EXPR> );
+			and _StatementControl.is-valid( $parsed.hash.<statement_control> );
+		return True if self.assert-hash-keys( $parsed, [< EXPR >] )
+			and _EXPR.is-valid( $parsed.hash.<EXPR> );
 		die self.new-term
 	}
 }
@@ -5968,9 +5929,9 @@ class _StatementList does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< statement >] )
-			and _Statement.new.is-valid( $parsed.hash.<statement> );
-		return if self.assert-hash-keys( $parsed, [], [< statement >] );
+		return True if self.assert-hash-keys( $parsed, [< statement >] )
+			and _Statement.is-valid( $parsed.hash.<statement> );
+		return True if self.assert-hash-keys( $parsed, [], [< statement >] );
 		die self.new-term
 	}
 }
@@ -5998,9 +5959,9 @@ class _StatementModCond does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< sym modifier_expr >] )
-			and _Sym.new.is-valid( $parsed.hash.<sym> )
-			and _ModifierExpr.new.is-valid( $parsed.hash.<modifier_expr> );
+		return True if self.assert-hash-keys( $parsed, [< sym modifier_expr >] )
+			and _Sym.is-valid( $parsed.hash.<sym> )
+			and _ModifierExpr.is-valid( $parsed.hash.<modifier_expr> );
 		die self.new-term
 	}
 }
@@ -6029,9 +5990,9 @@ class _StatementModCond_EXPR does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< statement_mod_cond EXPR >] )
-			and _StatementModCond.new.is-valid( $parsed.hash.<statement_mod_cond> )
-			and _EXPR.new.is-valid( $parsed.hash.<EXPR> );
+		return True if self.assert-hash-keys( $parsed, [< statement_mod_cond EXPR >] )
+			and _StatementModCond.is-valid( $parsed.hash.<statement_mod_cond> )
+			and _EXPR.is-valid( $parsed.hash.<EXPR> );
 		die self.new-term
 	}
 }
@@ -6059,9 +6020,9 @@ class _StatementModLoop does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< sym smexpr >] )
-			and _Sym.new.is-valid( $parsed.hash.<sym> )
-			and _SMExpr.new.is-valid( $parsed.hash.<smexpr> );
+		return True if self.assert-hash-keys( $parsed, [< sym smexpr >] )
+			and _Sym.is-valid( $parsed.hash.<sym> )
+			and _SMExpr.is-valid( $parsed.hash.<smexpr> );
 		die self.new-term
 	}
 }
@@ -6090,10 +6051,10 @@ class _StatementModLoop_EXPR does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $parsed,
 				[< statement_mod_loop EXPR >] )
-			and _StatementModLoop.new.is-valid( $parsed.hash.<statement_mod_loop> )
-			and _EXPR.new.is-valid( $parsed.hash.<EXPR> );
+			and _StatementModLoop.is-valid( $parsed.hash.<statement_mod_loop> )
+			and _EXPR.is-valid( $parsed.hash.<EXPR> );
 		die self.new-term
 	}
 }
@@ -6121,9 +6082,9 @@ class _StatementPrefix does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< sym blorst >] )
-			and _Sym.new.is-valid( $parsed.hash.<sym> )
-			and _Blorst.new.is-valid( $parsed.hash.<blorst> );
+		return True if self.assert-hash-keys( $parsed, [< sym blorst >] )
+			and _Sym.is-valid( $parsed.hash.<sym> )
+			and _Blorst.is-valid( $parsed.hash.<blorst> );
 		die self.new-term
 	}
 }
@@ -6154,9 +6115,9 @@ class _Sym does Node {
 			when X::Hash::Store::OddNumber { }
 			when X::Multi::NoMatch { }
 		}
-		return if $parsed.Bool and $parsed.Str eq '+';
-		return if $parsed.Bool and $parsed.Str eq '';
-		return if self.assert-Str( $parsed );
+		return True if $parsed.Bool and $parsed.Str eq '+';
+		return True if $parsed.Bool and $parsed.Str eq '';
+		return True if self.assert-Str( $parsed );
 		die self.new-term
 	}
 }
@@ -6188,10 +6149,10 @@ class _TermAlt does Node {
 		if $parsed.list {
 			for $parsed.list {
 				next if self.assert-hash-keys( $_, [< termconj >] )
-					and _TermConj.new.is-valid( $_.hash.<termconj> );
+					and _TermConj.is-valid( $_.hash.<termconj> );
 				die self.new-term
 			}
-			return
+			return True
 		}
 		die self.new-term
 	}
@@ -6215,8 +6176,8 @@ class _TermAltSeq does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< termconjseq >] )
-			and _TermConjSeq.new.is-valid( $parsed.hash.<termconjseq> );
+		return True if self.assert-hash-keys( $parsed, [< termconjseq >] )
+			and _TermConjSeq.is-valid( $parsed.hash.<termconjseq> );
 		die self.new-term
 	}
 }
@@ -6248,10 +6209,10 @@ class _TermConj does Node {
 		if $parsed.list {
 			for $parsed.list {
 				next if self.assert-hash-keys( $_, [< termish >] )
-					and _Termish.new.is-valid( $_.hash.<termish> );
+					and _Termish.is-valid( $_.hash.<termish> );
 				die self.new-term
 			}
-			return
+			return True
 		}
 		die self.new-term
 	}
@@ -6295,13 +6256,13 @@ class _TermConjSeq does Node {
 		if $parsed.list {
 			for $parsed.list {
 				next if self.assert-hash-keys( $_, [< termalt >] )
-					and _TermAlt.new.is-valid( $_.hash.<termalt> );
+					and _TermAlt.is-valid( $_.hash.<termalt> );
 				die self.new-term
 			}
-			return
+			return True
 		}
-		return if self.assert-hash-keys( $parsed, [< termalt >] )
-			and _TermAlt.new.is-valid( $parsed.hash.<termalt> );
+		return True if self.assert-hash-keys( $parsed, [< termalt >] )
+			and _TermAlt.is-valid( $parsed.hash.<termalt> );
 		die self.new-term
 	}
 }
@@ -6344,13 +6305,13 @@ class _Termish does Node {
 		if $parsed.list {
 			for $parsed.list {
 				next if self.assert-hash-keys( $_, [< noun >] )
-					and _Noun.new.is-valid( $_.hash.<noun> );
+					and _Noun.is-valid( $_.hash.<noun> );
 				die self.new-term
 			}
-			return
+			return True
 		}
-		return if self.assert-hash-keys( $parsed, [< noun >] )
-			and _Noun.new.is-valid( $parsed.hash.<noun> );
+		return True if self.assert-hash-keys( $parsed, [< noun >] )
+			and _Noun.is-valid( $parsed.hash.<noun> );
 		die self.new-term
 	}
 }
@@ -6371,7 +6332,7 @@ class _Triangle does Node {
 		self.trace;
 		if $parsed {
 # XXX
-			return
+			return True
 		}
 		else {
 			return self.bless
@@ -6398,8 +6359,8 @@ class _TermSeq does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< termaltseq >] )
-			and _TermAltSeq.new.is-valid( $parsed.hash.<termaltseq> );
+		return True if self.assert-hash-keys( $parsed, [< termaltseq >] )
+			and _TermAltSeq.is-valid( $parsed.hash.<termaltseq> );
 		die self.new-term
 	}
 }
@@ -6422,8 +6383,8 @@ class _Twigil does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< sym >] )
-			and _Sym.new.is-valid( $parsed.hash.<sym> );
+		return True if self.assert-hash-keys( $parsed, [< sym >] )
+			and _Sym.is-valid( $parsed.hash.<sym> );
 		die self.new-term
 	}
 }
@@ -6449,8 +6410,8 @@ class _TypeConstraint does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< typename >] )
-			and _TypeName.new.is-valid( $parsed.hash.<typename> );
+		return True if self.assert-hash-keys( $parsed, [< typename >] )
+			and _TypeName.is-valid( $parsed.hash.<typename> );
 		die self.new-term
 	}
 }
@@ -6526,19 +6487,19 @@ class _TypeDeclarator does Node {
 	method is-valid( Mu $parsed ) {
 		self.trace;
 		CATCH { when X::Multi::NoMatch { } }
-		return if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $parsed,
 				[< sym initalizer variable >] )
-			and _Sym.new.is-valid( $parsed.hash.<sym> )
-			and _Initializer.new.is-valid( $parsed.hash.<initializer> )
-			and _Variable.new.is-valid( $parsed.hash.<variable> );
-		return if self.assert-hash-keys( $parsed,
+			and _Sym.is-valid( $parsed.hash.<sym> )
+			and _Initializer.is-valid( $parsed.hash.<initializer> )
+			and _Variable.is-valid( $parsed.hash.<variable> );
+		return True if self.assert-hash-keys( $parsed,
 				[< sym initalizer defterm >], [< trait >] )
-			and _Sym.new.is-valid( $parsed.hash.<sym> )
-			and _Initializer.new.is-valid( $parsed.hash.<initializer> )
-			and _DefTerm.new.is-valid( $parsed.hash.<defterm> );
-		return if self.assert-hash-keys( $parsed, [< sym initalizer >] )
-			and _Sym.new.is-valid( $parsed.hash.<sym> )
-			and _Initializer.new.is-valid( $parsed.hash.<initializer> );
+			and _Sym.is-valid( $parsed.hash.<sym> )
+			and _Initializer.is-valid( $parsed.hash.<initializer> )
+			and _DefTerm.is-valid( $parsed.hash.<defterm> );
+		return True if self.assert-hash-keys( $parsed, [< sym initalizer >] )
+			and _Sym.is-valid( $parsed.hash.<sym> )
+			and _Initializer.is-valid( $parsed.hash.<initializer> );
 		die self.new-term
 	}
 }
@@ -6596,18 +6557,18 @@ class _TypeName does Node {
 				next if self.assert-hash-keys( $_,
 					[< longname colonpairs >],
 					[< colonpair >] )
-					and _LongName_ColonPairs.new.is-valid( $_ );
+					and _LongName_ColonPairs.is-valid( $_ );
 				next if self.assert-hash-keys( $_,
 					[< longname >],
 					[< colonpair >] )
-					and _LongName_ColonPair.new.is-valid( $_ );
+					and _LongName_ColonPair.is-valid( $_ );
 				die self.new-term
 			}
-			return
+			return True
 		}
-		return if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $parsed,
 				[< longname >], [< colonpair >] )
-			and _LongName.new.is-valid( $parsed.hash.<longname> );
+			and _LongName.is-valid( $parsed.hash.<longname> );
 		die self.new-term
 	}
 }
@@ -6630,8 +6591,8 @@ class _Val does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< value >] )
-			and _Value.new.is-valid( $parsed.hash.<value> );
+		return True if self.assert-hash-keys( $parsed, [< value >] )
+			and _Value.is-valid( $parsed.hash.<value> );
 		die self.new-term
 	}
 }
@@ -6665,11 +6626,10 @@ class _Value does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		self.trace;
-		return if self.assert-hash-keys( $parsed, [< number >] )
-			and _Number.new.is-valid( $parsed.hash.<number> );
-		return if self.assert-hash-keys( $parsed, [< quote >] )
-			and _Quote.new.is-valid( $parsed.hash.<quote> );
+		return True if self.assert-hash-keys( $parsed, [< number >] )
+			and _Number.is-valid( $parsed.hash.<number> );
+		return True if self.assert-hash-keys( $parsed, [< quote >] )
+			and _Quote.is-valid( $parsed.hash.<quote> );
 		die self.new-term
 	}
 }
@@ -6688,8 +6648,8 @@ class _VALUE does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if $parsed.Str and $parsed.Str eq '0';
-		return if self.assert-Int( $parsed );
+		return True if $parsed.Str and $parsed.Str eq '0';
+		return True if self.assert-Int( $parsed );
 		die self.new-term
 	}
 }
@@ -6728,11 +6688,11 @@ class _Var does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< sigil desigilname >] )
-			and _Sigil.new.is-valid( $parsed.hash.<sigil> )
-			and _DeSigilName.new.is-valid( $parsed.hash.<desigilname> );
-		return if self.assert-hash-keys( $parsed, [< variable >] )
-			and _Variable.new.is-valid( $parsed.hash.<variable> );
+		return True if self.assert-hash-keys( $parsed, [< sigil desigilname >] )
+			and _Sigil.is-valid( $parsed.hash.<sigil> )
+			and _DeSigilName.is-valid( $parsed.hash.<desigilname> );
+		return True if self.assert-hash-keys( $parsed, [< variable >] )
+			and _Variable.is-valid( $parsed.hash.<variable> );
 		die self.new-term
 	}
 }
@@ -6792,16 +6752,16 @@ class _VariableDeclarator does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $parsed,
 			[< semilist variable shape >],
 			[< postcircumfix signature trait post_constraint >] )
-			and _SemiList.new.is-valid( $parsed.hash.<semilist> )
-			and _Variable.new.is-valid( $parsed.hash.<variable> )
-			and _Shape.new.is-valid( $parsed.hash.<shape> );
-		return if self.assert-hash-keys( $parsed,
+			and _SemiList.is-valid( $parsed.hash.<semilist> )
+			and _Variable.is-valid( $parsed.hash.<variable> )
+			and _Shape.is-valid( $parsed.hash.<shape> );
+		return True if self.assert-hash-keys( $parsed,
 			[< variable >],
 			[< semilist postcircumfix signature trait post_constraint >] )
-			and _Variable.new.is-valid( $parsed.hash.<variable> );
+			and _Variable.is-valid( $parsed.hash.<variable> );
 		die self.new-term
 	}
 } 
@@ -6872,21 +6832,19 @@ class _Variable does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $parsed,
 				[< twigil sigil desigilname >] )
-			and _Twigil.new.is-valid( $parsed.hash.<twigil> )
-			and _Sigil.new.is-valid( $parsed.hash.<sigil> )
-			and _DeSigilName.new.is-valid( $parsed.hash.<desigilname> );
-		return if self.assert-hash-keys( $parsed,
+			and _Twigil.is-valid( $parsed.hash.<twigil> )
+			and _Sigil.is-valid( $parsed.hash.<sigil> )
+			and _DeSigilName.is-valid( $parsed.hash.<desigilname> );
+		return True if self.assert-hash-keys( $parsed,
 				[< sigil desigilname >] )
-			and _Sigil.new.is-valid( $parsed.hash.<sigil> )
-			and _DeSigilName.new.is-valid( $parsed.hash.<desigilname> );
-		return if self.assert-hash-keys( $parsed,
-				[< sigil >] )
-			and _Sigil.new.is-valid( $parsed.hash.<sigil> );
-		return if self.assert-hash-keys( $parsed,
-				[< contextualizer >] )
-			and _Contextualizer.new.is-valid( $parsed.hash.<contextualizer> );
+			and _Sigil.is-valid( $parsed.hash.<sigil> )
+			and _DeSigilName.is-valid( $parsed.hash.<desigilname> );
+		return True if self.assert-hash-keys( $parsed, [< sigil >] )
+			and _Sigil.is-valid( $parsed.hash.<sigil> );
+		return True if self.assert-hash-keys( $parsed, [< contextualizer >] )
+			and _Contextualizer.is-valid( $parsed.hash.<contextualizer> );
 		die self.new-term
 	}
 }
@@ -6914,9 +6872,9 @@ class _Version does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if self.assert-hash-keys( $parsed, [< vnum vstr >] )
-			and _VNum.new.is-valid( $parsed.hash.<vnum> )
-			and _VStr.new.is-valid( $parsed.hash.<vstr> );
+		return True if self.assert-hash-keys( $parsed, [< vnum vstr >] )
+			and _VNum.is-valid( $parsed.hash.<vnum> )
+			and _VStr.is-valid( $parsed.hash.<vstr> );
 		die self.new-term
 	}
 }
@@ -6931,7 +6889,7 @@ class _VNum does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if $parsed.list;
+		return True if $parsed.list;
 		die self.new-term
 	}
 }
@@ -6946,7 +6904,7 @@ class _VStr does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
-		return if $parsed.Int;
+		return True if $parsed.Int;
 		die self.new-term
 	}
 }
@@ -7003,11 +6961,11 @@ class _XBlock does Node {
 			when X::Hash::Store::OddNumber { }
 			when X::Multi::NoMatch { }
 		}
-		return if self.assert-hash-keys( $parsed, [< pblock EXPR >] )
-			and _PBlock.new.is-valid( $parsed.hash.<pblock> )
-			and _EXPR.new.is-valid( $parsed.hash.<EXPR> );
-		return if self.assert-hash-keys( $parsed, [< blockoid >] )
-			and _Blockoid.new.is-valid( $parsed.hash.<blockoid> );
+		return True if self.assert-hash-keys( $parsed, [< pblock EXPR >] )
+			and _PBlock.is-valid( $parsed.hash.<pblock> )
+			and _EXPR.is-valid( $parsed.hash.<EXPR> );
+		return True if self.assert-hash-keys( $parsed, [< blockoid >] )
+			and _Blockoid.is-valid( $parsed.hash.<blockoid> );
 		die self.new-term
 	}
 }
