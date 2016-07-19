@@ -197,6 +197,30 @@ sub dump( Mu $parsed ) {
 	dump-parsed( $parsed ).join( "\n" )
 }
 
+role IsString {
+	method is-valid( Mu $parsed ) {
+		self.trace;
+		return if $parsed.Str;
+		die self.new-term
+	}
+}
+
+role IsInteger {
+	method is-valid( Mu $parsed ) {
+		self.trace;
+		return if $parsed.Int;
+		die self.new-term
+	}
+}
+
+role IsBoolean {
+	method is-valid( Mu $parsed ) {
+		self.trace;
+		return if $parsed.Bool;
+		die self.new-term
+	}
+}
+
 role Node {
 	has $.name;
 	has @.child;
@@ -347,17 +371,12 @@ class _ArgList does Node {
 	}
 }
 
-class _Args does Node {
+class _Args does Node does IsBoolean {
 	method new( Mu $parsed ) {
 		self.trace;
 		if $parsed.Bool {
 			return self.bless( :name( $parsed.Bool ) )
 		}
-		die self.new-term
-	}
-	method is-valid( Mu $parsed ) {
-		self.trace;
-		return if $parsed.Bool;
 		die self.new-term
 	}
 }
@@ -565,17 +584,12 @@ class _Babble does Node {
 	}
 }
 
-class _BackMod does Node {
+class _BackMod does Node does IsBoolean {
 	method new( Mu $parsed ) {
 		self.trace;
 		if self.assert-Bool( $parsed ) {
 			return self.bless( :name( $parsed.Bool ) )
 		}
-		die self.new-term
-	}
-	method is-valid( Mu $parsed ) {
-		self.trace;
-		return if self.assert-Bool( $parsed );
 		die self.new-term
 	}
 }
@@ -604,17 +618,12 @@ class _BackSlash does Node {
 	}
 }
 
-class _B does Node {
+class _B does Node does IsBoolean {
 	method new( Mu $parsed ) {
 		self.trace;
 		if self.assert-Bool( $parsed ) {
 			return self.bless( :name( $parsed.Bool ) )
 		}
-		die self.new-term
-	}
-	method is-valid( Mu $parsed ) {
-		self.trace;
-		return if self.assert-Bool( $parsed );
 		die self.new-term
 	}
 }
@@ -1078,6 +1087,7 @@ class _ColonPairs does Node {
 	method new( Mu $parsed ) {
 		self.trace;
 		if $parsed {
+			return self.bless
 		}
 		else {
 			return self.bless
@@ -1788,17 +1798,12 @@ class _Dig does Node {
 	}
 }
 
-class _Doc does Node {
+class _Doc does Node does IsBoolean {
 	method new( Mu $parsed ) {
 		self.trace;
 		if self.assert-Bool( $parsed ) {
 			return self.bless( :name( $parsed.Bool ) )
 		}
-		die self.new-term
-	}
-	method is-valid( Mu $parsed ) {
-		self.trace;
-		return if self.assert-Bool( $parsed );
 		die self.new-term
 	}
 }
@@ -3064,32 +3069,22 @@ class _Integer does Node {
 	}
 }
 
-class _Key does Node {
+class _Key does Node does IsString {
 	method new( Mu $parsed ) {
 		self.trace;
 		if self.assert-Str( $parsed ) {
 			return self.bless( :name( $parsed.Str ) )
 		}
-		die self.new-term
-	}
-	method is-valid( Mu $parsed ) {
-		self.trace;
-		return if self.assert-Str( $parsed );
 		die self.new-term
 	}
 }
 
-class _Lambda does Node {
+class _Lambda does Node does IsString {
 	method new( Mu $parsed ) {
 		self.trace;
 		if self.assert-Str( $parsed ) {
 			return self.bless( :name( $parsed.Str ) )
 		}
-		die self.new-term
-	}
-	method is-valid( Mu $parsed ) {
-		self.trace;
-		return if self.assert-Str( $parsed );
 		die self.new-term
 	}
 }
@@ -3729,17 +3724,12 @@ class _Nibbler does Node {
 	}
 }
 
-class _NormSpace does Node {
+class _NormSpace does Node does IsString {
 	method new( Mu $parsed ) {
 		self.trace;
 		if self.assert-Str( $parsed ) {
 			return self.bless( :name( $parsed.Str ) )
 		}
-		die self.new-term
-	}
-	method is-valid( Mu $parsed ) {
-		self.trace;
-		return if self.assert-Str( $parsed );
 		die self.new-term
 	}
 }
@@ -4727,17 +4717,12 @@ class _Prefix_OPER does Node {
 	}
 }
 
-class _Quant does Node {
+class _Quant does Node does IsBoolean {
 	method new( Mu $parsed ) {
 		self.trace;
 		if self.assert-Bool( $parsed ) {
 			return self.bless( :name( $parsed.Bool ) )
 		}
-		die self.new-term
-	}
-	method is-valid( Mu $parsed ) {
-		self.trace;
-		return if self.assert-Bool( $parsed );
 		die self.new-term
 	}
 }
@@ -4923,17 +4908,12 @@ class _QuotePair does Node {
 	}
 }
 
-class _Radix does Node {
+class _Radix does Node does IsInteger {
 	method new( Mu $parsed ) {
 		self.trace;
 		if self.assert-Int( $parsed ) {
 			return self.bless( :name( $parsed.Int ) )
 		}
-		die self.new-term
-	}
-	method is-valid( Mu $parsed ) {
-		self.trace;
-		return if self.assert-Int( $parsed );
 		die self.new-term
 	}
 }
@@ -5428,32 +5408,22 @@ class _Separator does Node {
 	}
 }
 
-class _SepType does Node {
+class _SepType does Node does IsString {
 	method new( Mu $parsed ) {
 		self.trace;
 		if self.assert-Str( $parsed ) {
 			return self.bless( :name( $parsed.Str ) )
 		}
-		die self.new-term
-	}
-	method is-valid( Mu $parsed ) {
-		self.trace;
-		return if self.assert-Str( $parsed );
 		die self.new-term
 	}
 }
 
-class _Shape does Node {
+class _Shape does Node does IsString {
 	method new( Mu $parsed ) {
 		self.trace;
 		if self.assert-Str( $parsed ) {
 			return self.bless( :name( $parsed.Str ) )
 		}
-		die self.new-term
-	}
-	method is-valid( Mu $parsed ) {
-		self.trace;
-		return if self.assert-Str( $parsed );
 		die self.new-term
 	}
 }
@@ -5563,17 +5533,12 @@ class _SigFinal_Quantifier_Separator_Atom does Node {
 	}
 }
 
-class _Sigil does Node {
+class _Sigil does Node does IsString {
 	method new( Mu $parsed ) {
 		self.trace;
 		if self.assert-Str( $parsed ) {
 			return self.bless( :name( $parsed.Str ) )
 		}
-		die self.new-term
-	}
-	method is-valid( Mu $parsed ) {
-		self.trace;
-		return if self.assert-Str( $parsed );
 		die self.new-term
 	}
 }
@@ -5654,17 +5619,12 @@ class _Sign_CharSpec does Node {
 	}
 }
 
-class _Sign does Node {
+class _Sign does Node does IsBoolean {
 	method new( Mu $parsed ) {
 		self.trace;
 		if self.assert-Bool( $parsed ) {
 			return self.bless( :name( $parsed.Bool ) )
 		}
-		die self.new-term
-	}
-	method is-valid( Mu $parsed ) {
-		self.trace;
-		return if self.assert-Bool( $parsed );
 		die self.new-term
 	}
 }
@@ -5704,6 +5664,7 @@ class _Specials does Node {
 	}
 	method is-valid( Mu $parsed ) {
 		self.trace;
+		CATCH { when X::Multi::NoMatch { } }
 		return if self.assert-Bool( $parsed );
 		die self.new-term
 	}
@@ -6990,17 +6951,12 @@ class _VStr does Node {
 	}
 }
 
-class _Wu does Node {
+class _Wu does Node does IsString {
 	method new( Mu $parsed ) {
 		self.trace;
 		if self.assert-Str( $parsed ) {
 			return self.bless( :naem( $parsed.Str ) )
 		}
-		die self.new-term
-	}
-	method is-valid( Mu $parsed ) {
-		self.trace;
-		return if self.assert-Str( $parsed );
 		die self.new-term
 	}
 }
