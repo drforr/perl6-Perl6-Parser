@@ -96,19 +96,23 @@ class _QuantifiedAtom {...}
 class _Quantifier {...}
 class _Quibble {...}
 class _Quote {...}
+class _QuotePair {...}
 class _Radix {...}
 class _RadNumber {...}
 class _RegexDeclarator {...}
 class _RegexDef {...}
+class _Right {...}
 class Root {...}
 class _RoutineDeclarator {...}
 class _RoutineDef {...}
+class _RxAdverbs {...}
 class _Scoped {...}
 class _ScopeDeclarator {...}
 class _SemiList {...}
 class _Separator {...}
 class _SepType {...}
 class _Shape {...}
+class _Sibble {...}
 class _SigFinal {...}
 class _SigFinal_Quantifier_Separator_Atom {...}
 class _Sigil {...}
@@ -132,6 +136,7 @@ class _TermConj {...}
 class _TermConjSeq {...}
 class _Termish {...}
 class _TermSeq {...}
+class _Triangle {...}
 class _Twigil {...}
 class _TypeConstraint {...}
 class _TypeDeclarator {...}
@@ -1544,6 +1549,7 @@ class _Dig does Node {
 				}
 				die self.new-term
 			}
+			return self.bless
 		}
 		die self.new-term
 	}
@@ -1979,6 +1985,27 @@ class _EXPR does Node {
 				)
 			}
 			die self.new-term
+		}
+		if self.assert-hash-keys( $parsed, [< args op triangle >] ) {
+			return self.bless(
+				:content(
+					:args(
+						_Args.new(
+							$parsed.hash.<args>
+						)
+					),
+					:op(
+						_Op.new(
+							$parsed.hash.<op>
+						)
+					),
+					:triangle(
+						_Triangle.new(
+							$parsed.hash.<triangle>
+						)
+					)
+				)
+			)
 		}
 		if self.assert-hash-keys( $parsed, [< longname args >] ) {
 			return self.bless(
@@ -2795,6 +2822,30 @@ class _Lambda does Node {
 	}
 }
 
+class _Left does Node {
+	method new( Mu $parsed ) {
+		self.trace;
+		if self.assert-hash-keys( $parsed, [< termseq >] ) {
+			return self.bless(
+				:content(
+					:termseq(
+						_TermSeq.new(
+							$parsed.hash.<termseq>
+						)
+					)
+				)
+			)
+		}
+		die self.new-term
+	}
+	method validate( Mu $parsed ) {
+		self.trace;
+		return if self.assert-hash-keys( $parsed, [< termseq >] )
+			and _TermSeq.new.validate( $parsed.hash.<termseq> );
+		die self.new-term
+	}
+}
+
 class _LongName_ColonPair does Node {
 	method new( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< longname colonpairs >],
@@ -3605,6 +3656,22 @@ class _OPER does Node {
 				)
 			)
 		}
+		if self.assert-hash-keys( $parsed, [< dig O >] ) {
+			return self.bless(
+				:content(
+					:dig(
+						_Dig.new(
+							$parsed.hash.<dig>
+						)
+					),
+					:O(
+						_O.new(
+							$parsed.hash.<O>
+						)
+					)
+				)
+			)
+		}
 		if self.assert-hash-keys( $parsed, [< sym O >] ) {
 			return self.bless(
 				:content(
@@ -4310,6 +4377,28 @@ class _Quibble does Node {
 class _Quote does Node {
 	method new( Mu $parsed ) {
 		self.trace;
+		if self.assert-hash-keys( $parsed,
+				[< sym rx_adverbs sibble >] ) {
+			return self.bless(
+				:content(
+					:sym(
+						_Sym.new(
+							$parsed.hash.<sym>
+						)
+					),
+					:rx_adverbs(
+						_RxAdverbs.new(
+							$parsed.hash.<rx_adverbs>
+						)
+					),
+					:sibble(
+						_Sibble.new(
+							$parsed.hash.<sibble>
+						)
+					)
+				)
+			)
+		}
 		if self.assert-hash-keys( $parsed, [< nibble >] ) {
 			return self.bless(
 				:content(
@@ -4332,6 +4421,32 @@ class _Quote does Node {
 				)
 			)
 		}
+		die self.new-term
+	}
+}
+
+class _QuotePair does Node {
+	method new( Mu $parsed ) {
+		self.trace;
+		CATCH { when X::Hash::Store::OddNumber { } }
+		if self.assert-hash-keys( $parsed, [< identifier >] ) {
+			return self.bless(
+				:content(
+					:identifier(
+						_Identifier.new(
+							$parsed.hash.<identifier>
+						)
+					)
+				)
+			)
+		}
+		die self.new-term
+	}
+	method validate( Mu $parsed ) {
+		self.trace;
+		CATCH { when X::Hash::Store::OddNumber { } }
+		return if self.assert-hash-keys( $parsed, [< identifier >] )
+			and _Identifier.new.validate( $parsed.hash.<identifier> );
 		die self.new-term
 	}
 }
@@ -4421,6 +4536,20 @@ class _RegexDef does Node {
 					:trait()
 				)
 			)
+		}
+		die self.new-term
+	}
+}
+
+class _Right does Node {
+	method new( Mu $parsed ) {
+		self.trace;
+		if $parsed {
+# XXX
+			return self.bless
+		}
+		else {
+			return self.bless
 		}
 		die self.new-term
 	}
@@ -4556,6 +4685,24 @@ class _RoutineDef does Node {
 						)
 					),
 					:trait()
+				)
+			)
+		}
+		die self.new-term
+	}
+}
+
+class _RxAdverbs does Node {
+	method new( Mu $parsed ) {
+		self.trace;
+		if self.assert-hash-keys( $parsed, [< quotepair >] ) {
+			return self.bless(
+				:content(
+					:quotepair(
+						_QuotePair.new(
+							$parsed.hash.<quotepair>
+						)
+					)
 				)
 			)
 		}
@@ -4705,6 +4852,34 @@ class _Shape does Node {
 		self.trace;
 		if self.assert-Str( $parsed ) {
 			return self.bless( :name( $parsed.Str ) )
+		}
+		die self.new-term
+	}
+}
+
+class _Sibble does Node {
+	method new( Mu $parsed ) {
+		self.trace;
+		if self.assert-hash-keys( $parsed, [< right babble left >] ) {
+			return self.bless(
+				:content(
+					:right(
+						_Right.new(
+							$parsed.hash.<right>
+						)
+					)
+					:babble(
+						_Babble.new(
+							$parsed.hash.<babble>
+						)
+					)
+					:left(
+						_Left.new(
+							$parsed.hash.<left>
+						)
+					)
+				)
+			)
 		}
 		die self.new-term
 	}
@@ -5461,6 +5636,20 @@ class _Termish does Node {
 					)
 				)
 			)
+		}
+		die self.new-term
+	}
+}
+
+class _Triangle does Node {
+	method new( Mu $parsed ) {
+		self.trace;
+		if $parsed {
+# XXX
+			return self.bless
+		}
+		else {
+			return self.bless
 		}
 		die self.new-term
 	}
