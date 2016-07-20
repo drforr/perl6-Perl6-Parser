@@ -7083,6 +7083,23 @@ class _TypeConstraint does Node {
 		CATCH {
 			when X::Hash::Store::OddNumber { }
 		}
+		if $parsed.list {
+			my @child;
+			for $parsed.list {
+				if self.assert-hash-keys( $_, [< typename >] ) {
+					@child.push(
+						_TypeName.new(
+							$_.hash.<typename>
+						)
+					);
+					next
+				}
+				die self.new-term
+			}
+			return self.bless(
+				:child( @child )
+			)
+		}
 		if self.assert-hash-keys( $parsed, [< typename >] ) {
 			return self.bless(
 				:content(
@@ -7099,10 +7116,18 @@ class _TypeConstraint does Node {
 	method is-valid( Mu $parsed ) returns Bool {
 		self.trace;
 		CATCH {
-			when X::Hash::Store::OddNumber { }
+			when X::Hash::Store::OddNumber { .resume }
+		}
+		if $parsed.list {
+			for $parsed.list {
+				next if self.assert-hash-keys( $_, [< typename >] )
+					and _TypeName.is-valid( $_.hash.<typename> );
+				die self.new-term
+			}
 		}
 		return True if self.assert-hash-keys( $parsed, [< typename >] )
 			and _TypeName.is-valid( $parsed.hash.<typename> );
+dump($parsed);
 		die self.new-term
 	}
 }
@@ -7254,6 +7279,7 @@ class _TypeName does Node {
 					[< longname >],
 					[< colonpair >] )
 					and _LongName_ColonPair.is-valid( $_ );
+dump($_);
 				die self.new-term
 			}
 			return True
