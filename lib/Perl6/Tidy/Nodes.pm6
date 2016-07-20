@@ -4071,7 +4071,6 @@ class _Name does Node {
 		if self.assert-Str( $parsed ) {
 			return self.bless( :name( $parsed.Str ) )
 		}
-warn dump($parsed);
 		die self.new-term
 	}
 	method is-valid( Mu $parsed ) {
@@ -4760,7 +4759,6 @@ class _Parameter does Node {
 					);
 					next
 				}
-warn dump($_);
 				die self.new-term
 			}
 			return self.bless(
@@ -6402,10 +6400,10 @@ class _StatementControl does Node {
 			and _Sym.is-valid( $parsed.hash.<sym> )
 			and _Version.is-valid( $parsed.hash.<version> );
 		return True if self.assert-hash-keys( $parsed,
-				[< xblock else sym >] )
-			and _XBlock.is-valid( $parsed.hash.<xblock> )
+				[< sym else xblock >] )
+			and _Sym.is-valid( $parsed.hash.<sym> )
 			and _Else.is-valid( $parsed.hash.<else> )
-			and _Sym.is-valid( $parsed.hash.<sym> );
+			and _XBlock.is-valid( $parsed.hash.<xblock> );
 		return True if self.assert-hash-keys( $parsed,
 				[< xblock sym wu >] )
 			and _XBlock.is-valid( $parsed.hash.<xblock> )
@@ -6419,7 +6417,6 @@ class _StatementControl does Node {
 				[< block sym >] )
 			and _Block.is-valid( $parsed.hash.<block> )
 			and _Sym.is-valid( $parsed.hash.<sym> );
-dump($parsed);
 		die self.new-term
 	}
 }
@@ -6731,16 +6728,33 @@ class _Sym does Node {
 			when X::Hash::Store::OddNumber { }
 			when X::Multi::NoMatch { }
 		}
-		if $parsed.Bool and		# XXX Huh?
-		   $parsed.Str eq '+' {
-			return self.bless( :name( $parsed.Str ) )
+		if $parsed.list {
+			my @child;
+			for $parsed.list {
+				if $_.Str {
+					@child.push(
+						$_.Str
+					);
+					next
+				}
+				die self.new-term
+			}
+			return self.bless(
+				:child( @child )
+			)
 		}
-		if $parsed.Bool and		# XXX Huh?
-		   $parsed.Str eq '' {
-			return self.bless( :name( $parsed.Str ) )
-		}
-		if self.assert-Str( $parsed ) {
-			return self.bless( :name( $parsed.Str ) )
+		else {
+			if $parsed.Bool and		# XXX Huh?
+			   $parsed.Str eq '+' {
+				return self.bless( :name( $parsed.Str ) )
+			}
+			if $parsed.Bool and		# XXX Huh?
+			   $parsed.Str eq '' {
+				return self.bless( :name( $parsed.Str ) )
+			}
+			if self.assert-Str( $parsed ) {
+				return self.bless( :name( $parsed.Str ) )
+			}
 		}
 		die self.new-term
 	}
@@ -7153,7 +7167,6 @@ class _TypeDeclarator does Node {
 	method is-valid( Mu $parsed ) {
 		self.trace;
 		CATCH { when X::Multi::NoMatch { } }
-#warn dump-no-crash($parsed);
 		return True if self.assert-hash-keys( $parsed,
 				[< sym initializer variable >], [< trait >] )
 			and _Sym.is-valid( $parsed.hash.<sym> )
@@ -7168,22 +7181,6 @@ class _TypeDeclarator does Node {
 			and _Sym.is-valid( $parsed.hash.<sym> )
 			and _Initializer.is-valid( $parsed.hash.<initializer> );
 		die self.new-term
-	}
-}
-sub dump-no-crash( Mu $p ) {
-	if $p.hash {
-		my @defined;
-		my @undef;
-		for $p.hash.keys {
-			if $p.hash.{$_} {
-				@defined.push( $_ );
-			}
-			else {
-				@undef.push( $_ );
-			}
-		}
-		say "Hash:D: {@defined.gist}";
-		say "Hash:U: {@undef.gist}";
 	}
 }
 
