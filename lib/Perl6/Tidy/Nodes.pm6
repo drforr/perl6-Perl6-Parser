@@ -86,6 +86,7 @@ class _PackageDeclarator {...}
 class _PackageDef {...}
 class _Parameter {...}
 class _ParamVar {...}
+class _ParamVar_Quant {...}
 class _ParamVar_TypeConstraint_Quant {...}
 class _PBlock {...}
 class _PostCircumfix {...}
@@ -133,6 +134,7 @@ class _StatementModCond_EXPR {...}
 class _StatementModLoop {...}
 class _StatementModLoop_EXPR {...}
 class _StatementPrefix {...}
+class _SubShortName {...}
 class _Sym {...}
 class _TermAlt {...}
 class _TermAltSeq {...}
@@ -3974,9 +3976,23 @@ class _Name does Node {
 				:child()
 			)
 		}
+		if self.assert-hash-keys( $parsed, [< subshortname >] ) {
+			return self.bless(
+				:content(
+					:subshortname(
+						_SubShortName.new(
+							$parsed.hash.<subshortname>
+						)
+					),
+					:morename()
+				),
+				:child()
+			)
+		}
 		if self.assert-Str( $parsed ) {
 			return self.bless( :name( $parsed.Str ) )
 		}
+warn dump($parsed);
 		die self.new-term
 	}
 	method is-valid( Mu $parsed ) {
@@ -3990,6 +4006,9 @@ class _Name does Node {
 		return True if self.assert-hash-keys( $parsed,
 				[< identifier >], [< morename >] )
 			and _Identifier.is-valid( $parsed.hash.<identifier> );
+		return True if self.assert-hash-keys( $parsed,
+				[< subshortname >] )
+			and _SubShortName.is-valid( $parsed.hash.<subshortname> );
 		return True if self.assert-Str( $parsed );
 		die self.new-term
 	}
@@ -4633,6 +4652,17 @@ class _Parameter does Node {
 					);
 					next
 				}
+				if self.assert-hash-keys( $_,
+					[< param_var quant >],
+					[< default_value type_constraint modifier trait post_constraint >] ) {
+					@child.push(
+						_ParamVar_Quant.new(
+							$_
+						)
+					);
+					next
+				}
+warn dump($_);
 				die self.new-term
 			}
 			return self.bless(
@@ -4684,6 +4714,41 @@ class _ParamVar does Node {
 		return True if self.assert-hash-keys( $parsed, [< name sigil >] )
 			and _Name.is-valid( $parsed.hash.<name> )
 			and _Sigil.is-valid( $parsed.hash.<sigil> );
+		die self.new-term
+	}
+}
+
+class _ParamVar_Quant does Node {
+	method new( Mu $parsed ) {
+		self.trace;
+		if self.assert-hash-keys(
+				$parsed,
+				[< param_var quant >],
+				[< default_value type_constraint modifier trait post_constraint >] ) {
+			return self.bless(
+				:content(
+					:param_var(
+						_ParamVar.new(
+							$parsed.hash.<param_var>
+						)
+					)
+					:quant(
+						_Quant.new(
+							$parsed.hash.<quant>
+						)
+					)
+				)
+			)
+		}
+		die self.new-term
+	}
+	method is-valid( Mu $parsed ) {
+		self.trace;
+		return True if self.assert-hash-keys( $parsed,
+				[< param_var quant >],
+				[< default_value type_constraint modifier trait post_constraint >] )
+			and _ParamVar.is-valid( $parsed.hash.<param_var> )
+			and _Quant.is-valid( $parsed.hash.<quant> );
 		die self.new-term
 	}
 }
@@ -6517,6 +6582,31 @@ class _StatementPrefix does Node {
 		return True if self.assert-hash-keys( $parsed, [< sym blorst >] )
 			and _Sym.is-valid( $parsed.hash.<sym> )
 			and _Blorst.is-valid( $parsed.hash.<blorst> );
+		die self.new-term
+	}
+}
+
+class _SubShortName does Node {
+	method new( Mu $parsed ) {
+		self.trace;
+		if self.assert-hash-keys( $parsed, [< desigilname >] ) {
+			return self.bless(
+				:content(
+					:desigilname(
+						_DeSigilName.new(
+							$parsed.hash.<desigilname>
+						)
+					)
+				)
+			)
+		}
+		die self.new-term
+	}
+	method is-valid( Mu $parsed ) {
+		self.trace;
+		return True if self.assert-hash-keys( $parsed,
+				[< desigilname >] )
+			and _DeSigilName.is-valid( $parsed.hash.<desigilname> );
 		die self.new-term
 	}
 }

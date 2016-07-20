@@ -430,11 +430,11 @@ subtest {
 		plan 1;
 
 		my $parsed = $pt.tidy( Q:to[_END_] );
-###sub search (@a, $x --> Int) {
+sub search (@a, $x --> Int) {
 ###    binary_search { $x cmp @a[$^i] }, 0, @a.end
-###}
-###
-###sub binary_search (&p, Int $lo is copy, Int $hi is copy --> Int) {
+}
+
+sub binary_search (&p, Int $lo is copy, Int $hi is copy --> Int) {
 ###    until $lo > $hi {
 ###        my Int $mid = ($lo + $hi) div 2;
 ###        given p $mid {
@@ -444,7 +444,7 @@ subtest {
 ###        }
 ###    }
 ###    fail;
-###}
+}
 _END_
 		isa-ok $parsed, Q{Root};
 	}, Q{version 1};
