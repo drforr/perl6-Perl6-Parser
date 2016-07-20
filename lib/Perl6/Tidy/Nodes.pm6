@@ -2819,8 +2819,8 @@ class _EXPR does Node {
 					and _PackageDeclarator.is-valid( $_.hash.<package_declarator> );
 				next if self.assert-hash-keys( $_, [< sym >] )
 					and _Sym.is-valid( $_.hash.<sym> );
-				next if self.assert-hash-keys( $_, [< scope_declrator >] )
-					and _ScopeDeclarator.is-valid( $_.hash.<scope_declrator> );
+				next if self.assert-hash-keys( $_, [< scope_declarator >] )
+					and _ScopeDeclarator.is-valid( $_.hash.<scope_declarator> );
 				next if self.assert-hash-keys( $_, [< dotty >] )
 					and _Dotty.is-valid( $_.hash.<dotty> );
 				next if self.assert-hash-keys( $_, [< circumfix >] )
@@ -4881,7 +4881,8 @@ class _ParamVar_TypeConstraint_Quant does Node {
 	method is-valid( Mu $parsed ) returns Bool {
 		self.trace;
 		return True if self.assert-hash-keys( $parsed,
-				[< param_var type_constraint quant >] )
+				[< param_var type_constraint quant >],
+				[< default_value modifier trait post_constraint >] )
 			and _ParamVar.is-valid( $parsed.hash.<param_var> )
 			and _TypeConstraint.is-valid( $parsed.hash.<type_constraint> )
 			and _Quant.is-valid( $parsed.hash.<quant> );
@@ -7097,6 +7098,9 @@ class _TypeConstraint does Node {
 	}
 	method is-valid( Mu $parsed ) returns Bool {
 		self.trace;
+		CATCH {
+			when X::Hash::Store::OddNumber { }
+		}
 		return True if self.assert-hash-keys( $parsed, [< typename >] )
 			and _TypeName.is-valid( $parsed.hash.<typename> );
 		die self.new-term
@@ -7636,6 +7640,43 @@ class _XBlock does Node {
 			when X::Hash::Store::OddNumber { }
 			when X::Multi::NoMatch { }
 		}
+		if $parsed.list {
+			my @child;
+			for $parsed.list {
+				if self.assert-hash-keys( $parsed, [< EXPR >] ) {
+					@child.push(
+						self.bless(
+							:content(
+								:EXPR(
+									_EXPR.new(
+										$parsed.hash.<EXPR>
+									)
+								)
+							)
+						)
+					);
+					next
+				}
+				if self.assert-hash-keys( $parsed, [< pblock >] ) {
+					@child.push(
+						self.bless(
+							:content(
+								:pblock(
+									_PBlock.new(
+										$parsed.hash.<pblock>
+									)
+								)
+							)
+						)
+					);
+					next
+				}
+				die self.new-term
+			}
+			return self.bless(
+				:child( @child )
+			)
+		}
 		if self.assert-hash-keys( $parsed, [< pblock EXPR >] ) {
 			return self.bless(
 				:content(
@@ -7668,8 +7709,24 @@ class _XBlock does Node {
 	method is-valid( Mu $parsed ) returns Bool {
 		self.trace;
 		CATCH {
-			when X::Hash::Store::OddNumber { }
-			when X::Multi::NoMatch { }
+			when X::Hash::Store::OddNumber { .resume }
+#			when X::Multi::NoMatch { }
+		}
+		if $parsed.list {
+			for $parsed.list {
+				next if self.assert-hash-keys( $_,
+						[< pblock EXPR >] )
+					and _PBlock.is-valid( $_.hash.<pblock> )
+					and _EXPR.is-valid( $_.hash.<EXPR> );
+				next if self.assert-hash-keys( $_,
+						[< EXPR >] )
+					and _EXPR.is-valid( $_.hash.<EXPR> );
+				next if self.assert-hash-keys( $_,
+						[< pblock >] )
+					and _PBlock.is-valid( $_.hash.<pblock> );
+				die self.new-term
+			}
+			return True
 		}
 		return True if self.assert-hash-keys( $parsed,
 				[< pblock EXPR >] )
