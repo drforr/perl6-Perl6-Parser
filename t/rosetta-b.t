@@ -431,19 +431,19 @@ subtest {
 
 		my $parsed = $pt.tidy( Q:to[_END_] );
 sub search (@a, $x --> Int) {
-###    binary_search { $x cmp @a[$^i] }, 0, @a.end
+    binary_search { $x cmp @a[$^i] }, 0, @a.end
 }
 
 sub binary_search (&p, Int $lo is copy, Int $hi is copy --> Int) {
-###    until $lo > $hi {
-###        my Int $mid = ($lo + $hi) div 2;
-###        given p $mid {
-###            when -1 { $hi = $mid - 1; } 
-###            when  1 { $lo = $mid + 1; }
-###            default { return $mid;    }
-###        }
-###    }
-###    fail;
+    until $lo > $hi {
+        my Int $mid = ($lo + $hi) div 2;
+        given p $mid {
+            when -1 { $hi = $mid - 1; } 
+            when  1 { $lo = $mid + 1; }
+            default { return $mid;    }
+        }
+    }
+    fail;
 }
 _END_
 		isa-ok $parsed, Q{Root};
@@ -453,15 +453,15 @@ _END_
 		plan 1;
 
 		my $parsed = $pt.tidy( Q:to[_END_] );
-###sub binary_search (&p, Int $lo, Int $hi --> Int) {
-###    $lo <= $hi or fail;
-###    my Int $mid = ($lo + $hi) div 2;
-###    given p $mid {
-###        when -1 { binary_search &p, $lo,      $mid - 1 } 
-###        when  1 { binary_search &p, $mid + 1, $hi      }
-###        default { $mid                                 }
-###    }
-###}
+sub binary_search (&p, Int $lo, Int $hi --> Int) {
+    $lo <= $hi or fail;
+    my Int $mid = ($lo + $hi) div 2;
+    given p $mid {
+        when -1 { binary_search &p, $lo,      $mid - 1 } 
+        when  1 { binary_search &p, $mid + 1, $hi      }
+        default { $mid                                 }
+    }
+}
 _END_
 		isa-ok $parsed, Q{Root};
 	}, Q{version 2};
@@ -624,35 +624,35 @@ subtest {
 	plan 1;
 
 	my $parsed = $pt.tidy( Q:to[_END_] );
-###class Pixel { has UInt ($.R, $.G, $.B) }
-###class Bitmap {
-###    has UInt ($.width, $.height);
-###    has Pixel @!data;
-### 
-###    method fill(Pixel $p) {
-###        @!data = $p.clone xx ($!width*$!height)
-###    }
-###    method pixel(
-###	$i where ^$!width,
-###	$j where ^$!height
-###	--> Pixel
-###    ) is rw { @!data[$i*$!height + $j] }
-### 
-###    method set-pixel ($i, $j, Pixel $p) {
-###	self.pixel($i, $j) = $p.clone;
-###    }
-###    method get-pixel ($i, $j) returns Pixel {
-###	self.pixel($i, $j);
-###    }
-###}
-### 
-###my Bitmap $b = Bitmap.new( width => 10, height => 10);
-### 
-###$b.fill( Pixel.new( R => 0, G => 0, B => 200) );
-### 
-###$b.set-pixel( 7, 5, Pixel.new( R => 100, G => 200, B => 0) );
-### 
-###say $b.perl;
+class Pixel { has UInt ($.R, $.G, $.B) }
+class Bitmap {
+    has UInt ($.width, $.height);
+    has Pixel @!data;
+
+    method fill(Pixel $p) {
+        @!data = $p.clone xx ($!width*$!height)
+    }
+    method pixel(
+	$i where ^$!width,
+	$j where ^$!height
+	--> Pixel
+    ) is rw { @!data[$i*$!height + $j] }
+
+    method set-pixel ($i, $j, Pixel $p) {
+	self.pixel($i, $j) = $p.clone;
+    }
+    method get-pixel ($i, $j) returns Pixel {
+	self.pixel($i, $j);
+    }
+}
+
+my Bitmap $b = Bitmap.new( width => 10, height => 10);
+
+$b.fill( Pixel.new( R => 0, G => 0, B => 200) );
+
+$b.set-pixel( 7, 5, Pixel.new( R => 100, G => 200, B => 0) );
+
+say $b.perl;
 _END_
 	isa-ok $parsed, Q{Root};
 }, Q{Bitmap};
