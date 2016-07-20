@@ -6162,6 +6162,32 @@ class _StatementControl does Node {
 				)
 			)
 		}
+		if self.assert-hash-keys( $parsed, [< pblock sym EXPR wu >] ) {
+			return self.bless(
+				:content(
+					:pblock(
+						_PBlock.new(
+							$parsed.hash.<pblock>
+						)
+					),
+					:sym(
+						_Sym.new(
+							$parsed.hash.<sym>
+						)
+					),
+					:EXPR(
+						_EXPR.new(
+							$parsed.hash.<EXPR>
+						)
+					),
+					:wu(
+						_Wu.new(
+							$parsed.hash.<wu>
+						)
+					)
+				)
+			)
+		}
 		if self.assert-hash-keys( $parsed, [< doc sym module_name >] ) {
 			return self.bless(
 				:content(
@@ -6288,6 +6314,11 @@ class _StatementControl does Node {
 			and _E1.is-valid( $parsed.hash.<e1> )
 			and _E2.is-valid( $parsed.hash.<e2> )
 			and _E3.is-valid( $parsed.hash.<e3> );
+		return if self.assert-hash-keys( $parsed, [< pblock sym EXPR wu >] )
+			and _PBlock.is-valid( $parsed.hash.<pblock> )
+			and _Sym.is-valid( $parsed.hash.<sym> )
+			and _EXPR.is-valid( $parsed.hash.<EXPR> )
+			and _Wu.is-valid( $parsed.hash.<wu> );
 		return True if self.assert-hash-keys( $parsed, [< doc sym module_name >] )
 			and _Doc.is-valid( $parsed.hash.<doc> )
 			and _Sym.is-valid( $parsed.hash.<sym> )
