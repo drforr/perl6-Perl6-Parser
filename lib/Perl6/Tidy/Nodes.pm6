@@ -32,6 +32,7 @@ class _DECL {...}
 class _DecNumber {...}
 class _DefLongName {...}
 class _DefTerm {...}
+class _DefTerm_Quant {...}
 class _DefTermNow {...}
 class _DeSigilName {...}
 class _Dig {...}
@@ -1926,6 +1927,45 @@ class _DefTerm does Node {
 		return True if self.assert-hash-keys( $parsed,
 				[< identifier >], [< colonpair >] )
 			and _Identifier.is-valid( $parsed.hash.<identifier> );
+		die self.new-term
+	}
+}
+
+# XXX This is a compound type
+class _DefTerm_Quant does Node {
+	method new( Mu $parsed ) {
+		self.trace;
+		if self.assert-hash-keys( $parsed,
+				[< defterm quant >],
+				[< default_value modifier
+				   post_constraint trait
+				   type_constraint >] ) {
+			return self.bless(
+				:content(
+					:defterm(
+						_DefTerm.new(
+							$parsed.hash.<defterm>
+						)
+					),
+					:quant(
+						_Quant.new(
+							$parsed.hash.<quant>
+						)
+					)
+				)
+			)
+		}
+		die self.new-term
+	}
+	method is-valid( Mu $parsed ) returns Bool {
+		self.trace;
+		return True if self.assert-hash-keys( $parsed,
+				[< defterm quant >],
+				[< default_value modifier
+				   post_constraint trait
+				   type_constraint >] )
+			and _DefTerm.is-valid( $parsed.hash.<defterm> )
+			and _Quant.is-valid( $parsed.hash.<quant> );
 		die self.new-term
 	}
 }
@@ -5057,6 +5097,18 @@ class _Parameter does Node {
 					next
 				}
 				if self.assert-hash-keys( $_,
+					[< defterm quant >],
+					[< default_value modifier
+					   post_constraint trait
+					   type_constraint >] ) {
+					@child.push(
+						_DefTerm_Quant.new(
+							$_
+						)
+					);
+					next
+				}
+				if self.assert-hash-keys( $_,
 					[< type_constraint >],
 					[< param_var quant default_value modifier
 					   post_constraint trait
@@ -5068,6 +5120,7 @@ class _Parameter does Node {
 					);
 					next
 				}
+say $_.hash.keys.gist;
 				die self.new-term
 			}
 			return self.bless(
@@ -5151,7 +5204,17 @@ class _ParamVar does Node {
 				)
 			)
 		}
-dump($parsed);
+		if self.assert-hash-keys( $parsed, [< sigil >] ) {
+			return self.bless(
+				:content(
+					:sigil(
+						_Sigil.new(
+							$parsed.hash.<sigil>
+						)
+					)
+				)
+			)
+		}
 		die self.new-term
 	}
 	method is-valid( Mu $parsed ) returns Bool {
@@ -5166,6 +5229,8 @@ dump($parsed);
 			and _Sigil.is-valid( $parsed.hash.<sigil> );
 		return True if self.assert-hash-keys( $parsed, [< signature >] )
 			and _Signature.is-valid( $parsed.hash.<signature> );
+		return True if self.assert-hash-keys( $parsed, [< sigil >] )
+			and _Sigil.is-valid( $parsed.hash.<sigil> );
 		die self.new-term
 	}
 }
