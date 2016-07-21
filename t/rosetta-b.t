@@ -561,23 +561,23 @@ _END_
 subtest {
 	plan 1;
 
-	# XXX class Digest::SHA is recreated
+	# XXX class Digest::SHA exports 'sha256'
 	my $parsed = $pt.tidy( Q:to[_END_] );
-        class Digest::SHA { sub sha256 is export { } }
+sub sha256 { }
 my $bitcoin-address = rx/
     <+alnum-[0IOl]> ** 26..*  # an address is at least 26 characters long
-###    <?{
-###        #use Digest::SHA;
-###        .subbuf(21, 4) eqv sha256(sha256 .subbuf(0, 21)).subbuf(0, 4) given
-###        Blob.new: <
-###            1 2 3 4 5 6 7 8 9
-###            A B C D E F G H   J K L M N   P Q R S T U V W X Y Z
-###            a b c d e f g h i j k   m n o p q r s t u v w x y z
-###        >.pairs.invert.hash{$/.comb}
-###        .reduce(* * 58 + *)
-###        .polymod(256 xx 24)
-###        .reverse;
-###    }>
+    <?{
+        #use Digest::SHA;
+        .subbuf(21, 4) eqv sha256(sha256 .subbuf(0, 21)).subbuf(0, 4) given
+        Blob.new: <
+            1 2 3 4 5 6 7 8 9
+            A B C D E F G H   J K L M N   P Q R S T U V W X Y Z
+            a b c d e f g h i j k   m n o p q r s t u v w x y z
+        >.pairs.invert.hash{$/.comb}
+        .reduce(* * 58 + *)
+        .polymod(256 xx 24)
+        .reverse;
+    }>
 /;
 
 say "Here is a bitcoin address: 1AGNa15ZQXAZUgFiqJ2i7Z2DPU2J6hW62i" ~~ $bitcoin-address;
@@ -588,9 +588,10 @@ _END_
 subtest {
 	plan 1;
 
-	# XXX class Digest::SHA is recreated
+	# XXX class Digest::SHA exports sub sha256, sub rmd160
 	my $parsed = $pt.tidy( Q:to[_END_] );
-###use SSL::Digest;
+sub sha256 { }; sub rmd160 { }
+#use SSL::Digest;
  
 constant BASE58 = <
       1 2 3 4 5 6 7 8 9
@@ -608,9 +609,9 @@ sub public_point_to_address(Int $x is copy, Int $y is copy) {
     my @bytes;
     for 1 .. 32 { push @bytes, $y % 256; $y div= 256 }
     for 1 .. 32 { push @bytes, $x % 256; $x div= 256 }
-###    my $hash = rmd160 sha256 Blob.new: 4, @bytes.reverse;
-###    my $checksum = sha256(sha256 Blob.new: 0, $hash.list).subbuf: 0, 4;
-###    encode reduce * * 256 + * , 0, ($hash, $checksum)».list 
+    my $hash = rmd160 sha256 Blob.new: 4, @bytes.reverse;
+    my $checksum = sha256(sha256 Blob.new: 0, $hash.list).subbuf: 0, 4;
+    encode reduce * * 256 + * , 0, ($hash, $checksum)».list 
 }
 
 say public_point_to_address
