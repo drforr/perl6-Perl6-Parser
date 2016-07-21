@@ -50,6 +50,7 @@ class _FatArrow {...}
 class _Frac {...}
 class _HexInt {...}
 class _Identifier_Args {...}
+class _Identifier_Name_Sign {...}
 class _Identifier {...}
 class _Infix {...}
 class _Infixish {...}
@@ -65,9 +66,11 @@ class _LongName_Args {...}
 class _LongName_ColonPair {...}
 class _LongName_ColonPairs {...}
 class _LongName {...}
+class _Max {...}
 class _MetaChar {...}
 class _MethodDef {...}
 class _MethodOp {...}
+class _Min {...}
 class _ModifierExpr {...}
 class _ModuleName {...}
 class _MultiDeclarator {...}
@@ -122,6 +125,8 @@ class _Sibble {...}
 class _SigFinal {...}
 class _SigFinal_Quantifier_Separator_Atom {...}
 class _Sigil {...}
+class _SigMaybe {...}
+class _SigMaybe_SigFinal_Quantifier_Atom {...}
 class _Signature {...}
 class _Sign_CharSpec {...}
 class _Sign {...}
@@ -857,6 +862,14 @@ class _CClassElem does Node {
 		if $parsed.list {
 			my @child;
 			for $parsed.list {
+				if self.assert-hash-keys( $_, [< identifier name sign >], [< charspec >] ) {
+					@child.push(
+						_Identifier_Name_Sign.new(
+							$_
+						)
+					);
+					next
+				}
 				if self.assert-hash-keys( $_, [< sign charspec >] ) {
 					@child.push(
 						_Sign_CharSpec.new(
@@ -877,6 +890,10 @@ class _CClassElem does Node {
 		self.trace;
 		if $parsed.list {
 			for $parsed.list {
+				next if self.assert-hash-keys( $_,
+					[< identifier name sign >],
+					[< charspec >] )
+					and _Identifier_Name_Sign.is-valid( $_ );
 				next if self.assert-hash-keys( $_,
 						[< sign charspec >] )
 					and _Sign_CharSpec.is-valid( $_ );
@@ -3073,6 +3090,49 @@ class _Identifier_Args does Node {
 	}
 }
 
+# XXX This is a compound type
+class _Identifier_Name_Sign does Node {
+	method new( Mu $parsed ) {
+		self.trace;
+		if self.assert-hash-keys( $parsed, [< identifier name sign >], [< charspec >] ) {
+			return self.bless(
+				:content(
+					:identifier(
+						_Identifier.new(
+							$parsed.hash.<identifier>
+						)
+					),
+					:name(
+						_Name.new(
+							$parsed.hash.<name>
+						)
+					),
+					:sign(
+						_Sign.new(
+							$parsed.hash.<sign>
+						)
+					),
+					:charspec()
+				)
+			)
+		}
+		die self.new-term
+	}
+	method is-valid( Mu $parsed ) returns Bool {
+		self.trace;
+		return True if self.assert-hash-keys( $parsed,
+				[< identifier name sign >], [< charspec >] )
+			and _Identifier.is-valid( $parsed.hash.<identifier> )
+			and _Name.is-valid( $parsed.hash.<name> )
+			and _Sign.is-valid( $parsed.hash.<sign> );
+		return True if self.assert-hash-keys( $parsed,
+				[< identifier args >] )
+			and _Identifier.is-valid( $parsed.hash.<identifier> )
+			and _Args.is-valid( $parsed.hash.<args> );
+		die self.new-term
+	}
+}
+
 class _Identifier does Node {
 	method new( Mu $parsed ) {
 		self.trace;
@@ -3673,6 +3733,21 @@ class _LongName does Node {
 	}
 }
 
+class _Max does Node {
+	method new( Mu $parsed ) {
+		self.trace;
+		if self.assert-Str( $parsed ) {
+			return self.bless( :name( $parsed.Str ) )
+		}
+		die self.new-term
+	}
+	method is-valid( Mu $parsed ) returns Bool {
+		self.trace;
+		return True if self.assert-Str( $parsed );
+		die self.new-term
+	}
+}
+
 class _MetaChar does Node {
 	method new( Mu $parsed ) {
 		self.trace;
@@ -3918,6 +3993,37 @@ class _MethodOp does Node {
 		return True if self.assert-hash-keys( $parsed, [< longname >] )
 			and _LongName.is-valid( $parsed.hash.<longname> );
 		die dump( $parsed );
+	}
+}
+
+class _Min does Node {
+	method new( Mu $parsed ) {
+		self.trace;
+		if self.assert-hash-keys( $parsed, [< decint VALUE >] ) {
+			return self.bless(
+				:content(
+					:decint(
+						_DecInt.new(
+							$parsed.hash.<decint>
+						)
+					)
+					:VALUE(
+						_VALUE.new(
+							$parsed.hash.<VALUE>
+						)
+					)
+				)
+			)
+		}
+		die self.new-term
+	}
+	method is-valid( Mu $parsed ) returns Bool {
+		self.trace;
+		return True if self.assert-hash-keys( $parsed,
+				[< decint VALUE >] )
+			and _DecInt.is-valid( $parsed.hash.<decint> )
+			and _VALUE.is-valid( $parsed.hash.<VALUE> );
+		die self.new-term
 	}
 }
 
@@ -4211,6 +4317,16 @@ class _Noun does Node {
 			my @child;
 			for $parsed.list {
 				if self.assert-hash-keys( $_,
+					[< sigmaybe sigfinal
+					   quantifier atom >] ) {
+					@child.push(
+						_SigMaybe_SigFinal_Quantifier_Atom.new(
+							$_
+						)
+					);
+					next
+				}
+				if self.assert-hash-keys( $_,
 					[< sigfinal quantifier
 					   separator atom >] ) {
 					@child.push(
@@ -4254,6 +4370,10 @@ class _Noun does Node {
 					[< sigfinal quantifier
 					   separator atom >] )
 					and _SigFinal_Quantifier_Separator_Atom.is-valid( $_ );
+				next if self.assert-hash-keys( $_,
+					[< sigmaybe sigfinal
+					   separator atom >] )
+					and _SigMaybe_SigFinal_Quantifier_Atom.is-valid( $_ );
 				next if self.assert-hash-keys( $_,
 					[< atom sigfinal quantifier >] )
 					and _Atom_SigFinal_Quantifier.is-valid( $_ );
@@ -5249,6 +5369,32 @@ class _Prefix does Node {
 class _Prefix_OPER does Node {
 	method new( Mu $parsed ) {
 		self.trace;
+		if self.assert-hash-keys( $parsed, [< sym min max backmod >] ) {
+			return self.bless(
+				:content(
+					:sym(
+						_Sym.new(
+							$parsed.hash.<sym>
+						)
+					),
+					:min(
+						_Min.new(
+							$parsed.hash.<min>
+						)
+					),
+					:max(
+						_Max.new(
+							$parsed.hash.<max>
+						)
+					),
+					:backmod(
+						_BackMod.new(
+							$parsed.hash.<backmod>
+						)
+					)
+				)
+			)
+		}
 		if self.assert-hash-keys( $parsed,
 				     [< prefix OPER >],
 				     [< prefix_postfix_meta_operator >] ) {
@@ -5272,6 +5418,12 @@ class _Prefix_OPER does Node {
 	}
 	method is-valid( Mu $parsed ) returns Bool {
 		self.trace;
+		return True if self.assert-hash-keys( $parsed,
+			     [< sym min max backmod >] )
+			and _Sym.is-valid( $parsed.hash.<sym> )
+			and _Min.is-valid( $parsed.hash.<min> )
+			and _Max.is-valid( $parsed.hash.<max> )
+			and _BackMod.is-valid( $parsed.hash.<backmod> );
 		return True if self.assert-hash-keys( $parsed,
 			     [< prefix OPER >],
 			     [< prefix_postfix_meta_operator >] )
@@ -5324,6 +5476,32 @@ class _QuantifiedAtom does Node {
 class _Quantifier does Node {
 	method new( Mu $parsed ) {
 		self.trace;
+		if self.assert-hash-keys( $parsed, [< sym min max backmod >] ) {
+			return self.bless(
+				:content(
+					:sym(
+						_Sym.new(
+							$parsed.hash.<sym>
+						)
+					),
+					:min(
+						_Min.new(
+							$parsed.hash.<min>
+						)
+					),
+					:max(
+						_Max.new(
+							$parsed.hash.<max>
+						)
+					),
+					:backmod(
+						_BackMod.new(
+							$parsed.hash.<backmod>
+						)
+					)
+				)
+			)
+		}
 		if self.assert-hash-keys( $parsed, [< sym backmod >] ) {
 			return self.bless(
 				:content(
@@ -5344,6 +5522,11 @@ class _Quantifier does Node {
 	}
 	method is-valid( Mu $parsed ) returns Bool {
 		self.trace;
+		return True if self.assert-hash-keys( $parsed, [< sym min max backmod >] )
+			and _Sym.is-valid( $parsed.hash.<sym> )
+			and _Min.is-valid( $parsed.hash.<min> )
+			and _Max.is-valid( $parsed.hash.<max> )
+			and _BackMod.is-valid( $parsed.hash.<backmod> );
 		return True if self.assert-hash-keys( $parsed, [< sym backmod >] )
 			and _Sym.is-valid( $parsed.hash.<sym> )
 			and _BackMod.is-valid( $parsed.hash.<backmod> );
@@ -6129,12 +6312,102 @@ class _SigFinal_Quantifier_Separator_Atom does Node {
 	}
 }
 
+class _SigMaybe_SigFinal_Quantifier_Atom does Node {
+	method new( Mu $parsed ) {
+		self.trace;
+		if self.assert-hash-keys( $parsed,
+				[< sigmaybe sigfinal quantifier atom >] ) {
+			return self.bless(
+				:content(
+					:sigmaybe(
+						_SigMaybe.new(
+							$parsed.hash.<sigmaybe>
+						)
+					),
+					:sigfinal(
+						_SigFinal.new(
+							$parsed.hash.<sigfinal>
+						)
+					),
+					:quantifier(
+						_Quantifier.new(
+							$parsed.hash.<quantifier>
+						)
+					),
+					:atom(
+						_Atom.new(
+							$parsed.hash.<atom>
+						)
+					)
+				)
+			)
+		}
+		die self.new-term
+	}
+	method is-valid( Mu $parsed ) returns Bool {
+		self.trace;
+		return True if self.assert-hash-keys( $parsed,
+				[< sigmaybe sigfinal quantifier atom >] )
+			and _SigMaybe.is-valid( $parsed.hash.<sigmaybe> )
+			and _SigFinal.is-valid( $parsed.hash.<sigfinal> )
+			and _Quantifier.is-valid( $parsed.hash.<quantifier> )
+			and _Atom.is-valid( $parsed.hash.<atom> );
+		die self.new-term
+	}
+}
+
 class _Sigil does Node does IsString {
 	method new( Mu $parsed ) {
 		self.trace;
 		if self.assert-Str( $parsed ) {
 			return self.bless( :name( $parsed.Str ) )
 		}
+		die self.new-term
+	}
+}
+
+class _SigMaybe does Node {
+	method new( Mu $parsed ) {
+		self.trace;
+		if self.assert-hash-keys( $parsed,
+				[< parameter typename >],
+				[< param_sep >] ) {
+			return self.bless(
+				:content(
+					:parameter(
+						_Parameter.new(
+							$parsed.hash.<parameter>
+						)
+					),
+					:typename(
+						_TypeName.new(
+							$parsed.hash.<typename>
+						)
+					),
+					:param_sep()
+				)
+			)
+		}
+		if self.assert-hash-keys( $parsed, [], [< param_sep parameter >] ) {
+			return self.bless(
+				:name( $parsed.Bool ),
+				:content(
+					:param_sep(),
+					:parameter()
+				)
+			)
+		}
+		die self.new-term
+	}
+	method is-valid( Mu $parsed ) returns Bool {
+		self.trace;
+		return True if self.assert-hash-keys( $parsed,
+				[< parameter typename >],
+				[< param_sep >] )
+			and _Parameter.is-valid( $parsed.hash.<parameter> )
+			and _TypeName.is-valid( $parsed.hash.<typename> );
+		return True if self.assert-hash-keys( $parsed, [],
+				[< param_sep parameter >] );
 		die self.new-term
 	}
 }
@@ -6218,7 +6491,9 @@ class _Sign does Node {
 	method new( Mu $parsed ) {
 		self.trace;
 		# Note for later - don't replace with assert-Str
-		if $parsed.Str and $parsed.Str eq '-' {
+		if $parsed.Str and
+			( $parsed.Str eq '-' or
+			  $parsed.Str eq '+' ) {
 			return self.bless( :name( $parsed.Str ) )
 		}
 		if self.assert-Bool( $parsed ) {
@@ -6228,7 +6503,8 @@ class _Sign does Node {
 	}
 	method is-valid( Mu $parsed ) returns Bool {
 		self.trace;
-		return True if $parsed.Str and $parsed.Str eq '-';
+		return True if $parsed.Str
+			and ( $parsed.Str eq '-' or $parsed.Str eq '+' );
 		return True if self.assert-Bool( $parsed );
 		die self.new-term
 	}

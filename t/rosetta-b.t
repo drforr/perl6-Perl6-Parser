@@ -564,8 +564,8 @@ subtest {
 	# XXX class Digest::SHA is recreated
 	my $parsed = $pt.tidy( Q:to[_END_] );
         class Digest::SHA { sub sha256 is export { } }
-###my $bitcoin-address = rx/
-###    <+alnum-[0IOl]> ** 26..*  # an address is at least 26 characters long
+my $bitcoin-address = rx/
+    <+alnum-[0IOl]> ** 26..*  # an address is at least 26 characters long
 ###    <?{
 ###        #use Digest::SHA;
 ###        .subbuf(21, 4) eqv sha256(sha256 .subbuf(0, 21)).subbuf(0, 4) given
@@ -578,9 +578,9 @@ subtest {
 ###        .polymod(256 xx 24)
 ###        .reverse;
 ###    }>
-###/;
+/;
 
-###say "Here is a bitcoin address: 1AGNa15ZQXAZUgFiqJ2i7Z2DPU2J6hW62i" ~~ $bitcoin-address;
+say "Here is a bitcoin address: 1AGNa15ZQXAZUgFiqJ2i7Z2DPU2J6hW62i" ~~ $bitcoin-address;
 _END_
 	isa-ok $parsed, Q{Root};
 }, Q{Bitcoin validation};
@@ -942,7 +942,7 @@ class Foo {
 }
 my Foo $foo .= new;
 
-###say $foo.^attributes.first('$!shyguy').get_value($foo);
+say $foo.^attributes.first('$!shyguy').get_value($foo);
 _END_
 	isa-ok $parsed, Q{Root};
 }, Q{Break OO privacy};
