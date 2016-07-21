@@ -37,6 +37,7 @@ class _Dig {...}
 class _Doc {...}
 class _Dotty {...}
 class _DottyOp {...}
+class _DottyOpish {...}
 class _Dotty_OPER {...}
 class _E1 {...}
 class _E2 {...}
@@ -136,6 +137,7 @@ class _StatementModLoop_EXPR {...}
 class _StatementPrefix {...}
 class _SubShortName {...}
 class _Sym {...}
+class _Term {...}
 class _TermAlt {...}
 class _TermAltSeq {...}
 class _TermConj {...}
@@ -2053,6 +2055,30 @@ class _DottyOp does Node {
 	}
 }
 
+class _DottyOpish does Node {
+	method new( Mu $parsed ) {
+		self.trace;
+		if self.assert-hash-keys( $parsed, [< term >] ) {
+			return self.bless(
+				:content(
+					:term(
+						_Term.new(
+							$parsed.hash.<term>
+						)
+					)
+				)
+			)
+		}
+		die self.new-term
+	}
+	method is-valid( Mu $parsed ) returns Bool {
+		self.trace;
+		return True if self.assert-hash-keys( $parsed, [< colonpair >] )
+			and _ColonPair.is-valid( $parsed.hash.<colonpair> );
+		die self.new-term
+	}
+}
+
 # XXX This is a compound type
 class _Dotty_OPER does Node {
 	method new( Mu $parsed ) {
@@ -3304,6 +3330,22 @@ class _Initializer does Node {
 						:EXPR(
 							_EXPR.new(
 								$parsed.hash.<EXPR>
+							)
+						)
+					)
+				)
+			}
+			if self.assert-hash-keys( $parsed, [< dottyopish sym >] ) {
+				return self.bless(
+					:content(
+						:dottyopish(
+							_DottyOpish.new(
+								$parsed.hash.<dottyopish>
+							)
+						),
+						:sym(
+							_Sym.new(
+								$parsed.hash.<sym>
 							)
 						)
 					)
@@ -6814,6 +6856,30 @@ class _Sym does Node {
 	}
 }
 
+class _Term does Node {
+	method new( Mu $parsed ) {
+		self.trace;
+		if self.assert-hash-keys( $parsed, [< methodop >] ) {
+			return self.bless(
+				:content(
+					:methodop(
+						_MethodOp.new(
+							$parsed.hash.<methodop>
+						)
+					)
+				)
+			)
+		}
+		die self.new-term
+	}
+	method is-valid( Mu $parsed ) returns Bool {
+		self.trace;
+		return True if self.assert-hash-keys( $parsed, [< methodop >] )
+			and _MethodOp.is-valid( $parsed.hash.<methodop> );
+		die self.new-term
+	}
+}
+
 class _TermAlt does Node {
 	method new( Mu $parsed ) {
 		self.trace;
@@ -7161,7 +7227,6 @@ class _TypeConstraint does Node {
 		}
 		return True if self.assert-hash-keys( $parsed, [< typename >] )
 			and _TypeName.is-valid( $parsed.hash.<typename> );
-dump($parsed);
 		die self.new-term
 	}
 }
@@ -7313,7 +7378,6 @@ class _TypeName does Node {
 					[< longname >],
 					[< colonpair >] )
 					and _LongName_ColonPair.is-valid( $_ );
-dump($_);
 				die self.new-term
 			}
 			return True
