@@ -5110,7 +5110,19 @@ class _Parameter does Node {
 				}
 				if self.assert-hash-keys( $_,
 					[< type_constraint >],
-					[< param_var quant default_value modifier
+					[< param_var quant default_value
+					   modifier post_constraint trait
+					   type_constraint >] ) {
+					@child.push(
+						_TypeConstraint.new(
+							$_.hash.<type_constraint>
+						)
+					);
+					next
+				}
+				if self.assert-hash-keys( $_,
+					[< type_constraint >],
+					[< default_value modifier
 					   post_constraint trait
 					   type_constraint >] ) {
 					@child.push(
@@ -5120,7 +5132,6 @@ class _Parameter does Node {
 					);
 					next
 				}
-say $_.hash.keys.gist;
 				die self.new-term
 			}
 			return self.bless(
@@ -5145,6 +5156,23 @@ say $_.hash.keys.gist;
 					   type_constraint
 					   post_constraint >] )
 					and _ParamVar_Quant.is-valid( $_ );
+				next if self.assert-hash-keys( $_,
+					[< named_param quant >],
+					[< default_value modifier
+					   post_constraint trait
+					   type_constraint >] )
+					and _NamedParam_Quant.is-valid( $_ );
+				next if self.assert-hash-keys( $_,
+					[< defterm quant >],
+					[< default_value modifier
+					   post_constraint trait
+					   type_constraint >] )
+					and _DefTerm_Quant.is-valid( $_ );
+				next if self.assert-hash-keys( $_,
+					[< type_constraint >],
+					[< param_var quant default_value						   modifier post_constraint trait
+					   type_constraint >] )
+					and _TypeConstraint.is-valid( $_.hash.<type_constraint> );
 				die self.new-term
 			}
 			return True
@@ -5303,7 +5331,8 @@ class _ParamVar_TypeConstraint_Quant does Node {
 		self.trace;
 		return True if self.assert-hash-keys( $parsed,
 				[< param_var type_constraint quant >],
-				[< default_value modifier trait post_constraint >] )
+				[< default_value modifier trait
+				   post_constraint >] )
 			and _ParamVar.is-valid( $parsed.hash.<param_var> )
 			and _TypeConstraint.is-valid( $parsed.hash.<type_constraint> )
 			and _Quant.is-valid( $parsed.hash.<quant> );
@@ -7819,15 +7848,17 @@ class _TypeConstraint does Node {
 	method is-valid( Mu $parsed ) returns Bool {
 		self.trace;
 		CATCH {
-#			when X::Hash::Store::OddNumber { .resume }
 			when X::Hash::Store::OddNumber { }
 		}
 		if $parsed.list {
 			for $parsed.list {
 				next if self.assert-hash-keys( $_, [< typename >] )
 					and _TypeName.is-valid( $_.hash.<typename> );
+				next if self.assert-hash-keys( $_, [< value >] )
+					and _Value.is-valid( $_.hash.<value> );
 				die self.new-term
 			}
+			return True
 		}
 		return True if self.assert-hash-keys( $parsed, [< value >] )
 			and _Value.is-valid( $parsed.hash.<value> );
@@ -7865,8 +7896,8 @@ class _TypeDeclarator does Node {
 				)
 			)
 		}
-		if self.assert-hash-keys( $parsed, [< sym initializer defterm >],
-					      [< trait >] ) {
+		if self.assert-hash-keys( $parsed,
+				[< sym initializer defterm >], [< trait >] ) {
 			return self.bless(
 				:content(
 					:sym(
@@ -7919,7 +7950,8 @@ class _TypeDeclarator does Node {
 			and _Sym.is-valid( $parsed.hash.<sym> )
 			and _Initializer.is-valid( $parsed.hash.<initializer> )
 			and _DefTerm.is-valid( $parsed.hash.<defterm> );
-		return True if self.assert-hash-keys( $parsed, [< sym initializer >] )
+		return True if self.assert-hash-keys( $parsed,
+				[< sym initializer >] )
 			and _Sym.is-valid( $parsed.hash.<sym> )
 			and _Initializer.is-valid( $parsed.hash.<initializer> );
 		die self.new-term
