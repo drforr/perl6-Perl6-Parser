@@ -4144,23 +4144,38 @@ class _ModuleName does Node {
 class _MoreName does Node {
 	method new( Mu $parsed ) {
 		self.trace;
-		if self.assert-hash-keys( $parsed, [< XXX >] ) {
-			return self.bless(
-				:content(
-					:longname(
-						_LongName.new(
-							$parsed.hash.<longname>
+		if $parsed.list {
+			my @child;
+			for $parsed.list {
+				if self.assert-hash-keys( $_,
+						     [< identifier >] ) {
+					return self.bless(
+						:content(
+							:identifier(
+								_Identifier.new(
+									$_.hash.<identifier>
+								)
+							)
 						)
 					)
-				)
-			)
+				}
+				die self.new-term
+			}
+			die self.new-term
 		}
 		die self.new-term
 	}
 	method is-valid( Mu $parsed ) returns Bool {
 		self.trace;
-		return True if self.assert-hash-keys( $parsed, [< XXX >] )
-			and _LongName.is-valid( $parsed.hash.<longname> );
+		if $parsed.list {
+			for $parsed.list {
+				return True if self.assert-hash-keys( $_,
+						     [< identifier >] )
+					and _Identifier.is-valid( $_.hash.<identifier> );
+				die self.new-term
+			}
+			return True
+		}
 		die self.new-term
 	}
 }
@@ -4306,7 +4321,9 @@ class _NamedParam_Quant does Node {
 	method is-valid( Mu $parsed ) returns Bool {
 		self.trace;
 		return True if self.assert-hash-keys( $parsed,
-			[< named_param quant >] )
+			[< named_param quant >],
+			[< default_value type_constraint modifier
+			   trait post_constraint >] )
 			and _NamedParam.is-valid( $parsed.hash.<named_param> )
 			and _Quant.is-valid( $parsed.hash.<quant> );
 		die self.new-term
@@ -7805,7 +7822,7 @@ class _TypeConstraint does Node {
 	method new( Mu $parsed ) {
 		self.trace;
 		CATCH {
-			when X::Hash::Store::OddNumber { }
+			when X::Hash::Store::OddNumber { .resume }
 		}
 		if $parsed.list {
 			my @child;
@@ -7848,7 +7865,7 @@ class _TypeConstraint does Node {
 	method is-valid( Mu $parsed ) returns Bool {
 		self.trace;
 		CATCH {
-			when X::Hash::Store::OddNumber { }
+			when X::Hash::Store::OddNumber { .resume }
 		}
 		if $parsed.list {
 			for $parsed.list {
