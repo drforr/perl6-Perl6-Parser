@@ -74,8 +74,11 @@ class _MethodOp {...}
 class _Min {...}
 class _ModifierExpr {...}
 class _ModuleName {...}
+class _MoreName {...}
 class _MultiDeclarator {...}
 class _MultiSig {...}
+class _NamedParam {...}
+class _NamedParam_Quant {...}
 class _Name {...}
 class _Nibble {...}
 class _Nibbler {...}
@@ -4004,7 +4007,7 @@ class _MethodOp does Node {
 				)
 			)
 		}
-		die dump( $parsed );
+		die self.new-term
 	}
 	method is-valid( Mu $parsed ) returns Bool {
 		self.trace;
@@ -4015,7 +4018,7 @@ class _MethodOp does Node {
 			and _Variable.is-valid( $parsed.hash.<variable> );
 		return True if self.assert-hash-keys( $parsed, [< longname >] )
 			and _LongName.is-valid( $parsed.hash.<longname> );
-		die dump( $parsed );
+		die self.new-term
 	}
 }
 
@@ -4093,6 +4096,30 @@ class _ModuleName does Node {
 	method is-valid( Mu $parsed ) returns Bool {
 		self.trace;
 		return True if self.assert-hash-keys( $parsed, [< longname >] )
+			and _LongName.is-valid( $parsed.hash.<longname> );
+		die self.new-term
+	}
+}
+
+class _MoreName does Node {
+	method new( Mu $parsed ) {
+		self.trace;
+		if self.assert-hash-keys( $parsed, [< XXX >] ) {
+			return self.bless(
+				:content(
+					:longname(
+						_LongName.new(
+							$parsed.hash.<longname>
+						)
+					)
+				)
+			)
+		}
+		die self.new-term
+	}
+	method is-valid( Mu $parsed ) returns Bool {
+		self.trace;
+		return True if self.assert-hash-keys( $parsed, [< XXX >] )
 			and _LongName.is-valid( $parsed.hash.<longname> );
 		die self.new-term
 	}
@@ -4186,6 +4213,66 @@ class _MultiSig does Node {
 	}
 }
 
+class _NamedParam does Node {
+	method new( Mu $parsed ) {
+		self.trace;
+		if self.assert-hash-keys( $parsed, [< param_var >] ) {
+			return self.bless(
+				:content(
+					:param_var(
+						_ParamVar.new(
+							$parsed.hash.<param_var>
+						)
+					)
+				)
+			)
+		}
+		die self.new-term
+	}
+	method is-valid( Mu $parsed ) returns Bool {
+		self.trace;
+		return True if self.assert-hash-keys( $parsed,
+			[< param_var >] )
+			and _ParamVar.is-valid( $parsed.hash.<param_var> );
+		die self.new-term
+	}
+}
+
+class _NamedParam_Quant does Node {
+	method new( Mu $parsed ) {
+		self.trace;
+		if self.assert-hash-keys( $parsed, [< named_param quant >],
+					  [< default_value
+					     type_constraint
+					     modifier trait
+					     post_constraint >] ) {
+			return self.bless(
+				:content(
+					:named_param(
+						_NamedParam.new(
+							$parsed.hash.<named_param>
+						)
+					),
+					:quant(
+						_Quant.new(
+							$parsed.hash.<quant>
+						)
+					)
+				)
+			)
+		}
+		die self.new-term
+	}
+	method is-valid( Mu $parsed ) returns Bool {
+		self.trace;
+		return True if self.assert-hash-keys( $parsed,
+			[< named_param quant >] )
+			and _NamedParam.is-valid( $parsed.hash.<named_param> )
+			and _Quant.is-valid( $parsed.hash.<quant> );
+		die self.new-term
+	}
+}
+
 class _Name does Node {
 	method new( Mu $parsed ) {
 		self.trace;
@@ -4237,8 +4324,19 @@ class _Name does Node {
 						_SubShortName.new(
 							$parsed.hash.<subshortname>
 						)
-					),
-					:morename()
+					)
+				),
+				:child()
+			)
+		}
+		if self.assert-hash-keys( $parsed, [< morename >] ) {
+			return self.bless(
+				:content(
+					:morename(
+						_MoreName.new(
+							$parsed.hash.<morename>
+						)
+					)
 				),
 				:child()
 			)
@@ -4262,6 +4360,8 @@ class _Name does Node {
 		return True if self.assert-hash-keys( $parsed,
 				[< subshortname >] )
 			and _SubShortName.is-valid( $parsed.hash.<subshortname> );
+		return True if self.assert-hash-keys( $parsed, [< morename >] )
+			and _MoreName.is-valid( $parsed.hash.<morename> );
 		return True if self.assert-Str( $parsed );
 		die self.new-term
 	}
@@ -4923,7 +5023,8 @@ class _Parameter does Node {
 			for $parsed.list {
 				if self.assert-hash-keys( $_,
 					[< param_var type_constraint quant >],
-					[< default_value modifier trait post_constraint >] ) {
+					[< default_value modifier trait
+					   post_constraint >] ) {
 					@child.push(
 						_ParamVar_TypeConstraint_Quant.new(
 							$_
@@ -4933,9 +5034,9 @@ class _Parameter does Node {
 				}
 				if self.assert-hash-keys( $_,
 					[< param_var quant >],
-					[< default_value modifier trait
-					   type_constraint
-					   post_constraint >] ) {
+					[< default_value modifier
+					   post_constraint trait
+					   type_constraint >] ) {
 					@child.push(
 						_ParamVar_Quant.new(
 							$_
@@ -4944,12 +5045,25 @@ class _Parameter does Node {
 					next
 				}
 				if self.assert-hash-keys( $_,
-					[< param_var quant >],
-					[< default_value type_constraint
-					   modifier trait post_constraint >] ) {
+					[< named_param quant >],
+					[< default_value modifier
+					   post_constraint trait
+					   type_constraint >] ) {
 					@child.push(
-						_ParamVar_Quant.new(
+						_NamedParam_Quant.new(
 							$_
+						)
+					);
+					next
+				}
+				if self.assert-hash-keys( $_,
+					[< type_constraint >],
+					[< param_var quant default_value modifier
+					   post_constraint trait
+					   type_constraint >] ) {
+					@child.push(
+						_TypeConstraint.new(
+							$_.hash.<type_constraint>
 						)
 					);
 					next
@@ -5026,6 +5140,18 @@ class _ParamVar does Node {
 				)
 			)
 		}
+		if self.assert-hash-keys( $parsed, [< signature >] ) {
+			return self.bless(
+				:content(
+					:signature(
+						_Signature.new(
+							$parsed.hash.<signature>
+						)
+					)
+				)
+			)
+		}
+dump($parsed);
 		die self.new-term
 	}
 	method is-valid( Mu $parsed ) returns Bool {
@@ -5038,6 +5164,8 @@ class _ParamVar does Node {
 		return True if self.assert-hash-keys( $parsed, [< name sigil >] )
 			and _Name.is-valid( $parsed.hash.<name> )
 			and _Sigil.is-valid( $parsed.hash.<sigil> );
+		return True if self.assert-hash-keys( $parsed, [< signature >] )
+			and _Signature.is-valid( $parsed.hash.<signature> );
 		die self.new-term
 	}
 }
@@ -7596,6 +7724,14 @@ class _TypeConstraint does Node {
 					);
 					next
 				}
+				if self.assert-hash-keys( $_, [< value >] ) {
+					@child.push(
+						_Value.new(
+							$_.hash.<value>
+						)
+					);
+					next
+				}
 				die self.new-term
 			}
 			return self.bless(
@@ -7628,6 +7764,8 @@ class _TypeConstraint does Node {
 				die self.new-term
 			}
 		}
+		return True if self.assert-hash-keys( $parsed, [< value >] )
+			and _Value.is-valid( $parsed.hash.<value> );
 		return True if self.assert-hash-keys( $parsed, [< typename >] )
 			and _TypeName.is-valid( $parsed.hash.<typename> );
 		die self.new-term
