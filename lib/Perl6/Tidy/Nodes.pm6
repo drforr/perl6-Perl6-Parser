@@ -47,6 +47,7 @@ class _E3 {...}
 class _Else {...}
 class _EScale {...}
 class _EXPR {...}
+class _FakeInfix {...}
 class _FakeSignature {...}
 class _FatArrow {...}
 class _Frac {...}
@@ -2526,6 +2527,30 @@ class _EXPR does Node {
 				die self.new-term
 			}
 			if self.assert-hash-keys(
+					$parsed,
+					[< fake_infix OPER colonpair >] ) {
+				return self.bless(
+					:content(
+						:fake_infix(
+							_FakeInfix.new(
+								$parsed.hash.<fake_infix>
+							)
+						),
+						:OPER(
+							_OPER.new(
+								$parsed.hash.<OPER>
+							)
+						),
+						:colonpair(
+							_ColonPair.new(
+								$parsed.hash.<colonpair>
+							)
+						)
+					),
+					:child( @child )
+				)
+			}
+			if self.assert-hash-keys(
 				$parsed,
 				[< OPER dotty >],
 				[< postfix_prefix_meta_operator >] ) {
@@ -2963,6 +2988,12 @@ class _EXPR does Node {
 			}
 			return True if self.assert-hash-keys(
 					$parsed,
+					[< fake_infix OPER colonpair >] )
+				and _FakeInfix.is-valid( $parsed.hash.<fake_infix> )
+				and _OPER.is-valid( $parsed.hash.<OPER> )
+				and _ColonPair.is-valid( $parsed.hash.<colonpair> );
+			return True if self.assert-hash-keys(
+					$parsed,
 					[< OPER dotty >],
 					[< postfix_prefix_meta_operator >] )
 				and _OPER.is-valid( $parsed.hash.<OPER> )
@@ -3042,6 +3073,30 @@ class _EXPR does Node {
 			and _RegexDeclarator.is-valid( $parsed.hash.<regex_declarator> );
 		return True if self.assert-hash-keys( $parsed, [< dotty >] )
 			and _Dotty.is-valid( $parsed.hash.<dotty> );
+		die self.new-term
+	}
+}
+
+class _FakeInfix does Node {
+	method new( Mu $parsed ) {
+		self.trace;
+		if self.assert-hash-keys( $parsed, [< O >] ) {
+			return self.bless(
+				:content(
+					:O(
+						_O.new(
+							$parsed.hash.<O>
+						)
+					)
+				)
+			)
+		}
+		die self.new-term
+	}
+	method is-valid( Mu $parsed ) returns Bool {
+		self.trace;
+		return True if self.assert-hash-keys( $parsed, [< O >] )
+			and _O.is-valid( $parsed.hash.<O> );
 		die self.new-term
 	}
 }
@@ -6517,6 +6572,24 @@ class _SemiList does Node {
 	method new( Mu $parsed ) {
 		self.trace;
 		CATCH { when X::Hash::Store::OddNumber { } }
+		if $parsed.list {
+			my @child;
+			for $parsed.list {
+				if self.assert-hash-keys( $_,
+					[< XXX >] ) {
+					@child.push(
+						_Identifier.new(
+							$_.hash.<identifier>
+						)
+					);
+					next
+				}
+				die self.new-term
+			}
+			return self.bless(
+				:child( @child )
+			)
+		}
 		if self.assert-hash-keys( $parsed, [], [< statement >] ) {
 			return self.bless(
 				:content(
@@ -6528,7 +6601,17 @@ class _SemiList does Node {
 	}
 	method is-valid( Mu $parsed ) returns Bool {
 		self.trace;
-		CATCH { when X::Hash::Store::OddNumber { } }
+#		CATCH { when X::Hash::Store::OddNumber { } }
+#		CATCH { when X::Hash::Store::OddNumber { .resume } }
+		if $parsed.list {
+			for $parsed.list {
+				next if self.assert-hash-keys( $_,
+						[< XXX >] )
+					and _StatementModLoop_EXPR.is-valid( $_ );
+				die self.new-term
+			}
+			return True
+		}
 		return True if self.assert-hash-keys( $parsed, [ ], [< statement >] );
 		die self.new-term
 	}
@@ -8071,7 +8154,8 @@ class _Val does Node {
 						_OPER.new(
 							$parsed.hash.<OPER>
 						)
-					)
+					),
+					:prefix_postfix_meta_operator()
 				)
 			)
 		}
@@ -8090,13 +8174,13 @@ class _Val does Node {
 	}
 	method is-valid( Mu $parsed ) returns Bool {
 		self.trace;
-		return True if self.assert-hash-keys( $parsed, [< value >] )
-			and _Value.is-valid( $parsed.hash.<value> );
 		return True if self.assert-hash-keys( $parsed,
 				[< prefix OPER >],
 				[< prefix_postfix_meta_operator >] )
 			and _Prefix.is-valid( $parsed.hash.<prefix> )
 			and _OPER.is-valid( $parsed.hash.<OPER> );
+		return True if self.assert-hash-keys( $parsed, [< value >] )
+			and _Value.is-valid( $parsed.hash.<value> );
 		die self.new-term
 	}
 }
