@@ -411,6 +411,23 @@ role Node {
 class _ArgList does Node {
 	method new( Mu $parsed ) {
 		self.trace;
+		if $parsed.list {
+			my @child;
+			for $parsed.list {
+				if self.assert-hash-keys( $_, [< XXX >] ) {
+					@child.push(
+						_Identifier_Name_Sign.new(
+							$_
+						)
+					);
+					next
+				}
+				die self.new-term
+			}
+			return self.bless(
+				:child( @child )
+			)
+		}
 		if self.assert-hash-keys( $parsed,
 				[< deftermnow initializer term_init >],
 				[< trait >] ) {
@@ -452,14 +469,22 @@ class _ArgList does Node {
 	}
 	method is-valid( Mu $parsed ) returns Bool {
 		self.trace;
-		return True if self.assert-hash-keys( $parsed, [< EXPR >] )
-			and _EXPR.is-valid( $parsed.hash.<EXPR> );
+		if $parsed.list {
+			for $parsed.list {
+				next if self.assert-hash-keys( $_, [< XXX >] )
+					and _Identifier_Name_Sign.is-valid( $_ );
+				die self.new-term
+			}
+			return True
+		}
 		return True if self.assert-hash-keys( $parsed,
 				[< deftermnow initializer term_init >],
 				[< trait >] )
 			and _DefTermNow.is-valid( $parsed.hash.<deftermnow> )
 			and _Initializer.is-valid( $parsed.hash.<initializer> )
 			and _TermInit.is-valid( $parsed.hash.<term_init> );
+		return True if self.assert-hash-keys( $parsed, [< EXPR >] )
+			and _EXPR.is-valid( $parsed.hash.<EXPR> );
 		return True if self.assert-Bool( $parsed );
 		die self.new-term
 	}
@@ -4769,7 +4794,8 @@ class _OPER does Node {
 		return True if self.assert-hash-keys( $parsed, [< EXPR O >] )
 			and _EXPR.is-valid( $parsed.hash.<EXPR> )
 			and _O.is-valid( $parsed.hash.<O> );
-		return True if self.assert-hash-keys( $parsed, [< semilist O >] )
+		return True if self.assert-hash-keys( $parsed,
+				[< semilist O >] )
 			and _SemiList.is-valid( $parsed.hash.<semilist> )
 			and _O.is-valid( $parsed.hash.<O> );
 		return True if self.assert-hash-keys( $parsed, [< nibble O >] )
@@ -4779,7 +4805,7 @@ class _OPER does Node {
 			and _ArgList.is-valid( $parsed.hash.<arglist> )
 			and _O.is-valid( $parsed.hash.<O> );
 		return True if self.assert-hash-keys( $parsed, [< dig O >] )
-			and _ArgList.is-valid( $parsed.hash.<dig> )
+			and _Dig.is-valid( $parsed.hash.<dig> )
 			and _O.is-valid( $parsed.hash.<O> );
 		return True if self.assert-hash-keys( $parsed, [< O >] )
 			and _O.is-valid( $parsed.hash.<O> );
@@ -4907,7 +4933,20 @@ class _Parameter does Node {
 				}
 				if self.assert-hash-keys( $_,
 					[< param_var quant >],
-					[< default_value type_constraint modifier trait post_constraint >] ) {
+					[< default_value modifier trait
+					   type_constraint
+					   post_constraint >] ) {
+					@child.push(
+						_ParamVar_Quant.new(
+							$_
+						)
+					);
+					next
+				}
+				if self.assert-hash-keys( $_,
+					[< param_var quant >],
+					[< default_value type_constraint
+					   modifier trait post_constraint >] ) {
 					@child.push(
 						_ParamVar_Quant.new(
 							$_
@@ -4930,8 +4969,15 @@ class _Parameter does Node {
 			for $parsed.list {
 				next if self.assert-hash-keys( $_,
 					[< param_var type_constraint quant >],
-					[< default_value modifier trait post_constraint >] )
+					[< default_value modifier trait
+					   post_constraint >] )
 					and _ParamVar_TypeConstraint_Quant.is-valid( $_ );
+				next if self.assert-hash-keys( $_,
+					[< param_var quant >],
+					[< default_value modifier trait
+					   type_constraint
+					   post_constraint >] )
+					and _ParamVar_Quant.is-valid( $_ );
 				die self.new-term
 			}
 			return True
@@ -4943,6 +4989,27 @@ class _Parameter does Node {
 class _ParamVar does Node {
 	method new( Mu $parsed ) {
 		self.trace;
+		if self.assert-hash-keys( $parsed, [< name twigil sigil >] ) {
+			return self.bless(
+				:content(
+					:name(
+						_Name.new(
+							$parsed.hash.<name>
+						)
+					),
+					:twigil(
+						_Twigil.new(
+							$parsed.hash.<twigil>
+						)
+					),
+					:sigil(
+						_Sigil.new(
+							$parsed.hash.<sigil>
+						)
+					)
+				)
+			)
+		}
 		if self.assert-hash-keys( $parsed, [< name sigil >] ) {
 			return self.bless(
 				:content(
@@ -4950,7 +5017,7 @@ class _ParamVar does Node {
 						_Name.new(
 							$parsed.hash.<name>
 						)
-					)
+					),
 					:sigil(
 						_Sigil.new(
 							$parsed.hash.<sigil>
@@ -4963,6 +5030,11 @@ class _ParamVar does Node {
 	}
 	method is-valid( Mu $parsed ) returns Bool {
 		self.trace;
+		return True if self.assert-hash-keys( $parsed,
+				[< name twigil sigil >] )
+			and _Name.is-valid( $parsed.hash.<name> )
+			and _Twigil.is-valid( $parsed.hash.<twigil> )
+			and _Sigil.is-valid( $parsed.hash.<sigil> );
 		return True if self.assert-hash-keys( $parsed, [< name sigil >] )
 			and _Name.is-valid( $parsed.hash.<name> )
 			and _Sigil.is-valid( $parsed.hash.<sigil> );
@@ -6470,6 +6542,20 @@ class _Signature does Node {
 				)
 			)
 		}
+		if self.assert-hash-keys( $parsed,
+				[< parameter >],
+				[< param_sep >] ) {
+			return self.bless(
+				:content(
+					:parameter(
+						_Parameter.new(
+							$parsed.hash.<parameter>
+						)
+					),
+					:param_sep()
+				)
+			)
+		}
 		if self.assert-hash-keys( $parsed, [], [< param_sep parameter >] ) {
 			return self.bless(
 				:name( $parsed.Bool ),
@@ -6488,6 +6574,10 @@ class _Signature does Node {
 				[< param_sep >] )
 			and _Parameter.is-valid( $parsed.hash.<parameter> )
 			and _TypeName.is-valid( $parsed.hash.<typename> );
+		return True if self.assert-hash-keys( $parsed,
+				[< parameter >],
+				[< param_sep >] )
+			and _Parameter.is-valid( $parsed.hash.<parameter> );
 		return True if self.assert-hash-keys( $parsed, [],
 				[< param_sep parameter >] );
 		die self.new-term
@@ -6591,7 +6681,6 @@ class _StatementControl does Node {
 	method new( Mu $parsed ) {
 		self.trace;
 		if self.assert-hash-keys( $parsed, [< block sym e1 e2 e3 >] ) {
-dump($parsed.hash.<e3>);
 			return self.bless(
 				:content(
 					:block(
@@ -7529,7 +7618,8 @@ class _TypeConstraint does Node {
 	method is-valid( Mu $parsed ) returns Bool {
 		self.trace;
 		CATCH {
-			when X::Hash::Store::OddNumber { .resume }
+#			when X::Hash::Store::OddNumber { .resume }
+			when X::Hash::Store::OddNumber { }
 		}
 		if $parsed.list {
 			for $parsed.list {
