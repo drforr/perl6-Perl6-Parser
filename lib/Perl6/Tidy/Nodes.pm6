@@ -15,6 +15,7 @@ class _BinInt {...}
 class _Block {...}
 class _Blockoid {...}
 class _Blorst {...}
+class _Bracket {...}
 class _CClassElem {...}
 class _CharSpec {...}
 class _Circumfix {...}
@@ -852,6 +853,30 @@ class _Blorst does Node {
 			and _Statement.is-valid( $parsed.hash.<statement> );
 		return True if self.assert-hash-keys( $parsed, [< block >] )
 			and _Block.is-valid( $parsed.hash.<block> );
+		die self.new-term
+	}
+}
+
+class _Bracket does Node {
+	method new( Mu $parsed ) {
+		self.trace;
+		if self.assert-hash-keys( $parsed, [< semilist >] ) {
+			return self.bless(
+				:content(
+					:semilist(
+						_SemiList.new(
+							$parsed.hash.<semilist>
+						)
+					)
+				)
+			)
+		}
+		die self.new-term
+	}
+	method is-valid( Mu $parsed ) returns Bool {
+		self.trace;
+		return True if self.assert-hash-keys( $parsed, [< semilist >] )
+			and _SemiList.is-valid( $parsed.hash.<semilist> );
 		die self.new-term
 	}
 }
@@ -5658,7 +5683,49 @@ class _Quote does Node {
 class _QuotePair does Node {
 	method new( Mu $parsed ) {
 		self.trace;
-		CATCH { when X::Hash::Store::OddNumber { } }
+		CATCH { when X::Hash::Store::OddNumber { .resume } }
+		if $parsed.list {
+			my @child;
+			for $parsed.list {
+				if self.assert-hash-keys( $_,
+					[< identifier >] ) {
+					@child.push(
+						_Identifier.new(
+							$_.hash.<identifier>
+						)
+					);
+					next
+				}
+				die self.new-term
+			}
+			return self.bless(
+				:child( @child )
+			)
+		}
+		if self.assert-hash-keys( $parsed,
+			[< circumfix bracket radix >], [< exp base >] ) {
+			return self.bless(
+				:content(
+					:circumfix(
+						_Circumfix.new(
+							$parsed.hash.<circumfix>
+						)
+					),
+					:bracket(
+						_Bracket.new(
+							$parsed.hash.<bracket>
+						)
+					),
+					:radix(
+						_Radix.new(
+							$parsed.hash.<radix>
+						)
+					),
+					:exp(),
+					:base()
+				)
+			)
+		}
 		if self.assert-hash-keys( $parsed, [< identifier >] ) {
 			return self.bless(
 				:content(
@@ -5675,7 +5742,22 @@ class _QuotePair does Node {
 	method is-valid( Mu $parsed ) returns Bool {
 		self.trace;
 		CATCH { when X::Hash::Store::OddNumber { } }
-		return True if self.assert-hash-keys( $parsed, [< identifier >] )
+		if $parsed.list {
+			for $parsed.list {
+				next if self.assert-hash-keys( $_,
+					[< identifier >] )
+					and _Identifier.is-valid( $_.hash.<identifier> );
+				die self.new-term
+			}
+			return True
+		}
+		return True if self.assert-hash-keys( $parsed,
+				[< circumfix bracket radix >], [< exp base >] )
+			and _Circumfix.is-valid( $parsed.hash.<circumfix> )
+			and _Bracket.is-valid( $parsed.hash.<bracket> )
+			and _Radix.is-valid( $parsed.hash.<radix> );
+		return True if self.assert-hash-keys( $parsed,
+				[< identifier >] )
 			and _Identifier.is-valid( $parsed.hash.<identifier> );
 		die self.new-term
 	}
@@ -5694,6 +5776,30 @@ class _Radix does Node does IsInteger {
 class _RadNumber does Node {
 	method new( Mu $parsed ) {
 		self.trace;
+		if self.assert-hash-keys( $parsed,
+			[< circumfix bracket radix >], [< exp base >] ) {
+			return self.bless(
+				:content(
+					:circumfix(
+						_Circumfix.new(
+							$parsed.hash.<circumfix>
+						)
+					),
+					:bracket(
+						_Bracket.new(
+							$parsed.hash.<bracket>
+						)
+					),
+					:radix(
+						_Radix.new(
+							$parsed.hash.<radix>
+						)
+					),
+					:exp(),
+					:base()
+				)
+			)
+		}
 		if self.assert-hash-keys( $parsed,
 				[< circumfix radix >], [< exp base >] ) {
 			return self.bless(
@@ -5717,6 +5823,11 @@ class _RadNumber does Node {
 	}
 	method is-valid( Mu $parsed ) returns Bool {
 		self.trace;
+		return True if self.assert-hash-keys( $parsed,
+				[< circumfix bracket radix >], [< exp base >] )
+			and _Circumfix.is-valid( $parsed.hash.<circumfix> )
+			and _Bracket.is-valid( $parsed.hash.<bracket> )
+			and _Radix.is-valid( $parsed.hash.<radix> );
 		return True if self.assert-hash-keys( $parsed,
 				[< circumfix radix >], [< exp base >] )
 			and _Circumfix.is-valid( $parsed.hash.<circumfix> )
