@@ -886,14 +886,14 @@ subtest {
 
 	my $parsed = $pt.tidy( Q:to[_END_] );
 grammar BraceExpansion {
-###    token TOP  { ( <meta> | . )* }
-###    token meta { '{' <alts> '}' | \\ .  }
-###    token alts { <alt>+ % ',' }
-###    token alt  { ( <meta> | <-[ , } ]> )* }
+    token TOP  { ( <meta> | . )* }
+    token meta { '{' <alts> '}' | \\ .  }
+    token alts { <alt>+ % ',' }
+    token alt  { ( <meta> | <-[ , } ]> )* }
 }
 
 sub crosswalk($/) {
-###    [X~] '', $0.map: -> $/ { ([$<meta><alts><alt>.&alternatives]) or ~$/ }
+    [X~] '', $0.map: -> $/ { ([$<meta><alts><alt>.&alternatives]) or ~$/ }
 }
 
 sub alternatives($_) {
