@@ -2173,8 +2173,8 @@ class _DottyOpish does Node {
 	}
 	method is-valid( Mu $parsed ) returns Bool {
 		self.trace;
-		return True if self.assert-hash-keys( $parsed, [< colonpair >] )
-			and _ColonPair.is-valid( $parsed.hash.<colonpair> );
+		return True if self.assert-hash-keys( $parsed, [< term >] )
+			and _Term.is-valid( $parsed.hash.<term> );
 		die self.new-term
 	}
 }
@@ -3505,6 +3505,9 @@ class _Initializer does Node {
 			return True if self.assert-hash-keys( $parsed, [< sym EXPR >] )
 				and _Sym.is-valid( $parsed.hash.<sym> )
 				and _EXPR.is-valid( $parsed.hash.<EXPR> );
+			return True if self.assert-hash-keys( $parsed, [< dottyopish sym >] )
+				and _DottyOpish.is-valid( $parsed.hash.<dottyopish> )
+				and _Sym.is-valid( $parsed.hash.<sym> );
 		}
 		else {
 			return True
@@ -4538,6 +4541,10 @@ class _Noun does Node {
 		self.trace;
 		if $parsed.list {
 			for $parsed.list {
+				next if self.assert-hash-keys( $_,
+					[< sigmaybe sigfinal
+					   quantifier atom >] )
+					and _SigMaybe_SigFinal_Quantifier_Atom.is-valid( $_ );
 				next if self.assert-hash-keys( $_,
 					[< sigfinal quantifier
 					   separator atom >] )
@@ -7145,13 +7152,15 @@ class _Statement does Node {
 		if $parsed.list {
 			my @child;
 			for $parsed.list {
-				if self.assert-hash-keys( $_, [< statement_mod_loop EXPR >] ) {
+				if self.assert-hash-keys( $_,
+						[< statement_mod_loop EXPR >] ) {
 					@child.push(
 						_StatementModLoop_EXPR.new( $_ )
 					);
 					next
 				}
-				if self.assert-hash-keys( $_, [< statement_mod_cond EXPR >] ) {
+				if self.assert-hash-keys( $_,
+						[< statement_mod_cond EXPR >] ) {
 					@child.push(
 						_StatementModCond_EXPR.new(
 							$_
@@ -7220,6 +7229,8 @@ class _Statement does Node {
 				next if self.assert-hash-keys( $_,
 						[< statement_control >] )
 					and _StatementControl.is-valid( $_.hash.<statement_control> );
+				next if self.assert-hash-keys( $_, [],
+						[< statement_control >] );
 				die self.new-term
 			}
 			return True
