@@ -25,8 +25,6 @@ While classes like L<EClass> won't go away, their parent classes like L<DecInteg
 
 Classes representing Perl 6 object code are currently in the same file as the main L<Perl6::Tidy> class, as moving them to separate files caused a severe performance penalty. When the time is right I'll look at moving these to another location, but as shuffling out 20 classes increased my runtime on my little ol' VM from 6 to 20 seconds, it's not worth my time to break them out. And besides, having them all in one file makes editing en masse easier.
 
-When it comes to debugging the NQP internals, one simple thing to do is not to dump the $parsed object right at the point of invocation, but look one layer up the stack and debug from inside that function. It's a happy coincidence that usually any C<Mu $parsed> argument can be C<.dump>'d cleanly.
-
 =end DESCRIPTION
 
 =begin METHODS
