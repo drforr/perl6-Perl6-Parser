@@ -103,7 +103,7 @@ class Perl6::Tidy {
 		);
 
 		my $rv = Root.new( $parsed );
-#		Root.is-valid( $parsed );
+		Root.is-valid( $parsed );
 		return $rv;
 	}
 

@@ -6576,10 +6576,10 @@ class _SemiList does Node {
 			my @child;
 			for $parsed.list {
 				if self.assert-hash-keys( $_,
-					[< XXX >] ) {
+					[< statement >] ) {
 					@child.push(
-						_Identifier.new(
-							$_.hash.<identifier>
+						_Statement.new(
+							$_.hash.<statement>
 						)
 					);
 					next
@@ -6601,13 +6601,11 @@ class _SemiList does Node {
 	}
 	method is-valid( Mu $parsed ) returns Bool {
 		self.trace;
-#		CATCH { when X::Hash::Store::OddNumber { } }
-#		CATCH { when X::Hash::Store::OddNumber { .resume } }
 		if $parsed.list {
 			for $parsed.list {
 				next if self.assert-hash-keys( $_,
-						[< XXX >] )
-					and _StatementModLoop_EXPR.is-valid( $_ );
+						[< statement >] )
+					and _Statement.is-valid( $_.hash.<statement> );
 				die self.new-term
 			}
 			return True
@@ -7236,14 +7234,16 @@ class _Statement does Node {
 			my @child;
 			for $parsed.list {
 				if self.assert-hash-keys( $_,
-						[< statement_mod_loop EXPR >] ) {
+						[< statement_mod_loop
+						   EXPR >] ) {
 					@child.push(
 						_StatementModLoop_EXPR.new( $_ )
 					);
 					next
 				}
 				if self.assert-hash-keys( $_,
-						[< statement_mod_cond EXPR >] ) {
+						[< statement_mod_cond
+						    EXPR >] ) {
 					@child.push(
 						_StatementModCond_EXPR.new(
 							$_
@@ -7259,7 +7259,8 @@ class _Statement does Node {
 					);
 					next
 				}
-				if self.assert-hash-keys( $_, [< statement_control >] ) {
+				if self.assert-hash-keys( $_,
+						[< statement_control >] ) {
 					@child.push(
 						_StatementControl.new(
 							$_.hash.<statement_control>
