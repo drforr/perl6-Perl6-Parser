@@ -815,7 +815,7 @@ constant BITS = MAXINT.base(2).chars;
 
 # define rotate ops for the fun of it
 multi sub infix:<⥁>(Int:D \a, Int:D \b) { :2[(a +& MAXINT).polymod(2 xx BITS-1).list.rotate(b).reverse] }
-###multi sub infix:<⥀>(Int:D \a, Int:D \b) { :2[(a +& MAXINT).polymod(2 xx BITS-1).reverse.rotate(b)] }
+multi sub infix:<⥀>(Int:D \a, Int:D \b) { :2[(a +& MAXINT).polymod(2 xx BITS-1).reverse.rotate(b)] }
 
 sub int-bits (Int $a, Int $b) {
     say '';
@@ -827,9 +827,9 @@ sub int-bits (Int $a, Int $b) {
     say_bit "$a xor $b", $a +^ $b;
     say_bit "$a unsigned shift right $b", ($a +& MAXINT) +> $b;
     say_bit "$a signed shift right $b", $a +> $b;
-###    say_bit "$a rotate right $b", $a ⥁ $b;
+    say_bit "$a rotate right $b", $a ⥁ $b;
     say_bit "$a shift left $b", $a +< $b;
-###    say_bit "$a rotate left $b", $a ⥀ $b;
+    say_bit "$a rotate left $b", $a ⥀ $b;
 }
 
 int-bits(7,2);
