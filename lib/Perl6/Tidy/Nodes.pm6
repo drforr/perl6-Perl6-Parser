@@ -409,23 +409,6 @@ role Node {
 
 class _ArgList does Node {
 	method new( Mu $parsed ) {
-		if $parsed.list {
-			my @child;
-			for $parsed.list {
-				if self.assert-hash-keys( $_, [< XXX >] ) {
-					@child.push(
-						_Identifier_Name_Sign.new(
-							$_
-						)
-					);
-					next
-				}
-				die self.new-term
-			}
-			return self.bless(
-				:child( @child )
-			)
-		}
 		if self.assert-hash-keys( $parsed,
 				[< deftermnow initializer term_init >],
 				[< trait >] ) {
@@ -466,14 +449,6 @@ class _ArgList does Node {
 	}
 	method is-valid( Mu $parsed ) returns Bool {
 		self.trace;
-		if $parsed.list {
-			for $parsed.list {
-				next if self.assert-hash-keys( $_, [< XXX >] )
-					and _Identifier_Name_Sign.is-valid( $_ );
-				die self.new-term
-			}
-			return True
-		}
 		return True if self.assert-hash-keys( $parsed,
 				[< deftermnow initializer term_init >],
 				[< trait >] )
@@ -3727,18 +3702,7 @@ class _LongName does Node {
 	}
 }
 
-class _Max does Node {
-	method new( Mu $parsed ) {
-		if self.assert-Str( $parsed ) {
-			return self.bless( :name( $parsed.Str ) )
-		}
-	}
-	method is-valid( Mu $parsed ) returns Bool {
-		self.trace;
-		return True if self.assert-Str( $parsed );
-		die self.new-term
-	}
-}
+class _Max does Node does IsString { }
 
 class _MetaChar does Node {
 	method new( Mu $parsed ) {
@@ -6734,20 +6698,7 @@ class _SMExpr does Node {
 	}
 }
 
-class _Specials does Node {
-	method new( Mu $parsed ) {
-		CATCH { when X::Multi::NoMatch { } }
-		if self.assert-Bool( $parsed ) {
-			return self.bless( :name( $parsed.Bool ) )
-		}
-	}
-	method is-valid( Mu $parsed ) returns Bool {
-		self.trace;
-		CATCH { when X::Multi::NoMatch { } }
-		return True if self.assert-Bool( $parsed );
-		die self.new-term
-	}
-}
+class _Specials does Node does IsBoolean { }
 
 class _StatementControl does Node {
 	method new( Mu $parsed ) {
