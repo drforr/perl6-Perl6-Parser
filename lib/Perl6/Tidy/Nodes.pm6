@@ -243,9 +243,9 @@ sub dump( Mu $p ) {
 }
 
 role IsString {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-Str( $parsed ) {
-			return self.bless( :name( $parsed.Str ) )
+			return self.new( :name( $parsed.Str ) )
 		}
 	}
 	method is-valid( Mu $parsed ) returns Bool {
@@ -256,9 +256,9 @@ role IsString {
 }
 
 role IsInteger {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-Int( $parsed ) {
-			return self.bless( :name( $parsed.Int ) )
+			return self.new( :name( $parsed.Int ) )
 		}
 	}
 	method is-valid( Mu $parsed ) returns Bool {
@@ -269,9 +269,9 @@ role IsInteger {
 }
 
 role IsBoolean {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if $parsed.Bool {
-			return self.bless( :name( $parsed.Bool ) )
+			return self.new( :name( $parsed.Bool ) )
 		}
 	}
 	method is-valid( Mu $parsed ) returns Bool {
@@ -408,24 +408,24 @@ role Node {
 }
 
 class _ArgList does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed,
 				[< deftermnow initializer term_init >],
 				[< trait >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:deftermnow(
-						_DefTermNow.new(
+						_DefTermNow.populate(
 							$parsed.hash.<deftermnow>
 						)
 					),
 					:initializer(
-						_Initializer.new(
+						_Initializer.populate(
 							$parsed.hash.<initializer>
 						)
 					),
 					:term_init(
-						_TermInit.new(
+						_TermInit.populate(
 							$parsed.hash.<term_init>
 						)
 					)
@@ -433,10 +433,10 @@ class _ArgList does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< EXPR >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:EXPR(
-						_EXPR.new(
+						_EXPR.populate(
 							$parsed.hash.<EXPR>
 						)
 					)
@@ -444,7 +444,7 @@ class _ArgList does Node {
 			)
 		}
 		if self.assert-Bool( $parsed ) {
-			return self.bless( :name( $parsed.Bool ) )
+			return self.new( :name( $parsed.Bool ) )
 		}
 	}
 	method is-valid( Mu $parsed ) returns Bool {
@@ -465,17 +465,17 @@ class _ArgList does Node {
 class _Args does Node does IsBoolean { }
 
 class _Args_Op does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< args op >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:args(
-						_Args.new(
+						_Args.populate(
 							$parsed.hash.<args>
 						)
 					),
 					:op(
-						_Op.new(
+						_Op.populate(
 							$parsed.hash.<op>
 						)
 					)
@@ -493,12 +493,12 @@ class _Args_Op does Node {
 }
 
 class _Assertion does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< var >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:var(
-						_Var.new(
+						_Var.populate(
 							$parsed.hash.<var>
 						)
 					)
@@ -506,10 +506,10 @@ class _Assertion does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< longname >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:longname(
-						_LongName.new(
+						_LongName.populate(
 							$parsed.hash.<longname>
 						)
 					)
@@ -517,10 +517,10 @@ class _Assertion does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< cclass_elem >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:cclass_elem(
-						_CClassElem.new(
+						_CClassElem.populate(
 							$parsed.hash.<cclass_elem>
 						)
 					)
@@ -528,10 +528,10 @@ class _Assertion does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< codeblock >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:codeblock(
-						_CodeBlock.new(
+						_CodeBlock.populate(
 							$parsed.hash.<codeblock>
 						)
 					)
@@ -539,7 +539,7 @@ class _Assertion does Node {
 			)
 		}
 		if $parsed.Str {
-			return self.bless( :name( $parsed.Str ) )
+			return self.new( :name( $parsed.Str ) )
 		}
 	}
 	method is-valid( Mu $parsed ) returns Bool {
@@ -558,12 +558,12 @@ class _Assertion does Node {
 }
 
 class _Atom does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< metachar >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:metachar(
-						_MetaChar.new(
+						_MetaChar.populate(
 							$parsed.hash.<metachar>
 						)
 					)
@@ -571,7 +571,7 @@ class _Atom does Node {
 			)
 		}
 		if self.assert-Str( $parsed ) {
-			return self.bless( :name( $parsed.Str ) )
+			return self.new( :name( $parsed.Str ) )
 		}
 	}
 	method is-valid( Mu $parsed ) returns Bool {
@@ -584,17 +584,17 @@ class _Atom does Node {
 }
 
 class _Atom_SigFinal does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< atom sigfinal >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:atom(
-						_Atom.new(
+						_Atom.populate(
 							$parsed.hash.<atom>
 						)
 					),
 					:sigfinal(
-						_SigFinal.new(
+						_SigFinal.populate(
 							$parsed.hash.<sigfinal>
 						)
 					)
@@ -602,15 +602,15 @@ class _Atom_SigFinal does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< atom quantifier >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:atom(
-						_Atom.new(
+						_Atom.populate(
 							$parsed.hash.<atom>
 						)
 					),
 					:quantifier(
-						_Quantifier.new(
+						_Quantifier.populate(
 							$parsed.hash.<quantifier>
 						)
 					)
@@ -618,10 +618,10 @@ class _Atom_SigFinal does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< atom >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:atom(
-						_Atom.new(
+						_Atom.populate(
 							$parsed.hash.<atom>
 						)
 					)
@@ -644,23 +644,23 @@ class _Atom_SigFinal does Node {
 }
 
 class _Atom_SigFinal_Quantifier does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed,
 			[< atom sigfinal quantifier >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:atom(
-						_Atom.new(
+						_Atom.populate(
 							$parsed.hash.<atom>
 						)
 					),
 					:sigfinal(
-						_SigFinal.new(
+						_SigFinal.populate(
 							$parsed.hash.<sigfinal>
 						)
 					),
 					:quantifier(
-						_Quantifier.new(
+						_Quantifier.populate(
 							$parsed.hash.<quantifier>
 						)
 					)
@@ -680,12 +680,12 @@ class _Atom_SigFinal_Quantifier does Node {
 }
 
 class _Babble does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< B >], [< quotepair >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:B(
-						_B.new(
+						_B.populate(
 							$parsed.hash.<B>
 						)
 					),
@@ -706,12 +706,12 @@ class _Babble does Node {
 class _BackMod does Node does IsBoolean { }
 
 class _BackSlash does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< sym >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:sym(
-						_Sym.new(
+						_Sym.populate(
 							$parsed.hash.<sym>
 						)
 					)
@@ -719,7 +719,7 @@ class _BackSlash does Node {
 			)
 		}
 		if self.assert-Str( $parsed ) {
-			return self.bless( :name( $parsed.Str ) )
+			return self.new( :name( $parsed.Str ) )
 		}
 	}
 	method is-valid( Mu $parsed ) returns Bool {
@@ -734,13 +734,13 @@ class _BackSlash does Node {
 class _B does Node does IsBoolean { }
 
 class _BinInt does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if $parsed.Str and
 		   $parsed.Str eq '0' {
-			return self.bless( :name( $parsed.Str ) )
+			return self.new( :name( $parsed.Str ) )
 		}
 		if self.assert-Int( $parsed ) {
-			return self.bless( :name( $parsed.Int ) )
+			return self.new( :name( $parsed.Int ) )
 		}
 	}
 	method is-valid( Mu $parsed ) returns Bool {
@@ -752,12 +752,12 @@ class _BinInt does Node {
 }
 
 class _Block does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< blockoid >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:blockoid(
-						_Blockoid.new(
+						_Blockoid.populate(
 							$parsed.hash.<blockoid>
 						)
 					)
@@ -774,12 +774,12 @@ class _Block does Node {
 }
 
 class _Blockoid does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< statementlist >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:statementlist(
-						_StatementList.new(
+						_StatementList.populate(
 							$parsed.hash.<statementlist>
 						)
 					)
@@ -796,12 +796,12 @@ class _Blockoid does Node {
 }
 
 class _Blorst does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< statement >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:statement(
-						_Statement.new(
+						_Statement.populate(
 							$parsed.hash.<statement>
 						)
 					)
@@ -809,10 +809,10 @@ class _Blorst does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< block >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:block(
-						_Block.new(
+						_Block.populate(
 							$parsed.hash.<block>
 						)
 					)
@@ -831,12 +831,12 @@ class _Blorst does Node {
 }
 
 class _Bracket does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< semilist >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:semilist(
-						_SemiList.new(
+						_SemiList.populate(
 							$parsed.hash.<semilist>
 						)
 					)
@@ -853,13 +853,13 @@ class _Bracket does Node {
 }
 
 class _CClassElem does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if $parsed.list {
 			my @child;
 			for $parsed.list {
 				if self.assert-hash-keys( $_, [< identifier name sign >], [< charspec >] ) {
 					@child.push(
-						_Identifier_Name_Sign.new(
+						_Identifier_Name_Sign.populate(
 							$_
 						)
 					);
@@ -867,7 +867,7 @@ class _CClassElem does Node {
 				}
 				if self.assert-hash-keys( $_, [< sign charspec >] ) {
 					@child.push(
-						_Sign_CharSpec.new(
+						_Sign_CharSpec.populate(
 							$_
 						)
 					);
@@ -875,7 +875,7 @@ class _CClassElem does Node {
 				}
 				die self.new-term
 			}
-			return self.bless(
+			return self.new(
 				:child( @child )
 			)
 		}
@@ -900,7 +900,7 @@ class _CClassElem does Node {
 }
 
 class _CharSpec does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if $parsed.list {
 			my @child;
 			for $parsed.list -> $list {
@@ -923,7 +923,7 @@ class _CharSpec does Node {
 				}
 #				die self.new-term
 			}
-			return self.bless(
+			return self.new(
 				:child( @child )
 			)
 		}
@@ -937,12 +937,12 @@ class _CharSpec does Node {
 }
 
 class _Circumfix does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< nibble >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:nibble(
-						_Nibble.new(
+						_Nibble.populate(
 							$parsed.hash.<nibble>
 						)
 					)
@@ -950,10 +950,10 @@ class _Circumfix does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< pblock >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:pblock(
-						_PBlock.new(
+						_PBlock.populate(
 							$parsed.hash.<pblock>
 						)
 					)
@@ -961,10 +961,10 @@ class _Circumfix does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< semilist >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:semilist(
-						_SemiList.new(
+						_SemiList.populate(
 							$parsed.hash.<semilist>
 						)
 					)
@@ -972,15 +972,15 @@ class _Circumfix does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< binint VALUE >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:binint(
-						_BinInt.new(
+						_BinInt.populate(
 							$parsed.hash.<binint>
 						)
 					),
 					:VALUE(
-						_VALUE.new(
+						_VALUE.populate(
 							$parsed.hash.<VALUE>
 						)
 					)
@@ -988,15 +988,15 @@ class _Circumfix does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< octint VALUE >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:octint(
-						_OctInt.new(
+						_OctInt.populate(
 							$parsed.hash.<octint>
 						)
 					),
 					:VALUE(
-						_VALUE.new(
+						_VALUE.populate(
 							$parsed.hash.<VALUE>
 						)
 					)
@@ -1004,15 +1004,15 @@ class _Circumfix does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< hexint VALUE >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:hexint(
-						_HexInt.new(
+						_HexInt.populate(
 							$parsed.hash.<hexint>
 						)
 					),
 					:VALUE(
-						_VALUE.new(
+						_VALUE.populate(
 							$parsed.hash.<VALUE>
 						)
 					)
@@ -1042,12 +1042,12 @@ class _Circumfix does Node {
 }
 
 class _CodeBlock does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< block >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:block(
-						_Block.new(
+						_Block.populate(
 							$parsed.hash.<block>
 						)
 					)
@@ -1064,14 +1064,14 @@ class _CodeBlock does Node {
 }
 
 class _Coeff does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-Str( $parsed ) and
 		   ( $parsed.Str eq '0.0' or
 		     $parsed.Str eq '0' ) {
-			return self.bless( :name( $parsed.Str ) )
+			return self.new( :name( $parsed.Str ) )
 		}
 		if self.assert-Int( $parsed ) {
-			return self.bless( :name( $parsed.Int ) )
+			return self.new( :name( $parsed.Int ) )
 		}
 	}
 	method is-valid( Mu $parsed ) returns Bool {
@@ -1085,12 +1085,12 @@ class _Coeff does Node {
 }
 
 class _Coercee does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< semilist >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:semilist(
-						_SemiList.new(
+						_SemiList.populate(
 							$parsed.hash.<semilist>
 						)
 					)
@@ -1107,12 +1107,12 @@ class _Coercee does Node {
 }
 
 class _ColonCircumfix does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< circumfix >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:circumfix(
-						_Circumfix.new(
+						_Circumfix.populate(
 							$parsed.hash.<circumfix>
 						)
 					)
@@ -1129,18 +1129,18 @@ class _ColonCircumfix does Node {
 }
 
 class _ColonPair does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed,
 				     [< identifier coloncircumfix >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:identifier(
-						_Identifier.new(
+						_Identifier.populate(
 							$parsed.hash.<identifier>
 						)
 					),
 					:coloncircumfix(
-						_ColonCircumfix.new(
+						_ColonCircumfix.populate(
 							$parsed.hash.<coloncircumfix>
 						)
 					)
@@ -1148,10 +1148,10 @@ class _ColonPair does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< identifier >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:identifier(
-						_Identifier.new(
+						_Identifier.populate(
 							$parsed.hash.<identifier>
 						)
 					)
@@ -1159,10 +1159,10 @@ class _ColonPair does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< fakesignature >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:fakesignature(
-						_FakeSignature.new(
+						_FakeSignature.populate(
 							$parsed.hash.<fakesignature>
 						)
 					)
@@ -1170,10 +1170,10 @@ class _ColonPair does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< var >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:var(
-						_Var.new(
+						_Var.populate(
 							$parsed.hash.<var>
 						)
 					)
@@ -1198,12 +1198,13 @@ class _ColonPair does Node {
 }
 
 class _ColonPairs does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if $parsed {
-			return self.bless
+# XXX Must fix
+			return self.new
 		}
 		else {
-			return self.bless
+			return self.new
 		}
 	}
 	method is-valid( Mu $parsed ) returns Bool {
@@ -1215,22 +1216,22 @@ return True;
 }
 
 class _Contextualizer does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< coercee circumfix sigil >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:coercee(
-						_Coercee.new(
+						_Coercee.populate(
 							$parsed.hash.<coercee>
 						)
 					),
 					:circumfix(
-						_Circumfix.new(
+						_Circumfix.populate(
 							$parsed.hash.<circumfix>
 						)
 					),
 					:sigil(
-						_Sigil.new(
+						_Sigil.populate(
 							$parsed.hash.<sigil>
 						)
 					)
@@ -1250,13 +1251,13 @@ class _Contextualizer does Node {
 }
 
 class _DecInt does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if $parsed.Str and
 		   $parsed.Str eq '0' {
-			return self.bless( :name( $parsed.Str ) )
+			return self.new( :name( $parsed.Str ) )
 		}
 		if self.assert-Int( $parsed ) {
-			return self.bless( :name( $parsed.Int ) )
+			return self.new( :name( $parsed.Int ) )
 		}
 	}
 	method is-valid( Mu $parsed ) returns Bool {
@@ -1268,24 +1269,24 @@ class _DecInt does Node {
 }
 
 class _Declarator does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed,
 				[< deftermnow initializer term_init >],
 				[< trait >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:deftermnow(
-						_DefTermNow.new(
+						_DefTermNow.populate(
 							$parsed.hash.<deftermnow>
 						)
 					),
 					:initializer(
-						_Initializer.new(
+						_Initializer.populate(
 							$parsed.hash.<initializer>
 						)
 					),
 					:term_init(
-						_TermInit.new(
+						_TermInit.populate(
 							$parsed.hash.<term_init>
 						)
 					),
@@ -1295,15 +1296,15 @@ class _Declarator does Node {
 		}
 		if self.assert-hash-keys( $parsed, [< initializer signature >],
 						   [< trait >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:initializer(
-						_Initializer.new(
+						_Initializer.populate(
 							$parsed.hash.<initializer>
 						)
 					),
 					:signature(
-						_Signature.new(
+						_Signature.populate(
 							$parsed.hash.<signature>
 						)
 					),
@@ -1314,15 +1315,15 @@ class _Declarator does Node {
 		if self.assert-hash-keys( $parsed,
 					  [< initializer variable_declarator >],
 					  [< trait >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:initializer(
-						_Initializer.new(
+						_Initializer.populate(
 							$parsed.hash.<initializer>
 						)
 					),
 					:variable_declarator(
-						_VariableDeclarator.new(
+						_VariableDeclarator.populate(
 							$parsed.hash.<variable_declarator>
 						)
 					),
@@ -1332,10 +1333,10 @@ class _Declarator does Node {
 		}
 		if self.assert-hash-keys( $parsed, [< variable_declarator >],
 						   [< trait >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:variable_declarator(
-						_VariableDeclarator.new(
+						_VariableDeclarator.populate(
 							$parsed.hash.<variable_declarator>
 						)
 					),
@@ -1345,10 +1346,10 @@ class _Declarator does Node {
 		}
 		if self.assert-hash-keys( $parsed, [< regex_declarator >],
 					      [< trait >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:regex_declarator(
-						_RegexDeclarator.new(
+						_RegexDeclarator.populate(
 							$parsed.hash.<regex_declarator>
 						)
 					),
@@ -1358,10 +1359,10 @@ class _Declarator does Node {
 		}
 		if self.assert-hash-keys( $parsed, [< routine_declarator >],
 					      [< trait >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:routine_declarator(
-						_RoutineDeclarator.new(
+						_RoutineDeclarator.populate(
 							$parsed.hash.<routine_declarator>
 						)
 					),
@@ -1371,10 +1372,10 @@ class _Declarator does Node {
 		}
 		if self.assert-hash-keys( $parsed, [< signature >],
 					      [< trait >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:routine_declarator(
-						_Signature.new(
+						_Signature.populate(
 							$parsed.hash.<signature>
 						)
 					),
@@ -1417,24 +1418,24 @@ class _Declarator does Node {
 }
 
 class _DECL does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed,
 				[< deftermnow initializer term_init >],
 				[< trait >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:deftermnow(
-						_DefTermNow.new(
+						_DefTermNow.populate(
 							$parsed.hash.<deftermnow>
 						)
 					),
 					:initializer(
-						_Initializer.new(
+						_Initializer.populate(
 							$parsed.hash.<initializer>
 						)
 					),
 					:term_init(
-						_TermInit.new(
+						_TermInit.populate(
 							$parsed.hash.<term_init>
 						)
 					),
@@ -1445,20 +1446,20 @@ class _DECL does Node {
 		if self.assert-hash-keys( $parsed,
 				[< deftermnow initializer signature >],
 				[< trait >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:deftermnow(
-						_DefTermNow.new(
+						_DefTermNow.populate(
 							$parsed.hash.<deftermnow>
 						)
 					),
 					:initializer(
-						_Initializer.new(
+						_Initializer.populate(
 							$parsed.hash.<initializer>
 						)
 					),
 					:signature(
-						_Signature.new(
+						_Signature.populate(
 							$parsed.hash.<signature>
 						)
 					),
@@ -1468,15 +1469,15 @@ class _DECL does Node {
 		}
 		if self.assert-hash-keys( $parsed, [< initializer signature >],
 						   [< trait >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:initializer(
-						_Initializer.new(
+						_Initializer.populate(
 							$parsed.hash.<initializer>
 						)
 					),
 					:signature(
-						_Signature.new(
+						_Signature.populate(
 							$parsed.hash.<signature>
 						)
 					),
@@ -1487,15 +1488,15 @@ class _DECL does Node {
 		if self.assert-hash-keys( $parsed,
 					  [< initializer variable_declarator >],
 					  [< trait >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:initializer(
-						_Initializer.new(
+						_Initializer.populate(
 							$parsed.hash.<initializer>
 						)
 					),
 					:variable_declarator(
-						_VariableDeclarator.new(
+						_VariableDeclarator.populate(
 							$parsed.hash.<variable_declarator>
 						)
 					),
@@ -1505,15 +1506,15 @@ class _DECL does Node {
 		}
 		if self.assert-hash-keys( $parsed, [< signature >],
 						   [< trait >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:initializer(
-						_Initializer.new(
+						_Initializer.populate(
 							$parsed.hash.<initializer>
 						)
 					),
 					:signature(
-						_Signature.new(
+						_Signature.populate(
 							$parsed.hash.<signature>
 						)
 					),
@@ -1523,10 +1524,10 @@ class _DECL does Node {
 		}
 		if self.assert-hash-keys( $parsed, [< variable_declarator >],
 						   [< trait >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:variable_declarator(
-						_VariableDeclarator.new(
+						_VariableDeclarator.populate(
 							$parsed.hash.<variable_declarator>
 						)
 					),
@@ -1536,10 +1537,10 @@ class _DECL does Node {
 		}
 		if self.assert-hash-keys( $parsed, [< regex_declarator >],
 						   [< trait >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:regex_declarator(
-						_RegexDeclarator.new(
+						_RegexDeclarator.populate(
 							$parsed.hash.<regex_declarator>
 						)
 					),
@@ -1549,10 +1550,10 @@ class _DECL does Node {
 		}
 		if self.assert-hash-keys( $parsed, [< routine_declarator >],
 						   [< trait >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:routine_declarator(
-						_RoutineDeclarator.new(
+						_RoutineDeclarator.populate(
 							$parsed.hash.<routine_declarator>
 						)
 					),
@@ -1561,15 +1562,15 @@ class _DECL does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< package_def sym >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:package_def(
-						_PackageDef.new(
+						_PackageDef.populate(
 							$parsed.hash.<package_def>
 						)
 					),
 					:sym(
-						_Sym.new(
+						_Sym.populate(
 							$parsed.hash.<sym>
 						)
 					)
@@ -1577,10 +1578,10 @@ class _DECL does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< declarator >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:declarator(
-						_Declarator.new(
+						_Declarator.populate(
 							$parsed.hash.<declarator>
 						)
 					)
@@ -1636,28 +1637,28 @@ class _DECL does Node {
 }
 
 class _DecNumber does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed,
 					  [< int coeff frac escale >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:int(
-						_Int.new(
+						_Int.populate(
 							$parsed.hash.<int>
 						)
 					),
 					:coeff(
-						_Coeff.new(
+						_Coeff.populate(
 							$parsed.hash.<coeff>
 						)
 					),
 					:frac(
-						_Frac.new(
+						_Frac.populate(
 							$parsed.hash.<frac>
 						)
 					),
 					:escale(
-						_EScale.new(
+						_EScale.populate(
 							$parsed.hash.<escale>
 						)
 					)
@@ -1665,20 +1666,20 @@ class _DecNumber does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< coeff frac escale >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:coeff(
-						_Coeff.new(
+						_Coeff.populate(
 							$parsed.hash.<coeff>
 						)
 					),
 					:frac(
-						_Frac.new(
+						_Frac.populate(
 							$parsed.hash.<frac>
 						)
 					),
 					:escale(
-						_EScale.new(
+						_EScale.populate(
 							$parsed.hash.<escale>
 						)
 					)
@@ -1686,20 +1687,20 @@ class _DecNumber does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< int coeff frac >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:int(
-						_Int.new(
+						_Int.populate(
 							$parsed.hash.<int>
 						)
 					),
 					:coeff(
-						_Coeff.new(
+						_Coeff.populate(
 							$parsed.hash.<coeff>
 						)
 					),
 					:frac(
-						_Frac.new(
+						_Frac.populate(
 							$parsed.hash.<frac>
 						)
 					)
@@ -1707,20 +1708,20 @@ class _DecNumber does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< int coeff escale >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:int(
-						_Int.new(
+						_Int.populate(
 							$parsed.hash.<int>
 						)
 					),
 					:coeff(
-						_Coeff.new(
+						_Coeff.populate(
 							$parsed.hash.<coeff>
 						)
 					),
 					:escale(
-						_EScale.new(
+						_EScale.populate(
 							$parsed.hash.<escale>
 						)
 					)
@@ -1728,15 +1729,15 @@ class _DecNumber does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< coeff frac >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:coeff(
-						_Coeff.new(
+						_Coeff.populate(
 							$parsed.hash.<coeff>
 						)
 					),
 					:frac(
-						_Frac.new(
+						_Frac.populate(
 							$parsed.hash.<frac>
 						)
 					)
@@ -1776,12 +1777,12 @@ class _DecNumber does Node {
 }
 
 class _DefLongName does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< name >], [< colonpair >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:name(
-						_Name.new(
+						_Name.populate(
 							$parsed.hash.<name>
 						)
 					),
@@ -1800,17 +1801,17 @@ class _DefLongName does Node {
 }
 
 class _DefTerm does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< identifier colonpair >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:identifier(
-						_Identifier.new(
+						_Identifier.populate(
 							$parsed.hash.<identifier>
 						)
 					),
 					:colonpair(
-						_ColonPair.new(
+						_ColonPair.populate(
 							$parsed.hash.<colonpair>
 						)
 					)
@@ -1818,10 +1819,10 @@ class _DefTerm does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< identifier >], [< colonpair >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:identifier(
-						_Identifier.new(
+						_Identifier.populate(
 							$parsed.hash.<identifier>
 						)
 					),
@@ -1845,21 +1846,21 @@ class _DefTerm does Node {
 
 # XXX This is a compound type
 class _DefTerm_Quant does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed,
 				[< defterm quant >],
 				[< default_value modifier
 				   post_constraint trait
 				   type_constraint >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:defterm(
-						_DefTerm.new(
+						_DefTerm.populate(
 							$parsed.hash.<defterm>
 						)
 					),
 					:quant(
-						_Quant.new(
+						_Quant.populate(
 							$parsed.hash.<quant>
 						)
 					)
@@ -1881,12 +1882,12 @@ class _DefTerm_Quant does Node {
 }
 
 class _DefTermNow does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< defterm >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:dwfterm(
-						_DefTerm.new(
+						_DefTerm.populate(
 							$parsed.hash.<defterm>
 						)
 					)
@@ -1903,12 +1904,12 @@ class _DefTermNow does Node {
 }
 
 class _DeSigilName does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< longname >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:longname(
-						_LongName.new(
+						_LongName.populate(
 							$parsed.hash.<longname>
 						)
 					)
@@ -1916,7 +1917,7 @@ class _DeSigilName does Node {
 			)
 		}
 		if $parsed.Str {
-			return self.bless( :name( $parsed.Str ) )
+			return self.new( :name( $parsed.Str ) )
 		}
 	}
 	method is-valid( Mu $parsed ) returns Bool {
@@ -1929,7 +1930,7 @@ class _DeSigilName does Node {
 }
 
 class _Dig does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if $parsed.list {
 			my @child;
 			for $parsed.list {
@@ -1942,7 +1943,7 @@ class _Dig does Node {
 				}
 				die self.new-term
 			}
-			return self.bless
+			return self.new
 		}
 	}
 	method is-valid( Mu $parsed ) returns Bool {
@@ -1967,22 +1968,22 @@ class _Dig does Node {
 class _Doc does Node does IsBoolean { }
 
 class _Dotty does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< sym dottyop O >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:sym(
-						_Sym.new(
+						_Sym.populate(
 							$parsed.hash.<sym>
 						)
 					),
 					:dottyop(
-						_DottyOp.new(
+						_DottyOp.populate(
 							$parsed.hash.<dottyop>
 						)
 					),
 					:O(
-						_O.new(
+						_O.populate(
 							$parsed.hash.<O>
 						)
 					)
@@ -2001,17 +2002,17 @@ class _Dotty does Node {
 }
 
 class _DottyOp does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< sym postop >], [< O >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:sym(
-						_Sym.new(
+						_Sym.populate(
 							$parsed.hash.<sym>
 						)
 					),
 					:postop(
-						_PostOp.new(
+						_PostOp.populate(
 							$parsed.hash.<postop>
 						)
 					)
@@ -2019,10 +2020,10 @@ class _DottyOp does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< methodop >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:methodop(
-						_MethodOp.new(
+						_MethodOp.populate(
 							$parsed.hash.<methodop>
 						)
 					)
@@ -2030,10 +2031,10 @@ class _DottyOp does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< colonpair >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:colonpair(
-						_ColonPair.new(
+						_ColonPair.populate(
 							$parsed.hash.<colonpair>
 						)
 					)
@@ -2056,12 +2057,12 @@ class _DottyOp does Node {
 }
 
 class _DottyOpish does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< term >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:term(
-						_Term.new(
+						_Term.populate(
 							$parsed.hash.<term>
 						)
 					)
@@ -2079,19 +2080,19 @@ class _DottyOpish does Node {
 
 # XXX This is a compound type
 class _Dotty_OPER does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed,
 				     [< dotty OPER >],
 				     [< postfix_prefix_meta_operator >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:dotty(
-						_Dotty.new(
+						_Dotty.populate(
 							$parsed.hash.<dotty>
 						)
 					),
 					:OPER(
-						_OPER.new(
+						_OPER.populate(
 							$parsed.hash.<OPER>
 						)
 					),
@@ -2112,12 +2113,12 @@ class _Dotty_OPER does Node {
 }
 
 class _E1 does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< scope_declarator >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:scope_declarator(
-						_ScopeDeclarator.new(
+						_ScopeDeclarator.populate(
 							$parsed.hash.<scope_declarator>
 						)
 					)
@@ -2135,17 +2136,17 @@ class _E1 does Node {
 }
 
 class _E2 does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< infix OPER >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:infix(
-						_Infix.new(
+						_Infix.populate(
 							$parsed.hash.<infix>
 						)
 					),
 					:OPER(
-						_OPER.new(
+						_OPER.populate(
 							$parsed.hash.<OPER>
 						)
 					)
@@ -2164,20 +2165,20 @@ class _E2 does Node {
 }
 
 class _E3 does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys(
 			$parsed,
 			[< postfix OPER >],
 			[< postfix_prefix_meta_operator >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:postfix(
-						_Postfix.new(
+						_Postfix.populate(
 							$parsed.hash.<postfix>
 						)
 					),
 					:OPER(
-						_OPER.new(
+						_OPER.populate(
 							$parsed.hash.<OPER>
 						)
 					),
@@ -2198,17 +2199,17 @@ class _E3 does Node {
 }
 
 class _Else does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< sym blorst >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:sym(
-						_Sym.new(
+						_Sym.populate(
 							$parsed.hash.<sym>
 						)
 					),
 					:blorst(
-						_Blorst.new(
+						_Blorst.populate(
 							$parsed.hash.<blorst>
 						)
 					)
@@ -2216,10 +2217,10 @@ class _Else does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< blockoid >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:blockoid(
-						_Blockoid.new(
+						_Blockoid.populate(
 							$parsed.hash.<blockoid>
 						)
 					)
@@ -2239,17 +2240,17 @@ class _Else does Node {
 }
 
 class _EScale does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< sign decint >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:sign(
-						_Sign.new(
+						_Sign.populate(
 							$parsed.hash.<sign>
 						)
 					),
 					:decint(
-						_DecInt.new(
+						_DecInt.populate(
 							$parsed.hash.<decint>
 						)
 					)
@@ -2267,7 +2268,7 @@ class _EScale does Node {
 }
 
 class _EXPR does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		self.trace;
 		if $parsed.list {
 			my @child;
@@ -2276,7 +2277,7 @@ class _EXPR does Node {
 						[< dotty OPER >],
 						[< postfix_prefix_meta_operator >] ) {
 					@child.push(
-						_Dotty_OPER.new( $_ )
+						_Dotty_OPER.populate( $_ )
 					);
 					next
 				}
@@ -2284,124 +2285,124 @@ class _EXPR does Node {
 					[< postcircumfix OPER >],
 					[< postfix_prefix_meta_operator >] ) {
 					@child.push(
-						_PostCircumfix_OPER.new( $_ )
+						_PostCircumfix_OPER.populate( $_ )
 					);
 					next
 				}
 				if self.assert-hash-keys( $_, [< infix OPER >],
  						[< infix_postfix_meta_operator >] ) {
 					@child.push(
-						_Infix_OPER.new( $_ )
+						_Infix_OPER.populate( $_ )
 					);
 					next
 				}
 				if self.assert-hash-keys( $_, [< prefix OPER >],
 							 [< prefix_postfix_meta_operator >] ) {
 					@child.push(
-						_Prefix_OPER.new( $_ )
+						_Prefix_OPER.populate( $_ )
 					);
 					next
 				}
 				if self.assert-hash-keys( $_, [< postfix OPER >],
 							 [< postfix_prefix_meta_operator >] ) {
 					@child.push(
-						_Postfix_OPER.new( $_ )
+						_Postfix_OPER.populate( $_ )
 					);
 					next
 				}
 				if self.assert-hash-keys( $_, [< args op >] ) {
 					@child.push(
-						_Args_Op.new( $_ )
+						_Args_Op.populate( $_ )
 					);
 					next
 				}
 				if self.assert-hash-keys( $_, [< identifier args >] ) {
 					@child.push(
-						_Identifier_Args.new( $_ )
+						_Identifier_Args.populate( $_ )
 					);
 					next
 				}
 				if self.assert-hash-keys( $_, [< infix_prefix_meta_operator OPER >] ) {
 					@child.push(
-						_InfixPrefixMetaOperator_OPER.new( $_ )
+						_InfixPrefixMetaOperator_OPER.populate( $_ )
 					);
 					next
 				}
 				if self.assert-hash-keys( $_, [< longname args >] ) {
 					@child.push(
-						_LongName_Args.new( $_ )
+						_LongName_Args.populate( $_ )
 					);
 					next
 				}
 				if self.assert-hash-keys( $_, [< args op >] ) {
 					@child.push(
-						_Args_Op.new( $_ )
+						_Args_Op.populate( $_ )
 					);
 					next
 				}
 				if self.assert-hash-keys( $_, [< value >] ) {
 					@child.push(
-						_Value.new( $_.hash.<value> )
+						_Value.populate( $_.hash.<value> )
 					);
 					next
 				}
 				if self.assert-hash-keys( $_, [< longname >] ) {
 					@child.push(
-						_LongName.new( $_.hash.<longname> )
+						_LongName.populate( $_.hash.<longname> )
 					);
 					next
 				}
 				if self.assert-hash-keys( $_, [< variable >] ) {
 					@child.push(
-						_Variable.new( $_.hash.<variable> )
+						_Variable.populate( $_.hash.<variable> )
 					);
 					next
 				}
 				if self.assert-hash-keys( $_, [< methodop >] ) {
 					@child.push(
-						_MethodOp.new( $_.hash.<methodop> )
+						_MethodOp.populate( $_.hash.<methodop> )
 					);
 					next
 				}
 				if self.assert-hash-keys( $_, [< package_declarator >] ) {
 					@child.push(
-						_PackageDeclarator.new( $_.hash.<package_declarator> )
+						_PackageDeclarator.populate( $_.hash.<package_declarator> )
 					);
 					next
 				}
 				if self.assert-hash-keys( $_, [< sym >] ) {
 					@child.push(
-						_Sym.new( $_.hash.<sym> )
+						_Sym.populate( $_.hash.<sym> )
 					);
 					next
 				}
 				if self.assert-hash-keys( $_, [< scope_declarator >] ) {
 					@child.push(
-						_ScopeDeclarator.new( $_.hash.<scope_declarator> )
+						_ScopeDeclarator.populate( $_.hash.<scope_declarator> )
 					);
 					next
 				}
 				if self.assert-hash-keys( $_, [< dotty >] ) {
 					@child.push(
-						_Dotty.new( $_.hash.<dotty> )
+						_Dotty.populate( $_.hash.<dotty> )
 					);
 					next
 				}
 				if self.assert-hash-keys( $_, [< circumfix >] ) {
 					@child.push(
-						_Circumfix.new( $_.hash.<circumfix> )
+						_Circumfix.populate( $_.hash.<circumfix> )
 					);
 					next
 				}
 				if self.assert-hash-keys( $_, [< fatarrow >] ) {
 					@child.push(
-						_FatArrow.new( $_.hash.<fatarrow> )
+						_FatArrow.populate( $_.hash.<fatarrow> )
 					);
 					next
 				}
 				if self.assert-hash-keys( $_, [< statement_prefix >] ) {
 					@child.push(
-						_StatementPrefix.new( $_.hash.<statement_prefix> )
+						_StatementPrefix.populate( $_.hash.<statement_prefix> )
 					);
 					next
 				}
@@ -2414,20 +2415,20 @@ class _EXPR does Node {
 			if self.assert-hash-keys(
 					$parsed,
 					[< fake_infix OPER colonpair >] ) {
-				return self.bless(
+				return self.new(
 					:content(
 						:fake_infix(
-							_FakeInfix.new(
+							_FakeInfix.populate(
 								$parsed.hash.<fake_infix>
 							)
 						),
 						:OPER(
-							_OPER.new(
+							_OPER.populate(
 								$parsed.hash.<OPER>
 							)
 						),
 						:colonpair(
-							_ColonPair.new(
+							_ColonPair.populate(
 								$parsed.hash.<colonpair>
 							)
 						)
@@ -2439,15 +2440,15 @@ class _EXPR does Node {
 				$parsed,
 				[< OPER dotty >],
 				[< postfix_prefix_meta_operator >] ) {
-				return self.bless(
+				return self.new(
 					:content(
 						:OPER(
-							_OPER.new(
+							_OPER.populate(
 								$parsed.hash.<OPER>
 							)
 						),
 						:dotty(
-							_Dotty.new(
+							_Dotty.populate(
 								$parsed.hash.<dotty>
 							)
 						)
@@ -2460,15 +2461,15 @@ class _EXPR does Node {
 				$parsed,
 				[< postfix OPER >],
 				[< postfix_prefix_meta_operator >] ) {
-				return self.bless(
+				return self.new(
 					:content(
 						:postfix(
-							_Postfix.new(
+							_Postfix.populate(
 								$parsed.hash.<postfix>
 							)
 						),
 						:OPER(
-							_OPER.new(
+							_OPER.populate(
 								$parsed.hash.<OPER>
 							)
 						),
@@ -2481,15 +2482,15 @@ class _EXPR does Node {
 				$parsed,
 				[< infix OPER >],
 				[< prefix_postfix_meta_operator >] ) {
-				return self.bless(
+				return self.new(
 					:content(
 						:infix(
-							_Infix.new(
+							_Infix.populate(
 								$parsed.hash.<infix>
 							)
 						),
 						:OPER(
-							_OPER.new(
+							_OPER.populate(
 								$parsed.hash.<OPER>
 							)
 						),
@@ -2502,15 +2503,15 @@ class _EXPR does Node {
 				$parsed,
 				[< prefix OPER >],
 				[< prefix_postfix_meta_operator >] ) {
-				return self.bless(
+				return self.new(
 					:content(
 						:prefix(
-							_Prefix.new(
+							_Prefix.populate(
 								$parsed.hash.<prefix>
 							)
 						),
 						:OPER(
-							_OPER.new(
+							_OPER.populate(
 								$parsed.hash.<OPER>
 							)
 						),
@@ -2523,15 +2524,15 @@ class _EXPR does Node {
 				$parsed,
 				[< postcircumfix OPER >],
 				[< postfix_prefix_meta_operator >] ) {
-				return self.bless(
+				return self.new(
 					:content(
 						:postcircumfix(
-							_PostCircumfix.new(
+							_PostCircumfix.populate(
 								$parsed.hash.<postcircumfix>
 							)
 						),
 						:OPER(
-							_OPER.new(
+							_OPER.populate(
 								$parsed.hash.<OPER>
 							)
 						),
@@ -2544,10 +2545,10 @@ class _EXPR does Node {
 				$parsed,
 				[< OPER >],
 				[< infix_prefix_meta_operator >] ) {
-				return self.bless(
+				return self.new(
 					:content(
 						:OPER(
-							_OPER.new(
+							_OPER.populate(
 								$parsed.hash.<OPER>
 							)
 						),
@@ -2559,20 +2560,20 @@ class _EXPR does Node {
 			die self.new-term
 		}
 		if self.assert-hash-keys( $parsed, [< args op triangle >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:args(
-						_Args.new(
+						_Args.populate(
 							$parsed.hash.<args>
 						)
 					),
 					:op(
-						_Op.new(
+						_Op.populate(
 							$parsed.hash.<op>
 						)
 					),
 					:triangle(
-						_Triangle.new(
+						_Triangle.populate(
 							$parsed.hash.<triangle>
 						)
 					)
@@ -2580,15 +2581,15 @@ class _EXPR does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< longname args >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:longname(
-						_LongName.new(
+						_LongName.populate(
 							$parsed.hash.<longname>
 						)
 					),
 					:args(
-						_Args.new(
+						_Args.populate(
 							$parsed.hash.<args>
 						)
 					)
@@ -2596,15 +2597,15 @@ class _EXPR does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< identifier args >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:identifier(
-						_Identifier.new(
+						_Identifier.populate(
 							$parsed.hash.<identifier>
 						)
 					),
 					:args(
-						_Args.new(
+						_Args.populate(
 							$parsed.hash.<args>
 						)
 					)
@@ -2612,15 +2613,15 @@ class _EXPR does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< args op >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:args(
-						_Args.new(
+						_Args.populate(
 							$parsed.hash.<args>
 						)
 					),
 					:op(
-						_Op.new(
+						_Op.populate(
 							$parsed.hash.<op>
 						)
 					)
@@ -2628,15 +2629,15 @@ class _EXPR does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< sym args >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:sym( 
-						_Sym.new(
+						_Sym.populate(
 							$parsed.hash.<sym>
 						)
 					),
 					:args(
-						_Args.new(
+						_Args.populate(
 							$parsed.hash.<args>
 						)
 					)
@@ -2644,10 +2645,10 @@ class _EXPR does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< statement_prefix >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:statement_prefix(
-						_StatementPrefix.new(
+						_StatementPrefix.populate(
 							$parsed.hash.<statement_prefix>
 						)
 					)
@@ -2655,10 +2656,10 @@ class _EXPR does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< type_declarator >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:type_declarator(
-						_TypeDeclarator.new(
+						_TypeDeclarator.populate(
 							$parsed.hash.<type_declarator>
 						)
 					)
@@ -2666,10 +2667,10 @@ class _EXPR does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< longname >] ) {
-			return self.bless(
+			return self.new(
 				:content( 
 					:longname(
-						_LongName.new(
+						_LongName.populate(
 							$parsed.hash.<longname>
 						)
 					)
@@ -2677,10 +2678,10 @@ class _EXPR does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< value >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:value(
-						_Value.new(
+						_Value.populate(
 							$parsed.hash.<value>
 						)
 					)
@@ -2688,10 +2689,10 @@ class _EXPR does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< variable >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:variable(
-						_Variable.new(
+						_Variable.populate(
 							$parsed.hash.<variable>
 						)
 					)
@@ -2699,10 +2700,10 @@ class _EXPR does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< circumfix >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:circumfix(
-						_Circumfix.new(
+						_Circumfix.populate(
 							$parsed.hash.<circumfix>
 						)
 					)
@@ -2710,10 +2711,10 @@ class _EXPR does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< colonpair >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:colonpair(
-						_ColonPair.new(
+						_ColonPair.populate(
 							$parsed.hash.<colonpair>
 						)
 					)
@@ -2721,10 +2722,10 @@ class _EXPR does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< scope_declarator >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:scope_declarator(
-						_ScopeDeclarator.new(
+						_ScopeDeclarator.populate(
 							$parsed.hash.<scope_declarator>
 						)
 					)
@@ -2732,10 +2733,10 @@ class _EXPR does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< routine_declarator >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:routine_declarator(
-						_RoutineDeclarator.new(
+						_RoutineDeclarator.populate(
 							$parsed.hash.<routine_declarator>
 						)
 					)
@@ -2743,10 +2744,10 @@ class _EXPR does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< package_declarator >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:package_declarator(
-						_PackageDeclarator.new(
+						_PackageDeclarator.populate(
 							$parsed.hash.<package_declarator>
 						)
 					)
@@ -2754,10 +2755,10 @@ class _EXPR does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< fatarrow >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:fatarrow(
-						_FatArrow.new(
+						_FatArrow.populate(
 							$parsed.hash.<fatarrow>
 						)
 					)
@@ -2765,10 +2766,10 @@ class _EXPR does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< multi_declarator >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:multi_declarator(
-						_MultiDeclarator.new(
+						_MultiDeclarator.populate(
 							$parsed.hash.<multi_declarator>
 						)
 					)
@@ -2776,10 +2777,10 @@ class _EXPR does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< regex_declarator >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:regex_declarator(
-						_RegexDeclarator.new(
+						_RegexDeclarator.populate(
 							$parsed.hash.<regex_declarator>
 						)
 					)
@@ -2787,10 +2788,10 @@ class _EXPR does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< dotty >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:dotty(
-						_Dotty.new(
+						_Dotty.populate(
 							$parsed.hash.<dotty>
 						)
 					)
@@ -2963,12 +2964,12 @@ class _EXPR does Node {
 }
 
 class _FakeInfix does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< O >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:O(
-						_O.new(
+						_O.populate(
 							$parsed.hash.<O>
 						)
 					)
@@ -2985,12 +2986,12 @@ class _FakeInfix does Node {
 }
 
 class _FakeSignature does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< signature >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:signature(
-						_Signature.new(
+						_Signature.populate(
 							$parsed.hash.<signature>
 						)
 					)
@@ -3007,17 +3008,17 @@ class _FakeSignature does Node {
 }
 
 class _FatArrow does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< val key >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:val(
-						_Val.new(
+						_Val.populate(
 							$parsed.hash.<val>
 						)
 					),
 					:key(
-						_Key.new(
+						_Key.populate(
 							$parsed.hash.<key>
 						)
 					)
@@ -3035,13 +3036,13 @@ class _FatArrow does Node {
 }
 
 class _Frac does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if $parsed.Str and
 		   $parsed.Str eq '0' {
-			return self.bless( :name( $parsed.Str ) )
+			return self.new( :name( $parsed.Str ) )
 		}
 		if self.assert-Int( $parsed ) {
-			return self.bless( :name( $parsed.Int ) )
+			return self.new( :name( $parsed.Int ) )
 		}
 	}
 	method is-valid( Mu $parsed ) returns Bool {
@@ -3053,13 +3054,13 @@ class _Frac does Node {
 }
 
 class _HexInt does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if $parsed.Str and
 		   $parsed.Str eq '0' {
-			return self.bless( :name( $parsed.Str ) )
+			return self.new( :name( $parsed.Str ) )
 		}
 		if self.assert-Int( $parsed ) {
-			return self.bless( :name( $parsed.Int ) )
+			return self.new( :name( $parsed.Int ) )
 		}
 	}
 	method is-valid( Mu $parsed ) returns Bool {
@@ -3072,17 +3073,17 @@ class _HexInt does Node {
 
 # XXX This is a compound type
 class _Identifier_Args does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< identifier args >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:identifier(
-						_Identifier.new(
+						_Identifier.populate(
 							$parsed.hash.<identifier>
 						)
 					),
 					:args(
-						_Args.new(
+						_Args.populate(
 							$parsed.hash.<args>
 						)
 					)
@@ -3102,22 +3103,22 @@ class _Identifier_Args does Node {
 
 # XXX This is a compound type
 class _Identifier_Name_Sign does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< identifier name sign >], [< charspec >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:identifier(
-						_Identifier.new(
+						_Identifier.populate(
 							$parsed.hash.<identifier>
 						)
 					),
 					:name(
-						_Name.new(
+						_Name.populate(
 							$parsed.hash.<name>
 						)
 					),
 					:sign(
-						_Sign.new(
+						_Sign.populate(
 							$parsed.hash.<sign>
 						)
 					),
@@ -3142,7 +3143,7 @@ class _Identifier_Name_Sign does Node {
 }
 
 class _Identifier does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if $parsed.list {
 			my @child;
 			for $parsed.list {
@@ -3154,12 +3155,12 @@ class _Identifier does Node {
 				}
 				die self.new-term
 			}
-			return self.bless(
+			return self.new(
 				:child( @child )
 			)
 		}
 		elsif $parsed.Str {
-			return self.bless( :name( $parsed.Str ) )
+			return self.new( :name( $parsed.Str ) )
 		}
 	}
 	method is-valid( Mu $parsed ) returns Bool {
@@ -3179,17 +3180,17 @@ class _Identifier does Node {
 }
 
 class _Infix does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< EXPR O >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:EXPR(
-						_EXPR.new(
+						_EXPR.populate(
 							$parsed.hash.<EXPR>
 						)
 					),
 					:O(
-						_O.new(
+						_O.populate(
 							$parsed.hash.<O>
 						)
 					)
@@ -3197,15 +3198,15 @@ class _Infix does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< infix OPER >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:infix(
-						_Infix.new(
+						_Infix.populate(
 							$parsed.hash.<infix>
 						)
 					),
 					:OPER(
-						_OPER.new(
+						_OPER.populate(
 							$parsed.hash.<OPER>
 						)
 					)
@@ -3213,15 +3214,15 @@ class _Infix does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< sym O >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:sym(
-						_Sym.new(
+						_Sym.populate(
 							$parsed.hash.<sym>
 						)
 					),
 					:O(
-						_O.new(
+						_O.populate(
 							$parsed.hash.<O>
 						)
 					)
@@ -3245,17 +3246,17 @@ class _Infix does Node {
 }
 
 class _Infixish does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< infix OPER >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:infix(
-						_Infix.new(
+						_Infix.populate(
 							$parsed.hash.<infix>
 						)
 					),
 					:OPER(
-						_OPER.new(
+						_OPER.populate(
 							$parsed.hash.<OPER>
 						)
 					)
@@ -3274,19 +3275,19 @@ class _Infixish does Node {
 
 # XXX This is a compound type
 class _Infix_OPER does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed,
 				     [< infix OPER >],
 				     [< infix_postfix_meta_operator >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:infix(
-						_Infix.new(
+						_Infix.populate(
 							$parsed.hash.<infix>
 						)
 					),
 					:OPER(
-						_OPER.new(
+						_OPER.populate(
 							$parsed.hash.<OPER>
 						)
 					),
@@ -3307,23 +3308,23 @@ class _Infix_OPER does Node {
 }
 
 class _InfixPrefixMetaOperator does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed,
 				     [< sym infixish O >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:sym(
-						_Sym.new(
+						_Sym.populate(
 							$parsed.hash.<sym>
 						)
 					),
 					:infixish(
-						_Infixish.new(
+						_Infixish.populate(
 							$parsed.hash.<infixish>
 						)
 					),
 					:O(
-						_O.new(
+						_O.populate(
 							$parsed.hash.<O>
 						)
 					)
@@ -3342,18 +3343,18 @@ class _InfixPrefixMetaOperator does Node {
 }
 
 class _InfixPrefixMetaOperator_OPER does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed,
 				[< infix_prefix_meta_operator OPER >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:infix_prefix_meta_operator(
-						_InfixPrefixMetaOperator.new(
+						_InfixPrefixMetaOperator.populate(
 							$parsed.hash.<infix_prefix_meta_operator>
 						)
 					),
 					:OPER(
-						_OPER.new(
+						_OPER.populate(
 							$parsed.hash.<OPER>
 						)
 					)
@@ -3372,18 +3373,18 @@ class _InfixPrefixMetaOperator_OPER does Node {
 }
 
 class _Initializer does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if $parsed {
 			if self.assert-hash-keys( $parsed, [< sym EXPR >] ) {
-				return self.bless(
+				return self.new(
 					:content(
 						:sym(
-							_Sym.new(
+							_Sym.populate(
 								$parsed.hash.<sym>
 							)
 						),
 						:EXPR(
-							_EXPR.new(
+							_EXPR.populate(
 								$parsed.hash.<EXPR>
 							)
 						)
@@ -3391,15 +3392,15 @@ class _Initializer does Node {
 				)
 			}
 			if self.assert-hash-keys( $parsed, [< dottyopish sym >] ) {
-				return self.bless(
+				return self.new(
 					:content(
 						:dottyopish(
-							_DottyOpish.new(
+							_DottyOpish.populate(
 								$parsed.hash.<dottyopish>
 							)
 						),
 						:sym(
-							_Sym.new(
+							_Sym.populate(
 								$parsed.hash.<sym>
 							)
 						)
@@ -3408,7 +3409,7 @@ class _Initializer does Node {
 			}
 		}
 		else {
-			return self.bless
+			return self.new
 		}
 	}
 	method is-valid( Mu $parsed ) returns Bool {
@@ -3429,13 +3430,13 @@ class _Initializer does Node {
 }
 
 class _Int does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if $parsed.Str and
 		   $parsed.Str eq '0' {
-			return self.bless( :name( $parsed.Str ) )
+			return self.new( :name( $parsed.Str ) )
 		}
 		if self.assert-Int( $parsed ) {
-			return self.bless( :name( $parsed.Int ) )
+			return self.new( :name( $parsed.Int ) )
 		}
 	}
 	method is-valid( Mu $parsed ) returns Bool {
@@ -3447,17 +3448,17 @@ class _Int does Node {
 }
 
 class _Integer does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< decint VALUE >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:decint(
-						_DecInt.new(
+						_DecInt.populate(
 							$parsed.hash.<decint>
 						)
 					),
 					:VALUE(
-						_VALUE.new(
+						_VALUE.populate(
 							$parsed.hash.<VALUE>
 						)
 					)
@@ -3468,12 +3469,12 @@ class _Integer does Node {
 			return self.bless(
 				:content(
 					:binint(
-						_BinInt.new(
+						_BinInt.populate(
 							$parsed.hash.<binint>
 						)
 					),
 					:VALUE(
-						_VALUE.new(
+						_VALUE.populate(
 							$parsed.hash.<VALUE>
 						)
 					)
@@ -3484,12 +3485,12 @@ class _Integer does Node {
 			return self.bless(
 				:content(
 					:octint(
-						_OctInt.new(
+						_OctInt.populate(
 							$parsed.hash.<octint>
 						)
 					),
 					:VALUE(
-						_VALUE.new(
+						_VALUE.populate(
 							$parsed.hash.<VALUE>
 						)
 					)
@@ -3500,12 +3501,12 @@ class _Integer does Node {
 			return self.bless(
 				:content(
 					:hexint(
-						_HexInt.new(
+						_HexInt.populate(
 							$parsed.hash.<hexint>
 						)
 					),
 					:VALUE(
-						_VALUE.new(
+						_VALUE.populate(
 							$parsed.hash.<VALUE>
 						)
 					)
@@ -3541,7 +3542,7 @@ class _Left does Node {
 			return self.bless(
 				:content(
 					:termseq(
-						_TermSeq.new(
+						_TermSeq.populate(
 							$parsed.hash.<termseq>
 						)
 					)
@@ -3558,17 +3559,17 @@ class _Left does Node {
 }
 
 class _LongName_Args does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< longname args >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:longname(
-						_LongName.new(
+						_LongName.populate(
 							$parsed.hash.<longname>
 						)
 					),
 					:args(
-						_Args.new(
+						_Args.populate(
 							$parsed.hash.<args>
 						)
 					)
@@ -3587,18 +3588,18 @@ class _LongName_Args does Node {
 }
 
 class _LongName_ColonPair does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< longname colonpairs >],
 						   [< colonpair >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:longname(
-						_LongName.new(
+						_LongName.populate(
 							$parsed.hash.<longname>
 						)
 					),
 					:colonpairs(
-						_ColonPairs.new(
+						_ColonPairs.populate(
 							$parsed.hash.<colonpairs>
 						)
 					),
@@ -3608,10 +3609,10 @@ class _LongName_ColonPair does Node {
 		}
 		if self.assert-hash-keys( $parsed, [< longname >],
 						   [< colonpair >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:longname(
-						_LongName.new(
+						_LongName.populate(
 							$parsed.hash.<longname>
 						)
 					),
@@ -3634,18 +3635,18 @@ class _LongName_ColonPair does Node {
 }
 
 class _LongName_ColonPairs does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< longname colonpairs >],
 						   [< colonpair >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:longname(
-						_LongName.new(
+						_LongName.populate(
 							$parsed.hash.<longname>
 						)
 					),
 					:colonpairs(
-						_ColonPairs.new(
+						_ColonPairs.populate(
 							$parsed.hash.<colonpairs>
 						)
 					),
@@ -3665,15 +3666,15 @@ class _LongName_ColonPairs does Node {
 }
 
 class _LongName does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if $parsed {
 			if self.assert-hash-keys( $parsed,
 						  [< name >],
 						  [< colonpair >] ) {
-				return self.bless(
+				return self.new(
 					:content(
 						:name(
-							_Name.new(
+							_Name.populate(
 								$parsed.hash.<name>
 							)
 						),
@@ -3683,7 +3684,7 @@ class _LongName does Node {
 			}
 		}
 		else {
-			return self.bless
+			return self.new
 		}
 	}
 	method is-valid( Mu $parsed ) returns Bool {
@@ -3705,12 +3706,12 @@ class _LongName does Node {
 class _Max does Node does IsString { }
 
 class _MetaChar does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< sym >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:sym(
-						_Sym.new(
+						_Sym.populate(
 							$parsed.hash.<sym>
 						)
 					)
@@ -3718,10 +3719,10 @@ class _MetaChar does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< codeblock >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:codeblock(
-						_CodeBlock.new(
+						_CodeBlock.populate(
 							$parsed.hash.<codeblock>
 						)
 					)
@@ -3729,10 +3730,10 @@ class _MetaChar does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< backslash >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:backslash(
-						_BackSlash.new(
+						_BackSlash.populate(
 							$parsed.hash.<backslash>
 						)
 					)
@@ -3740,10 +3741,10 @@ class _MetaChar does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< assertion >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:assertion(
-						_Assertion.new(
+						_Assertion.populate(
 							$parsed.hash.<assertion>
 						)
 					)
@@ -3751,10 +3752,10 @@ class _MetaChar does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< nibble >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:nibble(
-						_Nibble.new(
+						_Nibble.populate(
 							$parsed.hash.<nibble>
 						)
 					)
@@ -3762,10 +3763,10 @@ class _MetaChar does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< quote >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:quote(
-						_Quote.new(
+						_Quote.populate(
 							$parsed.hash.<quote>
 						)
 					)
@@ -3773,10 +3774,10 @@ class _MetaChar does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< nibbler >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:nibbler(
-						_Nibbler.new(
+						_Nibbler.populate(
 							$parsed.hash.<nibbler>
 						)
 					)
@@ -3784,10 +3785,10 @@ class _MetaChar does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< statement >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:statement(
-						_Statement.new(
+						_Statement.populate(
 							$parsed.hash.<statement>
 						)
 					)
@@ -3818,29 +3819,29 @@ class _MetaChar does Node {
 }
 
 class _MethodDef does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed,
 				     [< specials longname blockoid multisig >],
 				     [< trait >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:specials(
-						_Specials.new(
+						_Specials.populate(
 							$parsed.hash.<specials>
 						)
 					),
 					:longname(
-						_LongName.new(
+						_LongName.populate(
 							$parsed.hash.<longname>
 						)
 					),
 					:blockoid(
-						_Blockoid.new(
+						_Blockoid.populate(
 							$parsed.hash.<blockoid>
 						)
 					),
 					:multisig(
-						_MultiSig.new(
+						_MultiSig.populate(
 							$parsed.hash.<multisig>
 						)
 					),
@@ -3851,20 +3852,20 @@ class _MethodDef does Node {
 		if self.assert-hash-keys( $parsed,
 				     [< specials longname blockoid >],
 				     [< trait >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:specials(
-						_Specials.new(
+						_Specials.populate(
 							$parsed.hash.<specials>
 						)
 					),
 					:longname(
-						_LongName.new(
+						_LongName.populate(
 							$parsed.hash.<longname>
 						)
 					),
 					:blockoid(
-						_Blockoid.new(
+						_Blockoid.populate(
 							$parsed.hash.<blockoid>
 						)
 					),
@@ -3893,17 +3894,17 @@ class _MethodDef does Node {
 }
 
 class _MethodOp does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< longname args >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:longname(
-						_LongName.new(
+						_LongName.populate(
 							$parsed.hash.<longname>
 						)
 					),
 					:args(
-						_Args.new(
+						_Args.populate(
 							$parsed.hash.<args>
 						)
 					)
@@ -3911,10 +3912,10 @@ class _MethodOp does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< variable >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:variable(
-						_Variable.new(
+						_Variable.populate(
 							$parsed.hash.<variable>
 						)
 					)
@@ -3922,10 +3923,10 @@ class _MethodOp does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< longname >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:longname(
-						_LongName.new(
+						_LongName.populate(
 							$parsed.hash.<longname>
 						)
 					)
@@ -3952,12 +3953,12 @@ class _Min does Node {
 			return self.bless(
 				:content(
 					:decint(
-						_DecInt.new(
+						_DecInt.populate(
 							$parsed.hash.<decint>
 						)
 					)
 					:VALUE(
-						_VALUE.new(
+						_VALUE.populate(
 							$parsed.hash.<VALUE>
 						)
 					)
@@ -3976,12 +3977,12 @@ class _Min does Node {
 }
 
 class _ModifierExpr does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< EXPR >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:EXPR(
-						_EXPR.new(
+						_EXPR.populate(
 							$parsed.hash.<EXPR>
 						)
 					)
@@ -3998,12 +3999,12 @@ class _ModifierExpr does Node {
 }
 
 class _ModuleName does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< longname >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:longname(
-						_LongName.new(
+						_LongName.populate(
 							$parsed.hash.<longname>
 						)
 					)
@@ -4020,16 +4021,17 @@ class _ModuleName does Node {
 }
 
 class _MoreName does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if $parsed.list {
 			my @child;
 			for $parsed.list {
+# XXX
 				if self.assert-hash-keys( $_,
 						     [< identifier >] ) {
-					return self.bless(
+					return self.new(
 						:content(
 							:identifier(
-								_Identifier.new(
+								_Identifier.populate(
 									$_.hash.<identifier>
 								)
 							)
@@ -4057,17 +4059,17 @@ class _MoreName does Node {
 }
 
 class _MultiDeclarator does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< sym routine_def >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:sym(
-						_Sym.new(
+						_Sym.populate(
 							$parsed.hash.<sym>
 						)
 					),
 					:routine_def(
-						_RoutineDef.new(
+						_RoutineDef.populate(
 							$parsed.hash.<routine_def>
 						)
 					)
@@ -4075,15 +4077,15 @@ class _MultiDeclarator does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< sym declarator >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:sym(
-						_Sym.new(
+						_Sym.populate(
 							$parsed.hash.<sym>
 						)
 					),
 					:declarator(
-						_Declarator.new(
+						_Declarator.populate(
 							$parsed.hash.<declarator>
 						)
 					)
@@ -4091,10 +4093,10 @@ class _MultiDeclarator does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< declarator >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:declarator(
-						_Declarator.new(
+						_Declarator.populate(
 							$parsed.hash.<declarator>
 						)
 					)
@@ -4119,12 +4121,12 @@ class _MultiDeclarator does Node {
 }
 
 class _MultiSig does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< signature >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:signature(
-						_Signature.new(
+						_Signature.populate(
 							$parsed.hash.<signature>
 						)
 					)
@@ -4141,12 +4143,12 @@ class _MultiSig does Node {
 }
 
 class _NamedParam does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< param_var >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:param_var(
-						_ParamVar.new(
+						_ParamVar.populate(
 							$parsed.hash.<param_var>
 						)
 					)
@@ -4164,21 +4166,21 @@ class _NamedParam does Node {
 }
 
 class _NamedParam_Quant does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< named_param quant >],
 					  [< default_value
 					     type_constraint
 					     modifier trait
 					     post_constraint >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:named_param(
-						_NamedParam.new(
+						_NamedParam.populate(
 							$parsed.hash.<named_param>
 						)
 					),
 					:quant(
-						_Quant.new(
+						_Quant.populate(
 							$parsed.hash.<quant>
 						)
 					)
@@ -4199,24 +4201,24 @@ class _NamedParam_Quant does Node {
 }
 
 class _Name does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed,
 			[< param_var type_constraint quant >],
 			[< default_value modifier trait post_constraint >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:param_var(
-						_ParamVar.new(
+						_ParamVar.populate(
 							$parsed.hash.<param_var>
 						)
 					),
 					:type_constraint(
-						_TypeConstraint.new(
+						_TypeConstraint.populate(
 							$parsed.hash.<type_constraint>
 						)
 					),
 					:quant(
-						_Quant.new(
+						_Quant.populate(
 							$parsed.hash.<quant>
 						)
 					),
@@ -4229,10 +4231,10 @@ class _Name does Node {
 		}
 		if self.assert-hash-keys( $parsed, [< identifier >],
 						   [< morename >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:identifier(
-						_Identifier.new(
+						_Identifier.populate(
 							$parsed.hash.<identifier>
 						)
 					),
@@ -4242,10 +4244,10 @@ class _Name does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< subshortname >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:subshortname(
-						_SubShortName.new(
+						_SubShortName.populate(
 							$parsed.hash.<subshortname>
 						)
 					)
@@ -4254,10 +4256,10 @@ class _Name does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< morename >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:morename(
-						_MoreName.new(
+						_MoreName.populate(
 							$parsed.hash.<morename>
 						)
 					)
@@ -4266,7 +4268,7 @@ class _Name does Node {
 			)
 		}
 		if self.assert-Str( $parsed ) {
-			return self.bless( :name( $parsed.Str ) )
+			return self.new( :name( $parsed.Str ) )
 		}
 	}
 	method is-valid( Mu $parsed ) returns Bool {
@@ -4291,12 +4293,12 @@ class _Name does Node {
 }
 
 class _Nibble does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< termseq >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:termseq(
-						_TermSeq.new(
+						_TermSeq.populate(
 							$parsed.hash.<termseq>
 						)
 					)
@@ -4304,10 +4306,10 @@ class _Nibble does Node {
 			)
 		}
 		if $parsed.Str {
-			return self.bless( :name( $parsed.Str ) )
+			return self.new( :name( $parsed.Str ) )
 		}
 		if $parsed.Bool {
-			return self.bless( :name( $parsed.Bool ) )
+			return self.new( :name( $parsed.Bool ) )
 		}
 	}
 	method is-valid( Mu $parsed ) returns Bool {
@@ -4321,12 +4323,12 @@ class _Nibble does Node {
 }
 
 class _Nibbler does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< termseq >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:termseq(
-						_TermSeq.new(
+						_TermSeq.populate(
 							$parsed.hash.<termseq>
 						)
 					)
@@ -4345,7 +4347,7 @@ class _Nibbler does Node {
 class _NormSpace does Node does IsString { }
 
 class _Noun does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if $parsed.list {
 			my @child;
 			for $parsed.list {
@@ -4353,7 +4355,7 @@ class _Noun does Node {
 					[< sigmaybe sigfinal
 					   quantifier atom >] ) {
 					@child.push(
-						_SigMaybe_SigFinal_Quantifier_Atom.new(
+						_SigMaybe_SigFinal_Quantifier_Atom.populate(
 							$_
 						)
 					);
@@ -4363,7 +4365,7 @@ class _Noun does Node {
 					[< sigfinal quantifier
 					   separator atom >] ) {
 					@child.push(
-						_SigFinal_Quantifier_Separator_Atom.new(
+						_SigFinal_Quantifier_Separator_Atom.populate(
 							$_
 						)
 					);
@@ -4372,7 +4374,7 @@ class _Noun does Node {
 				if self.assert-hash-keys( $_,
 					[< atom sigfinal quantifier >] ) {
 					@child.push(
-						_Atom_SigFinal_Quantifier.new(
+						_Atom_SigFinal_Quantifier.populate(
 							$_
 						)
 					);
@@ -4381,7 +4383,7 @@ class _Noun does Node {
 				if self.assert-hash-keys( $_, [< atom >],
 							      [< sigfinal >] ) {
 					@child.push(
-						_Atom_SigFinal.new(
+						_Atom_SigFinal.populate(
 							$_
 						)
 					);
@@ -4389,7 +4391,7 @@ class _Noun does Node {
 				}
 				die self.new-term
 			}
-			return self.bless(
+			return self.new(
 				:child( @child )
 			)
 		}
@@ -4425,12 +4427,12 @@ class _Noun does Node {
 }
 
 class _Number does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< numish >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:numish(
-						_Numish.new(
+						_Numish.populate(
 							$parsed.hash.<numish>
 						)
 					)
@@ -4447,12 +4449,12 @@ class _Number does Node {
 }
 
 class _Numish does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< integer >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:integer(
-						_Integer.new(
+						_Integer.populate(
 							$parsed.hash.<integer>
 						)
 					)
@@ -4460,10 +4462,10 @@ class _Numish does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< rad_number >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:rad_number(
-						_RadNumber.new(
+						_RadNumber.populate(
 							$parsed.hash.<rad_number>
 						)
 					)
@@ -4471,10 +4473,10 @@ class _Numish does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< dec_number >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:dec_number(
-						_DecNumber.new(
+						_DecNumber.populate(
 							$parsed.hash.<dec_number>
 						)
 					)
@@ -4482,7 +4484,7 @@ class _Numish does Node {
 			)
 		}
 		if self.assert-Num( $parsed ) {
-			return self.bless( :name( $parsed.Num ) )
+			return self.new( :name( $parsed.Num ) )
 		}
 	}
 	method is-valid( Mu $parsed ) returns Bool {
@@ -4499,13 +4501,13 @@ class _Numish does Node {
 }
 
 class _OctInt does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if $parsed.Str and
 		   $parsed.Str eq '0' {
-			return self.bless( :name( $parsed.Str ) )
+			return self.new( :name( $parsed.Str ) )
 		}
 		if self.assert-Int( $parsed ) {
-			return self.bless( :name( $parsed.Int ) )
+			return self.new( :name( $parsed.Int ) )
 		}
 	}
 	method is-valid( Mu $parsed ) returns Bool {
@@ -4517,7 +4519,7 @@ class _OctInt does Node {
 }
 
 class _O does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		# XXX There has to be a better way to handle this NoMatch case
 		CATCH { when X::Multi::NoMatch { } }
 		if $parsed ~~ Hash {
@@ -4525,7 +4527,7 @@ class _O does Node {
 			   $parsed.<fiddly> and
 			   $parsed.<dba> and
 			   $parsed.<assoc> {
-				return self.bless(
+				return self.new(
 					:content(
 						:prec( $parsed.<prec> ),
 						:fiddly( $parsed.<fiddly> ),
@@ -4537,7 +4539,7 @@ class _O does Node {
 			if $parsed.<prec> and
 			   $parsed.<dba> and
 			   $parsed.<assoc> {
-				return self.bless(
+				return self.new(
 					:content(
 						:prec( $parsed.<prec> ),
 						:dba( $parsed.<dba> ),
@@ -4571,18 +4573,18 @@ warn "Bypassing _O possibly";
 }
 
 class _Op does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed,
 				     [< infix_prefix_meta_operator OPER >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:infix_prefix_meta_operator(
-						_InfixPrefixMetaOperator.new(
+						_InfixPrefixMetaOperator.populate(
 							$parsed.hash.<infix_prefix_meta_operator>
 						)
 					),
 					:OPER(
-						_OPER.new(
+						_OPER.populate(
 							$parsed.hash.<OPER>
 						)
 					)
@@ -4590,15 +4592,15 @@ class _Op does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< infix OPER >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:infix(
-						_Infix.new(
+						_Infix.populate(
 							$parsed.hash.<infix>
 						)
 					),
 					:OPER(
-						_OPER.new(
+						_OPER.populate(
 							$parsed.hash.<OPER>
 						)
 					)
@@ -4620,22 +4622,22 @@ class _Op does Node {
 }
 
 class _OPER does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< sym dottyop O >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:sym(
-						_Sym.new(
+						_Sym.populate(
 							$parsed.hash.<sym>
 						)
 					),
 					:dottyop(
-						_DottyOp.new(
+						_DottyOp.populate(
 							$parsed.hash.<dottyop>
 						)
 					),
 					:O(
-						_O.new(
+						_O.populate(
 							$parsed.hash.<O>
 						)
 					)
@@ -4645,20 +4647,20 @@ class _OPER does Node {
 		if self.assert-hash-keys(
 			$parsed,
 			[< sym infixish O >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:sym(
-						_Sym.new(
+						_Sym.populate(
 							$parsed.hash.<sym>
 						)
 					),
 					:infixish(
-						_Infixish.new(
+						_Infixish.populate(
 							$parsed.hash.<infixish>
 						)
 					),
 					:O(
-						_O.new(
+						_O.populate(
 							$parsed.hash.<O>
 						)
 					)
@@ -4666,15 +4668,15 @@ class _OPER does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< dig O >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:dig(
-						_Dig.new(
+						_Dig.populate(
 							$parsed.hash.<dig>
 						)
 					),
 					:O(
-						_O.new(
+						_O.populate(
 							$parsed.hash.<O>
 						)
 					)
@@ -4682,15 +4684,15 @@ class _OPER does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< sym O >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:sym(
-						_Sym.new(
+						_Sym.populate(
 							$parsed.hash.<sym>
 						)
 					),
 					:O(
-						_O.new(
+						_O.populate(
 							$parsed.hash.<O>
 						)
 					)
@@ -4698,15 +4700,15 @@ class _OPER does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< EXPR O >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:EXPR(
-						_EXPR.new(
+						_EXPR.populate(
 							$parsed.hash.<EXPR>
 						)
 					),
 					:O(
-						_O.new(
+						_O.populate(
 							$parsed.hash.<O>
 						)
 					)
@@ -4714,14 +4716,14 @@ class _OPER does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< semilist O >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:semilist(
-						_SemiList.new(
+						_SemiList.populate(
 							$parsed.hash.<semilist>)
 					),
 					:O(
-						_O.new(
+						_O.populate(
 							$parsed.hash.<O>
 						)
 					)
@@ -4729,14 +4731,14 @@ class _OPER does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< nibble O >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:nibble(
-						_Nibble.new(
+						_Nibble.populate(
 							$parsed.hash.<nibble>)
 					),
 					:O(
-						_O.new(
+						_O.populate(
 							$parsed.hash.<O>
 						)
 					)
@@ -4744,15 +4746,15 @@ class _OPER does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< arglist O >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:arglist(
-						_ArgList.new(
+						_ArgList.populate(
 							$parsed.hash.<arglist>
 						)
 					),
 					:O(
-						_O.new(
+						_O.populate(
 							$parsed.hash.<O>
 						)
 					)
@@ -4760,15 +4762,15 @@ class _OPER does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< dig O >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:dig(
-						_Dig.new(
+						_Dig.populate(
 							$parsed.hash.<dig>
 						)
 					),
 					:O(
-						_O.new(
+						_O.populate(
 							$parsed.hash.<O>
 						)
 					)
@@ -4776,10 +4778,10 @@ class _OPER does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< O >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:O(
-						_O.new(
+						_O.populate(
 							$parsed.hash.<O>
 						)
 					)
@@ -4823,17 +4825,17 @@ class _OPER does Node {
 }
 
 class _PackageDeclarator does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< sym package_def >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:sym(
-						_Sym.new(
+						_Sym.populate(
 							$parsed.hash.<sym>
 						)
 					),
 					:package_def(
-						_PackageDef.new(
+						_PackageDef.populate(
 							$parsed.hash.<package_def>
 						)
 					)
@@ -4852,18 +4854,18 @@ class _PackageDeclarator does Node {
 }
 
 class _PackageDef does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< blockoid longname >],
 					      [< trait >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:blockoid(
-						_Blockoid.new(
+						_Blockoid.populate(
 							$parsed.hash.<blockoid>
 						)
 					),
 					:longname(
-						_LongName.new(
+						_LongName.populate(
 							$parsed.hash.<longname>
 						)
 					),
@@ -4873,15 +4875,15 @@ class _PackageDef does Node {
 		}
 		if self.assert-hash-keys( $parsed, [< longname statementlist >],
 					      [< trait >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:longname(
-						_LongName.new(
+						_LongName.populate(
 							$parsed.hash.<longname>
 						)
 					),
 					:statementlist(
-						_StatementList.new(
+						_StatementList.populate(
 							$parsed.hash.<statementlist>
 						)
 					),
@@ -4891,10 +4893,10 @@ class _PackageDef does Node {
 		}
 		if self.assert-hash-keys( $parsed,
 				[< blockoid >], [< trait >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:blockoid(
-						_Blockoid.new(
+						_Blockoid.populate(
 							$parsed.hash.<blockoid>
 						)
 					),
@@ -4921,7 +4923,7 @@ class _PackageDef does Node {
 }
 
 class _Parameter does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if $parsed.list {
 			my @child;
 			for $parsed.list {
@@ -4930,7 +4932,7 @@ class _Parameter does Node {
 					[< default_value modifier trait
 					   post_constraint >] ) {
 					@child.push(
-						_ParamVar_TypeConstraint_Quant.new(
+						_ParamVar_TypeConstraint_Quant.populate(
 							$_
 						)
 					);
@@ -4942,7 +4944,7 @@ class _Parameter does Node {
 					   post_constraint trait
 					   type_constraint >] ) {
 					@child.push(
-						_ParamVar_Quant.new(
+						_ParamVar_Quant.populate(
 							$_
 						)
 					);
@@ -4954,7 +4956,7 @@ class _Parameter does Node {
 					   post_constraint trait
 					   type_constraint >] ) {
 					@child.push(
-						_NamedParam_Quant.new(
+						_NamedParam_Quant.populate(
 							$_
 						)
 					);
@@ -4966,7 +4968,7 @@ class _Parameter does Node {
 					   post_constraint trait
 					   type_constraint >] ) {
 					@child.push(
-						_DefTerm_Quant.new(
+						_DefTerm_Quant.populate(
 							$_
 						)
 					);
@@ -4978,7 +4980,7 @@ class _Parameter does Node {
 					   modifier post_constraint trait
 					   type_constraint >] ) {
 					@child.push(
-						_TypeConstraint.new(
+						_TypeConstraint.populate(
 							$_.hash.<type_constraint>
 						)
 					);
@@ -4990,7 +4992,7 @@ class _Parameter does Node {
 					   post_constraint trait
 					   type_constraint >] ) {
 					@child.push(
-						_TypeConstraint.new(
+						_TypeConstraint.populate(
 							$_.hash.<type_constraint>
 						)
 					);
@@ -4998,7 +5000,7 @@ class _Parameter does Node {
 				}
 				die self.new-term
 			}
-			return self.bless(
+			return self.new(
 				:child( @child )
 			)
 		}
@@ -5045,22 +5047,22 @@ class _Parameter does Node {
 }
 
 class _ParamVar does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< name twigil sigil >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:name(
-						_Name.new(
+						_Name.populate(
 							$parsed.hash.<name>
 						)
 					),
 					:twigil(
-						_Twigil.new(
+						_Twigil.populate(
 							$parsed.hash.<twigil>
 						)
 					),
 					:sigil(
-						_Sigil.new(
+						_Sigil.populate(
 							$parsed.hash.<sigil>
 						)
 					)
@@ -5068,15 +5070,15 @@ class _ParamVar does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< name sigil >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:name(
-						_Name.new(
+						_Name.populate(
 							$parsed.hash.<name>
 						)
 					),
 					:sigil(
-						_Sigil.new(
+						_Sigil.populate(
 							$parsed.hash.<sigil>
 						)
 					)
@@ -5084,10 +5086,10 @@ class _ParamVar does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< signature >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:signature(
-						_Signature.new(
+						_Signature.populate(
 							$parsed.hash.<signature>
 						)
 					)
@@ -5095,10 +5097,10 @@ class _ParamVar does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< sigil >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:sigil(
-						_Sigil.new(
+						_Sigil.populate(
 							$parsed.hash.<sigil>
 						)
 					)
@@ -5125,20 +5127,20 @@ class _ParamVar does Node {
 }
 
 class _ParamVar_Quant does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys(
 				$parsed,
 				[< param_var quant >],
 				[< default_value type_constraint modifier trait post_constraint >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:param_var(
-						_ParamVar.new(
+						_ParamVar.populate(
 							$parsed.hash.<param_var>
 						)
 					)
 					:quant(
-						_Quant.new(
+						_Quant.populate(
 							$parsed.hash.<quant>
 						)
 					)
@@ -5158,25 +5160,25 @@ class _ParamVar_Quant does Node {
 }
 
 class _ParamVar_TypeConstraint_Quant does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys(
 				$parsed,
 				[< param_var type_constraint quant >],
 				[< default_value modifier trait post_constraint >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:param_var(
-						_ParamVar.new(
+						_ParamVar.populate(
 							$parsed.hash.<param_var>
 						)
 					)
 					:type_constraint(
-						_TypeConstraint.new(
+						_TypeConstraint.populate(
 							$parsed.hash.<type_constraint>
 						)
 					),
 					:quant(
-						_Quant.new(
+						_Quant.populate(
 							$parsed.hash.<quant>
 						)
 					)
@@ -5198,23 +5200,23 @@ class _ParamVar_TypeConstraint_Quant does Node {
 }
 
 class _PBlock does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed,
 				     [< lambda blockoid signature >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:lambda(
-						_Lambda.new(
+						_Lambda.populate(
 							$parsed.hash.<lambda>
 						)
 					),
 					:blockoid(
-						_Blockoid.new(
+						_Blockoid.populate(
 							$parsed.hash.<blockoid>
 						)
 					),
 					:signature(
-						_Signature.new(
+						_Signature.populate(
 							$parsed.hash.<signature>
 						)
 					),
@@ -5222,10 +5224,10 @@ class _PBlock does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< blockoid >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:blockoid(
-						_Blockoid.new(
+						_Blockoid.populate(
 							$parsed.hash.<blockoid>
 						)
 					)
@@ -5247,17 +5249,17 @@ class _PBlock does Node {
 }
 
 class _PostCircumfix does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< nibble O >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:nibble(
-						_Nibble.new(
+						_Nibble.populate(
 							$parsed.hash.<nibble>
 						)
 					),
 					:O(
-						_O.new(
+						_O.populate(
 							$parsed.hash.<O>
 						)
 					)
@@ -5265,15 +5267,15 @@ class _PostCircumfix does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< semilist O >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:semilist(
-						_SemiList.new(
+						_SemiList.populate(
 							$parsed.hash.<semilist>
 						)
 					),
 					:O(
-						_O.new(
+						_O.populate(
 							$parsed.hash.<O>
 						)
 					)
@@ -5281,15 +5283,15 @@ class _PostCircumfix does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< arglist O >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:arglist(
-						_ArgList.new(
+						_ArgList.populate(
 							$parsed.hash.<arglist>
 						)
 					),
 					:O(
-						_O.new(
+						_O.populate(
 							$parsed.hash.<O>
 						)
 					)
@@ -5313,19 +5315,19 @@ class _PostCircumfix does Node {
 }
 
 class _PostCircumfix_OPER does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed,
 				     [< postcircumfix OPER >],
 				     [< postfix_prefix_meta_operator >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:postcircumfix(
-						_PostCircumfix.new(
+						_PostCircumfix.populate(
 							$parsed.hash.<postcircumfix>
 						)
 					),
 					:OPER(
-						_OPER.new(
+						_OPER.populate(
 							$parsed.hash.<OPER>
 						)
 					),
@@ -5346,17 +5348,17 @@ class _PostCircumfix_OPER does Node {
 }
 
 class _Postfix does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< dig O >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:dig(
-						_Dig.new(
+						_Dig.populate(
 							$parsed.hash.<dig>
 						)
 					),
 					:O(
-						_O.new(
+						_O.populate(
 							$parsed.hash.<O>
 						)
 					)
@@ -5364,15 +5366,15 @@ class _Postfix does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< sym O >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:sym(
-						_Sym.new(
+						_Sym.populate(
 							$parsed.hash.<sym>
 						)
 					),
 					:O(
-						_O.new(
+						_O.populate(
 							$parsed.hash.<O>
 						)
 					)
@@ -5394,19 +5396,19 @@ class _Postfix does Node {
 
 # XXX This is a compound type
 class _Postfix_OPER does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed,
 				     [< postfix OPER >],
 				     [< postfix_prefix_meta_operator >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:postfix(
-						_Postfix.new(
+						_Postfix.populate(
 							$parsed.hash.<postfix>
 						)
 					),
 					:OPER(
-						_OPER.new(
+						_OPER.populate(
 							$parsed.hash.<OPER>
 						)
 					),
@@ -5426,22 +5428,22 @@ class _Postfix_OPER does Node {
 }
 
 class _PostOp does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< sym postcircumfix O >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:sym(
-						_Sym.new(
+						_Sym.populate(
 							$parsed.hash.<sym>
 						)
 					),
 					:postcircumfix(
-						_PostCircumfix.new(
+						_PostCircumfix.populate(
 							$parsed.hash.<postcircumfix>
 						)
 					),
 					:O(
-						_O.new(
+						_O.populate(
 							$parsed.hash.<O>
 						)
 					)
@@ -5465,17 +5467,17 @@ class _PostOp does Node {
 }
 
 class _Prefix does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< sym O >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:sym(
-						_Sym.new(
+						_Sym.populate(
 							$parsed.hash.<sym>
 						)
 					),
 					:O(
-						_O.new(
+						_O.populate(
 							$parsed.hash.<O>
 						)
 					)
@@ -5494,12 +5496,12 @@ class _Prefix does Node {
 
 # XXX This is a compound type
 class _Prefix_OPER does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< sym min max backmod >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:sym(
-						_Sym.new(
+						_Sym.populate(
 							$parsed.hash.<sym>
 						)
 					),
@@ -5509,12 +5511,12 @@ class _Prefix_OPER does Node {
 						)
 					),
 					:max(
-						_Max.new(
+						_Max.populate(
 							$parsed.hash.<max>
 						)
 					),
 					:backmod(
-						_BackMod.new(
+						_BackMod.populate(
 							$parsed.hash.<backmod>
 						)
 					)
@@ -5524,15 +5526,15 @@ class _Prefix_OPER does Node {
 		if self.assert-hash-keys( $parsed,
 				     [< prefix OPER >],
 				     [< prefix_postfix_meta_operator >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:prefix(
-						_Prefix.new(
+						_Prefix.populate(
 							$parsed.hash.<prefix>
 						)
 					),
 					:OPER(
-						_OPER.new(
+						_OPER.populate(
 							$parsed.hash.<OPER>
 						)
 					),
@@ -5561,17 +5563,17 @@ class _Prefix_OPER does Node {
 class _Quant does Node does IsBoolean { }
 
 class _QuantifiedAtom does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< sigfinal atom >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:sigfinal(
-						_SigFinal.new(
+						_SigFinal.populate(
 							$parsed.hash.<sigfinal>
 						)
 					),
 					:atom(
-						_Atom.new(
+						_Atom.populate(
 							$parsed.hash.<atom>
 						)
 					)
@@ -5589,12 +5591,12 @@ class _QuantifiedAtom does Node {
 }
 
 class _Quantifier does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< sym min max backmod >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:sym(
-						_Sym.new(
+						_Sym.populate(
 							$parsed.hash.<sym>
 						)
 					),
@@ -5604,12 +5606,12 @@ class _Quantifier does Node {
 						)
 					),
 					:max(
-						_Max.new(
+						_Max.populate(
 							$parsed.hash.<max>
 						)
 					),
 					:backmod(
-						_BackMod.new(
+						_BackMod.populate(
 							$parsed.hash.<backmod>
 						)
 					)
@@ -5617,15 +5619,15 @@ class _Quantifier does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< sym backmod >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:sym(
-						_Sym.new(
+						_Sym.populate(
 							$parsed.hash.<sym>
 						)
 					),
 					:backmod(
-						_BackMod.new(
+						_BackMod.populate(
 							$parsed.hash.<backmod>
 						)
 					)
@@ -5648,17 +5650,17 @@ class _Quantifier does Node {
 }
 
 class _Quibble does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< babble nibble >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:babble(
-						_Babble.new(
+						_Babble.populate(
 							$parsed.hash.<babble>
 						)
 					),
 					:nibble(
-						_Nibble.new(
+						_Nibble.populate(
 							$parsed.hash.<nibble>
 						)
 					)
@@ -5676,23 +5678,23 @@ class _Quibble does Node {
 }
 
 class _Quote does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed,
 				[< sym quibble rx_adverbs >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:sym(
-						_Sym.new(
+						_Sym.populate(
 							$parsed.hash.<sym>
 						)
 					),
 					:quibble(
-						_Quibble.new(
+						_Quibble.populate(
 							$parsed.hash.<quibble>
 						)
 					),
 					:rx_adverbs(
-						_RxAdverbs.new(
+						_RxAdverbs.populate(
 							$parsed.hash.<rx_adverbs>
 						)
 					),
@@ -5701,20 +5703,20 @@ class _Quote does Node {
 		}
 		if self.assert-hash-keys( $parsed,
 				[< sym rx_adverbs sibble >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:sym(
-						_Sym.new(
+						_Sym.populate(
 							$parsed.hash.<sym>
 						)
 					),
 					:rx_adverbs(
-						_RxAdverbs.new(
+						_RxAdverbs.populate(
 							$parsed.hash.<rx_adverbs>
 						)
 					),
 					:sibble(
-						_Sibble.new(
+						_Sibble.populate(
 							$parsed.hash.<sibble>
 						)
 					)
@@ -5722,10 +5724,10 @@ class _Quote does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< nibble >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:nibble(
-						_Nibble.new(
+						_Nibble.populate(
 							$parsed.hash.<nibble>
 						)
 					)
@@ -5733,10 +5735,10 @@ class _Quote does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< quibble >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:quibble(
-						_Quibble.new(
+						_Quibble.populate(
 							$parsed.hash.<quibble>
 						)
 					)
@@ -5765,7 +5767,7 @@ class _Quote does Node {
 }
 
 class _QuotePair does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		CATCH { when X::Hash::Store::OddNumber { .resume } }
 		if $parsed.list {
 			my @child;
@@ -5773,7 +5775,7 @@ class _QuotePair does Node {
 				if self.assert-hash-keys( $_,
 					[< identifier >] ) {
 					@child.push(
-						_Identifier.new(
+						_Identifier.populate(
 							$_.hash.<identifier>
 						)
 					);
@@ -5781,26 +5783,26 @@ class _QuotePair does Node {
 				}
 				die self.new-term
 			}
-			return self.bless(
+			return self.new(
 				:child( @child )
 			)
 		}
 		if self.assert-hash-keys( $parsed,
 			[< circumfix bracket radix >], [< exp base >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:circumfix(
-						_Circumfix.new(
+						_Circumfix.populate(
 							$parsed.hash.<circumfix>
 						)
 					),
 					:bracket(
-						_Bracket.new(
+						_Bracket.populate(
 							$parsed.hash.<bracket>
 						)
 					),
 					:radix(
-						_Radix.new(
+						_Radix.populate(
 							$parsed.hash.<radix>
 						)
 					),
@@ -5810,10 +5812,10 @@ class _QuotePair does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< identifier >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:identifier(
-						_Identifier.new(
+						_Identifier.populate(
 							$parsed.hash.<identifier>
 						)
 					)
@@ -5848,23 +5850,23 @@ class _QuotePair does Node {
 class _Radix does Node does IsInteger { }
 
 class _RadNumber does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed,
 			[< circumfix bracket radix >], [< exp base >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:circumfix(
-						_Circumfix.new(
+						_Circumfix.populate(
 							$parsed.hash.<circumfix>
 						)
 					),
 					:bracket(
-						_Bracket.new(
+						_Bracket.populate(
 							$parsed.hash.<bracket>
 						)
 					),
 					:radix(
-						_Radix.new(
+						_Radix.populate(
 							$parsed.hash.<radix>
 						)
 					),
@@ -5875,15 +5877,15 @@ class _RadNumber does Node {
 		}
 		if self.assert-hash-keys( $parsed,
 				[< circumfix radix >], [< exp base >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:circumfix(
-						_Circumfix.new(
+						_Circumfix.populate(
 							$parsed.hash.<circumfix>
 						)
 					),
 					:radix(
-						_Radix.new(
+						_Radix.populate(
 							$parsed.hash.<radix>
 						)
 					),
@@ -5909,17 +5911,17 @@ class _RadNumber does Node {
 }
 
 class _RegexDeclarator does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< sym regex_def >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:sym(
-						_Sym.new(
+						_Sym.populate(
 							$parsed.hash.<sym>
 						)
 					),
 					:regex_def(
-						_RegexDef.new(
+						_RegexDef.populate(
 							$parsed.hash.<regex_def>
 						)
 					)
@@ -5937,18 +5939,18 @@ class _RegexDeclarator does Node {
 }
 
 class _RegexDef does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< deflongname nibble >],
 					      [< signature trait >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:deflongname(
-						_DefLongName.new(
+						_DefLongName.populate(
 							$parsed.hash.<deflongname>
 						)
 					),
 					:nibble(
-						_Nibble.new(
+						_Nibble.populate(
 							$parsed.hash.<nibble>
 						)
 					),
@@ -5970,13 +5972,13 @@ class _RegexDef does Node {
 }
 
 class _Right does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if $parsed {
 # XXX
-			return self.bless
+			return self.new
 		}
 		else {
-			return self.bless
+			return self.new
 		}
 	}
 	method is-valid( Mu $parsed ) returns Bool {
@@ -5998,7 +6000,7 @@ class Root does Node {
 			return self.bless(
 				:content(
 					:statementlist(
-						_StatementList.new(
+						_StatementList.populate(
 							$parsed.hash.<statementlist>
 						)
 					)
@@ -6015,17 +6017,17 @@ class Root does Node {
 }
 
 class _RoutineDeclarator does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< sym method_def >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:sym(
-						_Sym.new(
+						_Sym.populate(
 							$parsed.hash.<sym>
 						)
 					),
 					:method_def(
-						_MethodDef.new(
+						_MethodDef.populate(
 							$parsed.hash.<method_def>
 						)
 					)
@@ -6033,15 +6035,15 @@ class _RoutineDeclarator does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< sym routine_def >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:sym(
-						_Sym.new(
+						_Sym.populate(
 							$parsed.hash.<sym>
 						)
 					),
 					:routine_def(
-						_RoutineDef.new(
+						_RoutineDef.populate(
 							$parsed.hash.<routine_def>
 						)
 					)
@@ -6063,24 +6065,24 @@ class _RoutineDeclarator does Node {
 }
 
 class _RoutineDef does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed,
 				     [< blockoid deflongname multisig >],
 				     [< trait >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:blockoid(
-						_Blockoid.new(
+						_Blockoid.populate(
 							$parsed.hash.<blockoid>
 						)
 					),
 					:deflongname(
-						_DefLongName.new(
+						_DefLongName.populate(
 							$parsed.hash.<deflongname>
 						)
 					),
 					:multisig(
-						_MultiSig.new(
+						_MultiSig.populate(
 							$parsed.hash.<multisig>
 						)
 					),
@@ -6090,15 +6092,15 @@ class _RoutineDef does Node {
 		}
 		if self.assert-hash-keys( $parsed, [< blockoid deflongname >],
 					      [< trait >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:blockoid(
-						_Blockoid.new(
+						_Blockoid.populate(
 							$parsed.hash.<blockoid>
 						)
 					),
 					:deflongname(
-						_DefLongName.new(
+						_DefLongName.populate(
 							$parsed.hash.<deflongname>
 						)
 					),
@@ -6108,15 +6110,15 @@ class _RoutineDef does Node {
 		}
 		if self.assert-hash-keys( $parsed, [< blockoid multisig >],
 						   [< trait >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:blockoid(
-						_Blockoid.new(
+						_Blockoid.populate(
 							$parsed.hash.<blockoid>
 						)
 					),
 					:multisig(
-						_MultiSig.new(
+						_MultiSig.populate(
 							$parsed.hash.<multisig>
 						)
 					),
@@ -6126,10 +6128,10 @@ class _RoutineDef does Node {
 		}
 		if self.assert-hash-keys( $parsed, [< blockoid >],
 					      [< trait >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:blockoid(
-						_Blockoid.new(
+						_Blockoid.populate(
 							$parsed.hash.<blockoid>
 						)
 					),
@@ -6164,12 +6166,12 @@ class _RoutineDef does Node {
 }
 
 class _RxAdverbs does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< quotepair >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:quotepair(
-						_QuotePair.new(
+						_QuotePair.populate(
 							$parsed.hash.<quotepair>
 						)
 					)
@@ -6177,7 +6179,7 @@ class _RxAdverbs does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [], [< quotepair >] ) {
-			return self.bless
+			return self.new
 		}
 	}
 	method is-valid( Mu $parsed ) returns Bool {
@@ -6191,18 +6193,18 @@ class _RxAdverbs does Node {
 }
 
 class _Scoped does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< declarator DECL >],
 						   [< typename >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:declarator(
-						_Declarator.new(
+						_Declarator.populate(
 							$parsed.hash.<declarator>
 						)
 					),
 					:DECL(
-						_DECL.new(
+						_DECL.populate(
 							$parsed.hash.<DECL>
 						)
 					),
@@ -6212,20 +6214,20 @@ class _Scoped does Node {
 		}
 		if self.assert-hash-keys( $parsed,
 					[< multi_declarator DECL typename >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:multi_declarator(
-						_MultiDeclarator.new(
+						_MultiDeclarator.populate(
 							$parsed.hash.<multi_declarator>
 						)
 					),
 					:DECL(
-						_DECL.new(
+						_DECL.populate(
 							$parsed.hash.<DECL>
 						)
 					),
 					:typename(
-						_TypeName.new(
+						_TypeName.populate(
 							$parsed.hash.<typename>
 						)
 					)
@@ -6238,12 +6240,12 @@ class _Scoped does Node {
 			return self.bless(
 				:content(
 					:package_declarator(
-						_PackageDeclarator.new(
+						_PackageDeclarator.populate(
 							$parsed.hash.<package_declarator>
 						)
 					),
 					:DECL(
-						_DECL.new(
+						_DECL.populate(
 							$parsed.hash.<DECL>
 						)
 					),
@@ -6273,17 +6275,17 @@ class _Scoped does Node {
 }
 
 class _ScopeDeclarator does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< sym scoped >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:sym(
-						_Sym.new(
+						_Sym.populate(
 							$parsed.hash.<sym>
 						)
 					),
 					:scoped(
-						_Scoped.new(
+						_Scoped.populate(
 							$parsed.hash.<scoped>
 						)
 					)
@@ -6301,7 +6303,7 @@ class _ScopeDeclarator does Node {
 }
 
 class _SemiList does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		CATCH { when X::Hash::Store::OddNumber { } }
 		if $parsed.list {
 			my @child;
@@ -6309,7 +6311,7 @@ class _SemiList does Node {
 				if self.assert-hash-keys( $_,
 					[< statement >] ) {
 					@child.push(
-						_Statement.new(
+						_Statement.populate(
 							$_.hash.<statement>
 						)
 					);
@@ -6317,12 +6319,12 @@ class _SemiList does Node {
 				}
 				die self.new-term
 			}
-			return self.bless(
+			return self.new(
 				:child( @child )
 			)
 		}
 		if self.assert-hash-keys( $parsed, [], [< statement >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:statement()
 				)
@@ -6346,17 +6348,17 @@ class _SemiList does Node {
 }
 
 class _Separator does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< septype quantified_atom >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:septype(
-						_SepType.new(
+						_SepType.populate(
 							$parsed.hash.<septype>
 						)
 					),
 					:quantified_atom(
-						_QuantifiedAtom.new(
+						_QuantifiedAtom.populate(
 							$parsed.hash.<quantified_atom>
 						)
 					)
@@ -6379,17 +6381,17 @@ class _SepType does Node does IsString { }
 class _Shape does Node does IsString { }
 
 class _Sibble does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< right babble left >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:right(
-						_Right.new(
+						_Right.populate(
 							$parsed.hash.<right>
 						)
 					)
 					:babble(
-						_Babble.new(
+						_Babble.populate(
 							$parsed.hash.<babble>
 						)
 					)
@@ -6414,12 +6416,12 @@ class _Sibble does Node {
 }
 
 class _SigFinal does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< normspace >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:normspace(
-						_NormSpace.new(
+						_NormSpace.populate(
 							$parsed.hash.<normspace>
 						)
 					)
@@ -6436,28 +6438,28 @@ class _SigFinal does Node {
 }
 
 class _SigFinal_Quantifier_Separator_Atom does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed,
 				[< sigfinal quantifier separator atom >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:sigfinal(
-						_SigFinal.new(
+						_SigFinal.populate(
 							$parsed.hash.<sigfinal>
 						)
 					),
 					:quantifier(
-						_Quantifier.new(
+						_Quantifier.populate(
 							$parsed.hash.<quantifier>
 						)
 					),
 					:separator(
-						_Separator.new(
+						_Separator.populate(
 							$parsed.hash.<separator>
 						)
 					),
 					:atom(
-						_Atom.new(
+						_Atom.populate(
 							$parsed.hash.<atom>
 						)
 					)
@@ -6478,28 +6480,28 @@ class _SigFinal_Quantifier_Separator_Atom does Node {
 }
 
 class _SigMaybe_SigFinal_Quantifier_Atom does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed,
 				[< sigmaybe sigfinal quantifier atom >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:sigmaybe(
-						_SigMaybe.new(
+						_SigMaybe.populate(
 							$parsed.hash.<sigmaybe>
 						)
 					),
 					:sigfinal(
-						_SigFinal.new(
+						_SigFinal.populate(
 							$parsed.hash.<sigfinal>
 						)
 					),
 					:quantifier(
-						_Quantifier.new(
+						_Quantifier.populate(
 							$parsed.hash.<quantifier>
 						)
 					),
 					:atom(
-						_Atom.new(
+						_Atom.populate(
 							$parsed.hash.<atom>
 						)
 					)
@@ -6522,19 +6524,19 @@ class _SigMaybe_SigFinal_Quantifier_Atom does Node {
 class _Sigil does Node does IsString { }
 
 class _SigMaybe does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed,
 				[< parameter typename >],
 				[< param_sep >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:parameter(
-						_Parameter.new(
+						_Parameter.populate(
 							$parsed.hash.<parameter>
 						)
 					),
 					:typename(
-						_TypeName.new(
+						_TypeName.populate(
 							$parsed.hash.<typename>
 						)
 					),
@@ -6543,7 +6545,7 @@ class _SigMaybe does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [], [< param_sep parameter >] ) {
-			return self.bless(
+			return self.new(
 				:name( $parsed.Bool ),
 				:content(
 					:param_sep(),
@@ -6566,19 +6568,19 @@ class _SigMaybe does Node {
 }
 
 class _Signature does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed,
 				[< parameter typename >],
 				[< param_sep >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:parameter(
-						_Parameter.new(
+						_Parameter.populate(
 							$parsed.hash.<parameter>
 						)
 					),
 					:typename(
-						_TypeName.new(
+						_TypeName.populate(
 							$parsed.hash.<typename>
 						)
 					),
@@ -6589,10 +6591,10 @@ class _Signature does Node {
 		if self.assert-hash-keys( $parsed,
 				[< parameter >],
 				[< param_sep >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:parameter(
-						_Parameter.new(
+						_Parameter.populate(
 							$parsed.hash.<parameter>
 						)
 					),
@@ -6601,7 +6603,7 @@ class _Signature does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [], [< param_sep parameter >] ) {
-			return self.bless(
+			return self.new(
 				:name( $parsed.Bool ),
 				:content(
 					:param_sep(),
@@ -6628,17 +6630,17 @@ class _Signature does Node {
 }
 
 class _Sign_CharSpec does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< sign charspec >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:sign(
-						_Sign.new(
+						_Sign.populate(
 							$parsed.hash.<sign>
 						)
 					),
 					:charspec(
-						_CharSpec.new(
+						_CharSpec.populate(
 							$parsed.hash.<charspec>
 						)
 					)
@@ -6656,15 +6658,15 @@ class _Sign_CharSpec does Node {
 }
 
 class _Sign does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		# Note for later - don't replace with assert-Str
 		if $parsed.Str and
 			( $parsed.Str eq '-' or
 			  $parsed.Str eq '+' ) {
-			return self.bless( :name( $parsed.Str ) )
+			return self.new( :name( $parsed.Str ) )
 		}
 		if self.assert-Bool( $parsed ) {
-			return self.bless( :name( $parsed.Bool ) )
+			return self.new( :name( $parsed.Bool ) )
 		}
 	}
 	method is-valid( Mu $parsed ) returns Bool {
@@ -6677,12 +6679,12 @@ class _Sign does Node {
 }
 
 class _SMExpr does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< EXPR >] ) {
 			return self.bless(
 				:content(
 					:EXPR(
-						_EXPR.new(
+						_EXPR.populate(
 							$parsed.hash.<EXPR>
 						)
 					)
@@ -6701,32 +6703,32 @@ class _SMExpr does Node {
 class _Specials does Node does IsBoolean { }
 
 class _StatementControl does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< block sym e1 e2 e3 >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:block(
-						_Block.new(
+						_Block.populate(
 							$parsed.hash.<block>
 						)
 					),
 					:sym(
-						_Sym.new(
+						_Sym.populate(
 							$parsed.hash.<sym>
 						)
 					),
 					:e1(
-						_E1.new(
+						_E1.populate(
 							$parsed.hash.<e1>
 						)
 					),
 					:e2(
-						_E2.new(
+						_E2.populate(
 							$parsed.hash.<e2>
 						)
 					),
 					:e3(
-						_E3.new(
+						_E3.populate(
 							$parsed.hash.<e3>
 						)
 					)
@@ -6734,25 +6736,25 @@ class _StatementControl does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< pblock sym EXPR wu >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:pblock(
-						_PBlock.new(
+						_PBlock.populate(
 							$parsed.hash.<pblock>
 						)
 					),
 					:sym(
-						_Sym.new(
+						_Sym.populate(
 							$parsed.hash.<sym>
 						)
 					),
 					:EXPR(
-						_EXPR.new(
+						_EXPR.populate(
 							$parsed.hash.<EXPR>
 						)
 					),
 					:wu(
-						_Wu.new(
+						_Wu.populate(
 							$parsed.hash.<wu>
 						)
 					)
@@ -6760,20 +6762,20 @@ class _StatementControl does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< doc sym module_name >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:doc(
-						_Doc.new(
+						_Doc.populate(
 							$parsed.hash.<doc>
 						)
 					),
 					:sym(
-						_Sym.new(
+						_Sym.populate(
 							$parsed.hash.<sym>
 						)
 					),
 					:module_name(
-						_ModuleName.new(
+						_ModuleName.populate(
 							$parsed.hash.<module_name>
 						)
 					)
@@ -6781,20 +6783,20 @@ class _StatementControl does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< doc sym version >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:doc(
-						_Doc.new(
+						_Doc.populate(
 							$parsed.hash.<doc>
 						)
 					),
 					:sym(
-						_Sym.new(
+						_Sym.populate(
 							$parsed.hash.<sym>
 						)
 					),
 					:version(
-						_Version.new(
+						_Version.populate(
 							$parsed.hash.<version>
 						)
 					)
@@ -6802,20 +6804,20 @@ class _StatementControl does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< xblock else sym >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:xblock(
-						_XBlock.new(
+						_XBlock.populate(
 							$parsed.hash.<xblock>
 						)
 					),
 					:else(
-						_Else.new(
+						_Else.populate(
 							$parsed.hash.<else>
 						)
 					),
 					:sym(
-						_Sym.new(
+						_Sym.populate(
 							$parsed.hash.<sym>
 						)
 					)
@@ -6823,20 +6825,20 @@ class _StatementControl does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< xblock sym wu >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:xblock(
-						_XBlock.new(
+						_XBlock.populate(
 							$parsed.hash.<xblock>
 						)
 					),
 					:sym(
-						_Sym.new(
+						_Sym.populate(
 							$parsed.hash.<sym>
 						)
 					),
 					:wu(
-						_Wu.new(
+						_Wu.populate(
 							$parsed.hash.<wu>
 						)
 					)
@@ -6844,15 +6846,15 @@ class _StatementControl does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< xblock sym >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:xblock(
-						_XBlock.new(
+						_XBlock.populate(
 							$parsed.hash.<xblock>
 						)
 					),
 					:sym(
-						_Sym.new(
+						_Sym.populate(
 							$parsed.hash.<sym>
 						)
 					)
@@ -6860,15 +6862,15 @@ class _StatementControl does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< block sym >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:block(
-						_Block.new(
+						_Block.populate(
 							$parsed.hash.<block>
 						)
 					),
 					:sym(
-						_Sym.new(
+						_Sym.populate(
 							$parsed.hash.<sym>
 						)
 					)
@@ -6922,7 +6924,7 @@ class _StatementControl does Node {
 }
 
 class _Statement does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if $parsed.list {
 			my @child;
 			for $parsed.list {
@@ -6930,7 +6932,7 @@ class _Statement does Node {
 						[< statement_mod_loop
 						   EXPR >] ) {
 					@child.push(
-						_StatementModLoop_EXPR.new( $_ )
+						_StatementModLoop_EXPR.populate( $_ )
 					);
 					next
 				}
@@ -6938,7 +6940,7 @@ class _Statement does Node {
 						[< statement_mod_cond
 						    EXPR >] ) {
 					@child.push(
-						_StatementModCond_EXPR.new(
+						_StatementModCond_EXPR.populate(
 							$_
 						)
 					);
@@ -6946,7 +6948,7 @@ class _Statement does Node {
 				}
 				if self.assert-hash-keys( $_, [< EXPR >] ) {
 					@child.push(
-						_EXPR.new(
+						_EXPR.populate(
 							$_.hash.<EXPR>
 						)
 					);
@@ -6955,7 +6957,7 @@ class _Statement does Node {
 				if self.assert-hash-keys( $_,
 						[< statement_control >] ) {
 					@child.push(
-						_StatementControl.new(
+						_StatementControl.populate(
 							$_.hash.<statement_control>
 						)
 					);
@@ -6963,15 +6965,15 @@ class _Statement does Node {
 				}
 				die self.new-term
 			}
-			return self.bless(
+			return self.new(
 				:child( @child )
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< statement_control >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:statement_control(
-						_StatementControl.new(
+						_StatementControl.populate(
 							$parsed.hash.<statement_control>
 						)
 					)
@@ -6979,10 +6981,10 @@ class _Statement does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< EXPR >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:EXPR(
-						_EXPR.new(
+						_EXPR.populate(
 							$parsed.hash.<EXPR>
 						)
 					)
@@ -7021,12 +7023,12 @@ class _Statement does Node {
 }
 
 class _StatementList does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< statement >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:statement(
-						_Statement.new(
+						_Statement.populate(
 							$parsed.hash.<statement>
 						)
 					)
@@ -7034,7 +7036,7 @@ class _StatementList does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [], [< statement >] ) {
-			return self.bless
+			return self.new
 		}
 	}
 	method is-valid( Mu $parsed ) returns Bool {
@@ -7047,17 +7049,17 @@ class _StatementList does Node {
 }
 
 class _StatementModCond does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< sym modifier_expr >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:sym(
-						_Sym.new(
+						_Sym.populate(
 							$parsed.hash.<sym>
 						)
 					),
 					:modifier_expr(
-						_ModifierExpr.new(
+						_ModifierExpr.populate(
 							$parsed.hash.<modifier_expr>
 						)
 					)
@@ -7076,17 +7078,17 @@ class _StatementModCond does Node {
 
 # XXX This is a compound type
 class _StatementModCond_EXPR does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< statement_mod_cond EXPR >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:statement_mod_cond(
-						_StatementModCond.new(
+						_StatementModCond.populate(
 							$parsed.hash.<statement_mod_cond>
 						)
 					),
 					:EXPR(
-						_EXPR.new(
+						_EXPR.populate(
 							$parsed.hash.<EXPR>
 						)
 					)
@@ -7104,17 +7106,17 @@ class _StatementModCond_EXPR does Node {
 }
 
 class _StatementModLoop does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< sym smexpr >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:sym(
-						_Sym.new(
+						_Sym.populate(
 							$parsed.hash.<sym>
 						)
 					),
 					:smexpr(
-						_SMExpr.new(
+						_SMExpr.populate(
 							$parsed.hash.<smexpr>
 						)
 					)
@@ -7133,17 +7135,17 @@ class _StatementModLoop does Node {
 
 # XXX This is a compound type
 class _StatementModLoop_EXPR does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< statement_mod_loop EXPR >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:statement_mod_loop(
-						_StatementModLoop.new(
+						_StatementModLoop.populate(
 							$parsed.hash.<statement_mod_loop>
 						)
 					),
 					:EXPR(
-						_EXPR.new(
+						_EXPR.populate(
 							$parsed.hash.<EXPR>
 						)
 					)
@@ -7162,17 +7164,17 @@ class _StatementModLoop_EXPR does Node {
 }
 
 class _StatementPrefix does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< sym blorst >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:sym(
-						_Sym.new(
+						_Sym.populate(
 							$parsed.hash.<sym>
 						)
 					),
 					:blorst(
-						_Blorst.new(
+						_Blorst.populate(
 							$parsed.hash.<blorst>
 						)
 					)
@@ -7190,12 +7192,12 @@ class _StatementPrefix does Node {
 }
 
 class _SubShortName does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< desigilname >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:desigilname(
-						_DeSigilName.new(
+						_DeSigilName.populate(
 							$parsed.hash.<desigilname>
 						)
 					)
@@ -7213,7 +7215,7 @@ class _SubShortName does Node {
 }
 
 class _Sym does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		CATCH {
 			when X::Hash::Store::OddNumber { }
 			when X::Multi::NoMatch { }
@@ -7229,21 +7231,21 @@ class _Sym does Node {
 				}
 				die self.new-term
 			}
-			return self.bless(
+			return self.new(
 				:child( @child )
 			)
 		}
 		else {
 			if $parsed.Bool and		# XXX Huh?
 			   $parsed.Str eq '+' {
-				return self.bless( :name( $parsed.Str ) )
+				return self.new( :name( $parsed.Str ) )
 			}
 			if $parsed.Bool and		# XXX Huh?
 			   $parsed.Str eq '' {
-				return self.bless( :name( $parsed.Str ) )
+				return self.new( :name( $parsed.Str ) )
 			}
 			if self.assert-Str( $parsed ) {
-				return self.bless( :name( $parsed.Str ) )
+				return self.new( :name( $parsed.Str ) )
 			}
 		}
 	}
@@ -7269,12 +7271,12 @@ class _Sym does Node {
 }
 
 class _Term does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< methodop >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:methodop(
-						_MethodOp.new(
+						_MethodOp.populate(
 							$parsed.hash.<methodop>
 						)
 					)
@@ -7291,13 +7293,13 @@ class _Term does Node {
 }
 
 class _TermAlt does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if $parsed.list {
 			my @child;
 			for $parsed.list {
 				if self.assert-hash-keys( $_, [< termconj >] ) {
 					@child.push(
-						_TermConj.new(
+						_TermConj.populate(
 							$_.hash.<termconj>
 						)
 					);
@@ -7305,10 +7307,11 @@ class _TermAlt does Node {
 				}
 				die self.new-term
 			}
-			return self.bless(
+			return self.new(
 				:child( @child )
 			)
 		}
+		die self.new-term
 	}
 	method is-valid( Mu $parsed ) returns Bool {
 		self.trace;
@@ -7325,12 +7328,12 @@ class _TermAlt does Node {
 }
 
 class _TermAltSeq does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< termconjseq >] ) {
 			return self.bless(
 				:content(
 					:termconjseq(
-						_TermConjSeq.new(
+						_TermConjSeq.populate(
 							$parsed.hash.<termconjseq>
 						)
 					)
@@ -7347,13 +7350,13 @@ class _TermAltSeq does Node {
 }
 
 class _TermConj does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if $parsed.list {
 			my @child;
 			for $parsed.list {
 				if self.assert-hash-keys( $_, [< termish >] ) {
 					@child.push(
-						_Termish.new(
+						_Termish.populate(
 							$_.hash.<termish>
 						)
 					);
@@ -7381,13 +7384,13 @@ class _TermConj does Node {
 }
 
 class _TermConjSeq does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if $parsed.list {
 			my @child;
 			for $parsed.list {
 				if self.assert-hash-keys( $_, [< termalt >] ) {
 					@child.push(
-						_TermAlt.new(
+						_TermAlt.populate(
 							$_.hash.<termalt>
 						)
 					);
@@ -7403,7 +7406,7 @@ class _TermConjSeq does Node {
 			return self.bless(
 				:content(
 					:termalt(
-						_TermAlt.new(
+						_TermAlt.populate(
 							$parsed.hash.<termalt>
 						)
 					)
@@ -7428,17 +7431,17 @@ class _TermConjSeq does Node {
 }
 
 class _TermInit does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< sym EXPR >] ) {
 			return self.bless(
 				:content(
 					:sym(
-						_Sym.new(
+						_Sym.populate(
 							$parsed.hash.<sym>
 						)
 					),
 					:EXPR(
-						_EXPR.new(
+						_EXPR.populate(
 							$parsed.hash.<EXPR>
 						)
 					)
@@ -7456,13 +7459,13 @@ class _TermInit does Node {
 }
 
 class _Termish does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if $parsed.list {
 			my @child;
 			for $parsed.list {
 				if self.assert-hash-keys( $_, [< noun >] ) {
 					@child.push(
-						_Noun.new(
+						_Noun.populate(
 							$_.hash.<noun>
 						)
 					);
@@ -7478,7 +7481,7 @@ class _Termish does Node {
 			return self.bless(
 				:content(
 					:noun(
-						_Noun.new(
+						_Noun.populate(
 							$parsed.hash.<noun>
 						)
 					)
@@ -7503,13 +7506,13 @@ class _Termish does Node {
 }
 
 class _Triangle does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if $parsed {
 # XXX
-			return self.bless
+			return self.new
 		}
 		else {
-			return self.bless
+			return self.new
 		}
 	}
 	method is-valid( Mu $parsed ) returns Bool {
@@ -7526,12 +7529,12 @@ class _Triangle does Node {
 }
 
 class _TermSeq does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< termaltseq >] ) {
 			return self.bless(
 				:content(
 					:termaltseq(
-						_TermAltSeq.new(
+						_TermAltSeq.populate(
 							$parsed.hash.<termaltseq>
 						)
 					)
@@ -7548,12 +7551,12 @@ class _TermSeq does Node {
 }
 
 class _Twigil does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< sym >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:sym(
-						_Sym.new(
+						_Sym.populate(
 							$parsed.hash.<sym>
 						)
 					)
@@ -7570,7 +7573,7 @@ class _Twigil does Node {
 }
 
 class _TypeConstraint does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		CATCH {
 			when X::Hash::Store::OddNumber { .resume }
 		}
@@ -7579,7 +7582,7 @@ class _TypeConstraint does Node {
 			for $parsed.list {
 				if self.assert-hash-keys( $_, [< typename >] ) {
 					@child.push(
-						_TypeName.new(
+						_TypeName.populate(
 							$_.hash.<typename>
 						)
 					);
@@ -7587,7 +7590,7 @@ class _TypeConstraint does Node {
 				}
 				if self.assert-hash-keys( $_, [< value >] ) {
 					@child.push(
-						_Value.new(
+						_Value.populate(
 							$_.hash.<value>
 						)
 					);
@@ -7595,15 +7598,15 @@ class _TypeConstraint does Node {
 				}
 				die self.new-term
 			}
-			return self.bless(
+			return self.new(
 				:child( @child )
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< typename >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:typename(
-						_TypeName.new(
+						_TypeName.populate(
 							$parsed.hash.<typename>
 						)
 					)
@@ -7635,15 +7638,15 @@ class _TypeConstraint does Node {
 }
 
 class _TypeDeclarator does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		CATCH { when X::Multi::NoMatch { } }
 		if self.assert-hash-keys( $parsed,
 				[< sym initializer variable >],
 				[< trait >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:sym(
-						_Sym.new(
+						_Sym.populate(
 							$parsed.hash.<sym>
 						)
 					),
@@ -7653,7 +7656,7 @@ class _TypeDeclarator does Node {
 						)
 					),
 					:variable(
-						_Variable.new(
+						_Variable.populate(
 							$parsed.hash.<variable>
 						)
 					),
@@ -7663,10 +7666,10 @@ class _TypeDeclarator does Node {
 		}
 		if self.assert-hash-keys( $parsed,
 				[< sym initializer defterm >], [< trait >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:sym(
-						_Sym.new(
+						_Sym.populate(
 							$parsed.hash.<sym>
 						)
 					),
@@ -7676,7 +7679,7 @@ class _TypeDeclarator does Node {
 						)
 					),
 					:defterm(
-						_DefTerm.new(
+						_DefTerm.populate(
 							$parsed.hash.<defterm>
 						)
 					),
@@ -7685,10 +7688,10 @@ class _TypeDeclarator does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< sym initializer >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:sym(
-						_Sym.new(
+						_Sym.populate(
 							$parsed.hash.<sym>
 						)
 					),
@@ -7723,7 +7726,7 @@ class _TypeDeclarator does Node {
 }
 
 class _TypeName does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if $parsed.list {
 			my @child;
 			for $parsed.list {
@@ -7731,7 +7734,7 @@ class _TypeName does Node {
 					[< longname colonpairs >],
 					[< colonpair >] ) {
 					@child.push(
-						_LongName_ColonPairs.new(
+						_LongName_ColonPairs.populate(
 							$_
 						)
 					);
@@ -7741,7 +7744,7 @@ class _TypeName does Node {
 					[< longname >],
 					[< colonpair >] ) {
 					@child.push(
-						_LongName_ColonPair.new(
+						_LongName_ColonPair.populate(
 							$_
 						)
 					);
@@ -7749,16 +7752,16 @@ class _TypeName does Node {
 				}
 				die self.new-term
 			}
-			return self.bless(
+			return self.new(
 				:child( @child )
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< longname >],
 						   [< colonpair >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:longname(
-						_LongName.new(
+						_LongName.populate(
 							$parsed.hash.<longname>
 						)
 					)
@@ -7790,18 +7793,18 @@ class _TypeName does Node {
 }
 
 class _Val does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< prefix OPER >],
 				[< prefix_postfix_meta_operator >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:prefix(
-						_Prefix.new(
+						_Prefix.populate(
 							$parsed.hash.<prefix>
 						)
 					),
 					:OPER(
-						_OPER.new(
+						_OPER.populate(
 							$parsed.hash.<OPER>
 						)
 					),
@@ -7810,10 +7813,10 @@ class _Val does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< value >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:value(
-						_Value.new(
+						_Value.populate(
 							$parsed.hash.<value>
 						)
 					)
@@ -7835,12 +7838,12 @@ class _Val does Node {
 }
 
 class _Value does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< number >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:number(
-						_Number.new(
+						_Number.populate(
 							$parsed.hash.<number>
 						)
 					)
@@ -7848,10 +7851,10 @@ class _Value does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< quote >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:quote(
-						_Quote.new(
+						_Quote.populate(
 							$parsed.hash.<quote>
 						)
 					)
@@ -7870,13 +7873,13 @@ class _Value does Node {
 }
 
 class _VALUE does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if $parsed.Str and
 		   $parsed.Str eq '0' {
-			return self.bless( :name( $parsed.Str ) )
+			return self.new( :name( $parsed.Str ) )
 		}
 		if self.assert-Int( $parsed ) {
-			return self.bless( :name( $parsed.Int ) )
+			return self.new( :name( $parsed.Int ) )
 		}
 	}
 	method is-valid( Mu $parsed ) returns Bool {
@@ -7888,17 +7891,17 @@ class _VALUE does Node {
 }
 
 class _Var does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< sigil desigilname >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:sigil(
-						_Sigil.new(
+						_Sigil.populate(
 							$parsed.hash.<sigil>
 						)
 					),
 					:desigilname(
-						_DeSigilName.new(
+						_DeSigilName.populate(
 							$parsed.hash.<desigilname>
 						)
 					)
@@ -7906,10 +7909,10 @@ class _Var does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< variable >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:variable(
-						_Variable.new(
+						_Variable.populate(
 							$parsed.hash.<variable>
 						)
 					)
@@ -7929,25 +7932,25 @@ class _Var does Node {
 }
 
 class _VariableDeclarator does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys(
 			$parsed,
 			[< semilist variable shape >],
 			[< postcircumfix signature trait post_constraint >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:semilist(
-						_SemiList.new(
+						_SemiList.populate(
 							$parsed.hash.<semilist>
 						)
 					),
 					:variable(
-						_Variable.new(
+						_Variable.populate(
 							$parsed.hash.<variable>
 						)
 					),
 					:shape(
-						_Shape.new(
+						_Shape.populate(
 							$parsed.hash.<shape>
 						)
 					),
@@ -7963,10 +7966,10 @@ class _VariableDeclarator does Node {
 			[< variable >],
 			[< semilist postcircumfix signature
 			   trait post_constraint >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:variable(
-						_Variable.new(
+						_Variable.populate(
 							$parsed.hash.<variable>
 						)
 					),
@@ -7996,22 +7999,22 @@ class _VariableDeclarator does Node {
 } 
 
 class _Variable does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< twigil sigil desigilname >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:twigil(
-						_Twigil.new(
+						_Twigil.populate(
 							$parsed.hash.<twigil>
 						)
 					),
 					:sigil(
-						_Sigil.new(
+						_Sigil.populate(
 							$parsed.hash.<sigil>
 						)
 					),
 					:desigilname(
-						_DeSigilName.new(
+						_DeSigilName.populate(
 							$parsed.hash.<desigilname>
 						)
 					)
@@ -8019,15 +8022,15 @@ class _Variable does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< sigil desigilname >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:sigil(
-						_Sigil.new(
+						_Sigil.populate(
 							$parsed.hash.<sigil>
 						)
 					),
 					:desigilname(
-						_DeSigilName.new(
+						_DeSigilName.populate(
 							$parsed.hash.<desigilname>
 						)
 					)
@@ -8035,10 +8038,10 @@ class _Variable does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< sigil >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:sigil(
-						_Sigil.new(
+						_Sigil.populate(
 							$parsed.hash.<sigil>
 						)
 					)
@@ -8046,10 +8049,10 @@ class _Variable does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< contextualizer >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:contextualizer(
-						_Contextualizer.new(
+						_Contextualizer.populate(
 							$parsed.hash.<contextualizer>
 						)
 					)
@@ -8077,17 +8080,17 @@ class _Variable does Node {
 }
 
 class _Version does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< vnum vstr >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:vnum(
-						_VNum.new(
+						_VNum.populate(
 							$parsed.hash.<vnum>
 						)
 					),
 					:vstr(
-						_VStr.new(
+						_VStr.populate(
 							$parsed.hash.<vstr>
 						)
 					)
@@ -8105,9 +8108,10 @@ class _Version does Node {
 }
 
 class _VNum does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		if $parsed.list {
-			return self.bless( :child() )
+			# XXX
+			return self.new( :child() )
 		}
 	}
 	method is-valid( Mu $parsed ) returns Bool {
@@ -8117,23 +8121,12 @@ class _VNum does Node {
 	}
 }
 
-class _VStr does Node {
-	method new( Mu $parsed ) {
-		if $parsed.Int {
-			return self.bless( :name( $parsed.Int ) )
-		}
-	}
-	method is-valid( Mu $parsed ) returns Bool {
-		self.trace;
-		return True if $parsed.Int;
-		die self.new-term
-	}
-}
+class _VStr does Node does IsInteger { }
 
 class _Wu does Node does IsString { }
 
 class _XBlock does Node {
-	method new( Mu $parsed ) {
+	method populate( Mu $parsed ) {
 		CATCH {
 			when X::Hash::Store::OddNumber { }
 			when X::Multi::NoMatch { }
@@ -8146,7 +8139,7 @@ class _XBlock does Node {
 						self.bless(
 							:content(
 								:EXPR(
-									_EXPR.new(
+									_EXPR.populate(
 										$parsed.hash.<EXPR>
 									)
 								)
@@ -8160,7 +8153,7 @@ class _XBlock does Node {
 						self.bless(
 							:content(
 								:pblock(
-									_PBlock.new(
+									_PBlock.populate(
 										$parsed.hash.<pblock>
 									)
 								)
@@ -8171,20 +8164,20 @@ class _XBlock does Node {
 				}
 				die self.new-term
 			}
-			return self.bless(
+			return self.new(
 				:child( @child )
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< pblock EXPR >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:pblock(
-						_PBlock.new(
+						_PBlock.populate(
 							$parsed.hash.<pblock>
 						)
 					),
 					:EXPR(
-						_EXPR.new(
+						_EXPR.populate(
 							$parsed.hash.<EXPR>
 						)
 					)
@@ -8192,10 +8185,10 @@ class _XBlock does Node {
 			)
 		}
 		if self.assert-hash-keys( $parsed, [< blockoid >] ) {
-			return self.bless(
+			return self.new(
 				:content(
 					:blockoid(
-						_Blockoid.new(
+						_Blockoid.populate(
 							$parsed.hash.<blockoid>
 						)
 					)
