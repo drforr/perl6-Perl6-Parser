@@ -1180,6 +1180,7 @@ class _ColonPair does Node {
 				)
 			)
 		}
+		die self.new-term
 	}
 	method is-valid( Mu $parsed ) returns Bool {
 		self.trace;
@@ -1199,18 +1200,31 @@ class _ColonPair does Node {
 
 class _ColonPairs does Node {
 	method populate( Mu $parsed ) {
-		if $parsed {
-# XXX Must fix
-			return self.new
-		}
-		else {
-			return self.new
+		if $parsed ~~ Hash {
+			if $parsed.<D> {
+				return self.new(
+					:content(
+						:D( $parsed.hash.<D> )
+					)
+				)
+			}
+			if $parsed.<U> {
+				return self.new(
+					:content(
+						:U( $parsed.hash.<U> )
+					)
+				)
+			}
 		}
 	}
 	method is-valid( Mu $parsed ) returns Bool {
 		self.trace;
-warn "No validation done";
-return True;
+		if $parsed {
+			if $parsed ~~ Hash {
+				return True if $parsed.<D>;
+				return True if $parsed.<U>;
+			}
+		}
 		die self.new-term
 	}
 }
