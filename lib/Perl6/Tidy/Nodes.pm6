@@ -857,7 +857,9 @@ class _CClassElem does Node {
 		if $parsed.list {
 			my @child;
 			for $parsed.list {
-				if self.assert-hash-keys( $_, [< identifier name sign >], [< charspec >] ) {
+				if self.assert-hash-keys( $_,
+						[< identifier name sign >],
+						[< charspec >] ) {
 					@child.push(
 						_Identifier_Name_Sign.populate(
 							$_
@@ -865,7 +867,8 @@ class _CClassElem does Node {
 					);
 					next
 				}
-				if self.assert-hash-keys( $_, [< sign charspec >] ) {
+				if self.assert-hash-keys( $_,
+						[< sign charspec >] ) {
 					@child.push(
 						_Sign_CharSpec.populate(
 							$_
@@ -885,8 +888,8 @@ class _CClassElem does Node {
 		if $parsed.list {
 			for $parsed.list {
 				next if self.assert-hash-keys( $_,
-					[< identifier name sign >],
-					[< charspec >] )
+						[< identifier name sign >],
+						[< charspec >] )
 					and _Identifier_Name_Sign.is-valid( $_ );
 				next if self.assert-hash-keys( $_,
 						[< sign charspec >] )
@@ -1219,11 +1222,9 @@ class _ColonPairs does Node {
 	}
 	method is-valid( Mu $parsed ) returns Bool {
 		self.trace;
-		if $parsed {
-			if $parsed ~~ Hash {
-				return True if $parsed.<D>;
-				return True if $parsed.<U>;
-			}
+		if $parsed ~~ Hash {
+			return True if $parsed.<D>;
+			return True if $parsed.<U>;
 		}
 		die self.new-term
 	}
@@ -1964,6 +1965,7 @@ class _Dig does Node {
 		self.trace;
 		if $parsed.list {
 			for $parsed.list {
+				# UTF-8....
 				if $_ {
 					# XXX
 					next
@@ -2311,14 +2313,14 @@ class _EXPR does Node {
 					next
 				}
 				if self.assert-hash-keys( $_, [< prefix OPER >],
-							 [< prefix_postfix_meta_operator >] ) {
+						 [< prefix_postfix_meta_operator >] ) {
 					@child.push(
 						_Prefix_OPER.populate( $_ )
 					);
 					next
 				}
 				if self.assert-hash-keys( $_, [< postfix OPER >],
-							 [< postfix_prefix_meta_operator >] ) {
+						[< postfix_prefix_meta_operator >] ) {
 					@child.push(
 						_Postfix_OPER.populate( $_ )
 					);
@@ -2330,19 +2332,22 @@ class _EXPR does Node {
 					);
 					next
 				}
-				if self.assert-hash-keys( $_, [< identifier args >] ) {
+				if self.assert-hash-keys( $_,
+						[< identifier args >] ) {
 					@child.push(
 						_Identifier_Args.populate( $_ )
 					);
 					next
 				}
-				if self.assert-hash-keys( $_, [< infix_prefix_meta_operator OPER >] ) {
+				if self.assert-hash-keys( $_,
+						[< infix_prefix_meta_operator OPER >] ) {
 					@child.push(
 						_InfixPrefixMetaOperator_OPER.populate( $_ )
 					);
 					next
 				}
-				if self.assert-hash-keys( $_, [< longname args >] ) {
+				if self.assert-hash-keys( $_,
+						[< longname args >] ) {
 					@child.push(
 						_LongName_Args.populate( $_ )
 					);
@@ -2378,7 +2383,8 @@ class _EXPR does Node {
 					);
 					next
 				}
-				if self.assert-hash-keys( $_, [< package_declarator >] ) {
+				if self.assert-hash-keys( $_,
+						[< package_declarator >] ) {
 					@child.push(
 						_PackageDeclarator.populate( $_.hash.<package_declarator> )
 					);
@@ -2390,7 +2396,8 @@ class _EXPR does Node {
 					);
 					next
 				}
-				if self.assert-hash-keys( $_, [< scope_declarator >] ) {
+				if self.assert-hash-keys( $_,
+						[< scope_declarator >] ) {
 					@child.push(
 						_ScopeDeclarator.populate( $_.hash.<scope_declarator> )
 					);
@@ -2414,7 +2421,8 @@ class _EXPR does Node {
 					);
 					next
 				}
-				if self.assert-hash-keys( $_, [< statement_prefix >] ) {
+				if self.assert-hash-keys( $_,
+						[< statement_prefix >] ) {
 					@child.push(
 						_StatementPrefix.populate( $_.hash.<statement_prefix> )
 					);
@@ -2451,9 +2459,9 @@ class _EXPR does Node {
 				)
 			}
 			if self.assert-hash-keys(
-				$parsed,
-				[< OPER dotty >],
-				[< postfix_prefix_meta_operator >] ) {
+					$parsed,
+					[< OPER dotty >],
+					[< postfix_prefix_meta_operator >] ) {
 				return self.new(
 					:content(
 						:OPER(
@@ -2472,9 +2480,9 @@ class _EXPR does Node {
 				)
 			}
 			if self.assert-hash-keys(
-				$parsed,
-				[< postfix OPER >],
-				[< postfix_prefix_meta_operator >] ) {
+					$parsed,
+					[< postfix OPER >],
+					[< postfix_prefix_meta_operator >] ) {
 				return self.new(
 					:content(
 						:postfix(
@@ -2493,9 +2501,9 @@ class _EXPR does Node {
 				)
 			}
 			if self.assert-hash-keys(
-				$parsed,
-				[< infix OPER >],
-				[< prefix_postfix_meta_operator >] ) {
+					$parsed,
+					[< infix OPER >],
+					[< prefix_postfix_meta_operator >] ) {
 				return self.new(
 					:content(
 						:infix(
@@ -2514,9 +2522,9 @@ class _EXPR does Node {
 				)
 			}
 			if self.assert-hash-keys(
-				$parsed,
-				[< prefix OPER >],
-				[< prefix_postfix_meta_operator >] ) {
+					$parsed,
+					[< prefix OPER >],
+					[< prefix_postfix_meta_operator >] ) {
 				return self.new(
 					:content(
 						:prefix(
@@ -2535,9 +2543,9 @@ class _EXPR does Node {
 				)
 			}
 			if self.assert-hash-keys(
-				$parsed,
-				[< postcircumfix OPER >],
-				[< postfix_prefix_meta_operator >] ) {
+					$parsed,
+					[< postcircumfix OPER >],
+					[< postfix_prefix_meta_operator >] ) {
 				return self.new(
 					:content(
 						:postcircumfix(
@@ -2556,9 +2564,9 @@ class _EXPR does Node {
 				)
 			}
 			if self.assert-hash-keys(
-				$parsed,
-				[< OPER >],
-				[< infix_prefix_meta_operator >] ) {
+					$parsed,
+					[< OPER >],
+					[< infix_prefix_meta_operator >] ) {
 				return self.new(
 					:content(
 						:OPER(
@@ -3173,7 +3181,7 @@ class _Identifier does Node {
 				:child( @child )
 			)
 		}
-		elsif $parsed.Str {
+		if $parsed.Str {
 			return self.new( :name( $parsed.Str ) )
 		}
 	}
@@ -3186,9 +3194,7 @@ class _Identifier does Node {
 			}
 			return True
 		}
-		elsif $parsed.Str {
-			return True
-		}
+		return True if $parsed.Str;
 		die self.new-term
 	}
 }
@@ -3388,57 +3394,47 @@ class _InfixPrefixMetaOperator_OPER does Node {
 
 class _Initializer does Node {
 	method populate( Mu $parsed ) {
-		if $parsed {
-			if self.assert-hash-keys( $parsed, [< sym EXPR >] ) {
-				return self.new(
-					:content(
-						:sym(
-							_Sym.populate(
-								$parsed.hash.<sym>
-							)
-						),
-						:EXPR(
-							_EXPR.populate(
-								$parsed.hash.<EXPR>
-							)
+		if self.assert-hash-keys( $parsed, [< sym EXPR >] ) {
+			return self.new(
+				:content(
+					:sym(
+						_Sym.populate(
+							$parsed.hash.<sym>
+						)
+					),
+					:EXPR(
+						_EXPR.populate(
+							$parsed.hash.<EXPR>
 						)
 					)
 				)
-			}
-			if self.assert-hash-keys( $parsed, [< dottyopish sym >] ) {
-				return self.new(
-					:content(
-						:dottyopish(
-							_DottyOpish.populate(
-								$parsed.hash.<dottyopish>
-							)
-						),
-						:sym(
-							_Sym.populate(
-								$parsed.hash.<sym>
-							)
-						)
-					)
-				)
-			}
+			)
 		}
-		else {
-			return self.new
+		if self.assert-hash-keys( $parsed, [< dottyopish sym >] ) {
+			return self.new(
+				:content(
+					:dottyopish(
+						_DottyOpish.populate(
+							$parsed.hash.<dottyopish>
+						)
+					),
+					:sym(
+						_Sym.populate(
+							$parsed.hash.<sym>
+						)
+					)
+				)
+			)
 		}
 	}
 	method is-valid( Mu $parsed ) returns Bool {
 		self.trace;
-		if $parsed {
-			return True if self.assert-hash-keys( $parsed, [< sym EXPR >] )
-				and _Sym.is-valid( $parsed.hash.<sym> )
-				and _EXPR.is-valid( $parsed.hash.<EXPR> );
-			return True if self.assert-hash-keys( $parsed, [< dottyopish sym >] )
-				and _DottyOpish.is-valid( $parsed.hash.<dottyopish> )
-				and _Sym.is-valid( $parsed.hash.<sym> );
-		}
-		else {
-			return True
-		}
+		return True if self.assert-hash-keys( $parsed, [< sym EXPR >] )
+			and _Sym.is-valid( $parsed.hash.<sym> )
+			and _EXPR.is-valid( $parsed.hash.<EXPR> );
+		return True if self.assert-hash-keys( $parsed, [< dottyopish sym >] )
+			and _DottyOpish.is-valid( $parsed.hash.<dottyopish> )
+			and _Sym.is-valid( $parsed.hash.<sym> );
 		die self.new-term
 	}
 }
@@ -3681,38 +3677,27 @@ class _LongName_ColonPairs does Node {
 
 class _LongName does Node {
 	method populate( Mu $parsed ) {
-		if $parsed {
-			if self.assert-hash-keys( $parsed,
-						  [< name >],
-						  [< colonpair >] ) {
-				return self.new(
-					:content(
-						:name(
-							_Name.populate(
-								$parsed.hash.<name>
-							)
-						),
-						:colonpair()
-					)
+		if self.assert-hash-keys( $parsed,
+					  [< name >],
+					  [< colonpair >] ) {
+			return self.new(
+				:content(
+					:name(
+						_Name.populate(
+							$parsed.hash.<name>
+						)
+					),
+					:colonpair()
 				)
-			}
-		}
-		else {
-			return self.new
+			)
 		}
 	}
 	method is-valid( Mu $parsed ) returns Bool {
 		self.trace;
-		if $parsed {
-			return True if self.assert-hash-keys( $parsed,
-					[< name >],
-					[< colonpair >] )
-				and _Name.is-valid( $parsed.hash.<name> );
-		}
-		else {
-			# XXX Hardly seems fair this way, doesn't it?
-			return True
-		}
+		return True if self.assert-hash-keys( $parsed,
+				[< name >],
+				[< colonpair >] )
+			and _Name.is-valid( $parsed.hash.<name> );
 		die self.new-term
 	}
 }
@@ -4039,30 +4024,32 @@ class _MoreName does Node {
 		if $parsed.list {
 			my @child;
 			for $parsed.list {
-# XXX
 				if self.assert-hash-keys( $_,
-						     [< identifier >] ) {
-					return self.new(
-						:content(
-							:identifier(
-								_Identifier.populate(
-									$_.hash.<identifier>
+						[< identifier >] ) {
+					@child.push(
+						self.new(
+							:content(
+								:identifier(
+									_Identifier.populate(
+										$_.hash.<identifier>
+									)
 								)
 							)
 						)
-					)
+					);
+					next
 				}
 				die self.new-term
 			}
-			die self.new-term
+			return self.new( :child( @child ) )
 		}
 	}
 	method is-valid( Mu $parsed ) returns Bool {
 		self.trace;
 		if $parsed.list {
 			for $parsed.list {
-				return True if self.assert-hash-keys( $_,
-						     [< identifier >] )
+				next if self.assert-hash-keys( $_,
+						[< identifier >] )
 					and _Identifier.is-valid( $_.hash.<identifier> );
 				die self.new-term
 			}
@@ -4128,7 +4115,8 @@ class _MultiDeclarator does Node {
 				[< sym declarator >] )
 			and _Sym.is-valid( $parsed.hash.<sym> )
 			and _Declarator.is-valid( $parsed.hash.<declarator> );
-		return True if self.assert-hash-keys( $parsed, [< declarator >] )
+		return True if self.assert-hash-keys( $parsed,
+				[< declarator >] )
 			and _Declarator.is-valid( $parsed.hash.<declarator> );
 		die self.new-term
 	}
@@ -4173,7 +4161,7 @@ class _NamedParam does Node {
 	method is-valid( Mu $parsed ) returns Bool {
 		self.trace;
 		return True if self.assert-hash-keys( $parsed,
-			[< param_var >] )
+				[< param_var >] )
 			and _ParamVar.is-valid( $parsed.hash.<param_var> );
 		die self.new-term
 	}
@@ -4565,22 +4553,15 @@ class _O does Node {
 	}
 	method is-valid( Mu $parsed ) returns Bool {
 		self.trace;
-		# XXX There has to be a better way to handle this NoMatch case
 		CATCH { when X::Multi::NoMatch { } }
-		if $parsed {
-			if $parsed ~~ Hash {
-				return True if $parsed.<prec>
-					and $parsed.<fiddly>
-					and $parsed.<dba>
-					and $parsed.<assoc>;
-				return True if $parsed.<prec>
-					and $parsed.<dba>
-					and $parsed.<assoc>;
-			}
-		}
-		else {
-warn "Bypassing _O possibly";
-			return True
+		if $parsed ~~ Hash {
+			return True if $parsed.<prec>
+				and $parsed.<fiddly>
+				and $parsed.<dba>
+				and $parsed.<assoc>;
+			return True if $parsed.<prec>
+				and $parsed.<dba>
+				and $parsed.<assoc>;
 		}
 		die self.new-term
 	}
@@ -5782,7 +5763,6 @@ class _Quote does Node {
 
 class _QuotePair does Node {
 	method populate( Mu $parsed ) {
-		CATCH { when X::Hash::Store::OddNumber { .resume } }
 		if $parsed.list {
 			my @child;
 			for $parsed.list {
@@ -5839,7 +5819,6 @@ class _QuotePair does Node {
 	}
 	method is-valid( Mu $parsed ) returns Bool {
 		self.trace;
-		CATCH { when X::Hash::Store::OddNumber { } }
 		if $parsed.list {
 			for $parsed.list {
 				next if self.assert-hash-keys( $_,
@@ -5987,23 +5966,13 @@ class _RegexDef does Node {
 
 class _Right does Node {
 	method populate( Mu $parsed ) {
-		if $parsed {
-# XXX
-			return self.new
-		}
-		else {
-			return self.new
+		if self.assert-Bool( $parsed ) {
+			return self.new( :name( $parsed.Bool ) )
 		}
 	}
 	method is-valid( Mu $parsed ) returns Bool {
 		self.trace;
-		if $parsed {
-# XXX
-			return True
-		}
-		else {
-			return True
-		}
+		return True if self.assert-Bool( $parsed );
 		die self.new-term
 	}
 }
@@ -6024,7 +5993,8 @@ class Root does Node {
 	}
 	method is-valid( Mu $parsed ) returns Bool {
 		self.trace;
-		return True if self.assert-hash-keys( $parsed, [< statementlist >] )
+		return True if self.assert-hash-keys( $parsed,
+				[< statementlist >] )
 			and _StatementList.is-valid( $parsed.hash.<statementlist> );
 		die self.new-term
 	}
@@ -6318,7 +6288,6 @@ class _ScopeDeclarator does Node {
 
 class _SemiList does Node {
 	method populate( Mu $parsed ) {
-		CATCH { when X::Hash::Store::OddNumber { } }
 		if $parsed.list {
 			my @child;
 			for $parsed.list {
@@ -7083,14 +7052,14 @@ class _StatementModCond does Node {
 	}
 	method is-valid( Mu $parsed ) returns Bool {
 		self.trace;
-		return True if self.assert-hash-keys( $parsed, [< sym modifier_expr >] )
+		return True if self.assert-hash-keys( $parsed,
+				[< sym modifier_expr >] )
 			and _Sym.is-valid( $parsed.hash.<sym> )
 			and _ModifierExpr.is-valid( $parsed.hash.<modifier_expr> );
 		die self.new-term
 	}
 }
 
-# XXX This is a compound type
 class _StatementModCond_EXPR does Node {
 	method populate( Mu $parsed ) {
 		if self.assert-hash-keys( $parsed, [< statement_mod_cond EXPR >] ) {
@@ -7112,7 +7081,8 @@ class _StatementModCond_EXPR does Node {
 	}
 	method is-valid( Mu $parsed ) returns Bool {
 		self.trace;
-		return True if self.assert-hash-keys( $parsed, [< statement_mod_cond EXPR >] )
+		return True if self.assert-hash-keys( $parsed,
+				[< statement_mod_cond EXPR >] )
 			and _StatementModCond.is-valid( $parsed.hash.<statement_mod_cond> )
 			and _EXPR.is-valid( $parsed.hash.<EXPR> );
 		die self.new-term
@@ -7230,10 +7200,6 @@ class _SubShortName does Node {
 
 class _Sym does Node {
 	method populate( Mu $parsed ) {
-		CATCH {
-			when X::Hash::Store::OddNumber { }
-			when X::Multi::NoMatch { }
-		}
 		if $parsed.list {
 			my @child;
 			for $parsed.list {
@@ -7265,10 +7231,6 @@ class _Sym does Node {
 	}
 	method is-valid( Mu $parsed ) returns Bool {
 		self.trace;
-		CATCH {
-			when X::Hash::Store::OddNumber { }
-			when X::Multi::NoMatch { }
-		}
 		if $parsed.list {
 			my @child;
 			for $parsed.list {
@@ -7521,23 +7483,13 @@ class _Termish does Node {
 
 class _Triangle does Node {
 	method populate( Mu $parsed ) {
-		if $parsed {
-# XXX
-			return self.new
-		}
-		else {
-			return self.new
+		if self.assert-Str( $parsed ) {
+			return self.new( :name( $parsed.Str ) )
 		}
 	}
 	method is-valid( Mu $parsed ) returns Bool {
 		self.trace;
-		if $parsed {
-# XXX
-			return True
-		}
-		else {
-			return self.bless
-		}
+		return True if self.assert-Str( $parsed );
 		die self.new-term
 	}
 }
@@ -7588,9 +7540,6 @@ class _Twigil does Node {
 
 class _TypeConstraint does Node {
 	method populate( Mu $parsed ) {
-		CATCH {
-			when X::Hash::Store::OddNumber { .resume }
-		}
 		if $parsed.list {
 			my @child;
 			for $parsed.list {
@@ -7630,12 +7579,10 @@ class _TypeConstraint does Node {
 	}
 	method is-valid( Mu $parsed ) returns Bool {
 		self.trace;
-		CATCH {
-			when X::Hash::Store::OddNumber { .resume }
-		}
 		if $parsed.list {
 			for $parsed.list {
-				next if self.assert-hash-keys( $_, [< typename >] )
+				next if self.assert-hash-keys( $_,
+						[< typename >] )
 					and _TypeName.is-valid( $_.hash.<typename> );
 				next if self.assert-hash-keys( $_, [< value >] )
 					and _Value.is-valid( $_.hash.<value> );
@@ -7720,7 +7667,6 @@ class _TypeDeclarator does Node {
 	}
 	method is-valid( Mu $parsed ) returns Bool {
 		self.trace;
-		CATCH { when X::Multi::NoMatch { } }
 		return True if self.assert-hash-keys( $parsed,
 				[< sym initializer variable >], [< trait >] )
 			and _Sym.is-valid( $parsed.hash.<sym> )
@@ -7745,8 +7691,8 @@ class _TypeName does Node {
 			my @child;
 			for $parsed.list {
 				if self.assert-hash-keys( $_,
-					[< longname colonpairs >],
-					[< colonpair >] ) {
+						[< longname colonpairs >],
+						[< colonpair >] ) {
 					@child.push(
 						_LongName_ColonPairs.populate(
 							$_
@@ -7755,8 +7701,8 @@ class _TypeName does Node {
 					next
 				}
 				if self.assert-hash-keys( $_,
-					[< longname >],
-					[< colonpair >] ) {
+						[< longname >],
+						[< colonpair >] ) {
 					@child.push(
 						_LongName_ColonPair.populate(
 							$_
@@ -7788,12 +7734,12 @@ class _TypeName does Node {
 		if $parsed.list {
 			for $parsed.list {
 				next if self.assert-hash-keys( $_,
-					[< longname colonpairs >],
-					[< colonpair >] )
+						[< longname colonpairs >],
+						[< colonpair >] )
 					and _LongName_ColonPairs.is-valid( $_ );
 				next if self.assert-hash-keys( $_,
-					[< longname >],
-					[< colonpair >] )
+						[< longname >],
+						[< colonpair >] )
 					and _LongName_ColonPair.is-valid( $_ );
 				die self.new-term
 			}
@@ -8124,13 +8070,30 @@ class _Version does Node {
 class _VNum does Node {
 	method populate( Mu $parsed ) {
 		if $parsed.list {
-			# XXX
-			return self.new( :child() )
+			my @child;
+			for $parsed.list {
+				if self.assert-Int( $_ ) {
+					@child.push(
+						$_.Int
+					);
+					next
+				}
+				die self.new-term
+			}
+			return self.new(
+				:child( @child )
+			)
 		}
 	}
 	method is-valid( Mu $parsed ) returns Bool {
 		self.trace;
-		return True if $parsed.list;
+		if $parsed.list {
+			for $parsed.list {
+				next if self.assert-Int( $_ );
+				die self.new-term
+			}
+			return True
+		}
 		die self.new-term
 	}
 }
@@ -8141,34 +8104,22 @@ class _Wu does Node does IsString { }
 
 class _XBlock does Node {
 	method populate( Mu $parsed ) {
-		CATCH {
-			when X::Hash::Store::OddNumber { }
-			when X::Multi::NoMatch { }
-		}
 		if $parsed.list {
 			my @child;
 			for $parsed.list {
-				if self.assert-hash-keys( $parsed, [< EXPR >] ) {
-					@child.push(
-						self.bless(
-							:content(
-								:EXPR(
-									_EXPR.populate(
-										$parsed.hash.<EXPR>
-									)
-								)
-							)
-						)
-					);
-					next
-				}
-				if self.assert-hash-keys( $parsed, [< pblock >] ) {
+				if self.assert-hash-keys( $_,
+						[< pblock EXPR >] ) {
 					@child.push(
 						self.bless(
 							:content(
 								:pblock(
 									_PBlock.populate(
-										$parsed.hash.<pblock>
+										$_.hash.<pblock>
+									)
+								)
+								:EXPR(
+									_EXPR.populate(
+										$_.hash.<EXPR>
 									)
 								)
 							)
@@ -8212,22 +8163,12 @@ class _XBlock does Node {
 	}
 	method is-valid( Mu $parsed ) returns Bool {
 		self.trace;
-		CATCH {
-			when X::Hash::Store::OddNumber { .resume }
-#			when X::Multi::NoMatch { }
-		}
 		if $parsed.list {
 			for $parsed.list {
 				next if self.assert-hash-keys( $_,
 						[< pblock EXPR >] )
 					and _PBlock.is-valid( $_.hash.<pblock> )
 					and _EXPR.is-valid( $_.hash.<EXPR> );
-				next if self.assert-hash-keys( $_,
-						[< EXPR >] )
-					and _EXPR.is-valid( $_.hash.<EXPR> );
-				next if self.assert-hash-keys( $_,
-						[< pblock >] )
-					and _PBlock.is-valid( $_.hash.<pblock> );
 				die self.new-term
 			}
 			return True
