@@ -3526,16 +3526,20 @@ class _Integer does Node {
 	}
 	method is-valid( Mu $parsed ) returns Bool {
 		self.trace;
-		return True if self.assert-hash-keys( $parsed, [< decint VALUE >] )
+		return True if self.assert-hash-keys( $parsed,
+				[< decint VALUE >] )
 			and _DecInt.is-valid( $parsed.hash.<decint> )
 			and _VALUE.is-valid( $parsed.hash.<VALUE> );
-		return True if self.assert-hash-keys( $parsed, [< binint VALUE >] )
+		return True if self.assert-hash-keys( $parsed,
+				[< binint VALUE >] )
 			and _BinInt.is-valid( $parsed.hash.<binint> )
 			and _VALUE.is-valid( $parsed.hash.<VALUE> );
-		return True if self.assert-hash-keys( $parsed, [< octint VALUE >] )
+		return True if self.assert-hash-keys( $parsed,
+				[< octint VALUE >] )
 			and _OctInt.is-valid( $parsed.hash.<octint> )
 			and _VALUE.is-valid( $parsed.hash.<VALUE> );
-		return True if self.assert-hash-keys( $parsed, [< hexint VALUE >] )
+		return True if self.assert-hash-keys( $parsed,
+				[< hexint VALUE >] )
 			and _HexInt.is-valid( $parsed.hash.<hexint> )
 			and _VALUE.is-valid( $parsed.hash.<VALUE> );
 		die self.new-term

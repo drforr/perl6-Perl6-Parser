@@ -45,7 +45,7 @@ subtest {
 	}, Q{decimal};
 
 	subtest {
-		plan 2;
+		plan 3;
 
 		subtest {
 			plan 1;
@@ -60,10 +60,17 @@ subtest {
 			my $parsed = $pt.tidy( Q{0b1} );
 			isa-ok $parsed, Q{Root};
 		}, Q{1};
+
+		subtest {
+			plan 1;
+
+			my $parsed = $pt.tidy( Q{-0b1} );
+			isa-ok $parsed, Q{Root};
+		}, Q{-1};
 	}, Q{binary};
 
 	subtest {
-		plan 2;
+		plan 3;
 
 		subtest {
 			plan 1;
@@ -78,10 +85,17 @@ subtest {
 			my $parsed = $pt.tidy( Q{0o1} );
 			isa-ok $parsed, Q{Root};
 		}, Q{1};
+
+		subtest {
+			plan 1;
+
+			my $parsed = $pt.tidy( Q{-0o1} );
+			isa-ok $parsed, Q{Root};
+		}, Q{-1};
 	}, Q{octal};
 
 	subtest {
-		plan 2;
+		plan 3;
 
 		subtest {
 			plan 1;
@@ -96,10 +110,17 @@ subtest {
 			my $parsed = $pt.tidy( Q{0d1} );
 			isa-ok $parsed, Q{Root};
 		}, Q{1};
+
+		subtest {
+			plan 1;
+
+			my $parsed = $pt.tidy( Q{-0d1} );
+			isa-ok $parsed, Q{Root};
+		}, Q{-1};
 	}, Q{explicit decimal};
 
 	subtest {
-		plan 2;
+		plan 3;
 
 		subtest {
 			plan 1;
@@ -114,10 +135,17 @@ subtest {
 			my $parsed = $pt.tidy( Q{1} );
 			isa-ok $parsed, Q{Root};
 		}, Q{1};
+
+		subtest {
+			plan 1;
+
+			my $parsed = $pt.tidy( Q{-1} );
+			isa-ok $parsed, Q{Root};
+		}, Q{-1};
 	}, Q{implicit decimal};
 
 	subtest {
-		plan 2;
+		plan 3;
 
 		subtest {
 			plan 1;
@@ -132,10 +160,17 @@ subtest {
 			my $parsed = $pt.tidy( Q{0x1} );
 			isa-ok $parsed, Q{Root};
 		}, Q{1};
+
+		subtest {
+			plan 1;
+
+			my $parsed = $pt.tidy( Q{-0x1} );
+			isa-ok $parsed, Q{Root};
+		}, Q{-1};
 	}, Q{hexadecimal};
 
 	subtest {
-		plan 2;
+		plan 3;
 
 		subtest {
 			plan 1;
@@ -150,10 +185,17 @@ subtest {
 			my $parsed = $pt.tidy( Q{:13(1)} );
 			isa-ok $parsed, Q{Root};
 		}, Q{1};
+
+		subtest {
+			plan 1;
+
+			my $parsed = $pt.tidy( Q{:13(-1)} );
+			isa-ok $parsed, Q{Root};
+		}, Q{-1};
 	}, Q{base-13};
 
 	subtest {
-		plan 4;
+		plan 5;
 
 		subtest {
 			plan 1;
@@ -182,10 +224,17 @@ subtest {
 			my $parsed = $pt.tidy( Q{1.0} );
 			isa-ok $parsed, Q{Root};
 		}, Q{1.0};
+
+		subtest {
+			plan 1;
+
+			my $parsed = $pt.tidy( Q{-1.0} );
+			isa-ok $parsed, Q{Root};
+		}, Q{-1.0};
 	}, Q{rational};
 
 	subtest {
-		plan 5;
+		plan 6;
 
 		subtest {
 			plan 1;
@@ -221,10 +270,17 @@ subtest {
 			my $parsed = $pt.tidy( Q{1e0} );
 			isa-ok $parsed, Q{Root};
 		}, Q{1.0e0};
+
+		subtest {
+			plan 1;
+
+			my $parsed = $pt.tidy( Q{-1e0} );
+			isa-ok $parsed, Q{Root};
+		}, Q{-1.0e0};
 	}, Q{Num};
 
 	subtest {
-		plan 2;
+		plan 3;
 
 		subtest {
 			plan 1;
@@ -239,6 +295,13 @@ subtest {
 			my $parsed = $pt.tidy( Q{1i} );
 			isa-ok $parsed, Q{Root};
 		}, Q{11};
+
+		subtest {
+			plan 1;
+
+			my $parsed = $pt.tidy( Q{-1i} );
+			isa-ok $parsed, Q{Root};
+		}, Q{-11};
 	}, Q{imaginary};
 }, Q{integer};
 
