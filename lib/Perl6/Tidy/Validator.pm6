@@ -187,7 +187,7 @@ class Perl6::Tidy::Validator {
 						[< sign charspec >] )
 					and self.sign( $_.hash.<sign> )
 					and self.charspec( $_.hash.<charspec> );
-				die self.new-term
+				return False
 			}
 			return True
 		}
@@ -429,7 +429,7 @@ class Perl6::Tidy::Validator {
 				else {
 					next
 				}
-				die self.new-term
+				return True
 			}
 			return True
 		}
@@ -541,7 +541,7 @@ class Perl6::Tidy::Validator {
 					and self.args( $_.hash.<args> );
 				next if self.assert-hash-keys( $_,
 					[< infix_prefix_meta_operator OPER >] )
-					and self.infixprefixmetaoperator( $_ )
+					and self.infixprefixmetaoperator( $_.hash.<infixprefixmetaoperator> )
 					and self.OPER( $_.hash.<OPER> );
 				next if self.assert-hash-keys( $_,
 						[< longname args >] )
@@ -572,9 +572,9 @@ class Perl6::Tidy::Validator {
 				next if self.assert-hash-keys( $_, [< fatarrow >] )
 					and self.fatarrow( $_.hash.<fatarrow> );
 				next if self.assert-hash-keys( $_, [< statement_prefix >] )
-					and self.statementprefix( $_.hash.<statement_prefix> );
+					and self.statement_prefix( $_.hash.<statement_prefix> );
 				next if self.assert-Str( $_ );
-				die self.new-term
+				return False
 			}
 			return True if self.assert-hash-keys(
 					$parsed,
@@ -616,17 +616,19 @@ class Perl6::Tidy::Validator {
 					[< OPER >],
 					[< infix_prefix_meta_operator >] )
 				and self.OPER( $parsed.hash.<OPER> );
-			die self.new-term
+			return False
 		}
 		return True if self.assert-hash-keys( $parsed,
 				[< args op triangle >] )
 			and self.args( $parsed.hash.<args> )
 			and self.op( $parsed.hash.<op> )
 			and self.triangle( $parsed.hash.<triangle> );
-		return True if self.assert-hash-keys( $parsed, [< longname args >] )
+		return True if self.assert-hash-keys( $parsed,
+				[< longname args >] )
 			and self.longname( $parsed.hash.<longname> )
 			and self.args( $parsed.hash.<args> );
-		return True if self.assert-hash-keys( $parsed, [< identifier args >] )
+		return True if self.assert-hash-keys( $parsed,
+				[< identifier args >] )
 			and self.identifier( $parsed.hash.<identifier> )
 			and self.args( $parsed.hash.<args> );
 		return True if self.assert-hash-keys( $parsed, [< args op >] )
@@ -635,9 +637,11 @@ class Perl6::Tidy::Validator {
 		return True if self.assert-hash-keys( $parsed, [< sym args >] )
 			and self.sym( $parsed.hash.<sym> )
 			and self.args( $parsed.hash.<args> );
-		return True if self.assert-hash-keys( $parsed, [< statement_prefix >] )
-			and self.statementprefix( $parsed.hash.<statement_prefix> );
-		return True if self.assert-hash-keys( $parsed, [< type_declarator >] )
+		return True if self.assert-hash-keys( $parsed,
+				[< statement_prefix >] )
+			and self.statement_prefix( $parsed.hash.<statement_prefix> );
+		return True if self.assert-hash-keys( $parsed,
+				[< type_declarator >] )
 			and self.type_declarator( $parsed.hash.<type_declarator> );
 		return True if self.assert-hash-keys( $parsed, [< longname >] )
 			and self.longname( $parsed.hash.<longname> );
@@ -701,7 +705,7 @@ class Perl6::Tidy::Validator {
 		if $parsed.list {
 			for $parsed.list {
 				next if self.assert-Str( $_ );
-				die self.new-term
+				return False
 			}
 			return True
 		}
@@ -876,7 +880,7 @@ class Perl6::Tidy::Validator {
 				next if self.assert-hash-keys( $_,
 						[< identifier >] )
 					and self.identifier( $_.hash.<identifier> );
-				die self.new-term
+				return False
 			}
 			return True
 		}
@@ -908,7 +912,7 @@ class Perl6::Tidy::Validator {
 		return True if self.assert-hash-keys( $parsed,
 			[< param_var type_constraint quant >],
 			[< default_value modifier trait post_constraint >] )
-			and self.paramvar( $parsed.hash.<param_var> )
+			and self.param_var( $parsed.hash.<param_var> )
 			and self.type_constraint( $parsed.hash.<type_constraint> )
 			and self.quant( $parsed.hash.<quant> );
 		return True if self.assert-hash-keys( $parsed,
@@ -926,7 +930,7 @@ class Perl6::Tidy::Validator {
 	method named_param( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed,
 				[< param_var >] )
-			and self.paramvar( $parsed.hash.<param_var> );
+			and self.param_var( $parsed.hash.<param_var> );
 		return False
 	}
 
@@ -982,7 +986,7 @@ class Perl6::Tidy::Validator {
 						[< atom >], [< sigfinal >] )
 					and self.sigfinal( $_.hash.<sigfinal> )
 					and self.atom( $_.hash.<atom> );
-				die self.new-term
+				return False
 			}
 			return True
 		}
@@ -1001,7 +1005,7 @@ class Perl6::Tidy::Validator {
 		return True if self.assert-hash-keys( $parsed, [< rad_number >] )
 			and self.rad_number( $parsed.hash.<rad_number> );
 		return True if self.assert-hash-keys( $parsed, [< dec_number >] )
-			and self.decnumber( $parsed.hash.<dec_number> );
+			and self.dec_number( $parsed.hash.<dec_number> );
 		return True if self.assert-Num( $parsed );
 		return False
 	}
@@ -1116,7 +1120,7 @@ class Perl6::Tidy::Validator {
 					[< default_value modifier
 					   post_constraint trait
 					   type_constraint >] )
-					and self.namedparam( $_.hash.<namedparam> )
+					and self.named_param( $_.hash.<named_param> )
 					and self.quant( $_.hash.<quant> );
 				next if self.assert-hash-keys( $_,
 					[< defterm quant >],
@@ -1130,7 +1134,7 @@ class Perl6::Tidy::Validator {
 					[< param_var quant default_value						   modifier post_constraint trait
 					   type_constraint >] )
 					and self.type_constraint( $_.hash.<type_constraint> );
-				die self.new-term
+				return False
 			}
 			return True
 		}
@@ -1262,7 +1266,7 @@ class Perl6::Tidy::Validator {
 				next if self.assert-hash-keys( $_,
 					[< identifier >] )
 					and self.identifier( $_.hash.<identifier> );
-				die self.new-term
+				return False
 			}
 			return True
 		}
@@ -1298,7 +1302,7 @@ class Perl6::Tidy::Validator {
 	method regex_declarator( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< sym regex_def >] )
 			and self.sym( $parsed.hash.<sym> )
-			and self.regexdef( $parsed.hash.<regex_def> );
+			and self.regex_def( $parsed.hash.<regex_def> );
 		return False
 	}
 
@@ -1389,7 +1393,7 @@ class Perl6::Tidy::Validator {
 				next if self.assert-hash-keys( $_,
 						[< statement >] )
 					and self.statement( $_.hash.<statement> );
-				die self.new-term
+				return False
 			}
 			return True
 		}
@@ -1494,16 +1498,16 @@ class Perl6::Tidy::Validator {
 					and self.EXPR( $_.hash.<EXPR> );
 				next if self.assert-hash-keys( $_,
 						[< statement_control >] )
-					and self.statementcontrol( $_.hash.<statement_control> );
+					and self.statement_control( $_.hash.<statement_control> );
 				next if self.assert-hash-keys( $_, [],
 						[< statement_control >] );
-				die self.new-term
+				return False
 			}
 			return True
 		}
 		return True if self.assert-hash-keys( $parsed,
 				[< statement_control >] )
-			and self.statementcontrol( $parsed.hash.<statement_control> );
+			and self.statement_control( $parsed.hash.<statement_control> );
 		return True if self.assert-hash-keys( $parsed, [< EXPR >] )
 			and self.EXPR( $parsed.hash.<EXPR> );
 		return False
@@ -1525,7 +1529,7 @@ class Perl6::Tidy::Validator {
 		return True if self.assert-hash-keys( $parsed, [< doc sym module_name >] )
 			and self.doc( $parsed.hash.<doc> )
 			and self.sym( $parsed.hash.<sym> )
-			and self.modulename( $parsed.hash.<module_name> );
+			and self.module_name( $parsed.hash.<module_name> );
 		return True if self.assert-hash-keys( $parsed,
 				[< doc sym version >] )
 			and self.doc( $parsed.hash.<doc> )
@@ -1555,7 +1559,8 @@ class Perl6::Tidy::Validator {
 	method statementlist( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< statement >] )
 			and self.statement( $parsed.hash.<statement> );
-		return True if self.assert-hash-keys( $parsed, [], [< statement >] );
+		return True if self.assert-hash-keys( $parsed, [],
+			[< statement >] );
 		return False
 	}
 
@@ -1563,7 +1568,7 @@ class Perl6::Tidy::Validator {
 		return True if self.assert-hash-keys( $parsed,
 				[< sym modifier_expr >] )
 			and self.sym( $parsed.hash.<sym> )
-			and self.modifierexpr( $parsed.hash.<modifier_expr> );
+			and self.modifier_expr( $parsed.hash.<modifier_expr> );
 		return False
 	}
 
@@ -1593,7 +1598,7 @@ class Perl6::Tidy::Validator {
 			my @child;
 			for $parsed.list {
 				next if $_.Str;
-				die self.new-term
+				return False
 			}
 			return True
 		}
@@ -1614,7 +1619,7 @@ class Perl6::Tidy::Validator {
 			for $parsed.list {
 				next if self.assert-hash-keys( $_, [< termconj >] )
 					and self.termconj( $_.hash.<termconj> );
-				die self.new-term
+				return False
 			}
 			return True
 		}
@@ -1632,7 +1637,7 @@ class Perl6::Tidy::Validator {
 			for $parsed.list {
 				next if self.assert-hash-keys( $_, [< termish >] )
 					and self.termish( $_.hash.<termish> );
-				die self.new-term
+				return False
 			}
 			return True
 		}
@@ -1644,7 +1649,7 @@ class Perl6::Tidy::Validator {
 			for $parsed.list {
 				next if self.assert-hash-keys( $_, [< termalt >] )
 					and self.termalt( $_.hash.<termalt> );
-				die self.new-term
+				return False
 			}
 			return True
 		}
@@ -1658,7 +1663,7 @@ class Perl6::Tidy::Validator {
 			for $parsed.list {
 				next if self.assert-hash-keys( $_, [< noun >] )
 					and self.noun( $_.hash.<noun> );
-				die self.new-term
+				return False
 			}
 			return True
 		}
@@ -1699,7 +1704,7 @@ class Perl6::Tidy::Validator {
 					and self.typename( $_.hash.<typename> );
 				next if self.assert-hash-keys( $_, [< value >] )
 					and self.value( $_.hash.<value> );
-				die self.new-term
+				return False
 			}
 			return True
 		}
@@ -1739,13 +1744,14 @@ class Perl6::Tidy::Validator {
 				next if self.assert-hash-keys( $_,
 						[< longname >],
 						[< colonpair >] )
-					and self.longname( $_ );
-				die self.new-term
+					and self.longname( $_.hash.<longname> );
+				return False
 			}
 			return True
 		}
 		return True if self.assert-hash-keys( $parsed,
-				[< longname >], [< colonpair >] )
+				[< longname >],
+				[< colonpair >] )
 			and self.longname( $parsed.hash.<longname> );
 		return False
 	}
@@ -1776,7 +1782,8 @@ class Perl6::Tidy::Validator {
 	}
 
 	method var( Mu $parsed ) returns Bool {
-		return True if self.assert-hash-keys( $parsed, [< sigil desigilname >] )
+		return True if self.assert-hash-keys( $parsed,
+				[< sigil desigilname >] )
 			and self.sigil( $parsed.hash.<sigil> )
 			and self.desigilname( $parsed.hash.<desigilname> );
 		return True if self.assert-hash-keys( $parsed, [< variable >] )
@@ -1796,7 +1803,8 @@ class Perl6::Tidy::Validator {
 			and self.desigilname( $parsed.hash.<desigilname> );
 		return True if self.assert-hash-keys( $parsed, [< sigil >] )
 			and self.sigil( $parsed.hash.<sigil> );
-		return True if self.assert-hash-keys( $parsed, [< contextualizer >] )
+		return True if self.assert-hash-keys( $parsed,
+				[< contextualizer >] )
 			and self.contextualizer( $parsed.hash.<contextualizer> );
 		return False
 	}
@@ -1810,7 +1818,8 @@ class Perl6::Tidy::Validator {
 			and self.shape( $parsed.hash.<shape> );
 		return True if self.assert-hash-keys( $parsed,
 			[< variable >],
-			[< semilist postcircumfix signature trait post_constraint >] )
+			[< semilist postcircumfix signature
+			   trait post_constraint >] )
 			and self.variable( $parsed.hash.<variable> );
 		return False
 	}
@@ -1826,7 +1835,7 @@ class Perl6::Tidy::Validator {
 		if $parsed.list {
 			for $parsed.list {
 				next if self.assert-Int( $_ );
-				die self.new-term
+				return False
 			}
 			return True
 		}
@@ -1850,7 +1859,7 @@ class Perl6::Tidy::Validator {
 						[< pblock EXPR >] )
 					and self.pblock( $_.hash.<pblock> )
 					and self.EXPR( $_.hash.<EXPR> );
-				die self.new-term
+				return False
 			}
 			return True
 		}
@@ -1862,5 +1871,4 @@ class Perl6::Tidy::Validator {
 			and self.blockoid( $parsed.hash.<blockoid> );
 		return False
 	}
-
 }

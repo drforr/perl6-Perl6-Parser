@@ -11,7 +11,7 @@ subtest {
 	plan 1;
 
 	my $parsed = $pt.tidy( Q[sub foo { }] );
-	isa-ok $parsed, Q{Root};
+	isa-ok $parsed, Q{Perl6::Tidy::Root};
 }, Q{empty};
 
 subtest {
@@ -26,7 +26,7 @@ subtest {
 			my $parsed = $pt.tidy( Q:to[_END_] );
 sub foo( 0 ) { }
 _END_
-			isa-ok $parsed, Q{Root};
+			isa-ok $parsed, Q{Perl6::Tidy::Root};
 		}, Q{constant};
 
 		subtest {
@@ -35,7 +35,7 @@ _END_
 			my $parsed = $pt.tidy( Q:to[_END_] );
 sub foo( $a ) { }
 _END_
-			isa-ok $parsed, Q{Root};
+			isa-ok $parsed, Q{Perl6::Tidy::Root};
 		}, Q{untyped};
 
 		subtest {
@@ -47,7 +47,7 @@ _END_
 				my $parsed = $pt.tidy( Q:to[_END_] );
 sub foo( Str $a ) { }
 _END_
-				isa-ok $parsed, Q{Root};
+				isa-ok $parsed, Q{Perl6::Tidy::Root};
 			}, Q{typed};
 
 			subtest {
@@ -56,7 +56,7 @@ _END_
 				my $parsed = $pt.tidy( Q:to[_END_] );
 sub foo( ::T $a ) { }
 _END_
-				isa-ok $parsed, Q{Root};
+				isa-ok $parsed, Q{Perl6::Tidy::Root};
 			}, Q{type-capture};
 
 			subtest {
@@ -65,7 +65,7 @@ _END_
 				my $parsed = $pt.tidy( Q:to[_END_] );
 sub foo( Str ) { }
 _END_
-				isa-ok $parsed, Q{Root};
+				isa-ok $parsed, Q{Perl6::Tidy::Root};
 			}, Q{type-only};
 
 			subtest {
@@ -74,7 +74,7 @@ _END_
 				my $parsed = $pt.tidy( Q:to[_END_] );
 sub foo( Str $a where "foo" ) { }
 _END_
-				isa-ok $parsed, Q{Root};
+				isa-ok $parsed, Q{Perl6::Tidy::Root};
 			}, Q{type-constrained};
 		}, Q{typed};
 
@@ -84,7 +84,7 @@ _END_
 			my $parsed = $pt.tidy( Q:to[_END_] );
 sub foo( $a = 0 ) { }
 _END_
-			isa-ok $parsed, Q{Root};
+			isa-ok $parsed, Q{Perl6::Tidy::Root};
 		}, Q{default};
 
 		subtest {
@@ -93,7 +93,7 @@ _END_
 			my $parsed = $pt.tidy( Q:to[_END_] );
 sub foo( :$a ) { }
 _END_
-			isa-ok $parsed, Q{Root};
+			isa-ok $parsed, Q{Perl6::Tidy::Root};
 		}, Q{optional};
 	}, Q{single};
 
@@ -103,7 +103,7 @@ _END_
 		my $parsed = $pt.tidy( Q:to[_END_] );
 sub foo( $a, $b ) { }
 _END_
-		isa-ok $parsed, Q{Root};
+		isa-ok $parsed, Q{Perl6::Tidy::Root};
 	}, Q{multiple};
 }, Q{scalar arguments};
 
