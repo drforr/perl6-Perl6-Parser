@@ -84,11 +84,11 @@ class Perl6::Tidy::Validator {
 		return True if self.assert-hash-keys( $parsed,
 				[< deftermnow initializer term_init >],
 				[< trait >] )
-			and _DefTermNow.is-valid( $parsed.hash.<deftermnow> )
-			and _Initializer.is-valid( $parsed.hash.<initializer> )
-			and _TermInit.is-valid( $parsed.hash.<term_init> );
+			and self.deftermnow( $parsed.hash.<deftermnow> )
+			and self.initializer( $parsed.hash.<initializer> )
+			and self.terminit( $parsed.hash.<term_init> );
 		return True if self.assert-hash-keys( $parsed, [< EXPR >] )
-			and _EXPR.is-valid( $parsed.hash.<EXPR> );
+			and self.EXPR( $parsed.hash.<EXPR> );
 		return True if self.assert-Bool( $parsed );
 		return False
 	}
@@ -100,20 +100,20 @@ class Perl6::Tidy::Validator {
 
 	method assertion( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< var >] )
-			and _Var.is-valid( $parsed.hash.<var> );
+			and self.var( $parsed.hash.<var> );
 		return True if self.assert-hash-keys( $parsed, [< longname >] )
-			and _LongName.is-valid( $parsed.hash.<longname> );
+			and self.longname( $parsed.hash.<longname> );
 		return True if self.assert-hash-keys( $parsed, [< cclass_elem >] )
-			and _CClassElem.is-valid( $parsed.hash.<cclass_elem> );
+			and self.cclass_elem( $parsed.hash.<cclass_elem> );
 		return True if self.assert-hash-keys( $parsed, [< codeblock >] )
-			and _CodeBlock.is-valid( $parsed.hash.<codeblock> );
+			and self.codeblock( $parsed.hash.<codeblock> );
 		return True if $parsed.Str;
 		return False
 	}
 
 	method atom( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< metachar >] )
-			and _MetaChar.is-valid( $parsed.hash.<metachar> );
+			and self.metachar( $parsed.hash.<metachar> );
 		return True if self.assert-Str( $parsed );
 		return False
 	}
@@ -126,7 +126,7 @@ class Perl6::Tidy::Validator {
 	method babble( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed,
 				[< B >], [< quotepair >] )
-			and _B.is-valid( $parsed.hash.<B> );
+			and self.B( $parsed.hash.<B> );
 		return False
 	}
 
@@ -137,7 +137,7 @@ class Perl6::Tidy::Validator {
 
 	method backslash( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< sym >] )
-			and _Sym.is-valid( $parsed.hash.<sym> );
+			and self.sym( $parsed.hash.<sym> );
 		return True if self.assert-Str( $parsed );
 		return False
 	}
@@ -150,27 +150,27 @@ class Perl6::Tidy::Validator {
 
 	method block( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< blockoid >] )
-			and _Blockoid.is-valid( $parsed.hash.<blockoid> );
+			and self.blockoid( $parsed.hash.<blockoid> );
 		return False
 	}
 
 	method blockoid( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< statementlist >] )
-			and _StatementList.is-valid( $parsed.hash.<statementlist> );
+			and self.statementlist( $parsed.hash.<statementlist> );
 		return False
 	}
 
 	method blorst( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< statement >] )
-			and _Statement.is-valid( $parsed.hash.<statement> );
+			and self.statement( $parsed.hash.<statement> );
 		return True if self.assert-hash-keys( $parsed, [< block >] )
-			and _Block.is-valid( $parsed.hash.<block> );
+			and self.block( $parsed.hash.<block> );
 		return False
 	}
 
 	method bracket( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< semilist >] )
-			and _SemiList.is-valid( $parsed.hash.<semilist> );
+			and self.semilist( $parsed.hash.<semilist> );
 		return False
 	}
 
@@ -180,10 +180,13 @@ class Perl6::Tidy::Validator {
 				next if self.assert-hash-keys( $_,
 						[< identifier name sign >],
 						[< charspec >] )
-					and _Identifier_Name_Sign.is-valid( $_ );
+					and self.identifier( $_.hash.<identifier> )
+					and self.name( $_.hash.<name> )
+					and self.charspec( $_.hash.<charspec> );
 				next if self.assert-hash-keys( $_,
 						[< sign charspec >] )
-					and _Sign_CharSpec.is-valid( $_ );
+					and self.sign( $_.hash.<sign> )
+					and self.charspec( $_.hash.<charspec> );
 				die self.new-term
 			}
 			return True
@@ -199,26 +202,26 @@ class Perl6::Tidy::Validator {
 
 	method circumfix( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< nibble >] )
-			and _Nibble.is-valid( $parsed.hash.<nibble> );
+			and self.nibble( $parsed.hash.<nibble> );
 		return True if self.assert-hash-keys( $parsed, [< pblock >] )
-			and _PBlock.is-valid( $parsed.hash.<pblock> );
+			and self.pblock( $parsed.hash.<pblock> );
 		return True if self.assert-hash-keys( $parsed, [< semilist >] )
-			and _SemiList.is-valid( $parsed.hash.<semilist> );
+			and self.semilist( $parsed.hash.<semilist> );
 		return True if self.assert-hash-keys( $parsed, [< binint VALUE >] )
-			and _BinInt.is-valid( $parsed.hash.<binint> )
-			and _VALUE.is-valid( $parsed.hash.<VALUE> );
+			and self.binint( $parsed.hash.<binint> )
+			and self.VALUE( $parsed.hash.<VALUE> );
 		return True if self.assert-hash-keys( $parsed, [< octint VALUE >] )
-			and _OctInt.is-valid( $parsed.hash.<octint> )
-			and _VALUE.is-valid( $parsed.hash.<VALUE> );
+			and self.octint( $parsed.hash.<octint> )
+			and self.VALUE( $parsed.hash.<VALUE> );
 		return True if self.assert-hash-keys( $parsed, [< hexint VALUE >] )
-			and _HexInt.is-valid( $parsed.hash.<hexint> )
-			and _VALUE.is-valid( $parsed.hash.<VALUE> );
+			and self.hexint( $parsed.hash.<hexint> )
+			and self.VALUE( $parsed.hash.<VALUE> );
 		return False
 	}
 
 	method codeblock( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< block >] )
-			and _Block.is-valid( $parsed.hash.<block> );
+			and self.block( $parsed.hash.<block> );
 		return False
 	}
 
@@ -232,27 +235,27 @@ class Perl6::Tidy::Validator {
 
 	method coercee( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< semilist >] )
-			and _SemiList.is-valid( $parsed.hash.<semilist> );
+			and self.semilist( $parsed.hash.<semilist> );
 		return False
 	}
 
 	method coloncircumfix( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< circumfix >] )
-			and _Circumfix.is-valid( $parsed.hash.<circumfix> );
+			and self.circumfix( $parsed.hash.<circumfix> );
 		return False
 	}
 
 	method colonpair( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed,
 				     [< identifier coloncircumfix >] )
-			and _Identifier.is-valid( $parsed.hash.<identifier> )
-			and _ColonCircumfix.is-valid( $parsed.hash.<coloncircumfix> );
+			and self.identifier( $parsed.hash.<identifier> )
+			and self.coloncircumfix( $parsed.hash.<coloncircumfix> );
 		return True if self.assert-hash-keys( $parsed, [< identifier >] )
-			and _Identifier.is-valid( $parsed.hash.<identifier> );
+			and self.identifier( $parsed.hash.<identifier> );
 		return True if self.assert-hash-keys( $parsed, [< fakesignature >] )
-			and _FakeSignature.is-valid( $parsed.hash.<fakesignature> );
+			and self.fakesignature( $parsed.hash.<fakesignature> );
 		return True if self.assert-hash-keys( $parsed, [< var >] )
-			and _Var.is-valid( $parsed.hash.<var> );
+			and self.var( $parsed.hash.<var> );
 		return False
 	}
 
@@ -267,9 +270,9 @@ class Perl6::Tidy::Validator {
 	method contextualizer( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed,
 				[< coercee circumfix sigil >] )
-			and _Coercee.is-valid( $parsed.hash.<coercee> )
-			and _Circumfix.is-valid( $parsed.hash.<circumfix> )
-			and _Sigil.is-valid( $parsed.hash.<sigil> );
+			and self.coercee( $parsed.hash.<coercee> )
+			and self.circumfix( $parsed.hash.<circumfix> )
+			and self.sigil( $parsed.hash.<sigil> );
 		return False
 	}
 
@@ -283,134 +286,134 @@ class Perl6::Tidy::Validator {
 		return True if self.assert-hash-keys( $parsed,
 				[< deftermnow initializer term_init >],
 				[< trait >] )
-			and _DefTermNow.is-valid( $parsed.hash.<deftermnow> )
-			and _Initializer.is-valid( $parsed.hash.<initializer> )
-			and _TermInit.is-valid( $parsed.hash.<term_init> );
+			and self.deftermnow( $parsed.hash.<deftermnow> )
+			and self.initializer( $parsed.hash.<initializer> )
+			and self.terminit( $parsed.hash.<term_init> );
 		return True if self.assert-hash-keys( $parsed,
 				[< initializer signature >], [< trait >] )
-			and _Initializer.is-valid( $parsed.hash.<initializer> )
-			and _Signature.is-valid( $parsed.hash.<signature> );
+			and self.initializer( $parsed.hash.<initializer> )
+			and self.signature( $parsed.hash.<signature> );
 		return True if self.assert-hash-keys( $parsed,
 				  [< initializer variable_declarator >],
 				  [< trait >] )
-			and _Initializer.is-valid( $parsed.hash.<initializer> )
-			and _VariableDeclarator.is-valid( $parsed.hash.<variable_declarator> );
+			and self.initializer( $parsed.hash.<initializer> )
+			and self.variable_declarator( $parsed.hash.<variable_declarator> );
 		return True if self.assert-hash-keys( $parsed,
 				[< variable_declarator >], [< trait >] )
-			and _VariableDeclarator.is-valid( $parsed.hash.<variable_declarator> );
+			and self.variable_declarator( $parsed.hash.<variable_declarator> );
 		return True if self.assert-hash-keys( $parsed,
 				[< regex_declarator >], [< trait >] )
-			and _RegexDeclarator.is-valid( $parsed.hash.<regex_declarator> );
+			and self.regex_declarator( $parsed.hash.<regex_declarator> );
 		return True if self.assert-hash-keys( $parsed,
 				[< routine_declarator >], [< trait >] )
-			and _RoutineDeclarator.is-valid( $parsed.hash.<routine_declarator> );
+			and self.routine_declarator( $parsed.hash.<routine_declarator> );
 		return True if self.assert-hash-keys( $parsed,
 				[< signature >], [< trait >] )
-			and _Signature.is-valid( $parsed.hash.<signature> );
+			and self.signature( $parsed.hash.<signature> );
 		return False
 	}
 
 	method declarator( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed,
 				[< deftermnow initializer term_init >], [< trait >] )
-			and _DefTermNow.is-valid( $parsed.hash.<deftermnow> )
-			and _Initializer.is-valid( $parsed.hash.<initializer> )
-			and _TermInit.is-valid( $parsed.hash.<term_init> );
+			and self.deftermnow( $parsed.hash.<deftermnow> )
+			and self.initializer( $parsed.hash.<initializer> )
+			and self.terminit( $parsed.hash.<term_init> );
 		return True if self.assert-hash-keys( $parsed,
 				[< deftermnow initializer signature >], [< trait >] )
-			and _DefTermNow.is-valid( $parsed.hash.<deftermnow> )
-			and _Initializer.is-valid( $parsed.hash.<initializer> )
-			and _Signature.is-valid( $parsed.hash.<signature> );
+			and self.deftermnow( $parsed.hash.<deftermnow> )
+			and self.initializer( $parsed.hash.<initializer> )
+			and self.signature( $parsed.hash.<signature> );
 		return True if self.assert-hash-keys( $parsed,
 				[< initializer signature >], [< trait >] )
-			and _Initializer.is-valid( $parsed.hash.<initializer> )
-			and _Signature.is-valid( $parsed.hash.<signature> );
+			and self.initializer( $parsed.hash.<initializer> )
+			and self.signature( $parsed.hash.<signature> );
 		return True if self.assert-hash-keys( $parsed,
 					  [< initializer variable_declarator >],
 					  [< trait >] )
-			and _Initializer.is-valid( $parsed.hash.<initializer> )
-			and _VariableDeclarator.is-valid( $parsed.hash.<variable_declarator> );
+			and self.initializer( $parsed.hash.<initializer> )
+			and self.variable_declarator( $parsed.hash.<variable_declarator> );
 		return True if self.assert-hash-keys( $parsed,
 				[< signature >], [< trait >] )
-			and _Signature.is-valid( $parsed.hash.<signature> );
+			and self.signature( $parsed.hash.<signature> );
 		return True if self.assert-hash-keys( $parsed,
 					  [< variable_declarator >],
 					  [< trait >] )
-			and _VariableDeclarator.is-valid( $parsed.hash.<variable_declarator> );
+			and self.variable_declarator( $parsed.hash.<variable_declarator> );
 		return True if self.assert-hash-keys( $parsed,
 					  [< regex_declarator >],
 					  [< trait >] )
-			and _RegexDeclarator.is-valid( $parsed.hash.<regex_declarator> );
+			and self.regex_declarator( $parsed.hash.<regex_declarator> );
 		return True if self.assert-hash-keys( $parsed,
 					  [< routine_declarator >],
 					  [< trait >] )
-			and _RoutineDeclarator.is-valid( $parsed.hash.<routine_declarator> );
+			and self.routine_declarator( $parsed.hash.<routine_declarator> );
 		return True if self.assert-hash-keys( $parsed,
 					  [< package_def sym >] )
-			and _PackageDef.is-valid( $parsed.hash.<package_def> )
-			and _Sym.is-valid( $parsed.hash.<sym> );
+			and self.package_def( $parsed.hash.<package_def> )
+			and self.sym( $parsed.hash.<sym> );
 		return True if self.assert-hash-keys( $parsed,
 					  [< declarator >] )
-			and _Declarator.is-valid( $parsed.hash.<declarator> );
+			and self.declarator( $parsed.hash.<declarator> );
 		return False
 	}
 
 	method dec_number( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed,
 				  [< int coeff frac escale >] )
-			and _Int.is-valid( $parsed.hash.<int> )
-			and _Coeff.is-valid( $parsed.hash.<coeff> )
-			and _Frac.is-valid( $parsed.hash.<frac> )
-			and _EScale.is-valid( $parsed.hash.<escale> );
+			and self.int( $parsed.hash.<int> )
+			and self.coeff( $parsed.hash.<coeff> )
+			and self.frac( $parsed.hash.<frac> )
+			and self.escale( $parsed.hash.<escale> );
 		return True if self.assert-hash-keys( $parsed,
 				  [< coeff frac escale >] )
-			and _Coeff.is-valid( $parsed.hash.<coeff> )
-			and _Frac.is-valid( $parsed.hash.<frac> )
-			and _EScale.is-valid( $parsed.hash.<escale> );
+			and self.coeff( $parsed.hash.<coeff> )
+			and self.frac( $parsed.hash.<frac> )
+			and self.escale( $parsed.hash.<escale> );
 		return True if self.assert-hash-keys( $parsed,
 				  [< int coeff frac >] )
-			and _Int.is-valid( $parsed.hash.<int> )
-			and _Coeff.is-valid( $parsed.hash.<coeff> )
-			and _Frac.is-valid( $parsed.hash.<frac> );
+			and self.int( $parsed.hash.<int> )
+			and self.coeff( $parsed.hash.<coeff> )
+			and self.frac( $parsed.hash.<frac> );
 		return True if self.assert-hash-keys( $parsed,
 				  [< int coeff escale >] )
-			and _Int.is-valid( $parsed.hash.<int> )
-			and _Coeff.is-valid( $parsed.hash.<coeff> )
-			and _EScale.is-valid( $parsed.hash.<escale> );
+			and self.int( $parsed.hash.<int> )
+			and self.coeff( $parsed.hash.<coeff> )
+			and self.escale( $parsed.hash.<escale> );
 		return True if self.assert-hash-keys( $parsed,
 				  [< coeff frac >] )
-			and _Coeff.is-valid( $parsed.hash.<coeff> )
-			and _Frac.is-valid( $parsed.hash.<frac> );
+			and self.coeff( $parsed.hash.<coeff> )
+			and self.frac( $parsed.hash.<frac> );
 		return False
 	}
 
 	method deflongname( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed,
 				[< name >], [< colonpair >] )
-			and _Name.is-valid( $parsed.hash.<name> );
+			and self.name( $parsed.hash.<name> );
 		return False
 	}
 
 	method defterm( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed,
 				[< identifier colonpair >] )
-			and _Identifier.is-valid( $parsed.hash.<identifier> )
-			and _ColonPair.is-valid( $parsed.hash.<colonpair> );
+			and self.identifier( $parsed.hash.<identifier> )
+			and self.colonpair( $parsed.hash.<colonpair> );
 		return True if self.assert-hash-keys( $parsed,
 				[< identifier >], [< colonpair >] )
-			and _Identifier.is-valid( $parsed.hash.<identifier> );
+			and self.identifier( $parsed.hash.<identifier> );
 		return False
 	}
 
 	method deftermnow( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< defterm >] )
-			and _DefTerm.is-valid( $parsed.hash.<defterm> );
+			and self.defterm( $parsed.hash.<defterm> );
 		return False
 	}
 
 	method desigilname( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< longname >] )
-			and _LongName.is-valid( $parsed.hash.<longname> );
+			and self.longname( $parsed.hash.<longname> );
 		return True if $parsed.Str;
 		return False
 	}
@@ -440,42 +443,42 @@ class Perl6::Tidy::Validator {
 
 	method dotty( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< sym dottyop O >] )
-			and _Sym.is-valid( $parsed.hash.<sym> )
-			and _DottyOp.is-valid( $parsed.hash.<dottyop> )
-			and _O.is-valid( $parsed.hash.<O> );
+			and self.sym( $parsed.hash.<sym> )
+			and self.dottyop( $parsed.hash.<dottyop> )
+			and self.O( $parsed.hash.<O> );
 		return False
 	}
 
 	method dottyop( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed,
 				[< sym postop >], [< O >] )
-			and _Sym.is-valid( $parsed.hash.<sym> )
-			and _PostOp.is-valid( $parsed.hash.<postop> );
+			and self.sym( $parsed.hash.<sym> )
+			and self.postop( $parsed.hash.<postop> );
 		return True if self.assert-hash-keys( $parsed, [< methodop >] )
-			and _MethodOp.is-valid( $parsed.hash.<methodop> );
+			and self.methodop( $parsed.hash.<methodop> );
 		return True if self.assert-hash-keys( $parsed, [< colonpair >] )
-			and _ColonPair.is-valid( $parsed.hash.<colonpair> );
+			and self.colonpair( $parsed.hash.<colonpair> );
 		return False
 	}
 
 	method dottyopish( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< term >] )
-			and _Term.is-valid( $parsed.hash.<term> );
+			and self.term( $parsed.hash.<term> );
 		return False
 	}
 
 	method e1( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed,
 				[< scope_declarator >] )
-			and _ScopeDeclarator.is-valid( $parsed.hash.<scope_declarator> );
+			and self.scope_declarator( $parsed.hash.<scope_declarator> );
 		return False
 	}
 
 	method e2( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed,
 				[< infix OPER >] )
-			and _Infix.is-valid( $parsed.hash.<infix> )
-			and _OPER.is-valid( $parsed.hash.<OPER> );
+			and self.infix( $parsed.hash.<infix> )
+			and self.OPER( $parsed.hash.<OPER> );
 		return False
 	}
 
@@ -483,24 +486,24 @@ class Perl6::Tidy::Validator {
 		return True if self.assert-hash-keys( $parsed,
 				[< postfix OPER >],
 				[< postfix_prefix_meta_operator >] )
-			and _Postfix.is-valid( $parsed.hash.<postfix> )
-			and _OPER.is-valid( $parsed.hash.<OPER> );
+			and self.postfix( $parsed.hash.<postfix> )
+			and self.OPER( $parsed.hash.<OPER> );
 		return False
 	}
 
 	method else( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< sym blorst >] )
-			and _Sym.is-valid( $parsed.hash.<sym> )
-			and _Blorst.is-valid( $parsed.hash.<blorst> );
+			and self.sym( $parsed.hash.<sym> )
+			and self.blorst( $parsed.hash.<blorst> );
 		return True if self.assert-hash-keys( $parsed, [< blockoid >] )
-			and _Blockoid.is-valid( $parsed.hash.<blockoid> );
+			and self.blockoid( $parsed.hash.<blockoid> );
 		return False
 	}
 
 	method escale( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< sign decint >] )
-			and _Sign.is-valid( $parsed.hash.<sign> )
-			and _DecInt.is-valid( $parsed.hash.<decint> );
+			and self.sign( $parsed.hash.<sign> )
+			and self.decint( $parsed.hash.<decint> );
 		return False
 	}
 
@@ -510,177 +513,175 @@ class Perl6::Tidy::Validator {
 				next if self.assert-hash-keys( $_,
 						[< dotty OPER >],
 						[< postfix_prefix_meta_operator >] )
-					and _Dotty_OPER.is-valid( $_ );
+					and self.dotty( $_.hash.<dotty> )
+					and self.OPER( $_.hash.<OPER> );
 				next if self.assert-hash-keys( $_,
 					[< postcircumfix OPER >],
 					[< postfix_prefix_meta_operator >] )
-					and _PostCircumfix_OPER.is-valid( $_ );
+					and self.postcircumfix( $_.hash.<postcircumfix> )
+					and self.OPER( $_.hash.<OPER> );
 				next if self.assert-hash-keys( $_,
 						[< infix OPER >],
 						[< infix_postfix_meta_operator >] )
-					and _Infix_OPER.is-valid( $_ );
+					and self.infix( $_.hash.<infix> )
+					and self.OPER( $_.hash.<OPER> );
 				next if self.assert-hash-keys( $_,
 						[< prefix OPER >],
 						[< prefix_postfix_meta_operator >] )
-					and _Prefix_OPER.is-valid( $_ );
+					and self.prefix( $_.hash.<prefix> )
+					and self.OPER( $_.hash.<OPER> );
 				next if self.assert-hash-keys( $_,
 						[< postfix OPER >],
 						[< postfix_prefix_meta_operator >] )
-					and _Postfix_OPER.is-valid( $_ );
+					and self.postfix( $_.hash.<postfix> )
+					and self.OPER( $_.hash.<OPER> );
 				next if self.assert-hash-keys( $_,
 						[< identifier args >] )
-					and _Identifier_Args.is-valid( $_ );
+					and self.identifier( $_.hash.<identifier> )
+					and self.args( $_.hash.<args> );
 				next if self.assert-hash-keys( $_,
 					[< infix_prefix_meta_operator OPER >] )
-					and _InfixPrefixMetaOperator_OPER.is-valid( $_ );
+					and self.infixprefixmetaoperator( $_ )
+					and self.OPER( $_.hash.<OPER> );
 				next if self.assert-hash-keys( $_,
 						[< longname args >] )
-					and _LongName_Args.is-valid( $_ );
+					and self.longname( $_.hash.<longname> )
+					and self.args( $_.hash.<args> );
 				next if self.assert-hash-keys( $_,
 						[< args op >] )
-					and _Args_Op.is-valid( $_ );
-				# XXX The *hell*?...
-				# Actually it's just a consequence of how the
-				# compound terms are structured.
-				#
-				# They really need to be singularized, but
-				# until that happens, what's happening here
-				# really is a hash access.
-				#
-				# But I'm wondering why it took breaking out
-				# the validation into a separate method
-				# in order to find the bug.
+					and self.args( $_.hash.<args> )
+					and self.op( $_.hash.<op> );
 				next if self.assert-hash-keys( $_, [< value >] )
-					and _Value.is-valid( $_.hash.<value> );
+					and self.value( $_.hash.<value> );
 				next if self.assert-hash-keys( $_, [< longname >] )
-					and _LongName.is-valid( $_.hash.<longname> );
+					and self.longname( $_.hash.<longname> );
 				next if self.assert-hash-keys( $_, [< variable >] )
-					and _Variable.is-valid( $_.hash.<variable> );
+					and self.variable( $_.hash.<variable> );
 				next if self.assert-hash-keys( $_, [< methodop >] )
-					and _MethodOp.is-valid( $_.hash.<methodop> );
+					and self.methodop( $_.hash.<methodop> );
 				next if self.assert-hash-keys( $_, [< package_declarator >] )
-					and _PackageDeclarator.is-valid( $_.hash.<package_declarator> );
+					and self.package_declarator( $_.hash.<package_declarator> );
 				next if self.assert-hash-keys( $_, [< sym >] )
-					and _Sym.is-valid( $_.hash.<sym> );
+					and self.sym( $_.hash.<sym> );
 				next if self.assert-hash-keys( $_, [< scope_declarator >] )
-					and _ScopeDeclarator.is-valid( $_.hash.<scope_declarator> );
+					and self.scope_declarator( $_.hash.<scope_declarator> );
 				next if self.assert-hash-keys( $_, [< dotty >] )
-					and _Dotty.is-valid( $_.hash.<dotty> );
+					and self.dotty( $_.hash.<dotty> );
 				next if self.assert-hash-keys( $_, [< circumfix >] )
-					and _Circumfix.is-valid( $_.hash.<circumfix> );
+					and self.circumfix( $_.hash.<circumfix> );
 				next if self.assert-hash-keys( $_, [< fatarrow >] )
-					and _FatArrow.is-valid( $_.hash.<fatarrow> );
+					and self.fatarrow( $_.hash.<fatarrow> );
 				next if self.assert-hash-keys( $_, [< statement_prefix >] )
-					and _StatementPrefix.is-valid( $_.hash.<statement_prefix> );
+					and self.statementprefix( $_.hash.<statement_prefix> );
 				next if self.assert-Str( $_ );
 				die self.new-term
 			}
 			return True if self.assert-hash-keys(
 					$parsed,
 					[< fake_infix OPER colonpair >] )
-				and _FakeInfix.is-valid( $parsed.hash.<fake_infix> )
-				and _OPER.is-valid( $parsed.hash.<OPER> )
-				and _ColonPair.is-valid( $parsed.hash.<colonpair> );
+				and self.fakeinfix( $parsed.hash.<fake_infix> )
+				and self.OPER( $parsed.hash.<OPER> )
+				and self.colonpair( $parsed.hash.<colonpair> );
 			return True if self.assert-hash-keys(
 					$parsed,
 					[< OPER dotty >],
 					[< postfix_prefix_meta_operator >] )
-				and _OPER.is-valid( $parsed.hash.<OPER> )
-				and _Dotty.is-valid( $parsed.hash.<dotty> );
+				and self.OPER( $parsed.hash.<OPER> )
+				and self.dotty( $parsed.hash.<dotty> );
 			return True if self.assert-hash-keys(
 					$parsed,
 					[< postfix OPER >],
 					[< postfix_prefix_meta_operator >] )
-				and _Postfix.is-valid( $parsed.hash.<postfix> )
-				and _OPER.is-valid( $parsed.hash.<OPER> );
+				and self.postfix( $parsed.hash.<postfix> )
+				and self.OPER( $parsed.hash.<OPER> );
 			return True if self.assert-hash-keys(
 					$parsed,
 					[< infix OPER >],
 					[< prefix_postfix_meta_operator >] )
-				and _Infix.is-valid( $parsed.hash.<infix> )
-				and _OPER.is-valid( $parsed.hash.<OPER> );
+				and self.infix( $parsed.hash.<infix> )
+				and self.OPER( $parsed.hash.<OPER> );
 			return True if self.assert-hash-keys(
 					$parsed,
 					[< prefix OPER >],
 					[< prefix_postfix_meta_operator >] )
-				and _Prefix.is-valid( $parsed.hash.<prefix> )
-				and _OPER.is-valid( $parsed.hash.<OPER> );
+				and self.prefix( $parsed.hash.<prefix> )
+				and self.OPER( $parsed.hash.<OPER> );
 			return True if self.assert-hash-keys(
 					$parsed,
 					[< postcircumfix OPER >],
 					[< postfix_prefix_meta_operator >] )
-				and _PostCircumfix.is-valid( $parsed.hash.<postcircumfix> )
-				and _OPER.is-valid( $parsed.hash.<OPER> );
+				and self.postcircumfix( $parsed.hash.<postcircumfix> )
+				and self.OPER( $parsed.hash.<OPER> );
 			return True if self.assert-hash-keys( $parsed,
 					[< OPER >],
 					[< infix_prefix_meta_operator >] )
-				and _OPER.is-valid( $parsed.hash.<OPER> );
+				and self.OPER( $parsed.hash.<OPER> );
 			die self.new-term
 		}
 		return True if self.assert-hash-keys( $parsed,
 				[< args op triangle >] )
-			and _Args.is-valid( $parsed.hash.<args> )
-			and _Op.is-valid( $parsed.hash.<op> )
-			and _Triangle.is-valid( $parsed.hash.<triangle> );
+			and self.args( $parsed.hash.<args> )
+			and self.op( $parsed.hash.<op> )
+			and self.triangle( $parsed.hash.<triangle> );
 		return True if self.assert-hash-keys( $parsed, [< longname args >] )
-			and _LongName.is-valid( $parsed.hash.<longname> )
-			and _Args.is-valid( $parsed.hash.<args> );
+			and self.longname( $parsed.hash.<longname> )
+			and self.args( $parsed.hash.<args> );
 		return True if self.assert-hash-keys( $parsed, [< identifier args >] )
-			and _Identifier.is-valid( $parsed.hash.<identifier> )
-			and _Args.is-valid( $parsed.hash.<args> );
+			and self.identifier( $parsed.hash.<identifier> )
+			and self.args( $parsed.hash.<args> );
 		return True if self.assert-hash-keys( $parsed, [< args op >] )
-			and _Args.is-valid( $parsed.hash.<args> )
-			and _Op.is-valid( $parsed.hash.<op> );
+			and self.args( $parsed.hash.<args> )
+			and self.op( $parsed.hash.<op> );
 		return True if self.assert-hash-keys( $parsed, [< sym args >] )
-			and _Sym.is-valid( $parsed.hash.<sym> )
-			and _Args.is-valid( $parsed.hash.<args> );
+			and self.sym( $parsed.hash.<sym> )
+			and self.args( $parsed.hash.<args> );
 		return True if self.assert-hash-keys( $parsed, [< statement_prefix >] )
-			and _StatementPrefix.is-valid( $parsed.hash.<statement_prefix> );
+			and self.statementprefix( $parsed.hash.<statement_prefix> );
 		return True if self.assert-hash-keys( $parsed, [< type_declarator >] )
-			and _TypeDeclarator.is-valid( $parsed.hash.<type_declarator> );
+			and self.type_declarator( $parsed.hash.<type_declarator> );
 		return True if self.assert-hash-keys( $parsed, [< longname >] )
-			and _LongName.is-valid( $parsed.hash.<longname> );
+			and self.longname( $parsed.hash.<longname> );
 		return True if self.assert-hash-keys( $parsed, [< value >] )
-			and _Value.is-valid( $parsed.hash.<value> );
+			and self.value( $parsed.hash.<value> );
 		return True if self.assert-hash-keys( $parsed, [< variable >] )
-			and _Variable.is-valid( $parsed.hash.<variable> );
+			and self.variable( $parsed.hash.<variable> );
 		return True if self.assert-hash-keys( $parsed, [< circumfix >] )
-			and _Circumfix.is-valid( $parsed.hash.<circumfix> );
+			and self.circumfix( $parsed.hash.<circumfix> );
 		return True if self.assert-hash-keys( $parsed, [< colonpair >] )
-			and _ColonPair.is-valid( $parsed.hash.<colonpair> );
+			and self.colonpair( $parsed.hash.<colonpair> );
 		return True if self.assert-hash-keys( $parsed, [< scope_declarator >] )
-			and _ScopeDeclarator.is-valid( $parsed.hash.<scope_declarator> );
+			and self.scope_declarator( $parsed.hash.<scope_declarator> );
 		return True if self.assert-hash-keys( $parsed, [< routine_declarator >] )
-			and _RoutineDeclarator.is-valid( $parsed.hash.<routine_declarator> );
+			and self.routine_declarator( $parsed.hash.<routine_declarator> );
 		return True if self.assert-hash-keys( $parsed, [< package_declarator >] )
-			and _PackageDeclarator.is-valid( $parsed.hash.<package_declarator> );
+			and self.package_declarator( $parsed.hash.<package_declarator> );
 		return True if self.assert-hash-keys( $parsed, [< fatarrow >] )
-			and _FatArrow.is-valid( $parsed.hash.<fatarrow> );
+			and self.fatarrow( $parsed.hash.<fatarrow> );
 		return True if self.assert-hash-keys( $parsed, [< multi_declarator >] )
-			and _MultiDeclarator.is-valid( $parsed.hash.<multi_declarator> );
+			and self.multi_declarator( $parsed.hash.<multi_declarator> );
 		return True if self.assert-hash-keys( $parsed, [< regex_declarator >] )
-			and _RegexDeclarator.is-valid( $parsed.hash.<regex_declarator> );
+			and self.regex_declarator( $parsed.hash.<regex_declarator> );
 		return True if self.assert-hash-keys( $parsed, [< dotty >] )
-			and _Dotty.is-valid( $parsed.hash.<dotty> );
+			and self.dotty( $parsed.hash.<dotty> );
 		return False
 	}
 
 	method fake_infix( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< O >] )
-			and _O.is-valid( $parsed.hash.<O> );
+			and self.O( $parsed.hash.<O> );
 		return False
 	}
 
 	method fakesignature( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< signature >] )
-			and _Signature.is-valid( $parsed.hash.<signature> );
+			and self.signature( $parsed.hash.<signature> );
 		return False
 	}
 
 	method fatarrow( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< val key >] )
-			and _Val.is-valid( $parsed.hash.<val> )
-			and _Key.is-valid( $parsed.hash.<key> );
+			and self.val( $parsed.hash.<val> )
+			and self.key( $parsed.hash.<key> );
 		return False
 	}
 
@@ -710,39 +711,39 @@ class Perl6::Tidy::Validator {
 
 	method infix( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< EXPR O >] )
-			and _EXPR.is-valid( $parsed.hash.<EXPR> )
-			and _O.is-valid( $parsed.hash.<O> );
+			and self.EXPR( $parsed.hash.<EXPR> )
+			and self.O( $parsed.hash.<O> );
 		return True if self.assert-hash-keys( $parsed, [< infix OPER >] )
-			and _Infix.is-valid( $parsed.hash.<infix> )
-			and _OPER.is-valid( $parsed.hash.<OPER> );
+			and self.infix( $parsed.hash.<infix> )
+			and self.OPER( $parsed.hash.<OPER> );
 		return True if self.assert-hash-keys( $parsed, [< sym O >] )
-			and _Sym.is-valid( $parsed.hash.<sym> )
-			and _O.is-valid( $parsed.hash.<O> );
+			and self.sym( $parsed.hash.<sym> )
+			and self.O( $parsed.hash.<O> );
 		return False
 	}
 
 	method infixish( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< infix OPER >] )
-			and _Infix.is-valid( $parsed.hash.<infix> )
-			and _OPER.is-valid( $parsed.hash.<OPER> );
+			and self.infix( $parsed.hash.<infix> )
+			and self.OPER( $parsed.hash.<OPER> );
 		return False
 	}
 
 	method infix_prefix_meta_operator( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< sym infixish O >] )
-			and _Sym.is-valid( $parsed.hash.<sym> )
-			and _Infixish.is-valid( $parsed.hash.<infixish> )
-			and _O.is-valid( $parsed.hash.<O> );
+			and self.sym( $parsed.hash.<sym> )
+			and self.infixish( $parsed.hash.<infixish> )
+			and self.O( $parsed.hash.<O> );
 		return False
 	}
 
 	method initializer( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< sym EXPR >] )
-			and _Sym.is-valid( $parsed.hash.<sym> )
-			and _EXPR.is-valid( $parsed.hash.<EXPR> );
+			and self.sym( $parsed.hash.<sym> )
+			and self.EXPR( $parsed.hash.<EXPR> );
 		return True if self.assert-hash-keys( $parsed, [< dottyopish sym >] )
-			and _DottyOpish.is-valid( $parsed.hash.<dottyopish> )
-			and _Sym.is-valid( $parsed.hash.<sym> );
+			and self.dottyopish( $parsed.hash.<dottyopish> )
+			and self.sym( $parsed.hash.<sym> );
 		return False
 	}
 
@@ -755,20 +756,20 @@ class Perl6::Tidy::Validator {
 	method integer( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed,
 				[< decint VALUE >] )
-			and _DecInt.is-valid( $parsed.hash.<decint> )
-			and _VALUE.is-valid( $parsed.hash.<VALUE> );
+			and self.decint( $parsed.hash.<decint> )
+			and self.VALUE( $parsed.hash.<VALUE> );
 		return True if self.assert-hash-keys( $parsed,
 				[< binint VALUE >] )
-			and _BinInt.is-valid( $parsed.hash.<binint> )
-			and _VALUE.is-valid( $parsed.hash.<VALUE> );
+			and self.binint( $parsed.hash.<binint> )
+			and self.VALUE( $parsed.hash.<VALUE> );
 		return True if self.assert-hash-keys( $parsed,
 				[< octint VALUE >] )
-			and _OctInt.is-valid( $parsed.hash.<octint> )
-			and _VALUE.is-valid( $parsed.hash.<VALUE> );
+			and self.octint( $parsed.hash.<octint> )
+			and self.VALUE( $parsed.hash.<VALUE> );
 		return True if self.assert-hash-keys( $parsed,
 				[< hexint VALUE >] )
-			and _HexInt.is-valid( $parsed.hash.<hexint> )
-			and _VALUE.is-valid( $parsed.hash.<VALUE> );
+			and self.hexint( $parsed.hash.<hexint> )
+			and self.VALUE( $parsed.hash.<VALUE> );
 		return False
 	}
 
@@ -784,7 +785,7 @@ class Perl6::Tidy::Validator {
 
 	method left( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< termseq >] )
-			and _TermSeq.is-valid( $parsed.hash.<termseq> );
+			and self.termseq( $parsed.hash.<termseq> );
 		return False
 	}
 
@@ -792,7 +793,7 @@ class Perl6::Tidy::Validator {
 		return True if self.assert-hash-keys( $parsed,
 				[< name >],
 				[< colonpair >] )
-			and _Name.is-valid( $parsed.hash.<name> );
+			and self.name( $parsed.hash.<name> );
 		return False
 	}
 
@@ -803,21 +804,21 @@ class Perl6::Tidy::Validator {
 
 	method metachar( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< sym >] )
-			and _Sym.is-valid( $parsed.hash.<sym> );
+			and self.sym( $parsed.hash.<sym> );
 		return True if self.assert-hash-keys( $parsed, [< codeblock >] )
-			and _CodeBlock.is-valid( $parsed.hash.<codeblock> );
+			and self.codeblock( $parsed.hash.<codeblock> );
 		return True if self.assert-hash-keys( $parsed, [< backslash >] )
-			and _BackSlash.is-valid( $parsed.hash.<backslash> );
+			and self.backslash( $parsed.hash.<backslash> );
 		return True if self.assert-hash-keys( $parsed, [< assertion >] )
-			and _Assertion.is-valid( $parsed.hash.<assertion> );
+			and self.assertion( $parsed.hash.<assertion> );
 		return True if self.assert-hash-keys( $parsed, [< nibble >] )
-			and _Nibble.is-valid( $parsed.hash.<nibble> );
+			and self.nibble( $parsed.hash.<nibble> );
 		return True if self.assert-hash-keys( $parsed, [< quote >] )
-			and _Quote.is-valid( $parsed.hash.<quote> );
+			and self.quote( $parsed.hash.<quote> );
 		return True if self.assert-hash-keys( $parsed, [< nibbler >] )
-			and _Nibbler.is-valid( $parsed.hash.<nibbler> );
+			and self.nibbler( $parsed.hash.<nibbler> );
 		return True if self.assert-hash-keys( $parsed, [< statement >] )
-			and _Statement.is-valid( $parsed.hash.<statement> );
+			and self.statement( $parsed.hash.<statement> );
 		return False
 	}
 
@@ -825,47 +826,47 @@ class Perl6::Tidy::Validator {
 		return True if self.assert-hash-keys( $parsed,
 			     [< specials longname blockoid multisig >],
 			     [< trait >] )
-			and _Specials.is-valid( $parsed.hash.<specials> )
-			and _LongName.is-valid( $parsed.hash.<longname> )
-			and _Blockoid.is-valid( $parsed.hash.<blockoid> )
-			and _MultiSig.is-valid( $parsed.hash.<multisig> );
+			and self.specials( $parsed.hash.<specials> )
+			and self.longname( $parsed.hash.<longname> )
+			and self.blockoid( $parsed.hash.<blockoid> )
+			and self.multisig( $parsed.hash.<multisig> );
 		return True if self.assert-hash-keys( $parsed,
 			     [< specials longname blockoid >],
 			     [< trait >] )
-			and _Specials.is-valid( $parsed.hash.<specials> )
-			and _LongName.is-valid( $parsed.hash.<longname> )
-			and _Blockoid.is-valid( $parsed.hash.<blockoid> );
+			and self.specials( $parsed.hash.<specials> )
+			and self.longname( $parsed.hash.<longname> )
+			and self.blockoid( $parsed.hash.<blockoid> );
 		return False
 	}
 
 	method methodop( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< longname args >] )
-			and _LongName.is-valid( $parsed.hash.<longname> )
-			and _Args.is-valid( $parsed.hash.<args> );
+			and self.longname( $parsed.hash.<longname> )
+			and self.args( $parsed.hash.<args> );
 		return True if self.assert-hash-keys( $parsed, [< variable >] )
-			and _Variable.is-valid( $parsed.hash.<variable> );
+			and self.variable( $parsed.hash.<variable> );
 		return True if self.assert-hash-keys( $parsed, [< longname >] )
-			and _LongName.is-valid( $parsed.hash.<longname> );
+			and self.longname( $parsed.hash.<longname> );
 		return False
 	}
 
 	method min( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed,
 				[< decint VALUE >] )
-			and _DecInt.is-valid( $parsed.hash.<decint> )
-			and _VALUE.is-valid( $parsed.hash.<VALUE> );
+			and self.decint( $parsed.hash.<decint> )
+			and self.VALUE( $parsed.hash.<VALUE> );
 		return False
 	}
 
 	method modifier_expr( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< EXPR >] )
-			and _EXPR.is-valid( $parsed.hash.<EXPR> );
+			and self.EXPR( $parsed.hash.<EXPR> );
 		return False
 	}
 
 	method module_name( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< longname >] )
-			and _LongName.is-valid( $parsed.hash.<longname> );
+			and self.longname( $parsed.hash.<longname> );
 		return False
 	}
 
@@ -874,7 +875,7 @@ class Perl6::Tidy::Validator {
 			for $parsed.list {
 				next if self.assert-hash-keys( $_,
 						[< identifier >] )
-					and _Identifier.is-valid( $_.hash.<identifier> );
+					and self.identifier( $_.hash.<identifier> );
 				die self.new-term
 			}
 			return True
@@ -885,21 +886,21 @@ class Perl6::Tidy::Validator {
 	method multi_declarator( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed,
 				[< sym routine_def >] )
-			and _Sym.is-valid( $parsed.hash.<sym> )
-			and _RoutineDef.is-valid( $parsed.hash.<routine_def> );
+			and self.sym( $parsed.hash.<sym> )
+			and self.routine_def( $parsed.hash.<routine_def> );
 		return True if self.assert-hash-keys( $parsed,
 				[< sym declarator >] )
-			and _Sym.is-valid( $parsed.hash.<sym> )
-			and _Declarator.is-valid( $parsed.hash.<declarator> );
+			and self.sym( $parsed.hash.<sym> )
+			and self.declarator( $parsed.hash.<declarator> );
 		return True if self.assert-hash-keys( $parsed,
 				[< declarator >] )
-			and _Declarator.is-valid( $parsed.hash.<declarator> );
+			and self.declarator( $parsed.hash.<declarator> );
 		return False
 	}
 
 	method multisig( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< signature >] )
-			and _Signature.is-valid( $parsed.hash.<signature> );
+			and self.signature( $parsed.hash.<signature> );
 		return False
 	}
 
@@ -907,17 +908,17 @@ class Perl6::Tidy::Validator {
 		return True if self.assert-hash-keys( $parsed,
 			[< param_var type_constraint quant >],
 			[< default_value modifier trait post_constraint >] )
-			and _ParamVar.is-valid( $parsed.hash.<param_var> )
-			and _TypeConstraint.is-valid( $parsed.hash.<type_constraint> )
-			and _Quant.is-valid( $parsed.hash.<quant> );
+			and self.paramvar( $parsed.hash.<param_var> )
+			and self.type_constraint( $parsed.hash.<type_constraint> )
+			and self.quant( $parsed.hash.<quant> );
 		return True if self.assert-hash-keys( $parsed,
 				[< identifier >], [< morename >] )
-			and _Identifier.is-valid( $parsed.hash.<identifier> );
+			and self.identifier( $parsed.hash.<identifier> );
 		return True if self.assert-hash-keys( $parsed,
 				[< subshortname >] )
-			and _SubShortName.is-valid( $parsed.hash.<subshortname> );
+			and self.subshortname( $parsed.hash.<subshortname> );
 		return True if self.assert-hash-keys( $parsed, [< morename >] )
-			and _MoreName.is-valid( $parsed.hash.<morename> );
+			and self.morename( $parsed.hash.<morename> );
 		return True if self.assert-Str( $parsed );
 		return False
 	}
@@ -925,13 +926,13 @@ class Perl6::Tidy::Validator {
 	method named_param( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed,
 				[< param_var >] )
-			and _ParamVar.is-valid( $parsed.hash.<param_var> );
+			and self.paramvar( $parsed.hash.<param_var> );
 		return False
 	}
 
 	method nibble( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< termseq >] )
-			and _TermSeq.is-valid( $parsed.hash.<termseq> );
+			and self.termseq( $parsed.hash.<termseq> );
 		return True if $parsed.Str;
 		return True if $parsed.Bool;
 		return False
@@ -939,7 +940,7 @@ class Perl6::Tidy::Validator {
 
 	method nibbler( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< termseq >] )
-			and _TermSeq.is-valid( $parsed.hash.<termseq> );
+			and self.termseq( $parsed.hash.<termseq> );
 		return False
 	}
 
@@ -954,21 +955,33 @@ class Perl6::Tidy::Validator {
 				next if self.assert-hash-keys( $_,
 					[< sigmaybe sigfinal
 					   quantifier atom >] )
-					and _SigMaybe_SigFinal_Quantifier_Atom.is-valid( $_ );
+					and self.signaybe( $_.hash.<signaybe> )
+					and self.sigfinal( $_.hash.<sigfinal> )
+					and self.quantifier( $_.hash.<quantifier> )
+					and self.atom( $_.hash.<atom> );
 				next if self.assert-hash-keys( $_,
 					[< sigfinal quantifier
 					   separator atom >] )
-					and _SigFinal_Quantifier_Separator_Atom.is-valid( $_ );
+					and self.sigfinal( $_.hash.<sigfinal> )
+					and self.quantifier( $_.hash.<quantifier> )
+					and self.separator( $_.hash.<separator> )
+					and self.atom( $_.hash.<atom> );
 				next if self.assert-hash-keys( $_,
 					[< sigmaybe sigfinal
 					   separator atom >] )
-					and _SigMaybe_SigFinal_Quantifier_Atom.is-valid( $_ );
+					and self.signaybe( $_.hash.<signaybe> )
+					and self.sigfinal( $_.hash.<sigfinal> )
+					and self.separator( $_.hash.<separator> )
+					and self.atom( $_.hash.<atom> );
 				next if self.assert-hash-keys( $_,
 					[< atom sigfinal quantifier >] )
-					and _Atom_SigFinal_Quantifier.is-valid( $_ );
+					and self.sigfinal( $_.hash.<sigfinal> )
+					and self.quantifier( $_.hash.<quantifier> )
+					and self.atom( $_.hash.<atom> );
 				next if self.assert-hash-keys( $_,
 						[< atom >], [< sigfinal >] )
-					and _Atom_SigFinal.is-valid( $_ );
+					and self.sigfinal( $_.hash.<sigfinal> )
+					and self.atom( $_.hash.<atom> );
 				die self.new-term
 			}
 			return True
@@ -978,17 +991,17 @@ class Perl6::Tidy::Validator {
 
 	method number( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< numish >] )
-			and _Numish.is-valid( $parsed.hash.<numish> );
+			and self.numish( $parsed.hash.<numish> );
 		return False
 	}
 
 	method numish( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< integer >] )
-			and _Integer.is-valid( $parsed.hash.<integer> );
+			and self.integer( $parsed.hash.<integer> );
 		return True if self.assert-hash-keys( $parsed, [< rad_number >] )
-			and _RadNumber.is-valid( $parsed.hash.<rad_number> );
+			and self.rad_number( $parsed.hash.<rad_number> );
 		return True if self.assert-hash-keys( $parsed, [< dec_number >] )
-			and _DecNumber.is-valid( $parsed.hash.<dec_number> );
+			and self.decnumber( $parsed.hash.<dec_number> );
 		return True if self.assert-Num( $parsed );
 		return False
 	}
@@ -1016,67 +1029,67 @@ class Perl6::Tidy::Validator {
 	method op( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed,
 			     [< infix_prefix_meta_operator OPER >] )
-			and _InfixPrefixMetaOperator.is-valid( $parsed.hash.<infix_prefix_meta_operator> )
-			and _OPER.is-valid( $parsed.hash.<OPER> );
+			and self.infixprefixmetaoperator( $parsed.hash.<infix_prefix_meta_operator> )
+			and self.OPER( $parsed.hash.<OPER> );
 		return True if self.assert-hash-keys( $parsed, [< infix OPER >] )
-			and _Infix.is-valid( $parsed.hash.<infix> )
-			and _OPER.is-valid( $parsed.hash.<OPER> );
+			and self.infix( $parsed.hash.<infix> )
+			and self.OPER( $parsed.hash.<OPER> );
 		return False
 	}
 
 	method OPER( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< sym dottyop O >] )
-			and _Sym.is-valid( $parsed.hash.<sym> )
-			and _DottyOp.is-valid( $parsed.hash.<dottyop> )
-			and _O.is-valid( $parsed.hash.<O> );
+			and self.sym( $parsed.hash.<sym> )
+			and self.dottyop( $parsed.hash.<dottyop> )
+			and self.O( $parsed.hash.<O> );
 		return True if self.assert-hash-keys( $parsed, [< sym infixish O >] )
-			and _Sym.is-valid( $parsed.hash.<sym> )
-			and _Infixish.is-valid( $parsed.hash.<infixish> )
-			and _O.is-valid( $parsed.hash.<O> );
+			and self.sym( $parsed.hash.<sym> )
+			and self.infixish( $parsed.hash.<infixish> )
+			and self.O( $parsed.hash.<O> );
 		return True if self.assert-hash-keys( $parsed, [< sym O >] )
-			and _Sym.is-valid( $parsed.hash.<sym> )
-			and _O.is-valid( $parsed.hash.<O> );
+			and self.sym( $parsed.hash.<sym> )
+			and self.O( $parsed.hash.<O> );
 		return True if self.assert-hash-keys( $parsed, [< EXPR O >] )
-			and _EXPR.is-valid( $parsed.hash.<EXPR> )
-			and _O.is-valid( $parsed.hash.<O> );
+			and self.EXPR( $parsed.hash.<EXPR> )
+			and self.O( $parsed.hash.<O> );
 		return True if self.assert-hash-keys( $parsed,
 				[< semilist O >] )
-			and _SemiList.is-valid( $parsed.hash.<semilist> )
-			and _O.is-valid( $parsed.hash.<O> );
+			and self.semilist( $parsed.hash.<semilist> )
+			and self.O( $parsed.hash.<O> );
 		return True if self.assert-hash-keys( $parsed, [< nibble O >] )
-			and _Nibble.is-valid( $parsed.hash.<nibble> )
-			and _O.is-valid( $parsed.hash.<O> );
+			and self.nibble( $parsed.hash.<nibble> )
+			and self.O( $parsed.hash.<O> );
 		return True if self.assert-hash-keys( $parsed, [< arglist O >] )
-			and _ArgList.is-valid( $parsed.hash.<arglist> )
-			and _O.is-valid( $parsed.hash.<O> );
+			and self.arglist( $parsed.hash.<arglist> )
+			and self.O( $parsed.hash.<O> );
 		return True if self.assert-hash-keys( $parsed, [< dig O >] )
-			and _Dig.is-valid( $parsed.hash.<dig> )
-			and _O.is-valid( $parsed.hash.<O> );
+			and self.dig( $parsed.hash.<dig> )
+			and self.O( $parsed.hash.<O> );
 		return True if self.assert-hash-keys( $parsed, [< O >] )
-			and _O.is-valid( $parsed.hash.<O> );
+			and self.O( $parsed.hash.<O> );
 		return False
 	}
 
 	method package_declarator( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed,
 				[< sym package_def >] )
-			and _Sym.is-valid( $parsed.hash.<sym> )
-			and _PackageDef.is-valid( $parsed.hash.<package_def> );
+			and self.sym( $parsed.hash.<sym> )
+			and self.package_def( $parsed.hash.<package_def> );
 		return False
 	}
 
 	method package_def( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed,
 				[< blockoid longname >], [< trait >] )
-			and _Blockoid.is-valid( $parsed.hash.<blockoid> )
-			and _LongName.is-valid( $parsed.hash.<longname> );
+			and self.blockoid( $parsed.hash.<blockoid> )
+			and self.longname( $parsed.hash.<longname> );
 		return True if self.assert-hash-keys( $parsed,
 				[< longname statementlist >], [< trait >] )
-			and _LongName.is-valid( $parsed.hash.<longname> )
-			and _StatementList.is-valid( $parsed.hash.<statementlist> );
+			and self.longname( $parsed.hash.<longname> )
+			and self.statementlist( $parsed.hash.<statementlist> );
 		return True if self.assert-hash-keys( $parsed,
 				[< blockoid >], [< trait >] )
-			and _Blockoid.is-valid( $parsed.hash.<blockoid> );
+			and self.blockoid( $parsed.hash.<blockoid> );
 		return False
 	}
 
@@ -1088,30 +1101,35 @@ class Perl6::Tidy::Validator {
 					[< param_var type_constraint quant >],
 					[< default_value modifier trait
 					   post_constraint >] )
-					and _ParamVar_TypeConstraint_Quant.is-valid( $_ );
+					and self.param_var( $_.hash.<param_var> )
+					and self.type_constraint( $_.hash.<type_constraint> )
+					and self.quant( $_.hash.<quant> );
 				next if self.assert-hash-keys( $_,
 					[< param_var quant >],
 					[< default_value modifier trait
 					   type_constraint
 					   post_constraint >] )
-					and _ParamVar_Quant.is-valid( $_ );
+					and self.param_var( $_.hash.<param_var> )
+					and self.quant( $_.hash.<quant> );
 				next if self.assert-hash-keys( $_,
 					[< named_param quant >],
 					[< default_value modifier
 					   post_constraint trait
 					   type_constraint >] )
-					and _NamedParam_Quant.is-valid( $_ );
+					and self.namedparam( $_.hash.<namedparam> )
+					and self.quant( $_.hash.<quant> );
 				next if self.assert-hash-keys( $_,
 					[< defterm quant >],
 					[< default_value modifier
 					   post_constraint trait
 					   type_constraint >] )
-					and _DefTerm_Quant.is-valid( $_ );
+					and self.defterm( $_.hash.<defterm> )
+					and self.quant( $_.hash.<quant> );
 				next if self.assert-hash-keys( $_,
 					[< type_constraint >],
 					[< param_var quant default_value						   modifier post_constraint trait
 					   type_constraint >] )
-					and _TypeConstraint.is-valid( $_.hash.<type_constraint> );
+					and self.type_constraint( $_.hash.<type_constraint> );
 				die self.new-term
 			}
 			return True
@@ -1122,70 +1140,70 @@ class Perl6::Tidy::Validator {
 	method param_var( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed,
 				[< name twigil sigil >] )
-			and _Name.is-valid( $parsed.hash.<name> )
-			and _Twigil.is-valid( $parsed.hash.<twigil> )
-			and _Sigil.is-valid( $parsed.hash.<sigil> );
+			and self.name( $parsed.hash.<name> )
+			and self.twigil( $parsed.hash.<twigil> )
+			and self.sigil( $parsed.hash.<sigil> );
 		return True if self.assert-hash-keys( $parsed, [< name sigil >] )
-			and _Name.is-valid( $parsed.hash.<name> )
-			and _Sigil.is-valid( $parsed.hash.<sigil> );
+			and self.name( $parsed.hash.<name> )
+			and self.sigil( $parsed.hash.<sigil> );
 		return True if self.assert-hash-keys( $parsed, [< signature >] )
-			and _Signature.is-valid( $parsed.hash.<signature> );
+			and self.signature( $parsed.hash.<signature> );
 		return True if self.assert-hash-keys( $parsed, [< sigil >] )
-			and _Sigil.is-valid( $parsed.hash.<sigil> );
+			and self.sigil( $parsed.hash.<sigil> );
 		return False
 	}
 
 	method pblock( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed,
 				     [< lambda blockoid signature >] )
-			and _Lambda.is-valid( $parsed.hash.<lambda> )
-			and _Blockoid.is-valid( $parsed.hash.<blockoid> )
-			and _Signature.is-valid( $parsed.hash.<signature> );
+			and self.lambda( $parsed.hash.<lambda> )
+			and self.blockoid( $parsed.hash.<blockoid> )
+			and self.signature( $parsed.hash.<signature> );
 		return True if self.assert-hash-keys( $parsed, [< blockoid >] )
-			and _Blockoid.is-valid( $parsed.hash.<blockoid> );
+			and self.blockoid( $parsed.hash.<blockoid> );
 		return False
 	}
 
 	method postcircumfix( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< nibble O >] )
-			and _Nibble.is-valid( $parsed.hash.<nibble> )
-			and _O.is-valid( $parsed.hash.<O> );
+			and self.nibble( $parsed.hash.<nibble> )
+			and self.O( $parsed.hash.<O> );
 		return True if self.assert-hash-keys( $parsed, [< semilist O >] )
-			and _SemiList.is-valid( $parsed.hash.<semilist> )
-			and _O.is-valid( $parsed.hash.<O> );
+			and self.semilist( $parsed.hash.<semilist> )
+			and self.O( $parsed.hash.<O> );
 		return True if self.assert-hash-keys( $parsed, [< arglist O >] )
-			and _ArgList.is-valid( $parsed.hash.<arglist> )
-			and _O.is-valid( $parsed.hash.<O> );
+			and self.arglist( $parsed.hash.<arglist> )
+			and self.O( $parsed.hash.<O> );
 		return False
 	}
 
 	method postfix( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< dig O >] )
-			and _Dig.is-valid( $parsed.hash.<dig> )
-			and _O.is-valid( $parsed.hash.<O> );
+			and self.dig( $parsed.hash.<dig> )
+			and self.O( $parsed.hash.<O> );
 		return True if self.assert-hash-keys( $parsed, [< sym O >] )
-			and _Sym.is-valid( $parsed.hash.<sym> )
-			and _O.is-valid( $parsed.hash.<O> );
+			and self.sym( $parsed.hash.<sym> )
+			and self.O( $parsed.hash.<O> );
 		return False
 	}
 
 	method postop( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed,
 				[< sym postcircumfix O >] )
-			and _Sym.is-valid( $parsed.hash.<sym> )
-			and _PostCircumfix.is-valid( $parsed.hash.<postcircumfix> )
-			and _O.is-valid( $parsed.hash.<O> );
+			and self.sym( $parsed.hash.<sym> )
+			and self.postcircumfix( $parsed.hash.<postcircumfix> )
+			and self.O( $parsed.hash.<O> );
 		return True if self.assert-hash-keys( $parsed,
 				[< sym postcircumfix >], [< O >] )
-			and _Sym.is-valid( $parsed.hash.<sym> )
-			and _PostCircumfix.is-valid( $parsed.hash.<postcircumfix> );
+			and self.sym( $parsed.hash.<sym> )
+			and self.postcircumfix( $parsed.hash.<postcircumfix> );
 		return False
 	}
 
 	method prefix( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< sym O >] )
-			and _Sym.is-valid( $parsed.hash.<sym> )
-			and _O.is-valid( $parsed.hash.<O> );
+			and self.sym( $parsed.hash.<sym> )
+			and self.O( $parsed.hash.<O> );
 		return False
 	}
 
@@ -1196,45 +1214,45 @@ class Perl6::Tidy::Validator {
 
 	method quantified_atom( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< sigfinal atom >] )
-			and _SigFinal.is-valid( $parsed.hash.<sigfinal> )
-			and _Atom.is-valid( $parsed.hash.<atom> );
+			and self.sigfinal( $parsed.hash.<sigfinal> )
+			and self.atom( $parsed.hash.<atom> );
 		return False
 	}
 
 	method quantifier( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< sym min max backmod >] )
-			and _Sym.is-valid( $parsed.hash.<sym> )
-			and _Min.is-valid( $parsed.hash.<min> )
-			and _Max.is-valid( $parsed.hash.<max> )
-			and _BackMod.is-valid( $parsed.hash.<backmod> );
+			and self.sym( $parsed.hash.<sym> )
+			and self.min( $parsed.hash.<min> )
+			and self.max( $parsed.hash.<max> )
+			and self.backmod( $parsed.hash.<backmod> );
 		return True if self.assert-hash-keys( $parsed, [< sym backmod >] )
-			and _Sym.is-valid( $parsed.hash.<sym> )
-			and _BackMod.is-valid( $parsed.hash.<backmod> );
+			and self.sym( $parsed.hash.<sym> )
+			and self.backmod( $parsed.hash.<backmod> );
 		return False
 	}
 
 	method quibble( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< babble nibble >] )
-			and _Babble.is-valid( $parsed.hash.<babble> )
-			and _Nibble.is-valid( $parsed.hash.<nibble> );
+			and self.babble( $parsed.hash.<babble> )
+			and self.nibble( $parsed.hash.<nibble> );
 		return False
 	}
 
 	method quote( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed,
 				[< sym quibble rx_adverbs >] )
-			and _Sym.is-valid( $parsed.hash.<sym> )
-			and _Quibble.is-valid( $parsed.hash.<quibble> )
-			and _RxAdverbs.is-valid( $parsed.hash.<rx_adverbs> );
+			and self.sym( $parsed.hash.<sym> )
+			and self.quibble( $parsed.hash.<quibble> )
+			and self.rxadverbs( $parsed.hash.<rx_adverbs> );
 		return True if self.assert-hash-keys( $parsed,
 				[< sym rx_adverbs sibble >] )
-			and _Sym.is-valid( $parsed.hash.<sym> )
-			and _RxAdverbs.is-valid( $parsed.hash.<rx_adverbs> )
-			and _Sibble.is-valid( $parsed.hash.<sibble> );
+			and self.sym( $parsed.hash.<sym> )
+			and self.rxadverbs( $parsed.hash.<rx_adverbs> )
+			and self.sibble( $parsed.hash.<sibble> );
 		return True if self.assert-hash-keys( $parsed, [< nibble >] )
-			and _Nibble.is-valid( $parsed.hash.<nibble> );
+			and self.nibble( $parsed.hash.<nibble> );
 		return True if self.assert-hash-keys( $parsed, [< quibble >] )
-			and _Quibble.is-valid( $parsed.hash.<quibble> );
+			and self.quibble( $parsed.hash.<quibble> );
 		return False
 	}
 
@@ -1243,19 +1261,19 @@ class Perl6::Tidy::Validator {
 			for $parsed.list {
 				next if self.assert-hash-keys( $_,
 					[< identifier >] )
-					and _Identifier.is-valid( $_.hash.<identifier> );
+					and self.identifier( $_.hash.<identifier> );
 				die self.new-term
 			}
 			return True
 		}
 		return True if self.assert-hash-keys( $parsed,
 				[< circumfix bracket radix >], [< exp base >] )
-			and _Circumfix.is-valid( $parsed.hash.<circumfix> )
-			and _Bracket.is-valid( $parsed.hash.<bracket> )
-			and _Radix.is-valid( $parsed.hash.<radix> );
+			and self.circumfix( $parsed.hash.<circumfix> )
+			and self.bracket( $parsed.hash.<bracket> )
+			and self.radix( $parsed.hash.<radix> );
 		return True if self.assert-hash-keys( $parsed,
 				[< identifier >] )
-			and _Identifier.is-valid( $parsed.hash.<identifier> );
+			and self.identifier( $parsed.hash.<identifier> );
 		return False
 	}
 
@@ -1267,20 +1285,20 @@ class Perl6::Tidy::Validator {
 	method rad_number( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed,
 				[< circumfix bracket radix >], [< exp base >] )
-			and _Circumfix.is-valid( $parsed.hash.<circumfix> )
-			and _Bracket.is-valid( $parsed.hash.<bracket> )
-			and _Radix.is-valid( $parsed.hash.<radix> );
+			and self.circumfix( $parsed.hash.<circumfix> )
+			and self.bracket( $parsed.hash.<bracket> )
+			and self.radix( $parsed.hash.<radix> );
 		return True if self.assert-hash-keys( $parsed,
 				[< circumfix radix >], [< exp base >] )
-			and _Circumfix.is-valid( $parsed.hash.<circumfix> )
-			and _Radix.is-valid( $parsed.hash.<radix> );
+			and self.circumfix( $parsed.hash.<circumfix> )
+			and self.radix( $parsed.hash.<radix> );
 		return False
 	}
 
 	method regex_declarator( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< sym regex_def >] )
-			and _Sym.is-valid( $parsed.hash.<sym> )
-			and _RegexDef.is-valid( $parsed.hash.<regex_def> );
+			and self.sym( $parsed.hash.<sym> )
+			and self.regexdef( $parsed.hash.<regex_def> );
 		return False
 	}
 
@@ -1288,8 +1306,8 @@ class Perl6::Tidy::Validator {
 		return True if self.assert-hash-keys( $parsed,
 				[< deflongname nibble >],
 				[< signature trait >] )
-			and _DefLongName.is-valid( $parsed.hash.<deflongname> )
-			and _Nibble.is-valid( $parsed.hash.<nibble> );
+			and self.deflongname( $parsed.hash.<deflongname> )
+			and self.nibble( $parsed.hash.<nibble> );
 		return False
 	}
 
@@ -1300,12 +1318,12 @@ class Perl6::Tidy::Validator {
 
 	method routine_declarator( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< sym method_def >] )
-			and _Sym.is-valid( $parsed.hash.<sym> )
-			and _MethodDef.is-valid( $parsed.hash.<method_def> );
+			and self.sym( $parsed.hash.<sym> )
+			and self.method_def( $parsed.hash.<method_def> );
 		return True if self.assert-hash-keys( $parsed,
 				[< sym routine_def >] )
-			and _Sym.is-valid( $parsed.hash.<sym> )
-			and _RoutineDef.is-valid( $parsed.hash.<routine_def> );
+			and self.sym( $parsed.hash.<sym> )
+			and self.routine_def( $parsed.hash.<routine_def> );
 		return False
 	}
 
@@ -1313,28 +1331,28 @@ class Perl6::Tidy::Validator {
 		return True if self.assert-hash-keys( $parsed,
 				[< blockoid deflongname multisig >],
 				[< trait >] )
-			and _Blockoid.is-valid( $parsed.hash.<blockoid> )
-			and _DefLongName.is-valid( $parsed.hash.<deflongname> )
-			and _MultiSig.is-valid( $parsed.hash.<multisig> );
+			and self.blockoid( $parsed.hash.<blockoid> )
+			and self.deflongname( $parsed.hash.<deflongname> )
+			and self.multisig( $parsed.hash.<multisig> );
 		return True if self.assert-hash-keys( $parsed,
 				[< blockoid deflongname >],
 				[< trait >] )
-			and _Blockoid.is-valid( $parsed.hash.<blockoid> )
-			and _DefLongName.is-valid( $parsed.hash.<deflongname> );
+			and self.blockoid( $parsed.hash.<blockoid> )
+			and self.deflongname( $parsed.hash.<deflongname> );
 		return True if self.assert-hash-keys( $parsed,
 				[< blockoid multisig >],
 				[< trait >] )
-			and _Blockoid.is-valid( $parsed.hash.<blockoid> )
-			and _MultiSig.is-valid( $parsed.hash.<multisig> );
+			and self.blockoid( $parsed.hash.<blockoid> )
+			and self.multisig( $parsed.hash.<multisig> );
 		return True if self.assert-hash-keys( $parsed,
 				[< blockoid >], [< trait >] )
-			and _Blockoid.is-valid( $parsed.hash.<blockoid> );
+			and self.blockoid( $parsed.hash.<blockoid> );
 		return False
 	}
 
 	method rx_adverbs( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< quotepair >] )
-			and _QuotePair.is-valid( $parsed.hash.<quotepair> );
+			and self.quotepair( $parsed.hash.<quotepair> );
 		return True if self.assert-hash-keys( $parsed,
 				[], [< quotepair >] );
 		return False
@@ -1343,25 +1361,25 @@ class Perl6::Tidy::Validator {
 	method scoped( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed,
 				[< declarator DECL >], [< typename >] )
-			and _Declarator.is-valid( $parsed.hash.<declarator> )
-			and _DECL.is-valid( $parsed.hash.<DECL> );
+			and self.declarator( $parsed.hash.<declarator> )
+			and self.DECL( $parsed.hash.<DECL> );
 		return True if self.assert-hash-keys( $parsed,
 					[< multi_declarator DECL typename >] )
-			and _MultiDeclarator.is-valid( $parsed.hash.<multi_declarator> )
-			and _DECL.is-valid( $parsed.hash.<DECL> )
-			and _TypeName.is-valid( $parsed.hash.<typename> );
+			and self.multi_declarator( $parsed.hash.<multi_declarator> )
+			and self.DECL( $parsed.hash.<DECL> )
+			and self.typename( $parsed.hash.<typename> );
 		return True if self.assert-hash-keys( $parsed,
 				[< package_declarator DECL >],
 				[< typename >] )
-			and _PackageDeclarator.is-valid( $parsed.hash.<package_declarator> )
-			and _DECL.is-valid( $parsed.hash.<DECL> );
+			and self.package_declarator( $parsed.hash.<package_declarator> )
+			and self.DECL( $parsed.hash.<DECL> );
 		return False
 	}
 
 	method scope_declarator( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< sym scoped >] )
-			and _Sym.is-valid( $parsed.hash.<sym> )
-			and _Scoped.is-valid( $parsed.hash.<scoped> );
+			and self.sym( $parsed.hash.<sym> )
+			and self.scoped( $parsed.hash.<scoped> );
 		return False
 	}
 
@@ -1370,7 +1388,7 @@ class Perl6::Tidy::Validator {
 			for $parsed.list {
 				next if self.assert-hash-keys( $_,
 						[< statement >] )
-					and _Statement.is-valid( $_.hash.<statement> );
+					and self.statement( $_.hash.<statement> );
 				die self.new-term
 			}
 			return True
@@ -1382,8 +1400,8 @@ class Perl6::Tidy::Validator {
 	method separator( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed,
 				[< septype quantified_atom >] )
-			and _SepType.is-valid( $parsed.hash.<septype> )
-			and _QuantifiedAtom.is-valid( $parsed.hash.<quantified_atom> );
+			and self.septype( $parsed.hash.<septype> )
+			and self.quantified_atom( $parsed.hash.<quantified_atom> );
 		return False
 	}
 
@@ -1400,15 +1418,15 @@ class Perl6::Tidy::Validator {
 	method sibble( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed,
 				[< right babble left >] )
-			and _Right.is-valid( $parsed.hash.<right> )
-			and _Babble.is-valid( $parsed.hash.<babble> )
-			and _Left.is-valid( $parsed.hash.<left> );
+			and self.right( $parsed.hash.<right> )
+			and self.babble( $parsed.hash.<babble> )
+			and self.left( $parsed.hash.<left> );
 		return False
 	}
 
 	method sigfinal( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< normspace >] )
-			and _NormSpace.is-valid( $parsed.hash.<normspace> );
+			and self.normspace( $parsed.hash.<normspace> );
 		return False
 	}
 
@@ -1421,8 +1439,8 @@ class Perl6::Tidy::Validator {
 		return True if self.assert-hash-keys( $parsed,
 				[< parameter typename >],
 				[< param_sep >] )
-			and _Parameter.is-valid( $parsed.hash.<parameter> )
-			and _TypeName.is-valid( $parsed.hash.<typename> );
+			and self.parameter( $parsed.hash.<parameter> )
+			and self.typename( $parsed.hash.<typename> );
 		return True if self.assert-hash-keys( $parsed, [],
 				[< param_sep parameter >] );
 		return False
@@ -1439,12 +1457,12 @@ class Perl6::Tidy::Validator {
 		return True if self.assert-hash-keys( $parsed,
 				[< parameter typename >],
 				[< param_sep >] )
-			and _Parameter.is-valid( $parsed.hash.<parameter> )
-			and _TypeName.is-valid( $parsed.hash.<typename> );
+			and self.parameter( $parsed.hash.<parameter> )
+			and self.typename( $parsed.hash.<typename> );
 		return True if self.assert-hash-keys( $parsed,
 				[< parameter >],
 				[< param_sep >] )
-			and _Parameter.is-valid( $parsed.hash.<parameter> );
+			and self.parameter( $parsed.hash.<parameter> );
 		return True if self.assert-hash-keys( $parsed, [],
 				[< param_sep parameter >] );
 		return False
@@ -1452,7 +1470,7 @@ class Perl6::Tidy::Validator {
 
 	method smexpr( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< EXPR >] )
-			and _EXPR.is-valid( $parsed.hash.<EXPR> );
+			and self.EXPR( $parsed.hash.<EXPR> );
 		return False
 	}
 
@@ -1466,15 +1484,17 @@ class Perl6::Tidy::Validator {
 			for $parsed.list {
 				next if self.assert-hash-keys( $_,
 						[< statement_mod_loop EXPR >] )
-					and _StatementModLoop_EXPR.is-valid( $_ );
+					and self.statement_mod_loop( $_.hash.<statement_mod_loop> )
+					and self.EXPR( $_.hash.<EXPR> );
 				next if self.assert-hash-keys( $_,
 						[< statement_mod_cond EXPR >] )
-					and _StatementModCond_EXPR.is-valid( $_ );
+					and self.statement_mod_cond( $_.hash.<statement_mod_cond> )
+					and self.EXPR( $_.hash.<EXPR> );
 				next if self.assert-hash-keys( $_, [< EXPR >] )
-					and _EXPR.is-valid( $_.hash.<EXPR> );
+					and self.EXPR( $_.hash.<EXPR> );
 				next if self.assert-hash-keys( $_,
 						[< statement_control >] )
-					and _StatementControl.is-valid( $_.hash.<statement_control> );
+					and self.statementcontrol( $_.hash.<statement_control> );
 				next if self.assert-hash-keys( $_, [],
 						[< statement_control >] );
 				die self.new-term
@@ -1483,58 +1503,58 @@ class Perl6::Tidy::Validator {
 		}
 		return True if self.assert-hash-keys( $parsed,
 				[< statement_control >] )
-			and _StatementControl.is-valid( $parsed.hash.<statement_control> );
+			and self.statementcontrol( $parsed.hash.<statement_control> );
 		return True if self.assert-hash-keys( $parsed, [< EXPR >] )
-			and _EXPR.is-valid( $parsed.hash.<EXPR> );
+			and self.EXPR( $parsed.hash.<EXPR> );
 		return False
 	}
 
 	method statement_control( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed,
 				[< block sym e1 e2 e3 >] )
-			and _Block.is-valid( $parsed.hash.<block> )
-			and _Sym.is-valid( $parsed.hash.<sym> )
-			and _E1.is-valid( $parsed.hash.<e1> )
-			and _E2.is-valid( $parsed.hash.<e2> )
-			and _E3.is-valid( $parsed.hash.<e3> );
+			and self.block( $parsed.hash.<block> )
+			and self.sym( $parsed.hash.<sym> )
+			and self.e1( $parsed.hash.<e1> )
+			and self.e2( $parsed.hash.<e2> )
+			and self.e3( $parsed.hash.<e3> );
 		return if self.assert-hash-keys( $parsed, [< pblock sym EXPR wu >] )
-			and _PBlock.is-valid( $parsed.hash.<pblock> )
-			and _Sym.is-valid( $parsed.hash.<sym> )
-			and _EXPR.is-valid( $parsed.hash.<EXPR> )
-			and _Wu.is-valid( $parsed.hash.<wu> );
+			and self.pblock( $parsed.hash.<pblock> )
+			and self.sym( $parsed.hash.<sym> )
+			and self.EXPR( $parsed.hash.<EXPR> )
+			and self.wu( $parsed.hash.<wu> );
 		return True if self.assert-hash-keys( $parsed, [< doc sym module_name >] )
-			and _Doc.is-valid( $parsed.hash.<doc> )
-			and _Sym.is-valid( $parsed.hash.<sym> )
-			and _ModuleName.is-valid( $parsed.hash.<module_name> );
+			and self.doc( $parsed.hash.<doc> )
+			and self.sym( $parsed.hash.<sym> )
+			and self.modulename( $parsed.hash.<module_name> );
 		return True if self.assert-hash-keys( $parsed,
 				[< doc sym version >] )
-			and _Doc.is-valid( $parsed.hash.<doc> )
-			and _Sym.is-valid( $parsed.hash.<sym> )
-			and _Version.is-valid( $parsed.hash.<version> );
+			and self.doc( $parsed.hash.<doc> )
+			and self.sym( $parsed.hash.<sym> )
+			and self.version( $parsed.hash.<version> );
 		return True if self.assert-hash-keys( $parsed,
 				[< sym else xblock >] )
-			and _Sym.is-valid( $parsed.hash.<sym> )
-			and _Else.is-valid( $parsed.hash.<else> )
-			and _XBlock.is-valid( $parsed.hash.<xblock> );
+			and self.sym( $parsed.hash.<sym> )
+			and self.else( $parsed.hash.<else> )
+			and self.xblock( $parsed.hash.<xblock> );
 		return True if self.assert-hash-keys( $parsed,
 				[< xblock sym wu >] )
-			and _XBlock.is-valid( $parsed.hash.<xblock> )
-			and _Sym.is-valid( $parsed.hash.<sym> )
-			and _Wu.is-valid( $parsed.hash.<wu> );
+			and self.xblock( $parsed.hash.<xblock> )
+			and self.sym( $parsed.hash.<sym> )
+			and self.wu( $parsed.hash.<wu> );
 		return True if self.assert-hash-keys( $parsed,
 				[< sym xblock >] )
-			and _Sym.is-valid( $parsed.hash.<sym> )
-			and _XBlock.is-valid( $parsed.hash.<xblock> );
+			and self.sym( $parsed.hash.<sym> )
+			and self.xblock( $parsed.hash.<xblock> );
 		return True if self.assert-hash-keys( $parsed,
 				[< block sym >] )
-			and _Block.is-valid( $parsed.hash.<block> )
-			and _Sym.is-valid( $parsed.hash.<sym> );
+			and self.block( $parsed.hash.<block> )
+			and self.sym( $parsed.hash.<sym> );
 		return False
 	}
 
 	method statementlist( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< statement >] )
-			and _Statement.is-valid( $parsed.hash.<statement> );
+			and self.statement( $parsed.hash.<statement> );
 		return True if self.assert-hash-keys( $parsed, [], [< statement >] );
 		return False
 	}
@@ -1542,29 +1562,29 @@ class Perl6::Tidy::Validator {
 	method statement_mod_cond( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed,
 				[< sym modifier_expr >] )
-			and _Sym.is-valid( $parsed.hash.<sym> )
-			and _ModifierExpr.is-valid( $parsed.hash.<modifier_expr> );
+			and self.sym( $parsed.hash.<sym> )
+			and self.modifierexpr( $parsed.hash.<modifier_expr> );
 		return False
 	}
 
 	method statement_mod_loop( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< sym smexpr >] )
-			and _Sym.is-valid( $parsed.hash.<sym> )
-			and _SMExpr.is-valid( $parsed.hash.<smexpr> );
+			and self.sym( $parsed.hash.<sym> )
+			and self.smexpr( $parsed.hash.<smexpr> );
 		return False
 	}
 
 	method statement_prefix( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< sym blorst >] )
-			and _Sym.is-valid( $parsed.hash.<sym> )
-			and _Blorst.is-valid( $parsed.hash.<blorst> );
+			and self.sym( $parsed.hash.<sym> )
+			and self.blorst( $parsed.hash.<blorst> );
 		return False
 	}
 
 	method subshortname( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed,
 				[< desigilname >] )
-			and _DeSigilName.is-valid( $parsed.hash.<desigilname> );
+			and self.desigilname( $parsed.hash.<desigilname> );
 		return False
 	}
 
@@ -1585,7 +1605,7 @@ class Perl6::Tidy::Validator {
 
 	method term( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< methodop >] )
-			and _MethodOp.is-valid( $parsed.hash.<methodop> );
+			and self.methodop( $parsed.hash.<methodop> );
 		return False
 	}
 
@@ -1593,7 +1613,7 @@ class Perl6::Tidy::Validator {
 		if $parsed.list {
 			for $parsed.list {
 				next if self.assert-hash-keys( $_, [< termconj >] )
-					and _TermConj.is-valid( $_.hash.<termconj> );
+					and self.termconj( $_.hash.<termconj> );
 				die self.new-term
 			}
 			return True
@@ -1603,7 +1623,7 @@ class Perl6::Tidy::Validator {
 
 	method termaltseq( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< termconjseq >] )
-			and _TermConjSeq.is-valid( $parsed.hash.<termconjseq> );
+			and self.termconjseq( $parsed.hash.<termconjseq> );
 		return False
 	}
 
@@ -1611,7 +1631,7 @@ class Perl6::Tidy::Validator {
 		if $parsed.list {
 			for $parsed.list {
 				next if self.assert-hash-keys( $_, [< termish >] )
-					and _Termish.is-valid( $_.hash.<termish> );
+					and self.termish( $_.hash.<termish> );
 				die self.new-term
 			}
 			return True
@@ -1623,13 +1643,13 @@ class Perl6::Tidy::Validator {
 		if $parsed.list {
 			for $parsed.list {
 				next if self.assert-hash-keys( $_, [< termalt >] )
-					and _TermAlt.is-valid( $_.hash.<termalt> );
+					and self.termalt( $_.hash.<termalt> );
 				die self.new-term
 			}
 			return True
 		}
 		return True if self.assert-hash-keys( $parsed, [< termalt >] )
-			and _TermAlt.is-valid( $parsed.hash.<termalt> );
+			and self.termalt( $parsed.hash.<termalt> );
 		return False
 	}
 
@@ -1637,26 +1657,26 @@ class Perl6::Tidy::Validator {
 		if $parsed.list {
 			for $parsed.list {
 				next if self.assert-hash-keys( $_, [< noun >] )
-					and _Noun.is-valid( $_.hash.<noun> );
+					and self.noun( $_.hash.<noun> );
 				die self.new-term
 			}
 			return True
 		}
 		return True if self.assert-hash-keys( $parsed, [< noun >] )
-			and _Noun.is-valid( $parsed.hash.<noun> );
+			and self.noun( $parsed.hash.<noun> );
 		return False
 	}
 
 	method term_init( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< sym EXPR >] )
-			and _Sym.is-valid( $parsed.hash.<sym> )
-			and _EXPR.is-valid( $parsed.hash.<EXPR> );
+			and self.sym( $parsed.hash.<sym> )
+			and self.EXPR( $parsed.hash.<EXPR> );
 		return False
 	}
 
 	method termseq( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< termaltseq >] )
-			and _TermAltSeq.is-valid( $parsed.hash.<termaltseq> );
+			and self.termaltseq( $parsed.hash.<termaltseq> );
 		return False
 	}
 
@@ -1667,7 +1687,7 @@ class Perl6::Tidy::Validator {
 
 	method twigil( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< sym >] )
-			and _Sym.is-valid( $parsed.hash.<sym> );
+			and self.sym( $parsed.hash.<sym> );
 		return False
 	}
 
@@ -1676,35 +1696,35 @@ class Perl6::Tidy::Validator {
 			for $parsed.list {
 				next if self.assert-hash-keys( $_,
 						[< typename >] )
-					and _TypeName.is-valid( $_.hash.<typename> );
+					and self.typename( $_.hash.<typename> );
 				next if self.assert-hash-keys( $_, [< value >] )
-					and _Value.is-valid( $_.hash.<value> );
+					and self.value( $_.hash.<value> );
 				die self.new-term
 			}
 			return True
 		}
 		return True if self.assert-hash-keys( $parsed, [< value >] )
-			and _Value.is-valid( $parsed.hash.<value> );
+			and self.value( $parsed.hash.<value> );
 		return True if self.assert-hash-keys( $parsed, [< typename >] )
-			and _TypeName.is-valid( $parsed.hash.<typename> );
+			and self.typename( $parsed.hash.<typename> );
 		return False
 	}
 
 	method type_declarator( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed,
 				[< sym initializer variable >], [< trait >] )
-			and _Sym.is-valid( $parsed.hash.<sym> )
-			and _Initializer.is-valid( $parsed.hash.<initializer> )
-			and _Variable.is-valid( $parsed.hash.<variable> );
+			and self.sym( $parsed.hash.<sym> )
+			and self.initializer( $parsed.hash.<initializer> )
+			and self.variable( $parsed.hash.<variable> );
 		return True if self.assert-hash-keys( $parsed,
 				[< sym initializer defterm >], [< trait >] )
-			and _Sym.is-valid( $parsed.hash.<sym> )
-			and _Initializer.is-valid( $parsed.hash.<initializer> )
-			and _DefTerm.is-valid( $parsed.hash.<defterm> );
+			and self.sym( $parsed.hash.<sym> )
+			and self.initializer( $parsed.hash.<initializer> )
+			and self.defterm( $parsed.hash.<defterm> );
 		return True if self.assert-hash-keys( $parsed,
 				[< sym initializer >] )
-			and _Sym.is-valid( $parsed.hash.<sym> )
-			and _Initializer.is-valid( $parsed.hash.<initializer> );
+			and self.sym( $parsed.hash.<sym> )
+			and self.initializer( $parsed.hash.<initializer> );
 		return False
 	}
 
@@ -1714,18 +1734,19 @@ class Perl6::Tidy::Validator {
 				next if self.assert-hash-keys( $_,
 						[< longname colonpairs >],
 						[< colonpair >] )
-					and _LongName_ColonPairs.is-valid( $_ );
+					and self.longname( $_.hash.<longname> )
+					and self.colonpairs( $_.hash.<colonpairs> );
 				next if self.assert-hash-keys( $_,
 						[< longname >],
 						[< colonpair >] )
-					and _LongName_ColonPair.is-valid( $_ );
+					and self.longname( $_ );
 				die self.new-term
 			}
 			return True
 		}
 		return True if self.assert-hash-keys( $parsed,
 				[< longname >], [< colonpair >] )
-			and _LongName.is-valid( $parsed.hash.<longname> );
+			and self.longname( $parsed.hash.<longname> );
 		return False
 	}
 
@@ -1733,18 +1754,18 @@ class Perl6::Tidy::Validator {
 		return True if self.assert-hash-keys( $parsed,
 				[< prefix OPER >],
 				[< prefix_postfix_meta_operator >] )
-			and _Prefix.is-valid( $parsed.hash.<prefix> )
-			and _OPER.is-valid( $parsed.hash.<OPER> );
+			and self.prefix( $parsed.hash.<prefix> )
+			and self.OPER( $parsed.hash.<OPER> );
 		return True if self.assert-hash-keys( $parsed, [< value >] )
-			and _Value.is-valid( $parsed.hash.<value> );
+			and self.value( $parsed.hash.<value> );
 		return False
 	}
 
 	method value( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< number >] )
-			and _Number.is-valid( $parsed.hash.<number> );
+			and self.number( $parsed.hash.<number> );
 		return True if self.assert-hash-keys( $parsed, [< quote >] )
-			and _Quote.is-valid( $parsed.hash.<quote> );
+			and self.quote( $parsed.hash.<quote> );
 		return False
 	}
 
@@ -1756,27 +1777,27 @@ class Perl6::Tidy::Validator {
 
 	method var( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< sigil desigilname >] )
-			and _Sigil.is-valid( $parsed.hash.<sigil> )
-			and _DeSigilName.is-valid( $parsed.hash.<desigilname> );
+			and self.sigil( $parsed.hash.<sigil> )
+			and self.desigilname( $parsed.hash.<desigilname> );
 		return True if self.assert-hash-keys( $parsed, [< variable >] )
-			and _Variable.is-valid( $parsed.hash.<variable> );
+			and self.variable( $parsed.hash.<variable> );
 		return False
 	}
 
 	method variable( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed,
 				[< twigil sigil desigilname >] )
-			and _Twigil.is-valid( $parsed.hash.<twigil> )
-			and _Sigil.is-valid( $parsed.hash.<sigil> )
-			and _DeSigilName.is-valid( $parsed.hash.<desigilname> );
+			and self.twigil( $parsed.hash.<twigil> )
+			and self.sigil( $parsed.hash.<sigil> )
+			and self.desigilname( $parsed.hash.<desigilname> );
 		return True if self.assert-hash-keys( $parsed,
 				[< sigil desigilname >] )
-			and _Sigil.is-valid( $parsed.hash.<sigil> )
-			and _DeSigilName.is-valid( $parsed.hash.<desigilname> );
+			and self.sigil( $parsed.hash.<sigil> )
+			and self.desigilname( $parsed.hash.<desigilname> );
 		return True if self.assert-hash-keys( $parsed, [< sigil >] )
-			and _Sigil.is-valid( $parsed.hash.<sigil> );
+			and self.sigil( $parsed.hash.<sigil> );
 		return True if self.assert-hash-keys( $parsed, [< contextualizer >] )
-			and _Contextualizer.is-valid( $parsed.hash.<contextualizer> );
+			and self.contextualizer( $parsed.hash.<contextualizer> );
 		return False
 	}
 
@@ -1784,20 +1805,20 @@ class Perl6::Tidy::Validator {
 		return True if self.assert-hash-keys( $parsed,
 			[< semilist variable shape >],
 			[< postcircumfix signature trait post_constraint >] )
-			and _SemiList.is-valid( $parsed.hash.<semilist> )
-			and _Variable.is-valid( $parsed.hash.<variable> )
-			and _Shape.is-valid( $parsed.hash.<shape> );
+			and self.semilist( $parsed.hash.<semilist> )
+			and self.variable( $parsed.hash.<variable> )
+			and self.shape( $parsed.hash.<shape> );
 		return True if self.assert-hash-keys( $parsed,
 			[< variable >],
 			[< semilist postcircumfix signature trait post_constraint >] )
-			and _Variable.is-valid( $parsed.hash.<variable> );
+			and self.variable( $parsed.hash.<variable> );
 		return False
 	}
 
 	method version( Mu $parsed ) returns Bool {
 		return True if self.assert-hash-keys( $parsed, [< vnum vstr >] )
-			and _VNum.is-valid( $parsed.hash.<vnum> )
-			and _VStr.is-valid( $parsed.hash.<vstr> );
+			and self.vnum( $parsed.hash.<vnum> )
+			and self.vstr( $parsed.hash.<vstr> );
 		return False
 	}
 
@@ -1827,18 +1848,18 @@ class Perl6::Tidy::Validator {
 			for $parsed.list {
 				next if self.assert-hash-keys( $_,
 						[< pblock EXPR >] )
-					and _PBlock.is-valid( $_.hash.<pblock> )
-					and _EXPR.is-valid( $_.hash.<EXPR> );
+					and self.pblock( $_.hash.<pblock> )
+					and self.EXPR( $_.hash.<EXPR> );
 				die self.new-term
 			}
 			return True
 		}
 		return True if self.assert-hash-keys( $parsed,
 				[< pblock EXPR >] )
-			and _PBlock.is-valid( $parsed.hash.<pblock> )
-			and _EXPR.is-valid( $parsed.hash.<EXPR> );
+			and self.pblock( $parsed.hash.<pblock> )
+			and self.EXPR( $parsed.hash.<EXPR> );
 		return True if self.assert-hash-keys( $parsed, [< blockoid >] )
-			and _Blockoid.is-valid( $parsed.hash.<blockoid> );
+			and self.blockoid( $parsed.hash.<blockoid> );
 		return False
 	}
 

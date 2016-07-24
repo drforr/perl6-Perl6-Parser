@@ -113,8 +113,8 @@ class Root { }
 
 		my $validator = Perl6::Tidy::Validator.new;
 		if $validator.root( $parsed ) {
-return Root.new;
+return Root.new
 		}
-return Root.new;
+die "Validation failed";
 	}
 }

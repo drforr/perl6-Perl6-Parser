@@ -11,7 +11,7 @@ subtest {
 	plan 1;
 
 	my $parsed = $pt.tidy( Q[class Unqualified { }] );
-	isa-ok $parsed, Q{Root};
+	isa-ok $parsed, Q{Perl6::Tidy::Root};
 }, Q{empty};
 
 subtest {
@@ -22,7 +22,7 @@ subtest {
 
 		my $parsed =
 			$pt.tidy( Q[class Unqualified { method foo { } }] );
-		isa-ok $parsed, Q{Root};
+		isa-ok $parsed, Q{Perl6::Tidy::Root};
 	}, Q{single};
 
 	subtest {
@@ -35,7 +35,7 @@ class Unqualified {
 	method bar { }
 }
 _END_
-		isa-ok $parsed, Q{Root};
+		isa-ok $parsed, Q{Perl6::Tidy::Root};
 	}, Q{multiple};
 }, Q{method};
 
@@ -49,7 +49,7 @@ subtest {
 			plan 1;
 
 			my $parsed = $pt.tidy( Q[class Unqualified { has $.a }] );
-			isa-ok $parsed, Q{Root};
+			isa-ok $parsed, Q{Perl6::Tidy::Root};
 		}, Q{single};
 
 		subtest {
@@ -61,7 +61,7 @@ class Unqualified {
 	has $.b;
 }
 _END_
-			isa-ok $parsed, Q{Root};
+			isa-ok $parsed, Q{Perl6::Tidy::Root};
 		}, Q{multiple};
 
 		subtest {
@@ -70,7 +70,7 @@ _END_
 			my $parsed = $pt.tidy( Q:to[_END_] );
 class Unqualified { has ( $.a, $.b ) }
 _END_
-			isa-ok $parsed, Q{Root};
+			isa-ok $parsed, Q{Perl6::Tidy::Root};
 		}, Q{list};
 	}, Q{$};
 
@@ -78,21 +78,21 @@ _END_
 		plan 1;
 
 		my $parsed = $pt.tidy( Q[class Unqualified { has @.a }] );
-		isa-ok $parsed, Q{Root};
+		isa-ok $parsed, Q{Perl6::Tidy::Root};
 	}, Q{@};
 
 	subtest {
 		plan 1;
 
 		my $parsed = $pt.tidy( Q[class Unqualified { has %.a }] );
-		isa-ok $parsed, Q{Root};
+		isa-ok $parsed, Q{Perl6::Tidy::Root};
 	}, Q{%};
 
 	subtest {
 		plan 1;
 
 		my $parsed = $pt.tidy( Q[class Unqualified { has &.a }] );
-		isa-ok $parsed, Q{Root};
+		isa-ok $parsed, Q{Perl6::Tidy::Root};
 	}, Q{&};
 }, Q{Attribute};
 
