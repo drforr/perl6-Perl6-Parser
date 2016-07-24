@@ -11,7 +11,7 @@ subtest {
 	plan 1;
 
 	my $parsed = $pt.tidy( Q{} );
-	isa-ok $parsed, Q{Root};
+	isa-ok $parsed, Q{Perl6::Tidy::Root};
 }, Q{Empty file};
 
 # vim: ft=perl6

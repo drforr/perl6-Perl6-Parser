@@ -85,11 +85,13 @@ sub dump( Mu $parsed ) {
 	dump-parsed( $parsed ).join( "\n" )
 }
 
+use Perl6::Tidy::Validator;
+
 class Perl6::Tidy {
 	use nqp;
-	use Perl6::Tidy::Nodes;
+#	use Perl6::Tidy::Nodes;
 
-	method tidy( Str $text ) {
+	method parse-text( Str $text ) {
 		my $*LINEPOSCACHE;
 		my $compiler := nqp::getcomp('perl6');
 		my $g := nqp::findmethod($compiler,'parsegrammar')($compiler);
@@ -102,24 +104,17 @@ class Perl6::Tidy {
 			:actions( $a )
 		);
 
-		my $rv = Root.new( $parsed );
-		Root.is-valid( $parsed );
-		return $rv;
+		return $parsed
 	}
 
-	method dump( Str $text ) {
-		my $*LINEPOSCACHE;
-		my $compiler := nqp::getcomp('perl6');
-		my $g := nqp::findmethod($compiler,'parsegrammar')($compiler);
-		#$g.HOW.trace-on($g);
-		my $a := nqp::findmethod($compiler,'parseactions')($compiler);
+	method tidy( Str $text ) {
+		my $parsed = self.parse-text( $text );
+class Root { }
 
-		my $parsed = $g.parse(
-			$text,
-			:p( 0 ),
-			:actions( $a )
-		);
-
-		dump-parsed( $parsed ).join( "\n" )
+		my $validator = Perl6::Tidy::Validator.new;
+		if $validator.root( $parsed ) {
+return Root.new;
+		}
+return Root.new;
 	}
 }
