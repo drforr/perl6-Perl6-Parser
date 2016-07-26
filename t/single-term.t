@@ -6,8 +6,8 @@ use Perl6::Tidy;
 plan 9;
 
 my $pt = Perl6::Tidy.new;
-my $*TRACE = 1;
-my $*DEBUG = 1;
+#my $*TRACE = 1;
+#my $*DEBUG = 1;
 
 #my $*TRACE = 1;
 subtest {

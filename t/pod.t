@@ -12,8 +12,11 @@ my $pt = Perl6::Tidy.new;
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q{} );
+	my $parsed = $pt.tidy( Q:to[_EOF_] );
+=begin EMPTY
+=end EMPTY
+_EOF_
 	isa-ok $parsed, Q{Perl6::Tidy::Root};
-}, Q{Empty file};
+}, Q{empty};
 
 # vim: ft=perl6

@@ -1965,6 +1965,9 @@ return True;
 		return True if self.assert-hash-keys( $parsed, [< statement >] )
 			and self._Statement( $parsed.hash.<statement> );
 		return True if self.assert-hash-keys( $parsed, [], [< statement >] );
+		# This line is caught above, but is where comments and POD are
+		# stored.
+		return True if self.assert-Str( $parsed );
 		return self.record-failure( '_StatementList' );
 	}
 
