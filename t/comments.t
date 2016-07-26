@@ -15,7 +15,7 @@ subtest {
 	my $parsed = $pt.tidy( Q:to[_END_] );
 #!/usr/bin/env perl6
 _END_
-	isa-ok $parsed, Q{Perl6::Tidy::Root};
+	isa-ok $parsed, Q{Perl6::Document};
 }, Q{shebang line};
 
 subtest {
@@ -27,7 +27,7 @@ subtest {
 		my $parsed = $pt.tidy( Q:to[_END_] );
 # comment to end of line
 _END_
-		isa-ok $parsed, Q{Perl6::Tidy::Root};
+		isa-ok $parsed, Q{Perl6::Document};
 	}, Q{single EOL comment};
 
 	subtest {
@@ -37,7 +37,7 @@ _END_
 # comment to end of line
 # comment to end of line
 _END_
-		isa-ok $parsed, Q{Perl6::Tidy::Root};
+		isa-ok $parsed, Q{Perl6::Document};
 	}, Q{Two EOL comments in a row};
 }, Q{full-line comments};
 
@@ -50,7 +50,7 @@ subtest {
 		my $parsed = $pt.tidy( Q:to[_END_] );
 #`( comment on single line )
 _END_
-		isa-ok $parsed, Q{Perl6::Tidy::Root};
+		isa-ok $parsed, Q{Perl6::Document};
 	}, Q{single EOL comment};
 
 	subtest {
@@ -62,7 +62,7 @@ spanning
 multiple
 lines )
 _END_
-		isa-ok $parsed, Q{Perl6::Tidy::Root};
+		isa-ok $parsed, Q{Perl6::Document};
 	}, Q{Two EOL comments in a row};
 }, Q{spanning comment};
 

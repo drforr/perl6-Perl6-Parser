@@ -16,7 +16,7 @@ subtest {
 =begin EMPTY
 =end EMPTY
 _EOF_
-	isa-ok $parsed, Q{Perl6::Tidy::Root};
+	isa-ok $parsed, Q{Perl6::Document};
 }, Q{empty};
 
 # vim: ft=perl6

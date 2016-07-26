@@ -21,7 +21,7 @@ for 1 .. Inf -> $integer {
     print "{$integer}² equals $square" and exit if $square % 1000000 == 269696;
 }
 _END_
-	isa-ok $parsed, Q{Perl6::Tidy::Root};
+	isa-ok $parsed, Q{Perl6::Document};
 }, Q{Babbage problem};
 
 subtest {
@@ -83,7 +83,7 @@ say '*' x 70;
 say "Hidden message revealed:";
 say reveal $steganography;
 _END_
-	isa-ok $parsed, Q{Perl6::Tidy::Root};
+	isa-ok $parsed, Q{Perl6::Document};
 }, Q{Bacon cipher};
 
 subtest {
@@ -111,7 +111,7 @@ my $n = prompt "Number of brackets";
 my $s = (<[ ]> xx $n).flat.pick(*).join;
 say "$s {balanced($s) ?? "is" !! "is not"} well-balanced"
 _END_
-		isa-ok $parsed, Q{Perl6::Tidy::Root};
+		isa-ok $parsed, Q{Perl6::Document};
 	}, Q{version 1};
 
 	subtest {
@@ -127,7 +127,7 @@ my $n = prompt "Number of bracket pairs: ";
 my $s = <[ ]>.roll($n*2).join;
 say "$s { balanced($s) ?? "is" !! "is not" } well-balanced"
 _END_
-		isa-ok $parsed, Q{Perl6::Tidy::Root};
+		isa-ok $parsed, Q{Perl6::Document};
 	}, Q{version 2};
 
 	subtest {
@@ -143,7 +143,7 @@ my $n = prompt "Number of bracket pairs: ";
 my $s = <[ ]>.roll($n*2).join;
 say "$s is", ' not' x not balanced($s), " well-balanced";
 _END_
-		isa-ok $parsed, Q{Perl6::Tidy::Root};
+		isa-ok $parsed, Q{Perl6::Document};
 	}, Q{version 3};
 
 	subtest {
@@ -156,7 +156,7 @@ my $n = prompt "Number of bracket pairs: ";
 my $s = ('[' xx $n, ']' xx $n).flat.pick(*).join;
 say "$s { BalBrack.parse($s) ?? "is" !! "is not" } well-balanced";
 _END_
-		isa-ok $parsed, Q{Perl6::Tidy::Root};
+		isa-ok $parsed, Q{Perl6::Document};
 	}, Q{version 4};
 }, Q{Balanced brackets};
 
@@ -228,7 +228,7 @@ say 'b == ', $b.Int;
 say 'c == ', $c.Int;
 say "a × (b − c) == ", ~$x, ' == ', $x.Int;
 _END_
-	isa-ok $parsed, Q{Perl6::Tidy::Root};
+	isa-ok $parsed, Q{Perl6::Document};
 }, Q{Balanced ternary};
 
 subtest {
@@ -258,7 +258,7 @@ for ^2e5 {
  
 $png.write: 'Barnsley-fern-perl6.png';
 _END_
-	isa-ok $parsed, Q{Perl6::Tidy::Root};
+	isa-ok $parsed, Q{Perl6::Document};
 }, Q{Barnsley fern};
 
 subtest {
@@ -289,7 +289,7 @@ sub buf-to-Base64($buf) {
     }
 }
 _END_
-	isa-ok $parsed, Q{Perl6::Tidy::Root};
+	isa-ok $parsed, Q{Perl6::Document};
 }, Q{Base64 encode data};
 
 subtest {
@@ -311,7 +311,7 @@ sub show(%distribution) {
 multi MAIN($file) { show benford $file.IO.lines }
 multi MAIN() { show benford ( 1, 1, 2, *+* ... * )[^1000] }
 _END_
-	isa-ok $parsed, Q{Perl6::Tidy::Root};
+	isa-ok $parsed, Q{Perl6::Document};
 }, Q{Benford's law};
 
 subtest {
@@ -339,7 +339,7 @@ my $form = "B(%2d) = \%{$width}d/%d\n";
  
 printf $form, .key, .value.nude for @bpairs;
 _END_
-		isa-ok $parsed, Q{Perl6::Tidy::Root};
+		isa-ok $parsed, Q{Perl6::Document};
 	}, Q{version 1};
 
 	subtest {
@@ -365,7 +365,7 @@ my $form = "B(%d)\t= \%{$width}d/%d\n";
  
 printf $form, .key, .value.nude for @bpairs;
 _END_
-		isa-ok $parsed, Q{Perl6::Tidy::Root};
+		isa-ok $parsed, Q{Perl6::Document};
 	}, Q{version 2};
 
 	subtest {
@@ -380,7 +380,7 @@ constant bernoulli = grep *.value, map { (.key => .value.[*-1]) }, do
              $pm + 1 => [ map *.value, [\bop] ($pm + 2 ... 1) Z=> FatRat.new(1, $pm + 2), @pa ];
         } ... *;
 _END_
-		isa-ok $parsed, Q{Perl6::Tidy::Root};
+		isa-ok $parsed, Q{Perl6::Document};
 	}, Q{version 3};
 }, Q{Balanced brackets};
 
@@ -413,7 +413,7 @@ sub best-shuffle(Str $orig) {
 printf "%s, %s, (%d)\n", $_, best-shuffle $_
     for <abracadabra seesaw elk grrrrrr up a>;
 _END_
-	isa-ok $parsed, Q{Perl6::Tidy::Root};
+	isa-ok $parsed, Q{Perl6::Document};
 }, Q{Best shuffle};
 
 subtest {
@@ -422,7 +422,7 @@ subtest {
 	my $parsed = $pt.tidy( Q:to[_END_] );
 say .fmt("%b") for 5, 50, 9000;
 _END_
-	isa-ok $parsed, Q{Perl6::Tidy::Root};
+	isa-ok $parsed, Q{Perl6::Document};
 }, Q{Binary digits};
 
 subtest {
@@ -448,7 +448,7 @@ sub binary_search (&p, Int $lo is copy, Int $hi is copy --> Int) {
     fail;
 }
 _END_
-		isa-ok $parsed, Q{Perl6::Tidy::Root};
+		isa-ok $parsed, Q{Perl6::Document};
 	}, Q{version 1};
 
 	subtest {
@@ -465,7 +465,7 @@ sub binary_search (&p, Int $lo, Int $hi --> Int) {
     }
 }
 _END_
-		isa-ok $parsed, Q{Perl6::Tidy::Root};
+		isa-ok $parsed, Q{Perl6::Document};
 	}, Q{version 2};
 }, Q{Binary search};
 
@@ -557,7 +557,7 @@ say $b2;
 my ByteStr $b3 = $b1 ~ $sub;
 say 'joined = ', $b3;
 _END_
-	isa-ok $parsed, Q{Perl6::Tidy::Root};
+	isa-ok $parsed, Q{Perl6::Document};
 }, Q{Binary strings};
 
 subtest {
@@ -584,7 +584,7 @@ my $bitcoin-address = rx/
 
 say "Here is a bitcoin address: 1AGNa15ZQXAZUgFiqJ2i7Z2DPU2J6hW62i" ~~ $bitcoin-address;
 _END_
-	isa-ok $parsed, Q{Perl6::Tidy::Root};
+	isa-ok $parsed, Q{Perl6::Document};
 }, Q{Bitcoin validation};
 
 subtest {
@@ -620,7 +620,7 @@ say public_point_to_address
 0x50863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B2352,
 0x2CD470243453A299FA9E77237716103ABC11A1DF38855ED6F2EE187E9C582BA6;
 _END_
-	isa-ok $parsed, Q{Perl6::Tidy::Root};
+	isa-ok $parsed, Q{Perl6::Document};
 }, Q{Bitcoin public point to address};
 
 subtest {
@@ -657,7 +657,7 @@ $b.set-pixel( 7, 5, Pixel.new( R => 100, G => 200, B => 0) );
 
 say $b.perl;
 _END_
-	isa-ok $parsed, Q{Perl6::Tidy::Root};
+	isa-ok $parsed, Q{Perl6::Document};
 }, Q{Bitmap};
 
 subtest {
@@ -698,7 +698,7 @@ sub line(Bitmap $bitmap, $x0 is copy, $x1 is copy, $y0 is copy, $y1 is copy) {
     } 
 }
 _END_
-	isa-ok $parsed, Q{Perl6::Tidy::Root};
+	isa-ok $parsed, Q{Perl6::Document};
 }, Q{Bitmap / Bresenham's line algorithm};
 
 subtest {
@@ -745,7 +745,7 @@ augment class Bitmap {
     }
 }
 _END_
-	isa-ok $parsed, Q{Perl6::Tidy::Root};
+	isa-ok $parsed, Q{Perl6::Document};
 }, Q{Bitmap / midpoint circle algorithm};
 
 subtest {
@@ -783,7 +783,7 @@ for flat ^$b.height X ^$b.width -> $i, $j {
 
 $*OUT.write: $b.P6;
 _END_
-	isa-ok $parsed, Q{Perl6::Tidy::Root};
+	isa-ok $parsed, Q{Perl6::Document};
 }, Q{Bitmap / write a PPM file};
 
 subtest {
@@ -805,7 +805,7 @@ sub decode-ascii(Buf $b) {
 say my $encode = encode-ascii 'STRING';
 say decode-ascii $encode;
 _END_
-	isa-ok $parsed, Q{Perl6::Tidy::Root};
+	isa-ok $parsed, Q{Perl6::Document};
 }, Q{Bitwise I/O};
 
 subtest {
@@ -841,7 +841,7 @@ sub say_bit ($message, $value) {
     printf("%30s: %{'0' ~ BITS}b\n", $message, $value +& MAXINT);
 }
 _END_
-	isa-ok $parsed, Q{Perl6::Tidy::Root};
+	isa-ok $parsed, Q{Perl6::Document};
 }, Q{Bitwise operations};
 
 subtest {
@@ -851,7 +851,7 @@ subtest {
 my Bool $crashed = False;
 my $val = 0 but True;
 _END_
-	isa-ok $parsed, Q{Perl6::Tidy::Root};
+	isa-ok $parsed, Q{Perl6::Document};
 }, Q{Boolean types};
 
 subtest {
@@ -881,7 +881,7 @@ for 0 .. 32 -> $ix {
                          tc point angle-to-point 𝜽;
 }
 _END_
-	isa-ok $parsed, Q{Perl6::Tidy::Root};
+	isa-ok $parsed, Q{Perl6::Document};
 }, Q{Box the compass};
 
 subtest {
@@ -933,7 +933,7 @@ bxtest Q:to/END/.lines;
     {a,b{{1,2}e}f
     END
 _END_
-	isa-ok $parsed, Q{Perl6::Tidy::Root};
+	isa-ok $parsed, Q{Perl6::Document};
 }, Q{Brace expansion};
 
 subtest {
@@ -947,7 +947,7 @@ my Foo $foo .= new;
 
 say $foo.^attributes.first('$!shyguy').get_value($foo);
 _END_
-	isa-ok $parsed, Q{Perl6::Tidy::Root};
+	isa-ok $parsed, Q{Perl6::Document};
 }, Q{Break OO privacy};
 
 subtest {
@@ -1027,7 +1027,7 @@ say "";
 say "time elapsed: ", (now - BEGIN { now }).Num.fmt("%.2f"), " seconds";
 say "";
 _END_
-	isa-ok $parsed, Q{Perl6::Tidy::Root};
+	isa-ok $parsed, Q{Perl6::Document};
 }, Q{Brownian tree};
 
 subtest {
@@ -1056,7 +1056,7 @@ for 1..* -> $guesses {
 
 say 'A winner is you!';
 _END_
-	isa-ok $parsed, Q{Perl6::Tidy::Root};
+	isa-ok $parsed, Q{Perl6::Document};
 }, Q{Bulls and cows};
 
 subtest {
@@ -1109,7 +1109,7 @@ say @candidates
 	?? "Your secret number is {@candidates[0].join}!"
 	!! "I think you made a mistake with your scoring.";
 _END_
-	isa-ok $parsed, Q{Perl6::Tidy::Root};
+	isa-ok $parsed, Q{Perl6::Document};
 }, Q{Bulls and cows / player};
 
 # vim: ft=perl6

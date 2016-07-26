@@ -22,7 +22,7 @@ my @doors = False xx 101;
  
 say "Door $_ is ", <closed open>[ @doors[$_] ] for 1..100;
 END
-		isa-ok $parsed, Q{Perl6::Tidy::Root};
+		isa-ok $parsed, Q{Perl6::Document};
 	}, Q{version 1};
 
 	subtest {
@@ -31,7 +31,7 @@ END
 		my $parsed = $pt.tidy( Q:to[END] );
 say "Door $_ is open" for map {$^n ** 2}, 1..10;
 END
-		isa-ok $parsed, Q{Perl6::Tidy::Root};
+		isa-ok $parsed, Q{Perl6::Document};
 	}, Q{version 2};
 	
 
@@ -41,7 +41,7 @@ END
 		my $parsed = $pt.tidy( Q:to[END] );
 say "Door $_ is open" for 1..10 X** 2;
 END
-		isa-ok $parsed, Q{Perl6::Tidy::Root};
+		isa-ok $parsed, Q{Perl6::Document};
 	}, Q{version 3};
 
 	subtest {
@@ -50,7 +50,7 @@ END
 		my $parsed = $pt.tidy( Q:to[END] );
 say "Door $_ is ", <closed open>[.sqrt == .sqrt.floor] for 1..100;
 END
-		isa-ok $parsed, Q{Perl6::Tidy::Root};
+		isa-ok $parsed, Q{Perl6::Document};
 	}, Q{version 4};
 }, Q{100 doors};
 
@@ -177,7 +177,7 @@ loop {
 }
 _END_
 
-	isa-ok $parsed, Q{Perl6::Tidy::Root};
+	isa-ok $parsed, Q{Perl6::Document};
 }, Q{15 Puzzle};
 
 subtest {
@@ -299,7 +299,7 @@ loop {
     last if $key eq 'q'; # (q)uit
 }
 _END_
-	isa-ok $parsed, Q{Perl6::Tidy::Root};
+	isa-ok $parsed, Q{Perl6::Document};
 }, Q{2048};
 
 subtest {
@@ -333,7 +333,7 @@ while my $exp = prompt "\n24? " {
     }
 }
 _END_
-	isa-ok $parsed, Q{Perl6::Tidy::Root};
+	isa-ok $parsed, Q{Perl6::Document};
 }, Q{24 game};
 
 subtest {
@@ -385,7 +385,7 @@ sub unique (@array) {
     %h.values;
 }
 _END_
-	isa-ok $parsed, Q{Perl6::Tidy::Root};
+	isa-ok $parsed, Q{Perl6::Document};
 }, Q{24 game/Solve};
 
 subtest {
@@ -422,7 +422,7 @@ for 23, 123, 1234, 10000 {
     say $_, "\t", [+] nextrow($_)[];
 }
 _END_
-	isa-ok $parsed, Q{Perl6::Tidy::Root};
+	isa-ok $parsed, Q{Perl6::Document};
 }, Q{9 billion names of God};
 
 subtest {
@@ -446,7 +446,7 @@ sub b($b) {
     "$b bottle{'s' if $b != 1} of beer";
 }
 _END_
-		isa-ok $parsed, Q{Perl6::Tidy::Root};
+		isa-ok $parsed, Q{Perl6::Document};
 	}, Q{version 1};
 
 	subtest {
@@ -472,7 +472,7 @@ sub sing(
     say "$quantity bottle$plural of beer$location"
 }
 _END_
-		isa-ok $parsed, Q{Perl6::Tidy::Root};
+		isa-ok $parsed, Q{Perl6::Document};
 	}, Q{version 2};
 
 	subtest {
@@ -493,7 +493,7 @@ for @quantities Z @bottles Z @actions Z
     say "$d $e of beer on the wall\n";
 }
 _END_
-		isa-ok $parsed, Q{Perl6::Tidy::Root};
+		isa-ok $parsed, Q{Perl6::Document};
 	}, Q{version 3};
 }, Q{99 bottles of beer};
 

@@ -1,4 +1,54 @@
-class Perl6::Tidy::Validator {
+role Perl6::Node {
+	method Str() {...}
+
+	method perl6 ( ) {
+	}
+}
+
+# Documents will be laid out in a typical tree format.
+# I'll use 'Leaf' to distinguish nodes that have no children from those that do.
+#
+role Perl6::Leaf does Perl6::Node {
+	has $.content;
+}
+
+role Perl6::Branch does Perl6::Node {
+	has @.child;
+}
+
+# In passing, please note that Factory methods don't have to validate their
+# contents.
+
+class Perl6::Document does Perl6::Branch {
+	method Str() {
+		''
+	}
+}
+
+# * 	Dynamic
+# ! 	Attribute (class member)
+# ? 	Compile-time variable
+# . 	Method (not really a variable)
+# < 	Index into match object (not really a variable)
+# ^ 	Self-declared formal positional parameter
+# : 	Self-declared formal named parameter
+# = 	Pod variables
+# ~ 	The sublanguage seen by the parser at this lexical spot
+
+class Perl6::Variable does Perl6::Leaf {
+	has Str $.headless;
+	has Str $.sigil is required;
+	has $.twigil;
+
+	method Str() { ~$.content }
+}
+
+class Perl6::Variable::Scalar is Perl6::Variable { }
+class Perl6::Variable::Array is Perl6::Variable { }
+class Perl6::Variable::Hash is Perl6::Variable { }
+class Perl6::Variable::Callable is Perl6::Variable { }
+
+class Perl6::Tidy::Factory {
 
 	sub dump( Mu $parsed ) {
 		say $parsed.hash.keys.gist;
@@ -1663,11 +1713,17 @@ return True;
 		return self.record-failure( '_Right' );
 	}
 
-	method validate( Mu $parsed ) {
-		self.trace( 'validate' );
-		return True if self.assert-hash-keys( $parsed,
-				[< statementlist >] )
-			and self._StatementList( $parsed.hash.<statementlist> );
+	method build( Mu $parsed ) {
+		self.trace( 'build' );
+		if self.assert-hash-keys( $parsed, [< statementlist >] ) {
+			return Perl6::Document.new(
+				:child(
+					self._StatementList(
+						$parsed.hash.<statementlist>
+					)
+				)
+			)
+		}
 		return self.record-failure( 'Root' );
 	}
 
@@ -1965,9 +2021,6 @@ return True;
 		return True if self.assert-hash-keys( $parsed, [< statement >] )
 			and self._Statement( $parsed.hash.<statement> );
 		return True if self.assert-hash-keys( $parsed, [], [< statement >] );
-		# This line is caught above, but is where comments and POD are
-		# stored.
-		return True if self.assert-Str( $parsed );
 		return self.record-failure( '_StatementList' );
 	}
 
@@ -2266,23 +2319,40 @@ return True;
 		return self.record-failure( '_VariableDeclarator' );
 	}
 
-	method _Variable( Mu $parsed ) {
+	method _Variable( Mu $p ) {
 		self.trace( '_Variable' );
-#return True;
-		return True if self.assert-hash-keys( $parsed,
-				[< twigil sigil desigilname >] )
-			and self._Twigil( $parsed.hash.<twigil> )
-			and self._Sigil( $parsed.hash.<sigil> )
-			and self._DeSigilName( $parsed.hash.<desigilname> );
-		return True if self.assert-hash-keys( $parsed,
-				[< sigil desigilname >] )
-			and self._Sigil( $parsed.hash.<sigil> )
-			and self._DeSigilName( $parsed.hash.<desigilname> );
-		return True if self.assert-hash-keys( $parsed, [< sigil >] )
-			and self._Sigil( $parsed.hash.<sigil> );
-		return True if self.assert-hash-keys( $parsed,
-				[< contextualizer >] )
-			and self._Contextualizer( $parsed.hash.<contextualizer> );
+
+		my $sigil       = $p.hash.<sigil>.Str;
+		my $twigil      = $p.hash.<twigil> ??
+			          $p.hash.<twigil>.Str !! '';
+		my $desigilname = $p.hash.<desigilname> ??
+				  $p.hash.<desigilname>.Str !! '';
+		my $content     = $p.hash.<sigil> ~ $twigil ~ $desigilname;
+		my %sigil-to-class = (
+			'$' => 'Perl6::Variable::Scalar',
+			'@' => 'Perl6::Variable::Array',
+			'%' => 'Perl6::Variable::Hash',
+			'&' => 'Perl6::Variable::Callable',
+		);
+		my $class = %sigil-to-class{$sigil};
+		die "Unknown sigil '$sigil'!" unless $class;
+		#my $leaf = $class.new(
+		my $leaf = Perl6::Variable::Scalar.new(
+			:content( $content ),
+			:sigil( $sigil ),
+			:twigil( $twigil ),
+			:headless( $desigilname )
+		);
+say $p.dump;
+say $class;
+say $leaf.gist;
+		return $leaf;
+
+#		return True if self.assert-hash-keys( $p, [< sigil >] )
+#			and self._Sigil( $p.hash.<sigil> );
+#		return True if self.assert-hash-keys( $p,
+#				[< contextualizer >] )
+#			and self._Contextualizer( $p.hash.<contextualizer> );
 		return self.record-failure( '_Variable' );
 	}
 

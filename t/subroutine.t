@@ -13,7 +13,7 @@ subtest {
 	plan 1;
 
 	my $parsed = $pt.tidy( Q[sub foo { }] );
-	isa-ok $parsed, Q{Perl6::Tidy::Root};
+	isa-ok $parsed, Q{Perl6::Document};
 }, Q{empty};
 
 subtest {
@@ -28,7 +28,7 @@ subtest {
 			my $parsed = $pt.tidy( Q:to[_END_] );
 sub foo( 0 ) { }
 _END_
-			isa-ok $parsed, Q{Perl6::Tidy::Root};
+			isa-ok $parsed, Q{Perl6::Document};
 		}, Q{constant};
 
 		subtest {
@@ -37,7 +37,7 @@ _END_
 			my $parsed = $pt.tidy( Q:to[_END_] );
 sub foo( $a ) { }
 _END_
-			isa-ok $parsed, Q{Perl6::Tidy::Root};
+			isa-ok $parsed, Q{Perl6::Document};
 		}, Q{untyped};
 
 		subtest {
@@ -49,7 +49,7 @@ _END_
 				my $parsed = $pt.tidy( Q:to[_END_] );
 sub foo( Str $a ) { }
 _END_
-				isa-ok $parsed, Q{Perl6::Tidy::Root};
+				isa-ok $parsed, Q{Perl6::Document};
 			}, Q{typed};
 
 			subtest {
@@ -58,7 +58,7 @@ _END_
 				my $parsed = $pt.tidy( Q:to[_END_] );
 sub foo( ::T $a ) { }
 _END_
-				isa-ok $parsed, Q{Perl6::Tidy::Root};
+				isa-ok $parsed, Q{Perl6::Document};
 			}, Q{type-capture};
 
 			subtest {
@@ -67,7 +67,7 @@ _END_
 				my $parsed = $pt.tidy( Q:to[_END_] );
 sub foo( Str ) { }
 _END_
-				isa-ok $parsed, Q{Perl6::Tidy::Root};
+				isa-ok $parsed, Q{Perl6::Document};
 			}, Q{type-only};
 
 			subtest {
@@ -76,7 +76,7 @@ _END_
 				my $parsed = $pt.tidy( Q:to[_END_] );
 sub foo( Str $a where "foo" ) { }
 _END_
-				isa-ok $parsed, Q{Perl6::Tidy::Root};
+				isa-ok $parsed, Q{Perl6::Document};
 			}, Q{type-constrained};
 		}, Q{typed};
 
@@ -86,7 +86,7 @@ _END_
 			my $parsed = $pt.tidy( Q:to[_END_] );
 sub foo( $a = 0 ) { }
 _END_
-			isa-ok $parsed, Q{Perl6::Tidy::Root};
+			isa-ok $parsed, Q{Perl6::Document};
 		}, Q{default};
 
 		subtest {
@@ -95,7 +95,7 @@ _END_
 			my $parsed = $pt.tidy( Q:to[_END_] );
 sub foo( :$a ) { }
 _END_
-			isa-ok $parsed, Q{Perl6::Tidy::Root};
+			isa-ok $parsed, Q{Perl6::Document};
 		}, Q{optional};
 	}, Q{single};
 
@@ -105,7 +105,7 @@ _END_
 		my $parsed = $pt.tidy( Q:to[_END_] );
 sub foo( $a, $b ) { }
 _END_
-		isa-ok $parsed, Q{Perl6::Tidy::Root};
+		isa-ok $parsed, Q{Perl6::Document};
 	}, Q{multiple};
 }, Q{scalar arguments};
 

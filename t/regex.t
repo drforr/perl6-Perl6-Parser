@@ -13,28 +13,28 @@ subtest {
 	plan 1;
 
 	my $parsed = $pt.tidy( Q{/pi/} );
-	isa-ok $parsed, Q{Perl6::Tidy::Root};
+	isa-ok $parsed, Q{Perl6::Document};
 }, Q{/pi/};
 
 subtest {
 	plan 1;
 
 	my $parsed = $pt.tidy( Q{/<[ p i ]>/} );
-	isa-ok $parsed, Q{Perl6::Tidy::Root};
+	isa-ok $parsed, Q{Perl6::Document};
 }, Q{/<[ p i ]>/};
 
 subtest {
 	plan 1;
 
 	my $parsed = $pt.tidy( Q{/ \d /} );
-	isa-ok $parsed, Q{Perl6::Tidy::Root};
+	isa-ok $parsed, Q{Perl6::Document};
 }, Q{/ \d /};
 
 subtest {
 	plan 1;
 
 	my $parsed = $pt.tidy( Q{/ . /} );
-	isa-ok $parsed, Q{Perl6::Tidy::Root};
+	isa-ok $parsed, Q{Perl6::Document};
 }, Q{/ . /};
 
 # vim: ft=perl6

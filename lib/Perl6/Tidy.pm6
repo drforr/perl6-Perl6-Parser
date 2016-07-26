@@ -86,6 +86,7 @@ sub dump( Mu $parsed ) {
 }
 
 use Perl6::Tidy::Validator;
+use Perl6::Tidy::Factory;
 
 class Perl6::Tidy {
 	use nqp;
@@ -107,13 +108,14 @@ class Perl6::Tidy {
 		return $parsed
 	}
 
-	method tidy( Str $text ) {
-		my $parsed = self.parse-text( $text );
-class Root { }
-
+	method tidy( Str $text, Hash $formatting? ) {
+		my $parsed    = self.parse-text( $text );
 		my $validator = Perl6::Tidy::Validator.new;
-		if $validator.Root( $parsed ) {
-return Root.new
+		my $factory   = Perl6::Tidy::Factory.new;
+
+		if $validator.validate( $parsed ) {
+			my $tree = $factory.build( $parsed );
+			return $tree;
 		}
 		return False
 	}
