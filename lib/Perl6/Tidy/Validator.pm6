@@ -1,5 +1,13 @@
 class Perl6::Tidy::Validator {
 
+	sub dump( Mu $parsed ) {
+		say $parsed.hash.keys.gist;
+	}
+
+	method trace( Str $term ) {
+		note $term if $*TRACE;
+	}
+
 	method record-failure( Str $term ) returns Bool {
 		note "Failure in term '$term'" if $*DEBUG;
 		return False
@@ -23,6 +31,7 @@ class Perl6::Tidy::Validator {
 		return False if $parsed.list;
 
 		return True if $parsed.Int;
+		return True if $parsed.Bool;
 		warn "Uncaught type";
 		return False
 	}
@@ -43,6 +52,7 @@ class Perl6::Tidy::Validator {
 	method assert-Str( Mu $parsed ) {
 		return False if $parsed.hash;
 		return False if $parsed.list;
+		return False if $parsed.Num;
 		return False if $parsed.Int;
 
 		return True if $parsed.Str;
@@ -51,20 +61,21 @@ class Perl6::Tidy::Validator {
 	}
 
 	method assert-hash-keys( Mu $parsed, $keys, $defined-keys = [] ) {
-		if $parsed.hash {
-			my @keys;
-			my @defined-keys;
-			for $parsed.hash.keys {
-				if $parsed.hash.{$_} {
-					@keys.push( $_ );
-				}
-				elsif $parsed.hash:defined{$_} {
-					@defined-keys.push( $_ );
-				}
-			}
+		return False unless $parsed and $parsed.hash;
 
-			if $parsed.hash.keys.elems !=
-				$keys.elems + $defined-keys.elems {
+		my @keys;
+		my @defined-keys;
+		for $parsed.hash.keys {
+			if $parsed.hash.{$_} {
+				@keys.push( $_ );
+			}
+			elsif $parsed.hash:defined{$_} {
+				@defined-keys.push( $_ );
+			}
+		}
+
+		if $parsed.hash.keys.elems !=
+			$keys.elems + $defined-keys.elems {
 #				warn "Test " ~
 #					$keys.gist ~
 #					", " ~
@@ -72,34 +83,34 @@ class Perl6::Tidy::Validator {
 #					" against parser " ~
 #					$parsed.hash.keys.gist;
 #				CONTROL { when CX::Warn { warn .message ~ "\n" ~ .backtrace.Str } }
-				return False
-			}
-			
-			for @( $keys ) -> $key {
-				return False unless $parsed.hash.{$key}
-			}
-			for @( $defined-keys ) -> $key {
-				return False unless $parsed.hash:defined{$key}
-			}
-			return True
+			return False
 		}
-		return False
+		
+		for @( $keys ) -> $key {
+			next if $parsed.hash.{$key};
+			return False
+		}
+		for @( $defined-keys ) -> $key {
+			next if $parsed.hash:defined{$key};
+			return False
+		}
+		return True
 	}
 
 	method _ArgList( Mu $parsed ) returns Bool {
-		say '_ArgList' if $*TRACE;
+		self.trace( '_ArgList' );
 		CATCH {
-			when X::Hash::Store::OddNumber { }
-			when X::Multi::NoMatch { }
+			when X::Hash::Store::OddNumber { .resume }
 		}
 #return True;
 		if $parsed.list {
 			for $parsed.list {
-				next if self.assert-hash-keys( $_,
-						[< EXPR >] )
+				next if self.assert-hash-keys( $_, [< EXPR >] )
 					and self._EXPR( $_.hash.<EXPR> );
-				return self.record-failure( '_ArgList' );
+				next if self.assert-Bool( $_ );
+				return self.record-failure( '_ArgList list' );
 			}
+			return True;
 		}
 		return True if self.assert-hash-keys( $parsed,
 				[< deftermnow initializer term_init >],
@@ -109,12 +120,13 @@ class Perl6::Tidy::Validator {
 			and self._TermInit( $parsed.hash.<term_init> );
 		return True if self.assert-hash-keys( $parsed, [< EXPR >] )
 			and self._EXPR( $parsed.hash.<EXPR> );
+		return True if self.assert-Int( $parsed );
 		return True if self.assert-Bool( $parsed );
 		return self.record-failure( '_ArgList' );
 	}
 
 	method _Args( Mu $parsed ) returns Bool {
-		say '_Args' if $*TRACE;
+		self.trace( '_Args' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< invocant semiarglist >] )
@@ -123,6 +135,8 @@ class Perl6::Tidy::Validator {
 		return True if self.assert-hash-keys( $parsed,
 				[< semiarglist >] )
 			and self._SemiArgList( $parsed.hash.<semiarglist> );
+		return True if self.assert-hash-keys( $parsed, [ ],
+				[< semiarglist >] );
 		return True if self.assert-hash-keys( $parsed, [< arglist >] )
 			and self._ArgList( $parsed.hash.<arglist> );
 		return True if self.assert-hash-keys( $parsed, [< EXPR >] )
@@ -133,7 +147,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Assertion( Mu $parsed ) returns Bool {
-		say '_Assertion' if $*TRACE;
+		self.trace( '_Assertion' );
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< var >] )
 			and self._Var( $parsed.hash.<var> );
@@ -149,7 +163,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Atom( Mu $parsed ) returns Bool {
-		say '_Atom' if $*TRACE;
+		self.trace( '_Atom' );
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< metachar >] )
 			and self._MetaChar( $parsed.hash.<metachar> );
@@ -158,7 +172,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Babble( Mu $parsed ) returns Bool {
-		say '_Bubble' if $*TRACE;
+		self.trace( '_Bubble' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< B >], [< quotepair >] )
@@ -167,14 +181,14 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _BackMod( Mu $parsed ) returns Bool {
-		say '_BackMod' if $*TRACE;
+		self.trace( '_BackMod' );
 #return True;
 		return True if self.assert-Bool( $parsed );
 		return self.record-failure( '_BackMod' );
 	}
 
 	method _BackSlash( Mu $parsed ) returns Bool {
-		say '_BackSlash' if $*TRACE;
+		self.trace( '_BackSlash' );
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< sym >] )
 			and self._Sym( $parsed.hash.<sym> );
@@ -183,14 +197,14 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _B( Mu $parsed ) returns Bool {
-		say '_B' if $*TRACE;
+		self.trace( '_B' );
 #return True;
 		return True if self.assert-Bool( $parsed );
 		return self.record-failure( '_B' );
 	}
 
 	method _BinInt( Mu $parsed ) returns Bool {
-		say '_BinInt' if $*TRACE;
+		self.trace( '_BinInt' );
 #return True;
 		return True if $parsed.Str and $parsed.Str eq '0';
 		return True if self.assert-Int( $parsed );
@@ -198,7 +212,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Block( Mu $parsed ) returns Bool {
-		say '_Block' if $*TRACE;
+		self.trace( '_Block' );
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< blockoid >] )
 			and self._Blockoid( $parsed.hash.<blockoid> );
@@ -206,7 +220,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Blockoid( Mu $parsed ) returns Bool {
-		say '_Blockoid' if $*TRACE;
+		self.trace( '_Blockoid' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< statementlist >] )
@@ -215,7 +229,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Blorst( Mu $parsed ) returns Bool {
-		say '_Blorst' if $*TRACE;
+		self.trace( '_Blorst' );
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< statement >] )
 			and self._Statement( $parsed.hash.<statement> );
@@ -225,7 +239,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Bracket( Mu $parsed ) returns Bool {
-		say '_Bracket' if $*TRACE;
+		self.trace( '_Bracket' );
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< semilist >] )
 			and self._SemiList( $parsed.hash.<semilist> );
@@ -233,7 +247,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _CClassElem( Mu $parsed ) returns Bool {
-		say '_CClassElem' if $*TRACE;
+		self.trace( '_CClassElem' );
 #return True;
 		if $parsed.list {
 			for $parsed.list {
@@ -255,7 +269,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _CharSpec( Mu $parsed ) returns Bool {
-		say '_CharSpec' if $*TRACE;
+		self.trace( '_CharSpec' );
 #return True;
 # XXX work on this, of course.
 		return True if $parsed.list;
@@ -263,7 +277,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Circumfix( Mu $parsed ) returns Bool {
-		say '_Circumfix' if $*TRACE;
+		self.trace( '_Circumfix' );
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< nibble >] )
 			and self._Nibble( $parsed.hash.<nibble> );
@@ -287,7 +301,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _CodeBlock( Mu $parsed ) returns Bool {
-		say '_CodeBlock' if $*TRACE;
+		self.trace( '_CodeBlock' );
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< block >] )
 			and self._Block( $parsed.hash.<block> );
@@ -295,7 +309,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Coeff( Mu $parsed ) returns Bool {
-		say '_Coeff' if $*TRACE;
+		self.trace( '_Coeff' );
 #return True;
 		return True if self.assert-Str( $parsed ) and
 		   ( $parsed.Str eq '0.0' or
@@ -305,7 +319,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Coercee( Mu $parsed ) returns Bool {
-		say '_Coercee' if $*TRACE;
+		self.trace( '_Coercee' );
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< semilist >] )
 			and self._SemiList( $parsed.hash.<semilist> );
@@ -313,7 +327,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _ColonCircumfix( Mu $parsed ) returns Bool {
-		say '_ColonCircumfix' if $*TRACE;
+		self.trace( '_ColonCircumfix' );
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< circumfix >] )
 			and self._Circumfix( $parsed.hash.<circumfix> );
@@ -321,7 +335,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _ColonPair( Mu $parsed ) returns Bool {
-		say '_ColonPair' if $*TRACE;
+		self.trace( '_ColonPair' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				     [< identifier coloncircumfix >] )
@@ -339,7 +353,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _ColonPairs( Mu $parsed ) {
-		say '_ColonPairs' if $*TRACE;
+		self.trace( '_ColonPairs' );
 #return True;
 		if $parsed ~~ Hash {
 			return True if $parsed.<D>;
@@ -349,7 +363,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Contextualizer( Mu $parsed ) {
-		say '_Contextualizer' if $*TRACE;
+		self.trace( '_Contextualizer' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< coercee circumfix sigil >] )
@@ -360,7 +374,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _DecInt( Mu $parsed ) {
-		say '_DecInt' if $*TRACE;
+		self.trace( '_DecInt' );
 #return True;
 		return True if $parsed.Str and $parsed.Str eq '0';
 		return True if self.assert-Int( $parsed );
@@ -368,7 +382,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Declarator( Mu $parsed ) {
-		say '_Declarator' if $*TRACE;
+		self.trace( '_Declarator' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< deftermnow initializer term_init >],
@@ -401,7 +415,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _DECL( Mu $parsed ) {
-		say '_DECL' if $*TRACE;
+		self.trace( '_DECL' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< deftermnow initializer term_init >],
@@ -450,7 +464,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _DecNumber( Mu $parsed ) {
-		say '_DecNumber' if $*TRACE;
+		self.trace( '_DecNumber' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				  [< int coeff frac escale >] )
@@ -481,7 +495,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _DefLongName( Mu $parsed ) {
-		say '_DefLongName' if $*TRACE;
+		self.trace( '_DefLongName' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< name >], [< colonpair >] )
@@ -490,7 +504,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _DefTerm( Mu $parsed ) {
-		say '_DefTerm' if $*TRACE;
+		self.trace( '_DefTerm' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< identifier colonpair >] )
@@ -503,7 +517,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _DefTermNow( Mu $parsed ) {
-		say '_DefTermNow' if $*TRACE;
+		self.trace( '_DefTermNow' );
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< defterm >] )
 			and self._DefTerm( $parsed.hash.<defterm> );
@@ -511,7 +525,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _DeSigilName( Mu $parsed ) {
-		say '_DeSigilName' if $*TRACE;
+		self.trace( '_DeSigilName' );
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< longname >] )
 			and self._LongName( $parsed.hash.<longname> );
@@ -520,7 +534,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Dig( Mu $parsed ) {
-		say '_Dig' if $*TRACE;
+		self.trace( '_Dig' );
 #return True;
 		if $parsed.list {
 			for $parsed.list {
@@ -540,14 +554,14 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Doc( Mu $parsed ) returns Bool {
-		say '_Doc' if $*TRACE;
+		self.trace( '_Doc' );
 #return True;
 		return True if self.assert-Bool( $parsed );
 		return self.record-failure( '_Doc' );
 	}
 
 	method _Dotty( Mu $parsed ) {
-		say '_Dotty' if $*TRACE;
+		self.trace( '_Dotty' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< sym dottyop O >] )
@@ -558,7 +572,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _DottyOp( Mu $parsed ) {
-		say '_DottyOp' if $*TRACE;
+		self.trace( '_DottyOp' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< sym postop >], [< O >] )
@@ -572,7 +586,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _DottyOpish( Mu $parsed ) {
-		say '_DottyOpish' if $*TRACE;
+		self.trace( '_DottyOpish' );
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< term >] )
 			and self._Term( $parsed.hash.<term> );
@@ -580,7 +594,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _E1( Mu $parsed ) {
-		say '_E1' if $*TRACE;
+		self.trace( '_E1' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< scope_declarator >] )
@@ -589,7 +603,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _E2( Mu $parsed ) {
-		say '_E2' if $*TRACE;
+		self.trace( '_E2' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< infix OPER >] )
@@ -599,7 +613,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _E3( Mu $parsed ) {
-		say '_E3' if $*TRACE;
+		self.trace( '_E3' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< postfix OPER >],
@@ -610,7 +624,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Else( Mu $parsed ) {
-		say '_Else' if $*TRACE;
+		self.trace( '_Else' );
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< sym blorst >] )
 			and self._Sym( $parsed.hash.<sym> )
@@ -621,7 +635,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _EScale( Mu $parsed ) {
-		say '_EScale' if $*TRACE;
+		self.trace( '_EScale' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< sign decint >] )
@@ -631,7 +645,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _EXPR( Mu $parsed ) {
-		say '_EXPR' if $*TRACE;
+		self.trace( '_EXPR' );
 #return True;
 		if $parsed.list {
 			for $parsed.list {
@@ -707,7 +721,7 @@ class Perl6::Tidy::Validator {
 						[< statement_prefix >] )
 					and self._StatementPrefix( $_.hash.<statement_prefix> );
 				next if self.assert-Str( $_ );
-				return self.record-failure( '_EXPR' );
+				return self.record-failure( '_EXPR list' );
 			}
 			return True if self.assert-hash-keys(
 					$parsed,
@@ -749,7 +763,7 @@ class Perl6::Tidy::Validator {
 					[< OPER >],
 					[< infix_prefix_meta_operator >] )
 				and self._OPER( $parsed.hash.<OPER> );
-			return self.record-failure( '_EXPR list' );
+			return self.record-failure( '_EXPR hash' );
 		}
 		return True if self.assert-hash-keys( $parsed,
 				[< args op triangle >] )
@@ -809,7 +823,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _FakeInfix( Mu $parsed ) {
-		say '_FakeInfix' if $*TRACE;
+		self.trace( '_FakeInfix' );
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< O >] )
 			and self._O( $parsed.hash.<O> );
@@ -817,7 +831,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _FakeSignature( Mu $parsed ) {
-		say '_FakeSignature' if $*TRACE;
+		self.trace( '_FakeSignature' );
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< signature >] )
 			and self._Signature( $parsed.hash.<signature> );
@@ -825,7 +839,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _FatArrow( Mu $parsed ) {
-		say '_FatArrow' if $*TRACE;
+		self.trace( '_FatArrow' );
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< val key >] )
 			and self._Val( $parsed.hash.<val> )
@@ -834,7 +848,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Frac( Mu $parsed ) {
-		say '_Frac' if $*TRACE;
+		self.trace( '_Frac' );
 #return True;
 		return True if $parsed.Str and $parsed.Str eq '0';
 		return True if self.assert-Int( $parsed );
@@ -842,7 +856,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _HexInt( Mu $parsed ) {
-		say '_HexInt' if $*TRACE;
+		self.trace( '_HexInt' );
 #return True;
 		return True if $parsed.Str and $parsed.Str eq '0';
 		return True if self.assert-Int( $parsed );
@@ -850,7 +864,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Identifier( Mu $parsed ) {
-		say '_Identifier' if $*TRACE;
+		self.trace( '_Identifier' );
 #return True;
 		if $parsed.list {
 			for $parsed.list {
@@ -864,7 +878,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Infix( Mu $parsed ) {
-		say '_Infix' if $*TRACE;
+		self.trace( '_Infix' );
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< EXPR O >] )
 			and self._EXPR( $parsed.hash.<EXPR> )
@@ -880,7 +894,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Infixish( Mu $parsed ) {
-		say '_Infixish' if $*TRACE;
+		self.trace( '_Infixish' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< infix OPER >] )
@@ -890,7 +904,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _InfixPrefixMetaOperator( Mu $parsed ) {
-		say '_InfixPrefixMetaOperator' if $*TRACE;
+		self.trace( '_InfixPrefixMetaOperator' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< sym infixish O >] )
@@ -901,7 +915,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Initializer( Mu $parsed ) {
-		say '_Initializer' if $*TRACE;
+		self.trace( '_Initializer' );
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< sym EXPR >] )
 			and self._Sym( $parsed.hash.<sym> )
@@ -914,7 +928,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Int( Mu $parsed ) {
-		say '_Int' if $*TRACE;
+		self.trace( '_Int' );
 #return True;
 		return True if $parsed.Str and $parsed.Str eq '0';
 		return True if self.assert-Int( $parsed );
@@ -922,7 +936,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Integer( Mu $parsed ) {
-		say '_Integer' if $*TRACE;
+		self.trace( '_Integer' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< decint VALUE >] )
@@ -944,32 +958,38 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Invocant( Mu $parsed ) {
-		say '_Invocant' if $*TRACE;
+		self.trace( '_Invocant' );
+		CATCH {
+			when X::Multi::NoMatch { }
+		}
 #return True;
 		#return True if $parsed ~~ QAST::Want;
 		#return True if self.assert-hash-keys( $parsed, [< XXX >] )
 		#	and self._VALUE( $parsed.hash.<XXX> );
 # XXX Fixme
+#say $parsed.dump;
+#say $parsed.dump_annotations;
+#say "############## " ~$parsed.<annotations>.gist;#<BY>;
+return True;
 		return self.record-failure( '_Invocant' );
-		return True
 	}
 
 	method _Key( Mu $parsed ) returns Bool {
-		say '_Key' if $*TRACE;
+		self.trace( '_Key' );
 #return True;
 		return True if self.assert-Str( $parsed );
 		return self.record-failure( '_Key' );
 	}
 
 	method _Lambda( Mu $parsed ) returns Bool {
-		say '_Lambda' if $*TRACE;
+		self.trace( '_Lambda' );
 #return True;
 		return True if self.assert-Str( $parsed );
 		return self.record-failure( '_Labmda' );
 	}
 
 	method _Left( Mu $parsed ) {
-		say '_Left' if $*TRACE;
+		self.trace( '_Left' );
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< termseq >] )
 			and self._TermSeq( $parsed.hash.<termseq> );
@@ -977,7 +997,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _LongName( Mu $parsed ) {
-		say '_LongName' if $*TRACE;
+		self.trace( '_LongName' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< name >],
@@ -987,14 +1007,14 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Max( Mu $parsed ) returns Bool {
-		say '_Max' if $*TRACE;
+		self.trace( '_Max' );
 #return True;
 		return True if self.assert-Str( $parsed );
 		return self.record-failure( '_Max' );
 	}
 
 	method _MetaChar( Mu $parsed ) {
-		say '_MetaChar' if $*TRACE;
+		self.trace( '_MetaChar' );
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< sym >] )
 			and self._Sym( $parsed.hash.<sym> );
@@ -1016,7 +1036,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _MethodDef( Mu $parsed ) {
-		say '_MethodDef' if $*TRACE;
+		self.trace( '_MethodDef' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 			     [< specials longname blockoid multisig >],
@@ -1034,10 +1054,8 @@ class Perl6::Tidy::Validator {
 		return self.record-failure( '_MethodDef' );
 	}
 
-	# Ding - longname args here.
-	# Ding - args failing.
 	method _MethodOp( Mu $parsed ) {
-		say '_MethodOp' if $*TRACE;
+		self.trace( '_MethodOp' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< longname args >] )
@@ -1051,7 +1069,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Min( Mu $parsed ) {
-		say '_Min' if $*TRACE;
+		self.trace( '_Min' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< decint VALUE >] )
@@ -1061,7 +1079,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _ModifierExpr( Mu $parsed ) {
-		say '_ModifierExpr' if $*TRACE;
+		self.trace( '_ModifierExpr' );
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< EXPR >] )
 			and self._EXPR( $parsed.hash.<EXPR> );
@@ -1069,7 +1087,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _ModuleName( Mu $parsed ) {
-		say '_ModuleName' if $*TRACE;
+		self.trace( '_ModuleName' );
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< longname >] )
 			and self._LongName( $parsed.hash.<longname> );
@@ -1077,14 +1095,14 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _MoreName( Mu $parsed ) {
-		say '_MoreName' if $*TRACE;
+		self.trace( '_MoreName' );
 #return True;
 		if $parsed.list {
 			for $parsed.list {
 				next if self.assert-hash-keys( $_,
 						[< identifier >] )
 					and self._Identifier( $_.hash.<identifier> );
-				return self.record-failure( '_MoreName' );
+				return self.record-failure( '_MoreName list' );
 			}
 			return True
 		}
@@ -1092,7 +1110,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _MultiDeclarator( Mu $parsed ) {
-		say '_MultiDeclarator' if $*TRACE;
+		self.trace( '_MultiDeclarator' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< sym routine_def >] )
@@ -1109,7 +1127,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _MultiSig( Mu $parsed ) {
-		say '_MultiSig' if $*TRACE;
+		self.trace( '_MultiSig' );
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< signature >] )
 			and self._Signature( $parsed.hash.<signature> );
@@ -1117,7 +1135,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _NamedParam( Mu $parsed ) {
-		say '_NamedParam' if $*TRACE;
+		self.trace( '_NamedParam' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< param_var >] )
@@ -1126,7 +1144,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Name( Mu $parsed ) {
-		say '_Name' if $*TRACE;
+		self.trace( '_Name' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 			[< param_var type_constraint quant >],
@@ -1147,7 +1165,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Nibble( Mu $parsed ) {
-		say '_Nibble' if $*TRACE;
+		self.trace( '_Nibble' );
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< termseq >] )
 			and self._TermSeq( $parsed.hash.<termseq> );
@@ -1157,7 +1175,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Nibbler( Mu $parsed ) {
-		say '_Nibbler' if $*TRACE;
+		self.trace( '_Nibbler' );
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< termseq >] )
 			and self._TermSeq( $parsed.hash.<termseq> );
@@ -1165,14 +1183,14 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _NormSpace( Mu $parsed ) returns Bool {
-		say '_NormSpace' if $*TRACE;
+		self.trace( '_NormSpace' );
 #return True;
 		return True if self.assert-Str( $parsed );
 		return self.record-failure( '_NormSpace' );
 	}
 
 	method _Noun( Mu $parsed ) {
-		say '_Noun' if $*TRACE;
+		self.trace( '_Noun' );
 #return True;
 		if $parsed.list {
 			for $parsed.list {
@@ -1213,7 +1231,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Number( Mu $parsed ) {
-		say '_Number' if $*TRACE;
+		self.trace( '_Number' );
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< numish >] )
 			and self._Numish( $parsed.hash.<numish> );
@@ -1221,7 +1239,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Numish( Mu $parsed ) {
-		say '_Numish' if $*TRACE;
+		self.trace( '_Numish' );
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< integer >] )
 			and self._Integer( $parsed.hash.<integer> );
@@ -1236,7 +1254,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _OctInt( Mu $parsed ) {
-		say '_OctInt' if $*TRACE;
+		self.trace( '_OctInt' );
 #return True;
 		return True if $parsed.Str and $parsed.Str eq '0';
 		return True if self.assert-Int( $parsed );
@@ -1244,7 +1262,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _O( Mu $parsed ) {
-		say '_O' if $*TRACE;
+		self.trace( '_O' );
 		CATCH {
 			when X::Multi::NoMatch { .resume }
 			#default { .resume }
@@ -1303,7 +1321,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Op( Mu $parsed ) {
-		say '_Op' if $*TRACE;
+		self.trace( '_Op' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 			     [< infix_prefix_meta_operator OPER >] )
@@ -1316,7 +1334,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _OPER( Mu $parsed ) {
-		say '_OPER' if $*TRACE;
+		self.trace( '_OPER' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< sym dottyop O >] )
@@ -1353,7 +1371,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _PackageDeclarator( Mu $parsed ) {
-		say '_PackageDeclarator' if $*TRACE;
+		self.trace( '_PackageDeclarator' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< sym package_def >] )
@@ -1363,7 +1381,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _PackageDef( Mu $parsed ) {
-		say '_PackageDef' if $*TRACE;
+		self.trace( '_PackageDef' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< blockoid longname >], [< trait >] )
@@ -1380,7 +1398,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Parameter( Mu $parsed ) {
-		say '_Parameter' if $*TRACE;
+		self.trace( '_Parameter' );
 #return True;
 		if $parsed.list {
 			my @child;
@@ -1427,7 +1445,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _ParamVar( Mu $parsed ) {
-		say '_ParamVar' if $*TRACE;
+		self.trace( '_ParamVar' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< name twigil sigil >] )
@@ -1445,7 +1463,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _PBlock( Mu $parsed ) {
-		say '_PBlock' if $*TRACE;
+		self.trace( '_PBlock' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				     [< lambda blockoid signature >] )
@@ -1458,7 +1476,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _PostCircumfix( Mu $parsed ) {
-		say '_PostCircumfix' if $*TRACE;
+		self.trace( '_PostCircumfix' );
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< nibble O >] )
 			and self._Nibble( $parsed.hash.<nibble> )
@@ -1473,7 +1491,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Postfix( Mu $parsed ) {
-		say '_Postfix' if $*TRACE;
+		self.trace( '_Postfix' );
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< dig O >] )
 			and self._Dig( $parsed.hash.<dig> )
@@ -1485,7 +1503,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _PostOp( Mu $parsed ) {
-		say '_PostOp' if $*TRACE;
+		self.trace( '_PostOp' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< sym postcircumfix O >] )
@@ -1500,7 +1518,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Prefix( Mu $parsed ) {
-		say '_Prefix' if $*TRACE;
+		self.trace( '_Prefix' );
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< sym O >] )
 			and self._Sym( $parsed.hash.<sym> )
@@ -1509,7 +1527,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Quant( Mu $parsed ) returns Bool {
-		say '_Quant' if $*TRACE;
+		self.trace( '_Quant' );
 #return True;
 		return True if self.assert-Bool( $parsed );
 		return self.record-failure( '_Quant' );
@@ -1517,7 +1535,7 @@ class Perl6::Tidy::Validator {
 
 
 	method _QuantifiedAtom( Mu $parsed ) {
-		say '_QuantifiedAtom' if $*TRACE;
+		self.trace( '_QuantifiedAtom' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< sigfinal atom >] )
@@ -1527,7 +1545,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Quantifier( Mu $parsed ) {
-		say '_Quantifier' if $*TRACE;
+		self.trace( '_Quantifier' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< sym min max backmod >] )
@@ -1543,7 +1561,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Quibble( Mu $parsed ) {
-		say '_Quibble' if $*TRACE;
+		self.trace( '_Quibble' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< babble nibble >] )
@@ -1553,7 +1571,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Quote( Mu $parsed ) {
-		say '_Quote' if $*TRACE;
+		self.trace( '_Quote' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< sym quibble rx_adverbs >] )
@@ -1573,7 +1591,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _QuotePair( Mu $parsed ) {
-		say '_QuotePair' if $*TRACE;
+		self.trace( '_QuotePair' );
 #return True;
 		if $parsed.list {
 			for $parsed.list {
@@ -1596,14 +1614,14 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Radix( Mu $parsed ) returns Bool {
-		say '_Radix' if $*TRACE;
+		self.trace( '_Radix' );
 #return True;
 		return True if self.assert-Int( $parsed );
 		return self.record-failure( '_Radix' );
 	}
 
 	method _RadNumber( Mu $parsed ) {
-		say '_RadNumber' if $*TRACE;
+		self.trace( '_RadNumber' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< circumfix bracket radix >], [< exp base >] )
@@ -1618,7 +1636,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _RegexDeclarator( Mu $parsed ) {
-		say '_RegexDeclarator' if $*TRACE;
+		self.trace( '_RegexDeclarator' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< sym regex_def >] )
@@ -1628,7 +1646,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _RegexDef( Mu $parsed ) {
-		say '_RegexDef' if $*TRACE;
+		self.trace( '_RegexDef' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< deflongname nibble >],
@@ -1639,21 +1657,22 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Right( Mu $parsed ) {
-		say '_Right' if $*TRACE;
+		self.trace( '_Right' );
 #return True;
 		return True if self.assert-Bool( $parsed );
 		return self.record-failure( '_Right' );
 	}
 
 	method Root( Mu $parsed ) {
+		self.trace( 'Root' );
 		return True if self.assert-hash-keys( $parsed,
 				[< statementlist >] )
 			and self._StatementList( $parsed.hash.<statementlist> );
-		return self.record-failure( '_Root' );
+		return self.record-failure( 'Root' );
 	}
 
 	method _RoutineDeclarator( Mu $parsed ) {
-		say '_RoutineDeclarator' if $*TRACE;
+		self.trace( '_RoutineDeclarator' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< sym method_def >] )
@@ -1668,7 +1687,7 @@ class Perl6::Tidy::Validator {
 
 	# DING
 	method _RoutineDef( Mu $parsed ) {
-		say '_RoutineDef' if $*TRACE;
+		self.trace( '_RoutineDef' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< blockoid deflongname multisig >],
@@ -1693,7 +1712,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _RxAdverbs( Mu $parsed ) {
-		say '_RxAdverbs' if $*TRACE;
+		self.trace( '_RxAdverbs' );
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< quotepair >] )
 			and self._QuotePair( $parsed.hash.<quotepair> );
@@ -1703,7 +1722,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Scoped( Mu $parsed ) {
-		say '_Scoped' if $*TRACE;
+		self.trace( '_Scoped' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< declarator DECL >], [< typename >] )
@@ -1723,7 +1742,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _ScopeDeclarator( Mu $parsed ) {
-		say '_ScopeDeclarator' if $*TRACE;
+		self.trace( '_ScopeDeclarator' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< sym scoped >] )
@@ -1733,15 +1752,15 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _SemiArgList( Mu $parsed ) {
-		say '_SemiArgList' if $*TRACE;
+		self.trace( '_SemiArgList' );
 #return True;
-		next if self.assert-hash-keys( $parsed, [< arglist >] )
+		return True if self.assert-hash-keys( $parsed, [< arglist >] )
 			and self._ArgList( $parsed.hash.<arglist> );
 		return self.record-failure( '_SemiArgList' );
 	}
 
 	method _SemiList( Mu $parsed ) {
-		say '_SemiList' if $*TRACE;
+		self.trace( '_SemiList' );
 #return True;
 		if $parsed.list {
 			for $parsed.list {
@@ -1758,7 +1777,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Separator( Mu $parsed ) {
-		say '_Separator' if $*TRACE;
+		self.trace( '_Separator' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< septype quantified_atom >] )
@@ -1768,21 +1787,21 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _SepType( Mu $parsed ) returns Bool {
-		say '_SepType' if $*TRACE;
+		self.trace( '_SepType' );
 #return True;
 		return True if self.assert-Str( $parsed );
 		return self.record-failure( '_SepType' );
 	}
 
 	method _Shape( Mu $parsed ) returns Bool {
-		say '_Shape' if $*TRACE;
+		self.trace( '_Shape' );
 #return True;
 		return True if self.assert-Str( $parsed );
 		return self.record-failure( '_Shape' );
 	}
 
 	method _Sibble( Mu $parsed ) {
-		say '_Sibble' if $*TRACE;
+		self.trace( '_Sibble' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< right babble left >] )
@@ -1793,7 +1812,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _SigFinal( Mu $parsed ) {
-		say '_SigFinal' if $*TRACE;
+		self.trace( '_SigFinal' );
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< normspace >] )
 			and self._NormSpace( $parsed.hash.<normspace> );
@@ -1801,14 +1820,14 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Sigil( Mu $parsed ) returns Bool {
-		say '_Sigil' if $*TRACE;
+		self.trace( '_Sigil' );
 #return True;
 		return True if self.assert-Str( $parsed );
 		return self.record-failure( '_Sigil' );
 	}
 
 	method _SigMaybe( Mu $parsed ) {
-		say '_SigMaybe' if $*TRACE;
+		self.trace( '_SigMaybe' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< parameter typename >],
@@ -1821,7 +1840,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Signature( Mu $parsed ) {
-		say '_Signature' if $*TRACE;
+		self.trace( '_Signature' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< parameter typename >],
@@ -1838,7 +1857,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Sign( Mu $parsed ) {
-		say '_Sign' if $*TRACE;
+		self.trace( '_Sign' );
 #return True;
 		return True if $parsed.Str
 			and ( $parsed.Str eq '-' or $parsed.Str eq '+' );
@@ -1847,7 +1866,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _SMExpr( Mu $parsed ) {
-		say '_SMExpr' if $*TRACE;
+		self.trace( '_SMExpr' );
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< EXPR >] )
 			and self._EXPR( $parsed.hash.<EXPR> );
@@ -1855,14 +1874,14 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Specials( Mu $parsed ) returns Bool {
-		say '_Specials' if $*TRACE;
+		self.trace( '_Specials' );
 #return True;
 		return True if self.assert-Bool( $parsed );
 		return self.record-failure( '_Specials' );
 	}
 
 	method _StatementControl( Mu $parsed ) {
-		say '_StatementControl' if $*TRACE;
+		self.trace( '_StatementControl' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< block sym e1 e2 e3 >] )
@@ -1871,7 +1890,7 @@ class Perl6::Tidy::Validator {
 			and self._E1( $parsed.hash.<e1> )
 			and self._E2( $parsed.hash.<e2> )
 			and self._E3( $parsed.hash.<e3> );
-		return if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $parsed,
 				[< pblock sym EXPR wu >] )
 			and self._PBlock( $parsed.hash.<pblock> )
 			and self._Sym( $parsed.hash.<sym> )
@@ -1909,7 +1928,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Statement( Mu $parsed ) {
-		say '_Statement' if $*TRACE;
+		self.trace( '_Statement' );
 #return True;
 		if $parsed.list {
 			for $parsed.list {
@@ -1941,7 +1960,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _StatementList( Mu $parsed ) {
-		say '_StatementList' if $*TRACE;
+		self.trace( '_StatementList' );
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< statement >] )
 			and self._Statement( $parsed.hash.<statement> );
@@ -1950,7 +1969,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _StatementModCond( Mu $parsed ) {
-		say '_StatementModCond' if $*TRACE;
+		self.trace( '_StatementModCond' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< sym modifier_expr >] )
@@ -1960,7 +1979,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _StatementModLoop( Mu $parsed ) {
-		say '_StatementModLoop' if $*TRACE;
+		self.trace( '_StatementModLoop' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< sym smexpr >] )
@@ -1970,7 +1989,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _StatementPrefix( Mu $parsed ) {
-		say '_StatementPrefix' if $*TRACE;
+		self.trace( '_StatementPrefix' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< sym blorst >] )
@@ -1981,7 +2000,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _SubShortName( Mu $parsed ) {
-		say '_SubShortName' if $*TRACE;
+		self.trace( '_SubShortName' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< desigilname >] )
@@ -1990,15 +2009,14 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Sym( Mu $parsed ) {
-		say '_Sym' if $*TRACE;
+		self.trace( '_Sym' );
 #return True;
 		if $parsed.list {
 			my @child;
 			for $parsed.list {
 				next if $_.Str;
-				return self.record-failure( '_Sym' );
+				return self.record-failure( '_Sym list' );
 			}
-			return self.record-failure( '_Sym' );
 			return True
 		}
 		return True if $parsed.Bool and $parsed.Str eq '+';
@@ -2008,7 +2026,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Term( Mu $parsed ) {
-		say '_Term' if $*TRACE;
+		self.trace( '_Term' );
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< methodop >] )
 			and self._MethodOp( $parsed.hash.<methodop> );
@@ -2016,14 +2034,14 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _TermAlt( Mu $parsed ) {
-		say '_TermAlt' if $*TRACE;
+		self.trace( '_TermAlt' );
 #return True;
 		if $parsed.list {
 			for $parsed.list {
 				next if self.assert-hash-keys( $_,
 						[< termconj >] )
 					and self._TermConj( $_.hash.<termconj> );
-				return self.record-failure( '_TermAlt' );
+				return self.record-failure( '_TermAlt list' );
 			}
 			return True
 		}
@@ -2031,7 +2049,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _TermAltSeq( Mu $parsed ) {
-		say '_TermAltSeq' if $*TRACE;
+		self.trace( '_TermAltSeq' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< termconjseq >] )
@@ -2040,14 +2058,14 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _TermConj( Mu $parsed ) {
-		say '_TermConj' if $*TRACE;
+		self.trace( '_TermConj' );
 #return True;
 		if $parsed.list {
 			for $parsed.list {
 				next if self.assert-hash-keys( $_,
 						[< termish >] )
 					and self._Termish( $_.hash.<termish> );
-				return self.record-failure( '_TermConj' );
+				return self.record-failure( '_TermConj list' );
 			}
 			return True
 		}
@@ -2055,14 +2073,14 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _TermConjSeq( Mu $parsed ) {
-		say '_TermConjSeq' if $*TRACE;
+		self.trace( '_TermConjSeq' );
 #return True;
 		if $parsed.list {
 			for $parsed.list {
 				next if self.assert-hash-keys( $_,
 						[< termalt >] )
 					and self._TermAlt( $_.hash.<termalt> );
-				return self.record-failure( '_TermConjSeq' );
+				return self.record-failure( '_TermConjSeq list' );
 			}
 			return True
 		}
@@ -2072,7 +2090,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _TermInit( Mu $parsed ) {
-		say '_TermInit' if $*TRACE;
+		self.trace( '_TermInit' );
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< sym EXPR >] )
 			and self._Sym( $parsed.hash.<sym> )
@@ -2081,13 +2099,13 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Termish( Mu $parsed ) {
-		say '_Termish' if $*TRACE;
+		self.trace( '_Termish' );
 #return True;
 		if $parsed.list {
 			for $parsed.list {
 				next if self.assert-hash-keys( $_, [< noun >] )
 					and self._Noun( $_.hash.<noun> );
-				return self.record-failure( '_Termish' );
+				return self.record-failure( '_Termish list' );
 			}
 			return True
 		}
@@ -2097,7 +2115,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _TermSeq( Mu $parsed ) {
-		say '_TermSeq' if $*TRACE;
+		self.trace( '_TermSeq' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< termaltseq >] )
@@ -2106,14 +2124,14 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Triangle( Mu $parsed ) {
-		say '_Triangle' if $*TRACE;
+		self.trace( '_Triangle' );
 #return True;
 		return True if self.assert-Str( $parsed );
 		return self.record-failure( '_Triangle' );
 	}
 
 	method _Twigil( Mu $parsed ) {
-		say '_Twigil' if $*TRACE;
+		self.trace( '_Twigil' );
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< sym >] )
 			and self._Sym( $parsed.hash.<sym> );
@@ -2121,7 +2139,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _TypeConstraint( Mu $parsed ) {
-		say '_TypeConstraint' if $*TRACE;
+		self.trace( '_TypeConstraint' );
 #return True;
 		if $parsed.list {
 			for $parsed.list {
@@ -2130,7 +2148,7 @@ class Perl6::Tidy::Validator {
 					and self._TypeName( $_.hash.<typename> );
 				next if self.assert-hash-keys( $_, [< value >] )
 					and self._Value( $_.hash.<value> );
-				return self.record-failure( '_TypeConstraint' );
+				return self.record-failure( '_TypeConstraint list' );
 			}
 			return True
 		}
@@ -2142,7 +2160,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _TypeDeclarator( Mu $parsed ) {
-		say '_TypeDeclarator' if $*TRACE;
+		self.trace( '_TypeDeclarator' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< sym initializer variable >], [< trait >] )
@@ -2162,7 +2180,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _TypeName( Mu $parsed ) {
-		say '_TypeName' if $*TRACE;
+		self.trace( '_TypeName' );
 #return True;
 		if $parsed.list {
 			for $parsed.list {
@@ -2175,7 +2193,7 @@ class Perl6::Tidy::Validator {
 						[< longname >],
 						[< colonpair >] )
 					and self._LongName( $_.hash.<longname> );
-				return self.record-failure( '_TypeName' );
+				return self.record-failure( '_TypeName list' );
 			}
 			return True
 		}
@@ -2186,7 +2204,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Val( Mu $parsed ) {
-		say '_Val' if $*TRACE;
+		self.trace( '_Val' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< prefix OPER >],
@@ -2199,7 +2217,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Value( Mu $parsed ) {
-		say '_Value' if $*TRACE;
+		self.trace( '_Value' );
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< number >] )
 			and self._Number( $parsed.hash.<number> );
@@ -2209,7 +2227,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _VALUE( Mu $parsed ) {
-		say '_VALUE' if $*TRACE;
+		self.trace( '_VALUE' );
 #return True;
 		return True if $parsed.Str and $parsed.Str eq '0';
 		return True if self.assert-Int( $parsed );
@@ -2217,7 +2235,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Var( Mu $parsed ) {
-		say '_Var' if $*TRACE;
+		self.trace( '_Var' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< sigil desigilname >] )
@@ -2229,7 +2247,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _VariableDeclarator( Mu $parsed ) {
-		say '_VariableDeclarator' if $*TRACE;
+		self.trace( '_VariableDeclarator' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 			[< semilist variable shape >],
@@ -2246,7 +2264,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Variable( Mu $parsed ) {
-		say '_Variable' if $*TRACE;
+		self.trace( '_Variable' );
 #return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< twigil sigil desigilname >] )
@@ -2266,7 +2284,7 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _Version( Mu $parsed ) {
-		say '_Version' if $*TRACE;
+		self.trace( '_Version' );
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< vnum vstr >] )
 			and self._VNum( $parsed.hash.<vnum> )
@@ -2275,12 +2293,12 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _VNum( Mu $parsed ) {
-		say '_VNum' if $*TRACE;
+		self.trace( '_VNum' );
 #return True;
 		if $parsed.list {
 			for $parsed.list {
 				next if self.assert-Int( $_ );
-				return self.record-failure( '_VNum' );
+				return self.record-failure( '_VNum list' );
 			}
 			return True
 		}
@@ -2288,21 +2306,21 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _VStr( Mu $parsed ) returns Bool {
-		say '_VStr' if $*TRACE;
+		self.trace( '_VStr' );
 #return True;
 		return True if self.assert-Int( $parsed );
 		return self.record-failure( '_VStr' );
 	}
 
 	method _Wu( Mu $parsed ) returns Bool {
-		say '_Wu' if $*TRACE;
+		self.trace( '_Wu' );
 #return True;
 		return True if self.assert-Str( $parsed );
 		return self.record-failure( '_Wu' );
 	}
 
 	method _XBlock( Mu $parsed ) returns Bool {
-		say '_XBlock' if $*TRACE;
+		self.trace( '_XBlock' );
 #return True;
 		if $parsed.list {
 			for $parsed.list {
