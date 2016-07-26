@@ -115,6 +115,6 @@ class Root { }
 		if $validator.Root( $parsed ) {
 return Root.new
 		}
-die "Validation failed";
+		return False
 	}
 }
