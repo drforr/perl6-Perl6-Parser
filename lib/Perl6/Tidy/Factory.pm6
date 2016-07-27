@@ -1,15 +1,153 @@
+=begin pod
+
+=begin NAME
+
+Perl6::Tidy::Factory - Builds client-ready Perl 6 data tree
+
+=end NAME
+
+=begin DESCRIPTION
+
+Generates the complete tree of Perl6-ready objects, shielding the client from the ugly details of the internal L<nqp> representation of the object. None of the elements, hash values or children should have L<NQPMatch> objects associated with them, as trying to view them can cause nasty crashes.
+
+The child classes are described below, and have what's hopefully a reasonable hierarchy of entries. The root is a L<Perl6::Element>, and everything genrated by the factory is a subclass of that.
+
+Read on for a breadth-first survey of the objects, but below is a brief summary.
+
+L<Perl6::Element>
+    L<...>
+    L<...>
+    L<Perl6::Number>
+        L<Perl6::Number::Binary>
+        L<Perl6::Number::Decimal>
+        L<Perl6::Number::Octal>
+        L<Perl6::Number::Hexadecimal>
+        L<Perl6::Number::Radix>
+    L<Perl6::Variable>
+	    L<Perl6::Variable::Scalar>
+	        L<Perl6::Variable::Scalar::Dynamic>
+                L<...>
+	    L<Perl6::Variable::Hash>
+	    L<Perl6::Variable::Array>
+	    L<Perl6::Variable::Callable>
+	    L<Perl6::Variable::Contextualizer>
+	        L<Perl6::Variable::Contextualizer::Scalar>
+	            L<Perl6::Variable::Contextualizer::Scalar::Dynamic>
+
+=end DESCRIPTION
+
+=begin CLASSES
+
+=item L<Perl6::Element>
+
+The root of the object hierarchy.
+
+This hierarchy is mostly for the clients' convenience, so that they can safely ignore the fact that an object is actually a L<Perl6::Number::Complex::Radix::Floating> when all they really want to know is that it's a L<Perl6::Number>.
+
+It'll eventually have a bunch of useful methods attached to it, but for the moment ... well, it doesn't actually exist.
+
+=cut
+
+=item L<Perl6::Number>
+
+All numbers, whether decimal, rational, radix-32 or complex, fall under this class. You should be able to compare C<$x> to L<Perl6::Number> to do a quick check. Under this lies the teeming complexity of the full Perl 6 numeric lattice.
+
+Binary, octal, hex and radix numbers have an additional C<$.headless> attribute, which gives you the binary value without the leading C<0b>. Radix numbers (C<:13(19a)>) have an additional C<$.radix> attribute specifying the radix, and its C<$.headless> attribute works as you'd expect, delivering C<'19a'> without the surrounding C<':13(..)'>.
+
+Imaginary numbers have an alternative C<$.tailless> attribute which gives you the decimal value without the trailing C<i> marker.
+
+Rather than spelling out a huge list, here's how the hierarchy looks:
+
+L<Perl6::Number>
+    L<Perl6::Number::Binary>
+    L<Perl6::Number::Octal>
+    L<Perl6::Number::Decimal>
+        L<Perl6::Number::Decimal::Floating>
+    L<Perl6::Number::Hexadecimal>
+    L<Perl6::Number::Radix>
+    L<Perl6::Number::Imaginary>
+
+There likely won't be a L<Perl6::Number::Complex>. While it's relatively easy to figure out that C<my $z = 3+2i;> is a complex number, who's to say what the intet behind C<my $z = 3*$a+2i> is, or a more complex high-order polynomial. Best to just assert that C<2i> is an imaginary number, and leave it to the client to form the proper interpretation.
+
+=cut
+
+=item L<Perl6::Variable>
+
+The catch-all for Perl 6 variable types.
+
+Scalar, Hash, Array and Callable subtypes have C<$.headless> attributes with the variable's name minus the sigil and optional twigil. They also all have C<$.sigil> which keeps the sigil C<$> etc., and C<$.twigil> optionally for the classes that have twigils.
+
+L<Perl6::Variable>
+    L<Perl6::Variable::Scalar>
+        L<Perl6::Variable::Scalar::Dynamic>
+        L<Perl6::Variable::Scalar::Attribute>
+        L<Perl6::Variable::Scalar::CompileTimeVariable>
+        L<Perl6::Variable::Scalar::MatchIndex>
+        L<Perl6::Variable::Scalar::Positional>
+        L<Perl6::Variable::Scalar::Named>
+        L<Perl6::Variable::Scalar::Pod>
+        L<Perl6::Variable::Scalar::Sublanguage>
+    L<Perl6::Variable::Hash>
+        (and the same subtypes)
+    L<Perl6::Variable::Array>
+        (and the same subtypes)
+    L<Perl6::Variable::Callable>
+        (and the same subtypes)
+
+=cut
+
+=item L<Perl6::Variable::Contextualizer>
+
+Children: L<Perl6::Variable::Contextualizer::Scalar> and so forth.
+
+(a side note - These really should be L<Perl6::Variable::Scalar:Contextualizer::>, but that would mean that these were both a Leaf (from the parent L<Perl6::Variable::Scalar> and a Branch (because they have children). Resolving this would mean removing the L<Perl6::Leaf> role from the L<Perl6::Variable::Scalar> class, which means that I either have to create a longer class name for L<Perl6::Variable::JustAPlainScalarVariable> or manually add the L<Perl6::Leaf>'s contents to the L<Perl6::Variable::Scalar>, and forget to update it when I change my mind in a few weeks' time about what L<Perl6::Leaf> does. Adding a separate class for this seems the lesser of two evils, especially given how often they'll appear in "real world" code.)
+
+=cut
+
+=end CLASSES
+
+=begin ROLES
+
+=item L<Perl6::Node>
+
+Purely a virtual role. Client-facing classes use this to require the C<Str()> functionality of the rest of the classes in the system.
+
+=cut
+
+=item Perl6::Leaf
+
+Represents things such as numbers that are a token unto themselves.
+
+Classes such as C<Perl6::Number> and C<Perl6::Quote> mix in this role in order to declare that they represent stand-alone tokens. Any class that uses this can expect a C<$.content> member to contain the full text of the token, whether it be a variable such as C<$a> or a 50-line heredoc string.
+
+Classes can have custom attributes such as a number's radix value, or a string's delimiters, but they'll always have a C<$.content> value.
+
+=cut
+
+=item Perl6::Branch
+
+Represents things such as lists and circumfix operators that have children.
+
+Anything that's not a C<Perl6::Leaf> wil have this role mixed in, and provide a C<@.child> accessor to get at, say, elements in a list or the expressions in a standalone subroutine.
+
+Child elements aren't restricted to leaves, because a document is a tree the C<@.child> elements can be anything, even including the class itself. Although not the object itself, to avoid recursive loops.
+
+=cut
+
+=end ROLES
+
+=end pod
+
 role Perl6::Node {
 	method Str() {...}
-
-	method perl6 ( ) {
-	}
 }
 
 # Documents will be laid out in a typical tree format.
 # I'll use 'Leaf' to distinguish nodes that have no children from those that do.
 #
 role Perl6::Leaf does Perl6::Node {
-	has $.content;
+	has $.content is required;
+	method Str() { ~$.content }
 }
 
 role Perl6::Branch does Perl6::Node {
@@ -20,9 +158,7 @@ role Perl6::Branch does Perl6::Node {
 # contents.
 
 class Perl6::Document does Perl6::Branch {
-	method Str() {
-		''
-	}
+	method Str() { '' }
 }
 
 # * 	Dynamic
@@ -35,18 +171,185 @@ class Perl6::Document does Perl6::Branch {
 # = 	Pod variables
 # ~ 	The sublanguage seen by the parser at this lexical spot
 
-class Perl6::Variable does Perl6::Leaf {
+# Variables themselves are neither Leaves nor Branches, because they could
+# be contextualized, such as '$[1]'.
+#
+class Perl6::Variable {
 	has Str $.headless;
-	has Str $.sigil is required;
-	has $.twigil;
 
 	method Str() { ~$.content }
 }
 
-class Perl6::Variable::Scalar is Perl6::Variable { }
-class Perl6::Variable::Array is Perl6::Variable { }
-class Perl6::Variable::Hash is Perl6::Variable { }
-class Perl6::Variable::Callable is Perl6::Variable { }
+class Perl6::Variable::Contextualizer does Perl6::Branch {
+	also is Perl6::Variable;
+
+	method Str() { '' }
+}
+
+class Perl6::Variable::Contextualizer::Scalar {
+	also is Perl6::Variable::Contextualizer;
+	has $.sigil = '$';
+}
+class Perl6::Variable::Contextualizer::Hash {
+	also is Perl6::Variable::Contextualizer;
+	has $.sigil = '%';
+}
+class Perl6::Variable::Contextualizer::Array {
+	also is Perl6::Variable::Contextualizer;
+	has $.sigil = '@';
+}
+class Perl6::Variable::Contextualizer::Callable {
+	also is Perl6::Variable::Contextualizer;
+	has $.sigil = '&';
+}
+
+class Perl6::Variable::Scalar does Perl6::Leaf {
+	also is Perl6::Variable;
+	has $.sigil = '$';
+}
+class Perl6::Variable::Scalar::Dynamic {
+	also is Perl6::Variable::Scalar;
+	has $.twigil = '*';
+}
+class Perl6::Variable::Scalar::Attribute {
+	also is Perl6::Variable::Scalar;
+	has $.twigil = '!';
+}
+class Perl6::Variable::Scalar::CompileTimeVariable {
+	also is Perl6::Variable::Scalar;
+	has $.twigil = '?';
+}
+class Perl6::Variable::Scalar::MatchIndex {
+	also is Perl6::Variable::Scalar;
+	has $.twigil = '<';
+}
+class Perl6::Variable::Scalar::Positional {
+	also is Perl6::Variable::Scalar;
+	has $.twigil = '^';
+}
+class Perl6::Variable::Scalar::Named {
+	also is Perl6::Variable::Scalar;
+	has $.twigil = ':';
+}
+class Perl6::Variable::Scalar::Pod {
+	also is Perl6::Variable::Scalar;
+	has $.twigil = '~';
+}
+class Perl6::Variable::Scalar::Sublanguage {
+	also is Perl6::Variable::Scalar;
+	has $.twigil = '~';
+}
+
+class Perl6::Variable::Array does Perl6::Leaf {
+	also is Perl6::Variable;
+	has $.sigil = '@';
+}
+class Perl6::Variable::Array::Dynamic {
+	also is Perl6::Variable::Array;
+	has $.twigil = '*';
+}
+class Perl6::Variable::Array::Attribute {
+	also is Perl6::Variable::Array;
+	has $.twigil = '!';
+}
+class Perl6::Variable::Array::CompileTimeVariable {
+	also is Perl6::Variable::Array;
+	has $.twigil = '?';
+}
+class Perl6::Variable::Array::MatchIndex {
+	also is Perl6::Variable::Array;
+	has $.twigil = '<';
+}
+class Perl6::Variable::Array::Positional {
+	also is Perl6::Variable::Array;
+	has $.twigil = '^';
+}
+class Perl6::Variable::Array::Named {
+	also is Perl6::Variable::Array;
+	has $.twigil = ':';
+}
+class Perl6::Variable::Array::Pod {
+	also is Perl6::Variable::Array;
+	has $.twigil = '~';
+}
+class Perl6::Variable::Array::Sublanguage {
+	also is Perl6::Variable::Array;
+	has $.twigil = '~';
+}
+
+class Perl6::Variable::Hash does Perl6::Leaf {
+	also is Perl6::Variable;
+	has $.sigil = '%';
+}
+class Perl6::Variable::Hash::Dynamic {
+	also is Perl6::Variable::Hash;
+	has $.twigil = '*';
+}
+class Perl6::Variable::Hash::Attribute {
+	also is Perl6::Variable::Hash;
+	has $.twigil = '!';
+}
+class Perl6::Variable::Hash::CompileTimeVariable {
+	also is Perl6::Variable::Hash;
+	has $.twigil = '?';
+}
+class Perl6::Variable::Hash::MatchIndex {
+	also is Perl6::Variable::Hash;
+	has $.twigil = '<';
+}
+class Perl6::Variable::Hash::Positional {
+	also is Perl6::Variable::Hash;
+	has $.twigil = '^';
+}
+class Perl6::Variable::Hash::Named {
+	also is Perl6::Variable::Hash;
+	has $.twigil = ':';
+}
+class Perl6::Variable::Hash::Pod {
+	also is Perl6::Variable::Hash;
+	has $.twigil = '~';
+}
+class Perl6::Variable::Hash::Sublanguage {
+	also is Perl6::Variable::Hash;
+	has $.twigil = '~';
+}
+
+class Perl6::Variable::Callable does Perl6::Leaf {
+	also is Perl6::Variable;
+	has $.sigil = '&';
+}
+class Perl6::Variable::Callable::Dynamic {
+	also is Perl6::Variable::Callable;
+	has $.twigil = '*';
+}
+class Perl6::Variable::Callable::Attribute {
+	also is Perl6::Variable::Callable;
+	has $.twigil = '!';
+}
+class Perl6::Variable::Callable::CompileTimeVariable {
+	also is Perl6::Variable::Callable;
+	has $.twigil = '?';
+}
+class Perl6::Variable::Callable::MatchIndex {
+	also is Perl6::Variable::Callable;
+	has $.twigil = '<';
+}
+class Perl6::Variable::Callable::Positional {
+	also is Perl6::Variable::Callable;
+	has $.twigil = '^';
+}
+class Perl6::Variable::Callable::Named {
+	also is Perl6::Variable::Callable;
+	has $.twigil = ':';
+}
+class Perl6::Variable::Callable::Pod {
+	also is Perl6::Variable::Callable;
+	has $.twigil = '~';
+}
+class Perl6::Variable::Callable::Sublanguage {
+	also is Perl6::Variable::Callable;
+	has $.twigil = '~';
+}
 
 class Perl6::Tidy::Factory {
 
@@ -224,17 +527,10 @@ class Perl6::Tidy::Factory {
 	method _Babble( Mu $parsed ) returns Bool {
 		self.trace( '_Bubble' );
 #return True;
+		# _B is a Bool leaf
 		return True if self.assert-hash-keys( $parsed,
-				[< B >], [< quotepair >] )
-			and self._B( $parsed.hash.<B> );
+				[< B >], [< quotepair >] );
 		return self.record-failure( '_Babble' );
-	}
-
-	method _BackMod( Mu $parsed ) returns Bool {
-		self.trace( '_BackMod' );
-#return True;
-		return True if self.assert-Bool( $parsed );
-		return self.record-failure( '_BackMod' );
 	}
 
 	method _BackSlash( Mu $parsed ) returns Bool {
@@ -244,21 +540,6 @@ class Perl6::Tidy::Factory {
 			and self._Sym( $parsed.hash.<sym> );
 		return True if self.assert-Str( $parsed );
 		return self.record-failure( '_BackSlash' );
-	}
-
-	method _B( Mu $parsed ) returns Bool {
-		self.trace( '_B' );
-#return True;
-		return True if self.assert-Bool( $parsed );
-		return self.record-failure( '_B' );
-	}
-
-	method _BinInt( Mu $parsed ) returns Bool {
-		self.trace( '_BinInt' );
-#return True;
-		return True if $parsed.Str and $parsed.Str eq '0';
-		return True if self.assert-Int( $parsed );
-		return self.record-failure( '_BinInt' );
 	}
 
 	method _Block( Mu $parsed ) returns Bool {
@@ -301,15 +582,15 @@ class Perl6::Tidy::Factory {
 #return True;
 		if $parsed.list {
 			for $parsed.list {
+				# _Sign is a Str/Bool leaf
 				next if self.assert-hash-keys( $_,
 						[< identifier name sign >],
 						[< charspec >] )
 					and self._Identifier( $_.hash.<identifier> )
-					and self._Name( $_.hash.<name> )
-					and self._Sign( $_.hash.<sign> );
+					and self._Name( $_.hash.<name> );
+				# _Sign is a Str/Bool leaf
 				next if self.assert-hash-keys( $_,
 						[< sign charspec >] )
-					and self._Sign( $_.hash.<sign> )
 					and self._CharSpec( $_.hash.<charspec> );
 				return self.record-failure( '_CClassElem list' );
 			}
@@ -335,18 +616,18 @@ class Perl6::Tidy::Factory {
 			and self._PBlock( $parsed.hash.<pblock> );
 		return True if self.assert-hash-keys( $parsed, [< semilist >] )
 			and self._SemiList( $parsed.hash.<semilist> );
+		# _BinInt is a Str/Int leaf
+		# _VALUE is a Str/Int leaf
 		return True if self.assert-hash-keys( $parsed,
-				[< binint VALUE >] )
-			and self._BinInt( $parsed.hash.<binint> )
-			and self._VALUE( $parsed.hash.<VALUE> );
+				[< binint VALUE >] );
+		# _OctInt is a Str/Int leaf
+		# _VALUE is a Str/Int leaf
 		return True if self.assert-hash-keys( $parsed,
-				[< octint VALUE >] )
-			and self._OctInt( $parsed.hash.<octint> )
-			and self._VALUE( $parsed.hash.<VALUE> );
+				[< octint VALUE >] );
+		# _HexInt is Str/Int leaf
+		# _VALUE is a Str/Int leaf
 		return True if self.assert-hash-keys( $parsed,
-				[< hexint VALUE >] )
-			and self._HexInt( $parsed.hash.<hexint> )
-			and self._VALUE( $parsed.hash.<VALUE> );
+				[< hexint VALUE >] );
 		return self.record-failure( '_Circumfix' );
 	}
 
@@ -356,16 +637,6 @@ class Perl6::Tidy::Factory {
 		return True if self.assert-hash-keys( $parsed, [< block >] )
 			and self._Block( $parsed.hash.<block> );
 		return self.record-failure( '_CodeBlock' );
-	}
-
-	method _Coeff( Mu $parsed ) returns Bool {
-		self.trace( '_Coeff' );
-#return True;
-		return True if self.assert-Str( $parsed ) and
-		   ( $parsed.Str eq '0.0' or
-		     $parsed.Str eq '0' );
-		return True if self.assert-Int( $parsed );
-		return self.record-failure( '_Coeff' );
 	}
 
 	method _Coercee( Mu $parsed ) returns Bool {
@@ -415,20 +686,12 @@ class Perl6::Tidy::Factory {
 	method _Contextualizer( Mu $parsed ) {
 		self.trace( '_Contextualizer' );
 #return True;
+		# _Sigil is a Str leaf
 		return True if self.assert-hash-keys( $parsed,
 				[< coercee circumfix sigil >] )
 			and self._Coercee( $parsed.hash.<coercee> )
-			and self._Circumfix( $parsed.hash.<circumfix> )
-			and self._Sigil( $parsed.hash.<sigil> );
+			and self._Circumfix( $parsed.hash.<circumfix> );
 		return self.record-failure( '_Contextualizer' );
-	}
-
-	method _DecInt( Mu $parsed ) {
-		self.trace( '_DecInt' );
-#return True;
-		return True if $parsed.Str and $parsed.Str eq '0';
-		return True if self.assert-Int( $parsed );
-		return self.record-failure( '_DecInt' );
 	}
 
 	method _Declarator( Mu $parsed ) {
@@ -516,31 +779,31 @@ class Perl6::Tidy::Factory {
 	method _DecNumber( Mu $parsed ) {
 		self.trace( '_DecNumber' );
 #return True;
+		# _Coeff is a Str/Int leaf
+		# _Frac is a Str/Int leaf
+		# _Int is a Str/Int leaf
 		return True if self.assert-hash-keys( $parsed,
 				  [< int coeff frac escale >] )
-			and self._Int( $parsed.hash.<int> )
-			and self._Coeff( $parsed.hash.<coeff> )
-			and self._Frac( $parsed.hash.<frac> )
 			and self._EScale( $parsed.hash.<escale> );
+		# _Coeff is a Str/Int leaf
+		# _Frac is a Str/Int leaf
 		return True if self.assert-hash-keys( $parsed,
 				  [< coeff frac escale >] )
-			and self._Coeff( $parsed.hash.<coeff> )
-			and self._Frac( $parsed.hash.<frac> )
 			and self._EScale( $parsed.hash.<escale> );
+		# _Coeff is a Str/Int leaf
+		# _Frac is a Str/Int leaf
+		# _Int is a Str/Int leaf
 		return True if self.assert-hash-keys( $parsed,
-				  [< int coeff frac >] )
-			and self._Int( $parsed.hash.<int> )
-			and self._Coeff( $parsed.hash.<coeff> )
-			and self._Frac( $parsed.hash.<frac> );
+				  [< int coeff frac >] );
+		# _Coeff is a Str/Int leaf
+		# _Int is a Str/Int leaf
 		return True if self.assert-hash-keys( $parsed,
 				  [< int coeff escale >] )
-			and self._Int( $parsed.hash.<int> )
-			and self._Coeff( $parsed.hash.<coeff> )
 			and self._EScale( $parsed.hash.<escale> );
+		# _Coeff is a Str/Int leaf
+		# _Frac is a Str/Int leaf
 		return True if self.assert-hash-keys( $parsed,
-				  [< coeff frac >] )
-			and self._Coeff( $parsed.hash.<coeff> )
-			and self._Frac( $parsed.hash.<frac> );
+				  [< coeff frac >] );
 		return self.record-failure( '_DecNumber' );
 	}
 
@@ -601,13 +864,6 @@ class Perl6::Tidy::Factory {
 			return True
 		}
 		return self.record-failure( '_Dig' );
-	}
-
-	method _Doc( Mu $parsed ) returns Bool {
-		self.trace( '_Doc' );
-#return True;
-		return True if self.assert-Bool( $parsed );
-		return self.record-failure( '_Doc' );
 	}
 
 	method _Dotty( Mu $parsed ) {
@@ -687,10 +943,10 @@ class Perl6::Tidy::Factory {
 	method _EScale( Mu $parsed ) {
 		self.trace( '_EScale' );
 #return True;
+		# _DecInt is a Str/Int leaf
+		# _Sign is a Str/Bool leaf
 		return True if self.assert-hash-keys( $parsed,
-				[< sign decint >] )
-			and self._Sign( $parsed.hash.<sign> )
-			and self._DecInt( $parsed.hash.<decint> );
+				[< sign decint >] );
 		return self.record-failure( '_EScale' );
 	}
 
@@ -815,11 +1071,11 @@ class Perl6::Tidy::Factory {
 				and self._OPER( $parsed.hash.<OPER> );
 			return self.record-failure( '_EXPR hash' );
 		}
+		# _Triangle is a Str leaf
 		return True if self.assert-hash-keys( $parsed,
 				[< args op triangle >] )
 			and self._Args( $parsed.hash.<args> )
-			and self._Op( $parsed.hash.<op> )
-			and self._Triangle( $parsed.hash.<triangle> );
+			and self._Op( $parsed.hash.<op> );
 		return True if self.assert-hash-keys( $parsed,
 				[< longname args >] )
 			and self._LongName( $parsed.hash.<longname> )
@@ -891,26 +1147,10 @@ class Perl6::Tidy::Factory {
 	method _FatArrow( Mu $parsed ) {
 		self.trace( '_FatArrow' );
 #return True;
+		# _Key is a Str leaf
 		return True if self.assert-hash-keys( $parsed, [< val key >] )
-			and self._Val( $parsed.hash.<val> )
-			and self._Key( $parsed.hash.<key> );
+			and self._Val( $parsed.hash.<val> );
 		return self.record-failure( '_FatArrow' );
-	}
-
-	method _Frac( Mu $parsed ) {
-		self.trace( '_Frac' );
-#return True;
-		return True if $parsed.Str and $parsed.Str eq '0';
-		return True if self.assert-Int( $parsed );
-		return self.record-failure( '_Frac' );
-	}
-
-	method _HexInt( Mu $parsed ) {
-		self.trace( '_HexInt' );
-#return True;
-		return True if $parsed.Str and $parsed.Str eq '0';
-		return True if self.assert-Int( $parsed );
-		return self.record-failure( '_HexInt' );
 	}
 
 	method _Identifier( Mu $parsed ) {
@@ -977,33 +1217,25 @@ class Perl6::Tidy::Factory {
 		return self.record-failure( '_Initializer' );
 	}
 
-	method _Int( Mu $parsed ) {
-		self.trace( '_Int' );
-#return True;
-		return True if $parsed.Str and $parsed.Str eq '0';
-		return True if self.assert-Int( $parsed );
-		return self.record-failure( '_Int' );
-	}
-
 	method _Integer( Mu $parsed ) {
 		self.trace( '_Integer' );
 #return True;
+		# _DecInt is a Str/Int leaf
+		# _VALUE is a Str/Int leaf
 		return True if self.assert-hash-keys( $parsed,
-				[< decint VALUE >] )
-			and self._DecInt( $parsed.hash.<decint> )
-			and self._VALUE( $parsed.hash.<VALUE> );
+				[< decint VALUE >] );
+		# _BinInt is a Str/Int leaf
+		# _VALUE is a Str/Int leaf
 		return True if self.assert-hash-keys( $parsed,
-				[< binint VALUE >] )
-			and self._BinInt( $parsed.hash.<binint> )
-			and self._VALUE( $parsed.hash.<VALUE> );
+				[< binint VALUE >] );
+		# _OctInt is a Str/Int leaf
+		# _VALUE is a Str/Int leaf
 		return True if self.assert-hash-keys( $parsed,
-				[< octint VALUE >] )
-			and self._OctInt( $parsed.hash.<octint> )
-			and self._VALUE( $parsed.hash.<VALUE> );
+				[< octint VALUE >] );
+		# _HexInt is Str/Int leaf
+		# _VALUE is a Str/Int leaf
 		return True if self.assert-hash-keys( $parsed,
-				[< hexint VALUE >] )
-			and self._HexInt( $parsed.hash.<hexint> )
-			and self._VALUE( $parsed.hash.<VALUE> );
+				[< hexint VALUE >] );
 		return self.record-failure( '_Integer' );
 	}
 
@@ -1024,20 +1256,6 @@ return True;
 		return self.record-failure( '_Invocant' );
 	}
 
-	method _Key( Mu $parsed ) returns Bool {
-		self.trace( '_Key' );
-#return True;
-		return True if self.assert-Str( $parsed );
-		return self.record-failure( '_Key' );
-	}
-
-	method _Lambda( Mu $parsed ) returns Bool {
-		self.trace( '_Lambda' );
-#return True;
-		return True if self.assert-Str( $parsed );
-		return self.record-failure( '_Labmda' );
-	}
-
 	method _Left( Mu $parsed ) {
 		self.trace( '_Left' );
 #return True;
@@ -1054,13 +1272,6 @@ return True;
 				[< colonpair >] )
 			and self._Name( $parsed.hash.<name> );
 		return self.record-failure( '_LongName' );
-	}
-
-	method _Max( Mu $parsed ) returns Bool {
-		self.trace( '_Max' );
-#return True;
-		return True if self.assert-Str( $parsed );
-		return self.record-failure( '_Max' );
 	}
 
 	method _MetaChar( Mu $parsed ) {
@@ -1088,17 +1299,17 @@ return True;
 	method _MethodDef( Mu $parsed ) {
 		self.trace( '_MethodDef' );
 #return True;
+		# _Specials is a Bool leaf
 		return True if self.assert-hash-keys( $parsed,
 			     [< specials longname blockoid multisig >],
 			     [< trait >] )
-			and self._Specials( $parsed.hash.<specials> )
 			and self._LongName( $parsed.hash.<longname> )
 			and self._Blockoid( $parsed.hash.<blockoid> )
 			and self._MultiSig( $parsed.hash.<multisig> );
+		# _Specials is a Bool leaf
 		return True if self.assert-hash-keys( $parsed,
 			     [< specials longname blockoid >],
 			     [< trait >] )
-			and self._Specials( $parsed.hash.<specials> )
 			and self._LongName( $parsed.hash.<longname> )
 			and self._Blockoid( $parsed.hash.<blockoid> );
 		return self.record-failure( '_MethodDef' );
@@ -1121,10 +1332,10 @@ return True;
 	method _Min( Mu $parsed ) {
 		self.trace( '_Min' );
 #return True;
+		# _DecInt is a Str/Int leaf
+		# _VALUE is a Str/Int leaf
 		return True if self.assert-hash-keys( $parsed,
-				[< decint VALUE >] )
-			and self._DecInt( $parsed.hash.<decint> )
-			and self._VALUE( $parsed.hash.<VALUE> );
+				[< decint VALUE >] );
 		return self.record-failure( '_Min' );
 	}
 
@@ -1196,12 +1407,12 @@ return True;
 	method _Name( Mu $parsed ) {
 		self.trace( '_Name' );
 #return True;
+		# _Quant is a Bool leaf
 		return True if self.assert-hash-keys( $parsed,
 			[< param_var type_constraint quant >],
 			[< default_value modifier trait post_constraint >] )
 			and self._ParamVar( $parsed.hash.<param_var> )
-			and self._TypeConstraint( $parsed.hash.<type_constraint> )
-			and self._Quant( $parsed.hash.<quant> );
+			and self._TypeConstraint( $parsed.hash.<type_constraint> );
 		return True if self.assert-hash-keys( $parsed,
 				[< identifier >], [< morename >] )
 			and self._Identifier( $parsed.hash.<identifier> );
@@ -1230,13 +1441,6 @@ return True;
 		return True if self.assert-hash-keys( $parsed, [< termseq >] )
 			and self._TermSeq( $parsed.hash.<termseq> );
 		return self.record-failure( '_Nibbler' );
-	}
-
-	method _NormSpace( Mu $parsed ) returns Bool {
-		self.trace( '_NormSpace' );
-#return True;
-		return True if self.assert-Str( $parsed );
-		return self.record-failure( '_NormSpace' );
 	}
 
 	method _Noun( Mu $parsed ) {
@@ -1301,14 +1505,6 @@ return True;
 			and self._DecNumber( $parsed.hash.<dec_number> );
 		return True if self.assert-Num( $parsed );
 		return self.record-failure( '_Numish' );
-	}
-
-	method _OctInt( Mu $parsed ) {
-		self.trace( '_OctInt' );
-#return True;
-		return True if $parsed.Str and $parsed.Str eq '0';
-		return True if self.assert-Int( $parsed );
-		return self.record-failure( '_OctInt' );
 	}
 
 	method _O( Mu $parsed ) {
@@ -1453,35 +1649,35 @@ return True;
 		if $parsed.list {
 			my @child;
 			for $parsed.list {
+				# _Quant is a Bool leaf
 				next if self.assert-hash-keys( $_,
 					[< param_var type_constraint quant >],
 					[< default_value modifier trait
 					   post_constraint >] )
 					and self._ParamVar( $_.hash.<param_var> )
-					and self._TypeConstraint( $_.hash.<type_constraint> )
-					and self._Quant( $_.hash.<quant> );
+					and self._TypeConstraint( $_.hash.<type_constraint> );
+				# _Quant is a Bool leaf
 				next if self.assert-hash-keys( $_,
 					[< param_var quant >],
 					[< default_value modifier trait
 					   type_constraint
 					   post_constraint >] )
-					and self._ParamVar( $_.hash.<param_var> )
-					and self._Quant( $_.hash.<quant> );
+					and self._ParamVar( $_.hash.<param_var> );
 	
+				# _Quant is a Bool leaf
 				next if self.assert-hash-keys( $_,
 					[< named_param quant >],
 					[< default_value modifier
 					   post_constraint trait
 					   type_constraint >] )
-					and self._NamedParam( $_.hash.<named_param> )
-					and self._Quant( $_.hash.<quant> );
+					and self._NamedParam( $_.hash.<named_param> );
+				# _Quant is a Bool leaf
 				next if self.assert-hash-keys( $_,
 					[< defterm quant >],
 					[< default_value modifier
 					   post_constraint trait
 					   type_constraint >] )
-					and self._DefTerm( $_.hash.<defterm> )
-					and self._Quant( $_.hash.<quant> );
+					and self._DefTerm( $_.hash.<defterm> );
 				next if self.assert-hash-keys( $_,
 					[< type_constraint >],
 					[< param_var quant default_value						   modifier post_constraint trait
@@ -1497,27 +1693,27 @@ return True;
 	method _ParamVar( Mu $parsed ) {
 		self.trace( '_ParamVar' );
 #return True;
+		# _Sigil is a Str leaf
 		return True if self.assert-hash-keys( $parsed,
 				[< name twigil sigil >] )
 			and self._Name( $parsed.hash.<name> )
-			and self._Twigil( $parsed.hash.<twigil> )
-			and self._Sigil( $parsed.hash.<sigil> );
+			and self._Twigil( $parsed.hash.<twigil> );
+		# _Sigil is a Str leaf
 		return True if self.assert-hash-keys( $parsed, [< name sigil >] )
-			and self._Name( $parsed.hash.<name> )
-			and self._Sigil( $parsed.hash.<sigil> );
+			and self._Name( $parsed.hash.<name> );
 		return True if self.assert-hash-keys( $parsed, [< signature >] )
 			and self._Signature( $parsed.hash.<signature> );
-		return True if self.assert-hash-keys( $parsed, [< sigil >] )
-			and self._Sigil( $parsed.hash.<sigil> );
+		# _Sigil is a Str leaf
+		return True if self.assert-hash-keys( $parsed, [< sigil >] );
 		return self.record-failure( '_ParamVar' );
 	}
 
 	method _PBlock( Mu $parsed ) {
 		self.trace( '_PBlock' );
 #return True;
+		# _Lambda is a Str leaf
 		return True if self.assert-hash-keys( $parsed,
 				     [< lambda blockoid signature >] )
-			and self._Lambda( $parsed.hash.<lambda> )
 			and self._Blockoid( $parsed.hash.<blockoid> )
 			and self._Signature( $parsed.hash.<signature> );
 		return True if self.assert-hash-keys( $parsed, [< blockoid >] )
@@ -1576,14 +1772,6 @@ return True;
 		return self.record-failure( '_Prefix' );
 	}
 
-	method _Quant( Mu $parsed ) returns Bool {
-		self.trace( '_Quant' );
-#return True;
-		return True if self.assert-Bool( $parsed );
-		return self.record-failure( '_Quant' );
-	}
-
-
 	method _QuantifiedAtom( Mu $parsed ) {
 		self.trace( '_QuantifiedAtom' );
 #return True;
@@ -1597,16 +1785,16 @@ return True;
 	method _Quantifier( Mu $parsed ) {
 		self.trace( '_Quantifier' );
 #return True;
+		# _Max is a Str leaf
+		# _BackMod is a Bool leaf
 		return True if self.assert-hash-keys( $parsed,
 				[< sym min max backmod >] )
 			and self._Sym( $parsed.hash.<sym> )
-			and self._Min( $parsed.hash.<min> )
-			and self._Max( $parsed.hash.<max> )
-			and self._BackMod( $parsed.hash.<backmod> );
+			and self._Min( $parsed.hash.<min> );
+		# _BackMod is a Bool leaf
 		return True if self.assert-hash-keys( $parsed,
 				[< sym backmod >] )
-			and self._Sym( $parsed.hash.<sym> )
-			and self._BackMod( $parsed.hash.<backmod> );
+			and self._Sym( $parsed.hash.<sym> );
 		return self.record-failure( '_Quantifier' );
 	}
 
@@ -1652,36 +1840,29 @@ return True;
 			}
 			return True
 		}
+		# _Radix is a Str/Int leaf
 		return True if self.assert-hash-keys( $parsed,
 				[< circumfix bracket radix >], [< exp base >] )
 			and self._Circumfix( $parsed.hash.<circumfix> )
-			and self._Bracket( $parsed.hash.<bracket> )
-			and self._Radix( $parsed.hash.<radix> );
+			and self._Bracket( $parsed.hash.<bracket> );
 		return True if self.assert-hash-keys( $parsed,
 				[< identifier >] )
 			and self._Identifier( $parsed.hash.<identifier> );
 		return self.record-failure( '_QuotePair' );
 	}
 
-	method _Radix( Mu $parsed ) returns Bool {
-		self.trace( '_Radix' );
-#return True;
-		return True if self.assert-Int( $parsed );
-		return self.record-failure( '_Radix' );
-	}
-
 	method _RadNumber( Mu $parsed ) {
 		self.trace( '_RadNumber' );
 #return True;
+		# _Radix is a Str/Int leaf
 		return True if self.assert-hash-keys( $parsed,
 				[< circumfix bracket radix >], [< exp base >] )
 			and self._Circumfix( $parsed.hash.<circumfix> )
-			and self._Bracket( $parsed.hash.<bracket> )
-			and self._Radix( $parsed.hash.<radix> );
+			and self._Bracket( $parsed.hash.<bracket> );
+		# _Radix is a Str/Int leaf
 		return True if self.assert-hash-keys( $parsed,
 				[< circumfix radix >], [< exp base >] )
-			and self._Circumfix( $parsed.hash.<circumfix> )
-			and self._Radix( $parsed.hash.<radix> );
+			and self._Circumfix( $parsed.hash.<circumfix> );
 		return self.record-failure( '_RadNumber' );
 	}
 
@@ -1704,13 +1885,6 @@ return True;
 			and self._DefLongName( $parsed.hash.<deflongname> )
 			and self._Nibble( $parsed.hash.<nibble> );
 		return self.record-failure( '_RegexDef' );
-	}
-
-	method _Right( Mu $parsed ) {
-		self.trace( '_Right' );
-#return True;
-		return True if self.assert-Bool( $parsed );
-		return self.record-failure( '_Right' );
 	}
 
 	method build( Mu $parsed ) {
@@ -1835,33 +2009,19 @@ return True;
 	method _Separator( Mu $parsed ) {
 		self.trace( '_Separator' );
 #return True;
+		# _SepType is a Str leaf
 		return True if self.assert-hash-keys( $parsed,
 				[< septype quantified_atom >] )
-			and self._SepType( $parsed.hash.<septype> )
 			and self._QuantifiedAtom( $parsed.hash.<quantified_atom> );
 		return self.record-failure( '_Separator' );
-	}
-
-	method _SepType( Mu $parsed ) returns Bool {
-		self.trace( '_SepType' );
-#return True;
-		return True if self.assert-Str( $parsed );
-		return self.record-failure( '_SepType' );
-	}
-
-	method _Shape( Mu $parsed ) returns Bool {
-		self.trace( '_Shape' );
-#return True;
-		return True if self.assert-Str( $parsed );
-		return self.record-failure( '_Shape' );
 	}
 
 	method _Sibble( Mu $parsed ) {
 		self.trace( '_Sibble' );
 #return True;
+		# _Right is a Bool leaf
 		return True if self.assert-hash-keys( $parsed,
 				[< right babble left >] )
-			and self._Right( $parsed.hash.<right> )
 			and self._Babble( $parsed.hash.<babble> )
 			and self._Left( $parsed.hash.<left> );
 		return self.record-failure( '_Sibble' );
@@ -1870,16 +2030,9 @@ return True;
 	method _SigFinal( Mu $parsed ) {
 		self.trace( '_SigFinal' );
 #return True;
-		return True if self.assert-hash-keys( $parsed, [< normspace >] )
-			and self._NormSpace( $parsed.hash.<normspace> );
+		# _NormSpace is a Str leaf
+		return True if self.assert-hash-keys( $parsed, [< normspace >] );
 		return self.record-failure( '_SigFinal' );
-	}
-
-	method _Sigil( Mu $parsed ) returns Bool {
-		self.trace( '_Sigil' );
-#return True;
-		return True if self.assert-Str( $parsed );
-		return self.record-failure( '_Sigil' );
 	}
 
 	method _SigMaybe( Mu $parsed ) {
@@ -1912,28 +2065,12 @@ return True;
 		return self.record-failure( '_Signature' );
 	}
 
-	method _Sign( Mu $parsed ) {
-		self.trace( '_Sign' );
-#return True;
-		return True if $parsed.Str
-			and ( $parsed.Str eq '-' or $parsed.Str eq '+' );
-		return True if self.assert-Bool( $parsed );
-		return self.record-failure( '_Sign' );
-	}
-
 	method _SMExpr( Mu $parsed ) {
 		self.trace( '_SMExpr' );
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< EXPR >] )
 			and self._EXPR( $parsed.hash.<EXPR> );
 		return self.record-failure( '_SMExpr' );
-	}
-
-	method _Specials( Mu $parsed ) returns Bool {
-		self.trace( '_Specials' );
-#return True;
-		return True if self.assert-Bool( $parsed );
-		return self.record-failure( '_Specials' );
 	}
 
 	method _StatementControl( Mu $parsed ) {
@@ -1946,20 +2083,20 @@ return True;
 			and self._E1( $parsed.hash.<e1> )
 			and self._E2( $parsed.hash.<e2> )
 			and self._E3( $parsed.hash.<e3> );
+		# _Wu is a Str leaf
 		return True if self.assert-hash-keys( $parsed,
 				[< pblock sym EXPR wu >] )
 			and self._PBlock( $parsed.hash.<pblock> )
 			and self._Sym( $parsed.hash.<sym> )
-			and self._EXPR( $parsed.hash.<EXPR> )
-			and self._Wu( $parsed.hash.<wu> );
+			and self._EXPR( $parsed.hash.<EXPR> );
+		# _Doc is a Bool leaf
 		return True if self.assert-hash-keys( $parsed,
 				[< doc sym module_name >] )
-			and self._Doc( $parsed.hash.<doc> )
 			and self._Sym( $parsed.hash.<sym> )
 			and self._ModuleName( $parsed.hash.<module_name> );
+		# _Doc is a Bool leaf
 		return True if self.assert-hash-keys( $parsed,
 				[< doc sym version >] )
-			and self._Doc( $parsed.hash.<doc> )
 			and self._Sym( $parsed.hash.<sym> )
 			and self._Version( $parsed.hash.<version> );
 		return True if self.assert-hash-keys( $parsed,
@@ -1967,11 +2104,11 @@ return True;
 			and self._Sym( $parsed.hash.<sym> )
 			and self._Else( $parsed.hash.<else> )
 			and self._XBlock( $parsed.hash.<xblock> );
+		# _Wu is a Str leaf
 		return True if self.assert-hash-keys( $parsed,
 				[< xblock sym wu >] )
 			and self._XBlock( $parsed.hash.<xblock> )
-			and self._Sym( $parsed.hash.<sym> )
-			and self._Wu( $parsed.hash.<wu> );
+			and self._Sym( $parsed.hash.<sym> );
 		return True if self.assert-hash-keys( $parsed,
 				[< sym xblock >] )
 			and self._Sym( $parsed.hash.<sym> )
@@ -2179,13 +2316,6 @@ return True;
 		return self.record-failure( '_TermSeq' );
 	}
 
-	method _Triangle( Mu $parsed ) {
-		self.trace( '_Triangle' );
-#return True;
-		return True if self.assert-Str( $parsed );
-		return self.record-failure( '_Triangle' );
-	}
-
 	method _Twigil( Mu $parsed ) {
 		self.trace( '_Twigil' );
 #return True;
@@ -2282,20 +2412,12 @@ return True;
 		return self.record-failure( '_Value' );
 	}
 
-	method _VALUE( Mu $parsed ) {
-		self.trace( '_VALUE' );
-#return True;
-		return True if $parsed.Str and $parsed.Str eq '0';
-		return True if self.assert-Int( $parsed );
-		return self.record-failure( '_VALUE' );
-	}
-
 	method _Var( Mu $parsed ) {
 		self.trace( '_Var' );
 #return True;
+		# _Sigil is a Str leaf
 		return True if self.assert-hash-keys( $parsed,
 				[< sigil desigilname >] )
-			and self._Sigil( $parsed.hash.<sigil> )
 			and self._DeSigilName( $parsed.hash.<desigilname> );
 		return True if self.assert-hash-keys( $parsed, [< variable >] )
 			and self._Variable( $parsed.hash.<variable> );
@@ -2305,12 +2427,12 @@ return True;
 	method _VariableDeclarator( Mu $parsed ) {
 		self.trace( '_VariableDeclarator' );
 #return True;
+		# _Shape is a Str leaf
 		return True if self.assert-hash-keys( $parsed,
 			[< semilist variable shape >],
 			[< postcircumfix signature trait post_constraint >] )
 			and self._SemiList( $parsed.hash.<semilist> )
-			and self._Variable( $parsed.hash.<variable> )
-			and self._Shape( $parsed.hash.<shape> );
+			and self._Variable( $parsed.hash.<variable> );
 		return True if self.assert-hash-keys( $parsed,
 			[< variable >],
 			[< semilist postcircumfix signature
@@ -2322,34 +2444,64 @@ return True;
 	method _Variable( Mu $p ) {
 		self.trace( '_Variable' );
 
+		if self.assert-hash-keys( $p, [< contextualizer >] ) {
+#die $p.dump;
+			return;
+		}
+
 		my $sigil       = $p.hash.<sigil>.Str;
 		my $twigil      = $p.hash.<twigil> ??
 			          $p.hash.<twigil>.Str !! '';
 		my $desigilname = $p.hash.<desigilname> ??
 				  $p.hash.<desigilname>.Str !! '';
 		my $content     = $p.hash.<sigil> ~ $twigil ~ $desigilname;
-		my %sigil-to-class = (
-			'$' => 'Perl6::Variable::Scalar',
-			'@' => 'Perl6::Variable::Array',
-			'%' => 'Perl6::Variable::Hash',
-			'&' => 'Perl6::Variable::Callable',
+		my %lookup = (
+			'$' => Perl6::Variable::Scalar,
+			'$*' => Perl6::Variable::Scalar::Dynamic,
+			'$!' => Perl6::Variable::Scalar::Attribute,
+			'$?' => Perl6::Variable::Scalar::CompileTimeVariable,
+			'$<' => Perl6::Variable::Scalar::MatchIndex,
+			'$^' => Perl6::Variable::Scalar::Positional,
+			'$:' => Perl6::Variable::Scalar::Named,
+			'$=' => Perl6::Variable::Scalar::Pod,
+			'$~' => Perl6::Variable::Scalar::Sublanguage,
+			'%' => Perl6::Variable::Hash,
+			'%*' => Perl6::Variable::Hash::Dynamic,
+			'%!' => Perl6::Variable::Hash::Attribute,
+			'%?' => Perl6::Variable::Hash::CompileTimeVariable,
+			'%<' => Perl6::Variable::Hash::MatchIndex,
+			'%^' => Perl6::Variable::Hash::Positional,
+			'%:' => Perl6::Variable::Hash::Named,
+			'%=' => Perl6::Variable::Hash::Pod,
+			'%~' => Perl6::Variable::Hash::Sublanguage,
+			'@' => Perl6::Variable::Array,
+			'@*' => Perl6::Variable::Array::Dynamic,
+			'@!' => Perl6::Variable::Array::Attribute,
+			'@?' => Perl6::Variable::Array::CompileTimeVariable,
+			'@<' => Perl6::Variable::Array::MatchIndex,
+			'@^' => Perl6::Variable::Array::Positional,
+			'@:' => Perl6::Variable::Array::Named,
+			'@=' => Perl6::Variable::Array::Pod,
+			'@~' => Perl6::Variable::Array::Sublanguage,
+			'&' => Perl6::Variable::Callable,
+			'&*' => Perl6::Variable::Callable::Dynamic,
+			'&!' => Perl6::Variable::Callable::Attribute,
+			'&?' => Perl6::Variable::Callable::CompileTimeVariable,
+			'&<' => Perl6::Variable::Callable::MatchIndex,
+			'&^' => Perl6::Variable::Callable::Positional,
+			'&:' => Perl6::Variable::Callable::Named,
+			'&=' => Perl6::Variable::Callable::Pod,
+			'&~' => Perl6::Variable::Callable::Sublanguage,
 		);
-		my $class = %sigil-to-class{$sigil};
-		die "Unknown sigil '$sigil'!" unless $class;
-		#my $leaf = $class.new(
-		my $leaf = Perl6::Variable::Scalar.new(
+
+		my $leaf;
+		$leaf = %lookup{$sigil ~ $twigil}.new(
 			:content( $content ),
-			:sigil( $sigil ),
-			:twigil( $twigil ),
 			:headless( $desigilname )
 		);
-say $p.dump;
-say $class;
-say $leaf.gist;
+#say $leaf.perl;
 		return $leaf;
 
-#		return True if self.assert-hash-keys( $p, [< sigil >] )
-#			and self._Sigil( $p.hash.<sigil> );
 #		return True if self.assert-hash-keys( $p,
 #				[< contextualizer >] )
 #			and self._Contextualizer( $p.hash.<contextualizer> );
@@ -2359,9 +2511,9 @@ say $leaf.gist;
 	method _Version( Mu $parsed ) {
 		self.trace( '_Version' );
 #return True;
+		# _VStr is an Int leaf
 		return True if self.assert-hash-keys( $parsed, [< vnum vstr >] )
-			and self._VNum( $parsed.hash.<vnum> )
-			and self._VStr( $parsed.hash.<vstr> );
+			and self._VNum( $parsed.hash.<vnum> );
 		return self.record-failure( '_Version' );
 	}
 
@@ -2376,20 +2528,6 @@ say $leaf.gist;
 			return True
 		}
 		return self.record-failure( '_VNum' );
-	}
-
-	method _VStr( Mu $parsed ) returns Bool {
-		self.trace( '_VStr' );
-#return True;
-		return True if self.assert-Int( $parsed );
-		return self.record-failure( '_VStr' );
-	}
-
-	method _Wu( Mu $parsed ) returns Bool {
-		self.trace( '_Wu' );
-#return True;
-		return True if self.assert-Str( $parsed );
-		return self.record-failure( '_Wu' );
 	}
 
 	method _XBlock( Mu $parsed ) returns Bool {
