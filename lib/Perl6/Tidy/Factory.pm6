@@ -373,10 +373,6 @@ class Perl6::Tidy::Factory {
 		say $parsed.hash.keys.gist;
 	}
 
-	method trace( Str $term ) {
-		note $term if $*TRACE;
-	}
-
 	method assert-Bool( Mu $parsed ) {
 		return False if $parsed.hash;
 		return False if $parsed.list;
@@ -400,7 +396,8 @@ class Perl6::Tidy::Factory {
 		return False
 	}
 
-	# $parsed can only be Num, by extension Int, by extension Str, by extension Bool.
+	# $parsed can only be Num, by extension Int, by extension Str,
+	# by extension Bool.
 	#
 	method assert-Num( Mu $parsed ) {
 		return False if $parsed.hash;
@@ -440,13 +437,6 @@ class Perl6::Tidy::Factory {
 
 		if $parsed.hash.keys.elems !=
 			$keys.elems + $defined-keys.elems {
-#				warn "Test " ~
-#					$keys.gist ~
-#					", " ~
-#					$defined-keys.gist ~
-#					" against parser " ~
-#					$parsed.hash.keys.gist;
-#				CONTROL { when CX::Warn { warn .message ~ "\n" ~ .backtrace.Str } }
 			return False
 		}
 		
@@ -506,17 +496,25 @@ class Perl6::Tidy::Factory {
 				[< B >], [< quotepair >] );
 	}
 
+	method _BackMod( Mu $p ) returns Bool {
+		$p.hash.<backmod>.Bool
+	}
+
 	method _BackSlash( Mu $p ) returns Bool {
 		return True if self.assert-hash-keys( $p, [< sym >] );
 		return True if self.assert-Str( $p );
 	}
 
 	method _Block( Mu $p ) returns Bool {
-		return True if self.assert-hash-keys( $p, [< blockoid >] );
+		if self.assert-hash-keys( $p, [< blockoid >] ) {
+			self._Blockoid( $p.hash.<blockoid> )
+		}
 	}
 
 	method _Blockoid( Mu $p ) returns Bool {
-		return True if self.assert-hash-keys( $p, [< statementlist >] );
+		if self.assert-hash-keys( $p, [< statementlist >] ) {
+			self._StatementList( $p.hash.<statementlist> )
+		}
 	}
 
 	method _Blorst( Mu $p ) returns Bool {
@@ -525,7 +523,9 @@ class Perl6::Tidy::Factory {
 	}
 
 	method _Bracket( Mu $p ) returns Bool {
-		return True if self.assert-hash-keys( $p, [< semilist >] );
+		if self.assert-hash-keys( $p, [< semilist >] ) {
+			self._SemiList( $p.hash.<semilist> )
+		}
 	}
 
 	method _CClassElem( Mu $p ) returns Bool {
@@ -561,23 +561,35 @@ class Perl6::Tidy::Factory {
 	}
 
 	method _CodeBlock( Mu $p ) returns Bool {
-		return True if self.assert-hash-keys( $p, [< block >] );
+		if self.assert-hash-keys( $p, [< block >] ) {
+			self._Block( $p.hash.<block> )
+		}
 	}
 
 	method _Coercee( Mu $p ) returns Bool {
-		return True if self.assert-hash-keys( $p, [< semilist >] );
+		if self.assert-hash-keys( $p, [< semilist >] ) {
+			self._SemiList( $p.hash.<semilist> )
+		}
 	}
 
 	method _ColonCircumfix( Mu $p ) returns Bool {
-		return True if self.assert-hash-keys( $p, [< circumfix >] );
+		if self.assert-hash-keys( $p, [< circumfix >] ) {
+			self._Circumfix( $p.hash.<circumfix> )
+		}
 	}
 
-	method _ColonPair( Mu $p ) returns Bool {
+	method _ColonPair( Mu $p ) {
 		return True if self.assert-hash-keys( $p,
 				     [< identifier coloncircumfix >] );
-		return True if self.assert-hash-keys( $p, [< identifier >] );
-		return True if self.assert-hash-keys( $p, [< fakesignature >] );
-		return True if self.assert-hash-keys( $p, [< var >] );
+		if self.assert-hash-keys( $p, [< identifier >] ) {
+			self._Identifier( $p.hash.<identifier> )
+		}
+		if self.assert-hash-keys( $p, [< fakesignature >] ) {
+			self._FakeSignature( $p.hash.<fakesignature> )
+		}
+		if self.assert-hash-keys( $p, [< var >] ) {
+			self._Var( $p.hash.<var> )
+		}
 	}
 
 	method _ColonPairs( Mu $p ) {
@@ -653,8 +665,9 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 					  [< trait >] );
 		return True if self.assert-hash-keys( $p,
 					  [< package_def sym >] );
-		return True if self.assert-hash-keys( $p,
-					  [< declarator >] );
+		if self.assert-hash-keys( $p, [< declarator >] ) {
+			self._Declarator( $p.hash.<declarator> )
+		}
 	}
 
 	method _DecNumber( Mu $p ) {
@@ -694,7 +707,9 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _DefTermNow( Mu $p ) {
-		return True if self.assert-hash-keys( $p, [< defterm >] );
+		if self.assert-hash-keys( $p, [< defterm >] ) {
+			self._DefTerm( $p.hash.<defterm> )
+		}
 	}
 
 	method _DeSigilName( Mu $p ) {
@@ -715,6 +730,10 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 	}
 
+	method _Doc( Mu $p ) returns Bool {
+		$p.hash.<doc>.Bool
+	}
+
 	method _Dotty( Mu $p ) {
 		return True if self.assert-hash-keys( $p, [< sym dottyop O >] );
 	}
@@ -722,17 +741,24 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	method _DottyOp( Mu $p ) {
 		return True if self.assert-hash-keys( $p,
 				[< sym postop >], [< O >] );
-		return True if self.assert-hash-keys( $p, [< methodop >] );
-		return True if self.assert-hash-keys( $p, [< colonpair >] );
+		if self.assert-hash-keys( $p, [< methodop >] ) {
+			self._MethodOp( $p.hash.<methodop> )
+		}
+		if self.assert-hash-keys( $p, [< colonpair >] ) {
+			self._ColonPair( $p.hash.<colonpair> )
+		}
 	}
 
 	method _DottyOpish( Mu $p ) {
-		return True if self.assert-hash-keys( $p, [< term >] );
+		if self.assert-hash-keys( $p, [< term >] ) {
+			self._Term( $p.hash.<term> )
+		}
 	}
 
 	method _E1( Mu $p ) {
-		return True if self.assert-hash-keys( $p,
-				[< scope_declarator >] );
+		if self.assert-hash-keys( $p, [< scope_declarator >] ) {
+			self._ScopeDeclarator( $p.hash.<scope_declarator> )
+		}
 	}
 
 	method _E2( Mu $p ) {
@@ -903,46 +929,46 @@ Perl6::Unimplemented.new(:content( "_EXPR") );
 Perl6::Unimplemented.new(:content( "_EXPR") );
 		}
 		elsif self.assert-hash-keys( $p, [< statement_prefix >] ) {
-Perl6::Unimplemented.new(:content( "_EXPR") );
+			self._StatementPrefix( $p.hash.<statement_prefix> )
 		}
 		elsif self.assert-hash-keys( $p, [< type_declarator >] ) {
-Perl6::Unimplemented.new(:content( "_EXPR") );
+			self._TypeDeclarator( $p.hash.<type_declarator> )
 		}
 		elsif self.assert-hash-keys( $p, [< longname >] ) {
-Perl6::Unimplemented.new(:content( "_EXPR") );
+			self._LongName( $p.hash.<longname> )
 		}
 		elsif self.assert-hash-keys( $p, [< value >] ) {
-Perl6::Unimplemented.new(:content( "_EXPR") );
+			self._Value( $p.hash.<value> )
 		}
 		elsif self.assert-hash-keys( $p, [< variable >] ) {
-Perl6::Unimplemented.new(:content( "_EXPR") );
+			self._Variable( $p.hash.<variable> )
 		}
 		elsif self.assert-hash-keys( $p, [< circumfix >] ) {
-Perl6::Unimplemented.new(:content( "_EXPR") );
+			self._Circumfix( $p.hash.<circumfix> )
 		}
 		elsif self.assert-hash-keys( $p, [< colonpair >] ) {
-Perl6::Unimplemented.new(:content( "_EXPR") );
+			self._ColonPair( $p.hash.<colonpair> )
 		}
 		elsif self.assert-hash-keys( $p, [< scope_declarator >] ) {
 			self._ScopeDeclarator( $p.hash.<scope_declarator> )
 		}
 		elsif self.assert-hash-keys( $p, [< routine_declarator >] ) {
-Perl6::Unimplemented.new(:content( "_EXPR") );
+			self._RoutineDeclarator( $p.hash.<routine_declarator> )
 		}
 		elsif self.assert-hash-keys( $p, [< package_declarator >] ) {
-Perl6::Unimplemented.new(:content( "_EXPR") );
+			self._PackageDeclarator( $p.hash.<package_declarator> )
 		}
 		elsif self.assert-hash-keys( $p, [< fatarrow >] ) {
-Perl6::Unimplemented.new(:content( "_EXPR") );
+			self._FatArrow( $p.hash.<fatarrow> )
 		}
 		elsif self.assert-hash-keys( $p, [< multi_declarator >] ) {
-Perl6::Unimplemented.new(:content( "_EXPR") );
+			self._MultiDeclarator( $p.hash.<multi_declarator> )
 		}
 		elsif self.assert-hash-keys( $p, [< regex_declarator >] ) {
-Perl6::Unimplemented.new(:content( "_EXPR") );
+			self._RegexDeclarator( $p.hash.<regex_declarator> )
 		}
 		elsif self.assert-hash-keys( $p, [< dotty >] ) {
-Perl6::Unimplemented.new(:content( "_EXPR") );
+			self._Dotty( $p.hash.<dotty> )
 		}
 		else {
 Perl6::Unimplemented.new(:content( "_EXPR") );
@@ -950,11 +976,15 @@ Perl6::Unimplemented.new(:content( "_EXPR") );
 	}
 
 	method _FakeInfix( Mu $p ) {
-		return True if self.assert-hash-keys( $p, [< O >] );
+		if self.assert-hash-keys( $p, [< O >] ) {
+			self._O( $p.hash.<O> )
+		}
 	}
 
 	method _FakeSignature( Mu $p ) {
-		return True if self.assert-hash-keys( $p, [< signature >] );
+		if self.assert-hash-keys( $p, [< signature >] ) {
+			self._Signature( $p.hash.<signature> )
+		}
 	}
 
 	method _FatArrow( Mu $p ) {
@@ -992,16 +1022,12 @@ Perl6::Unimplemented.new(:content( "_EXPR") );
 
 	method _Integer( Mu $p ) {
 		# _DecInt is a Str/Int leaf
-		# _VALUE is a Str/Int leaf
 		return True if self.assert-hash-keys( $p, [< decint VALUE >] );
 		# _BinInt is a Str/Int leaf
-		# _VALUE is a Str/Int leaf
 		return True if self.assert-hash-keys( $p, [< binint VALUE >] );
 		# _OctInt is a Str/Int leaf
-		# _VALUE is a Str/Int leaf
 		return True if self.assert-hash-keys( $p, [< octint VALUE >] );
 		# _HexInt is Str/Int leaf
-		# _VALUE is a Str/Int leaf
 		return True if self.assert-hash-keys( $p, [< hexint VALUE >] );
 	}
 
@@ -1018,8 +1044,14 @@ Perl6::Unimplemented.new(:content( "_EXPR") );
 return True;
 	}
 
+	method _Lambda( Mu $p ) returns Str {
+		$p.hash.<lambda>.Str
+	}
+
 	method _Left( Mu $p ) {
-		return True if self.assert-hash-keys( $p, [< termseq >] );
+		if self.assert-hash-keys( $p, [< termseq >] ) {
+			self._TermSeq( $p.hash.<termseq> )
+		}
 	}
 
 	method _LongName( Mu $p ) {
@@ -1028,23 +1060,41 @@ return True;
 				[< colonpair >] );
 	}
 
+	method _Max( Mu $p ) returns Str {
+		$p.hash.<max>.Str
+	}
+
 	method _MetaChar( Mu $p ) {
-		return True if self.assert-hash-keys( $p, [< sym >] );
-		return True if self.assert-hash-keys( $p, [< codeblock >] );
-		return True if self.assert-hash-keys( $p, [< backslash >] );
-		return True if self.assert-hash-keys( $p, [< assertion >] );
-		return True if self.assert-hash-keys( $p, [< nibble >] );
-		return True if self.assert-hash-keys( $p, [< quote >] );
-		return True if self.assert-hash-keys( $p, [< nibbler >] );
-		return True if self.assert-hash-keys( $p, [< statement >] );
+		if self.assert-hash-keys( $p, [< sym >] ) {
+			self._Sym( $p.hash.<sym> )
+		}
+		if self.assert-hash-keys( $p, [< codeblock >] ) {
+			self._CodeBlock( $p.hash.<codeblock> )
+		}
+		if self.assert-hash-keys( $p, [< backslash >] ) {
+			self._BackSlash( $p.hash.<backslash> )
+		}
+		if self.assert-hash-keys( $p, [< assertion >] ) {
+			self._Assertion( $p.hash.<assertion> )
+		}
+		if self.assert-hash-keys( $p, [< nibble >] ) {
+			self._Nibble( $p.hash.<nibble> )
+		}
+		if self.assert-hash-keys( $p, [< quote >] ) {
+			self._Quote( $p.hash.<quote> )
+		}
+		if self.assert-hash-keys( $p, [< nibbler >] ) {
+			self._Nibbler( $p.hash.<nibbler> )
+		}
+		if self.assert-hash-keys( $p, [< statement >] ) {
+			self._Statement( $p.hash.<statement> )
+		}
 	}
 
 	method _MethodDef( Mu $p ) {
-		# _Specials is a Bool leaf
 		return True if self.assert-hash-keys( $p,
 			     [< specials longname blockoid multisig >],
 			     [< trait >] );
-		# _Specials is a Bool leaf
 		return True if self.assert-hash-keys( $p,
 			     [< specials longname blockoid >],
 			     [< trait >] );
@@ -1052,22 +1102,29 @@ return True;
 
 	method _MethodOp( Mu $p ) {
 		return True if self.assert-hash-keys( $p, [< longname args >] );
-		return True if self.assert-hash-keys( $p, [< longname >] );
-		return True if self.assert-hash-keys( $p, [< variable >] );
+		if self.assert-hash-keys( $p, [< longname >] ) {
+			self._LongName( $p.hash.<longname> )
+		}
+		if self.assert-hash-keys( $p, [< variable >] ) {
+			self._Variable( $p.hash.<variable> )
+		}
 	}
 
 	method _Min( Mu $p ) {
 		# _DecInt is a Str/Int leaf
-		# _VALUE is a Str/Int leaf
 		return True if self.assert-hash-keys( $p, [< decint VALUE >] );
 	}
 
 	method _ModifierExpr( Mu $p ) {
-		return True if self.assert-hash-keys( $p, [< EXPR >] );
+		if self.assert-hash-keys( $p, [< EXPR >] ) {
+			self._EXPR( $p.hash.<EXPR> )
+		}
 	}
 
 	method _ModuleName( Mu $p ) {
-		return True if self.assert-hash-keys( $p, [< longname >] );
+		if self.assert-hash-keys( $p, [< longname >] ) {
+			self._LongName( $p.hash.<longname> )
+		}
 	}
 
 	method _MoreName( Mu $p ) {
@@ -1081,19 +1138,24 @@ return True;
 				[< sym routine_def >] );
 		return True if self.assert-hash-keys( $p,
 				[< sym declarator >] );
-		return True if self.assert-hash-keys( $p, [< declarator >] );
+		if self.assert-hash-keys( $p, [< declarator >] ) {
+			self._Declarator( $p.hash.<declarator> )
+		}
 	}
 
 	method _MultiSig( Mu $p ) {
-		return True if self.assert-hash-keys( $p, [< signature >] );
+		if self.assert-hash-keys( $p, [< signature >] ) {
+			self._Signature( $p.hash.<signature> )
+		}
 	}
 
 	method _NamedParam( Mu $p ) {
-		return True if self.assert-hash-keys( $p, [< param_var >] );
+		if self.assert-hash-keys( $p, [< param_var >] ) {
+			self._ParamVar( $p.hash.<param_var> )
+		}
 	}
 
 	method _Name( Mu $p ) {
-		# _Quant is a Bool leaf
 		return True if self.assert-hash-keys( $p,
 			[< param_var type_constraint quant >],
 			[< default_value modifier trait post_constraint >] );
@@ -1111,7 +1173,13 @@ return True;
 	}
 
 	method _Nibbler( Mu $p ) {
-		return True if self.assert-hash-keys( $p, [< termseq >] );
+		if self.assert-hash-keys( $p, [< termseq >] ) {
+			self._TermSeq( $p.hash.<termseq> )
+		}
+	}
+
+	method _NormSpace( Mu $p ) returns Str {
+		$p.hash.<normspace>.Str
 	}
 
 	method _Noun( Mu $p ) {
@@ -1130,7 +1198,9 @@ return True;
 	}
 
 	method _Number( Mu $p ) {
-		return True if self.assert-hash-keys( $p, [< numish >] );
+		if self.assert-hash-keys( $p, [< numish >] ) {
+			self._Numish( $p.hash.<numish> )
+		}
 	}
 
 	method _Numish( Mu $p ) {
@@ -1232,25 +1302,21 @@ return True;
 
 	method _Parameter( Mu $p ) {
 		for $p.list {
-			# _Quant is a Bool leaf
 			next if self.assert-hash-keys( $_,
 				[< param_var type_constraint quant >],
 				[< default_value modifier trait
 				   post_constraint >] );
-			# _Quant is a Bool leaf
 			next if self.assert-hash-keys( $_,
 				[< param_var quant >],
 				[< default_value modifier trait
 				   type_constraint
 				   post_constraint >] );
 
-			# _Quant is a Bool leaf
 			next if self.assert-hash-keys( $_,
 				[< named_param quant >],
 				[< default_value modifier
 				   post_constraint trait
 				   type_constraint >] );
-			# _Quant is a Bool leaf
 			next if self.assert-hash-keys( $_,
 				[< defterm quant >],
 				[< default_value modifier
@@ -1264,21 +1330,23 @@ return True;
 	}
 
 	method _ParamVar( Mu $p ) {
-		# _Sigil is a Str leaf
 		return True if self.assert-hash-keys( $p,
 				[< name twigil sigil >] );
-		# _Sigil is a Str leaf
 		return True if self.assert-hash-keys( $p, [< name sigil >] );
-		return True if self.assert-hash-keys( $p, [< signature >] );
-		# _Sigil is a Str leaf
-		return True if self.assert-hash-keys( $p, [< sigil >] );
+		if self.assert-hash-keys( $p, [< signature >] ) {
+			self._Signature( $p.hash.<signature> )
+		}
+		if self.assert-hash-keys( $p, [< sigil >] ) {
+			self._Sigil( $p.hash.<sigil> )
+		}
 	}
 
 	method _PBlock( Mu $p ) {
-		# _Lambda is a Str leaf
 		return True if self.assert-hash-keys( $p,
 				     [< lambda blockoid signature >] );
-		return True if self.assert-hash-keys( $p, [< blockoid >] );
+		if self.assert-hash-keys( $p, [< blockoid >] ) {
+			self._Blockoid( $p.hash.<blockoid> )
+		}
 	}
 
 	method _PostCircumfix( Mu $p ) {
@@ -1303,16 +1371,17 @@ return True;
 		return True if self.assert-hash-keys( $p, [< sym O >] );
 	}
 
+	method _Quant( Mu $p ) returns Bool {
+		$p.hash.<quant>.Bool
+	}
+
 	method _QuantifiedAtom( Mu $p ) {
 		return True if self.assert-hash-keys( $p, [< sigfinal atom >] );
 	}
 
 	method _Quantifier( Mu $p ) {
-		# _Max is a Str leaf
-		# _BackMod is a Bool leaf
 		return True if self.assert-hash-keys( $p,
 				[< sym min max backmod >] );
-		# _BackMod is a Bool leaf
 		return True if self.assert-hash-keys( $p, [< sym backmod >] );
 	}
 
@@ -1325,25 +1394,32 @@ return True;
 				[< sym quibble rx_adverbs >] );
 		return True if self.assert-hash-keys( $p,
 				[< sym rx_adverbs sibble >] );
-		return True if self.assert-hash-keys( $p, [< nibble >] );
-		return True if self.assert-hash-keys( $p, [< quibble >] );
+		if self.assert-hash-keys( $p, [< nibble >] ) {
+			self._Nibble( $p.hash.<nibble> )
+		}
+		if self.assert-hash-keys( $p, [< quibble >] ) {
+			self._Quibble( $p.hash.<quibble> )
+		}
 	}
 
 	method _QuotePair( Mu $p ) {
 		for $p.list {
 			next if self.assert-hash-keys( $_, [< identifier >] );
 		}
-		# _Radix is a Str/Int leaf
 		return True if self.assert-hash-keys( $p,
 				[< circumfix bracket radix >], [< exp base >] );
-		return True if self.assert-hash-keys( $p, [< identifier >] );
+		if self.assert-hash-keys( $p, [< identifier >] ) {
+			self._Identifier( $p.hash.<identifier> )
+		}
+	}
+
+	method _Radix( Mu $p ) returns Int {
+		$p.hash.<radix>.Int
 	}
 
 	method _RadNumber( Mu $p ) {
-		# _Radix is a Str/Int leaf
 		return True if self.assert-hash-keys( $p,
 				[< circumfix bracket radix >], [< exp base >] );
-		# _Radix is a Str/Int leaf
 		return True if self.assert-hash-keys( $p,
 				[< circumfix radix >], [< exp base >] );
 	}
@@ -1356,6 +1432,10 @@ return True;
 		return True if self.assert-hash-keys( $p,
 				[< deflongname nibble >],
 				[< signature trait >] );
+	}
+
+	method _Right( Mu $p ) returns Bool {
+		$p.hash.<right>.Bool
 	}
 
 	method build( Mu $p ) {
@@ -1430,7 +1510,9 @@ Perl6::Unimplemented.new(:content( "_Scoped") );
 	}
 
 	method _SemiArgList( Mu $p ) {
-		return True if self.assert-hash-keys( $p, [< arglist >] );
+		if self.assert-hash-keys( $p, [< arglist >] ) {
+			self._ArgList( $p.hash.<arglist> )
+		}
 	}
 
 	method _SemiList( Mu $p ) {
@@ -1442,20 +1524,31 @@ Perl6::Unimplemented.new(:content( "_Scoped") );
 	}
 
 	method _Separator( Mu $p ) {
-		# _SepType is a Str leaf
 		return True if self.assert-hash-keys( $p,
 				[< septype quantified_atom >] );
 	}
 
+	method _SepType( Mu $p ) returns Str {
+		$p.hash.<septype>.Str
+	}
+
+	method _Shape( Mu $p ) returns Str {
+		$p.hash.<shape>.Str
+	}
+
 	method _Sibble( Mu $p ) {
-		# _Right is a Bool leaf
 		return True if self.assert-hash-keys( $p,
 				[< right babble left >] );
 	}
 
 	method _SigFinal( Mu $p ) {
-		# _NormSpace is a Str leaf
-		return True if self.assert-hash-keys( $p, [< normspace >] );
+		if self.assert-hash-keys( $p, [< normspace >] ) {
+			self._NormSpace( $p.hash.<normspace> )
+		}
+	}
+
+	method _Sigil( Mu $p ) returns Str {
+		$p.hash.<sym>.Str
 	}
 
 	method _SigMaybe( Mu $p ) {
@@ -1478,24 +1571,26 @@ Perl6::Unimplemented.new(:content( "_Scoped") );
 	}
 
 	method _SMExpr( Mu $p ) {
-		return True if self.assert-hash-keys( $p, [< EXPR >] );
+		if self.assert-hash-keys( $p, [< EXPR >] ) {
+			self._EXPR( $p.hash.<EXPR> )
+		}
+	}
+
+	method _Specials( Mu $p ) returns Bool {
+		$p.hash.<specials>.Bool
 	}
 
 	method _StatementControl( Mu $p ) {
 		return True if self.assert-hash-keys( $p,
 				[< block sym e1 e2 e3 >] );
-		# _Wu is a Str leaf
 		return True if self.assert-hash-keys( $p,
 				[< pblock sym EXPR wu >] );
-		# _Doc is a Bool leaf
 		return True if self.assert-hash-keys( $p,
 				[< doc sym module_name >] );
-		# _Doc is a Bool leaf
 		return True if self.assert-hash-keys( $p,
 				[< doc sym version >] );
 		return True if self.assert-hash-keys( $p,
 				[< sym else xblock >] );
-		# _Wu is a Str leaf
 		return True if self.assert-hash-keys( $p, [< xblock sym wu >] );
 		return True if self.assert-hash-keys( $p, [< sym xblock >] );
 		return True if self.assert-hash-keys( $p, [< block sym >] );
@@ -1515,11 +1610,15 @@ Perl6::Unimplemented.new(:content( "_Statement") );
 Perl6::Unimplemented.new(:content( "_Statement") );
 			}
 			elsif self.assert-hash-keys( $_, [< EXPR >] ) {
-Perl6::Unimplemented.new(:content( "_Statement") );
+				self._EXPR(
+					$_.hash.<EXPR>
+				)
 			}
 			elsif self.assert-hash-keys( $_,
 					[< statement_control >] ) {
-Perl6::Unimplemented.new(:content( "_Statement") );
+				self._StatementControl(
+					$_.hash.<statement_control>
+				)
 			}
 			elsif self.assert-hash-keys( $_, [],
 					[< statement_control >] ) {
@@ -1527,7 +1626,7 @@ Perl6::Unimplemented.new(:content( "_Statement") );
 			}
 		}
 		if self.assert-hash-keys( $p, [< statement_control >] ) {
-Perl6::Unimplemented.new(:content( "_Statement") );
+			self._StatementControl( $p.hash.<statement_control> )
 		}
 		elsif self.assert-hash-keys( $p, [< EXPR >] ) {
 			self._EXPR( $p.hash.<EXPR> )
@@ -1556,7 +1655,9 @@ Perl6::Unimplemented.new(:content( "_Statement") );
 	}
 
 	method _SubShortName( Mu $p ) {
-		return True if self.assert-hash-keys( $p, [< desigilname >] );
+		if self.assert-hash-keys( $p, [< desigilname >] ) {
+			self._DeSigilName( $p.hash.<desigilname> )
+		}
 	}
 
 	method _Sym( Mu $p ) {
@@ -1569,7 +1670,9 @@ Perl6::Unimplemented.new(:content( "_Statement") );
 	}
 
 	method _Term( Mu $p ) {
-		return True if self.assert-hash-keys( $p, [< methodop >] );
+		if self.assert-hash-keys( $p, [< methodop >] ) {
+			self._MethodOp( $p.hash.<methodop> )
+		}
 	}
 
 	method _TermAlt( Mu $p ) {
@@ -1579,7 +1682,9 @@ Perl6::Unimplemented.new(:content( "_Statement") );
 	}
 
 	method _TermAltSeq( Mu $p ) {
-		return True if self.assert-hash-keys( $p, [< termconjseq >] );
+		if self.assert-hash-keys( $p, [< termconjseq >] ) {
+			self._TermConjSeq( $p.hash.<termconjseq> )
+		}
 	}
 
 	method _TermConj( Mu $p ) {
@@ -1607,11 +1712,13 @@ Perl6::Unimplemented.new(:content( "_Statement") );
 	}
 
 	method _TermSeq( Mu $p ) {
-		return True if self.assert-hash-keys( $p, [< termaltseq >] );
+		if self.assert-hash-keys( $p, [< termaltseq >] ) {
+			self._TermAltSeq( $p.hash.<termaltseq> )
+		}
 	}
 
-	method _Twigil( Mu $p ) {
-		return True if self.assert-hash-keys( $p, [< sym >] );
+	method _Twigil( Mu $p ) returns Str {
+		$p.hash.<sym>.Str
 	}
 
 	method _TypeConstraint( Mu $p ) {
@@ -1652,20 +1759,25 @@ Perl6::Unimplemented.new(:content( "_Statement") );
 		return True if self.assert-hash-keys( $p, [< value >] );
 	}
 
+	method _VALUE( Mu $p ) returns Int {
+#		return $p.hash.<VALUE>.Str if
+#			$p.hash.<VALUE>.Str and $p.hash.<VALUE>.Str eq '0';
+#		$p.hash.<VALUE>.Int
+		$p.hash.<VALUE>.Str || $p.hash.<VALUE>.Int
+	}
+
 	method _Value( Mu $p ) {
 		return True if self.assert-hash-keys( $p, [< number >] );
 		return True if self.assert-hash-keys( $p, [< quote >] );
 	}
 
 	method _Var( Mu $p ) {
-		# _Sigil is a Str leaf
 		return True if self.assert-hash-keys( $p,
 				[< sigil desigilname >] );
 		return True if self.assert-hash-keys( $p, [< variable >] );
 	}
 
 	method _VariableDeclarator( Mu $p ) {
-		# _Shape is a Str leaf
 		if self.assert-hash-keys( $p,
 				[< semilist variable shape >],
 				[< postcircumfix signature trait
@@ -1743,14 +1855,21 @@ Perl6::Unimplemented.new(:content( "_VariableDeclarator") );
 	}
 
 	method _Version( Mu $p ) {
-		# _VStr is an Int leaf
 		return True if self.assert-hash-keys( $p, [< vnum vstr >] );
+	}
+
+	method _VStr( Mu $p ) returns Int {
+		$p.hash.<vstr>.Int
 	}
 
 	method _VNum( Mu $p ) {
 		for $p.list {
 			next if self.assert-Int( $_ );
 		}
+	}
+
+	method _Wu( Mu $p ) returns Str {
+		$p.hash.<wu>.Str
 	}
 
 	method _XBlock( Mu $p ) returns Bool {
@@ -1760,5 +1879,4 @@ Perl6::Unimplemented.new(:content( "_VariableDeclarator") );
 		return True if self.assert-hash-keys( $p, [< pblock EXPR >] );
 		return True if self.assert-hash-keys( $p, [< blockoid >] );
 	}
-
 }
