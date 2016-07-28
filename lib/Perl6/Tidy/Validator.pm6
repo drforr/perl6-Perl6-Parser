@@ -1401,7 +1401,6 @@ return True;
 		self.trace( '_Parameter' );
 #return True;
 		if $parsed.list {
-			my @child;
 			for $parsed.list {
 				next if self.assert-hash-keys( $_,
 					[< param_var type_constraint quant >],
@@ -2015,7 +2014,6 @@ return True;
 		self.trace( '_Sym' );
 #return True;
 		if $parsed.list {
-			my @child;
 			for $parsed.list {
 				next if $_.Str;
 				return self.record-failure( '_Sym list' );
