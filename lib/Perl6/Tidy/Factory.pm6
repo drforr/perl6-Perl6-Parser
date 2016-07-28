@@ -452,10 +452,7 @@ class Perl6::Tidy::Factory {
 
 	method _ArgList( Mu $parsed ) returns Bool {
 		self.trace( '_ArgList' );
-		CATCH {
-			when X::Hash::Store::OddNumber { .resume }
-		}
-#return True;
+		CATCH { when X::Hash::Store::OddNumber { .resume } }
 		if $parsed.list {
 			for $parsed.list {
 				next if self.assert-hash-keys( $_, [< EXPR >] )
@@ -478,110 +475,97 @@ class Perl6::Tidy::Factory {
 		return self.record-failure( '_ArgList' );
 	}
 
-	method _Args( Mu $parsed ) returns Bool {
+	method _Args( Mu $p ) returns Bool {
 		self.trace( '_Args' );
-#return True;
-		return True if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $p,
 				[< invocant semiarglist >] )
-			and self._Invocant( $parsed.hash.<invocant> )
-			and self._SemiArgList( $parsed.hash.<semiarglist> );
-		return True if self.assert-hash-keys( $parsed,
-				[< semiarglist >] )
-			and self._SemiArgList( $parsed.hash.<semiarglist> );
-		return True if self.assert-hash-keys( $parsed, [ ],
+			and self._Invocant( $p.hash.<invocant> )
+			and self._SemiArgList( $p.hash.<semiarglist> );
+		return True if self.assert-hash-keys( $p, [< semiarglist >] )
+			and self._SemiArgList( $p.hash.<semiarglist> );
+		return True if self.assert-hash-keys( $p, [ ],
 				[< semiarglist >] );
-		return True if self.assert-hash-keys( $parsed, [< arglist >] )
-			and self._ArgList( $parsed.hash.<arglist> );
-		return True if self.assert-hash-keys( $parsed, [< EXPR >] )
-			and self._EXPR( $parsed.hash.<EXPR> );
-		return True if self.assert-Bool( $parsed );
-		return True if self.assert-Str( $parsed );
+		return True if self.assert-hash-keys( $p, [< arglist >] )
+			and self._ArgList( $p.hash.<arglist> );
+		return True if self.assert-hash-keys( $p, [< EXPR >] )
+			and self._EXPR( $p.hash.<EXPR> );
+		return True if self.assert-Bool( $p );
+		return True if self.assert-Str( $p );
 		return self.record-failure( '_Args' );
 	}
 
-	method _Assertion( Mu $parsed ) returns Bool {
+	method _Assertion( Mu $p ) returns Bool {
 		self.trace( '_Assertion' );
-#return True;
-		return True if self.assert-hash-keys( $parsed, [< var >] )
-			and self._Var( $parsed.hash.<var> );
-		return True if self.assert-hash-keys( $parsed, [< longname >] )
-			and self._LongName( $parsed.hash.<longname> );
-		return True if self.assert-hash-keys( $parsed,
-				[< cclass_elem >] )
-			and self._CClassElem( $parsed.hash.<cclass_elem> );
-		return True if self.assert-hash-keys( $parsed, [< codeblock >] )
-			and self._CodeBlock( $parsed.hash.<codeblock> );
-		return True if $parsed.Str;
+		return True if self.assert-hash-keys( $p, [< var >] )
+			and self._Var( $p.hash.<var> );
+		return True if self.assert-hash-keys( $p, [< longname >] )
+			and self._LongName( $p.hash.<longname> );
+		return True if self.assert-hash-keys( $p, [< cclass_elem >] )
+			and self._CClassElem( $p.hash.<cclass_elem> );
+		return True if self.assert-hash-keys( $p, [< codeblock >] )
+			and self._CodeBlock( $p.hash.<codeblock> );
+		return True if $p.Str;
 		return self.record-failure( '_Assertion' );
 	}
 
-	method _Atom( Mu $parsed ) returns Bool {
+	method _Atom( Mu $p ) returns Bool {
 		self.trace( '_Atom' );
-#return True;
-		return True if self.assert-hash-keys( $parsed, [< metachar >] )
-			and self._MetaChar( $parsed.hash.<metachar> );
-		return True if self.assert-Str( $parsed );
+		return True if self.assert-hash-keys( $p, [< metachar >] )
+			and self._MetaChar( $p.hash.<metachar> );
+		return True if self.assert-Str( $p );
 		return self.record-failure( '_Atom' );
 	}
 
-	method _Babble( Mu $parsed ) returns Bool {
+	method _Babble( Mu $p ) returns Bool {
 		self.trace( '_Bubble' );
-#return True;
 		# _B is a Bool leaf
-		return True if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $p,
 				[< B >], [< quotepair >] );
 		return self.record-failure( '_Babble' );
 	}
 
-	method _BackSlash( Mu $parsed ) returns Bool {
+	method _BackSlash( Mu $p ) returns Bool {
 		self.trace( '_BackSlash' );
-#return True;
-		return True if self.assert-hash-keys( $parsed, [< sym >] )
-			and self._Sym( $parsed.hash.<sym> );
-		return True if self.assert-Str( $parsed );
+		return True if self.assert-hash-keys( $p, [< sym >] )
+			and self._Sym( $p.hash.<sym> );
+		return True if self.assert-Str( $p );
 		return self.record-failure( '_BackSlash' );
 	}
 
-	method _Block( Mu $parsed ) returns Bool {
+	method _Block( Mu $p ) returns Bool {
 		self.trace( '_Block' );
-#return True;
-		return True if self.assert-hash-keys( $parsed, [< blockoid >] )
-			and self._Blockoid( $parsed.hash.<blockoid> );
+		return True if self.assert-hash-keys( $p, [< blockoid >] )
+			and self._Blockoid( $p.hash.<blockoid> );
 		return self.record-failure( '_Block' );
 	}
 
-	method _Blockoid( Mu $parsed ) returns Bool {
+	method _Blockoid( Mu $p ) returns Bool {
 		self.trace( '_Blockoid' );
-#return True;
-		return True if self.assert-hash-keys( $parsed,
-				[< statementlist >] )
-			and self._StatementList( $parsed.hash.<statementlist> );
+		return True if self.assert-hash-keys( $p, [< statementlist >] )
+			and self._StatementList( $p.hash.<statementlist> );
 		return self.record-failure( '_Blockoid' );
 	}
 
-	method _Blorst( Mu $parsed ) returns Bool {
+	method _Blorst( Mu $p ) returns Bool {
 		self.trace( '_Blorst' );
-#return True;
-		return True if self.assert-hash-keys( $parsed, [< statement >] )
-			and self._Statement( $parsed.hash.<statement> );
-		return True if self.assert-hash-keys( $parsed, [< block >] )
-			and self._Block( $parsed.hash.<block> );
+		return True if self.assert-hash-keys( $p, [< statement >] )
+			and self._Statement( $p.hash.<statement> );
+		return True if self.assert-hash-keys( $p, [< block >] )
+			and self._Block( $p.hash.<block> );
 		return self.record-failure( '_Blorst' );
 	}
 
-	method _Bracket( Mu $parsed ) returns Bool {
+	method _Bracket( Mu $p ) returns Bool {
 		self.trace( '_Bracket' );
-#return True;
-		return True if self.assert-hash-keys( $parsed, [< semilist >] )
-			and self._SemiList( $parsed.hash.<semilist> );
+		return True if self.assert-hash-keys( $p, [< semilist >] )
+			and self._SemiList( $p.hash.<semilist> );
 		return self.record-failure( '_Bracket' );
 	}
 
-	method _CClassElem( Mu $parsed ) returns Bool {
+	method _CClassElem( Mu $p ) returns Bool {
 		self.trace( '_CClassElem' );
-#return True;
-		if $parsed.list {
-			for $parsed.list {
+		if $p.list {
+			for $p.list {
 				# _Sign is a Str/Bool leaf
 				next if self.assert-hash-keys( $_,
 						[< identifier name sign >],
@@ -599,258 +583,236 @@ class Perl6::Tidy::Factory {
 		return self.record-failure( '_CClassElem' );
 	}
 
-	method _CharSpec( Mu $parsed ) returns Bool {
+	method _CharSpec( Mu $p ) returns Bool {
 		self.trace( '_CharSpec' );
-#return True;
 # XXX work on this, of course.
-		return True if $parsed.list;
+		return True if $p.list;
 		return self.record-failure( '_CharSpec' );
 	}
 
-	method _Circumfix( Mu $parsed ) returns Bool {
+	method _Circumfix( Mu $p ) returns Bool {
 		self.trace( '_Circumfix' );
-#return True;
-		return True if self.assert-hash-keys( $parsed, [< nibble >] )
-			and self._Nibble( $parsed.hash.<nibble> );
-		return True if self.assert-hash-keys( $parsed, [< pblock >] )
-			and self._PBlock( $parsed.hash.<pblock> );
-		return True if self.assert-hash-keys( $parsed, [< semilist >] )
-			and self._SemiList( $parsed.hash.<semilist> );
+		return True if self.assert-hash-keys( $p, [< nibble >] )
+			and self._Nibble( $p.hash.<nibble> );
+		return True if self.assert-hash-keys( $p, [< pblock >] )
+			and self._PBlock( $p.hash.<pblock> );
+		return True if self.assert-hash-keys( $p, [< semilist >] )
+			and self._SemiList( $p.hash.<semilist> );
 		# _BinInt is a Str/Int leaf
 		# _VALUE is a Str/Int leaf
-		return True if self.assert-hash-keys( $parsed,
-				[< binint VALUE >] );
+		return True if self.assert-hash-keys( $p, [< binint VALUE >] );
 		# _OctInt is a Str/Int leaf
 		# _VALUE is a Str/Int leaf
-		return True if self.assert-hash-keys( $parsed,
-				[< octint VALUE >] );
+		return True if self.assert-hash-keys( $p, [< octint VALUE >] );
 		# _HexInt is Str/Int leaf
 		# _VALUE is a Str/Int leaf
-		return True if self.assert-hash-keys( $parsed,
-				[< hexint VALUE >] );
+		return True if self.assert-hash-keys( $p, [< hexint VALUE >] );
 		return self.record-failure( '_Circumfix' );
 	}
 
-	method _CodeBlock( Mu $parsed ) returns Bool {
+	method _CodeBlock( Mu $p ) returns Bool {
 		self.trace( '_CodeBlock' );
-#return True;
-		return True if self.assert-hash-keys( $parsed, [< block >] )
-			and self._Block( $parsed.hash.<block> );
+		return True if self.assert-hash-keys( $p, [< block >] )
+			and self._Block( $p.hash.<block> );
 		return self.record-failure( '_CodeBlock' );
 	}
 
-	method _Coercee( Mu $parsed ) returns Bool {
+	method _Coercee( Mu $p ) returns Bool {
 		self.trace( '_Coercee' );
-#return True;
-		return True if self.assert-hash-keys( $parsed, [< semilist >] )
-			and self._SemiList( $parsed.hash.<semilist> );
+		return True if self.assert-hash-keys( $p, [< semilist >] )
+			and self._SemiList( $p.hash.<semilist> );
 		return self.record-failure( '_Coercee' );
 	}
 
-	method _ColonCircumfix( Mu $parsed ) returns Bool {
+	method _ColonCircumfix( Mu $p ) returns Bool {
 		self.trace( '_ColonCircumfix' );
-#return True;
-		return True if self.assert-hash-keys( $parsed, [< circumfix >] )
-			and self._Circumfix( $parsed.hash.<circumfix> );
+		return True if self.assert-hash-keys( $p, [< circumfix >] )
+			and self._Circumfix( $p.hash.<circumfix> );
 		return self.record-failure( '_ColonCircumfix' );
 	}
 
-	method _ColonPair( Mu $parsed ) returns Bool {
+	method _ColonPair( Mu $p ) returns Bool {
 		self.trace( '_ColonPair' );
-#return True;
-		return True if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $p,
 				     [< identifier coloncircumfix >] )
-			and self._Identifier( $parsed.hash.<identifier> )
-			and self._ColonCircumfix( $parsed.hash.<coloncircumfix> );
-		return True if self.assert-hash-keys( $parsed,
-				[< identifier >] )
-			and self._Identifier( $parsed.hash.<identifier> );
-		return True if self.assert-hash-keys( $parsed,
-				[< fakesignature >] )
-			and self._FakeSignature( $parsed.hash.<fakesignature> );
-		return True if self.assert-hash-keys( $parsed, [< var >] )
-			and self._Var( $parsed.hash.<var> );
+			and self._Identifier( $p.hash.<identifier> )
+			and self._ColonCircumfix( $p.hash.<coloncircumfix> );
+		return True if self.assert-hash-keys( $p, [< identifier >] )
+			and self._Identifier( $p.hash.<identifier> );
+		return True if self.assert-hash-keys( $p, [< fakesignature >] )
+			and self._FakeSignature( $p.hash.<fakesignature> );
+		return True if self.assert-hash-keys( $p, [< var >] )
+			and self._Var( $p.hash.<var> );
 		return self.record-failure( '_ColonPair' );
 	}
 
-	method _ColonPairs( Mu $parsed ) {
+	method _ColonPairs( Mu $p ) {
 		self.trace( '_ColonPairs' );
-#return True;
-		if $parsed ~~ Hash {
-			return True if $parsed.<D>;
-			return True if $parsed.<U>;
+		if $p ~~ Hash {
+			return True if $p.<D>;
+			return True if $p.<U>;
 		}
 		return self.record-failure( '_ColonPairs' );
 	}
 
-	method _Contextualizer( Mu $parsed ) {
+	method _Contextualizer( Mu $p ) {
 		self.trace( '_Contextualizer' );
-#return True;
 		# _Sigil is a Str leaf
-		return True if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $p,
 				[< coercee circumfix sigil >] )
-			and self._Coercee( $parsed.hash.<coercee> )
-			and self._Circumfix( $parsed.hash.<circumfix> );
+			and self._Coercee( $p.hash.<coercee> )
+			and self._Circumfix( $p.hash.<circumfix> );
 		return self.record-failure( '_Contextualizer' );
 	}
 
-	method _Declarator( Mu $parsed ) {
+	method _Declarator( Mu $p ) {
 		self.trace( '_Declarator' );
-#return True;
-		return True if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $p,
 				[< deftermnow initializer term_init >],
 				[< trait >] )
-			and self._DefTermNow( $parsed.hash.<deftermnow> )
-			and self._Initializer( $parsed.hash.<initializer> )
-			and self._TermInit( $parsed.hash.<term_init> );
-		return True if self.assert-hash-keys( $parsed,
+			and self._DefTermNow( $p.hash.<deftermnow> )
+			and self._Initializer( $p.hash.<initializer> )
+			and self._TermInit( $p.hash.<term_init> );
+		return True if self.assert-hash-keys( $p,
 				[< initializer signature >], [< trait >] )
-			and self._Initializer( $parsed.hash.<initializer> )
-			and self._Signature( $parsed.hash.<signature> );
-		return True if self.assert-hash-keys( $parsed,
+			and self._Initializer( $p.hash.<initializer> )
+			and self._Signature( $p.hash.<signature> );
+		return True if self.assert-hash-keys( $p,
 				  [< initializer variable_declarator >],
 				  [< trait >] )
-			and self._Initializer( $parsed.hash.<initializer> )
-			and self._VariableDeclarator( $parsed.hash.<variable_declarator> );
-		return True if self.assert-hash-keys( $parsed,
+			and self._Initializer( $p.hash.<initializer> )
+			and self._VariableDeclarator( $p.hash.<variable_declarator> );
+		return True if self.assert-hash-keys( $p,
 				[< variable_declarator >], [< trait >] )
-			and self._VariableDeclarator( $parsed.hash.<variable_declarator> );
-		return True if self.assert-hash-keys( $parsed,
+			and self._VariableDeclarator( $p.hash.<variable_declarator> );
+		return True if self.assert-hash-keys( $p,
 				[< regex_declarator >], [< trait >] )
-			and self._RegexDeclarator( $parsed.hash.<regex_declarator> );
-		return True if self.assert-hash-keys( $parsed,
+			and self._RegexDeclarator( $p.hash.<regex_declarator> );
+		return True if self.assert-hash-keys( $p,
 				[< routine_declarator >], [< trait >] )
-			and self._RoutineDeclarator( $parsed.hash.<routine_declarator> );
-		return True if self.assert-hash-keys( $parsed,
+			and self._RoutineDeclarator( $p.hash.<routine_declarator> );
+		return True if self.assert-hash-keys( $p,
 				[< signature >], [< trait >] )
-			and self._Signature( $parsed.hash.<signature> );
+			and self._Signature( $p.hash.<signature> );
 		return self.record-failure( '_Declarator' );
 	}
 
-	method _DECL( Mu $parsed ) {
+	method _DECL( Mu $p ) {
 		self.trace( '_DECL' );
-#return True;
-		return True if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $p,
 				[< deftermnow initializer term_init >],
 				[< trait >] )
-			and self._DefTermNow( $parsed.hash.<deftermnow> )
-			and self._Initializer( $parsed.hash.<initializer> )
-			and self._TermInit( $parsed.hash.<term_init> );
-		return True if self.assert-hash-keys( $parsed,
+			and self._DefTermNow( $p.hash.<deftermnow> )
+			and self._Initializer( $p.hash.<initializer> )
+			and self._TermInit( $p.hash.<term_init> );
+		return True if self.assert-hash-keys( $p,
 				[< deftermnow initializer signature >],
 				[< trait >] )
-			and self._DefTermNow( $parsed.hash.<deftermnow> )
-			and self._Initializer( $parsed.hash.<initializer> )
-			and self._Signature( $parsed.hash.<signature> );
-		return True if self.assert-hash-keys( $parsed,
+			and self._DefTermNow( $p.hash.<deftermnow> )
+			and self._Initializer( $p.hash.<initializer> )
+			and self._Signature( $p.hash.<signature> );
+		return True if self.assert-hash-keys( $p,
 				[< initializer signature >], [< trait >] )
-			and self._Initializer( $parsed.hash.<initializer> )
-			and self._Signature( $parsed.hash.<signature> );
-		return True if self.assert-hash-keys( $parsed,
+			and self._Initializer( $p.hash.<initializer> )
+			and self._Signature( $p.hash.<signature> );
+		return True if self.assert-hash-keys( $p,
 					  [< initializer variable_declarator >],
 					  [< trait >] )
-			and self._Initializer( $parsed.hash.<initializer> )
-			and self._VariableDeclarator( $parsed.hash.<variable_declarator> );
-		return True if self.assert-hash-keys( $parsed,
+			and self._Initializer( $p.hash.<initializer> )
+			and self._VariableDeclarator( $p.hash.<variable_declarator> );
+		return True if self.assert-hash-keys( $p,
 				[< signature >], [< trait >] )
-			and self._Signature( $parsed.hash.<signature> );
-		return True if self.assert-hash-keys( $parsed,
+			and self._Signature( $p.hash.<signature> );
+		return True if self.assert-hash-keys( $p,
 					  [< variable_declarator >],
 					  [< trait >] )
-			and self._VariableDeclarator( $parsed.hash.<variable_declarator> );
-		return True if self.assert-hash-keys( $parsed,
+			and self._VariableDeclarator( $p.hash.<variable_declarator> );
+		return True if self.assert-hash-keys( $p,
 					  [< regex_declarator >],
 					  [< trait >] )
-			and self._RegexDeclarator( $parsed.hash.<regex_declarator> );
-		return True if self.assert-hash-keys( $parsed,
+			and self._RegexDeclarator( $p.hash.<regex_declarator> );
+		return True if self.assert-hash-keys( $p,
 					  [< routine_declarator >],
 					  [< trait >] )
-			and self._RoutineDeclarator( $parsed.hash.<routine_declarator> );
-		return True if self.assert-hash-keys( $parsed,
+			and self._RoutineDeclarator( $p.hash.<routine_declarator> );
+		return True if self.assert-hash-keys( $p,
 					  [< package_def sym >] )
-			and self._PackageDef( $parsed.hash.<package_def> )
-			and self._Sym( $parsed.hash.<sym> );
-		return True if self.assert-hash-keys( $parsed,
+			and self._PackageDef( $p.hash.<package_def> )
+			and self._Sym( $p.hash.<sym> );
+		return True if self.assert-hash-keys( $p,
 					  [< declarator >] )
-			and self._Declarator( $parsed.hash.<declarator> );
+			and self._Declarator( $p.hash.<declarator> );
 		return self.record-failure( '_DECL' );
 	}
 
-	method _DecNumber( Mu $parsed ) {
+	method _DecNumber( Mu $p ) {
 		self.trace( '_DecNumber' );
-#return True;
 		# _Coeff is a Str/Int leaf
 		# _Frac is a Str/Int leaf
 		# _Int is a Str/Int leaf
-		return True if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $p,
 				  [< int coeff frac escale >] )
-			and self._EScale( $parsed.hash.<escale> );
+			and self._EScale( $p.hash.<escale> );
 		# _Coeff is a Str/Int leaf
 		# _Frac is a Str/Int leaf
-		return True if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $p,
 				  [< coeff frac escale >] )
-			and self._EScale( $parsed.hash.<escale> );
+			and self._EScale( $p.hash.<escale> );
 		# _Coeff is a Str/Int leaf
 		# _Frac is a Str/Int leaf
 		# _Int is a Str/Int leaf
-		return True if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $p,
 				  [< int coeff frac >] );
 		# _Coeff is a Str/Int leaf
 		# _Int is a Str/Int leaf
-		return True if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $p,
 				  [< int coeff escale >] )
-			and self._EScale( $parsed.hash.<escale> );
+			and self._EScale( $p.hash.<escale> );
 		# _Coeff is a Str/Int leaf
 		# _Frac is a Str/Int leaf
-		return True if self.assert-hash-keys( $parsed,
-				  [< coeff frac >] );
+		return True if self.assert-hash-keys( $p, [< coeff frac >] );
 		return self.record-failure( '_DecNumber' );
 	}
 
-	method _DefLongName( Mu $parsed ) {
+	method _DefLongName( Mu $p ) {
 		self.trace( '_DefLongName' );
-#return True;
-		return True if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $p,
 				[< name >], [< colonpair >] )
-			and self._Name( $parsed.hash.<name> );
+			and self._Name( $p.hash.<name> );
 		return self.record-failure( '_DefLongName' );
 	}
 
-	method _DefTerm( Mu $parsed ) {
+	method _DefTerm( Mu $p ) {
 		self.trace( '_DefTerm' );
-#return True;
-		return True if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $p,
 				[< identifier colonpair >] )
-			and self._Identifier( $parsed.hash.<identifier> )
-			and self._ColonPair( $parsed.hash.<colonpair> );
-		return True if self.assert-hash-keys( $parsed,
+			and self._Identifier( $p.hash.<identifier> )
+			and self._ColonPair( $p.hash.<colonpair> );
+		return True if self.assert-hash-keys( $p,
 				[< identifier >], [< colonpair >] )
-			and self._Identifier( $parsed.hash.<identifier> );
+			and self._Identifier( $p.hash.<identifier> );
 		return self.record-failure( '_DefTerm' );
 	}
 
-	method _DefTermNow( Mu $parsed ) {
+	method _DefTermNow( Mu $p ) {
 		self.trace( '_DefTermNow' );
-#return True;
-		return True if self.assert-hash-keys( $parsed, [< defterm >] )
-			and self._DefTerm( $parsed.hash.<defterm> );
+		return True if self.assert-hash-keys( $p, [< defterm >] )
+			and self._DefTerm( $p.hash.<defterm> );
 		return self.record-failure( '_DefTermNow' );
 	}
 
-	method _DeSigilName( Mu $parsed ) {
+	method _DeSigilName( Mu $p ) {
 		self.trace( '_DeSigilName' );
-#return True;
-		return True if self.assert-hash-keys( $parsed, [< longname >] )
-			and self._LongName( $parsed.hash.<longname> );
-		return True if $parsed.Str;
+		return True if self.assert-hash-keys( $p, [< longname >] )
+			and self._LongName( $p.hash.<longname> );
+		return True if $p.Str;
 		return self.record-failure( '_DeSigilName' );
 	}
 
-	method _Dig( Mu $parsed ) {
+	method _Dig( Mu $p ) {
 		self.trace( '_Dig' );
-#return True;
-		if $parsed.list {
-			for $parsed.list {
+		if $p.list {
+			for $p.list {
 				# UTF-8....
 				if $_ {
 					# XXX
@@ -866,95 +828,83 @@ class Perl6::Tidy::Factory {
 		return self.record-failure( '_Dig' );
 	}
 
-	method _Dotty( Mu $parsed ) {
+	method _Dotty( Mu $p ) {
 		self.trace( '_Dotty' );
-#return True;
-		return True if self.assert-hash-keys( $parsed,
-				[< sym dottyop O >] )
-			and self._Sym( $parsed.hash.<sym> )
-			and self._DottyOp( $parsed.hash.<dottyop> )
-			and self._O( $parsed.hash.<O> );
+		return True if self.assert-hash-keys( $p, [< sym dottyop O >] )
+			and self._Sym( $p.hash.<sym> )
+			and self._DottyOp( $p.hash.<dottyop> )
+			and self._O( $p.hash.<O> );
 		return self.record-failure( '_Dotty' );
 	}
 
-	method _DottyOp( Mu $parsed ) {
+	method _DottyOp( Mu $p ) {
 		self.trace( '_DottyOp' );
-#return True;
-		return True if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $p,
 				[< sym postop >], [< O >] )
-			and self._Sym( $parsed.hash.<sym> )
-			and self._PostOp( $parsed.hash.<postop> );
-		return True if self.assert-hash-keys( $parsed, [< methodop >] )
-			and self._MethodOp( $parsed.hash.<methodop> );
-		return True if self.assert-hash-keys( $parsed, [< colonpair >] )
-			and self._ColonPair( $parsed.hash.<colonpair> );
+			and self._Sym( $p.hash.<sym> )
+			and self._PostOp( $p.hash.<postop> );
+		return True if self.assert-hash-keys( $p, [< methodop >] )
+			and self._MethodOp( $p.hash.<methodop> );
+		return True if self.assert-hash-keys( $p, [< colonpair >] )
+			and self._ColonPair( $p.hash.<colonpair> );
 		return self.record-failure( '_DottyOp' );
 	}
 
-	method _DottyOpish( Mu $parsed ) {
+	method _DottyOpish( Mu $p ) {
 		self.trace( '_DottyOpish' );
-#return True;
-		return True if self.assert-hash-keys( $parsed, [< term >] )
-			and self._Term( $parsed.hash.<term> );
+		return True if self.assert-hash-keys( $p, [< term >] )
+			and self._Term( $p.hash.<term> );
 		return self.record-failure( '_DottyOpish' );
 	}
 
-	method _E1( Mu $parsed ) {
+	method _E1( Mu $p ) {
 		self.trace( '_E1' );
-#return True;
-		return True if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $p,
 				[< scope_declarator >] )
-			and self._ScopeDeclarator( $parsed.hash.<scope_declarator> );
+			and self._ScopeDeclarator( $p.hash.<scope_declarator> );
 		return self.record-failure( '_E1' );
 	}
 
-	method _E2( Mu $parsed ) {
+	method _E2( Mu $p ) {
 		self.trace( '_E2' );
-#return True;
-		return True if self.assert-hash-keys( $parsed,
-				[< infix OPER >] )
-			and self._Infix( $parsed.hash.<infix> )
-			and self._OPER( $parsed.hash.<OPER> );
+		return True if self.assert-hash-keys( $p, [< infix OPER >] )
+			and self._Infix( $p.hash.<infix> )
+			and self._OPER( $p.hash.<OPER> );
 		return self.record-failure( '_E2' );
 	}
 
-	method _E3( Mu $parsed ) {
+	method _E3( Mu $p ) {
 		self.trace( '_E3' );
-#return True;
-		return True if self.assert-hash-keys( $parsed,
-				[< postfix OPER >],
+		return True if self.assert-hash-keys( $p, [< postfix OPER >],
 				[< postfix_prefix_meta_operator >] )
-			and self._Postfix( $parsed.hash.<postfix> )
-			and self._OPER( $parsed.hash.<OPER> );
+			and self._Postfix( $p.hash.<postfix> )
+			and self._OPER( $p.hash.<OPER> );
 		return self.record-failure( '_E3' );
 	}
 
-	method _Else( Mu $parsed ) {
+	method _Else( Mu $p ) {
 		self.trace( '_Else' );
-#return True;
-		return True if self.assert-hash-keys( $parsed, [< sym blorst >] )
-			and self._Sym( $parsed.hash.<sym> )
-			and self._Blorst( $parsed.hash.<blorst> );
-		return True if self.assert-hash-keys( $parsed, [< blockoid >] )
-			and self._Blockoid( $parsed.hash.<blockoid> );
+		return True if self.assert-hash-keys( $p, [< sym blorst >] )
+			and self._Sym( $p.hash.<sym> )
+			and self._Blorst( $p.hash.<blorst> );
+		return True if self.assert-hash-keys( $p, [< blockoid >] )
+			and self._Blockoid( $p.hash.<blockoid> );
 		return self.record-failure( '_Else' );
 	}
 
-	method _EScale( Mu $parsed ) {
+	method _EScale( Mu $p ) {
 		self.trace( '_EScale' );
-#return True;
 		# _DecInt is a Str/Int leaf
 		# _Sign is a Str/Bool leaf
-		return True if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $p,
 				[< sign decint >] );
 		return self.record-failure( '_EScale' );
 	}
 
-	method _EXPR( Mu $parsed ) {
+	method _EXPR( Mu $p ) {
 		self.trace( '_EXPR' );
-#return True;
-		if $parsed.list {
-			for $parsed.list {
+		if $p.list {
+			for $p.list {
 				next if self.assert-hash-keys( $_,
 						[< dotty OPER >],
 						[< postfix_prefix_meta_operator >] )
@@ -1030,336 +980,306 @@ class Perl6::Tidy::Factory {
 				return self.record-failure( '_EXPR list' );
 			}
 			return True if self.assert-hash-keys(
-					$parsed,
+					$p,
 					[< fake_infix OPER colonpair >] )
-				and self._FakeInfix( $parsed.hash.<fake_infix> )
-				and self._OPER( $parsed.hash.<OPER> )
-				and self._ColonPair( $parsed.hash.<colonpair> );
+				and self._FakeInfix( $p.hash.<fake_infix> )
+				and self._OPER( $p.hash.<OPER> )
+				and self._ColonPair( $p.hash.<colonpair> );
 			return True if self.assert-hash-keys(
-					$parsed,
+					$p,
 					[< OPER dotty >],
 					[< postfix_prefix_meta_operator >] )
-				and self._OPER( $parsed.hash.<OPER> )
-				and self._Dotty( $parsed.hash.<dotty> );
+				and self._OPER( $p.hash.<OPER> )
+				and self._Dotty( $p.hash.<dotty> );
 			return True if self.assert-hash-keys(
-					$parsed,
+					$p,
 					[< postfix OPER >],
 					[< postfix_prefix_meta_operator >] )
-				and self._Postfix( $parsed.hash.<postfix> )
-				and self._OPER( $parsed.hash.<OPER> );
+				and self._Postfix( $p.hash.<postfix> )
+				and self._OPER( $p.hash.<OPER> );
 			return True if self.assert-hash-keys(
-					$parsed,
+					$p,
 					[< infix OPER >],
 					[< prefix_postfix_meta_operator >] )
-				and self._Infix( $parsed.hash.<infix> )
-				and self._OPER( $parsed.hash.<OPER> );
+				and self._Infix( $p.hash.<infix> )
+				and self._OPER( $p.hash.<OPER> );
 			return True if self.assert-hash-keys(
-					$parsed,
+					$p,
 					[< prefix OPER >],
 					[< prefix_postfix_meta_operator >] )
-				and self._Prefix( $parsed.hash.<prefix> )
-				and self._OPER( $parsed.hash.<OPER> );
+				and self._Prefix( $p.hash.<prefix> )
+				and self._OPER( $p.hash.<OPER> );
 			return True if self.assert-hash-keys(
-					$parsed,
+					$p,
 					[< postcircumfix OPER >],
 					[< postfix_prefix_meta_operator >] )
-				and self._PostCircumfix( $parsed.hash.<postcircumfix> )
-				and self._OPER( $parsed.hash.<OPER> );
-			return True if self.assert-hash-keys( $parsed,
+				and self._PostCircumfix( $p.hash.<postcircumfix> )
+				and self._OPER( $p.hash.<OPER> );
+			return True if self.assert-hash-keys( $p,
 					[< OPER >],
 					[< infix_prefix_meta_operator >] )
-				and self._OPER( $parsed.hash.<OPER> );
+				and self._OPER( $p.hash.<OPER> );
 			return self.record-failure( '_EXPR hash' );
 		}
 		# _Triangle is a Str leaf
-		return True if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $p,
 				[< args op triangle >] )
-			and self._Args( $parsed.hash.<args> )
-			and self._Op( $parsed.hash.<op> );
-		return True if self.assert-hash-keys( $parsed,
-				[< longname args >] )
-			and self._LongName( $parsed.hash.<longname> )
-			and self._Args( $parsed.hash.<args> );
-		return True if self.assert-hash-keys( $parsed,
+			and self._Args( $p.hash.<args> )
+			and self._Op( $p.hash.<op> );
+		return True if self.assert-hash-keys( $p, [< longname args >] )
+			and self._LongName( $p.hash.<longname> )
+			and self._Args( $p.hash.<args> );
+		return True if self.assert-hash-keys( $p,
 				[< identifier args >] )
-			and self._Identifier( $parsed.hash.<identifier> )
-			and self._Args( $parsed.hash.<args> );
-		return True if self.assert-hash-keys( $parsed, [< args op >] )
-			and self._Args( $parsed.hash.<args> )
-			and self._Op( $parsed.hash.<op> );
-		return True if self.assert-hash-keys( $parsed, [< sym args >] )
-			and self._Sym( $parsed.hash.<sym> )
-			and self._Args( $parsed.hash.<args> );
-		return True if self.assert-hash-keys( $parsed,
+			and self._Identifier( $p.hash.<identifier> )
+			and self._Args( $p.hash.<args> );
+		return True if self.assert-hash-keys( $p, [< args op >] )
+			and self._Args( $p.hash.<args> )
+			and self._Op( $p.hash.<op> );
+		return True if self.assert-hash-keys( $p, [< sym args >] )
+			and self._Sym( $p.hash.<sym> )
+			and self._Args( $p.hash.<args> );
+		return True if self.assert-hash-keys( $p,
 				[< statement_prefix >] )
-			and self._StatementPrefix( $parsed.hash.<statement_prefix> );
-		return True if self.assert-hash-keys( $parsed,
+			and self._StatementPrefix( $p.hash.<statement_prefix> );
+		return True if self.assert-hash-keys( $p,
 				[< type_declarator >] )
-			and self._TypeDeclarator( $parsed.hash.<type_declarator> );
-		return True if self.assert-hash-keys( $parsed, [< longname >] )
-			and self._LongName( $parsed.hash.<longname> );
-		return True if self.assert-hash-keys( $parsed, [< value >] )
-			and self._Value( $parsed.hash.<value> );
-		return True if self.assert-hash-keys( $parsed, [< variable >] )
-			and self._Variable( $parsed.hash.<variable> );
-		return True if self.assert-hash-keys( $parsed, [< circumfix >] )
-			and self._Circumfix( $parsed.hash.<circumfix> );
-		return True if self.assert-hash-keys( $parsed, [< colonpair >] )
-			and self._ColonPair( $parsed.hash.<colonpair> );
-		return True if self.assert-hash-keys( $parsed,
+			and self._TypeDeclarator( $p.hash.<type_declarator> );
+		return True if self.assert-hash-keys( $p, [< longname >] )
+			and self._LongName( $p.hash.<longname> );
+		return True if self.assert-hash-keys( $p, [< value >] )
+			and self._Value( $p.hash.<value> );
+		return True if self.assert-hash-keys( $p, [< variable >] )
+			and self._Variable( $p.hash.<variable> );
+		return True if self.assert-hash-keys( $p, [< circumfix >] )
+			and self._Circumfix( $p.hash.<circumfix> );
+		return True if self.assert-hash-keys( $p, [< colonpair >] )
+			and self._ColonPair( $p.hash.<colonpair> );
+		return True if self.assert-hash-keys( $p,
 				[< scope_declarator >] )
-			and self._ScopeDeclarator( $parsed.hash.<scope_declarator> );
-		return True if self.assert-hash-keys( $parsed,
+			and self._ScopeDeclarator( $p.hash.<scope_declarator> );
+		return True if self.assert-hash-keys( $p,
 				[< routine_declarator >] )
-			and self._RoutineDeclarator( $parsed.hash.<routine_declarator> );
-		return True if self.assert-hash-keys( $parsed,
+			and self._RoutineDeclarator( $p.hash.<routine_declarator> );
+		return True if self.assert-hash-keys( $p,
 				[< package_declarator >] )
-			and self._PackageDeclarator( $parsed.hash.<package_declarator> );
-		return True if self.assert-hash-keys( $parsed, [< fatarrow >] )
-			and self._FatArrow( $parsed.hash.<fatarrow> );
-		return True if self.assert-hash-keys( $parsed,
+			and self._PackageDeclarator( $p.hash.<package_declarator> );
+		return True if self.assert-hash-keys( $p, [< fatarrow >] )
+			and self._FatArrow( $p.hash.<fatarrow> );
+		return True if self.assert-hash-keys( $p,
 				[< multi_declarator >] )
-			and self._MultiDeclarator( $parsed.hash.<multi_declarator> );
-		return True if self.assert-hash-keys( $parsed,
+			and self._MultiDeclarator( $p.hash.<multi_declarator> );
+		return True if self.assert-hash-keys( $p,
 				[< regex_declarator >] )
-			and self._RegexDeclarator( $parsed.hash.<regex_declarator> );
-		return True if self.assert-hash-keys( $parsed, [< dotty >] )
-			and self._Dotty( $parsed.hash.<dotty> );
+			and self._RegexDeclarator( $p.hash.<regex_declarator> );
+		return True if self.assert-hash-keys( $p, [< dotty >] )
+			and self._Dotty( $p.hash.<dotty> );
 		return self.record-failure( '_EXPR' ):
 	}
 
-	method _FakeInfix( Mu $parsed ) {
+	method _FakeInfix( Mu $p ) {
 		self.trace( '_FakeInfix' );
-#return True;
-		return True if self.assert-hash-keys( $parsed, [< O >] )
-			and self._O( $parsed.hash.<O> );
+		return True if self.assert-hash-keys( $p, [< O >] )
+			and self._O( $p.hash.<O> );
 		return self.record-failure( '_FakeInfix' );
 	}
 
-	method _FakeSignature( Mu $parsed ) {
+	method _FakeSignature( Mu $p ) {
 		self.trace( '_FakeSignature' );
-#return True;
-		return True if self.assert-hash-keys( $parsed, [< signature >] )
-			and self._Signature( $parsed.hash.<signature> );
+		return True if self.assert-hash-keys( $p, [< signature >] )
+			and self._Signature( $p.hash.<signature> );
 		return self.record-failure( '_FakeSignature' );
 	}
 
-	method _FatArrow( Mu $parsed ) {
+	method _FatArrow( Mu $p ) {
 		self.trace( '_FatArrow' );
-#return True;
 		# _Key is a Str leaf
-		return True if self.assert-hash-keys( $parsed, [< val key >] )
-			and self._Val( $parsed.hash.<val> );
+		return True if self.assert-hash-keys( $p, [< val key >] )
+			and self._Val( $p.hash.<val> );
 		return self.record-failure( '_FatArrow' );
 	}
 
-	method _Identifier( Mu $parsed ) {
+	method _Identifier( Mu $p ) {
 		self.trace( '_Identifier' );
-#return True;
-		if $parsed.list {
-			for $parsed.list {
+		if $p.list {
+			for $p.list {
 				next if self.assert-Str( $_ );
 				return self.record-failure( '_Identifier list' );
 			}
 			return True
 		}
-		return True if $parsed.Str;
+		return True if $p.Str;
 		return self.record-failure( '_Identifier' );
 	}
 
-	method _Infix( Mu $parsed ) {
+	method _Infix( Mu $p ) {
 		self.trace( '_Infix' );
-#return True;
-		return True if self.assert-hash-keys( $parsed, [< EXPR O >] )
-			and self._EXPR( $parsed.hash.<EXPR> )
-			and self._O( $parsed.hash.<O> );
-		return True if self.assert-hash-keys( $parsed,
-				[< infix OPER >] )
-			and self._Infix( $parsed.hash.<infix> )
-			and self._OPER( $parsed.hash.<OPER> );
-		return True if self.assert-hash-keys( $parsed, [< sym O >] )
-			and self._Sym( $parsed.hash.<sym> )
-			and self._O( $parsed.hash.<O> );
+		return True if self.assert-hash-keys( $p, [< EXPR O >] )
+			and self._EXPR( $p.hash.<EXPR> )
+			and self._O( $p.hash.<O> );
+		return True if self.assert-hash-keys( $p, [< infix OPER >] )
+			and self._Infix( $p.hash.<infix> )
+			and self._OPER( $p.hash.<OPER> );
+		return True if self.assert-hash-keys( $p, [< sym O >] )
+			and self._Sym( $p.hash.<sym> )
+			and self._O( $p.hash.<O> );
 		return self.record-failure( '_Infix' );
 	}
 
-	method _Infixish( Mu $parsed ) {
+	method _Infixish( Mu $p ) {
 		self.trace( '_Infixish' );
-#return True;
-		return True if self.assert-hash-keys( $parsed,
-				[< infix OPER >] )
-			and self._Infix( $parsed.hash.<infix> )
-			and self._OPER( $parsed.hash.<OPER> );
+		return True if self.assert-hash-keys( $p, [< infix OPER >] )
+			and self._Infix( $p.hash.<infix> )
+			and self._OPER( $p.hash.<OPER> );
 		return self.record-failure( '_Infixish' );
 	}
 
-	method _InfixPrefixMetaOperator( Mu $parsed ) {
+	method _InfixPrefixMetaOperator( Mu $p ) {
 		self.trace( '_InfixPrefixMetaOperator' );
-#return True;
-		return True if self.assert-hash-keys( $parsed,
-				[< sym infixish O >] )
-			and self._Sym( $parsed.hash.<sym> )
-			and self._Infixish( $parsed.hash.<infixish> )
-			and self._O( $parsed.hash.<O> );
+		return True if self.assert-hash-keys( $p, [< sym infixish O >] )
+			and self._Sym( $p.hash.<sym> )
+			and self._Infixish( $p.hash.<infixish> )
+			and self._O( $p.hash.<O> );
 		return self.record-failure( '_InfixPrefixMetaOperator' );
 	}
 
-	method _Initializer( Mu $parsed ) {
+	method _Initializer( Mu $p ) {
 		self.trace( '_Initializer' );
-#return True;
-		return True if self.assert-hash-keys( $parsed, [< sym EXPR >] )
-			and self._Sym( $parsed.hash.<sym> )
-			and self._EXPR( $parsed.hash.<EXPR> );
-		return True if self.assert-hash-keys( $parsed,
-				[< dottyopish sym >] )
-			and self._DottyOpish( $parsed.hash.<dottyopish> )
-			and self._Sym( $parsed.hash.<sym> );
+		return True if self.assert-hash-keys( $p, [< sym EXPR >] )
+			and self._Sym( $p.hash.<sym> )
+			and self._EXPR( $p.hash.<EXPR> );
+		return True if self.assert-hash-keys( $p, [< dottyopish sym >] )
+			and self._DottyOpish( $p.hash.<dottyopish> )
+			and self._Sym( $p.hash.<sym> );
 		return self.record-failure( '_Initializer' );
 	}
 
-	method _Integer( Mu $parsed ) {
+	method _Integer( Mu $p ) {
 		self.trace( '_Integer' );
-#return True;
 		# _DecInt is a Str/Int leaf
 		# _VALUE is a Str/Int leaf
-		return True if self.assert-hash-keys( $parsed,
-				[< decint VALUE >] );
+		return True if self.assert-hash-keys( $p, [< decint VALUE >] );
 		# _BinInt is a Str/Int leaf
 		# _VALUE is a Str/Int leaf
-		return True if self.assert-hash-keys( $parsed,
-				[< binint VALUE >] );
+		return True if self.assert-hash-keys( $p, [< binint VALUE >] );
 		# _OctInt is a Str/Int leaf
 		# _VALUE is a Str/Int leaf
-		return True if self.assert-hash-keys( $parsed,
-				[< octint VALUE >] );
+		return True if self.assert-hash-keys( $p, [< octint VALUE >] );
 		# _HexInt is Str/Int leaf
 		# _VALUE is a Str/Int leaf
-		return True if self.assert-hash-keys( $parsed,
-				[< hexint VALUE >] );
+		return True if self.assert-hash-keys( $p, [< hexint VALUE >] );
 		return self.record-failure( '_Integer' );
 	}
 
-	method _Invocant( Mu $parsed ) {
+	method _Invocant( Mu $p ) {
 		self.trace( '_Invocant' );
 		CATCH {
 			when X::Multi::NoMatch { }
 		}
-#return True;
-		#return True if $parsed ~~ QAST::Want;
-		#return True if self.assert-hash-keys( $parsed, [< XXX >] )
-		#	and self._VALUE( $parsed.hash.<XXX> );
+		#return True if $p ~~ QAST::Want;
+		#return True if self.assert-hash-keys( $p, [< XXX >] )
+		#	and self._VALUE( $p.hash.<XXX> );
 # XXX Fixme
-#say $parsed.dump;
-#say $parsed.dump_annotations;
-#say "############## " ~$parsed.<annotations>.gist;#<BY>;
+#say $p.dump;
+#say $p.dump_annotations;
+#say "############## " ~$p.<annotations>.gist;#<BY>;
 return True;
 		return self.record-failure( '_Invocant' );
 	}
 
-	method _Left( Mu $parsed ) {
+	method _Left( Mu $p ) {
 		self.trace( '_Left' );
-#return True;
-		return True if self.assert-hash-keys( $parsed, [< termseq >] )
-			and self._TermSeq( $parsed.hash.<termseq> );
+		return True if self.assert-hash-keys( $p, [< termseq >] )
+			and self._TermSeq( $p.hash.<termseq> );
 		return self.record-failure( '_Left' );
 	}
 
-	method _LongName( Mu $parsed ) {
+	method _LongName( Mu $p ) {
 		self.trace( '_LongName' );
-#return True;
-		return True if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $p,
 				[< name >],
 				[< colonpair >] )
-			and self._Name( $parsed.hash.<name> );
+			and self._Name( $p.hash.<name> );
 		return self.record-failure( '_LongName' );
 	}
 
-	method _MetaChar( Mu $parsed ) {
+	method _MetaChar( Mu $p ) {
 		self.trace( '_MetaChar' );
-#return True;
-		return True if self.assert-hash-keys( $parsed, [< sym >] )
-			and self._Sym( $parsed.hash.<sym> );
-		return True if self.assert-hash-keys( $parsed, [< codeblock >] )
-			and self._CodeBlock( $parsed.hash.<codeblock> );
-		return True if self.assert-hash-keys( $parsed, [< backslash >] )
-			and self._BackSlash( $parsed.hash.<backslash> );
-		return True if self.assert-hash-keys( $parsed, [< assertion >] )
-			and self._Assertion( $parsed.hash.<assertion> );
-		return True if self.assert-hash-keys( $parsed, [< nibble >] )
-			and self._Nibble( $parsed.hash.<nibble> );
-		return True if self.assert-hash-keys( $parsed, [< quote >] )
-			and self._Quote( $parsed.hash.<quote> );
-		return True if self.assert-hash-keys( $parsed, [< nibbler >] )
-			and self._Nibbler( $parsed.hash.<nibbler> );
-		return True if self.assert-hash-keys( $parsed, [< statement >] )
-			and self._Statement( $parsed.hash.<statement> );
+		return True if self.assert-hash-keys( $p, [< sym >] )
+			and self._Sym( $p.hash.<sym> );
+		return True if self.assert-hash-keys( $p, [< codeblock >] )
+			and self._CodeBlock( $p.hash.<codeblock> );
+		return True if self.assert-hash-keys( $p, [< backslash >] )
+			and self._BackSlash( $p.hash.<backslash> );
+		return True if self.assert-hash-keys( $p, [< assertion >] )
+			and self._Assertion( $p.hash.<assertion> );
+		return True if self.assert-hash-keys( $p, [< nibble >] )
+			and self._Nibble( $p.hash.<nibble> );
+		return True if self.assert-hash-keys( $p, [< quote >] )
+			and self._Quote( $p.hash.<quote> );
+		return True if self.assert-hash-keys( $p, [< nibbler >] )
+			and self._Nibbler( $p.hash.<nibbler> );
+		return True if self.assert-hash-keys( $p, [< statement >] )
+			and self._Statement( $p.hash.<statement> );
 		return self.record-failure( '_MetaChar' );
 	}
 
-	method _MethodDef( Mu $parsed ) {
+	method _MethodDef( Mu $p ) {
 		self.trace( '_MethodDef' );
-#return True;
 		# _Specials is a Bool leaf
-		return True if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $p,
 			     [< specials longname blockoid multisig >],
 			     [< trait >] )
-			and self._LongName( $parsed.hash.<longname> )
-			and self._Blockoid( $parsed.hash.<blockoid> )
-			and self._MultiSig( $parsed.hash.<multisig> );
+			and self._LongName( $p.hash.<longname> )
+			and self._Blockoid( $p.hash.<blockoid> )
+			and self._MultiSig( $p.hash.<multisig> );
 		# _Specials is a Bool leaf
-		return True if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $p,
 			     [< specials longname blockoid >],
 			     [< trait >] )
-			and self._LongName( $parsed.hash.<longname> )
-			and self._Blockoid( $parsed.hash.<blockoid> );
+			and self._LongName( $p.hash.<longname> )
+			and self._Blockoid( $p.hash.<blockoid> );
 		return self.record-failure( '_MethodDef' );
 	}
 
-	method _MethodOp( Mu $parsed ) {
+	method _MethodOp( Mu $p ) {
 		self.trace( '_MethodOp' );
-#return True;
-		return True if self.assert-hash-keys( $parsed,
-				[< longname args >] )
-			and self._LongName( $parsed.hash.<longname> )
-			and self._Args( $parsed.hash.<args> );
-		return True if self.assert-hash-keys( $parsed, [< longname >] )
-			and self._LongName( $parsed.hash.<longname> );
-		return True if self.assert-hash-keys( $parsed, [< variable >] )
-			and self._Variable( $parsed.hash.<variable> );
+		return True if self.assert-hash-keys( $p, [< longname args >] )
+			and self._LongName( $p.hash.<longname> )
+			and self._Args( $p.hash.<args> );
+		return True if self.assert-hash-keys( $p, [< longname >] )
+			and self._LongName( $p.hash.<longname> );
+		return True if self.assert-hash-keys( $p, [< variable >] )
+			and self._Variable( $p.hash.<variable> );
 		return self.record-failure( '_MethodOp' );
 	}
 
-	method _Min( Mu $parsed ) {
+	method _Min( Mu $p ) {
 		self.trace( '_Min' );
-#return True;
 		# _DecInt is a Str/Int leaf
 		# _VALUE is a Str/Int leaf
-		return True if self.assert-hash-keys( $parsed,
-				[< decint VALUE >] );
+		return True if self.assert-hash-keys( $p, [< decint VALUE >] );
 		return self.record-failure( '_Min' );
 	}
 
-	method _ModifierExpr( Mu $parsed ) {
+	method _ModifierExpr( Mu $p ) {
 		self.trace( '_ModifierExpr' );
-#return True;
-		return True if self.assert-hash-keys( $parsed, [< EXPR >] )
-			and self._EXPR( $parsed.hash.<EXPR> );
+		return True if self.assert-hash-keys( $p, [< EXPR >] )
+			and self._EXPR( $p.hash.<EXPR> );
 		return self.record-failure( '_ModifierExpr' );
 	}
 
-	method _ModuleName( Mu $parsed ) {
+	method _ModuleName( Mu $p ) {
 		self.trace( '_ModuleName' );
-#return True;
-		return True if self.assert-hash-keys( $parsed, [< longname >] )
-			and self._LongName( $parsed.hash.<longname> );
+		return True if self.assert-hash-keys( $p, [< longname >] )
+			and self._LongName( $p.hash.<longname> );
 		return self.record-failure( '_ModuleName' );
 	}
 
-	method _MoreName( Mu $parsed ) {
+	method _MoreName( Mu $p ) {
 		self.trace( '_MoreName' );
-#return True;
-		if $parsed.list {
-			for $parsed.list {
+		if $p.list {
+			for $p.list {
 				next if self.assert-hash-keys( $_,
 						[< identifier >] )
 					and self._Identifier( $_.hash.<identifier> );
@@ -1370,84 +1290,76 @@ return True;
 		return self.record-failure( '_MoreName' );
 	}
 
-	method _MultiDeclarator( Mu $parsed ) {
+	method _MultiDeclarator( Mu $p ) {
 		self.trace( '_MultiDeclarator' );
-#return True;
-		return True if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $p,
 				[< sym routine_def >] )
-			and self._Sym( $parsed.hash.<sym> )
-			and self._RoutineDef( $parsed.hash.<routine_def> );
-		return True if self.assert-hash-keys( $parsed,
+			and self._Sym( $p.hash.<sym> )
+			and self._RoutineDef( $p.hash.<routine_def> );
+		return True if self.assert-hash-keys( $p,
 				[< sym declarator >] )
-			and self._Sym( $parsed.hash.<sym> )
-			and self._Declarator( $parsed.hash.<declarator> );
-		return True if self.assert-hash-keys( $parsed,
+			and self._Sym( $p.hash.<sym> )
+			and self._Declarator( $p.hash.<declarator> );
+		return True if self.assert-hash-keys( $p,
 				[< declarator >] )
-			and self._Declarator( $parsed.hash.<declarator> );
+			and self._Declarator( $p.hash.<declarator> );
 		return self.record-failure( '_MultiDeclarator' );
 	}
 
-	method _MultiSig( Mu $parsed ) {
+	method _MultiSig( Mu $p ) {
 		self.trace( '_MultiSig' );
-#return True;
-		return True if self.assert-hash-keys( $parsed, [< signature >] )
-			and self._Signature( $parsed.hash.<signature> );
+		return True if self.assert-hash-keys( $p, [< signature >] )
+			and self._Signature( $p.hash.<signature> );
 		return self.record-failure( '_MultiSig' );
 	}
 
-	method _NamedParam( Mu $parsed ) {
+	method _NamedParam( Mu $p ) {
 		self.trace( '_NamedParam' );
-#return True;
-		return True if self.assert-hash-keys( $parsed,
-				[< param_var >] )
-			and self._ParamVar( $parsed.hash.<param_var> );
+		return True if self.assert-hash-keys( $p, [< param_var >] )
+			and self._ParamVar( $p.hash.<param_var> );
 		return self.record-failure( '_NamedParam' );
 	}
 
-	method _Name( Mu $parsed ) {
+	method _Name( Mu $p ) {
 		self.trace( '_Name' );
-#return True;
 		# _Quant is a Bool leaf
-		return True if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $p,
 			[< param_var type_constraint quant >],
 			[< default_value modifier trait post_constraint >] )
-			and self._ParamVar( $parsed.hash.<param_var> )
-			and self._TypeConstraint( $parsed.hash.<type_constraint> );
-		return True if self.assert-hash-keys( $parsed,
+			and self._ParamVar( $p.hash.<param_var> )
+			and self._TypeConstraint( $p.hash.<type_constraint> );
+		return True if self.assert-hash-keys( $p,
 				[< identifier >], [< morename >] )
-			and self._Identifier( $parsed.hash.<identifier> );
-		return True if self.assert-hash-keys( $parsed,
+			and self._Identifier( $p.hash.<identifier> );
+		return True if self.assert-hash-keys( $p,
 				[< subshortname >] )
-			and self._SubShortName( $parsed.hash.<subshortname> );
-		return True if self.assert-hash-keys( $parsed, [< morename >] )
-			and self._MoreName( $parsed.hash.<morename> );
-		return True if self.assert-Str( $parsed );
+			and self._SubShortName( $p.hash.<subshortname> );
+		return True if self.assert-hash-keys( $p, [< morename >] )
+			and self._MoreName( $p.hash.<morename> );
+		return True if self.assert-Str( $p );
 		return self.record-failure( '_Name' );
 	}
 
-	method _Nibble( Mu $parsed ) {
+	method _Nibble( Mu $p ) {
 		self.trace( '_Nibble' );
-#return True;
-		return True if self.assert-hash-keys( $parsed, [< termseq >] )
-			and self._TermSeq( $parsed.hash.<termseq> );
-		return True if $parsed.Str;
-		return True if $parsed.Bool;
+		return True if self.assert-hash-keys( $p, [< termseq >] )
+			and self._TermSeq( $p.hash.<termseq> );
+		return True if $p.Str;
+		return True if $p.Bool;
 		return self.record-failure( '_Nibble' );
 	}
 
-	method _Nibbler( Mu $parsed ) {
+	method _Nibbler( Mu $p ) {
 		self.trace( '_Nibbler' );
-#return True;
-		return True if self.assert-hash-keys( $parsed, [< termseq >] )
-			and self._TermSeq( $parsed.hash.<termseq> );
+		return True if self.assert-hash-keys( $p, [< termseq >] )
+			and self._TermSeq( $p.hash.<termseq> );
 		return self.record-failure( '_Nibbler' );
 	}
 
-	method _Noun( Mu $parsed ) {
+	method _Noun( Mu $p ) {
 		self.trace( '_Noun' );
-#return True;
-		if $parsed.list {
-			for $parsed.list {
+		if $p.list {
+			for $p.list {
 				next if self.assert-hash-keys( $_,
 					[< sigmaybe sigfinal
 					   quantifier atom >] )
@@ -1484,171 +1396,161 @@ return True;
 		return self.record-failure( '_Noun' );
 	}
 
-	method _Number( Mu $parsed ) {
+	method _Number( Mu $p ) {
 		self.trace( '_Number' );
-#return True;
-		return True if self.assert-hash-keys( $parsed, [< numish >] )
-			and self._Numish( $parsed.hash.<numish> );
+		return True if self.assert-hash-keys( $p, [< numish >] )
+			and self._Numish( $p.hash.<numish> );
 		return self.record-failure( '_Number' );
 	}
 
-	method _Numish( Mu $parsed ) {
+	method _Numish( Mu $p ) {
 		self.trace( '_Numish' );
-#return True;
-		return True if self.assert-hash-keys( $parsed, [< integer >] )
-			and self._Integer( $parsed.hash.<integer> );
-		return True if self.assert-hash-keys( $parsed,
-				[< rad_number >] )
-			and self._RadNumber( $parsed.hash.<rad_number> );
-		return True if self.assert-hash-keys( $parsed,
-				[< dec_number >] )
-			and self._DecNumber( $parsed.hash.<dec_number> );
-		return True if self.assert-Num( $parsed );
+		return True if self.assert-hash-keys( $p, [< integer >] )
+			and self._Integer( $p.hash.<integer> );
+		return True if self.assert-hash-keys( $p, [< rad_number >] )
+			and self._RadNumber( $p.hash.<rad_number> );
+		return True if self.assert-hash-keys( $p, [< dec_number >] )
+			and self._DecNumber( $p.hash.<dec_number> );
+		return True if self.assert-Num( $p );
 		return self.record-failure( '_Numish' );
 	}
 
-	method _O( Mu $parsed ) {
+	method _O( Mu $p ) {
 		self.trace( '_O' );
 		CATCH {
 			when X::Multi::NoMatch { .resume }
 			#default { .resume }
 			default { }
 		}
-#return True;
-		return True if $parsed.<thunky>
-			and $parsed.<prec>
-			and $parsed.<fiddly>
-			and $parsed.<reducecheck>
-			and $parsed.<pasttype>
-			and $parsed.<dba>
-			and $parsed.<assoc>;
-		return True if $parsed.<thunky>
-			and $parsed.<prec>
-			and $parsed.<pasttype>
-			and $parsed.<dba>
-			and $parsed.<iffy>
-			and $parsed.<assoc>;
-		return True if $parsed.<prec>
-			and $parsed.<pasttype>
-			and $parsed.<dba>
-			and $parsed.<diffy>
-			and $parsed.<iffy>
-			and $parsed.<assoc>;
-		return True if $parsed.<prec>
-			and $parsed.<fiddly>
-			and $parsed.<sub>
-			and $parsed.<dba>
-			and $parsed.<assoc>;
-		return True if $parsed.<prec>
-			and $parsed.<nextterm>
-			and $parsed.<fiddly>
-			and $parsed.<dba>
-			and $parsed.<assoc>;
-		return True if $parsed.<thunky>
-			and $parsed.<prec>
-			and $parsed.<dba>
-			and $parsed.<assoc>;
-		return True if $parsed.<prec>
-			and $parsed.<diffy>
-			and $parsed.<dba>
-			and $parsed.<assoc>;
-		return True if $parsed.<prec>
-			and $parsed.<iffy>
-			and $parsed.<dba>
-			and $parsed.<assoc>;
-		return True if $parsed.<prec>
-			and $parsed.<fiddly>
-			and $parsed.<dba>
-			and $parsed.<assoc>;
-		return True if $parsed.<prec>
-			and $parsed.<dba>
-			and $parsed.<assoc>;
+		return True if $p.<thunky>
+			and $p.<prec>
+			and $p.<fiddly>
+			and $p.<reducecheck>
+			and $p.<pasttype>
+			and $p.<dba>
+			and $p.<assoc>;
+		return True if $p.<thunky>
+			and $p.<prec>
+			and $p.<pasttype>
+			and $p.<dba>
+			and $p.<iffy>
+			and $p.<assoc>;
+		return True if $p.<prec>
+			and $p.<pasttype>
+			and $p.<dba>
+			and $p.<diffy>
+			and $p.<iffy>
+			and $p.<assoc>;
+		return True if $p.<prec>
+			and $p.<fiddly>
+			and $p.<sub>
+			and $p.<dba>
+			and $p.<assoc>;
+		return True if $p.<prec>
+			and $p.<nextterm>
+			and $p.<fiddly>
+			and $p.<dba>
+			and $p.<assoc>;
+		return True if $p.<thunky>
+			and $p.<prec>
+			and $p.<dba>
+			and $p.<assoc>;
+		return True if $p.<prec>
+			and $p.<diffy>
+			and $p.<dba>
+			and $p.<assoc>;
+		return True if $p.<prec>
+			and $p.<iffy>
+			and $p.<dba>
+			and $p.<assoc>;
+		return True if $p.<prec>
+			and $p.<fiddly>
+			and $p.<dba>
+			and $p.<assoc>;
+		return True if $p.<prec>
+			and $p.<dba>
+			and $p.<assoc>;
 		return self.record-failure( '_O' );
 	}
 
-	method _Op( Mu $parsed ) {
+	method _Op( Mu $p ) {
 		self.trace( '_Op' );
-#return True;
-		return True if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $p,
 			     [< infix_prefix_meta_operator OPER >] )
-			and self._InfixPrefixMetaOperator( $parsed.hash.<infix_prefix_meta_operator> )
-			and self._OPER( $parsed.hash.<OPER> );
-		return True if self.assert-hash-keys( $parsed, [< infix OPER >] )
-			and self._Infix( $parsed.hash.<infix> )
-			and self._OPER( $parsed.hash.<OPER> );
+			and self._InfixPrefixMetaOperator( $p.hash.<infix_prefix_meta_operator> )
+			and self._OPER( $p.hash.<OPER> );
+		return True if self.assert-hash-keys( $p, [< infix OPER >] )
+			and self._Infix( $p.hash.<infix> )
+			and self._OPER( $p.hash.<OPER> );
 		return self.record-failure( '_Op' );
 	}
 
-	method _OPER( Mu $parsed ) {
+	method _OPER( Mu $p ) {
 		self.trace( '_OPER' );
-#return True;
-		return True if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $p,
 				[< sym dottyop O >] )
-			and self._Sym( $parsed.hash.<sym> )
-			and self._DottyOp( $parsed.hash.<dottyop> )
-			and self._O( $parsed.hash.<O> );
-		return True if self.assert-hash-keys( $parsed,
+			and self._Sym( $p.hash.<sym> )
+			and self._DottyOp( $p.hash.<dottyop> )
+			and self._O( $p.hash.<O> );
+		return True if self.assert-hash-keys( $p,
 				[< sym infixish O >] )
-			and self._Sym( $parsed.hash.<sym> )
-			and self._Infixish( $parsed.hash.<infixish> )
-			and self._O( $parsed.hash.<O> );
-		return True if self.assert-hash-keys( $parsed, [< sym O >] )
-			and self._Sym( $parsed.hash.<sym> )
-			and self._O( $parsed.hash.<O> );
-		return True if self.assert-hash-keys( $parsed, [< EXPR O >] )
-			and self._EXPR( $parsed.hash.<EXPR> )
-			and self._O( $parsed.hash.<O> );
-		return True if self.assert-hash-keys( $parsed,
+			and self._Sym( $p.hash.<sym> )
+			and self._Infixish( $p.hash.<infixish> )
+			and self._O( $p.hash.<O> );
+		return True if self.assert-hash-keys( $p, [< sym O >] )
+			and self._Sym( $p.hash.<sym> )
+			and self._O( $p.hash.<O> );
+		return True if self.assert-hash-keys( $p, [< EXPR O >] )
+			and self._EXPR( $p.hash.<EXPR> )
+			and self._O( $p.hash.<O> );
+		return True if self.assert-hash-keys( $p,
 				[< semilist O >] )
-			and self._SemiList( $parsed.hash.<semilist> )
-			and self._O( $parsed.hash.<O> );
-		return True if self.assert-hash-keys( $parsed, [< nibble O >] )
-			and self._Nibble( $parsed.hash.<nibble> )
-			and self._O( $parsed.hash.<O> );
-		return True if self.assert-hash-keys( $parsed, [< arglist O >] )
-			and self._ArgList( $parsed.hash.<arglist> )
-			and self._O( $parsed.hash.<O> );
-		return True if self.assert-hash-keys( $parsed, [< dig O >] )
-			and self._Dig( $parsed.hash.<dig> )
-			and self._O( $parsed.hash.<O> );
-		return True if self.assert-hash-keys( $parsed, [< O >] )
-			and self._O( $parsed.hash.<O> );
+			and self._SemiList( $p.hash.<semilist> )
+			and self._O( $p.hash.<O> );
+		return True if self.assert-hash-keys( $p, [< nibble O >] )
+			and self._Nibble( $p.hash.<nibble> )
+			and self._O( $p.hash.<O> );
+		return True if self.assert-hash-keys( $p, [< arglist O >] )
+			and self._ArgList( $p.hash.<arglist> )
+			and self._O( $p.hash.<O> );
+		return True if self.assert-hash-keys( $p, [< dig O >] )
+			and self._Dig( $p.hash.<dig> )
+			and self._O( $p.hash.<O> );
+		return True if self.assert-hash-keys( $p, [< O >] )
+			and self._O( $p.hash.<O> );
 		return self.record-failure( '_OPER' );
 	}
 
-	method _PackageDeclarator( Mu $parsed ) {
+	method _PackageDeclarator( Mu $p ) {
 		self.trace( '_PackageDeclarator' );
-#return True;
-		return True if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $p,
 				[< sym package_def >] )
-			and self._Sym( $parsed.hash.<sym> )
-			and self._PackageDef( $parsed.hash.<package_def> );
+			and self._Sym( $p.hash.<sym> )
+			and self._PackageDef( $p.hash.<package_def> );
 		return self.record-failure( '_PackageDeclarator' );
 	}
 
-	method _PackageDef( Mu $parsed ) {
+	method _PackageDef( Mu $p ) {
 		self.trace( '_PackageDef' );
-#return True;
-		return True if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $p,
 				[< blockoid longname >], [< trait >] )
-			and self._Blockoid( $parsed.hash.<blockoid> )
-			and self._LongName( $parsed.hash.<longname> );
-		return True if self.assert-hash-keys( $parsed,
+			and self._Blockoid( $p.hash.<blockoid> )
+			and self._LongName( $p.hash.<longname> );
+		return True if self.assert-hash-keys( $p,
 				[< longname statementlist >], [< trait >] )
-			and self._LongName( $parsed.hash.<longname> )
-			and self._StatementList( $parsed.hash.<statementlist> );
-		return True if self.assert-hash-keys( $parsed,
+			and self._LongName( $p.hash.<longname> )
+			and self._StatementList( $p.hash.<statementlist> );
+		return True if self.assert-hash-keys( $p,
 				[< blockoid >], [< trait >] )
-			and self._Blockoid( $parsed.hash.<blockoid> );
+			and self._Blockoid( $p.hash.<blockoid> );
 		return self.record-failure( '_PackageDef' );
 	}
 
-	method _Parameter( Mu $parsed ) {
+	method _Parameter( Mu $p ) {
 		self.trace( '_Parameter' );
-#return True;
-		if $parsed.list {
+		if $p.list {
 			my @child;
-			for $parsed.list {
+			for $p.list {
 				# _Quant is a Bool leaf
 				next if self.assert-hash-keys( $_,
 					[< param_var type_constraint quant >],
@@ -1690,149 +1592,136 @@ return True;
 		return self.record-failure( '_Parameter' );
 	}
 
-	method _ParamVar( Mu $parsed ) {
+	method _ParamVar( Mu $p ) {
 		self.trace( '_ParamVar' );
-#return True;
 		# _Sigil is a Str leaf
-		return True if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $p,
 				[< name twigil sigil >] )
-			and self._Name( $parsed.hash.<name> )
-			and self._Twigil( $parsed.hash.<twigil> );
+			and self._Name( $p.hash.<name> )
+			and self._Twigil( $p.hash.<twigil> );
 		# _Sigil is a Str leaf
-		return True if self.assert-hash-keys( $parsed, [< name sigil >] )
-			and self._Name( $parsed.hash.<name> );
-		return True if self.assert-hash-keys( $parsed, [< signature >] )
-			and self._Signature( $parsed.hash.<signature> );
+		return True if self.assert-hash-keys( $p, [< name sigil >] )
+			and self._Name( $p.hash.<name> );
+		return True if self.assert-hash-keys( $p, [< signature >] )
+			and self._Signature( $p.hash.<signature> );
 		# _Sigil is a Str leaf
-		return True if self.assert-hash-keys( $parsed, [< sigil >] );
+		return True if self.assert-hash-keys( $p, [< sigil >] );
 		return self.record-failure( '_ParamVar' );
 	}
 
-	method _PBlock( Mu $parsed ) {
+	method _PBlock( Mu $p ) {
 		self.trace( '_PBlock' );
-#return True;
 		# _Lambda is a Str leaf
-		return True if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $p,
 				     [< lambda blockoid signature >] )
-			and self._Blockoid( $parsed.hash.<blockoid> )
-			and self._Signature( $parsed.hash.<signature> );
-		return True if self.assert-hash-keys( $parsed, [< blockoid >] )
-			and self._Blockoid( $parsed.hash.<blockoid> );
+			and self._Blockoid( $p.hash.<blockoid> )
+			and self._Signature( $p.hash.<signature> );
+		return True if self.assert-hash-keys( $p, [< blockoid >] )
+			and self._Blockoid( $p.hash.<blockoid> );
 		return self.record-failure( '_PBlock' );
 	}
 
-	method _PostCircumfix( Mu $parsed ) {
+	method _PostCircumfix( Mu $p ) {
 		self.trace( '_PostCircumfix' );
-#return True;
-		return True if self.assert-hash-keys( $parsed, [< nibble O >] )
-			and self._Nibble( $parsed.hash.<nibble> )
-			and self._O( $parsed.hash.<O> );
-		return True if self.assert-hash-keys( $parsed, [< semilist O >] )
-			and self._SemiList( $parsed.hash.<semilist> )
-			and self._O( $parsed.hash.<O> );
-		return True if self.assert-hash-keys( $parsed, [< arglist O >] )
-			and self._ArgList( $parsed.hash.<arglist> )
-			and self._O( $parsed.hash.<O> );
+		return True if self.assert-hash-keys( $p, [< nibble O >] )
+			and self._Nibble( $p.hash.<nibble> )
+			and self._O( $p.hash.<O> );
+		return True if self.assert-hash-keys( $p, [< semilist O >] )
+			and self._SemiList( $p.hash.<semilist> )
+			and self._O( $p.hash.<O> );
+		return True if self.assert-hash-keys( $p, [< arglist O >] )
+			and self._ArgList( $p.hash.<arglist> )
+			and self._O( $p.hash.<O> );
 		return self.record-failure( '_PostCircumfix' );
 	}
 
-	method _Postfix( Mu $parsed ) {
+	method _Postfix( Mu $p ) {
 		self.trace( '_Postfix' );
-#return True;
-		return True if self.assert-hash-keys( $parsed, [< dig O >] )
-			and self._Dig( $parsed.hash.<dig> )
-			and self._O( $parsed.hash.<O> );
-		return True if self.assert-hash-keys( $parsed, [< sym O >] )
-			and self._Sym( $parsed.hash.<sym> )
-			and self._O( $parsed.hash.<O> );
+		return True if self.assert-hash-keys( $p, [< dig O >] )
+			and self._Dig( $p.hash.<dig> )
+			and self._O( $p.hash.<O> );
+		return True if self.assert-hash-keys( $p, [< sym O >] )
+			and self._Sym( $p.hash.<sym> )
+			and self._O( $p.hash.<O> );
 		return self.record-failure( '_Postfix' );
 	}
 
-	method _PostOp( Mu $parsed ) {
+	method _PostOp( Mu $p ) {
 		self.trace( '_PostOp' );
-#return True;
-		return True if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $p,
 				[< sym postcircumfix O >] )
-			and self._Sym( $parsed.hash.<sym> )
-			and self._PostCircumfix( $parsed.hash.<postcircumfix> )
-			and self._O( $parsed.hash.<O> );
-		return True if self.assert-hash-keys( $parsed,
+			and self._Sym( $p.hash.<sym> )
+			and self._PostCircumfix( $p.hash.<postcircumfix> )
+			and self._O( $p.hash.<O> );
+		return True if self.assert-hash-keys( $p,
 				[< sym postcircumfix >], [< O >] )
-			and self._Sym( $parsed.hash.<sym> )
-			and self._PostCircumfix( $parsed.hash.<postcircumfix> );
+			and self._Sym( $p.hash.<sym> )
+			and self._PostCircumfix( $p.hash.<postcircumfix> );
 		return self.record-failure( '_PostOp' );
 	}
 
-	method _Prefix( Mu $parsed ) {
+	method _Prefix( Mu $p ) {
 		self.trace( '_Prefix' );
-#return True;
-		return True if self.assert-hash-keys( $parsed, [< sym O >] )
-			and self._Sym( $parsed.hash.<sym> )
-			and self._O( $parsed.hash.<O> );
+		return True if self.assert-hash-keys( $p, [< sym O >] )
+			and self._Sym( $p.hash.<sym> )
+			and self._O( $p.hash.<O> );
 		return self.record-failure( '_Prefix' );
 	}
 
-	method _QuantifiedAtom( Mu $parsed ) {
+	method _QuantifiedAtom( Mu $p ) {
 		self.trace( '_QuantifiedAtom' );
-#return True;
-		return True if self.assert-hash-keys( $parsed,
-				[< sigfinal atom >] )
-			and self._SigFinal( $parsed.hash.<sigfinal> )
-			and self._Atom( $parsed.hash.<atom> );
+		return True if self.assert-hash-keys( $p, [< sigfinal atom >] )
+			and self._SigFinal( $p.hash.<sigfinal> )
+			and self._Atom( $p.hash.<atom> );
 		return self.record-failure( '_QuantifiedAtom' );
 	}
 
-	method _Quantifier( Mu $parsed ) {
+	method _Quantifier( Mu $p ) {
 		self.trace( '_Quantifier' );
-#return True;
 		# _Max is a Str leaf
 		# _BackMod is a Bool leaf
-		return True if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $p,
 				[< sym min max backmod >] )
-			and self._Sym( $parsed.hash.<sym> )
-			and self._Min( $parsed.hash.<min> );
+			and self._Sym( $p.hash.<sym> )
+			and self._Min( $p.hash.<min> );
 		# _BackMod is a Bool leaf
-		return True if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $p,
 				[< sym backmod >] )
-			and self._Sym( $parsed.hash.<sym> );
+			and self._Sym( $p.hash.<sym> );
 		return self.record-failure( '_Quantifier' );
 	}
 
-	method _Quibble( Mu $parsed ) {
+	method _Quibble( Mu $p ) {
 		self.trace( '_Quibble' );
-#return True;
-		return True if self.assert-hash-keys( $parsed,
-				[< babble nibble >] )
-			and self._Babble( $parsed.hash.<babble> )
-			and self._Nibble( $parsed.hash.<nibble> );
+		return True if self.assert-hash-keys( $p, [< babble nibble >] )
+			and self._Babble( $p.hash.<babble> )
+			and self._Nibble( $p.hash.<nibble> );
 		return self.record-failure( '_Quibble' );
 	}
 
-	method _Quote( Mu $parsed ) {
+	method _Quote( Mu $p ) {
 		self.trace( '_Quote' );
-#return True;
-		return True if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $p,
 				[< sym quibble rx_adverbs >] )
-			and self._Sym( $parsed.hash.<sym> )
-			and self._Quibble( $parsed.hash.<quibble> )
-			and self._RxAdverbs( $parsed.hash.<rx_adverbs> );
-		return True if self.assert-hash-keys( $parsed,
+			and self._Sym( $p.hash.<sym> )
+			and self._Quibble( $p.hash.<quibble> )
+			and self._RxAdverbs( $p.hash.<rx_adverbs> );
+		return True if self.assert-hash-keys( $p,
 				[< sym rx_adverbs sibble >] )
-			and self._Sym( $parsed.hash.<sym> )
-			and self._RxAdverbs( $parsed.hash.<rx_adverbs> )
-			and self._Sibble( $parsed.hash.<sibble> );
-		return True if self.assert-hash-keys( $parsed, [< nibble >] )
-			and self._Nibble( $parsed.hash.<nibble> );
-		return True if self.assert-hash-keys( $parsed, [< quibble >] )
-			and self._Quibble( $parsed.hash.<quibble> );
+			and self._Sym( $p.hash.<sym> )
+			and self._RxAdverbs( $p.hash.<rx_adverbs> )
+			and self._Sibble( $p.hash.<sibble> );
+		return True if self.assert-hash-keys( $p, [< nibble >] )
+			and self._Nibble( $p.hash.<nibble> );
+		return True if self.assert-hash-keys( $p, [< quibble >] )
+			and self._Quibble( $p.hash.<quibble> );
 		return self.record-failure( '_Quote' );
 	}
 
-	method _QuotePair( Mu $parsed ) {
+	method _QuotePair( Mu $p ) {
 		self.trace( '_QuotePair' );
-#return True;
-		if $parsed.list {
-			for $parsed.list {
+		if $p.list {
+			for $p.list {
 				next if self.assert-hash-keys( $_,
 					[< identifier >] )
 					and self._Identifier( $_.hash.<identifier> );
@@ -1841,59 +1730,55 @@ return True;
 			return True
 		}
 		# _Radix is a Str/Int leaf
-		return True if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $p,
 				[< circumfix bracket radix >], [< exp base >] )
-			and self._Circumfix( $parsed.hash.<circumfix> )
-			and self._Bracket( $parsed.hash.<bracket> );
-		return True if self.assert-hash-keys( $parsed,
+			and self._Circumfix( $p.hash.<circumfix> )
+			and self._Bracket( $p.hash.<bracket> );
+		return True if self.assert-hash-keys( $p,
 				[< identifier >] )
-			and self._Identifier( $parsed.hash.<identifier> );
+			and self._Identifier( $p.hash.<identifier> );
 		return self.record-failure( '_QuotePair' );
 	}
 
-	method _RadNumber( Mu $parsed ) {
+	method _RadNumber( Mu $p ) {
 		self.trace( '_RadNumber' );
-#return True;
 		# _Radix is a Str/Int leaf
-		return True if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $p,
 				[< circumfix bracket radix >], [< exp base >] )
-			and self._Circumfix( $parsed.hash.<circumfix> )
-			and self._Bracket( $parsed.hash.<bracket> );
+			and self._Circumfix( $p.hash.<circumfix> )
+			and self._Bracket( $p.hash.<bracket> );
 		# _Radix is a Str/Int leaf
-		return True if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $p,
 				[< circumfix radix >], [< exp base >] )
-			and self._Circumfix( $parsed.hash.<circumfix> );
+			and self._Circumfix( $p.hash.<circumfix> );
 		return self.record-failure( '_RadNumber' );
 	}
 
-	method _RegexDeclarator( Mu $parsed ) {
+	method _RegexDeclarator( Mu $p ) {
 		self.trace( '_RegexDeclarator' );
-#return True;
-		return True if self.assert-hash-keys( $parsed,
-				[< sym regex_def >] )
-			and self._Sym( $parsed.hash.<sym> )
-			and self._RegexDef( $parsed.hash.<regex_def> );
+		return True if self.assert-hash-keys( $p, [< sym regex_def >] )
+			and self._Sym( $p.hash.<sym> )
+			and self._RegexDef( $p.hash.<regex_def> );
 		return self.record-failure( '_RegexDeclarator' );
 	}
 
-	method _RegexDef( Mu $parsed ) {
+	method _RegexDef( Mu $p ) {
 		self.trace( '_RegexDef' );
-#return True;
-		return True if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $p,
 				[< deflongname nibble >],
 				[< signature trait >] )
-			and self._DefLongName( $parsed.hash.<deflongname> )
-			and self._Nibble( $parsed.hash.<nibble> );
+			and self._DefLongName( $p.hash.<deflongname> )
+			and self._Nibble( $p.hash.<nibble> );
 		return self.record-failure( '_RegexDef' );
 	}
 
-	method build( Mu $parsed ) {
+	method build( Mu $p ) {
 		self.trace( 'build' );
-		if self.assert-hash-keys( $parsed, [< statementlist >] ) {
+		if self.assert-hash-keys( $p, [< statementlist >] ) {
 			return Perl6::Document.new(
 				:child(
 					self._StatementList(
-						$parsed.hash.<statementlist>
+						$p.hash.<statementlist>
 					)
 				)
 			)
@@ -1901,99 +1786,90 @@ return True;
 		return self.record-failure( 'Root' );
 	}
 
-	method _RoutineDeclarator( Mu $parsed ) {
+	method _RoutineDeclarator( Mu $p ) {
 		self.trace( '_RoutineDeclarator' );
-#return True;
-		return True if self.assert-hash-keys( $parsed,
-				[< sym method_def >] )
-			and self._Sym( $parsed.hash.<sym> )
-			and self._MethodDef( $parsed.hash.<method_def> );
-		return True if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $p, [< sym method_def >] )
+			and self._Sym( $p.hash.<sym> )
+			and self._MethodDef( $p.hash.<method_def> );
+		return True if self.assert-hash-keys( $p,
 				[< sym routine_def >] )
-			and self._Sym( $parsed.hash.<sym> )
-			and self._RoutineDef( $parsed.hash.<routine_def> );
+			and self._Sym( $p.hash.<sym> )
+			and self._RoutineDef( $p.hash.<routine_def> );
 		return self.record-failure( '_RoutineDeclarator' );
 	}
 
 	# DING
-	method _RoutineDef( Mu $parsed ) {
+	method _RoutineDef( Mu $p ) {
 		self.trace( '_RoutineDef' );
-#return True;
-		return True if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $p,
 				[< blockoid deflongname multisig >],
 				[< trait >] )
-			and self._Blockoid( $parsed.hash.<blockoid> )
-			and self._DefLongName( $parsed.hash.<deflongname> )
-			and self._MultiSig( $parsed.hash.<multisig> );
-		return True if self.assert-hash-keys( $parsed,
+			and self._Blockoid( $p.hash.<blockoid> )
+			and self._DefLongName( $p.hash.<deflongname> )
+			and self._MultiSig( $p.hash.<multisig> );
+		return True if self.assert-hash-keys( $p,
 				[< blockoid deflongname >],
 				[< trait >] )
-			and self._Blockoid( $parsed.hash.<blockoid> )
-			and self._DefLongName( $parsed.hash.<deflongname> );
-		return True if self.assert-hash-keys( $parsed,
+			and self._Blockoid( $p.hash.<blockoid> )
+			and self._DefLongName( $p.hash.<deflongname> );
+		return True if self.assert-hash-keys( $p,
 				[< blockoid multisig >],
 				[< trait >] )
-			and self._Blockoid( $parsed.hash.<blockoid> )
-			and self._MultiSig( $parsed.hash.<multisig> );
-		return True if self.assert-hash-keys( $parsed,
+			and self._Blockoid( $p.hash.<blockoid> )
+			and self._MultiSig( $p.hash.<multisig> );
+		return True if self.assert-hash-keys( $p,
 				[< blockoid >], [< trait >] )
-			and self._Blockoid( $parsed.hash.<blockoid> );
+			and self._Blockoid( $p.hash.<blockoid> );
 		return self.record-failure( '_RoutineDef' );
 	}
 
-	method _RxAdverbs( Mu $parsed ) {
+	method _RxAdverbs( Mu $p ) {
 		self.trace( '_RxAdverbs' );
-#return True;
-		return True if self.assert-hash-keys( $parsed, [< quotepair >] )
-			and self._QuotePair( $parsed.hash.<quotepair> );
-		return True if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $p, [< quotepair >] )
+			and self._QuotePair( $p.hash.<quotepair> );
+		return True if self.assert-hash-keys( $p,
 				[], [< quotepair >] );
 		return self.record-failure( '_RxAdverbs' );
 	}
 
-	method _Scoped( Mu $parsed ) {
+	method _Scoped( Mu $p ) {
 		self.trace( '_Scoped' );
-#return True;
-		return True if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $p,
 				[< declarator DECL >], [< typename >] )
-			and self._Declarator( $parsed.hash.<declarator> )
-			and self._DECL( $parsed.hash.<DECL> );
-		return True if self.assert-hash-keys( $parsed,
+			and self._Declarator( $p.hash.<declarator> )
+			and self._DECL( $p.hash.<DECL> );
+		return True if self.assert-hash-keys( $p,
 					[< multi_declarator DECL typename >] )
-			and self._MultiDeclarator( $parsed.hash.<multi_declarator> )
-			and self._DECL( $parsed.hash.<DECL> )
-			and self._TypeName( $parsed.hash.<typename> );
-		return True if self.assert-hash-keys( $parsed,
+			and self._MultiDeclarator( $p.hash.<multi_declarator> )
+			and self._DECL( $p.hash.<DECL> )
+			and self._TypeName( $p.hash.<typename> );
+		return True if self.assert-hash-keys( $p,
 				[< package_declarator DECL >],
 				[< typename >] )
-			and self._PackageDeclarator( $parsed.hash.<package_declarator> )
-			and self._DECL( $parsed.hash.<DECL> );
+			and self._PackageDeclarator( $p.hash.<package_declarator> )
+			and self._DECL( $p.hash.<DECL> );
 		return self.record-failure( '_Scoped' );
 	}
 
-	method _ScopeDeclarator( Mu $parsed ) {
+	method _ScopeDeclarator( Mu $p ) {
 		self.trace( '_ScopeDeclarator' );
-#return True;
-		return True if self.assert-hash-keys( $parsed,
-				[< sym scoped >] )
-			and self._Sym( $parsed.hash.<sym> )
-			and self._Scoped( $parsed.hash.<scoped> );
+		return True if self.assert-hash-keys( $p, [< sym scoped >] )
+			and self._Sym( $p.hash.<sym> )
+			and self._Scoped( $p.hash.<scoped> );
 		return self.record-failure( '_ScopeDeclarator' );
 	}
 
-	method _SemiArgList( Mu $parsed ) {
+	method _SemiArgList( Mu $p ) {
 		self.trace( '_SemiArgList' );
-#return True;
-		return True if self.assert-hash-keys( $parsed, [< arglist >] )
-			and self._ArgList( $parsed.hash.<arglist> );
+		return True if self.assert-hash-keys( $p, [< arglist >] )
+			and self._ArgList( $p.hash.<arglist> );
 		return self.record-failure( '_SemiArgList' );
 	}
 
-	method _SemiList( Mu $parsed ) {
+	method _SemiList( Mu $p ) {
 		self.trace( '_SemiList' );
-#return True;
-		if $parsed.list {
-			for $parsed.list {
+		if $p.list {
+			for $p.list {
 				next if self.assert-hash-keys( $_,
 						[< statement >] )
 					and self._Statement( $_.hash.<statement> );
@@ -2001,130 +1877,122 @@ return True;
 			}
 			return True
 		}
-		return True if self.assert-hash-keys( $parsed, [ ],
+		return True if self.assert-hash-keys( $p, [ ],
 			[< statement >] );
 		return self.record-failure( '_SemiList' );
 	}
 
-	method _Separator( Mu $parsed ) {
+	method _Separator( Mu $p ) {
 		self.trace( '_Separator' );
-#return True;
 		# _SepType is a Str leaf
-		return True if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $p,
 				[< septype quantified_atom >] )
-			and self._QuantifiedAtom( $parsed.hash.<quantified_atom> );
+			and self._QuantifiedAtom( $p.hash.<quantified_atom> );
 		return self.record-failure( '_Separator' );
 	}
 
-	method _Sibble( Mu $parsed ) {
+	method _Sibble( Mu $p ) {
 		self.trace( '_Sibble' );
-#return True;
 		# _Right is a Bool leaf
-		return True if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $p,
 				[< right babble left >] )
-			and self._Babble( $parsed.hash.<babble> )
-			and self._Left( $parsed.hash.<left> );
+			and self._Babble( $p.hash.<babble> )
+			and self._Left( $p.hash.<left> );
 		return self.record-failure( '_Sibble' );
 	}
 
-	method _SigFinal( Mu $parsed ) {
+	method _SigFinal( Mu $p ) {
 		self.trace( '_SigFinal' );
-#return True;
 		# _NormSpace is a Str leaf
-		return True if self.assert-hash-keys( $parsed, [< normspace >] );
+		return True if self.assert-hash-keys( $p, [< normspace >] );
 		return self.record-failure( '_SigFinal' );
 	}
 
-	method _SigMaybe( Mu $parsed ) {
+	method _SigMaybe( Mu $p ) {
 		self.trace( '_SigMaybe' );
-#return True;
-		return True if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $p,
 				[< parameter typename >],
 				[< param_sep >] )
-			and self._Parameter( $parsed.hash.<parameter> )
-			and self._TypeName( $parsed.hash.<typename> );
-		return True if self.assert-hash-keys( $parsed, [],
+			and self._Parameter( $p.hash.<parameter> )
+			and self._TypeName( $p.hash.<typename> );
+		return True if self.assert-hash-keys( $p, [],
 				[< param_sep parameter >] );
 		return self.record-failure( '_SigMaybe' );
 	}
 
-	method _Signature( Mu $parsed ) {
+	method _Signature( Mu $p ) {
 		self.trace( '_Signature' );
-#return True;
-		return True if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $p,
 				[< parameter typename >],
 				[< param_sep >] )
-			and self._Parameter( $parsed.hash.<parameter> )
-			and self._TypeName( $parsed.hash.<typename> );
-		return True if self.assert-hash-keys( $parsed,
+			and self._Parameter( $p.hash.<parameter> )
+			and self._TypeName( $p.hash.<typename> );
+		return True if self.assert-hash-keys( $p,
 				[< parameter >],
 				[< param_sep >] )
-			and self._Parameter( $parsed.hash.<parameter> );
-		return True if self.assert-hash-keys( $parsed, [],
+			and self._Parameter( $p.hash.<parameter> );
+		return True if self.assert-hash-keys( $p, [],
 				[< param_sep parameter >] );
 		return self.record-failure( '_Signature' );
 	}
 
-	method _SMExpr( Mu $parsed ) {
+	method _SMExpr( Mu $p ) {
 		self.trace( '_SMExpr' );
-#return True;
-		return True if self.assert-hash-keys( $parsed, [< EXPR >] )
-			and self._EXPR( $parsed.hash.<EXPR> );
+		return True if self.assert-hash-keys( $p, [< EXPR >] )
+			and self._EXPR( $p.hash.<EXPR> );
 		return self.record-failure( '_SMExpr' );
 	}
 
-	method _StatementControl( Mu $parsed ) {
+	method _StatementControl( Mu $p ) {
 		self.trace( '_StatementControl' );
-#return True;
-		return True if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $p,
 				[< block sym e1 e2 e3 >] )
-			and self._Block( $parsed.hash.<block> )
-			and self._Sym( $parsed.hash.<sym> )
-			and self._E1( $parsed.hash.<e1> )
-			and self._E2( $parsed.hash.<e2> )
-			and self._E3( $parsed.hash.<e3> );
+			and self._Block( $p.hash.<block> )
+			and self._Sym( $p.hash.<sym> )
+			and self._E1( $p.hash.<e1> )
+			and self._E2( $p.hash.<e2> )
+			and self._E3( $p.hash.<e3> );
 		# _Wu is a Str leaf
-		return True if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $p,
 				[< pblock sym EXPR wu >] )
-			and self._PBlock( $parsed.hash.<pblock> )
-			and self._Sym( $parsed.hash.<sym> )
-			and self._EXPR( $parsed.hash.<EXPR> );
+			and self._PBlock( $p.hash.<pblock> )
+			and self._Sym( $p.hash.<sym> )
+			and self._EXPR( $p.hash.<EXPR> );
 		# _Doc is a Bool leaf
-		return True if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $p,
 				[< doc sym module_name >] )
-			and self._Sym( $parsed.hash.<sym> )
-			and self._ModuleName( $parsed.hash.<module_name> );
+			and self._Sym( $p.hash.<sym> )
+			and self._ModuleName( $p.hash.<module_name> );
 		# _Doc is a Bool leaf
-		return True if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $p,
 				[< doc sym version >] )
-			and self._Sym( $parsed.hash.<sym> )
-			and self._Version( $parsed.hash.<version> );
-		return True if self.assert-hash-keys( $parsed,
+			and self._Sym( $p.hash.<sym> )
+			and self._Version( $p.hash.<version> );
+		return True if self.assert-hash-keys( $p,
 				[< sym else xblock >] )
-			and self._Sym( $parsed.hash.<sym> )
-			and self._Else( $parsed.hash.<else> )
-			and self._XBlock( $parsed.hash.<xblock> );
+			and self._Sym( $p.hash.<sym> )
+			and self._Else( $p.hash.<else> )
+			and self._XBlock( $p.hash.<xblock> );
 		# _Wu is a Str leaf
-		return True if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $p,
 				[< xblock sym wu >] )
-			and self._XBlock( $parsed.hash.<xblock> )
-			and self._Sym( $parsed.hash.<sym> );
-		return True if self.assert-hash-keys( $parsed,
+			and self._XBlock( $p.hash.<xblock> )
+			and self._Sym( $p.hash.<sym> );
+		return True if self.assert-hash-keys( $p,
 				[< sym xblock >] )
-			and self._Sym( $parsed.hash.<sym> )
-			and self._XBlock( $parsed.hash.<xblock> );
-		return True if self.assert-hash-keys( $parsed,
+			and self._Sym( $p.hash.<sym> )
+			and self._XBlock( $p.hash.<xblock> );
+		return True if self.assert-hash-keys( $p,
 				[< block sym >] )
-			and self._Block( $parsed.hash.<block> )
-			and self._Sym( $parsed.hash.<sym> );
+			and self._Block( $p.hash.<block> )
+			and self._Sym( $p.hash.<sym> );
 		return self.record-failure( '_StatementControl' );
 	}
 
-	method _Statement( Mu $parsed ) {
+	method _Statement( Mu $p ) {
 		self.trace( '_Statement' );
-#return True;
-		if $parsed.list {
-			for $parsed.list {
+		if $p.list {
+			for $p.list {
 				next if self.assert-hash-keys( $_,
 						[< statement_mod_loop EXPR >] )
 					and self._StatementModLoop( $_.hash.<statement_mod_loop> )
@@ -2144,93 +2012,82 @@ return True;
 			}
 			return True
 		}
-		return True if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $p,
 				[< statement_control >] )
-			and self._StatementControl( $parsed.hash.<statement_control> );
-		return True if self.assert-hash-keys( $parsed, [< EXPR >] )
-			and self._EXPR( $parsed.hash.<EXPR> );
+			and self._StatementControl( $p.hash.<statement_control> );
+		return True if self.assert-hash-keys( $p, [< EXPR >] )
+			and self._EXPR( $p.hash.<EXPR> );
 		return self.record-failure( '_Statement' );
 	}
 
-	method _StatementList( Mu $parsed ) {
+	method _StatementList( Mu $p ) {
 		self.trace( '_StatementList' );
-#return True;
-		return True if self.assert-hash-keys( $parsed, [< statement >] )
-			and self._Statement( $parsed.hash.<statement> );
-		return True if self.assert-hash-keys( $parsed, [], [< statement >] );
+		return True if self.assert-hash-keys( $p, [< statement >] )
+			and self._Statement( $p.hash.<statement> );
+		return True if self.assert-hash-keys( $p, [], [< statement >] );
 		return self.record-failure( '_StatementList' );
 	}
 
-	method _StatementModCond( Mu $parsed ) {
+	method _StatementModCond( Mu $p ) {
 		self.trace( '_StatementModCond' );
-#return True;
-		return True if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $p,
 				[< sym modifier_expr >] )
-			and self._Sym( $parsed.hash.<sym> )
-			and self._ModifierExpr( $parsed.hash.<modifier_expr> );
+			and self._Sym( $p.hash.<sym> )
+			and self._ModifierExpr( $p.hash.<modifier_expr> );
 		return self.record-failure( '_StatementModCond' );
 	}
 
-	method _StatementModLoop( Mu $parsed ) {
+	method _StatementModLoop( Mu $p ) {
 		self.trace( '_StatementModLoop' );
-#return True;
-		return True if self.assert-hash-keys( $parsed,
-				[< sym smexpr >] )
-			and self._Sym( $parsed.hash.<sym> )
-			and self._SMExpr( $parsed.hash.<smexpr> );
+		return True if self.assert-hash-keys( $p, [< sym smexpr >] )
+			and self._Sym( $p.hash.<sym> )
+			and self._SMExpr( $p.hash.<smexpr> );
 		return self.record-failure( '_StatementModLoop' );
 	}
 
-	method _StatementPrefix( Mu $parsed ) {
+	method _StatementPrefix( Mu $p ) {
 		self.trace( '_StatementPrefix' );
-#return True;
-		return True if self.assert-hash-keys( $parsed,
-				[< sym blorst >] )
-			and self._Sym( $parsed.hash.<sym> )
-			and self._Blorst( $parsed.hash.<blorst> );
+		return True if self.assert-hash-keys( $p, [< sym blorst >] )
+			and self._Sym( $p.hash.<sym> )
+			and self._Blorst( $p.hash.<blorst> );
 		return self.record-failure( '_StatementPrefix' );
 		return False
 	}
 
-	method _SubShortName( Mu $parsed ) {
+	method _SubShortName( Mu $p ) {
 		self.trace( '_SubShortName' );
-#return True;
-		return True if self.assert-hash-keys( $parsed,
-				[< desigilname >] )
-			and self._DeSigilName( $parsed.hash.<desigilname> );
+		return True if self.assert-hash-keys( $p, [< desigilname >] )
+			and self._DeSigilName( $p.hash.<desigilname> );
 		return self.record-failure( '_SubShortName' );
 	}
 
-	method _Sym( Mu $parsed ) {
+	method _Sym( Mu $p ) {
 		self.trace( '_Sym' );
-#return True;
-		if $parsed.list {
+		if $p.list {
 			my @child;
-			for $parsed.list {
+			for $p.list {
 				next if $_.Str;
 				return self.record-failure( '_Sym list' );
 			}
 			return True
 		}
-		return True if $parsed.Bool and $parsed.Str eq '+';
-		return True if $parsed.Bool and $parsed.Str eq '';
-		return True if self.assert-Str( $parsed );
+		return True if $p.Bool and $p.Str eq '+';
+		return True if $p.Bool and $p.Str eq '';
+		return True if self.assert-Str( $p );
 		return self.record-failure( '_Sym' );
 	}
 
-	method _Term( Mu $parsed ) {
+	method _Term( Mu $p ) {
 		self.trace( '_Term' );
-#return True;
-		return True if self.assert-hash-keys( $parsed, [< methodop >] )
-			and self._MethodOp( $parsed.hash.<methodop> );
+		return True if self.assert-hash-keys( $p, [< methodop >] )
+			and self._MethodOp( $p.hash.<methodop> );
 		return self.record-failure( '_Term' );
 	}
 
-	method _TermAlt( Mu $parsed ) {
+	method _TermAlt( Mu $p ) {
 		self.trace( '_TermAlt' );
-#return True;
-		if $parsed.list {
-			for $parsed.list {
+		if $p.list {
+			for $p.list {
 				next if self.assert-hash-keys( $_,
 						[< termconj >] )
 					and self._TermConj( $_.hash.<termconj> );
@@ -2241,20 +2098,17 @@ return True;
 		return self.record-failure( '_TermAlt' );
 	}
 
-	method _TermAltSeq( Mu $parsed ) {
+	method _TermAltSeq( Mu $p ) {
 		self.trace( '_TermAltSeq' );
-#return True;
-		return True if self.assert-hash-keys( $parsed,
-				[< termconjseq >] )
-			and self._TermConjSeq( $parsed.hash.<termconjseq> );
+		return True if self.assert-hash-keys( $p, [< termconjseq >] )
+			and self._TermConjSeq( $p.hash.<termconjseq> );
 		return self.record-failure( '_TermAltSeq' );
 	}
 
-	method _TermConj( Mu $parsed ) {
+	method _TermConj( Mu $p ) {
 		self.trace( '_TermConj' );
-#return True;
-		if $parsed.list {
-			for $parsed.list {
+		if $p.list {
+			for $p.list {
 				next if self.assert-hash-keys( $_,
 						[< termish >] )
 					and self._Termish( $_.hash.<termish> );
@@ -2265,11 +2119,10 @@ return True;
 		return self.record-failure( '_TermConj' );
 	}
 
-	method _TermConjSeq( Mu $parsed ) {
+	method _TermConjSeq( Mu $p ) {
 		self.trace( '_TermConjSeq' );
-#return True;
-		if $parsed.list {
-			for $parsed.list {
+		if $p.list {
+			for $p.list {
 				next if self.assert-hash-keys( $_,
 						[< termalt >] )
 					and self._TermAlt( $_.hash.<termalt> );
@@ -2277,58 +2130,52 @@ return True;
 			}
 			return True
 		}
-		return True if self.assert-hash-keys( $parsed, [< termalt >] )
-			and self._TermAlt( $parsed.hash.<termalt> );
+		return True if self.assert-hash-keys( $p, [< termalt >] )
+			and self._TermAlt( $p.hash.<termalt> );
 		return self.record-failure( '_TermConjSeq' );
 	}
 
-	method _TermInit( Mu $parsed ) {
+	method _TermInit( Mu $p ) {
 		self.trace( '_TermInit' );
-#return True;
-		return True if self.assert-hash-keys( $parsed, [< sym EXPR >] )
-			and self._Sym( $parsed.hash.<sym> )
-			and self._EXPR( $parsed.hash.<EXPR> );
+		return True if self.assert-hash-keys( $p, [< sym EXPR >] )
+			and self._Sym( $p.hash.<sym> )
+			and self._EXPR( $p.hash.<EXPR> );
 		return self.record-failure( '_TermInit' );
 	}
 
-	method _Termish( Mu $parsed ) {
+	method _Termish( Mu $p ) {
 		self.trace( '_Termish' );
-#return True;
-		if $parsed.list {
-			for $parsed.list {
+		if $p.list {
+			for $p.list {
 				next if self.assert-hash-keys( $_, [< noun >] )
 					and self._Noun( $_.hash.<noun> );
 				return self.record-failure( '_Termish list' );
 			}
 			return True
 		}
-		return True if self.assert-hash-keys( $parsed, [< noun >] )
-			and self._Noun( $parsed.hash.<noun> );
+		return True if self.assert-hash-keys( $p, [< noun >] )
+			and self._Noun( $p.hash.<noun> );
 		return self.record-failure( '_Termish' );
 	}
 
-	method _TermSeq( Mu $parsed ) {
+	method _TermSeq( Mu $p ) {
 		self.trace( '_TermSeq' );
-#return True;
-		return True if self.assert-hash-keys( $parsed,
-				[< termaltseq >] )
-			and self._TermAltSeq( $parsed.hash.<termaltseq> );
+		return True if self.assert-hash-keys( $p, [< termaltseq >] )
+			and self._TermAltSeq( $p.hash.<termaltseq> );
 		return self.record-failure( '_TermSeq' );
 	}
 
-	method _Twigil( Mu $parsed ) {
+	method _Twigil( Mu $p ) {
 		self.trace( '_Twigil' );
-#return True;
-		return True if self.assert-hash-keys( $parsed, [< sym >] )
-			and self._Sym( $parsed.hash.<sym> );
+		return True if self.assert-hash-keys( $p, [< sym >] )
+			and self._Sym( $p.hash.<sym> );
 		return self.record-failure( '_Twigil' );
 	}
 
-	method _TypeConstraint( Mu $parsed ) {
+	method _TypeConstraint( Mu $p ) {
 		self.trace( '_TypeConstraint' );
-#return True;
-		if $parsed.list {
-			for $parsed.list {
+		if $p.list {
+			for $p.list {
 				next if self.assert-hash-keys( $_,
 						[< typename >] )
 					and self._TypeName( $_.hash.<typename> );
@@ -2338,38 +2185,36 @@ return True;
 			}
 			return True
 		}
-		return True if self.assert-hash-keys( $parsed, [< value >] )
-			and self._Value( $parsed.hash.<value> );
-		return True if self.assert-hash-keys( $parsed, [< typename >] )
-			and self._TypeName( $parsed.hash.<typename> );
+		return True if self.assert-hash-keys( $p, [< value >] )
+			and self._Value( $p.hash.<value> );
+		return True if self.assert-hash-keys( $p, [< typename >] )
+			and self._TypeName( $p.hash.<typename> );
 		return self.record-failure( '_TypeConstraint' );
 	}
 
-	method _TypeDeclarator( Mu $parsed ) {
+	method _TypeDeclarator( Mu $p ) {
 		self.trace( '_TypeDeclarator' );
-#return True;
-		return True if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $p,
 				[< sym initializer variable >], [< trait >] )
-			and self._Sym( $parsed.hash.<sym> )
-			and self._Initializer( $parsed.hash.<initializer> )
-			and self._Variable( $parsed.hash.<variable> );
-		return True if self.assert-hash-keys( $parsed,
+			and self._Sym( $p.hash.<sym> )
+			and self._Initializer( $p.hash.<initializer> )
+			and self._Variable( $p.hash.<variable> );
+		return True if self.assert-hash-keys( $p,
 				[< sym initializer defterm >], [< trait >] )
-			and self._Sym( $parsed.hash.<sym> )
-			and self._Initializer( $parsed.hash.<initializer> )
-			and self._DefTerm( $parsed.hash.<defterm> );
-		return True if self.assert-hash-keys( $parsed,
+			and self._Sym( $p.hash.<sym> )
+			and self._Initializer( $p.hash.<initializer> )
+			and self._DefTerm( $p.hash.<defterm> );
+		return True if self.assert-hash-keys( $p,
 				[< sym initializer >] )
-			and self._Sym( $parsed.hash.<sym> )
-			and self._Initializer( $parsed.hash.<initializer> );
+			and self._Sym( $p.hash.<sym> )
+			and self._Initializer( $p.hash.<initializer> );
 		return self.record-failure( '_TypeDeclarator' );
 	}
 
-	method _TypeName( Mu $parsed ) {
+	method _TypeName( Mu $p ) {
 		self.trace( '_TypeName' );
-#return True;
-		if $parsed.list {
-			for $parsed.list {
+		if $p.list {
+			for $p.list {
 				next if self.assert-hash-keys( $_,
 						[< longname colonpairs >],
 						[< colonpair >] )
@@ -2383,61 +2228,58 @@ return True;
 			}
 			return True
 		}
-		return True if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $p,
 				[< longname >], [< colonpair >] )
-			and self._LongName( $parsed.hash.<longname> );
+			and self._LongName( $p.hash.<longname> );
 		return self.record-failure( '_TypeName' );
 	}
 
-	method _Val( Mu $parsed ) {
+	method _Val( Mu $p ) {
 		self.trace( '_Val' );
-#return True;
-		return True if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $p,
 				[< prefix OPER >],
 				[< prefix_postfix_meta_operator >] )
-			and self._Prefix( $parsed.hash.<prefix> )
-			and self._OPER( $parsed.hash.<OPER> );
-		return True if self.assert-hash-keys( $parsed, [< value >] )
-			and self._Value( $parsed.hash.<value> );
+			and self._Prefix( $p.hash.<prefix> )
+			and self._OPER( $p.hash.<OPER> );
+		return True if self.assert-hash-keys( $p, [< value >] )
+			and self._Value( $p.hash.<value> );
 		return self.record-failure( '_Val' );
 	}
 
-	method _Value( Mu $parsed ) {
+	method _Value( Mu $p ) {
 		self.trace( '_Value' );
-#return True;
-		return True if self.assert-hash-keys( $parsed, [< number >] )
-			and self._Number( $parsed.hash.<number> );
-		return True if self.assert-hash-keys( $parsed, [< quote >] )
-			and self._Quote( $parsed.hash.<quote> );
+		return True if self.assert-hash-keys( $p, [< number >] )
+			and self._Number( $p.hash.<number> );
+		return True if self.assert-hash-keys( $p, [< quote >] )
+			and self._Quote( $p.hash.<quote> );
 		return self.record-failure( '_Value' );
 	}
 
-	method _Var( Mu $parsed ) {
+	method _Var( Mu $p ) {
 		self.trace( '_Var' );
-#return True;
 		# _Sigil is a Str leaf
-		return True if self.assert-hash-keys( $parsed,
+		return True if self.assert-hash-keys( $p,
 				[< sigil desigilname >] )
-			and self._DeSigilName( $parsed.hash.<desigilname> );
-		return True if self.assert-hash-keys( $parsed, [< variable >] )
-			and self._Variable( $parsed.hash.<variable> );
+			and self._DeSigilName( $p.hash.<desigilname> );
+		return True if self.assert-hash-keys( $p, [< variable >] )
+			and self._Variable( $p.hash.<variable> );
 		return self.record-failure( '_Var' );
 	}
 
-	method _VariableDeclarator( Mu $parsed ) {
+	method _VariableDeclarator( Mu $p ) {
 		self.trace( '_VariableDeclarator' );
-#return True;
 		# _Shape is a Str leaf
-		return True if self.assert-hash-keys( $parsed,
-			[< semilist variable shape >],
-			[< postcircumfix signature trait post_constraint >] )
-			and self._SemiList( $parsed.hash.<semilist> )
-			and self._Variable( $parsed.hash.<variable> );
-		return True if self.assert-hash-keys( $parsed,
-			[< variable >],
-			[< semilist postcircumfix signature
-			   trait post_constraint >] )
-			and self._Variable( $parsed.hash.<variable> );
+		return True if self.assert-hash-keys( $p,
+				[< semilist variable shape >],
+				[< postcircumfix signature trait
+				   post_constraint >] )
+			and self._SemiList( $p.hash.<semilist> )
+			and self._Variable( $p.hash.<variable> );
+		return True if self.assert-hash-keys( $p,
+				[< variable >],
+				[< semilist postcircumfix signature
+				   trait post_constraint >] )
+			and self._Variable( $p.hash.<variable> );
 		return self.record-failure( '_VariableDeclarator' );
 	}
 
@@ -2502,26 +2344,21 @@ return True;
 #say $leaf.perl;
 		return $leaf;
 
-#		return True if self.assert-hash-keys( $p,
-#				[< contextualizer >] )
-#			and self._Contextualizer( $p.hash.<contextualizer> );
 		return self.record-failure( '_Variable' );
 	}
 
-	method _Version( Mu $parsed ) {
+	method _Version( Mu $p ) {
 		self.trace( '_Version' );
-#return True;
 		# _VStr is an Int leaf
-		return True if self.assert-hash-keys( $parsed, [< vnum vstr >] )
-			and self._VNum( $parsed.hash.<vnum> );
+		return True if self.assert-hash-keys( $p, [< vnum vstr >] )
+			and self._VNum( $p.hash.<vnum> );
 		return self.record-failure( '_Version' );
 	}
 
-	method _VNum( Mu $parsed ) {
+	method _VNum( Mu $p ) {
 		self.trace( '_VNum' );
-#return True;
-		if $parsed.list {
-			for $parsed.list {
+		if $p.list {
+			for $p.list {
 				next if self.assert-Int( $_ );
 				return self.record-failure( '_VNum list' );
 			}
@@ -2530,11 +2367,10 @@ return True;
 		return self.record-failure( '_VNum' );
 	}
 
-	method _XBlock( Mu $parsed ) returns Bool {
+	method _XBlock( Mu $p ) returns Bool {
 		self.trace( '_XBlock' );
-#return True;
-		if $parsed.list {
-			for $parsed.list {
+		if $p.list {
+			for $p.list {
 				next if self.assert-hash-keys( $_,
 						[< pblock EXPR >] )
 					and self._PBlock( $_.hash.<pblock> )
@@ -2543,12 +2379,11 @@ return True;
 			}
 			return True
 		}
-		return True if self.assert-hash-keys( $parsed,
-				[< pblock EXPR >] )
-			and self._PBlock( $parsed.hash.<pblock> )
-			and self._EXPR( $parsed.hash.<EXPR> );
-		return True if self.assert-hash-keys( $parsed, [< blockoid >] )
-			and self._Blockoid( $parsed.hash.<blockoid> );
+		return True if self.assert-hash-keys( $p, [< pblock EXPR >] )
+			and self._PBlock( $p.hash.<pblock> )
+			and self._EXPR( $p.hash.<EXPR> );
+		return True if self.assert-hash-keys( $p, [< blockoid >] )
+			and self._Blockoid( $p.hash.<blockoid> );
 		return self.record-failure( '_XBlock' );
 	}
 
