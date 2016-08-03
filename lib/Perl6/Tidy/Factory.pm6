@@ -81,7 +81,7 @@ L<Perl6::Variable>
     L<Perl6::Variable::Scalar>
         L<Perl6::Variable::Scalar::Dynamic>
         L<Perl6::Variable::Scalar::Attribute>
-        L<Perl6::Variable::Scalar::CompileTimeVariable>
+        L<Perl6::Variable::Scalar::CompileTime>
         L<Perl6::Variable::Scalar::MatchIndex>
         L<Perl6::Variable::Scalar::Positional>
         L<Perl6::Variable::Scalar::Named>
@@ -137,6 +137,8 @@ Child elements aren't restricted to leaves, because a document is a tree the C<@
 =end ROLES
 
 =end pod
+
+#`(
 
 # XXX Expect to see this a lot...
 class Perl6::Unimplemented {
@@ -231,7 +233,7 @@ class Perl6::Variable::Scalar::Attribute {
 	also is Perl6::Variable::Scalar;
 	has $.twigil = '!';
 }
-class Perl6::Variable::Scalar::CompileTimeVariable {
+class Perl6::Variable::Scalar::CompileTime {
 	also is Perl6::Variable::Scalar;
 	has $.twigil = '?';
 }
@@ -268,7 +270,7 @@ class Perl6::Variable::Array::Attribute {
 	also is Perl6::Variable::Array;
 	has $.twigil = '!';
 }
-class Perl6::Variable::Array::CompileTimeVariable {
+class Perl6::Variable::Array::CompileTime {
 	also is Perl6::Variable::Array;
 	has $.twigil = '?';
 }
@@ -305,7 +307,7 @@ class Perl6::Variable::Hash::Attribute {
 	also is Perl6::Variable::Hash;
 	has $.twigil = '!';
 }
-class Perl6::Variable::Hash::CompileTimeVariable {
+class Perl6::Variable::Hash::CompileTime {
 	also is Perl6::Variable::Hash;
 	has $.twigil = '?';
 }
@@ -342,7 +344,7 @@ class Perl6::Variable::Callable::Attribute {
 	also is Perl6::Variable::Callable;
 	has $.twigil = '!';
 }
-class Perl6::Variable::Callable::CompileTimeVariable {
+class Perl6::Variable::Callable::CompileTime {
 	also is Perl6::Variable::Callable;
 	has $.twigil = '?';
 }
@@ -367,7 +369,196 @@ class Perl6::Variable::Callable::Sublanguage {
 	has $.twigil = '~';
 }
 
+)
+
+class Perl6::Unimplemented { }
+
+class Perl6::Document {
+	has @.child
+}
+
+class Perl6::Statement {
+	has @.child
+}
+
+# And now for the most basic tokens...
+#
+class Perl6::Bareword {
+	has $.content;
+}
+class Perl6::Operator {
+	has $.content;
+}
+class Perl6::Semicolon {
+	has $.content;
+}
+class Perl6::Variable {
+	has $.content;
+}
+class Perl6::WS {
+	has $.content;
+}
+
+class Perl6::Variable::Scalar {
+	has $.content;
+}
+class Perl6::Variable::Scalar::Dynamic {
+	also is Perl6::Variable::Scalar
+}
+class Perl6::Variable::Scalar::Attribute {
+	also is Perl6::Variable::Scalar
+}
+class Perl6::Variable::Scalar::CompileTime {
+	also is Perl6::Variable::Scalar
+}
+class Perl6::Variable::Scalar::MatchIndex {
+	also is Perl6::Variable::Scalar
+}
+class Perl6::Variable::Scalar::Positional {
+	also is Perl6::Variable::Scalar
+}
+class Perl6::Variable::Scalar::Named {
+	also is Perl6::Variable::Scalar
+}
+class Perl6::Variable::Scalar::Pod {
+	also is Perl6::Variable::Scalar
+}
+class Perl6::Variable::Scalar::Sublanguage {
+	also is Perl6::Variable::Scalar
+}
+class Perl6::Variable::Array {
+	has $.content;
+}
+class Perl6::Variable::Array::Dynamic {
+	also is Perl6::Variable::Array
+}
+class Perl6::Variable::Array::Attribute {
+	also is Perl6::Variable::Array
+}
+class Perl6::Variable::Array::CompileTime {
+	also is Perl6::Variable::Array
+}
+class Perl6::Variable::Array::MatchIndex {
+	also is Perl6::Variable::Array
+}
+class Perl6::Variable::Array::Positional {
+	also is Perl6::Variable::Array
+}
+class Perl6::Variable::Array::Named {
+	also is Perl6::Variable::Array
+}
+class Perl6::Variable::Array::Pod {
+	also is Perl6::Variable::Array
+}
+class Perl6::Variable::Array::Sublanguage {
+	also is Perl6::Variable::Array
+}
+class Perl6::Variable::Hash {
+	has $.content;
+}
+class Perl6::Variable::Hash::Dynamic {
+	also is Perl6::Variable::Hash
+}
+class Perl6::Variable::Hash::Attribute {
+	also is Perl6::Variable::Hash
+}
+class Perl6::Variable::Hash::CompileTime {
+	also is Perl6::Variable::Hash
+}
+class Perl6::Variable::Hash::MatchIndex {
+	also is Perl6::Variable::Hash
+}
+class Perl6::Variable::Hash::Positional {
+	also is Perl6::Variable::Hash
+}
+class Perl6::Variable::Hash::Named {
+	also is Perl6::Variable::Hash
+}
+class Perl6::Variable::Hash::Pod {
+	also is Perl6::Variable::Hash
+}
+class Perl6::Variable::Hash::Sublanguage {
+	also is Perl6::Variable::Hash
+}
+class Perl6::Variable::Callable {
+	has $.content;
+}
+class Perl6::Variable::Callable::Dynamic {
+	also is Perl6::Variable::Callable
+}
+class Perl6::Variable::Callable::Attribute {
+	also is Perl6::Variable::Callable
+}
+class Perl6::Variable::Callable::CompileTime {
+	also is Perl6::Variable::Callable
+}
+class Perl6::Variable::Callable::MatchIndex {
+	also is Perl6::Variable::Callable
+}
+class Perl6::Variable::Callable::Positional {
+	also is Perl6::Variable::Callable
+}
+class Perl6::Variable::Callable::Named {
+	also is Perl6::Variable::Callable
+}
+class Perl6::Variable::Callable::Pod {
+	also is Perl6::Variable::Callable
+}
+class Perl6::Variable::Callable::Sublanguage {
+	also is Perl6::Variable::Callable
+}
+
 class Perl6::Tidy::Factory {
+
+	sub key-boundary( Mu $p ) {
+		say "{$p.from} {$p.to} [{substr($p.orig,$p.from,$p.to-$p.from)}]";
+	}
+
+	method ws-at-start( Mu $p ) {
+		my $from = $p.from;
+		my $to   = $p.to;
+		my $orig = $p.orig;
+		my $key  = substr( $orig, $from, $to - $from );
+		
+		$key ~~ m/^ ( \s+ ) /;
+		Perl6::WS.new(
+			:content( ~$0 )
+		)
+	}
+
+	method ws-after( Mu $p ) {
+		my $from = $p.from;
+		my $to   = $p.to;
+		my $orig = $p.orig;
+		my $key  = substr( $orig, $to, $orig.chars - $from );
+		
+		$key ~~ /^ ( \s+ ) /;
+		Perl6::WS.new(
+			:content( ~$0 )
+		)
+	}
+
+	method semicolon-after( Mu $p ) {
+		my $to   = $p.to;
+		my $orig = $p.orig;
+		my $key  = substr($orig, $to, $orig.chars);
+
+		if $key ~~ /^ ( \s* ) \; / {
+			if $0 and $0 ne '' {
+				return (
+					Perl6::WS.new( :content( ~$0 ) ),
+					Perl6::Semicolon.new(
+						:content( Q{;} )
+					)
+				)
+			}
+			return (
+				Perl6::Semicolon.new(
+					:content( Q{;} )
+				)
+			)
+		}
+	}
 
 	sub dump( Mu $parsed ) {
 		say $parsed.hash.keys.gist;
@@ -451,8 +642,9 @@ class Perl6::Tidy::Factory {
 		return True
 	}
 
-	method _ArgList( Mu $parsed ) returns Bool {
+	method _ArgList( Mu $p ) {
 		CATCH { when X::Hash::Store::OddNumber { .resume } }
+#`(
 		for $parsed.list {
 			next if self.assert-hash-keys( $_, [< EXPR >] );
 			next if self.assert-Bool( $_ );
@@ -463,9 +655,14 @@ class Perl6::Tidy::Factory {
 		return True if self.assert-hash-keys( $parsed, [< EXPR >] );
 		return True if self.assert-Int( $parsed );
 		return True if self.assert-Bool( $parsed );
+)
+		if self.assert-hash-keys( $p, [< EXPR >] ) {
+			self._EXPR( $p.hash.<EXPR> )
+		}
 	}
 
-	method _Args( Mu $p ) returns Bool {
+	method _Args( Mu $p ) {
+#`(
 		return True if self.assert-hash-keys( $p,
 				[< invocant semiarglist >] );
 		return True if self.assert-hash-keys( $p, [< semiarglist >] );
@@ -475,6 +672,10 @@ class Perl6::Tidy::Factory {
 		return True if self.assert-hash-keys( $p, [< EXPR >] );
 		return True if self.assert-Bool( $p );
 		return True if self.assert-Str( $p );
+)
+		if self.assert-hash-keys( $p, [< arglist >] ) {
+			self._ArgList( $p.hash.<arglist> );
+		}
 	}
 
 	method _Assertion( Mu $p ) returns Bool {
@@ -507,24 +708,33 @@ class Perl6::Tidy::Factory {
 
 	method _Block( Mu $p ) returns Bool {
 		if self.assert-hash-keys( $p, [< blockoid >] ) {
-			self._Blockoid( $p.hash.<blockoid> )
+#			self._Blockoid( $p.hash.<blockoid> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 	}
 
 	method _Blockoid( Mu $p ) returns Bool {
 		if self.assert-hash-keys( $p, [< statementlist >] ) {
-			self._StatementList( $p.hash.<statementlist> )
+#			self._StatementList( $p.hash.<statementlist> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 	}
 
 	method _Blorst( Mu $p ) returns Bool {
-		return True if self.assert-hash-keys( $p, [< statement >] );
-		return True if self.assert-hash-keys( $p, [< block >] );
+		if self.assert-hash-keys( $p, [< statement >] ) {
+#			self._Statement( $p.hash.<statement> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
+		}
+		if self.assert-hash-keys( $p, [< block >] ) {
+#			self._Block( $p.hash.<block> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
+		}
 	}
 
 	method _Bracket( Mu $p ) returns Bool {
 		if self.assert-hash-keys( $p, [< semilist >] ) {
-			self._SemiList( $p.hash.<semilist> )
+#			self._SemiList( $p.hash.<semilist> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 	}
 
@@ -562,19 +772,22 @@ class Perl6::Tidy::Factory {
 
 	method _CodeBlock( Mu $p ) returns Bool {
 		if self.assert-hash-keys( $p, [< block >] ) {
-			self._Block( $p.hash.<block> )
+#			self._Block( $p.hash.<block> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 	}
 
 	method _Coercee( Mu $p ) returns Bool {
 		if self.assert-hash-keys( $p, [< semilist >] ) {
-			self._SemiList( $p.hash.<semilist> )
+#			self._SemiList( $p.hash.<semilist> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 	}
 
 	method _ColonCircumfix( Mu $p ) returns Bool {
 		if self.assert-hash-keys( $p, [< circumfix >] ) {
-			self._Circumfix( $p.hash.<circumfix> )
+#			self._Circumfix( $p.hash.<circumfix> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 	}
 
@@ -582,13 +795,16 @@ class Perl6::Tidy::Factory {
 		return True if self.assert-hash-keys( $p,
 				     [< identifier coloncircumfix >] );
 		if self.assert-hash-keys( $p, [< identifier >] ) {
-			self._Identifier( $p.hash.<identifier> )
+#			self._Identifier( $p.hash.<identifier> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 		if self.assert-hash-keys( $p, [< fakesignature >] ) {
-			self._FakeSignature( $p.hash.<fakesignature> )
+#			self._FakeSignature( $p.hash.<fakesignature> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 		if self.assert-hash-keys( $p, [< var >] ) {
-			self._Var( $p.hash.<var> )
+#			self._Var( $p.hash.<var> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 	}
 
@@ -622,9 +838,10 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 		elsif self.assert-hash-keys( $p,
 				[< variable_declarator >], [< trait >] ) {
-			self._VariableDeclarator(
-				$p.hash.<variable_declarator>
-			)
+#			self._VariableDeclarator(
+#				$p.hash.<variable_declarator>
+#			)
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 		elsif self.assert-hash-keys( $p,
 				[< regex_declarator >], [< trait >] ) {
@@ -666,7 +883,8 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 		return True if self.assert-hash-keys( $p,
 					  [< package_def sym >] );
 		if self.assert-hash-keys( $p, [< declarator >] ) {
-			self._Declarator( $p.hash.<declarator> )
+#			self._Declarator( $p.hash.<declarator> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 	}
 
@@ -708,7 +926,8 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 
 	method _DefTermNow( Mu $p ) {
 		if self.assert-hash-keys( $p, [< defterm >] ) {
-			self._DefTerm( $p.hash.<defterm> )
+#			self._DefTerm( $p.hash.<defterm> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 	}
 
@@ -742,22 +961,26 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 		return True if self.assert-hash-keys( $p,
 				[< sym postop >], [< O >] );
 		if self.assert-hash-keys( $p, [< methodop >] ) {
-			self._MethodOp( $p.hash.<methodop> )
+#			self._MethodOp( $p.hash.<methodop> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 		if self.assert-hash-keys( $p, [< colonpair >] ) {
-			self._ColonPair( $p.hash.<colonpair> )
+#			self._ColonPair( $p.hash.<colonpair> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 	}
 
 	method _DottyOpish( Mu $p ) {
 		if self.assert-hash-keys( $p, [< term >] ) {
-			self._Term( $p.hash.<term> )
+#			self._Term( $p.hash.<term> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 	}
 
 	method _E1( Mu $p ) {
 		if self.assert-hash-keys( $p, [< scope_declarator >] ) {
-			self._ScopeDeclarator( $p.hash.<scope_declarator> )
+#			self._ScopeDeclarator( $p.hash.<scope_declarator> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 	}
 
@@ -782,6 +1005,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _EXPR( Mu $p ) {
+#`(
 		if $p.list {
 			for $p.list {
 				if self.assert-hash-keys( $_,
@@ -929,61 +1153,97 @@ Perl6::Unimplemented.new(:content( "_EXPR") );
 Perl6::Unimplemented.new(:content( "_EXPR") );
 		}
 		elsif self.assert-hash-keys( $p, [< statement_prefix >] ) {
-			self._StatementPrefix( $p.hash.<statement_prefix> )
+#			self._StatementPrefix( $p.hash.<statement_prefix> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 		elsif self.assert-hash-keys( $p, [< type_declarator >] ) {
-			self._TypeDeclarator( $p.hash.<type_declarator> )
+#			self._TypeDeclarator( $p.hash.<type_declarator> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 		elsif self.assert-hash-keys( $p, [< longname >] ) {
-			self._LongName( $p.hash.<longname> )
+#			self._LongName( $p.hash.<longname> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 		elsif self.assert-hash-keys( $p, [< value >] ) {
-			self._Value( $p.hash.<value> )
+#			self._Value( $p.hash.<value> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 		elsif self.assert-hash-keys( $p, [< variable >] ) {
-			self._Variable( $p.hash.<variable> )
+#			self._Variable( $p.hash.<variable> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 		elsif self.assert-hash-keys( $p, [< circumfix >] ) {
-			self._Circumfix( $p.hash.<circumfix> )
+#			self._Circumfix( $p.hash.<circumfix> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 		elsif self.assert-hash-keys( $p, [< colonpair >] ) {
-			self._ColonPair( $p.hash.<colonpair> )
+#			self._ColonPair( $p.hash.<colonpair> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 		elsif self.assert-hash-keys( $p, [< scope_declarator >] ) {
-			self._ScopeDeclarator( $p.hash.<scope_declarator> )
+#			self._ScopeDeclarator( $p.hash.<scope_declarator> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 		elsif self.assert-hash-keys( $p, [< routine_declarator >] ) {
-			self._RoutineDeclarator( $p.hash.<routine_declarator> )
+#			self._RoutineDeclarator( $p.hash.<routine_declarator> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 		elsif self.assert-hash-keys( $p, [< package_declarator >] ) {
-			self._PackageDeclarator( $p.hash.<package_declarator> )
+#			self._PackageDeclarator( $p.hash.<package_declarator> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 		elsif self.assert-hash-keys( $p, [< fatarrow >] ) {
-			self._FatArrow( $p.hash.<fatarrow> )
+#			self._FatArrow( $p.hash.<fatarrow> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 		elsif self.assert-hash-keys( $p, [< multi_declarator >] ) {
-			self._MultiDeclarator( $p.hash.<multi_declarator> )
+#			self._MultiDeclarator( $p.hash.<multi_declarator> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 		elsif self.assert-hash-keys( $p, [< regex_declarator >] ) {
-			self._RegexDeclarator( $p.hash.<regex_declarator> )
+#			self._RegexDeclarator( $p.hash.<regex_declarator> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 		elsif self.assert-hash-keys( $p, [< dotty >] ) {
-			self._Dotty( $p.hash.<dotty> )
+#			self._Dotty( $p.hash.<dotty> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 		else {
 Perl6::Unimplemented.new(:content( "_EXPR") );
+		}
+)
+
+		my @child;
+		if self.assert-hash-keys( $p, [< infix OPER >] ) {
+			(
+				self._Variable( $p.list.[0].hash.<variable> ),
+				self.ws-after( $p.list.[0].hash.<variable> ),
+				self._Infix( $p.hash.<infix> ),
+				self.ws-after( $p.hash.<infix> ),
+				self._Variable( $p.list.[1].hash.<variable> ),
+			).flat
+		}
+		elsif self.assert-hash-keys( $p, [< longname args >] ) {
+			(
+				self._LongName( $p.hash.<longname> ),
+				self.ws-at-start( $p.hash.<args> ),
+				self._Args( $p.hash.<args> ),
+				self.semicolon-after( $p.hash.<args> )
+			).flat;
 		}
 	}
 
 	method _FakeInfix( Mu $p ) {
 		if self.assert-hash-keys( $p, [< O >] ) {
-			self._O( $p.hash.<O> )
+#			self._O( $p.hash.<O> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 	}
 
 	method _FakeSignature( Mu $p ) {
 		if self.assert-hash-keys( $p, [< signature >] ) {
-			self._Signature( $p.hash.<signature> )
+#			self._Signature( $p.hash.<signature> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 	}
 
@@ -1000,9 +1260,14 @@ Perl6::Unimplemented.new(:content( "_EXPR") );
 	}
 
 	method _Infix( Mu $p ) {
+#`(
 		return True if self.assert-hash-keys( $p, [< EXPR O >] );
 		return True if self.assert-hash-keys( $p, [< infix OPER >] );
 		return True if self.assert-hash-keys( $p, [< sym O >] );
+)
+		if self.assert-hash-keys( $p, [< sym O >] ) {
+			Perl6::Operator.new( :content( ~$p.hash.<sym>.Str ) )
+		}
 	}
 
 	method _Infixish( Mu $p ) {
@@ -1050,14 +1315,19 @@ return True;
 
 	method _Left( Mu $p ) {
 		if self.assert-hash-keys( $p, [< termseq >] ) {
-			self._TermSeq( $p.hash.<termseq> )
+#			self._TermSeq( $p.hash.<termseq> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 	}
 
 	method _LongName( Mu $p ) {
-		return True if self.assert-hash-keys( $p,
-				[< name >],
-				[< colonpair >] );
+		if self.assert-hash-keys( $p, [< name >], [< colonpair >] ) {
+			Perl6::Bareword.new(
+				:content(
+					$p.hash.<name>.Str
+				)
+			)
+		}
 	}
 
 	method _Max( Mu $p ) returns Str {
@@ -1066,28 +1336,36 @@ return True;
 
 	method _MetaChar( Mu $p ) {
 		if self.assert-hash-keys( $p, [< sym >] ) {
-			self._Sym( $p.hash.<sym> )
+#			self._Sym( $p.hash.<sym> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 		if self.assert-hash-keys( $p, [< codeblock >] ) {
-			self._CodeBlock( $p.hash.<codeblock> )
+#			self._CodeBlock( $p.hash.<codeblock> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 		if self.assert-hash-keys( $p, [< backslash >] ) {
-			self._BackSlash( $p.hash.<backslash> )
+#			self._BackSlash( $p.hash.<backslash> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 		if self.assert-hash-keys( $p, [< assertion >] ) {
-			self._Assertion( $p.hash.<assertion> )
+#			self._Assertion( $p.hash.<assertion> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 		if self.assert-hash-keys( $p, [< nibble >] ) {
-			self._Nibble( $p.hash.<nibble> )
+#			self._Nibble( $p.hash.<nibble> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 		if self.assert-hash-keys( $p, [< quote >] ) {
-			self._Quote( $p.hash.<quote> )
+#			self._Quote( $p.hash.<quote> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 		if self.assert-hash-keys( $p, [< nibbler >] ) {
-			self._Nibbler( $p.hash.<nibbler> )
+#			self._Nibbler( $p.hash.<nibbler> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 		if self.assert-hash-keys( $p, [< statement >] ) {
-			self._Statement( $p.hash.<statement> )
+#			self._Statement( $p.hash.<statement> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 	}
 
@@ -1103,10 +1381,12 @@ return True;
 	method _MethodOp( Mu $p ) {
 		return True if self.assert-hash-keys( $p, [< longname args >] );
 		if self.assert-hash-keys( $p, [< longname >] ) {
-			self._LongName( $p.hash.<longname> )
+#			self._LongName( $p.hash.<longname> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 		if self.assert-hash-keys( $p, [< variable >] ) {
-			self._Variable( $p.hash.<variable> )
+#			self._Variable( $p.hash.<variable> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 	}
 
@@ -1117,13 +1397,15 @@ return True;
 
 	method _ModifierExpr( Mu $p ) {
 		if self.assert-hash-keys( $p, [< EXPR >] ) {
-			self._EXPR( $p.hash.<EXPR> )
+#			self._EXPR( $p.hash.<EXPR> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 	}
 
 	method _ModuleName( Mu $p ) {
 		if self.assert-hash-keys( $p, [< longname >] ) {
-			self._LongName( $p.hash.<longname> )
+#			self._LongName( $p.hash.<longname> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 	}
 
@@ -1139,19 +1421,22 @@ return True;
 		return True if self.assert-hash-keys( $p,
 				[< sym declarator >] );
 		if self.assert-hash-keys( $p, [< declarator >] ) {
-			self._Declarator( $p.hash.<declarator> )
+#			self._Declarator( $p.hash.<declarator> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 	}
 
 	method _MultiSig( Mu $p ) {
 		if self.assert-hash-keys( $p, [< signature >] ) {
-			self._Signature( $p.hash.<signature> )
+#			self._Signature( $p.hash.<signature> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 	}
 
 	method _NamedParam( Mu $p ) {
 		if self.assert-hash-keys( $p, [< param_var >] ) {
-			self._ParamVar( $p.hash.<param_var> )
+#			self._ParamVar( $p.hash.<param_var> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 	}
 
@@ -1174,7 +1459,8 @@ return True;
 
 	method _Nibbler( Mu $p ) {
 		if self.assert-hash-keys( $p, [< termseq >] ) {
-			self._TermSeq( $p.hash.<termseq> )
+#			self._TermSeq( $p.hash.<termseq> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 	}
 
@@ -1199,7 +1485,8 @@ return True;
 
 	method _Number( Mu $p ) {
 		if self.assert-hash-keys( $p, [< numish >] ) {
-			self._Numish( $p.hash.<numish> )
+#			self._Numish( $p.hash.<numish> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 	}
 
@@ -1334,10 +1621,12 @@ return True;
 				[< name twigil sigil >] );
 		return True if self.assert-hash-keys( $p, [< name sigil >] );
 		if self.assert-hash-keys( $p, [< signature >] ) {
-			self._Signature( $p.hash.<signature> )
+#			self._Signature( $p.hash.<signature> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 		if self.assert-hash-keys( $p, [< sigil >] ) {
-			self._Sigil( $p.hash.<sigil> )
+#			self._Sigil( $p.hash.<sigil> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 	}
 
@@ -1345,7 +1634,8 @@ return True;
 		return True if self.assert-hash-keys( $p,
 				     [< lambda blockoid signature >] );
 		if self.assert-hash-keys( $p, [< blockoid >] ) {
-			self._Blockoid( $p.hash.<blockoid> )
+#			self._Blockoid( $p.hash.<blockoid> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 	}
 
@@ -1395,10 +1685,12 @@ return True;
 		return True if self.assert-hash-keys( $p,
 				[< sym rx_adverbs sibble >] );
 		if self.assert-hash-keys( $p, [< nibble >] ) {
-			self._Nibble( $p.hash.<nibble> )
+#			self._Nibble( $p.hash.<nibble> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 		if self.assert-hash-keys( $p, [< quibble >] ) {
-			self._Quibble( $p.hash.<quibble> )
+#			self._Quibble( $p.hash.<quibble> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 	}
 
@@ -1409,7 +1701,8 @@ return True;
 		return True if self.assert-hash-keys( $p,
 				[< circumfix bracket radix >], [< exp base >] );
 		if self.assert-hash-keys( $p, [< identifier >] ) {
-			self._Identifier( $p.hash.<identifier> )
+#			self._Identifier( $p.hash.<identifier> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 	}
 
@@ -1441,21 +1734,22 @@ return True;
 	method build( Mu $p ) {
 		my $statementlist = $p.hash.<statementlist>;
 		my $statement     = $statementlist.hash.<statement>;
-		my @child;
+		my @child = map {
+			self._Statement( $_ )
+		}, $statement.list;
 
-		for $statement.list {
-			@child.push(
-				self._Statement( $_ )
-			)
-		}
+@child = ( @child[1] );
+
 		Perl6::Document.new(
-			:child( @child )
+			:child(
+				@child
+			)
 		)
 	}
 
 	method _RoutineDeclarator( Mu $p ) {
 		return True if self.assert-hash-keys( $p,
-			[< sym method_def >] );
+				[< sym method_def >] );
 		return True if self.assert-hash-keys( $p,
 				[< sym routine_def >] );
 	}
@@ -1485,11 +1779,12 @@ return True;
 		#
 		if self.assert-hash-keys( $p,
 				[< declarator DECL >], [< typename >] ) {
-			Perl6::Scoped.new(
-				:content(
-					self._Declarator( $p.hash.<declarator> )
-				)
-			)
+#			Perl6::Scoped.new(
+#				:content(
+#					self._Declarator( $p.hash.<declarator> )
+#				)
+#			)
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 		elsif self.assert-hash-keys( $p,
 					[< multi_declarator DECL typename >] ) {
@@ -1503,16 +1798,18 @@ Perl6::Unimplemented.new(:content( "_Scoped") );
 	}
 
 	method _ScopeDeclarator( Mu $p ) {
-		Perl6::ScopeDeclarator.new(
-			:content( self._Scoped( $p.hash.<scoped> ) ),
-			:scope( $p.hash.<sym>.Str ),
-		)
+#		Perl6::ScopeDeclarator.new(
+#			:content( self._Scoped( $p.hash.<scoped> ) ),
+#			:scope( $p.hash.<sym>.Str ),
+#		)
+Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _SemiArgList( Mu $p ) {
-		if self.assert-hash-keys( $p, [< arglist >] ) {
-			self._ArgList( $p.hash.<arglist> )
-		}
+#		if self.assert-hash-keys( $p, [< arglist >] ) {
+#			self._ArgList( $p.hash.<arglist> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
+#		}
 	}
 
 	method _SemiList( Mu $p ) {
@@ -1542,9 +1839,10 @@ Perl6::Unimplemented.new(:content( "_Scoped") );
 	}
 
 	method _SigFinal( Mu $p ) {
-		if self.assert-hash-keys( $p, [< normspace >] ) {
-			self._NormSpace( $p.hash.<normspace> )
-		}
+#		if self.assert-hash-keys( $p, [< normspace >] ) {
+#			self._NormSpace( $p.hash.<normspace> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
+#		}
 	}
 
 	method _Sigil( Mu $p ) returns Str {
@@ -1572,7 +1870,8 @@ Perl6::Unimplemented.new(:content( "_Scoped") );
 
 	method _SMExpr( Mu $p ) {
 		if self.assert-hash-keys( $p, [< EXPR >] ) {
-			self._EXPR( $p.hash.<EXPR> )
+#			self._EXPR( $p.hash.<EXPR> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 	}
 
@@ -1600,6 +1899,7 @@ Perl6::Unimplemented.new(:content( "_Scoped") );
 		# N.B. we don't care so much *if* there's a list as *what's*
 		# in the list. In other words we can assume that the content
 		# is what we consider valid, so we can relax our requirements.
+#`(
 		for $p.list {
 			if self.assert-hash-keys( $_,
 					[< statement_mod_loop EXPR >] ) {
@@ -1610,30 +1910,47 @@ Perl6::Unimplemented.new(:content( "_Statement") );
 Perl6::Unimplemented.new(:content( "_Statement") );
 			}
 			elsif self.assert-hash-keys( $_, [< EXPR >] ) {
-				self._EXPR(
-					$_.hash.<EXPR>
-				)
+#				self._EXPR(
+#					$_.hash.<EXPR>
+#				)
+Perl6::Unimplemented.new(:content( "_Declarator") );
 			}
 			elsif self.assert-hash-keys( $_,
 					[< statement_control >] ) {
-				self._StatementControl(
-					$_.hash.<statement_control>
-				)
+#				self._StatementControl(
+#					$_.hash.<statement_control>
+#				)
+Perl6::Unimplemented.new(:content( "_Declarator") );
 			}
 			elsif self.assert-hash-keys( $_, [],
 					[< statement_control >] ) {
 Perl6::Unimplemented.new(:content( "_Statement") );
 			}
 		}
+)
+
+#`(
 		if self.assert-hash-keys( $p, [< statement_control >] ) {
-			self._StatementControl( $p.hash.<statement_control> )
+#			self._StatementControl( $p.hash.<statement_control> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 		elsif self.assert-hash-keys( $p, [< EXPR >] ) {
-			self._EXPR( $p.hash.<EXPR> )
+#			self._EXPR( $p.hash.<EXPR> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 		else {
 Perl6::Unimplemented.new(:content( "_Statement") );
 		}
+)
+
+my @child;
+@child = self._EXPR( $p.hash.<EXPR> ) if $p.hash.<EXPR>;
+
+		Perl6::Statement.new(
+			:child(
+				@child
+			)
+		)
 	}
 
 	method _StatementList( Mu $p ) {
@@ -1656,7 +1973,8 @@ Perl6::Unimplemented.new(:content( "_Statement") );
 
 	method _SubShortName( Mu $p ) {
 		if self.assert-hash-keys( $p, [< desigilname >] ) {
-			self._DeSigilName( $p.hash.<desigilname> )
+#			self._DeSigilName( $p.hash.<desigilname> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 	}
 
@@ -1671,7 +1989,8 @@ Perl6::Unimplemented.new(:content( "_Statement") );
 
 	method _Term( Mu $p ) {
 		if self.assert-hash-keys( $p, [< methodop >] ) {
-			self._MethodOp( $p.hash.<methodop> )
+#			self._MethodOp( $p.hash.<methodop> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 	}
 
@@ -1683,7 +2002,8 @@ Perl6::Unimplemented.new(:content( "_Statement") );
 
 	method _TermAltSeq( Mu $p ) {
 		if self.assert-hash-keys( $p, [< termconjseq >] ) {
-			self._TermConjSeq( $p.hash.<termconjseq> )
+#			self._TermConjSeq( $p.hash.<termconjseq> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 	}
 
@@ -1697,7 +2017,10 @@ Perl6::Unimplemented.new(:content( "_Statement") );
 		for $p.list {
 			next if self.assert-hash-keys( $_, [< termalt >] );
 		}
-		return True if self.assert-hash-keys( $p, [< termalt >] );
+		if self.assert-hash-keys( $p, [< termalt >] ) {
+#			self._TermAlt( $p.hash.<termalt> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
+		}
 	}
 
 	method _TermInit( Mu $p ) {
@@ -1708,12 +2031,16 @@ Perl6::Unimplemented.new(:content( "_Statement") );
 		for $p.list {
 			next if self.assert-hash-keys( $_, [< noun >] );
 		}
-		return True if self.assert-hash-keys( $p, [< noun >] );
+		if self.assert-hash-keys( $p, [< noun >] ) {
+#			self._Noun( $p.hash.<noun> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
+		}
 	}
 
 	method _TermSeq( Mu $p ) {
 		if self.assert-hash-keys( $p, [< termaltseq >] ) {
-			self._TermAltSeq( $p.hash.<termaltseq> )
+#			self._TermAltSeq( $p.hash.<termaltseq> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 	}
 
@@ -1726,8 +2053,14 @@ Perl6::Unimplemented.new(:content( "_Statement") );
 			next if self.assert-hash-keys( $_, [< typename >] );
 			next if self.assert-hash-keys( $_, [< value >] );
 		}
-		return True if self.assert-hash-keys( $p, [< value >] );
-		return True if self.assert-hash-keys( $p, [< typename >] );
+		if self.assert-hash-keys( $p, [< value >] ) {
+#			self._Value( $p.hash.<value> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
+		}
+		elsif self.assert-hash-keys( $p, [< typename >] ) {
+#			self._TypeName( $p.hash.<typename> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
+		}
 	}
 
 	method _TypeDeclarator( Mu $p ) {
@@ -1748,15 +2081,21 @@ Perl6::Unimplemented.new(:content( "_Statement") );
 					[< longname >],
 					[< colonpair >] );
 		}
-		return True if self.assert-hash-keys( $p,
-				[< longname >], [< colonpair >] );
+		if self.assert-hash-keys( $p,
+				[< longname >], [< colonpair >] ) {
+#			self._LongName( $p.hash.<longname> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
+		}
 	}
 
 	method _Val( Mu $p ) {
 		return True if self.assert-hash-keys( $p,
 				[< prefix OPER >],
 				[< prefix_postfix_meta_operator >] );
-		return True if self.assert-hash-keys( $p, [< value >] );
+		if self.assert-hash-keys( $p, [< value >] ) {
+#			self._Value( $p.hash.<value> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
+		}
 	}
 
 	method _VALUE( Mu $p ) returns Int {
@@ -1767,14 +2106,23 @@ Perl6::Unimplemented.new(:content( "_Statement") );
 	}
 
 	method _Value( Mu $p ) {
-		return True if self.assert-hash-keys( $p, [< number >] );
-		return True if self.assert-hash-keys( $p, [< quote >] );
+		if self.assert-hash-keys( $p, [< number >] ) {
+#			self._Number( $p.hash.<number> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
+		}
+		elsif self.assert-hash-keys( $p, [< quote >] ) {
+#			self._Quote( $p.hash.<quote> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
+		}
 	}
 
 	method _Var( Mu $p ) {
 		return True if self.assert-hash-keys( $p,
 				[< sigil desigilname >] );
-		return True if self.assert-hash-keys( $p, [< variable >] );
+		if self.assert-hash-keys( $p, [< variable >] ) {
+#			self._Variable( $p.hash.<variable> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
+		}
 	}
 
 	method _VariableDeclarator( Mu $p ) {
@@ -1788,7 +2136,8 @@ Perl6::Unimplemented.new(:content( "_VariableDeclarator") );
 				[< variable >],
 				[< semilist postcircumfix signature
 				   trait post_constraint >] ) {
-			self._Variable( $p.hash.<variable> );
+#			self._Variable( $p.hash.<variable> );
+Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 	}
 
@@ -1809,7 +2158,7 @@ Perl6::Unimplemented.new(:content( "_VariableDeclarator") );
 			'$' => Perl6::Variable::Scalar,
 			'$*' => Perl6::Variable::Scalar::Dynamic,
 			'$!' => Perl6::Variable::Scalar::Attribute,
-			'$?' => Perl6::Variable::Scalar::CompileTimeVariable,
+			'$?' => Perl6::Variable::Scalar::CompileTime,
 			'$<' => Perl6::Variable::Scalar::MatchIndex,
 			'$^' => Perl6::Variable::Scalar::Positional,
 			'$:' => Perl6::Variable::Scalar::Named,
@@ -1818,7 +2167,7 @@ Perl6::Unimplemented.new(:content( "_VariableDeclarator") );
 			'%' => Perl6::Variable::Hash,
 			'%*' => Perl6::Variable::Hash::Dynamic,
 			'%!' => Perl6::Variable::Hash::Attribute,
-			'%?' => Perl6::Variable::Hash::CompileTimeVariable,
+			'%?' => Perl6::Variable::Hash::CompileTime,
 			'%<' => Perl6::Variable::Hash::MatchIndex,
 			'%^' => Perl6::Variable::Hash::Positional,
 			'%:' => Perl6::Variable::Hash::Named,
@@ -1827,7 +2176,7 @@ Perl6::Unimplemented.new(:content( "_VariableDeclarator") );
 			'@' => Perl6::Variable::Array,
 			'@*' => Perl6::Variable::Array::Dynamic,
 			'@!' => Perl6::Variable::Array::Attribute,
-			'@?' => Perl6::Variable::Array::CompileTimeVariable,
+			'@?' => Perl6::Variable::Array::CompileTime,
 			'@<' => Perl6::Variable::Array::MatchIndex,
 			'@^' => Perl6::Variable::Array::Positional,
 			'@:' => Perl6::Variable::Array::Named,
@@ -1836,7 +2185,7 @@ Perl6::Unimplemented.new(:content( "_VariableDeclarator") );
 			'&' => Perl6::Variable::Callable,
 			'&*' => Perl6::Variable::Callable::Dynamic,
 			'&!' => Perl6::Variable::Callable::Attribute,
-			'&?' => Perl6::Variable::Callable::CompileTimeVariable,
+			'&?' => Perl6::Variable::Callable::CompileTime,
 			'&<' => Perl6::Variable::Callable::MatchIndex,
 			'&^' => Perl6::Variable::Callable::Positional,
 			'&:' => Perl6::Variable::Callable::Named,
@@ -1847,7 +2196,7 @@ Perl6::Unimplemented.new(:content( "_VariableDeclarator") );
 		my $leaf;
 		$leaf = %lookup{$sigil ~ $twigil}.new(
 			:content( $content ),
-			:headless( $desigilname )
+#			:headless( $desigilname )
 		);
 #say $leaf.perl;
 		return $leaf;
@@ -1877,6 +2226,9 @@ Perl6::Unimplemented.new(:content( "_VariableDeclarator") );
 			next if self.assert-hash-keys( $_, [< pblock EXPR >] );
 		}
 		return True if self.assert-hash-keys( $p, [< pblock EXPR >] );
-		return True if self.assert-hash-keys( $p, [< blockoid >] );
+		if self.assert-hash-keys( $p, [< blockoid >] ) {
+#			self._Blockoid( $p.hash.<blockoid> )
+Perl6::Unimplemented.new(:content( "_Declarator") );
+		}
 	}
 }

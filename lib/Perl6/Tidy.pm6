@@ -41,6 +41,11 @@ Given a so-far undefined hash of format settings, return formatted Perl 6 code t
 
 =end pod
 
+# These debugging routines are rather hit-and-miss because the objects they're
+# supposed to silly-walk aren't actually Perl, but a lower-level object.
+#
+# I do need to firm them up before releasing.
+#
 sub dump-parsed( Mu $parsed ) {
 	my @lines;
 	my @types;
@@ -90,8 +95,10 @@ use Perl6::Tidy::Factory;
 
 class Perl6::Tidy {
 	use nqp;
-#	use Perl6::Tidy::Nodes;
 
+	# These could easily be a single method, but I'll separate them for
+	# testing purposes.
+	#
 	method parse-text( Str $text ) {
 		my $*LINEPOSCACHE;
 		my $compiler := nqp::getcomp('perl6');
@@ -108,15 +115,27 @@ class Perl6::Tidy {
 		return $parsed
 	}
 
-	method tidy( Str $text, Hash $formatting? ) {
-		my $parsed    = self.parse-text( $text );
+	method validate( Mu $parsed ) {
 		my $validator = Perl6::Tidy::Validator.new;
-		my $factory   = Perl6::Tidy::Factory.new;
+		my $res       = $validator.validate( $parsed );
 
-		if $validator.validate( $parsed ) {
-			my $tree = $factory.build( $parsed );
+		$res
+	}
+
+	method build-tree( Mu $parsed ) {
+		my $factory   = Perl6::Tidy::Factory.new;
+		my $tree = $factory.build( $parsed );
+
+		$tree
+	}
+
+	method tidy( Str $text, Hash $formatting? ) {
+		my $parsed = self.parse-text( $text );
+
+		if self.validate( $parsed ) {
+			my $tree = self.build-tree( $parsed );
 			return $tree;
 		}
-		return False
+		False
 	}
 }
