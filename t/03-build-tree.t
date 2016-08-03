@@ -57,13 +57,12 @@ subtest {
 			:child(
 				Perl6::Bareword.new( :content( Q{say} ) ),
 				Perl6::WS.new( :content( Q{ } ) ),
-				Perl6::Variable::Scalar.new(
-					:content( Q{$a} )
-				),
+				Perl6::Number::Decimal.new( :content( 1e0 ) ),
 				Perl6::WS.new( :content( Q{ } ) ),
 				Perl6::Operator.new( :content( Q{+} ) ),
 				Perl6::WS.new( :content( Q{ } ) ),
 				Perl6::Variable::Scalar.new(
+					:sigil( Q{$} ),
 					:content( Q{$b} )
 				),
 				Perl6::Semicolon.new( :content( Q{;} ) )
@@ -71,12 +70,6 @@ subtest {
 		);
 
 #`(
-- EXPR: say $a + $b
-  - longname: say
-    - name: say
-      - identifier: say
-  - args:  $a + $b
-    - arglist: $a + $b
       - EXPR: +
         - 0: $a
           - variable: $a
@@ -93,17 +86,46 @@ subtest {
                 - name: b
                   - identifier: b
         - infix: +
-          - sym: +
-          - O: <object>
         - OPER: +
-          - sym: +
-          - O: <object>
+
+
+      - EXPR: +
+        - 0: 1
+          - value: 1
+            - number: 1
+              - numish: 1
+                - integer: 1
+                  - decint: 1
+                  - VALUE: 1
+        - 1: 2
+          - value: 2
+            - number: 2
+              - numish: 2
+                - integer: 2
+                  - decint: 2
+                  - VALUE: 2
+        - infix: +
+        - OPER: +
+
+      - EXPR: ~
+        - 0: 'a'
+          - value: 'a'
+            - quote: 'a'
+              - nibble: a
+        - 1: 'b'
+          - value: 'b'
+            - quote: 'b'
+              - nibble: b
+        - infix: ~
+        - OPER: ~
 )
 
 	my $p = $pt.parse-text( Q:to[_END_] );
 my ($a, $b) = $*IN.get.split(" ");
-say $a + $b;
+say 1 + $b;
 _END_
+#say $a + $b;
+#say $p.hash.<statementlist>.hash.<statement>.list.[1].dump;
 	my $tree = $pt.build-tree( $p );
 	is-deeply $tree,
 		Perl6::Document.new(
