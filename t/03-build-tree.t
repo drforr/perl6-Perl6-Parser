@@ -22,6 +22,34 @@ subtest {
 subtest {
 	plan 1;
 
+	my $my_a =
+		Perl6::Statement.new(
+			:child(
+				Perl6::Bareword.new( :content( Q{my} ) ),
+				Perl6::WS.new( :content( Q{ } ) ),
+				Perl6::Variable::Scalar.new(
+					:sigil( Q{$} ),
+					:content( Q{$a} ),
+					:headless( Q{a} )
+				)
+			)
+		);
+	
+	my $p = $pt.parse-text( Q{my $a} );
+	my $t = $pt.build-tree( $p );
+	is-deeply $t,
+		Perl6::Document.new(
+			:child(
+				$my_a
+			)
+		),
+	Q{tree built};
+}, Q{Declaration};
+
+#`(
+subtest {
+	plan 1;
+
 	my $my_a_b =
 		Perl6::Statement.new(
 			:child(
@@ -63,62 +91,12 @@ subtest {
 				Perl6::WS.new( :content( Q{ } ) ),
 				Perl6::Variable::Scalar.new(
 					:sigil( Q{$} ),
-					:content( Q{$b} )
+					:content( Q{$b} ),
+					:headless( Q{b} )
 				),
 				Perl6::Semicolon.new( :content( Q{;} ) )
 			)
 		);
-
-#`(
-      - EXPR: +
-        - 0: $a
-          - variable: $a
-            - sigil: $
-            - desigilname: a
-              - longname: a
-                - name: a
-                  - identifier: a
-        - 1: $b
-          - variable: $b
-            - sigil: $
-            - desigilname: b
-              - longname: b
-                - name: b
-                  - identifier: b
-        - infix: +
-        - OPER: +
-
-
-      - EXPR: +
-        - 0: 1
-          - value: 1
-            - number: 1
-              - numish: 1
-                - integer: 1
-                  - decint: 1
-                  - VALUE: 1
-        - 1: 2
-          - value: 2
-            - number: 2
-              - numish: 2
-                - integer: 2
-                  - decint: 2
-                  - VALUE: 2
-        - infix: +
-        - OPER: +
-
-      - EXPR: ~
-        - 0: 'a'
-          - value: 'a'
-            - quote: 'a'
-              - nibble: a
-        - 1: 'b'
-          - value: 'b'
-            - quote: 'b'
-              - nibble: b
-        - infix: ~
-        - OPER: ~
-)
 
 	my $p = $pt.parse-text( Q:to[_END_] );
 my ($a, $b) = $*IN.get.split(" ");
@@ -135,5 +113,6 @@ _END_
 			)
 		);
 }, Q{File with string};
+)
 
 # vim: ft=perl6
