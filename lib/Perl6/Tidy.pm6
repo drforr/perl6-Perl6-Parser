@@ -137,8 +137,8 @@ class Perl6::Tidy {
 		$str
 	}
 
-	method _tidy( Str $text, $formatting = { } ) {
-		my $parsed    = self.parse-text( $text );
+	method _tidy( Str $source, $formatting = { } ) {
+		my $parsed    = self.parse-source( $source );
 say $parsed.hash.<statementlist>.hash.<statement>.list.[0].dump;
 		my $valid     = self.validate( $parsed );
 		my $tree      = self.build-tree( $parsed );

@@ -12,7 +12,10 @@ my $pt = Perl6::Tidy.new;
 subtest {
 	plan 1;
 
+say $pt.tidy( Q[class Unqualified { }] );
+$pt._tidy( Q[class Unqualified { }] );
 	my $parsed = $pt.get-tree( Q[class Unqualified { }] );
+say $parsed.perl;
 	isa-ok $parsed, Q{Perl6::Document};
 }, Q{empty};
 

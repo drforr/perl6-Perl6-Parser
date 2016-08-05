@@ -135,6 +135,12 @@ Child elements aren't restricted to leaves, because a document is a tree the C<@
 
 =end ROLES
 
+=begin DEVELOPER_NOTES
+
+Just to keep the hierarchy reasonably clean, classes do only the preprocessing necessary to generate the C<:content()> attribute. Everything else is done by methods. See L<Perl6::PackageName> and the L<Perl6::Variable> hierarchy for examples.
+
+=end DEVELOPER_NOTES
+
 =end pod
 
 #`(
@@ -214,6 +220,11 @@ class Perl6::Bareword does Token {
 }
 class Perl6::Operator does Token {
 }
+class Perl6::PackageName does Token {
+	method namespaces() returns Array {
+		$.content.split( '::' )
+	}
+}
 
 # Semicolons should only occur at statement boundaries.
 # So they're only generated in the _Statement handler.
@@ -228,6 +239,10 @@ class Perl6::WS does Token {
 }
 
 class Perl6::Variable {
+	method headless() returns Str {
+		$.content ~~ m/ <[$%@&]> <[*!?<^:=~]>? (.+) /;
+		$0
+	}
 }
 class Perl6::Variable::Scalar does Token {
 	has $.sigil = Q{$};
@@ -541,6 +556,9 @@ class Perl6::Tidy::Factory {
 		if self.assert-hash-keys( $p, [< EXPR >] ) {
 			self._EXPR( $p.hash.<EXPR> )
 		}
+		else {
+			warn "Unhandled _ArgList case"
+		}
 	}
 
 	method _Args( Mu $p ) {
@@ -554,6 +572,9 @@ class Perl6::Tidy::Factory {
 )
 		if self.assert-hash-keys( $p, [< arglist >] ) {
 			self._ArgList( $p.hash.<arglist> );
+		}
+		else {
+			warn "Unhandled _Arg case"
 		}
 	}
 
@@ -595,19 +616,21 @@ say "BackSlash fired";
 		)
 	}
 
-	method _Block( Mu $p ) returns Bool {
-say "Block fired";
+	method _Block( Mu $p ) {
 		if self.assert-hash-keys( $p, [< blockoid >] ) {
-#			self._Blockoid( $p.hash.<blockoid> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
+			self._Blockoid( $p.hash.<blockoid> )
+		}
+		else {
+			warn "Unhandled _Block case"
 		}
 	}
 
-	method _Blockoid( Mu $p ) returns Bool {
-say "Blockoid fired";
+	method _Blockoid( Mu $p ) {
 		if self.assert-hash-keys( $p, [< statementlist >] ) {
-#			self._StatementList( $p.hash.<statementlist> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
+			self._StatementList( $p.hash.<statementlist> )
+		}
+		else {
+			warn "Unhandled _Blockoid case"
 		}
 	}
 
@@ -762,6 +785,9 @@ say "Contextualizer fired";
 			self._VariableDeclarator(
 				$p.hash.<variable_declarator>
 			)
+		}
+		else {
+			warn "Unhandled _Declarator case"
 		}
 	}
 
@@ -946,6 +972,12 @@ say "EScale fired";
 					self.ws-after( $v.hash.<quote> )
 				)
 			}
+			else {
+				warn "Unhandled __Term case"
+			}
+		}
+		else {
+			warn "Unhandled __Term case"
 		}
 	}
 
@@ -1125,12 +1157,22 @@ say "EScale fired";
 				)
 			)
 		}
+		elsif self.assert-hash-keys( $p, [< package_declarator >] ) {
+			@child = (
+				self._PackageDeclarator(
+					$p.hash.<package_declarator>
+				)
+			)
+		}
 		elsif self.assert-hash-keys( $p, [< value >] ) {
 			@child = (
 				self._Value(
 					$p.hash.<value>
 				)
 			)
+		}
+		else {
+			warn "Unhandled _EXPR case"
 		}
 		@child
 	}
@@ -1166,11 +1208,15 @@ say "FatArrow fired";
 	}
 
 	method _Identifier( Mu $p ) {
-say "Identifier fired";
+#`(
 		for $p.list {
 			next if self.assert-Str( $_ );
 		}
 		return True if $p.Str;
+)
+		if $p.Str {
+			$p.Str
+		}
 	}
 
 	method _Infix( Mu $p ) {
@@ -1180,6 +1226,9 @@ say "Identifier fired";
 )
 		if self.assert-hash-keys( $p, [< sym O >] ) {
 			Perl6::Operator.new( :content( ~$p.hash.<sym>.Str ) )
+		}
+		else {
+			warn "Unhandled _Infix case"
 		}
 	}
 
@@ -1209,6 +1258,9 @@ say "InfixPrefixMetaOperator fired";
 				self.ws-after( $p.hash.<sym> ),
 				self._EXPR( $p.hash.<EXPR> )
 			)
+		}
+		else {
+			warn "Unhandled _Initializer case"
 		}
 	}
 
@@ -1258,7 +1310,14 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 
 	method _LongName( Mu $p ) {
 		if self.assert-hash-keys( $p, [< name >], [< colonpair >] ) {
-			self._Name( $p.hash.<name> )
+			Perl6::PackageName.new(
+				:content(
+					$p.hash.<name>.Str
+				)
+			)
+		}
+		else {
+			warn "Unhandled _LongName case"
 		}
 	}
 
@@ -1390,12 +1449,19 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 		if self.assert-hash-keys( $p, [< morename >] );
 		True if self.assert-Str( $p );
 )
-		if self.assert-Str( $p ) {
+		if self.assert-hash-keys( $p,
+			[< identifier >], [< morename >] ) {
+			self._Identifier( $p.hash.<identifier> )
+		}
+		elsif self.assert-Str( $p ) {
 			Perl6::Bareword.new(
 				:content(
 					$p.Str
 				)
 			)
+		}
+		else {
+			warn "Unhandled _Name case"
 		}
 	}
 
@@ -1406,6 +1472,9 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 )
 		if $p.Str {
 			$p.Str
+		}
+		else {
+			warn "Unhandled _Nibble case"
 		}
 	}
 
@@ -1439,6 +1508,9 @@ say "Noun fired";
 		if self.assert-hash-keys( $p, [< numish >] ) {
 			self._Numish( $p.hash.<numish> )
 		}
+		else {
+			warn "Unhandled _Number case"
+		}
 	}
 
 	method _Numish( Mu $p ) {
@@ -1450,6 +1522,9 @@ say "Noun fired";
 
 		if self.assert-hash-keys( $p, [< integer >] ) {
 			self._Integer( $p.hash.<integer> )
+		}
+		else {
+			warn "Unhandled _Numish case"
 		}
 	}
 
@@ -1541,19 +1616,32 @@ say "OPER fired";
 	}
 
 	method _PackageDeclarator( Mu $p ) {
-say "PackageDeclarator fired";
-		return True if self.assert-hash-keys( $p,
-				[< sym package_def >] );
+		if self.assert-hash-keys( $p, [< sym package_def >] ) {
+			(
+				self._Sym( $p.hash.<sym> ),
+				self.ws-at-start( $p.hash.<package_def> ),
+				self._PackageDef( $p.hash.<package_def> )
+			).flat
+		}
 	}
 
 	method _PackageDef( Mu $p ) {
-say "PackageDef fired";
+#`(
 		return True if self.assert-hash-keys( $p,
 				[< blockoid longname >], [< trait >] );
 		return True if self.assert-hash-keys( $p,
 				[< longname statementlist >], [< trait >] );
 		return True if self.assert-hash-keys( $p,
 				[< blockoid >], [< trait >] );
+)
+		if self.assert-hash-keys( $p,
+				[< blockoid longname >], [< trait >] ) {
+			(
+				self._LongName( $p.hash.<longname> ),
+				self.ws-after( $p.hash.<longname> ),
+				self._Blockoid( $p.hash.<blockoid> )
+			).flat
+		}
 	}
 
 	method _Parameter( Mu $p ) {
@@ -2174,8 +2262,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 		);
 
 		my $leaf = %lookup{$sigil ~ $twigil}.new(
-			:content( $content ),
-			:headless( $desigilname )
+			:content( $content )
 		);
 		return $leaf;
 	}
