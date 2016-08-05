@@ -17,26 +17,37 @@ subtest {
 }, Q{Empty file};
 
 subtest {
-	plan 12;
+	plan 11;
 
 	my $p = $pt.parse-text( Q{'a'} );
-	ok $p.hash.<statementlist>, Q{statementlist};
+	is-deeply [ $p.hash.keys ], [< statementlist >],
+		Q{document has correct hash keys};
+
 	my $a = $p.hash.<statementlist>;
-	ok $a.hash.<statement>, Q{statement};
+	is-deeply [ $a.hash.keys ], [< statement >],
+		Q{statementlist has correct hash keys};
+
 	my $b = $a.hash.<statement>;
-	ok $b.list, Q{list};
 	is $b.list.elems, 1, Q{list has correct length};
+
 	my $c = $b.list.[0];
-	ok $c.hash.<EXPR>, Q{EXPR};
+	is-deeply [ $c.hash.keys ], [< EXPR >],
+		Q{list has correct hash keys};
 	is $c.hash.<EXPR>.Str, Q{'a'}, Q{EXPR has correct Str};
+
 	my $d = $c.hash.<EXPR>;
-	ok $d.hash.<value>, Q{value};
+	is-deeply [ $d.hash.keys ], [< value >],
+		Q{EXPR has correct hash keys};
 	is $d.hash.<value>.Str, Q{'a'}, Q{value has correct Str};
+
 	my $e = $d.hash.<value>;
-	ok $e.hash.<quote>, Q{quote};
+	is-deeply [ $e.hash.keys ], [< quote >],
+		Q{value has correct hash keys};
 	is $e.hash.<quote>.Str, Q{'a'}, Q{quote has correct Str};
+
 	my $f = $e.hash.<quote>;
-	ok $f.hash.<nibble>, Q{nibble};
+	is-deeply [ $f.hash.keys ], [< nibble >],
+		Q{quote has correct hash keys};
 	is $f.hash.<nibble>.Str, Q{a}, Q{nibble has correct Str};
 }, Q{Smoketest hash structure};
 
