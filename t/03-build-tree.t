@@ -58,7 +58,7 @@ say $p.hash.<statementlist>.hash.<statement>.list.[0].dump;
 				Perl6::WS.new( :content( Q{ } ) ),
 				Perl6::Operator.new( :content( Q{=} ) ),
 				Perl6::WS.new( :content( Q{ } ) ),
-				Perl6::Number::Decimal.new( :content( Q{1} ) )
+				Perl6::Number::Decimal.new( :content( 1e0 ) )
 			) )
 		) ),
 	Q{tree built};

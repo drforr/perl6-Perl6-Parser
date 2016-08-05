@@ -375,6 +375,19 @@ class Perl6::Tidy::Factory {
 		}
 	}
 
+	method ws-before( Mu $p ) {
+		my $from = $p.from;
+		my $to   = $p.to;
+		my $orig = $p.orig;
+		my $key  = substr( $orig, 0, $from );
+		
+		if $key ~~ / ( \s+ ) $/ {
+			Perl6::WS.new(
+				:content( ~$0 )
+			)
+		}
+	}
+
 	method ws-after( Mu $p ) {
 		my $from = $p.from;
 		my $to   = $p.to;
@@ -1098,6 +1111,13 @@ say "EScale fired";
 				)
 			)
 		}
+		elsif self.assert-hash-keys( $p, [< value >] ) {
+			@child = (
+				self._Value(
+					$p.hash.<value>
+				)
+			)
+		}
 		@child
 	}
 
@@ -1161,10 +1181,23 @@ say "InfixPrefixMetaOperator fired";
 	}
 
 	method _Initializer( Mu $p ) {
-say "Initializer fired";
+#`(
 		return True if self.assert-hash-keys( $p, [< sym EXPR >] );
 		return True if self.assert-hash-keys( $p,
 			[< dottyopish sym >] );
+)
+		if self.assert-hash-keys( $p, [< sym EXPR >] ) {
+			(
+				self.ws-before( $p.hash.<sym> ),
+				Perl6::Operator.new(
+					:content(
+						$p.hash.<sym>.Str
+					)
+				),
+				self.ws-after( $p.hash.<sym> ),
+				self._EXPR( $p.hash.<EXPR> )
+			)
+		}
 	}
 
 	method _Integer( Mu $p ) {
@@ -2062,14 +2095,11 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _Value( Mu $p ) {
-say "Value fired";
 		if self.assert-hash-keys( $p, [< number >] ) {
-#			self._Number( $p.hash.<number> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
+			self._Number( $p.hash.<number> )
 		}
 		elsif self.assert-hash-keys( $p, [< quote >] ) {
-#			self._Quote( $p.hash.<quote> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
+			self._Quote( $p.hash.<quote> )
 		}
 	}
 
