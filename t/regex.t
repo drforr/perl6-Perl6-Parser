@@ -12,28 +12,28 @@ my $pt = Perl6::Tidy.new;
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q{/pi/} );
+	my $parsed = $pt.get-tree( Q{/pi/} );
 	isa-ok $parsed, Q{Perl6::Document};
 }, Q{/pi/};
 
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q{/<[ p i ]>/} );
+	my $parsed = $pt.get-tree( Q{/<[ p i ]>/} );
 	isa-ok $parsed, Q{Perl6::Document};
 }, Q{/<[ p i ]>/};
 
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q{/ \d /} );
+	my $parsed = $pt.get-tree( Q{/ \d /} );
 	isa-ok $parsed, Q{Perl6::Document};
 }, Q{/ \d /};
 
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q{/ . /} );
+	my $parsed = $pt.get-tree( Q{/ . /} );
 	isa-ok $parsed, Q{Perl6::Document};
 }, Q{/ . /};
 

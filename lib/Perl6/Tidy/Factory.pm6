@@ -85,7 +85,7 @@ L<Perl6::Variable>
         L<Perl6::Variable::Scalar::Positional>
         L<Perl6::Variable::Scalar::Named>
         L<Perl6::Variable::Scalar::Pod>
-        L<Perl6::Variable::Scalar::Sublanguage>
+        L<Perl6::Variable::Scalar::SubLanguage>
     L<Perl6::Variable::Hash>
         (and the same subtypes)
     L<Perl6::Variable::Array>
@@ -165,10 +165,16 @@ class Perl6::Variable::Contextualizer::Callable {
 
 role Branching {
 	has @.child;
+	method perl6( $f ) {
+		join( '', map { $_.perl6( $f ) }, @.child )
+	}
 }
 
 role Token {
 	has $.content;
+	method perl6( $f ) {
+		~$.content
+	}
 }
 
 class Perl6::Unimplemented {
@@ -208,7 +214,15 @@ class Perl6::Bareword does Token {
 }
 class Perl6::Operator does Token {
 }
+
+# Semicolons should only occur at statement boundaries.
+# So they're only generated in the _Statement handler.
+#
+# And the BUILD method is there so I can still have the role, and get the
+# stringification behavior by default.
+#
 class Perl6::Semicolon does Token {
+	submethod BUILD() { $!content = Q{;} }
 }
 class Perl6::WS does Token {
 }
@@ -216,144 +230,144 @@ class Perl6::WS does Token {
 class Perl6::Variable {
 }
 class Perl6::Variable::Scalar does Token {
-	has $.sigil = '$';
+	has $.sigil = Q{$};
 }
 class Perl6::Variable::Scalar::Dynamic {
 	also is Perl6::Variable::Scalar;
-	has $.twigil = '*';
+	has $.twigil = Q{*};
 }
 class Perl6::Variable::Scalar::Attribute {
 	also is Perl6::Variable::Scalar;
-	has $.twigil = '!';
+	has $.twigil = Q{!};
 }
 class Perl6::Variable::Scalar::CompileTime {
 	also is Perl6::Variable::Scalar;
-	has $.twigil = '?';
+	has $.twigil = Q{?};
 }
 class Perl6::Variable::Scalar::MatchIndex {
 	also is Perl6::Variable::Scalar;
-	has $.twigil = '<';
+	has $.twigil = Q{<};
 }
 class Perl6::Variable::Scalar::Positional {
 	also is Perl6::Variable::Scalar;
-	has $.twigil = '^';
+	has $.twigil = Q{^};
 }
 class Perl6::Variable::Scalar::Named {
 	also is Perl6::Variable::Scalar;
-	has $.twigil = ':';
+	has $.twigil = Q{:};
 }
 class Perl6::Variable::Scalar::Pod {
 	also is Perl6::Variable::Scalar;
-	has $.twigil = '=';
+	has $.twigil = Q{=};
 }
-class Perl6::Variable::Scalar::Sublanguage {
+class Perl6::Variable::Scalar::SubLanguage {
 	also is Perl6::Variable::Scalar;
-	has $.twigil = '~';
+	has $.twigil = Q{~};
 }
 class Perl6::Variable::Array does Token {
-	has $.sigil = '@';
+	has $.sigil = Q{@};
 }
 class Perl6::Variable::Array::Dynamic {
 	also is Perl6::Variable::Array;
-	has $.twigil = '*';
+	has $.twigil = Q{*};
 }
 class Perl6::Variable::Array::Attribute {
 	also is Perl6::Variable::Array;
-	has $.twigil = '!';
+	has $.twigil = Q{!};
 }
 class Perl6::Variable::Array::CompileTime {
 	also is Perl6::Variable::Array;
-	has $.twigil = '?';
+	has $.twigil = Q{?};
 }
 class Perl6::Variable::Array::MatchIndex {
 	also is Perl6::Variable::Array;
-	has $.twigil = '<';
+	has $.twigil = Q{<};
 }
 class Perl6::Variable::Array::Positional {
 	also is Perl6::Variable::Array;
-	has $.twigil = '^';
+	has $.twigil = Q{^};
 }
 class Perl6::Variable::Array::Named {
 	also is Perl6::Variable::Array;
-	has $.twigil = ':';
+	has $.twigil = Q{:};
 }
 class Perl6::Variable::Array::Pod {
 	also is Perl6::Variable::Array;
-	has $.twigil = '=';
+	has $.twigil = Q{=};
 }
-class Perl6::Variable::Array::Sublanguage {
+class Perl6::Variable::Array::SubLanguage {
 	also is Perl6::Variable::Array;
-	has $.twigil = '~';
+	has $.twigil = Q{~};
 }
 class Perl6::Variable::Hash does Token {
-	has $.sigil = '%';
+	has $.sigil = Q{%};
 }
 class Perl6::Variable::Hash::Dynamic {
 	also is Perl6::Variable::Hash;
-	has $.twigil = '*';
+	has $.twigil = Q{*};
 }
 class Perl6::Variable::Hash::Attribute {
 	also is Perl6::Variable::Hash;
-	has $.twigil = '!';
+	has $.twigil = Q{!};
 }
 class Perl6::Variable::Hash::CompileTime {
 	also is Perl6::Variable::Hash;
-	has $.twigil = '?';
+	has $.twigil = Q{?};
 }
 class Perl6::Variable::Hash::MatchIndex {
 	also is Perl6::Variable::Hash;
-	has $.twigil = '<';
+	has $.twigil = Q{<};
 }
 class Perl6::Variable::Hash::Positional {
 	also is Perl6::Variable::Hash;
-	has $.twigil = '^';
+	has $.twigil = Q{^};
 }
 class Perl6::Variable::Hash::Named {
 	also is Perl6::Variable::Hash;
-	has $.twigil = ':';
+	has $.twigil = Q{:};
 }
 class Perl6::Variable::Hash::Pod {
 	also is Perl6::Variable::Hash;
-	has $.twigil = '=';
+	has $.twigil = Q{=};
 }
-class Perl6::Variable::Hash::Sublanguage {
+class Perl6::Variable::Hash::SubLanguage {
 	also is Perl6::Variable::Hash;
-	has $.twigil = '~';
+	has $.twigil = Q{~};
 }
 class Perl6::Variable::Callable does Token {
-	has $.sigil = '&';
+	has $.sigil = Q{&};
 }
 class Perl6::Variable::Callable::Dynamic {
 	also is Perl6::Variable::Callable;
-	has $.twigil = '*';
+	has $.twigil = Q{*};
 }
 class Perl6::Variable::Callable::Attribute {
 	also is Perl6::Variable::Callable;
-	has $.twigil = '!';
+	has $.twigil = Q{!};
 }
 class Perl6::Variable::Callable::CompileTime {
 	also is Perl6::Variable::Callable;
-	has $.twigil = '?';
+	has $.twigil = Q{?};
 }
 class Perl6::Variable::Callable::MatchIndex {
 	also is Perl6::Variable::Callable;
-	has $.twigil = '<';
+	has $.twigil = Q{<};
 }
 class Perl6::Variable::Callable::Positional {
 	also is Perl6::Variable::Callable;
-	has $.twigil = '^';
+	has $.twigil = Q{^};
 }
 class Perl6::Variable::Callable::Named {
 	also is Perl6::Variable::Callable;
-	has $.twigil = ':';
+	has $.twigil = Q{:};
 }
 class Perl6::Variable::Callable::Pod {
 	also is Perl6::Variable::Callable;
-	has $.twigil = '=';
+	has $.twigil = Q{=};
 }
-class Perl6::Variable::Callable::Sublanguage {
+class Perl6::Variable::Callable::SubLanguage {
 	also is Perl6::Variable::Callable;
-	has $.twigil = '~';
+	has $.twigil = Q{~};
 }
 
 class Perl6::Tidy::Factory {
@@ -370,7 +384,9 @@ class Perl6::Tidy::Factory {
 		
 		if $key ~~ m/^ ( \s+ ) / {
 			Perl6::WS.new(
-				:content( ~$0 )
+				:content(
+					~$0
+				)
 			)
 		}
 	}
@@ -383,7 +399,9 @@ class Perl6::Tidy::Factory {
 		
 		if $key ~~ / ( \s+ ) $/ {
 			Perl6::WS.new(
-				:content( ~$0 )
+				:content(
+					~$0
+				)
 			)
 		}
 	}
@@ -396,7 +414,9 @@ class Perl6::Tidy::Factory {
 		
 		if $key ~~ /^ ( \s+ ) / {
 			Perl6::WS.new(
-				:content( ~$0 )
+				:content(
+					~$0
+				)
 			)
 		}
 	}
@@ -409,16 +429,16 @@ class Perl6::Tidy::Factory {
 		if $key ~~ /^ ( \s* ) \; / {
 			if $0 and $0 ne '' {
 				return (
-					Perl6::WS.new( :content( ~$0 ) ),
-					Perl6::Semicolon.new(
-						:content( Q{;} )
-					)
+					Perl6::WS.new(
+						:content(
+							~$0
+						)
+					),
+					Perl6::Semicolon.new
 				)
 			}
 			return (
-				Perl6::Semicolon.new(
-					:content( Q{;} )
-				)
+				Perl6::Semicolon.new
 			)
 		}
 	}
@@ -559,9 +579,7 @@ say "Babble fired";
 				[< B >], [< quotepair >] );
 	}
 
-	method _BackMod( Mu $p ) returns Bool {
-		$p.hash.<backmod>.Bool
-	}
+	method _BackMod( Mu $p ) returns Bool { $p.hash.<backmod>.Bool }
 
 	method _BackSlash( Mu $p ) returns Bool {
 say "BackSlash fired";
@@ -846,10 +864,7 @@ say "Dig fired";
 		}
 	}
 
-	method _Doc( Mu $p ) returns Bool {
-say "Doc fired";
-		$p.hash.<doc>.Bool
-	}
+	method _Doc( Mu $p ) returns Bool { $p.hash.<doc>.Bool }
 
 	method _Dotty( Mu $p ) {
 say "Dotty fired";
@@ -914,7 +929,7 @@ say "EScale fired";
 		if $p.hash.<variable> {
 			(
 				self._Variable( $p.hash.<variable> ),
-				self.ws-after( $p.hash.<variable> ),
+				self.ws-after( $p.hash.<variable> )
 			)
 		}
 		elsif $p.hash.<value> {
@@ -922,13 +937,13 @@ say "EScale fired";
 			if $v.hash.<number> {
 				(
 					self._Number( $v.hash.<number> ),
-					self.ws-after( $v.hash.<number> ),
+					self.ws-after( $v.hash.<number> )
 				)
 			}
 			elsif $v.hash.<quote> {
 				(
 					self._Quote( $v.hash.<quote> ),
-					self.ws-after( $v.hash.<quote> ),
+					self.ws-after( $v.hash.<quote> )
 				)
 			}
 		}
@@ -1093,15 +1108,14 @@ say "EScale fired";
 				self.__Term( $p.list.[0] ),
 				self._Infix( $p.hash.<infix> ),
 				self.ws-after( $p.hash.<infix> ),
-				self.__Term( $p.list.[1] ),
-			)
+				self.__Term( $p.list.[1] )
+			).flat
 		}
 		elsif self.assert-hash-keys( $p, [< longname args >] ) {
 			@child = (
 				self._LongName( $p.hash.<longname> ),
 				self.ws-at-start( $p.hash.<args> ),
-				self._Args( $p.hash.<args> ),
-				self.semicolon-after( $p.hash.<args> )
+				self._Args( $p.hash.<args> )
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< scope_declarator >] ) {
@@ -1182,9 +1196,7 @@ say "InfixPrefixMetaOperator fired";
 
 	method _Initializer( Mu $p ) {
 #`(
-		return True if self.assert-hash-keys( $p, [< sym EXPR >] );
-		return True if self.assert-hash-keys( $p,
-			[< dottyopish sym >] );
+		if self.assert-hash-keys( $p, [< dottyopish sym >] );
 )
 		if self.assert-hash-keys( $p, [< sym EXPR >] ) {
 			(
@@ -1234,9 +1246,7 @@ say "Invocant fired";
 return True;
 	}
 
-	method _Lambda( Mu $p ) returns Str {
-		$p.hash.<lambda>.Str
-	}
+	method _Lambda( Mu $p ) returns Str { $p.hash.<lambda>.Str }
 
 	method _Left( Mu $p ) {
 say "Left fired";
@@ -1252,9 +1262,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 	}
 
-	method _Max( Mu $p ) returns Str {
-		$p.hash.<max>.Str
-	}
+	method _Max( Mu $p ) returns Str { $p.hash.<max>.Str }
 
 	method _MetaChar( Mu $p ) {
 say "MetaChar fired";
@@ -1409,9 +1417,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 	}
 
-	method _NormSpace( Mu $p ) returns Str {
-		$p.hash.<normspace>.Str
-	}
+	method _NormSpace( Mu $p ) returns Str { $p.hash.<normspace>.Str }
 
 	method _Noun( Mu $p ) {
 say "Noun fired";
@@ -1631,9 +1637,7 @@ say "Prefix fired";
 		return True if self.assert-hash-keys( $p, [< sym O >] );
 	}
 
-	method _Quant( Mu $p ) returns Bool {
-		$p.hash.<quant>.Bool
-	}
+	method _Quant( Mu $p ) returns Bool { $p.hash.<quant>.Bool }
 
 	method _QuantifiedAtom( Mu $p ) {
 say "QuantifiedAtom fired";
@@ -1679,9 +1683,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 	}
 
-	method _Radix( Mu $p ) returns Int {
-		$p.hash.<radix>.Int
-	}
+	method _Radix( Mu $p ) returns Int { $p.hash.<radix>.Int }
 
 	method _RadNumber( Mu $p ) {
 say "RadNumber fired";
@@ -1703,9 +1705,7 @@ say "RegexDef fired";
 				[< signature trait >] );
 	}
 
-	method _Right( Mu $p ) returns Bool {
-		$p.hash.<right>.Bool
-	}
+	method _Right( Mu $p ) returns Bool { $p.hash.<right>.Bool }
 
 	method build( Mu $p ) {
 		my @child =
@@ -1797,13 +1797,9 @@ say "Separator fired";
 				[< septype quantified_atom >] );
 	}
 
-	method _SepType( Mu $p ) returns Str {
-		$p.hash.<septype>.Str
-	}
+	method _SepType( Mu $p ) returns Str { $p.hash.<septype>.Str }
 
-	method _Shape( Mu $p ) returns Str {
-		$p.hash.<shape>.Str
-	}
+	method _Shape( Mu $p ) returns Str { $p.hash.<shape>.Str }
 
 	method _Sibble( Mu $p ) {
 say "Sibble fired";
@@ -1819,9 +1815,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 #		}
 	}
 
-	method _Sigil( Mu $p ) returns Str {
-		$p.hash.<sym>.Str
-	}
+	method _Sigil( Mu $p ) returns Str { $p.hash.<sym>.Str }
 
 	method _SigMaybe( Mu $p ) {
 say "SigMaybe fired";
@@ -1852,9 +1846,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 	}
 
-	method _Specials( Mu $p ) returns Bool {
-		$p.hash.<specials>.Bool
-	}
+	method _Specials( Mu $p ) returns Bool { $p.hash.<specials>.Bool }
 
 	method _StatementControl( Mu $p ) {
 say "StatementControl fired";
@@ -1910,7 +1902,8 @@ say "StatementControl fired";
 
 		my @child;
 		if self.assert-hash-keys( $p, [< EXPR >] ) {
-			@child.append( self._EXPR( $p.hash.<EXPR> ) )
+			@child.append( self._EXPR( $p.hash.<EXPR> ) );
+			@child.append( self.semicolon-after( $p.hash.<EXPR> ) )
 		}
 
 		Perl6::Statement.new(
@@ -2031,9 +2024,7 @@ say "TermSeq fired";
 		}
 	}
 
-	method _Twigil( Mu $p ) returns Str {
-		$p.hash.<sym>.Str
-	}
+	method _Twigil( Mu $p ) returns Str { $p.hash.<sym>.Str }
 
 	method _TypeConstraint( Mu $p ) {
 say "TypeConstraint fired";
@@ -2152,7 +2143,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 			'$^' => Perl6::Variable::Scalar::Positional,
 			'$:' => Perl6::Variable::Scalar::Named,
 			'$=' => Perl6::Variable::Scalar::Pod,
-			'$~' => Perl6::Variable::Scalar::Sublanguage,
+			'$~' => Perl6::Variable::Scalar::SubLanguage,
 			'%' => Perl6::Variable::Hash,
 			'%*' => Perl6::Variable::Hash::Dynamic,
 			'%!' => Perl6::Variable::Hash::Attribute,
@@ -2161,7 +2152,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 			'%^' => Perl6::Variable::Hash::Positional,
 			'%:' => Perl6::Variable::Hash::Named,
 			'%=' => Perl6::Variable::Hash::Pod,
-			'%~' => Perl6::Variable::Hash::Sublanguage,
+			'%~' => Perl6::Variable::Hash::SubLanguage,
 			'@' => Perl6::Variable::Array,
 			'@*' => Perl6::Variable::Array::Dynamic,
 			'@!' => Perl6::Variable::Array::Attribute,
@@ -2170,7 +2161,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 			'@^' => Perl6::Variable::Array::Positional,
 			'@:' => Perl6::Variable::Array::Named,
 			'@=' => Perl6::Variable::Array::Pod,
-			'@~' => Perl6::Variable::Array::Sublanguage,
+			'@~' => Perl6::Variable::Array::SubLanguage,
 			'&' => Perl6::Variable::Callable,
 			'&*' => Perl6::Variable::Callable::Dynamic,
 			'&!' => Perl6::Variable::Callable::Attribute,
@@ -2179,7 +2170,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 			'&^' => Perl6::Variable::Callable::Positional,
 			'&:' => Perl6::Variable::Callable::Named,
 			'&=' => Perl6::Variable::Callable::Pod,
-			'&~' => Perl6::Variable::Callable::Sublanguage,
+			'&~' => Perl6::Variable::Callable::SubLanguage,
 		);
 
 		my $leaf = %lookup{$sigil ~ $twigil}.new(
@@ -2194,9 +2185,7 @@ say "Version fired";
 		return True if self.assert-hash-keys( $p, [< vnum vstr >] );
 	}
 
-	method _VStr( Mu $p ) returns Int {
-		$p.hash.<vstr>.Int
-	}
+	method _VStr( Mu $p ) returns Int { $p.hash.<vstr>.Int }
 
 	method _VNum( Mu $p ) {
 say "VNum fired";
@@ -2205,9 +2194,7 @@ say "VNum fired";
 		}
 	}
 
-	method _Wu( Mu $p ) returns Str {
-		$p.hash.<wu>.Str
-	}
+	method _Wu( Mu $p ) returns Str { $p.hash.<wu>.Str }
 
 	method _XBlock( Mu $p ) returns Bool {
 say "XBlock fired";

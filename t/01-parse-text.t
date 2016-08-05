@@ -12,14 +12,14 @@ my $pt = Perl6::Tidy.new;
 subtest {
 	plan 1;
 	
-	my $parsed = $pt.parse-text( Q{} );
+	my $parsed = $pt.parse-source( Q{} );
 	ok $parsed.hash.<statementlist>, Q{statementlist};
 }, Q{Empty file};
 
 subtest {
 	plan 11;
 
-	my $p = $pt.parse-text( Q{'a'} );
+	my $p = $pt.parse-source( Q{'a'} );
 	is-deeply [ $p.hash.keys ], [< statementlist >],
 		Q{document has correct hash keys};
 

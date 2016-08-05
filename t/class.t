@@ -12,7 +12,7 @@ my $pt = Perl6::Tidy.new;
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q[class Unqualified { }] );
+	my $parsed = $pt.get-tree( Q[class Unqualified { }] );
 	isa-ok $parsed, Q{Perl6::Document};
 }, Q{empty};
 
@@ -23,7 +23,7 @@ subtest {
 		plan 1;
 
 		my $parsed =
-			$pt.tidy( Q[class Unqualified { method foo { } }] );
+			$pt.get-tree( Q[class Unqualified { method foo { } }] );
 		isa-ok $parsed, Q{Perl6::Document};
 	}, Q{single};
 
@@ -31,7 +31,7 @@ subtest {
 		plan 1;
 
 		my $parsed =
-			$pt.tidy( Q:to[_END_] );
+			$pt.get-tree( Q:to[_END_] );
 class Unqualified {
 	method foo { }
 	method bar { }
@@ -50,14 +50,14 @@ subtest {
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.tidy( Q[class Unqualified { has $.a }] );
+			my $parsed = $pt.get-tree( Q[class Unqualified { has $.a }] );
 			isa-ok $parsed, Q{Perl6::Document};
 		}, Q{single};
 
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.tidy( Q:to[_END_] );
+			my $parsed = $pt.get-tree( Q:to[_END_] );
 class Unqualified {
 	has $.a;
 	has $.b;
@@ -69,7 +69,7 @@ _END_
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.tidy( Q:to[_END_] );
+			my $parsed = $pt.get-tree( Q:to[_END_] );
 class Unqualified { has ( $.a, $.b ) }
 _END_
 			isa-ok $parsed, Q{Perl6::Document};
@@ -79,21 +79,21 @@ _END_
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q[class Unqualified { has @.a }] );
+		my $parsed = $pt.get-tree( Q[class Unqualified { has @.a }] );
 		isa-ok $parsed, Q{Perl6::Document};
 	}, Q{@};
 
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q[class Unqualified { has %.a }] );
+		my $parsed = $pt.get-tree( Q[class Unqualified { has %.a }] );
 		isa-ok $parsed, Q{Perl6::Document};
 	}, Q{%};
 
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q[class Unqualified { has &.a }] );
+		my $parsed = $pt.get-tree( Q[class Unqualified { has &.a }] );
 		isa-ok $parsed, Q{Perl6::Document};
 	}, Q{&};
 }, Q{Attribute};

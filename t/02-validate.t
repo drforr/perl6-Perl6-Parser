@@ -12,14 +12,14 @@ my $pt = Perl6::Tidy.new;
 subtest {
 	plan 1;
 	
-	my $p = $pt.parse-text( Q{} );
+	my $p = $pt.parse-source( Q{} );
 	ok $pt.validate( $p ), Q{validates};
 }, Q{Empty file};
 
 subtest {
 	plan 1;
 
-	my $p = $pt.parse-text( Q{'a'} );
+	my $p = $pt.parse-source( Q{'a'} );
 	ok $pt.validate( $p ), Q{validates};
 }, Q{File with string};
 

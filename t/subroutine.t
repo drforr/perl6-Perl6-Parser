@@ -12,7 +12,7 @@ my $pt = Perl6::Tidy.new;
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q[sub foo { }] );
+	my $parsed = $pt.get-tree( Q[sub foo { }] );
 	isa-ok $parsed, Q{Perl6::Document};
 }, Q{empty};
 
@@ -25,7 +25,7 @@ subtest {
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.tidy( Q:to[_END_] );
+			my $parsed = $pt.get-tree( Q:to[_END_] );
 sub foo( 0 ) { }
 _END_
 			isa-ok $parsed, Q{Perl6::Document};
@@ -34,7 +34,7 @@ _END_
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.tidy( Q:to[_END_] );
+			my $parsed = $pt.get-tree( Q:to[_END_] );
 sub foo( $a ) { }
 _END_
 			isa-ok $parsed, Q{Perl6::Document};
@@ -46,7 +46,7 @@ _END_
 			subtest {
 				plan 1;
 
-				my $parsed = $pt.tidy( Q:to[_END_] );
+				my $parsed = $pt.get-tree( Q:to[_END_] );
 sub foo( Str $a ) { }
 _END_
 				isa-ok $parsed, Q{Perl6::Document};
@@ -55,7 +55,7 @@ _END_
 			subtest {
 				plan 1;
 
-				my $parsed = $pt.tidy( Q:to[_END_] );
+				my $parsed = $pt.get-tree( Q:to[_END_] );
 sub foo( ::T $a ) { }
 _END_
 				isa-ok $parsed, Q{Perl6::Document};
@@ -64,7 +64,7 @@ _END_
 			subtest {
 				plan 1;
 
-				my $parsed = $pt.tidy( Q:to[_END_] );
+				my $parsed = $pt.get-tree( Q:to[_END_] );
 sub foo( Str ) { }
 _END_
 				isa-ok $parsed, Q{Perl6::Document};
@@ -73,7 +73,7 @@ _END_
 			subtest {
 				plan 1;
 
-				my $parsed = $pt.tidy( Q:to[_END_] );
+				my $parsed = $pt.get-tree( Q:to[_END_] );
 sub foo( Str $a where "foo" ) { }
 _END_
 				isa-ok $parsed, Q{Perl6::Document};
@@ -83,7 +83,7 @@ _END_
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.tidy( Q:to[_END_] );
+			my $parsed = $pt.get-tree( Q:to[_END_] );
 sub foo( $a = 0 ) { }
 _END_
 			isa-ok $parsed, Q{Perl6::Document};
@@ -92,7 +92,7 @@ _END_
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.tidy( Q:to[_END_] );
+			my $parsed = $pt.get-tree( Q:to[_END_] );
 sub foo( :$a ) { }
 _END_
 			isa-ok $parsed, Q{Perl6::Document};
@@ -102,7 +102,7 @@ _END_
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q:to[_END_] );
+		my $parsed = $pt.get-tree( Q:to[_END_] );
 sub foo( $a, $b ) { }
 _END_
 		isa-ok $parsed, Q{Perl6::Document};

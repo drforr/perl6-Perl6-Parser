@@ -12,7 +12,7 @@ my $pt = Perl6::Tidy.new;
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 #!/usr/bin/env perl6
 _END_
 	isa-ok $parsed, Q{Perl6::Document};
@@ -24,7 +24,7 @@ subtest {
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q:to[_END_] );
+		my $parsed = $pt.get-tree( Q:to[_END_] );
 # comment to end of line
 _END_
 		isa-ok $parsed, Q{Perl6::Document};
@@ -33,7 +33,7 @@ _END_
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q:to[_END_] );
+		my $parsed = $pt.get-tree( Q:to[_END_] );
 # comment to end of line
 # comment to end of line
 _END_
@@ -47,7 +47,7 @@ subtest {
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q:to[_END_] );
+		my $parsed = $pt.get-tree( Q:to[_END_] );
 #`( comment on single line )
 _END_
 		isa-ok $parsed, Q{Perl6::Document};
@@ -56,7 +56,7 @@ _END_
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q:to[_END_] );
+		my $parsed = $pt.get-tree( Q:to[_END_] );
 #`( comment
 spanning
 multiple

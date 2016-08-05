@@ -99,7 +99,7 @@ class Perl6::Tidy {
 	# These could easily be a single method, but I'll separate them for
 	# testing purposes.
 	#
-	method parse-text( Str $text ) {
+	method parse-source( Str $source ) {
 		my $*LINEPOSCACHE;
 		my $compiler := nqp::getcomp('perl6');
 		my $g := nqp::findmethod($compiler,'parsegrammar')($compiler);
@@ -107,7 +107,7 @@ class Perl6::Tidy {
 		my $a := nqp::findmethod($compiler,'parseactions')($compiler);
 
 		my $parsed = $g.parse(
-			$text,
+			$source,
 			:p( 0 ),
 			:actions( $a )
 		);
@@ -119,23 +119,50 @@ class Perl6::Tidy {
 		my $validator = Perl6::Tidy::Validator.new;
 		my $res       = $validator.validate( $parsed );
 
+		die "Validation failed!" if !$res and %*ENV<AUTHOR_TESTS>;
+
 		$res
 	}
 
 	method build-tree( Mu $parsed ) {
-		my $factory   = Perl6::Tidy::Factory.new;
-		my $tree = $factory.build( $parsed );
+		my $factory = Perl6::Tidy::Factory.new;
+		my $tree    = $factory.build( $parsed );
 
 		$tree
 	}
 
-	method tidy( Str $text, Hash $formatting? ) {
-		my $parsed = self.parse-text( $text );
+	method format( $tree, $formatting ) {
+		my $str = $tree.perl6( $formatting );
 
-		if self.validate( $parsed ) {
-			my $tree = self.build-tree( $parsed );
-			return $tree;
-		}
-		False
+		$str
+	}
+
+	method _tidy( Str $text, $formatting = { } ) {
+		my $parsed    = self.parse-text( $text );
+say $parsed.hash.<statementlist>.hash.<statement>.list.[0].dump;
+		my $valid     = self.validate( $parsed );
+		my $tree      = self.build-tree( $parsed );
+		my $formatted = self.format( $tree, $formatting );
+
+		$formatted
+	}
+
+# Remove when the refactoring is done.
+#
+method get-tree( Str $source ) {
+	my $parsed    = self.parse-source( $source );
+	my $valid     = self.validate( $parsed );
+	my $tree      = self.build-tree( $parsed );
+
+	$tree
+}
+
+	method tidy( Str $source, $formatting = { } ) {
+		my $parsed    = self.parse-source( $source );
+		my $valid     = self.validate( $parsed );
+		my $tree      = self.build-tree( $parsed );
+		my $formatted = self.format( $tree, $formatting );
+
+		$formatted
 	}
 }

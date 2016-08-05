@@ -15,7 +15,7 @@ subtest {
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q:to[_END_] );
+		my $parsed = $pt.get-tree( Q:to[_END_] );
 get.words.sum.say;
 _END_
 		isa-ok $parsed, Q{Perl6::Document};
@@ -24,7 +24,7 @@ _END_
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q:to[_END_] );
+		my $parsed = $pt.get-tree( Q:to[_END_] );
 say [+] get.words;
 _END_
 		isa-ok $parsed, Q{Perl6::Document};
@@ -33,7 +33,7 @@ _END_
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q:to[_END_] );
+		my $parsed = $pt.get-tree( Q:to[_END_] );
 my ($a, $b) = $*IN.get.split(" ");
 say $a + $b;
 _END_
@@ -44,7 +44,7 @@ _END_
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 multi can-spell-word(Str $word, @blocks) {
     my @regex = @blocks.map({ my @c = .comb; rx/<@c>/ }).grep: { .ACCEPTS($word.uc) }
     can-spell-word $word.uc.comb.list, @regex;
@@ -73,7 +73,7 @@ _END_
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 use v6;
 
 role A {
@@ -100,7 +100,7 @@ _END_
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 sub propdivsum (\x) {
     [+] flat(x > 1, gather for 2 .. x.sqrt.floor -> \d {
         my \y = x div d;
@@ -116,7 +116,7 @@ _END_
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 sub accum ($n is copy) { sub { $n += $^x } }
 _END_
 	isa-ok $parsed, Q{Perl6::Document};
@@ -128,7 +128,7 @@ subtest {
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q:to[_END_] );
+		my $parsed = $pt.get-tree( Q:to[_END_] );
 sub A(Int $m, Int $n) {
     if    $m == 0 { $n + 1 } 
     elsif $n == 0 { A($m - 1, 1) }
@@ -141,7 +141,7 @@ _END_
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q:to[_END_] );
+		my $parsed = $pt.get-tree( Q:to[_END_] );
 multi sub A(0,      Int $n) { $n + 1                   }
 multi sub A(Int $m, 0     ) { A($m - 1, 1)             }
 multi sub A(Int $m, Int $n) { A($m - 1, A($m, $n - 1)) }
@@ -152,7 +152,7 @@ _END_
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q:to[_END_] );
+		my $parsed = $pt.get-tree( Q:to[_END_] );
 proto A(Int \𝑚, Int \𝑛) { (state @)[𝑚][𝑛] //= {*} }
 
 multi A(0,      Int \𝑛) { 𝑛 + 1 }
@@ -176,7 +176,7 @@ subtest {
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q:to[_END_] );
+		my $parsed = $pt.get-tree( Q:to[_END_] );
 class Bar { }             # an empty class
  
 my $object = Bar.new;     # new instance
@@ -206,7 +206,7 @@ _END_
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q:to[_END_] );
+		my $parsed = $pt.get-tree( Q:to[_END_] );
 my $lue = 42 but role { has $.answer = "Life, the Universe, and Everything" }
  
 say $lue;          # 42
@@ -218,7 +218,7 @@ _END_
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q:to[_END_] );
+		my $parsed = $pt.get-tree( Q:to[_END_] );
 use MONKEY-TYPING;
 augment class Int {
     method answer { "Life, the Universe, and Everything" }
@@ -232,7 +232,7 @@ _END_
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 my $x;
 say $x.WHERE;
  
@@ -249,7 +249,7 @@ _END_
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 constant expansions = [1], [1,-1], -> @prior { [|@prior,0 Z- 0,|@prior] } ... *;
  
 sub polyprime($p where 2..*) { so expansions[$p].[1 ..^ */2].all %% $p }
@@ -285,7 +285,7 @@ subtest {
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q:to[_END_] );
+		my $parsed = $pt.get-tree( Q:to[_END_] );
 #to be called with perl6 columnaligner.pl <orientation>(left, center , right )
 #with left as default
 my $fh = open  "example.txt" , :r  or die "Can't read text file!\n" ;
@@ -331,7 +331,7 @@ _END_
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q:to[_END_] );
+		my $parsed = $pt.get-tree( Q:to[_END_] );
 my @lines = slurp("example.txt").lines;
 my @widths;
 
@@ -354,7 +354,7 @@ _END_
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q:to[_END_] );
+		my $parsed = $pt.get-tree( Q:to[_END_] );
 sub MAIN ($alignment where 'left'|'right', $file) {
     my @lines := $file.IO.lines.map(*.split: '$').List;
     my @widths = roundrobin(|@lines).map(*».chars.max);
@@ -370,7 +370,7 @@ _END_
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 sub propdivsum (\x) {
     my @l = x > 1, gather for 2 .. x.sqrt.floor -> \d {
         my \y = x div d;
@@ -416,7 +416,7 @@ subtest {
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q:to[_END_] );
+		my $parsed = $pt.get-tree( Q:to[_END_] );
 sub is-k-almost-prime($n is copy, $k) returns Bool {
     loop (my ($p, $f) = 2, 0; $f < $k && $p*$p <= $n; $p++) {
         $n /= $p, $f++ while $n %% $p;
@@ -436,7 +436,7 @@ _END_
 		plan 1;
 
 		# 'factor^2' was superscript-2
-		my $parsed = $pt.tidy( Q:to[_END_] );
+		my $parsed = $pt.get-tree( Q:to[_END_] );
 constant @primes = 2, |(3, 5, 7 ... *).grep: *.is-prime;
 
 multi sub factors(1) { 1 }
@@ -471,7 +471,7 @@ subtest {
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q:to[_END_] );
+		my $parsed = $pt.get-tree( Q:to[_END_] );
 #| an array of four words, that have more possible values. 
 #| Normally we would want `any' to signify we want any of the values, but well negate later and thus we need `all'
 my @a =
@@ -497,7 +497,7 @@ _END_
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q:to[_END_] );
+		my $parsed = $pt.get-tree( Q:to[_END_] );
 sub infix:<lf> ($a,$b) {
     next unless try $a.substr(*-1,1) eq $b.substr(0,1);
     "$a $b";
@@ -523,7 +523,7 @@ _END_
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q:to[_END_] );
+		my $parsed = $pt.get-tree( Q:to[_END_] );
 sub amb($var,*@a) {
     "[{
         @a.pick(*).map: {"||\{ $var = '$_' }"}
@@ -554,7 +554,7 @@ _END_
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 sub propdivsum (\x) {
     my @l = x > 1, gather for 2 .. x.sqrt.floor -> \d {
         my \y = x div d;
@@ -577,7 +577,7 @@ subtest {
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q:to[_END_] );
+		my $parsed = $pt.get-tree( Q:to[_END_] );
 my %anagram = slurp('unixdict.txt').words.classify( { .comb.sort.join } );
  
 my $max = [max] map { +@($_) }, %anagram.values;
@@ -590,7 +590,7 @@ _END_
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q:to[_END_] );
+		my $parsed = $pt.get-tree( Q:to[_END_] );
 .put for                             # print each element of the array made this way:
 slurp('unixdict.txt')\               # load file in memory
 .words\                              # extract words
@@ -606,7 +606,7 @@ _END_
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 my %anagram = slurp('dict.ie').words.map({[.comb]}).classify({ .sort.join });
 
 for %anagram.values.sort({ -@($_[0]) }) -> @aset {
@@ -626,7 +626,7 @@ _END_
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 sub fib($n) {
     die "Naughty fib" if $n < 0;
     return {
@@ -644,7 +644,7 @@ _END_
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 sub function { 2 * $^x + 3 };
 my @array = 1 .. 5;
  
@@ -671,7 +671,7 @@ _END_
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 given ~[**] 5, 4, 3, 2 {
    say "5**4**3**2 = {.substr: 0,20}...{.substr: *-20} and has {.chars} digits";
 }
@@ -683,7 +683,7 @@ subtest {
 	plan 1;
 
 	# XXX Make up a 'Image::PNG::Portable' class
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 class Image::PNG::Portable { has ( $.width, $.height ); method set { }; method write { } }
 #use Image::PNG::Portable;
 
@@ -703,7 +703,7 @@ _END_
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 sub cumulative_freq(%freq) {
     my %cf;
     my $total = 0;
@@ -822,7 +822,7 @@ _END_
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 sub ev (Str $s --> Num) {
  
     grammar expr {
@@ -876,7 +876,7 @@ subtest {
 		plan 1;
 
     		#($a, $g) = ($a + $g)/2, sqrt $a * $g until $a ≅ $g;
-		my $parsed = $pt.tidy( Q:to[_END_] );
+		my $parsed = $pt.get-tree( Q:to[_END_] );
 sub agm( $a is copy, $g is copy ) {
     ($a, $g) = ($a + $g)/2, sqrt $a * $g until $a = $g;
     return $a;
@@ -891,7 +891,7 @@ _END_
 		plan 1;
 
     #$a ≅ $g ?? $a !! agm(|@$_)
-		my $parsed = $pt.tidy( Q:to[_END_] );
+		my $parsed = $pt.get-tree( Q:to[_END_] );
 sub agm( $a, $g ) {
     $a = $g ?? $a !! agm(|@$_)
         given ($a + $g)/2, sqrt $a * $g;
@@ -906,7 +906,7 @@ _END_
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 constant number-of-decimals = 100;
  
 multi sqrt(Int $n) {
@@ -938,7 +938,7 @@ _END_
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 my $a = 1 + i;
 my $b = pi + 1.25i;
  
@@ -951,7 +951,7 @@ _END_
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 my Int $a = get.floor;
 my Int $b = get.floor;
  
@@ -971,7 +971,7 @@ subtest {
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q:to[_END_] );
+		my $parsed = $pt.get-tree( Q:to[_END_] );
 for 2..2**19 -> $candidate {
     my $sum = 1 / $candidate;
     for 2 .. ceiling(sqrt($candidate)) -> $factor {
@@ -990,7 +990,7 @@ _END_
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q:to[_END_] );
+		my $parsed = $pt.get-tree( Q:to[_END_] );
 for 1.0, 1.1, 1.2 ... 10 { .say }
 _END_
 		isa-ok $parsed, Q{Perl6::Document};
@@ -1000,7 +1000,7 @@ _END_
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 # the prefix:<|> operator (called "slip") can be used to interpolate arrays into a list:
 sub cat-arrays(@a, @b) { 
 	|@a, |@b 
@@ -1019,7 +1019,7 @@ subtest {
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q:to[_END_] );
+		my $parsed = $pt.get-tree( Q:to[_END_] );
 my @array = <apple orange banana>;
  
 say @array.elems;  # 3
@@ -1033,7 +1033,7 @@ _END_
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q:to[_END_] );
+		my $parsed = $pt.get-tree( Q:to[_END_] );
 my @infinite = 1 .. Inf;  # 1, 2, 3, 4, ...
  
 say @infinite[5000];  # 5001
@@ -1047,7 +1047,7 @@ subtest {
 	plan 1;
 
 	# XXX Synthesize JSON::Tiny
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 class JSON::Tiny { sub from-json is export { } }
 #use JSON::Tiny;
  
@@ -1072,7 +1072,7 @@ _END_
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 my @arr;
  
 push @arr, 1;
@@ -1091,7 +1091,7 @@ subtest {
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q:to[_END_] );
+		my $parsed = $pt.get-tree( Q:to[_END_] );
 my %h1 = key1 => 'val1', 'key-2' => 2, three => -238.83, 4 => 'val3';
 my %h2 = 'key1', 'val1', 'key-2', 2, 'three', -238.83, 4, 'val3';
 _END_
@@ -1101,7 +1101,7 @@ _END_
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q:to[_END_] );
+		my $parsed = $pt.get-tree( Q:to[_END_] );
 my @a = 1..5;
 my @b = 'a'..'e';
 my %h = @a Z=> @b;
@@ -1112,7 +1112,7 @@ _END_
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q:to[_END_] );
+		my $parsed = $pt.get-tree( Q:to[_END_] );
 my %h1;
 say %h1{'key1'};
 say %h1<key1>;
@@ -1125,7 +1125,7 @@ _END_
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q:to[_END_] );
+		my $parsed = $pt.get-tree( Q:to[_END_] );
 my $h = {key1 => 'val1', 'key-2' => 2, three => -238.83, 4 => 'val3'};
 say $h<key1>;
 _END_
@@ -1135,7 +1135,7 @@ _END_
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q:to[_END_] );
+		my $parsed = $pt.get-tree( Q:to[_END_] );
 my %hash{Any}; # same as %hash{*}
 class C {};
 my %cash{C};
@@ -1147,7 +1147,7 @@ _END_
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q:to[_END_] );
+		my $parsed = $pt.get-tree( Q:to[_END_] );
 my @infinite = 1 .. Inf;  # 1, 2, 3, 4, ...
  
 say @infinite[5000];  # 5001
@@ -1160,7 +1160,7 @@ _END_
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 my %pairs = hello => 13, world => 31, '!' => 71;
  
 for %pairs.kv -> $k, $v {
@@ -1179,7 +1179,7 @@ _END_
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 constant MAX_N  = 20;
 constant TRIALS = 100;
  
@@ -1205,7 +1205,7 @@ _END_
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 multi mean([]){ Failure.new('mean on empty list is not defined') }; # Failure-objects are lazy exceptions
 multi mean (@a) { ([+] @a) / @a }
 _END_
@@ -1215,7 +1215,7 @@ _END_
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 # Of course, you can still use pi and 180.
 sub deg2rad { $^d * tau / 360 }
 sub rad2deg { $^r * 360 / tau }
@@ -1239,7 +1239,7 @@ _END_
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 sub tod2rad($_) { [+](.comb(/\d+/) Z* 3600,60,1) * tau / 86400 }
  
 sub rad2tod ($r) {
@@ -1261,7 +1261,7 @@ _END_
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 sub median {
   my @a = sort @_;
   return (@a[@a.end / 2] + @a[@a / 2]) / 2;
@@ -1273,7 +1273,7 @@ _END_
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 sub mode (*@a) {
     my %counts;
     ++%counts{$_} for @a;
@@ -1287,7 +1287,7 @@ _END_
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 sub A { ([+] @_) / @_ }
 sub G { ([*] @_) ** (1 / @_) }
 sub H { @_ / [+] 1 X/ @_ }
@@ -1305,7 +1305,7 @@ subtest {
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q:to[_END_] );
+		my $parsed = $pt.get-tree( Q:to[_END_] );
 sub rms(*@nums) { sqrt [+](@nums X** 2) / @nums }
  
 say rms 1..10;
@@ -1316,7 +1316,7 @@ _END_
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q:to[_END_] );
+		my $parsed = $pt.get-tree( Q:to[_END_] );
 sub rms { sqrt @_ R/ [+] @_ X** 2 }
 _END_
 		isa-ok $parsed, Q{Perl6::Document};
@@ -1326,7 +1326,7 @@ _END_
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 sub sma(Int \P where * > 0) returns Sub {
     sub ($x) {
         state @a = 0 xx P;

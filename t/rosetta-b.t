@@ -12,7 +12,7 @@ my $pt = Perl6::Tidy.new;
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 # For all positives integers from 1 to Infinity
 for 1 .. Inf -> $integer {
     # calculate the square of the integer
@@ -27,7 +27,7 @@ _END_
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 my $secret = q:to/END/;
     This task is to implement a program for encryption and decryption
     of plaintext using the simple alphabet of the Baconian cipher or
@@ -92,7 +92,7 @@ subtest {
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q:to[_END_] );
+		my $parsed = $pt.get-tree( Q:to[_END_] );
 sub balanced($s) {
     my $l = 0;
     for $s.comb {
@@ -117,7 +117,7 @@ _END_
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q:to[_END_] );
+		my $parsed = $pt.get-tree( Q:to[_END_] );
 sub balanced($s) {
     .none < 0 and .[*-1] == 0
         given [\+] '\\' «leg« $s.comb;
@@ -133,7 +133,7 @@ _END_
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q:to[_END_] );
+		my $parsed = $pt.get-tree( Q:to[_END_] );
 sub balanced($_ is copy) {
     Nil while s:g/'[]'//;
     $_ eq '';
@@ -149,7 +149,7 @@ _END_
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q:to[_END_] );
+		my $parsed = $pt.get-tree( Q:to[_END_] );
 grammar BalBrack { token TOP { '[' <TOP>* ']' } }
  
 my $n = prompt "Number of bracket pairs: ";
@@ -163,7 +163,7 @@ _END_
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 class BT {
     has @.coeff;
  
@@ -235,7 +235,7 @@ subtest {
 	plan 1;
 
 	# XXX Make up a 'Image::PNG::Portable' class
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 class Image::PNG::Portable { has ( $.width, $.height ); method set { }; method write { } }
 #use Image::PNG::Portable;
  
@@ -264,7 +264,7 @@ _END_
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 sub MAIN {
     my $buf = slurp("/tmp/favicon.ico", :bin);
     say buf-to-Base64($buf);
@@ -295,7 +295,7 @@ _END_
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 sub benford(@a) { bag +« flat @a».comb: /<( <[ 1..9 ]> )> <[ , . \d ]>*/ }
  
 sub show(%distribution) {
@@ -320,7 +320,7 @@ subtest {
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q:to[_END_] );
+		my $parsed = $pt.get-tree( Q:to[_END_] );
 sub bernoulli($n) {
     my @a;
     for 0..$n -> $m {
@@ -345,7 +345,7 @@ _END_
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q:to[_END_] );
+		my $parsed = $pt.get-tree( Q:to[_END_] );
 constant bernoulli = gather {
     my @a;
     for 0..* -> $m {
@@ -371,7 +371,7 @@ _END_
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q:to[_END_] );
+		my $parsed = $pt.get-tree( Q:to[_END_] );
 my sub infix:<bop>(\prev,\this) { this.key => this.key * (this.value - prev.value) }
  
 constant bernoulli = grep *.value, map { (.key => .value.[*-1]) }, do
@@ -387,7 +387,7 @@ _END_
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 sub best-shuffle(Str $orig) {
  
     my @s = $orig.comb;
@@ -419,7 +419,7 @@ _END_
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 say .fmt("%b") for 5, 50, 9000;
 _END_
 	isa-ok $parsed, Q{Perl6::Document};
@@ -431,7 +431,7 @@ subtest {
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q:to[_END_] );
+		my $parsed = $pt.get-tree( Q:to[_END_] );
 sub search (@a, $x --> Int) {
     binary_search { $x cmp @a[$^i] }, 0, @a.end
 }
@@ -454,7 +454,7 @@ _END_
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q:to[_END_] );
+		my $parsed = $pt.get-tree( Q:to[_END_] );
 sub binary_search (&p, Int $lo, Int $hi --> Int) {
     $lo <= $hi or fail;
     my Int $mid = ($lo + $hi) div 2;
@@ -472,7 +472,7 @@ _END_
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 # Perl 6 is perfectly fine with NUL *characters* in strings:
  
 my Str $s = 'nema' ~ 0.chr ~ 'problema!';
@@ -564,7 +564,7 @@ subtest {
 	plan 1;
 
 	# XXX class Digest::SHA exports 'sha256'
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 sub sha256 { }
 my $bitcoin-address = rx/
     <+alnum-[0IOl]> ** 26..*  # an address is at least 26 characters long
@@ -591,7 +591,7 @@ subtest {
 	plan 1;
 
 	# XXX class Digest::SHA exports sub sha256, sub rmd160
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 sub sha256 { }; sub rmd160 { }
 #use SSL::Digest;
  
@@ -626,7 +626,7 @@ _END_
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 class Pixel { has UInt ($.R, $.G, $.B) }
 class Bitmap {
     has UInt ($.width, $.height);
@@ -664,7 +664,7 @@ subtest {
 	plan 1;
 
 	# XXX Create a shell 'Bitmap' class.. yes, just above but separation...
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 class Pixel { has UInt ($.R, $.G, $.B) }
 class Bitmap { has ($.width, $.height, @!data); method fill { }; method pixel { }; method set-pixel { }; method get-pixel { } }
 sub line(Bitmap $bitmap, $x0 is copy, $x1 is copy, $y0 is copy, $y1 is copy) {
@@ -705,7 +705,7 @@ subtest {
 	plan 1;
 
 	# XXX Create a shell 'Bitmap' class.. yes, just above but separation...
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 use MONKEY-TYPING;
 class Pixel { has UInt ($.R, $.G, $.B) }
 class Bitmap { has ($.width, $.height, @!data); method fill { }; method pixel { }; method set-pixel { }; method get-pixel { } }
@@ -751,7 +751,7 @@ _END_
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 class Pixel { has uint8 ($.R, $.G, $.B) }
 class Bitmap {
     has UInt ($.width, $.height);
@@ -789,7 +789,7 @@ _END_
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 sub encode-ascii(Str $s) {
     my @b = $s.ords».fmt("%07b")».comb;
     @b.push(0) until @b %% 8;   # padding
@@ -811,7 +811,7 @@ _END_
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 constant MAXINT = uint.Range.max;
 constant BITS = MAXINT.base(2).chars;
 
@@ -847,7 +847,7 @@ _END_
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 my Bool $crashed = False;
 my $val = 0 but True;
 _END_
@@ -857,7 +857,7 @@ _END_
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 sub point (Int $index) {
     my $ix = $index % 32;
     if $ix +& 1
@@ -887,7 +887,7 @@ _END_
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 grammar BraceExpansion {
     token TOP  { ( <meta> | . )* }
     token meta { '{' <alts> '}' | \\ .  }
@@ -939,7 +939,7 @@ _END_
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 class Foo {
     has $!shyguy = 42;
 }
@@ -953,7 +953,7 @@ _END_
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 constant size = 100;
 constant particlenum = 1_000;
  
@@ -1033,7 +1033,7 @@ _END_
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 my $size = 4;
 my @secret = pick $size, '1' .. '9';
  
@@ -1062,7 +1062,7 @@ _END_
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 # we use the [] reduction meta operator along with the Cartesian Product
 # operator X to create the Cartesian Product of four times [1..9] and then get
 # all the elements where the number of unique digits is four.

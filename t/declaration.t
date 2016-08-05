@@ -18,14 +18,14 @@ subtest {
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.tidy( Q{my $a} );
+			my $parsed = $pt.get-tree( Q{my $a} );
 			isa-ok $parsed, Q{Perl6::Document};
 		}, Q{my $a};
 
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.tidy( Q{our $a} );
+			my $parsed = $pt.get-tree( Q{our $a} );
 			isa-ok $parsed, Q{Perl6::Document};
 		}, Q{our $a};
 
@@ -34,7 +34,7 @@ subtest {
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.tidy( Q{state $a} );
+			my $parsed = $pt.get-tree( Q{state $a} );
 			isa-ok $parsed, Q{Perl6::Document};
 		}, Q{state $a};
 
@@ -49,21 +49,21 @@ subtest {
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.tidy( Q{my Int $a} );
+			my $parsed = $pt.get-tree( Q{my Int $a} );
 			isa-ok $parsed, Q{Perl6::Document};
 		}, Q{regular};
 
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.tidy( Q{my Int:D $a = 0} );
+			my $parsed = $pt.get-tree( Q{my Int:D $a = 0} );
 			isa-ok $parsed, Q{Perl6::Document};
 		}, Q{defined};
 
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.tidy( Q{my Int:U $a} );
+			my $parsed = $pt.get-tree( Q{my Int:U $a} );
 			isa-ok $parsed, Q{Perl6::Document};
 		}, Q{undefined};
 	}, Q{typed};
@@ -74,7 +74,7 @@ subtest {
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.tidy( Q{my $a where 1} );
+			my $parsed = $pt.get-tree( Q{my $a where 1} );
 			isa-ok $parsed, Q{Perl6::Document};
 		}, Q{my $a where 1};
 	}, Q{constrained};
@@ -86,15 +86,14 @@ subtest {
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q[sub foo {}] );
+		my $parsed = $pt.get-tree( Q[sub foo {}] );
 		isa-ok $parsed, Q{Perl6::Document};
 	}, Q{sub foo {}};
 
 	subtest {
 		plan 1;
 
-		diag Q[Whitespace sensitivity - 'returns Int{&body}'];
-		my $parsed = $pt.tidy( Q[sub foo returns Int {}] );
+		my $parsed = $pt.get-tree( Q[sub foo returns Int {}] );
 		isa-ok $parsed, Q{Perl6::Document};
 	}, Q{sub foo returns Int {}};
 }, Q{subroutine};
@@ -108,15 +107,14 @@ subtest {
 		subtest {
 			plan 1;
 
-			diag "Interesting, 'unit module foo' is illegal.";
-			my $parsed = $pt.tidy( Q[unit module foo;] );
+			my $parsed = $pt.get-tree( Q[unit module foo;] );
 			isa-ok $parsed, Q{Perl6::Document};
 		}, Q{unit module foo;};
 
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.tidy( Q[module foo{}] );
+			my $parsed = $pt.get-tree( Q[module foo{}] );
 			isa-ok $parsed, Q{Perl6::Document};
 		}, Q{module foo {}};
 	}, q{module};
@@ -127,15 +125,14 @@ subtest {
 		subtest {
 			plan 1;
 
-			diag "Interesting, 'unit class foo' is illegal.";
-			my $parsed = $pt.tidy( Q[unit class foo;] );
+			my $parsed = $pt.get-tree( Q[unit class foo;] );
 			isa-ok $parsed, Q{Perl6::Document};
 		}, Q{unit class foo;};
 
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.tidy( Q[class foo{}] );
+			my $parsed = $pt.get-tree( Q[class foo{}] );
 			isa-ok $parsed, Q{Perl6::Document};
 		}, Q{class foo {}};
 	}, Q{class};
@@ -146,15 +143,14 @@ subtest {
 		subtest {
 			plan 1;
 
-			diag "Interesting, 'unit role foo' is illegal.";
-			my $parsed = $pt.tidy( Q[unit role foo;] );
+			my $parsed = $pt.get-tree( Q[unit role foo;] );
 			isa-ok $parsed, Q{Perl6::Document};
 		}, Q{unit role foo;};
 
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.tidy( Q[role foo{}] );
+			my $parsed = $pt.get-tree( Q[role foo{}] );
 			isa-ok $parsed, Q{Perl6::Document};
 		}, Q{role foo {}};
 	}, Q{role};
@@ -162,8 +158,7 @@ subtest {
 	subtest {
 		plan 1;
 
-		diag "There may be a Q[] bug lurking here.";
-		my $parsed = $pt.tidy( Q[my regex foo{a}] );
+		my $parsed = $pt.get-tree( Q[my regex foo{a}] );
 		isa-ok $parsed, Q{Perl6::Document};
 	}, Q{my regex foo {a} (null regex not allowed)};
 
@@ -173,14 +168,14 @@ subtest {
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.tidy( Q[unit grammar foo;] );
+			my $parsed = $pt.get-tree( Q[unit grammar foo;] );
 			isa-ok $parsed, Q{Perl6::Document};
 		}, Q{unit grammar foo;};
 
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.tidy( Q[grammar foo{}] );
+			my $parsed = $pt.get-tree( Q[grammar foo{}] );
 			isa-ok $parsed, Q{Perl6::Document};
 		}, Q{grammar foo {}};
 	}, Q{grammar};
@@ -188,14 +183,14 @@ subtest {
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q[my token foo{a}] );
+		my $parsed = $pt.get-tree( Q[my token foo{a}] );
 		isa-ok $parsed, Q{Perl6::Document};
 	}, Q{my token foo {a} (null regex not allowed, must give it content.)};
 
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q[my rule foo{a}] );
+		my $parsed = $pt.get-tree( Q[my rule foo{a}] );
 		isa-ok $parsed, Q{Perl6::Document};
 	}, Q{my rule foo {a}};
 }, Q{braced things};

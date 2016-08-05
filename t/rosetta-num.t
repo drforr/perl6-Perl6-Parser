@@ -15,7 +15,7 @@ subtest {
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q:to[END] );
+		my $parsed = $pt.get-tree( Q:to[END] );
 my @doors = False xx 101;
  
 (.=not for @doors[0, $_ ... 100]) for 1..100;
@@ -28,7 +28,7 @@ END
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q:to[END] );
+		my $parsed = $pt.get-tree( Q:to[END] );
 say "Door $_ is open" for map {$^n ** 2}, 1..10;
 END
 		isa-ok $parsed, Q{Perl6::Document};
@@ -38,7 +38,7 @@ END
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q:to[END] );
+		my $parsed = $pt.get-tree( Q:to[END] );
 say "Door $_ is open" for 1..10 X** 2;
 END
 		isa-ok $parsed, Q{Perl6::Document};
@@ -47,7 +47,7 @@ END
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q:to[END] );
+		my $parsed = $pt.get-tree( Q:to[END] );
 say "Door $_ is ", <closed open>[.sqrt == .sqrt.floor] for 1..100;
 END
 		isa-ok $parsed, Q{Perl6::Document};
@@ -60,7 +60,7 @@ subtest {
 
 # The parser also recursively parses use'd classes, so since Term::termios might
 # not be present on all systems, stub it out.
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 class Term::termios { has $fd; method getattr {}; method unset_lflags { }; method unset_iflags { }; method setattr { } }
 #use Term::termios;
 
@@ -183,7 +183,7 @@ _END_
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 class Term::termios { has $fd; method getattr {}; method unset_lflags { }; method unset_iflags { }; method setattr { } }
 #use Term::termios;
  
@@ -305,7 +305,7 @@ _END_
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 use MONKEY-SEE-NO-EVAL;
  
 say "Here are your digits: ", 
@@ -339,7 +339,7 @@ _END_
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 use MONKEY-SEE-NO-EVAL;
 
 my @digits;
@@ -391,7 +391,7 @@ _END_
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q:to[_END_] );
+	my $parsed = $pt.get-tree( Q:to[_END_] );
 my @todo = $[1];
 my @sums = 0;
 sub nextrow($n) {
@@ -431,7 +431,7 @@ subtest {
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q:to[_END_] );
+		my $parsed = $pt.get-tree( Q:to[_END_] );
 my $b = 99;
 
 repeat while --$b {
@@ -452,7 +452,7 @@ _END_
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q:to[_END_] );
+		my $parsed = $pt.get-tree( Q:to[_END_] );
 for 99...1 -> $bottles {
     sing $bottles, :wall;
     sing $bottles;
@@ -478,7 +478,7 @@ _END_
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.tidy( Q:to[_END_] );
+		my $parsed = $pt.get-tree( Q:to[_END_] );
 my @quantities = flat (99 ... 1), 'No more', 99;
 my @bottles = flat 'bottles' xx 98, 'bottle', 'bottles' xx 2;
 my @actions = flat 'Take one down, pass it around' xx 99,

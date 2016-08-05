@@ -12,7 +12,7 @@ my $pt = Perl6::Tidy.new;
 subtest {
 	plan 1;
 
-	my $parsed = $pt.tidy( Q:to[_EOF_] );
+	my $parsed = $pt.get-tree( Q:to[_EOF_] );
 =begin EMPTY
 =end EMPTY
 _EOF_
