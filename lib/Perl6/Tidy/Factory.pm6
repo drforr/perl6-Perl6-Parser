@@ -499,11 +499,11 @@ class Perl6::Tidy::Factory {
 			next if self.assert-hash-keys( $_, [< EXPR >] );
 			next if self.assert-Bool( $_ );
 		}
-		return True if self.assert-hash-keys( $parsed,
+		if self.assert-hash-keys( $parsed,
 				[< deftermnow initializer term_init >],
 				[< trait >] );
-		return True if self.assert-Int( $parsed );
-		return True if self.assert-Bool( $parsed );
+		if self.assert-Int( $parsed );
+		if self.assert-Bool( $parsed );
 )
 		if self.assert-hash-keys( $p, [< EXPR >] ) {
 			self._EXPR( $p.hash.<EXPR> )
@@ -512,14 +512,12 @@ class Perl6::Tidy::Factory {
 
 	method _Args( Mu $p ) {
 #`(
-		return True if self.assert-hash-keys( $p,
-				[< invocant semiarglist >] );
-		return True if self.assert-hash-keys( $p, [< semiarglist >] );
-		return True if self.assert-hash-keys( $p, [ ],
-				[< semiarglist >] );
-		return True if self.assert-hash-keys( $p, [< EXPR >] );
-		return True if self.assert-Bool( $p );
-		return True if self.assert-Str( $p );
+		if self.assert-hash-keys( $p, [< invocant semiarglist >] );
+		if self.assert-hash-keys( $p, [< semiarglist >] );
+		if self.assert-hash-keys( $p, [ ], [< semiarglist >] );
+		if self.assert-hash-keys( $p, [< EXPR >] );
+		if self.assert-Bool( $p );
+		if self.assert-Str( $p );
 )
 		if self.assert-hash-keys( $p, [< arglist >] ) {
 			self._ArgList( $p.hash.<arglist> );
@@ -527,6 +525,7 @@ class Perl6::Tidy::Factory {
 	}
 
 	method _Assertion( Mu $p ) returns Bool {
+say "Assertion fired";
 		return True if self.assert-hash-keys( $p, [< var >] );
 		return True if self.assert-hash-keys( $p, [< longname >] );
 		return True if self.assert-hash-keys( $p, [< cclass_elem >] );
@@ -535,11 +534,13 @@ class Perl6::Tidy::Factory {
 	}
 
 	method _Atom( Mu $p ) returns Bool {
+say "Atom fired";
 		return True if self.assert-hash-keys( $p, [< metachar >] );
 		return True if self.assert-Str( $p );
 	}
 
 	method _Babble( Mu $p ) returns Bool {
+say "Babble fired";
 		# _B is a Bool leaf
 		return True if self.assert-hash-keys( $p,
 				[< B >], [< quotepair >] );
@@ -550,6 +551,7 @@ class Perl6::Tidy::Factory {
 	}
 
 	method _BackSlash( Mu $p ) returns Bool {
+say "BackSlash fired";
 		return True if self.assert-hash-keys( $p, [< sym >] );
 		return True if self.assert-Str( $p );
 	}
@@ -563,6 +565,7 @@ class Perl6::Tidy::Factory {
 	}
 
 	method _Block( Mu $p ) returns Bool {
+say "Block fired";
 		if self.assert-hash-keys( $p, [< blockoid >] ) {
 #			self._Blockoid( $p.hash.<blockoid> )
 Perl6::Unimplemented.new(:content( "_Declarator") );
@@ -570,6 +573,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _Blockoid( Mu $p ) returns Bool {
+say "Blockoid fired";
 		if self.assert-hash-keys( $p, [< statementlist >] ) {
 #			self._StatementList( $p.hash.<statementlist> )
 Perl6::Unimplemented.new(:content( "_Declarator") );
@@ -577,6 +581,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _Blorst( Mu $p ) returns Bool {
+say "Blorst fired";
 		if self.assert-hash-keys( $p, [< statement >] ) {
 #			self._Statement( $p.hash.<statement> )
 Perl6::Unimplemented.new(:content( "_Declarator") );
@@ -588,6 +593,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _Bracket( Mu $p ) returns Bool {
+say "Bracket fired";
 		if self.assert-hash-keys( $p, [< semilist >] ) {
 #			self._SemiList( $p.hash.<semilist> )
 Perl6::Unimplemented.new(:content( "_Declarator") );
@@ -595,6 +601,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _CClassElem( Mu $p ) returns Bool {
+say "CClassElem fired";
 		for $p.list {
 			# _Sign is a Str/Bool leaf
 			next if self.assert-hash-keys( $_,
@@ -607,11 +614,13 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _CharSpec( Mu $p ) returns Bool {
+say "CharSpec fired";
 # XXX work on this, of course.
 		return True if $p.list;
 	}
 
 	method _Circumfix( Mu $p ) returns Bool {
+say "Circumfix fired";
 		return True if self.assert-hash-keys( $p, [< nibble >] );
 		return True if self.assert-hash-keys( $p, [< pblock >] );
 		return True if self.assert-hash-keys( $p, [< semilist >] );
@@ -627,6 +636,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _CodeBlock( Mu $p ) returns Bool {
+say "CodeBlock fired";
 		if self.assert-hash-keys( $p, [< block >] ) {
 #			self._Block( $p.hash.<block> )
 Perl6::Unimplemented.new(:content( "_Declarator") );
@@ -634,6 +644,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _Coercee( Mu $p ) returns Bool {
+say "Coercee fired";
 		if self.assert-hash-keys( $p, [< semilist >] ) {
 #			self._SemiList( $p.hash.<semilist> )
 Perl6::Unimplemented.new(:content( "_Declarator") );
@@ -641,6 +652,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _ColonCircumfix( Mu $p ) returns Bool {
+say "ColonCircumfix fired";
 		if self.assert-hash-keys( $p, [< circumfix >] ) {
 #			self._Circumfix( $p.hash.<circumfix> )
 Perl6::Unimplemented.new(:content( "_Declarator") );
@@ -648,6 +660,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _ColonPair( Mu $p ) {
+say "ColonPair fired";
 		return True if self.assert-hash-keys( $p,
 				     [< identifier coloncircumfix >] );
 		if self.assert-hash-keys( $p, [< identifier >] ) {
@@ -665,6 +678,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _ColonPairs( Mu $p ) {
+say "ColonPairs fired";
 		if $p ~~ Hash {
 			return True if $p.<D>;
 			return True if $p.<U>;
@@ -672,6 +686,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _Contextualizer( Mu $p ) {
+say "Contextualizer fired";
 		# _Sigil is a Str leaf
 		return True if self.assert-hash-keys( $p,
 				[< coercee circumfix sigil >] );
@@ -689,33 +704,29 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 #`(
 		if self.assert-hash-keys( $p,
 				[< deftermnow initializer term_init >],
-				[< trait >] ) {
-Perl6::Unimplemented.new(:content( "_Declarator") );
-		}
-		elsif self.assert-hash-keys( $p,
-				[< initializer signature >], [< trait >] ) {
-Perl6::Unimplemented.new(:content( "_Declarator") );
-		}
-		elsif self.assert-hash-keys( $p,
-				  [< initializer variable_declarator >],
-				  [< trait >] ) {
-Perl6::Unimplemented.new(:content( "_Declarator") );
-		}
-		elsif self.assert-hash-keys( $p,
-				[< regex_declarator >], [< trait >] ) {
-Perl6::Unimplemented.new(:content( "_Declarator") );
-		}
-		elsif self.assert-hash-keys( $p,
-				[< routine_declarator >], [< trait >] ) {
-Perl6::Unimplemented.new(:content( "_Declarator") );
-		}
-		elsif self.assert-hash-keys( $p,
-				[< signature >], [< trait >] ) {
-Perl6::Unimplemented.new(:content( "_Declarator") );
-		}
+				[< trait >] );
+		if self.assert-hash-keys( $p,
+				[< initializer signature >], [< trait >] );
+		if self.assert-hash-keys( $p,
+				[< regex_declarator >], [< trait >] );
+		if self.assert-hash-keys( $p,
+				[< routine_declarator >], [< trait >] );
+		if self.assert-hash-keys( $p, [< signature >], [< trait >] );
 )
 
 		if self.assert-hash-keys( $p,
+				  [< initializer variable_declarator >],
+				  [< trait >] ) {
+			(
+				self._VariableDeclarator(
+					$p.hash.<variable_declarator>
+				),
+				self._Initializer(
+					$p.hash.<initializer>
+				)
+			)
+		}
+		elsif self.assert-hash-keys( $p,
 				[< variable_declarator >], [< trait >] ) {
 			self._VariableDeclarator(
 				$p.hash.<variable_declarator>
@@ -724,6 +735,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _DECL( Mu $p ) {
+say "DECL fired";
 		return True if self.assert-hash-keys( $p,
 				[< deftermnow initializer term_init >],
 				[< trait >] );
@@ -755,6 +767,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _DecNumber( Mu $p ) {
+say "DecNumber fired";
 		# _Coeff is a Str/Int leaf
 		# _Frac is a Str/Int leaf
 		# _Int is a Str/Int leaf
@@ -779,11 +792,13 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _DefLongName( Mu $p ) {
+say "DefLongName fired";
 		return True if self.assert-hash-keys( $p,
 				[< name >], [< colonpair >] );
 	}
 
 	method _DefTerm( Mu $p ) {
+say "DefTerm fired";
 		return True if self.assert-hash-keys( $p,
 				[< identifier colonpair >] );
 		return True if self.assert-hash-keys( $p,
@@ -791,6 +806,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _DefTermNow( Mu $p ) {
+say "DefTermNow fired";
 		if self.assert-hash-keys( $p, [< defterm >] ) {
 #			self._DefTerm( $p.hash.<defterm> )
 Perl6::Unimplemented.new(:content( "_Declarator") );
@@ -798,11 +814,13 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _DeSigilName( Mu $p ) {
+say "DeSigilName fired";
 		return True if self.assert-hash-keys( $p, [< longname >] );
 		return True if $p.Str;
 	}
 
 	method _Dig( Mu $p ) {
+say "Dig fired";
 		for $p.list {
 			# UTF-8....
 			if $_ {
@@ -816,14 +834,17 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _Doc( Mu $p ) returns Bool {
+say "Doc fired";
 		$p.hash.<doc>.Bool
 	}
 
 	method _Dotty( Mu $p ) {
+say "Dotty fired";
 		return True if self.assert-hash-keys( $p, [< sym dottyop O >] );
 	}
 
 	method _DottyOp( Mu $p ) {
+say "DottyOp fired";
 		return True if self.assert-hash-keys( $p,
 				[< sym postop >], [< O >] );
 		if self.assert-hash-keys( $p, [< methodop >] ) {
@@ -837,6 +858,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _DottyOpish( Mu $p ) {
+say "DottyOpish fired";
 		if self.assert-hash-keys( $p, [< term >] ) {
 #			self._Term( $p.hash.<term> )
 Perl6::Unimplemented.new(:content( "_Declarator") );
@@ -844,6 +866,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _E1( Mu $p ) {
+say "E1 fired";
 		if self.assert-hash-keys( $p, [< scope_declarator >] ) {
 #			self._ScopeDeclarator( $p.hash.<scope_declarator> )
 Perl6::Unimplemented.new(:content( "_Declarator") );
@@ -851,20 +874,24 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _E2( Mu $p ) {
+say "E2 fired";
 		return True if self.assert-hash-keys( $p, [< infix OPER >] );
 	}
 
 	method _E3( Mu $p ) {
+say "E3 fired";
 		return True if self.assert-hash-keys( $p, [< postfix OPER >],
 				[< postfix_prefix_meta_operator >] );
 	}
 
 	method _Else( Mu $p ) {
+say "Else fired";
 		return True if self.assert-hash-keys( $p, [< sym blorst >] );
 		return True if self.assert-hash-keys( $p, [< blockoid >] );
 	}
 
 	method _EScale( Mu $p ) {
+say "EScale fired";
 		# _DecInt is a Str/Int leaf
 		# _Sign is a Str/Bool leaf
 		return True if self.assert-hash-keys( $p, [< sign decint >] );
@@ -893,6 +920,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 			}
 		}
 	}
+
 	method _EXPR( Mu $p ) {
 #`(
 		if $p.list {
@@ -962,42 +990,35 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 			if self.assert-hash-keys(
 					$p,
 					[< fake_infix OPER colonpair >] ) {
-Perl6::Unimplemented.new(:content( "_EXPR") );
 			}
 			elsif self.assert-hash-keys(
 					$p,
 					[< OPER dotty >],
 					[< postfix_prefix_meta_operator >] ) {
-Perl6::Unimplemented.new(:content( "_EXPR") );
 			}
 			elsif self.assert-hash-keys(
 					$p,
 					[< postfix OPER >],
 					[< postfix_prefix_meta_operator >] ) {
-Perl6::Unimplemented.new(:content( "_EXPR") );
 			}
 			elsif self.assert-hash-keys(
 					$p,
 					[< infix OPER >],
 					[< prefix_postfix_meta_operator >] ) {
-Perl6::Unimplemented.new(:content( "_EXPR") );
 			}
 			elsif self.assert-hash-keys(
 					$p,
 					[< prefix OPER >],
 					[< prefix_postfix_meta_operator >] ) {
-Perl6::Unimplemented.new(:content( "_EXPR") );
 			}
 			elsif self.assert-hash-keys(
 					$p,
 					[< postcircumfix OPER >],
 					[< postfix_prefix_meta_operator >] ) {
-Perl6::Unimplemented.new(:content( "_EXPR") );
 			}
 			elsif self.assert-hash-keys( $p,
 					[< OPER >],
 					[< infix_prefix_meta_operator >] ) {
-Perl6::Unimplemented.new(:content( "_EXPR") );
 			}
 		}
 		# _Triangle is a Str leaf
@@ -1081,6 +1102,7 @@ Perl6::Unimplemented.new(:content( "_EXPR") );
 	}
 
 	method _FakeInfix( Mu $p ) {
+say "FakeInfix fired";
 		if self.assert-hash-keys( $p, [< O >] ) {
 #			self._O( $p.hash.<O> )
 Perl6::Unimplemented.new(:content( "_Declarator") );
@@ -1088,6 +1110,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _FakeSignature( Mu $p ) {
+say "FakeSignature fired";
 		if self.assert-hash-keys( $p, [< signature >] ) {
 #			self._Signature( $p.hash.<signature> )
 Perl6::Unimplemented.new(:content( "_Declarator") );
@@ -1095,6 +1118,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _FatArrow( Mu $p ) {
+say "FatArrow fired";
 		# _Key is a Str leaf
 		return True if self.assert-hash-keys( $p, [< val key >] );
 	}
@@ -1108,6 +1132,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _Identifier( Mu $p ) {
+say "Identifier fired";
 		for $p.list {
 			next if self.assert-Str( $_ );
 		}
@@ -1116,8 +1141,8 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 
 	method _Infix( Mu $p ) {
 #`(
-		return True if self.assert-hash-keys( $p, [< EXPR O >] );
-		return True if self.assert-hash-keys( $p, [< infix OPER >] );
+		if self.assert-hash-keys( $p, [< EXPR O >] );
+		if self.assert-hash-keys( $p, [< infix OPER >] );
 )
 		if self.assert-hash-keys( $p, [< sym O >] ) {
 			Perl6::Operator.new( :content( ~$p.hash.<sym>.Str ) )
@@ -1125,15 +1150,18 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _Infixish( Mu $p ) {
+say "Infixish fired";
 		return True if self.assert-hash-keys( $p, [< infix OPER >] );
 	}
 
 	method _InfixPrefixMetaOperator( Mu $p ) {
+say "InfixPrefixMetaOperator fired";
 		return True if self.assert-hash-keys( $p,
 			[< sym infixish O >] );
 	}
 
 	method _Initializer( Mu $p ) {
+say "Initializer fired";
 		return True if self.assert-hash-keys( $p, [< sym EXPR >] );
 		return True if self.assert-hash-keys( $p,
 			[< dottyopish sym >] );
@@ -1160,6 +1188,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _Invocant( Mu $p ) {
+say "Invocant fired";
 		CATCH {
 			when X::Multi::NoMatch { }
 		}
@@ -1177,6 +1206,7 @@ return True;
 	}
 
 	method _Left( Mu $p ) {
+say "Left fired";
 		if self.assert-hash-keys( $p, [< termseq >] ) {
 #			self._TermSeq( $p.hash.<termseq> )
 Perl6::Unimplemented.new(:content( "_Declarator") );
@@ -1194,6 +1224,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _MetaChar( Mu $p ) {
+say "MetaChar fired";
 		if self.assert-hash-keys( $p, [< sym >] ) {
 #			self._Sym( $p.hash.<sym> )
 Perl6::Unimplemented.new(:content( "_Declarator") );
@@ -1229,6 +1260,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _MethodDef( Mu $p ) {
+say "MethodDef fired";
 		return True if self.assert-hash-keys( $p,
 			     [< specials longname blockoid multisig >],
 			     [< trait >] );
@@ -1238,6 +1270,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _MethodOp( Mu $p ) {
+say "MethodOp fired";
 		return True if self.assert-hash-keys( $p, [< longname args >] );
 		if self.assert-hash-keys( $p, [< longname >] ) {
 #			self._LongName( $p.hash.<longname> )
@@ -1255,6 +1288,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _ModifierExpr( Mu $p ) {
+say "ModifierExpr fired";
 		if self.assert-hash-keys( $p, [< EXPR >] ) {
 #			self._EXPR( $p.hash.<EXPR> )
 Perl6::Unimplemented.new(:content( "_Declarator") );
@@ -1262,6 +1296,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _ModuleName( Mu $p ) {
+say "ModuleName fired";
 		if self.assert-hash-keys( $p, [< longname >] ) {
 #			self._LongName( $p.hash.<longname> )
 Perl6::Unimplemented.new(:content( "_Declarator") );
@@ -1269,12 +1304,14 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _MoreName( Mu $p ) {
+say "MoreName fired";
 		for $p.list {
 			next if self.assert-hash-keys( $_, [< identifier >] );
 		}
 	}
 
 	method _MultiDeclarator( Mu $p ) {
+say "MultiDeclarator fired";
 		return True if self.assert-hash-keys( $p,
 				[< sym routine_def >] );
 		return True if self.assert-hash-keys( $p,
@@ -1286,6 +1323,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _MultiSig( Mu $p ) {
+say "MultiSig fired";
 		if self.assert-hash-keys( $p, [< signature >] ) {
 #			self._Signature( $p.hash.<signature> )
 Perl6::Unimplemented.new(:content( "_Declarator") );
@@ -1293,6 +1331,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _NamedParam( Mu $p ) {
+say "NamedParam fired";
 		if self.assert-hash-keys( $p, [< param_var >] ) {
 #			self._ParamVar( $p.hash.<param_var> )
 Perl6::Unimplemented.new(:content( "_Declarator") );
@@ -1301,14 +1340,14 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 
 	method _Name( Mu $p ) {
 #`(
-		return True if self.assert-hash-keys( $p,
+		if self.assert-hash-keys( $p,
 			[< param_var type_constraint quant >],
 			[< default_value modifier trait post_constraint >] );
-		return True if self.assert-hash-keys( $p,
+		if self.assert-hash-keys( $p,
 			[< identifier >], [< morename >] );
-		return True if self.assert-hash-keys( $p, [< subshortname >] );
-		return True if self.assert-hash-keys( $p, [< morename >] );
-		return True if self.assert-Str( $p );
+		if self.assert-hash-keys( $p, [< subshortname >] );
+		if self.assert-hash-keys( $p, [< morename >] );
+		True if self.assert-Str( $p );
 )
 		if self.assert-Str( $p ) {
 			Perl6::Bareword.new(
@@ -1321,9 +1360,8 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 
 	method _Nibble( Mu $p ) {
 #`(
-		return True if self.assert-hash-keys( $p, [< termseq >] );
-		return True if $p.Str;
-		return True if $p.Bool;
+		if self.assert-hash-keys( $p, [< termseq >] );
+		if $p.Bool;
 )
 		if $p.Str {
 			$p.Str
@@ -1331,6 +1369,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _Nibbler( Mu $p ) {
+say "Nibbler fired";
 		if self.assert-hash-keys( $p, [< termseq >] ) {
 #			self._TermSeq( $p.hash.<termseq> )
 Perl6::Unimplemented.new(:content( "_Declarator") );
@@ -1342,6 +1381,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _Noun( Mu $p ) {
+say "Noun fired";
 		for $p.list {
 			next if self.assert-hash-keys( $_,
 				[< sigmaybe sigfinal quantifier atom >] );
@@ -1364,9 +1404,9 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 
 	method _Numish( Mu $p ) {
 #`(
-		return True if self.assert-hash-keys( $p, [< rad_number >] );
-		return True if self.assert-hash-keys( $p, [< dec_number >] );
-		return True if self.assert-Num( $p );
+		if self.assert-hash-keys( $p, [< rad_number >] );
+		if self.assert-hash-keys( $p, [< dec_number >] );
+		if self.assert-Num( $p );
 )
 
 		if self.assert-hash-keys( $p, [< integer >] ) {
@@ -1375,6 +1415,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _O( Mu $p ) {
+say "O fired";
 		CATCH {
 			when X::Multi::NoMatch { .resume }
 			#default { .resume }
@@ -1439,12 +1480,14 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _Op( Mu $p ) {
+say "Op fired";
 		return True if self.assert-hash-keys( $p,
 			     [< infix_prefix_meta_operator OPER >] );
 		return True if self.assert-hash-keys( $p, [< infix OPER >] );
 	}
 
 	method _OPER( Mu $p ) {
+say "OPER fired";
 		return True if self.assert-hash-keys( $p, [< sym dottyop O >] );
 		return True if self.assert-hash-keys( $p,
 				[< sym infixish O >] );
@@ -1459,11 +1502,13 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _PackageDeclarator( Mu $p ) {
+say "PackageDeclarator fired";
 		return True if self.assert-hash-keys( $p,
 				[< sym package_def >] );
 	}
 
 	method _PackageDef( Mu $p ) {
+say "PackageDef fired";
 		return True if self.assert-hash-keys( $p,
 				[< blockoid longname >], [< trait >] );
 		return True if self.assert-hash-keys( $p,
@@ -1473,6 +1518,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _Parameter( Mu $p ) {
+say "Parameter fired";
 		for $p.list {
 			next if self.assert-hash-keys( $_,
 				[< param_var type_constraint quant >],
@@ -1502,6 +1548,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _ParamVar( Mu $p ) {
+say "ParamVar fired";
 		return True if self.assert-hash-keys( $p,
 				[< name twigil sigil >] );
 		return True if self.assert-hash-keys( $p, [< name sigil >] );
@@ -1516,6 +1563,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _PBlock( Mu $p ) {
+say "PBlock fired";
 		return True if self.assert-hash-keys( $p,
 				     [< lambda blockoid signature >] );
 		if self.assert-hash-keys( $p, [< blockoid >] ) {
@@ -1525,17 +1573,20 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _PostCircumfix( Mu $p ) {
+say "PostCircumfix fired";
 		return True if self.assert-hash-keys( $p, [< nibble O >] );
 		return True if self.assert-hash-keys( $p, [< semilist O >] );
 		return True if self.assert-hash-keys( $p, [< arglist O >] );
 	}
 
 	method _Postfix( Mu $p ) {
+say "Postfix fired";
 		return True if self.assert-hash-keys( $p, [< dig O >] );
 		return True if self.assert-hash-keys( $p, [< sym O >] );
 	}
 
 	method _PostOp( Mu $p ) {
+say "PostOp fired";
 		return True if self.assert-hash-keys( $p,
 				[< sym postcircumfix O >] );
 		return True if self.assert-hash-keys( $p,
@@ -1543,6 +1594,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _Prefix( Mu $p ) {
+say "Prefix fired";
 		return True if self.assert-hash-keys( $p, [< sym O >] );
 	}
 
@@ -1551,25 +1603,26 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _QuantifiedAtom( Mu $p ) {
+say "QuantifiedAtom fired";
 		return True if self.assert-hash-keys( $p, [< sigfinal atom >] );
 	}
 
 	method _Quantifier( Mu $p ) {
+say "Quantifier fired";
 		return True if self.assert-hash-keys( $p,
 				[< sym min max backmod >] );
 		return True if self.assert-hash-keys( $p, [< sym backmod >] );
 	}
 
 	method _Quibble( Mu $p ) {
+say "Quibble fired";
 		return True if self.assert-hash-keys( $p, [< babble nibble >] );
 	}
 
 	method _Quote( Mu $p ) {
 #`(
-		return True if self.assert-hash-keys( $p,
-				[< sym quibble rx_adverbs >] );
-		return True if self.assert-hash-keys( $p,
-				[< sym rx_adverbs sibble >] );
+		if self.assert-hash-keys( $p, [< sym quibble rx_adverbs >] );
+		if self.assert-hash-keys( $p, [< sym rx_adverbs sibble >] );
 		if self.assert-hash-keys( $p, [< quibble >] ) {
 #			self._Quibble( $p.hash.<quibble> )
 Perl6::Unimplemented.new(:content( "_Declarator") );
@@ -1581,6 +1634,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _QuotePair( Mu $p ) {
+say "QuotePair fired";
 		for $p.list {
 			next if self.assert-hash-keys( $_, [< identifier >] );
 		}
@@ -1597,6 +1651,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _RadNumber( Mu $p ) {
+say "RadNumber fired";
 		return True if self.assert-hash-keys( $p,
 				[< circumfix bracket radix >], [< exp base >] );
 		return True if self.assert-hash-keys( $p,
@@ -1604,10 +1659,12 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _RegexDeclarator( Mu $p ) {
+say "RegexDeclarator fired";
 		return True if self.assert-hash-keys( $p, [< sym regex_def >] );
 	}
 
 	method _RegexDef( Mu $p ) {
+say "RegexDef fired";
 		return True if self.assert-hash-keys( $p,
 				[< deflongname nibble >],
 				[< signature trait >] );
@@ -1628,6 +1685,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _RoutineDeclarator( Mu $p ) {
+say "RoutineDeclarator fired";
 		return True if self.assert-hash-keys( $p,
 				[< sym method_def >] );
 		return True if self.assert-hash-keys( $p,
@@ -1635,6 +1693,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _RoutineDef( Mu $p ) {
+say "RoutineDef fired";
 		return True if self.assert-hash-keys( $p,
 				[< blockoid deflongname multisig >],
 				[< trait >] );
@@ -1649,6 +1708,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _RxAdverbs( Mu $p ) {
+say "RxAdverbs fired";
 		return True if self.assert-hash-keys( $p, [< quotepair >] );
 		return True if self.assert-hash-keys( $p, [], [< quotepair >] );
 	}
@@ -1659,22 +1719,11 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 		# XXX will turn out to be not true later on.
 		#
 		if self.assert-hash-keys( $p,
-				[< declarator DECL >], [< typename >] ) {
-#			Perl6::Scoped.new(
-#				:content(
-#					self._Declarator( $p.hash.<declarator> )
-#				)
-#			)
-Perl6::Unimplemented.new(:content( "_Declarator") );
-		}
-		elsif self.assert-hash-keys( $p,
 					[< multi_declarator DECL typename >] ) {
-Perl6::Unimplemented.new(:content( "_Scoped") );
 		}
 		elsif self.assert-hash-keys( $p,
 				[< package_declarator DECL >],
 				[< typename >] ) {
-Perl6::Unimplemented.new(:content( "_Scoped") );
 		}
 )
 		
@@ -1693,6 +1742,7 @@ Perl6::Unimplemented.new(:content( "_Scoped") );
 	}
 
 	method _SemiArgList( Mu $p ) {
+say "SemiArgList fired";
 #		if self.assert-hash-keys( $p, [< arglist >] ) {
 #			self._ArgList( $p.hash.<arglist> )
 Perl6::Unimplemented.new(:content( "_Declarator") );
@@ -1700,6 +1750,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _SemiList( Mu $p ) {
+say "SemiList fired";
 		for $p.list {
 			next if self.assert-hash-keys( $_, [< statement >] );
 		}
@@ -1708,6 +1759,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _Separator( Mu $p ) {
+say "Separator fired";
 		return True if self.assert-hash-keys( $p,
 				[< septype quantified_atom >] );
 	}
@@ -1721,11 +1773,13 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _Sibble( Mu $p ) {
+say "Sibble fired";
 		return True if self.assert-hash-keys( $p,
 				[< right babble left >] );
 	}
 
 	method _SigFinal( Mu $p ) {
+say "SigFinal fired";
 #		if self.assert-hash-keys( $p, [< normspace >] ) {
 #			self._NormSpace( $p.hash.<normspace> )
 Perl6::Unimplemented.new(:content( "_Declarator") );
@@ -1737,6 +1791,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _SigMaybe( Mu $p ) {
+say "SigMaybe fired";
 		return True if self.assert-hash-keys( $p,
 				[< parameter typename >],
 				[< param_sep >] );
@@ -1745,6 +1800,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _Signature( Mu $p ) {
+say "Signature fired";
 		return True if self.assert-hash-keys( $p,
 				[< parameter typename >],
 				[< param_sep >] );
@@ -1756,6 +1812,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _SMExpr( Mu $p ) {
+say "SMExpr fired";
 		if self.assert-hash-keys( $p, [< EXPR >] ) {
 #			self._EXPR( $p.hash.<EXPR> )
 Perl6::Unimplemented.new(:content( "_Declarator") );
@@ -1767,6 +1824,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _StatementControl( Mu $p ) {
+say "StatementControl fired";
 		return True if self.assert-hash-keys( $p,
 				[< block sym e1 e2 e3 >] );
 		return True if self.assert-hash-keys( $p,
@@ -1790,28 +1848,23 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 		for $p.list {
 			if self.assert-hash-keys( $_,
 					[< statement_mod_loop EXPR >] ) {
-Perl6::Unimplemented.new(:content( "_Statement") );
 			}
 			elsif self.assert-hash-keys( $_,
 					[< statement_mod_cond EXPR >] ) {
-Perl6::Unimplemented.new(:content( "_Statement") );
 			}
 			elsif self.assert-hash-keys( $_, [< EXPR >] ) {
 #				self._EXPR(
 #					$_.hash.<EXPR>
 #				)
-Perl6::Unimplemented.new(:content( "_Declarator") );
 			}
 			elsif self.assert-hash-keys( $_,
 					[< statement_control >] ) {
 #				self._StatementControl(
 #					$_.hash.<statement_control>
 #				)
-Perl6::Unimplemented.new(:content( "_Declarator") );
 			}
 			elsif self.assert-hash-keys( $_, [],
 					[< statement_control >] ) {
-Perl6::Unimplemented.new(:content( "_Statement") );
 			}
 		}
 )
@@ -1819,7 +1872,6 @@ Perl6::Unimplemented.new(:content( "_Statement") );
 #`(
 		if self.assert-hash-keys( $p, [< statement_control >] ) {
 #			self._StatementControl( $p.hash.<statement_control> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 )
 
@@ -1844,19 +1896,23 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _StatementModCond( Mu $p ) {
+say "StatementModCond fired";
 		return True if self.assert-hash-keys( $p,
 				[< sym modifier_expr >] );
 	}
 
 	method _StatementModLoop( Mu $p ) {
+say "StatementModLoop fired";
 		return True if self.assert-hash-keys( $p, [< sym smexpr >] )
 	}
 
 	method _StatementPrefix( Mu $p ) {
+say "StatementPrefix fired";
 		return True if self.assert-hash-keys( $p, [< sym blorst >] );
 	}
 
 	method _SubShortName( Mu $p ) {
+say "SubShortName fired";
 		if self.assert-hash-keys( $p, [< desigilname >] ) {
 #			self._DeSigilName( $p.hash.<desigilname> )
 Perl6::Unimplemented.new(:content( "_Declarator") );
@@ -1868,18 +1924,20 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 		for $p.list {
 			next if $_.Str;
 		}
-		return True if $p.Bool and $p.Str eq '+';
-		return True if $p.Bool and $p.Str eq '';
-		return True if self.assert-Str( $p );
+		if $p.Bool and $p.Str eq '+';
+		if $p.Bool and $p.Str eq '';
 )
-		Perl6::Bareword.new(
-			:content(
-				$p.Str
+		if $p.Str {
+			Perl6::Bareword.new(
+				:content(
+					$p.Str
+				)
 			)
-		),
+		}
 	}
 
 	method _Term( Mu $p ) {
+say "Term fired";
 		if self.assert-hash-keys( $p, [< methodop >] ) {
 #			self._MethodOp( $p.hash.<methodop> )
 Perl6::Unimplemented.new(:content( "_Declarator") );
@@ -1887,12 +1945,14 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _TermAlt( Mu $p ) {
+say "TermAlt fired";
 		for $p.list {
 			next if self.assert-hash-keys( $_, [< termconj >] );
 		}
 	}
 
 	method _TermAltSeq( Mu $p ) {
+say "TermAltSeq fired";
 		if self.assert-hash-keys( $p, [< termconjseq >] ) {
 #			self._TermConjSeq( $p.hash.<termconjseq> )
 Perl6::Unimplemented.new(:content( "_Declarator") );
@@ -1900,39 +1960,41 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _TermConj( Mu $p ) {
+say "TermConj fired";
 		for $p.list {
 			next if self.assert-hash-keys( $_, [< termish >] );
 		}
 	}
 
 	method _TermConjSeq( Mu $p ) {
+say "TermConjSeq fired";
 		for $p.list {
 			next if self.assert-hash-keys( $_, [< termalt >] );
 		}
 		if self.assert-hash-keys( $p, [< termalt >] ) {
 #			self._TermAlt( $p.hash.<termalt> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 	}
 
 	method _TermInit( Mu $p ) {
+say "TermInit fired";
 		return True if self.assert-hash-keys( $p, [< sym EXPR >] );
 	}
 
 	method _Termish( Mu $p ) {
+say "Termish fired";
 		for $p.list {
 			next if self.assert-hash-keys( $_, [< noun >] );
 		}
 		if self.assert-hash-keys( $p, [< noun >] ) {
 #			self._Noun( $p.hash.<noun> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 	}
 
 	method _TermSeq( Mu $p ) {
+say "TermSeq fired";
 		if self.assert-hash-keys( $p, [< termaltseq >] ) {
 #			self._TermAltSeq( $p.hash.<termaltseq> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 	}
 
@@ -1941,21 +2003,21 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _TypeConstraint( Mu $p ) {
+say "TypeConstraint fired";
 		for $p.list {
 			next if self.assert-hash-keys( $_, [< typename >] );
 			next if self.assert-hash-keys( $_, [< value >] );
 		}
 		if self.assert-hash-keys( $p, [< value >] ) {
 #			self._Value( $p.hash.<value> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 		elsif self.assert-hash-keys( $p, [< typename >] ) {
 #			self._TypeName( $p.hash.<typename> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 	}
 
 	method _TypeDeclarator( Mu $p ) {
+say "TypeDeclarator fired";
 		return True if self.assert-hash-keys( $p,
 				[< sym initializer variable >], [< trait >] );
 		return True if self.assert-hash-keys( $p,
@@ -1965,6 +2027,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _TypeName( Mu $p ) {
+say "TypeName fired";
 		for $p.list {
 			next if self.assert-hash-keys( $_,
 					[< longname colonpairs >],
@@ -1981,6 +2044,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _Val( Mu $p ) {
+say "Val fired";
 		return True if self.assert-hash-keys( $p,
 				[< prefix OPER >],
 				[< prefix_postfix_meta_operator >] );
@@ -1998,6 +2062,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _Value( Mu $p ) {
+say "Value fired";
 		if self.assert-hash-keys( $p, [< number >] ) {
 #			self._Number( $p.hash.<number> )
 Perl6::Unimplemented.new(:content( "_Declarator") );
@@ -2009,6 +2074,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	}
 
 	method _Var( Mu $p ) {
+say "Var fired";
 		return True if self.assert-hash-keys( $p,
 				[< sigil desigilname >] );
 		if self.assert-hash-keys( $p, [< variable >] ) {
@@ -2023,7 +2089,6 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 				[< semilist variable shape >],
 				[< postcircumfix signature trait
 				   post_constraint >] ) {
-Perl6::Unimplemented.new(:content( "_VariableDeclarator") );
 		}
 )
 
@@ -2092,10 +2157,10 @@ Perl6::Unimplemented.new(:content( "_VariableDeclarator") );
 			:headless( $desigilname )
 		);
 		return $leaf;
-
 	}
 
 	method _Version( Mu $p ) {
+say "Version fired";
 		return True if self.assert-hash-keys( $p, [< vnum vstr >] );
 	}
 
@@ -2104,6 +2169,7 @@ Perl6::Unimplemented.new(:content( "_VariableDeclarator") );
 	}
 
 	method _VNum( Mu $p ) {
+say "VNum fired";
 		for $p.list {
 			next if self.assert-Int( $_ );
 		}
@@ -2114,6 +2180,7 @@ Perl6::Unimplemented.new(:content( "_VariableDeclarator") );
 	}
 
 	method _XBlock( Mu $p ) returns Bool {
+say "XBlock fired";
 		for $p.list {
 			next if self.assert-hash-keys( $_, [< pblock EXPR >] );
 		}
