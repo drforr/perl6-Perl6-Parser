@@ -20,7 +20,16 @@ subtest {
 	plan 2;
 
 	subtest {
-		plan 5;
+		plan 6;
+
+		subtest {
+			plan 1;
+
+			my $parsed = $pt.parse-source( Q:to[_END_] );
+sub foo( ) { }
+_END_
+			ok $pt.validate( $parsed );
+		}, Q{empty};
 
 		subtest {
 			plan 1;

@@ -177,7 +177,7 @@ role Branching {
 }
 
 role Token {
-	has $.content;
+	has $.content is required;
 	method perl6( $f ) {
 		~$.content
 	}
@@ -234,8 +234,6 @@ class Perl6::PackageName does Token {
 #
 class Perl6::Semicolon does Token {
 	submethod BUILD() { $!content = Q{;} }
-}
-class Perl6::WS does Token {
 }
 
 class Perl6::Variable {
@@ -391,70 +389,13 @@ class Perl6::Tidy::Factory {
 		say "{$p.from} {$p.to} [{substr($p.orig,$p.from,$p.to-$p.from)}]";
 	}
 
-	method ws-at-start( Mu $p ) {
-		my $from = $p.from;
-		my $to   = $p.to;
-		my $orig = $p.orig;
-		my $key  = substr( $orig, $from, $to - $from );
-		
-		if $key ~~ m/^ ( \s+ ) / {
-			Perl6::WS.new(
-				:content(
-					~$0
-				)
-			)
-		}
-	}
-
-	method ws-before( Mu $p ) {
-		my $from = $p.from;
-		my $to   = $p.to;
-		my $orig = $p.orig;
-		my $key  = substr( $orig, 0, $from );
-		
-		if $key ~~ / ( \s+ ) $/ {
-			Perl6::WS.new(
-				:content(
-					~$0
-				)
-			)
-		}
-	}
-
-	method ws-after( Mu $p ) {
-		my $from = $p.from;
-		my $to   = $p.to;
-		my $orig = $p.orig;
-		my $key  = substr( $orig, $to, $orig.chars - $from );
-		
-		if $key ~~ /^ ( \s+ ) / {
-			Perl6::WS.new(
-				:content(
-					~$0
-				)
-			)
-		}
-	}
-
 	method semicolon-after( Mu $p ) {
 		my $to   = $p.to;
 		my $orig = $p.orig;
 		my $key  = substr($orig, $to, $orig.chars);
 
-		if $key ~~ /^ ( \s* ) \; / {
-			if $0 and $0 ne '' {
-				return (
-					Perl6::WS.new(
-						:content(
-							~$0
-						)
-					),
-					Perl6::Semicolon.new
-				)
-			}
-			return (
-				Perl6::Semicolon.new
-			)
+		if $key ~~ /^ \; / {
+			Perl6::Semicolon.new
 		}
 	}
 
@@ -557,7 +498,7 @@ class Perl6::Tidy::Factory {
 			self._EXPR( $p.hash.<EXPR> )
 		}
 		else {
-			warn "Unhandled _ArgList case"
+			warn "Unhandled case"
 		}
 	}
 
@@ -574,7 +515,7 @@ class Perl6::Tidy::Factory {
 			self._ArgList( $p.hash.<arglist> );
 		}
 		else {
-			warn "Unhandled _Arg case"
+			warn "Unhandled case"
 		}
 	}
 
@@ -621,7 +562,7 @@ say "BackSlash fired";
 			self._Blockoid( $p.hash.<blockoid> )
 		}
 		else {
-			warn "Unhandled _Block case"
+			warn "Unhandled case"
 		}
 	}
 
@@ -630,7 +571,7 @@ say "BackSlash fired";
 			self._StatementList( $p.hash.<statementlist> )
 		}
 		else {
-			warn "Unhandled _Blockoid case"
+			warn "Unhandled case"
 		}
 	}
 
@@ -787,7 +728,7 @@ say "Contextualizer fired";
 			)
 		}
 		else {
-			warn "Unhandled _Declarator case"
+			warn "Unhandled case"
 		}
 	}
 
@@ -952,32 +893,41 @@ say "EScale fired";
 	}
 
 	method __Term( Mu $p ) {
-		if $p.hash.<variable> {
+		if self.assert-hash-keys( $p, [< identifier >], [< args >] ) {
 			(
-				self._Variable( $p.hash.<variable> ),
-				self.ws-after( $p.hash.<variable> )
+				self._Identifier( $p.hash.<identifier> )
 			)
 		}
-		elsif $p.hash.<value> {
+		elsif self.assert-hash-keys( $p, [< longname >], [< args >] ) {
+			(
+				self._LongName( $p.hash.<longname> )
+			)
+		}
+		elsif self.assert-hash-keys( $p, [< variable >] ) {
+			(
+				self._Variable( $p.hash.<variable> )
+			)
+		}
+		elsif self.assert-hash-keys( $p, [< value >] ) {
 			my $v = $p.hash.<value>;
-			if $v.hash.<number> {
+			if self.assert-hash-keys( $v, [< number >] ) {
 				(
-					self._Number( $v.hash.<number> ),
-					self.ws-after( $v.hash.<number> )
+					self._Number( $v.hash.<number> )
 				)
 			}
-			elsif $v.hash.<quote> {
+			elsif self.assert-hash-keys( $v, [< quote >] ) {
 				(
-					self._Quote( $v.hash.<quote> ),
-					self.ws-after( $v.hash.<quote> )
+					self._Quote( $v.hash.<quote> )
 				)
 			}
 			else {
-				warn "Unhandled __Term case"
+say $p.hash.keys.gist;
+				warn "Unhandled case"
 			}
 		}
 		else {
-			warn "Unhandled __Term case"
+say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -1139,14 +1089,12 @@ say "EScale fired";
 			@child = (
 				self.__Term( $p.list.[0] ),
 				self._Infix( $p.hash.<infix> ),
-				self.ws-after( $p.hash.<infix> ),
 				self.__Term( $p.list.[1] )
 			).flat
 		}
 		elsif self.assert-hash-keys( $p, [< longname args >] ) {
 			@child = (
 				self._LongName( $p.hash.<longname> ),
-				self.ws-at-start( $p.hash.<args> ),
 				self._Args( $p.hash.<args> )
 			)
 		}
@@ -1172,7 +1120,7 @@ say "EScale fired";
 			)
 		}
 		else {
-			warn "Unhandled _EXPR case"
+			warn "Unhandled case"
 		}
 		@child
 	}
@@ -1215,7 +1163,11 @@ say "FatArrow fired";
 		return True if $p.Str;
 )
 		if $p.Str {
-			$p.Str
+			Perl6::Bareword.new(
+				:content(
+					$p.Str
+				)
+			)
 		}
 	}
 
@@ -1228,7 +1180,7 @@ say "FatArrow fired";
 			Perl6::Operator.new( :content( ~$p.hash.<sym>.Str ) )
 		}
 		else {
-			warn "Unhandled _Infix case"
+			warn "Unhandled case"
 		}
 	}
 
@@ -1249,18 +1201,16 @@ say "InfixPrefixMetaOperator fired";
 )
 		if self.assert-hash-keys( $p, [< sym EXPR >] ) {
 			(
-				self.ws-before( $p.hash.<sym> ),
 				Perl6::Operator.new(
 					:content(
 						$p.hash.<sym>.Str
 					)
 				),
-				self.ws-after( $p.hash.<sym> ),
 				self._EXPR( $p.hash.<EXPR> )
 			)
 		}
 		else {
-			warn "Unhandled _Initializer case"
+			warn "Unhandled case"
 		}
 	}
 
@@ -1317,7 +1267,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 			)
 		}
 		else {
-			warn "Unhandled _LongName case"
+			warn "Unhandled case"
 		}
 	}
 
@@ -1449,11 +1399,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 		if self.assert-hash-keys( $p, [< morename >] );
 		True if self.assert-Str( $p );
 )
-		if self.assert-hash-keys( $p,
-			[< identifier >], [< morename >] ) {
-			self._Identifier( $p.hash.<identifier> )
-		}
-		elsif self.assert-Str( $p ) {
+		if self.assert-Str( $p ) {
 			Perl6::Bareword.new(
 				:content(
 					$p.Str
@@ -1461,7 +1407,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 			)
 		}
 		else {
-			warn "Unhandled _Name case"
+			warn "Unhandled case"
 		}
 	}
 
@@ -1474,7 +1420,7 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 			$p.Str
 		}
 		else {
-			warn "Unhandled _Nibble case"
+			warn "Unhandled case"
 		}
 	}
 
@@ -1509,7 +1455,7 @@ say "Noun fired";
 			self._Numish( $p.hash.<numish> )
 		}
 		else {
-			warn "Unhandled _Number case"
+			warn "Unhandled case"
 		}
 	}
 
@@ -1524,7 +1470,7 @@ say "Noun fired";
 			self._Integer( $p.hash.<integer> )
 		}
 		else {
-			warn "Unhandled _Numish case"
+			warn "Unhandled case"
 		}
 	}
 
@@ -1619,7 +1565,6 @@ say "OPER fired";
 		if self.assert-hash-keys( $p, [< sym package_def >] ) {
 			(
 				self._Sym( $p.hash.<sym> ),
-				self.ws-at-start( $p.hash.<package_def> ),
 				self._PackageDef( $p.hash.<package_def> )
 			).flat
 		}
@@ -1638,7 +1583,6 @@ say "OPER fired";
 				[< blockoid longname >], [< trait >] ) {
 			(
 				self._LongName( $p.hash.<longname> ),
-				self.ws-after( $p.hash.<longname> ),
 				self._Blockoid( $p.hash.<blockoid> )
 			).flat
 		}
@@ -1856,8 +1800,7 @@ say "RxAdverbs fired";
 
 	method _ScopeDeclarator( Mu $p ) {
 		(
-			self._Sym( $p.hash.<sym>.Str ),
-			self.ws-at-start( $p.hash.<scoped> ),
+			self._Sym( $p.hash.<sym> ),
 			self._Scoped( $p.hash.<scoped> )
 		).flat
 	}

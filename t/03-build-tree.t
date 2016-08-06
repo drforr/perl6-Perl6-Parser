@@ -27,7 +27,9 @@ subtest {
 	is-deeply $t,
 		Perl6::Document.new( :child(
 			Perl6::Statement.new( :child(
-				Perl6::Bareword.new( :content( Q{my} ) ),
+				Perl6::Bareword.new(
+					:content( Q{my} )
+				),
 				Perl6::Variable::Scalar.new(
 					:sigil( Q{$} ),
 					:content( Q{$a} ),
@@ -42,8 +44,9 @@ subtest {
 	is-deeply $t,
 		Perl6::Document.new( :child(
 			Perl6::Statement.new( :child(
-				Perl6::Bareword.new( :content( Q{my} ) ),
-				Perl6::WS.new( :content( Q{ } ) ),
+				Perl6::Bareword.new(
+					:content( Q{my} )
+				),
 				Perl6::Variable::Scalar.new(
 					:sigil( Q{$} ),
 					:content( Q{$a} ),
@@ -75,7 +78,6 @@ subtest {
 		Perl6::Document.new( :child(
 			Perl6::Statement.new( :child(
 				Perl6::Bareword.new( :content( Q{my} ) ),
-				Perl6::WS.new( :content( Q{ } ) ),
 				Perl6::Variable::Scalar.new(
 					:sigil( Q{$} ),
 					:content( Q{$a} ),
@@ -97,15 +99,12 @@ subtest {
 		Perl6::Document.new( :child(
 			Perl6::Statement.new( :child(
 				Perl6::Bareword.new( :content( Q{my} ) ),
-				Perl6::WS.new( :content( Q{ } ) ),
 				Perl6::Variable::Scalar.new(
 					:sigil( Q{$} ),
 					:content( Q{$a} ),
 					:headless( Q{a} )
 				),
-				Perl6::WS.new( :content( Q{ } ) ),
 				Perl6::Operator.new( :content( Q{=} ) ),
-				Perl6::WS.new( :content( Q{ } ) ),
 				Perl6::Number::Decimal.new( :content( 1e0 ) )
 			) )
 		) ),
@@ -122,19 +121,14 @@ subtest {
 		Perl6::Document.new( :child(
 			Perl6::Statement.new( :child(
 				Perl6::Bareword.new( :content( Q{my} ) ),
-				Perl6::WS.new( :content( Q{ } ) ),
 				Perl6::Variable::Scalar.new(
 					:sigil( Q{$} ),
 					:content( Q{$a} ),
 					:headless( Q{a} )
 				),
-				Perl6::WS.new( :content( Q{ } ) ),
 				Perl6::Operator.new( :content( Q{=} ) ),
-				Perl6::WS.new( :content( Q{ } ) ),
 				Perl6::Number::Decimal.new( :content( 1e0 ) ),
-				Perl6::WS.new( :content( Q{ } ) ),
 				Perl6::Operator.new( :content( Q{+} ) ),
-				Perl6::WS.new( :content( Q{ } ) ),
 				Perl6::Number::Decimal.new( :content( 2e0 ) )
 			) )
 		) ),

@@ -131,7 +131,7 @@ class Perl6::Tidy {
 		$tree
 	}
 
-	method format( $tree, $formatting ) {
+	method format( $tree, $formatting = { } ) {
 		my $str = $tree.perl6( $formatting );
 
 		$str

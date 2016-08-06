@@ -1241,6 +1241,7 @@ _END_
 		my $parsed = $pt.parse-source( Q:to[_END_] );
 3 orelse 2
 _END_
+say $parsed.hash.<statementlist>.hash.<statement>.list.[1].dump;
 		ok $pt.validate( $parsed );
 	}, Q{orelse};
 }, Q{loose or};
@@ -1249,21 +1250,27 @@ subtest {
 	plan 2;
 
 	subtest {
-		plan 1;
+		plan 2;
 
-		my $parsed = $pt.parse-source( Q:to[_END_] );
+		my $parsed = $pt.parse-source( Q:to[_END_].chomp );
 my @a; sort() <== @a
 _END_
+		my $tree = $pt.build-tree( $parsed );
 		ok $pt.validate( $parsed );
+#		is $pt.format( $tree ), Q{my @a; sort <== @a};
+		is $pt.format( $tree ), Q{my@a;sort<==@a};
 	}, Q{<==};
 
 	subtest {
-		plan 1;
+		plan 2;
 
-		my $parsed = $pt.parse-source( Q:to[_END_] );
+		my $parsed = $pt.parse-source( Q:to[_END_].chomp );
 my @a; @a ==> sort
 _END_
+		my $tree = $pt.build-tree( $parsed );
 		ok $pt.validate( $parsed );
+#		is $pt.format( $tree ), Q{my @a; @a ==> sort};
+		is $pt.format( $tree ), Q{my@a;@a==>sort};
 	}, Q{==>};
 
 	todo Q[<<== not implemented yet];
