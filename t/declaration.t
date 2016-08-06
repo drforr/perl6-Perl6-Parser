@@ -18,15 +18,15 @@ subtest {
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree( Q{my $a} );
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source( Q{my $a} );
+			ok $pt.validate( $parsed );
 		}, Q{my $a};
 
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree( Q{our $a} );
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source( Q{our $a} );
+			ok $pt.validate( $parsed );
 		}, Q{our $a};
 
 		todo Q{'anon $a' not implemented yet, maybe not ever.};
@@ -34,8 +34,8 @@ subtest {
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree( Q{state $a} );
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source( Q{state $a} );
+			ok $pt.validate( $parsed );
 		}, Q{state $a};
 
 		todo Q{'augment $a' not implemented yet, maybe not ever.};
@@ -49,22 +49,22 @@ subtest {
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree( Q{my Int $a} );
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source( Q{my Int $a} );
+			ok $pt.validate( $parsed );
 		}, Q{regular};
 
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree( Q{my Int:D $a = 0} );
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source( Q{my Int:D $a = 0} );
+			ok $pt.validate( $parsed );
 		}, Q{defined};
 
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree( Q{my Int:U $a} );
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source( Q{my Int:U $a} );
+			ok $pt.validate( $parsed );
 		}, Q{undefined};
 	}, Q{typed};
 
@@ -74,8 +74,8 @@ subtest {
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree( Q{my $a where 1} );
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source( Q{my $a where 1} );
+			ok $pt.validate( $parsed );
 		}, Q{my $a where 1};
 	}, Q{constrained};
 }, Q{variable};
@@ -86,15 +86,15 @@ subtest {
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.get-tree( Q[sub foo {}] );
-		isa-ok $parsed, Q{Perl6::Document};
+		my $parsed = $pt.parse-source( Q[sub foo {}] );
+		ok $pt.validate( $parsed );
 	}, Q{sub foo {}};
 
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.get-tree( Q[sub foo returns Int {}] );
-		isa-ok $parsed, Q{Perl6::Document};
+		my $parsed = $pt.parse-source( Q[sub foo returns Int {}] );
+		ok $pt.validate( $parsed );
 	}, Q{sub foo returns Int {}};
 }, Q{subroutine};
 
@@ -107,15 +107,15 @@ subtest {
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree( Q[unit module foo;] );
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source( Q[unit module foo;] );
+			ok $pt.validate( $parsed );
 		}, Q{unit module foo;};
 
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree( Q[module foo{}] );
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source( Q[module foo{}] );
+			ok $pt.validate( $parsed );
 		}, Q{module foo {}};
 	}, q{module};
 
@@ -125,15 +125,15 @@ subtest {
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree( Q[unit class foo;] );
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source(  Q[unit class foo;] );
+			ok $pt.validate( $parsed );
 		}, Q{unit class foo;};
 
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree( Q[class foo{}] );
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source( Q[class foo{}] );
+			ok $pt.validate( $parsed );
 		}, Q{class foo {}};
 	}, Q{class};
 
@@ -143,23 +143,23 @@ subtest {
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree( Q[unit role foo;] );
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source( Q[unit role foo;] );
+			ok $pt.validate( $parsed );
 		}, Q{unit role foo;};
 
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree( Q[role foo{}] );
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source( Q[role foo {}] );
+			ok $pt.validate( $parsed );
 		}, Q{role foo {}};
 	}, Q{role};
 
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.get-tree( Q[my regex foo{a}] );
-		isa-ok $parsed, Q{Perl6::Document};
+		my $parsed = $pt.parse-source( Q[my regex foo {a}] );
+		ok $pt.validate( $parsed );
 	}, Q{my regex foo {a} (null regex not allowed)};
 
 	subtest {
@@ -168,30 +168,30 @@ subtest {
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree( Q[unit grammar foo;] );
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source( Q[unit grammar foo;] );
+			ok $pt.validate( $parsed );
 		}, Q{unit grammar foo;};
 
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree( Q[grammar foo{}] );
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source( Q[grammar foo {}] );
+			ok $pt.validate( $parsed );
 		}, Q{grammar foo {}};
 	}, Q{grammar};
 
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.get-tree( Q[my token foo{a}] );
-		isa-ok $parsed, Q{Perl6::Document};
+		my $parsed = $pt.parse-source( Q[my token foo {a}] );
+		ok $pt.validate( $parsed );
 	}, Q{my token foo {a} (null regex not allowed, must give it content.)};
 
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.get-tree( Q[my rule foo{a}] );
-		isa-ok $parsed, Q{Perl6::Document};
+		my $parsed = $pt.parse-source( Q[my rule foo {a}] );
+		ok $pt.validate( $parsed );
 	}, Q{my rule foo {a}};
 }, Q{braced things};
 

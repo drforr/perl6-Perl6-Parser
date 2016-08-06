@@ -15,42 +15,42 @@ subtest {
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.get-tree( Q:to[END] );
+		my $parsed = $pt.parse-source( Q:to[END] );
 my @doors = False xx 101;
  
 (.=not for @doors[0, $_ ... 100]) for 1..100;
  
 say "Door $_ is ", <closed open>[ @doors[$_] ] for 1..100;
 END
-		isa-ok $parsed, Q{Perl6::Document};
+		ok $pt.validate( $parsed );
 	}, Q{version 1};
 
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.get-tree( Q:to[END] );
+		my $parsed = $pt.parse-source( Q:to[END] );
 say "Door $_ is open" for map {$^n ** 2}, 1..10;
 END
-		isa-ok $parsed, Q{Perl6::Document};
+		ok $pt.validate( $parsed );
 	}, Q{version 2};
 	
 
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.get-tree( Q:to[END] );
+		my $parsed = $pt.parse-source( Q:to[END] );
 say "Door $_ is open" for 1..10 X** 2;
 END
-		isa-ok $parsed, Q{Perl6::Document};
+		ok $pt.validate( $parsed );
 	}, Q{version 3};
 
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.get-tree( Q:to[END] );
+		my $parsed = $pt.parse-source( Q:to[END] );
 say "Door $_ is ", <closed open>[.sqrt == .sqrt.floor] for 1..100;
 END
-		isa-ok $parsed, Q{Perl6::Document};
+		ok $pt.validate( $parsed );
 	}, Q{version 4};
 }, Q{100 doors};
 
@@ -60,7 +60,7 @@ subtest {
 
 # The parser also recursively parses use'd classes, so since Term::termios might
 # not be present on all systems, stub it out.
-	my $parsed = $pt.get-tree( Q:to[_END_] );
+	my $parsed = $pt.parse-source( Q:to[_END_] );
 class Term::termios { has $fd; method getattr {}; method unset_lflags { }; method unset_iflags { }; method setattr { } }
 #use Term::termios;
 
@@ -176,14 +176,13 @@ loop {
     new() if $key eq 'n';
 }
 _END_
-
-	isa-ok $parsed, Q{Perl6::Document};
+	ok $pt.validate( $parsed );
 }, Q{15 Puzzle};
 
 subtest {
 	plan 1;
 
-	my $parsed = $pt.get-tree( Q:to[_END_] );
+	my $parsed = $pt.parse-source( Q:to[_END_] );
 class Term::termios { has $fd; method getattr {}; method unset_lflags { }; method unset_iflags { }; method setattr { } }
 #use Term::termios;
  
@@ -299,13 +298,13 @@ loop {
     last if $key eq 'q'; # (q)uit
 }
 _END_
-	isa-ok $parsed, Q{Perl6::Document};
+	ok $pt.validate( $parsed );
 }, Q{2048};
 
 subtest {
 	plan 1;
 
-	my $parsed = $pt.get-tree( Q:to[_END_] );
+	my $parsed = $pt.parse-source( Q:to[_END_] );
 use MONKEY-SEE-NO-EVAL;
  
 say "Here are your digits: ", 
@@ -333,13 +332,13 @@ while my $exp = prompt "\n24? " {
     }
 }
 _END_
-	isa-ok $parsed, Q{Perl6::Document};
+	ok $pt.validate( $parsed );
 }, Q{24 game};
 
 subtest {
 	plan 1;
 
-	my $parsed = $pt.get-tree( Q:to[_END_] );
+	my $parsed = $pt.parse-source( Q:to[_END_] );
 use MONKEY-SEE-NO-EVAL;
 
 my @digits;
@@ -385,13 +384,13 @@ sub unique (@array) {
     %h.values;
 }
 _END_
-	isa-ok $parsed, Q{Perl6::Document};
+	ok $pt.validate( $parsed );
 }, Q{24 game/Solve};
 
 subtest {
 	plan 1;
 
-	my $parsed = $pt.get-tree( Q:to[_END_] );
+	my $parsed = $pt.parse-source( Q:to[_END_] );
 my @todo = $[1];
 my @sums = 0;
 sub nextrow($n) {
@@ -422,7 +421,7 @@ for 23, 123, 1234, 10000 {
     say $_, "\t", [+] nextrow($_)[];
 }
 _END_
-	isa-ok $parsed, Q{Perl6::Document};
+	ok $pt.validate( $parsed );
 }, Q{9 billion names of God};
 
 subtest {
@@ -431,7 +430,7 @@ subtest {
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.get-tree( Q:to[_END_] );
+		my $parsed = $pt.parse-source( Q:to[_END_] );
 my $b = 99;
 
 repeat while --$b {
@@ -446,13 +445,13 @@ sub b($b) {
     "$b bottle{'s' if $b != 1} of beer";
 }
 _END_
-		isa-ok $parsed, Q{Perl6::Document};
+		ok $pt.validate( $parsed );
 	}, Q{version 1};
 
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.get-tree( Q:to[_END_] );
+		my $parsed = $pt.parse-source( Q:to[_END_] );
 for 99...1 -> $bottles {
     sing $bottles, :wall;
     sing $bottles;
@@ -472,13 +471,13 @@ sub sing(
     say "$quantity bottle$plural of beer$location"
 }
 _END_
-		isa-ok $parsed, Q{Perl6::Document};
+		ok $pt.validate( $parsed );
 	}, Q{version 2};
 
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.get-tree( Q:to[_END_] );
+		my $parsed = $pt.parse-source( Q:to[_END_] );
 my @quantities = flat (99 ... 1), 'No more', 99;
 my @bottles = flat 'bottles' xx 98, 'bottle', 'bottles' xx 2;
 my @actions = flat 'Take one down, pass it around' xx 99,
@@ -493,7 +492,7 @@ for @quantities Z @bottles Z @actions Z
     say "$d $e of beer on the wall\n";
 }
 _END_
-		isa-ok $parsed, Q{Perl6::Document};
+		ok $pt.validate( $parsed );
 	}, Q{version 3};
 }, Q{99 bottles of beer};
 

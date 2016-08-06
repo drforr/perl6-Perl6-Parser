@@ -12,29 +12,37 @@ my $pt = Perl6::Tidy.new;
 subtest {
 	plan 1;
 
-	my $parsed = $pt.get-tree( Q{/pi/} );
-	isa-ok $parsed, Q{Perl6::Document};
+	my $parsed = $pt.parse-source( Q:to[_END_] );
+/pi/
+_END_
+	ok $pt.validate( $parsed );
 }, Q{/pi/};
 
 subtest {
 	plan 1;
 
-	my $parsed = $pt.get-tree( Q{/<[ p i ]>/} );
-	isa-ok $parsed, Q{Perl6::Document};
+	my $parsed = $pt.parse-source( Q:to[_END_] );
+/<[ p i ]>/
+_END_
+	ok $pt.validate( $parsed );
 }, Q{/<[ p i ]>/};
 
 subtest {
 	plan 1;
 
-	my $parsed = $pt.get-tree( Q{/ \d /} );
-	isa-ok $parsed, Q{Perl6::Document};
+	my $parsed = $pt.parse-source( Q:to[_END_] );
+/ \d /
+_END_
+	ok $pt.validate( $parsed );
 }, Q{/ \d /};
 
 subtest {
 	plan 1;
 
-	my $parsed = $pt.get-tree( Q{/ . /} );
-	isa-ok $parsed, Q{Perl6::Document};
+	my $parsed = $pt.parse-source( Q:to[_END_] );
+/ . /
+_END_
+	ok $pt.validate( $parsed );
 }, Q{/ . /};
 
 # vim: ft=perl6

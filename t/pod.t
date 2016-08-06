@@ -12,11 +12,11 @@ my $pt = Perl6::Tidy.new;
 subtest {
 	plan 1;
 
-	my $parsed = $pt.get-tree( Q:to[_EOF_] );
+	my $parsed = $pt.parse-source( Q:to[_END_] );
 =begin EMPTY
 =end EMPTY
-_EOF_
-	isa-ok $parsed, Q{Perl6::Document};
+_END_
+	ok $pt.validate( $parsed );
 }, Q{empty};
 
 # vim: ft=perl6

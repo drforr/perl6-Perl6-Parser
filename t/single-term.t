@@ -20,29 +20,29 @@ subtest {
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree( Q{0} );
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source( Q{0} );
+			ok $pt.validate( $parsed );
 		}, Q{Zero};
 
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree( Q{1} );
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source( Q{1} );
+			ok $pt.validate( $parsed );
 		}, Q{positive};
 
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree( Q{-1} );
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source( Q{-1} );
+			ok $pt.validate( $parsed );
 		}, Q{negative};
 
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree( Q{1_1} );
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source( Q{1_1} );
+			ok $pt.validate( $parsed );
 		}, Q{underscores};
 	}, Q{decimal};
 
@@ -52,22 +52,22 @@ subtest {
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree( Q{0b0} );
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source( Q{0b0} );
+			ok $pt.validate( $parsed );
 		}, Q{zero};
 
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree( Q{0b1} );
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source( Q{0b1} );
+			ok $pt.validate( $parsed );
 		}, Q{1};
 
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree( Q{-0b1} );
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source( Q{-0b1} );
+			ok $pt.validate( $parsed );
 		}, Q{-1};
 	}, Q{binary};
 
@@ -77,22 +77,22 @@ subtest {
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree( Q{0o0} );
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source( Q{0o0} );
+			ok $pt.validate( $parsed );
 		}, Q{zero};
 
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree( Q{0o1} );
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source( Q{0o1} );
+			ok $pt.validate( $parsed );
 		}, Q{1};
 
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree( Q{-0o1} );
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source( Q{-0o1} );
+			ok $pt.validate( $parsed );
 		}, Q{-1};
 	}, Q{octal};
 
@@ -102,22 +102,22 @@ subtest {
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree( Q{0d0} );
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source( Q{0d0} );
+			ok $pt.validate( $parsed );
 		}, Q{zero};
 
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree( Q{0d1} );
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source( Q{0d1} );
+			ok $pt.validate( $parsed );
 		}, Q{1};
 
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree( Q{-0d1} );
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source( Q{-0d1} );
+			ok $pt.validate( $parsed );
 		}, Q{-1};
 	}, Q{explicit decimal};
 
@@ -127,22 +127,22 @@ subtest {
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree( Q{0} );
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source( Q{0} );
+			ok $pt.validate( $parsed );
 		}, Q{zero};
 
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree( Q{1} );
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source( Q{1} );
+			ok $pt.validate( $parsed );
 		}, Q{1};
 
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree( Q{-1} );
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source( Q{-1} );
+			ok $pt.validate( $parsed );
 		}, Q{-1};
 	}, Q{implicit decimal};
 
@@ -152,22 +152,22 @@ subtest {
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree( Q{0x0} );
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source( Q{0x0} );
+			ok $pt.validate( $parsed );
 		}, Q{zero};
 
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree( Q{0x1} );
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source( Q{0x1} );
+			ok $pt.validate( $parsed );
 		}, Q{1};
 
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree( Q{-0x1} );
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source( Q{-0x1} );
+			ok $pt.validate( $parsed );
 		}, Q{-1};
 	}, Q{hexadecimal};
 
@@ -177,22 +177,22 @@ subtest {
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree( Q{:13(0)} );
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source( Q{:13(0)} );
+			ok $pt.validate( $parsed );
 		}, Q{zero};
 
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree( Q{:13(1)} );
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source( Q{:13(1)} );
+			ok $pt.validate( $parsed );
 		}, Q{1};
 
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree( Q{:13(-1)} );
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source( Q{:13(-1)} );
+			ok $pt.validate( $parsed );
 		}, Q{-1};
 	}, Q{base-13};
 
@@ -202,36 +202,36 @@ subtest {
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree( Q{0.0} );
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source( Q{0.0} );
+			ok $pt.validate( $parsed );
 		}, Q{zero};
 
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree( Q{0.1} );
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source( Q{0.1} );
+			ok $pt.validate( $parsed );
 		}, Q{0.1};
 
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree( Q{.1} );
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source( Q{.1} );
+			ok $pt.validate( $parsed );
 		}, Q{.1};
 
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree( Q{1.0} );
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source( Q{1.0} );
+			ok $pt.validate( $parsed );
 		}, Q{1.0};
 
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree( Q{-1.0} );
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source( Q{-1.0} );
+			ok $pt.validate( $parsed );
 		}, Q{-1.0};
 	}, Q{rational};
 
@@ -241,43 +241,43 @@ subtest {
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree( Q{0e0} );
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source( Q{0e0} );
+			ok $pt.validate( $parsed );
 		}, Q{zero};
 
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree( Q{0.0e0} );
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source( Q{0.0e0} );
+			ok $pt.validate( $parsed );
 		}, Q{rational zero};
 
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree( Q{.1e0} );
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source( Q{.1e0} );
+			ok $pt.validate( $parsed );
 		}, Q{rational .1};
 
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree( Q{0.1e0} );
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source( Q{0.1e0} );
+			ok $pt.validate( $parsed );
 		}, Q{rational 0.1};
 
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree( Q{1e0} );
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source( Q{1e0} );
+			ok $pt.validate( $parsed );
 		}, Q{1.0e0};
 
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree( Q{-1e0} );
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source( Q{-1e0} );
+			ok $pt.validate( $parsed );
 		}, Q{-1.0e0};
 	}, Q{Num};
 
@@ -287,22 +287,22 @@ subtest {
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree( Q{0i} );
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source( Q{0i} );
+			ok $pt.validate( $parsed );
 		}, Q{0i};
 
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree( Q{1i} );
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source( Q{1i} );
+			ok $pt.validate( $parsed );
 		}, Q{11};
 
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree( Q{-1i} );
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source( Q{-1i} );
+			ok $pt.validate( $parsed );
 		}, Q{-11};
 	}, Q{imaginary};
 }, Q{integer};
@@ -313,8 +313,8 @@ subtest {
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.get-tree( Q{'Hello, world!'} );
-		isa-ok $parsed, Q{Perl6::Document};
+		my $parsed = $pt.parse-source( Q{'Hello, world!'} );
+		ok $pt.validate( $parsed );
 	}, Q{single quote};
 
 	subtest {
@@ -323,17 +323,15 @@ subtest {
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree( Q{"Hello, world!"} );
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source( Q{"Hello, world!"} );
+			ok $pt.validate( $parsed );
 		}, Q{uninterpolated};
 
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree(
-				Q{"Hello, {'world'}!"}
-			);
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source( Q{"Hello, {'world'}!"} );
+			ok $pt.validate( $parsed );
 		}, Q{interpolated};
 	}, Q{double quote};
 
@@ -343,29 +341,27 @@ subtest {
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree(
-				Q{Q{Hello, world!}}
-			);
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source( Q{Q{Hello, world!}} );
+			ok $pt.validate( $parsed );
 		}, Q{Q{} (only uninterpolated)};
 
 		subtest {
 			subtest {
 				plan 1;
 
-				my $parsed = $pt.get-tree(
+				my $parsed = $pt.parse-source(
 					Q{q[Hello, world!]}
 				);
-				isa-ok $parsed, Q{Perl6::Document};
+				ok $pt.validate( $parsed );
 			}, Q{unescaped};
 
 			subtest {
 				plan 1;
 
-				my $parsed = $pt.get-tree(
+				my $parsed = $pt.parse-source(
 					Q{q[Hello\, world!]}
 				);
-				isa-ok $parsed, Q{Perl6::Document};
+				ok $pt.validate( $parsed );
 			}, Q{escaped};
 		}, Q{q[]};
 	}, Q{q{}};
@@ -376,19 +372,17 @@ subtest {
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree(
-				Q{qq[Hello, world!]}
-			);
-			isa-ok $parsed, Q{Perl6::Document};
+			my $parsed = $pt.parse-source( Q{qq[Hello, world!]} );
+			ok $pt.validate( $parsed );
 		}, Q{uninterpolated};
 
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree(
+			my $parsed = $pt.parse-source(
 				Q{qq[Hello, {'world'}!]}
 			);
-			isa-ok $parsed, Q{Perl6::Document};
+			ok $pt.validate( $parsed );
 		}, Q{interpolated};
 	}, Q{qq{}};
 
@@ -398,23 +392,23 @@ subtest {
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree(
+			my $parsed = $pt.parse-source(
 				Q{q:to/END/
 Hello world!
 END}
 			);
-			isa-ok $parsed, Q{Perl6::Document};
+			ok $pt.validate( $parsed );
 		}, Q{q:to/END/, no spaces};
 
 		subtest {
 			plan 1;
 
-			my $parsed = $pt.get-tree(
+			my $parsed = $pt.parse-source(
 				Q{q:to/END/
   Hello world!
   END}
 			);
-			isa-ok $parsed, Q{Perl6::Document};
+			ok $pt.validate( $parsed );
 		}, Q{q:to/END/, spaces};
 	}, Q{q:to[]};
 }, Q{string};
@@ -425,58 +419,58 @@ subtest {
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.get-tree( Q{@*ARGS} );
-		isa-ok $parsed, Q{Perl6::Document};
+		my $parsed = $pt.parse-source( Q{@*ARGS} );
+		ok $pt.validate( $parsed );
 	}, Q{@*ARGS (is a global, so available everywhere)};
 
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.get-tree( Q{$} );
-		isa-ok $parsed, Q{Perl6::Document};
+		my $parsed = $pt.parse-source( Q{$} );
+		ok $pt.validate( $parsed );
 	}, Q{$};
 
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.get-tree( Q{$_} );
-		isa-ok $parsed, Q{Perl6::Document};
+		my $parsed = $pt.parse-source( Q{$_} );
+		ok $pt.validate( $parsed );
 	}, Q{$_};
 
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.get-tree( Q{$/} );
-		isa-ok $parsed, Q{Perl6::Document};
+		my $parsed = $pt.parse-source( Q{$/} );
+		ok $pt.validate( $parsed );
 	}, Q{$/};
 
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.get-tree( Q{$!} );
-		isa-ok $parsed, Q{Perl6::Document};
+		my $parsed = $pt.parse-source( Q{$!} );
+		ok $pt.validate( $parsed );
 	}, Q{$!};
 
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.get-tree( Q{$Foo::Bar} );
-		isa-ok $parsed, Q{Perl6::Document};
+		my $parsed = $pt.parse-source( Q{$Foo::Bar} );
+		ok $pt.validate( $parsed );
 	}, Q{$Foo::Bar};
 
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.get-tree( Q{&sum} );
-		isa-ok $parsed, Q{Perl6::Document};
+		my $parsed = $pt.parse-source( Q{&sum} );
+		ok $pt.validate( $parsed );
 	}, Q{&sum};
 
 	todo Q{$Foo::($bar)::Bar (requires a second term) to compile};
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.get-tree( Q[$Foo::($*GLOBAL)::Bar] );
-		isa-ok $parsed, Q{Perl6::Document};
+		my $parsed = $pt.parse-source( Q[$Foo::($*GLOBAL)::Bar] );
+		ok $pt.validate( $parsed );
 	}, Q[$Foo::($*GLOBAL)::Bar (Need $*GLOBAL in order to compile)];
 }, Q{variable};
 
@@ -486,15 +480,15 @@ subtest {
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.get-tree( Q{Int} );
-		isa-ok $parsed, Q{Perl6::Document};
+		my $parsed = $pt.parse-source( Q{Int} );
+		ok $pt.validate( $parsed );
 	}, Q{Int};
 
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.get-tree( Q{IO::Handle} );
-		isa-ok $parsed, Q{Perl6::Document};
+		my $parsed = $pt.parse-source( Q{IO::Handle} );
+		ok $pt.validate( $parsed );
 	}, Q{IO::Handle (Two package names)};
 }, Q{type};
 
@@ -504,8 +498,8 @@ subtest {
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.get-tree( Q{pi} );
-		isa-ok $parsed, Q{Perl6::Document};
+		my $parsed = $pt.parse-source( Q{pi} );
+		ok $pt.validate( $parsed );
 	}, Q{pi};
 }, Q{constant};
 
@@ -515,8 +509,8 @@ subtest {
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.get-tree( Q{sum} );
-		isa-ok $parsed, Q{Perl6::Document};
+		my $parsed = $pt.parse-source( Q{sum} );
+		ok $pt.validate( $parsed );
 	}, Q{sum};
 }, Q{function call};
 
@@ -526,8 +520,8 @@ subtest {
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.get-tree( Q{()} );
-		isa-ok $parsed, Q{Perl6::Document};
+		my $parsed = $pt.parse-source( Q{()} );
+		ok $pt.validate( $parsed );
 	}, Q{circumfix};
 }, Q{operator};
 
@@ -537,8 +531,8 @@ subtest {
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.get-tree( Q{:foo} );
-		isa-ok $parsed, Q{Perl6::Document};
+		my $parsed = $pt.parse-source( Q{:foo} );
+		ok $pt.validate( $parsed );
 	}, Q{:foo};
 }, Q{adverbial-pair};
 
@@ -548,8 +542,8 @@ subtest {
 	subtest {
 		plan 1;
 
-		my $parsed = $pt.get-tree( Q{:()} );
-		isa-ok $parsed, Q{Perl6::Document};
+		my $parsed = $pt.parse-source( Q{:()} );
+		ok $pt.validate( $parsed );
 	}, Q{:()};
 }, Q{signature};
 
