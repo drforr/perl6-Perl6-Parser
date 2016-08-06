@@ -28,9 +28,13 @@ subtest {
 		Perl6::Document.new( :child(
 			Perl6::Statement.new( :child(
 				Perl6::Bareword.new(
+					:from( 0 ),
+					:to( 2 ),
 					:content( Q{my} )
 				),
 				Perl6::Variable::Scalar.new(
+					:from( 2 ),
+					:to( 4 ),
 					:sigil( Q{$} ),
 					:content( Q{$a} ),
 					:headless( Q{a} )
@@ -45,9 +49,13 @@ subtest {
 		Perl6::Document.new( :child(
 			Perl6::Statement.new( :child(
 				Perl6::Bareword.new(
+					:from( 0 ),
+					:to( 2 ),
 					:content( Q{my} )
 				),
 				Perl6::Variable::Scalar.new(
+					:from( 3 ),
+					:to( 5 ),
 					:sigil( Q{$} ),
 					:content( Q{$a} ),
 					:headless( Q{a} )
@@ -61,13 +69,23 @@ subtest {
 	is-deeply $t,
 		Perl6::Document.new( :child(
 			Perl6::Statement.new( :child(
-				Perl6::Bareword.new( :content( Q{my} ) ),
+				Perl6::Bareword.new(
+					:from( 0 ),
+					:to( 2 ),
+					:content( Q{my} )
+				),
 				Perl6::Variable::Scalar.new(
+					:from( 2 ),
+					:to( 4 ),
 					:sigil( Q{$} ),
 					:content( Q{$a} ),
 					:headless( Q{a} )
 				),
-				Perl6::Semicolon.new( :content( Q{;} ) )
+				Perl6::Semicolon.new(
+					:from( 4 ),
+					:to( 5 ),
+					:content( Q{;} )
+				)
 			) )
 		) ),
 	Q{with semi, without ws};
@@ -77,13 +95,23 @@ subtest {
 	is-deeply $t,
 		Perl6::Document.new( :child(
 			Perl6::Statement.new( :child(
-				Perl6::Bareword.new( :content( Q{my} ) ),
+				Perl6::Bareword.new(
+					:from( 0 ),
+					:to( 2 ),
+					:content( Q{my} )
+				),
 				Perl6::Variable::Scalar.new(
+					:from( 3 ),
+					:to( 5 ),
 					:sigil( Q{$} ),
 					:content( Q{$a} ),
 					:headless( Q{a} )
 				),
-				Perl6::Semicolon.new( :content( Q{;} ) )
+				Perl6::Semicolon.new(
+					:from( 5 ),
+					:to( 6 ),
+					:content( Q{;} )
+				)
 			) )
 		) ),
 	Q{with semi, ws};
@@ -98,14 +126,28 @@ subtest {
 	is-deeply $t,
 		Perl6::Document.new( :child(
 			Perl6::Statement.new( :child(
-				Perl6::Bareword.new( :content( Q{my} ) ),
+				Perl6::Bareword.new(
+					:from( 0 ),
+					:to( 2 ),
+					:content( Q{my} )
+				),
 				Perl6::Variable::Scalar.new(
+					:from( 3 ),
+					:to( 5 ),
 					:sigil( Q{$} ),
 					:content( Q{$a} ),
 					:headless( Q{a} )
 				),
-				Perl6::Operator.new( :content( Q{=} ) ),
-				Perl6::Number::Decimal.new( :content( 1e0 ) )
+				Perl6::Operator.new(
+					:from( 6 ),
+					:to( 7 ),
+					:content( Q{=} )
+				),
+				Perl6::Number::Decimal.new(
+					:from( 8 ),
+					:to( 9 ),
+					:content( 1e0 )
+				)
 			) )
 		) ),
 	Q{tree built};
@@ -120,16 +162,38 @@ subtest {
 	is-deeply $t,
 		Perl6::Document.new( :child(
 			Perl6::Statement.new( :child(
-				Perl6::Bareword.new( :content( Q{my} ) ),
+				Perl6::Bareword.new(
+					:from( 0 ),
+					:to( 2 ),
+					:content( Q{my} )
+				),
 				Perl6::Variable::Scalar.new(
+					:from( 3 ),
+					:to( 5 ),
 					:sigil( Q{$} ),
 					:content( Q{$a} ),
 					:headless( Q{a} )
 				),
-				Perl6::Operator.new( :content( Q{=} ) ),
-				Perl6::Number::Decimal.new( :content( 1e0 ) ),
-				Perl6::Operator.new( :content( Q{+} ) ),
-				Perl6::Number::Decimal.new( :content( 2e0 ) )
+				Perl6::Operator.new(
+					:from( 6 ),
+					:to( 7 ),
+					:content( Q{=} )
+				),
+				Perl6::Number::Decimal.new(
+					:from( 8 ),
+					:to( 9 ),
+					:content( 1e0 )
+				),
+				Perl6::Operator.new(
+					:from( 10 ),
+					:to( 11 ),
+					:content( Q{+} )
+				),
+				Perl6::Number::Decimal.new(
+					:from( 12 ),
+					:to( 13 ),
+					:content( 2e0 )
+				)
 			) )
 		) ),
 	Q{tree built};

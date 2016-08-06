@@ -178,6 +178,8 @@ role Branching {
 
 role Token {
 	has $.content is required;
+	has Int $.from is required;
+	has Int $.to is required;
 	method perl6( $f ) {
 		~$.content
 	}
@@ -229,11 +231,7 @@ class Perl6::PackageName does Token {
 # Semicolons should only occur at statement boundaries.
 # So they're only generated in the _Statement handler.
 #
-# And the BUILD method is there so I can still have the role, and get the
-# stringification behavior by default.
-#
 class Perl6::Semicolon does Token {
-	submethod BUILD() { $!content = Q{;} }
 }
 
 class Perl6::Variable {
@@ -395,7 +393,11 @@ class Perl6::Tidy::Factory {
 		my $key  = substr($orig, $to, $orig.chars);
 
 		if $key ~~ /^ \; / {
-			Perl6::Semicolon.new
+			Perl6::Semicolon.new(
+				:from( $to ),
+				:to( $to + 1 ),
+				:content( Q{;} )
+			)
 		}
 	}
 
@@ -689,6 +691,8 @@ say "Contextualizer fired";
 
 	method _DecInt( Mu $p ) {
 		Perl6::Number::Decimal.new(
+			:from( $p.from ),
+			:to( $p.to ),
 			:content(
 				$p.Str eq '0' ?? 0 !! $p.Int
 			)
@@ -1160,10 +1164,11 @@ say "FatArrow fired";
 		for $p.list {
 			next if self.assert-Str( $_ );
 		}
-		return True if $p.Str;
 )
 		if $p.Str {
 			Perl6::Bareword.new(
+				:from( $p.from ),
+				:to( $p.to ),
 				:content(
 					$p.Str
 				)
@@ -1177,7 +1182,11 @@ say "FatArrow fired";
 		if self.assert-hash-keys( $p, [< infix OPER >] );
 )
 		if self.assert-hash-keys( $p, [< sym O >] ) {
-			Perl6::Operator.new( :content( ~$p.hash.<sym>.Str ) )
+			Perl6::Operator.new(
+				:from( $p.hash.<sym>.from ),
+				:to( $p.hash.<sym>.to ),
+				:content( $p.hash.<sym>.Str )
+			)
 		}
 		else {
 			warn "Unhandled case"
@@ -1202,6 +1211,8 @@ say "InfixPrefixMetaOperator fired";
 		if self.assert-hash-keys( $p, [< sym EXPR >] ) {
 			(
 				Perl6::Operator.new(
+					:from( $p.hash.<sym>.from ),
+					:to( $p.hash.<sym>.to )
 					:content(
 						$p.hash.<sym>.Str
 					)
@@ -1261,6 +1272,8 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 	method _LongName( Mu $p ) {
 		if self.assert-hash-keys( $p, [< name >], [< colonpair >] ) {
 			Perl6::PackageName.new(
+				:from( $p.hash.<name>.from ),
+				:to( $p.hash.<name>.to ),
 				:content(
 					$p.hash.<name>.Str
 				)
@@ -1397,7 +1410,6 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 			[< identifier >], [< morename >] );
 		if self.assert-hash-keys( $p, [< subshortname >] );
 		if self.assert-hash-keys( $p, [< morename >] );
-		True if self.assert-Str( $p );
 )
 		if self.assert-Str( $p ) {
 			Perl6::Bareword.new(
@@ -1986,6 +1998,8 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 )
 		if $p.Str {
 			Perl6::Bareword.new(
+				:from( $p.from ),
+				:to( $p.to ),
 				:content(
 					$p.Str
 				)
@@ -2205,6 +2219,8 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 		);
 
 		my $leaf = %lookup{$sigil ~ $twigil}.new(
+			:from( $p.from ),
+			:to( $p.to ),
 			:content( $content )
 		);
 		return $leaf;
