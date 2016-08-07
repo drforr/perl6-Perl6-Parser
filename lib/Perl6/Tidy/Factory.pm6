@@ -511,6 +511,7 @@ class Perl6::Tidy::Factory {
 			self._EXPR( $p.hash.<EXPR> )
 		}
 		else {
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -582,7 +583,7 @@ say "BackSlash fired";
 			self._Blockoid( $p.hash.<blockoid> )
 		}
 		else {
-say $p.hash.keys.gist;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -592,7 +593,7 @@ say $p.hash.keys.gist;
 			self._StatementList( $p.hash.<statementlist> )
 		}
 		else {
-say $p.hash.keys.gist;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -606,7 +607,7 @@ say "Blorst fired";
 #			self._Block( $p.hash.<block> )
 		}
 		else {
-say $p.hash.keys.gist;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -617,7 +618,7 @@ say "Bracket fired";
 #			self._SemiList( $p.hash.<semilist> )
 		}
 		else {
-say $p.hash.keys.gist;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -663,7 +664,7 @@ say "CodeBlock fired";
 #			self._Block( $p.hash.<block> )
 		}
 		else {
-say $p.hash.keys.gist;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -674,7 +675,7 @@ say "Coercee fired";
 #			self._SemiList( $p.hash.<semilist> )
 		}
 		else {
-say $p.hash.keys.gist;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -685,7 +686,7 @@ say "ColonCircumfix fired";
 #			self._Circumfix( $p.hash.<circumfix> )
 		}
 		else {
-say $p.hash.keys.gist;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -704,7 +705,7 @@ say "ColonPair fired";
 #			self._Var( $p.hash.<var> )
 		}
 		else {
-say $p.hash.keys.gist;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -716,7 +717,7 @@ say "ColonPairs fired";
 			return True if $p.<U>;
 		}
 		else {
-say $p.hash.keys.gist;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -771,7 +772,7 @@ say "Contextualizer fired";
 			)
 		}
 		else {
-say $p.hash.keys.gist;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -852,7 +853,7 @@ say "DefTermNow fired";
 #			self._DefTerm( $p.hash.<defterm> )
 		}
 		else {
-say $p.hash.keys.gist;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -895,7 +896,7 @@ say "DottyOp fired";
 #			self._ColonPair( $p.hash.<colonpair> )
 		}
 		else {
-say $p.hash.keys.gist;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -906,7 +907,7 @@ say "DottyOpish fired";
 #			self._Term( $p.hash.<term> )
 		}
 		else {
-say $p.hash.keys.gist;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -917,7 +918,7 @@ say "E1 fired";
 #			self._ScopeDeclarator( $p.hash.<scope_declarator> )
 		}
 		else {
-say $p.hash.keys.gist;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -975,12 +976,12 @@ say "EScale fired";
 				)
 			}
 			else {
-say $p.hash.keys.gist;
+				say $p.hash.keys.gist;
 				warn "Unhandled case"
 			}
 		}
 		else {
-say $p.hash.keys.gist;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -1148,6 +1149,14 @@ say $p.hash.keys.gist;
 			).flat
 		}
 		elsif self.assert-hash-keys( $p,
+				[< postfix OPER >],
+				[< postfix_prefix_meta_operator >] ) {
+			@child = (
+				self.__Term( $p.list.[0] ),
+				self._Postfix( $p.hash.<postfix> )
+			).flat
+		}
+		elsif self.assert-hash-keys( $p,
 				[< infix_prefix_meta_operator OPER >] ) {
 			@child = (
 				self.__Term( $p.list.[0] ),
@@ -1158,11 +1167,31 @@ say $p.hash.keys.gist;
 			).flat
 		}
 		elsif self.assert-hash-keys( $p, [< infix OPER >] ) {
-			@child = (
-				self.__Term( $p.list.[0] ),
-				self._Infix( $p.hash.<infix> ),
-				self.__Term( $p.list.[1] )
-			).flat
+			# XXX fix later
+			if $p.list.elems == 3 {
+				@child = (
+					self.__Term( $p.list.[0] ),
+					Perl6::Operator.new(
+						:from( $p.list.[0].to + 1 ),
+						:to( $p.list.[1].from - 1 ),
+						:content( Q{??} )
+					),
+					self.__Term( $p.list.[1] ),
+					Perl6::Operator.new(
+						:from( $p.list.[1].to + 1 ),
+						:to( $p.list.[2].from - 1 ),
+						:content( Q{!!} )
+					),
+					self.__Term( $p.list.[2] )
+				).flat
+			}
+			else {
+				@child = (
+					self.__Term( $p.list.[0] ),
+					self._Infix( $p.hash.<infix> ),
+					self.__Term( $p.list.[1] )
+				).flat
+			}
 		}
 		elsif self.assert-hash-keys( $p, [< sym args >] ) {
 note "Skipping args for the time being";
@@ -1181,7 +1210,6 @@ note "Skipping args for the time being";
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< fatarrow >] ) {
-say $p.dump;
 			@child = (
 				self._FatArrow(
 					$p.hash.<fatarrow>
@@ -1217,7 +1245,7 @@ say $p.dump;
 			)
 		}
 		else {
-say $p.hash.keys.gist;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 		@child
@@ -1229,7 +1257,7 @@ say "FakeInfix fired";
 #			self._O( $p.hash.<O> )
 		}
 		else {
-say $p.hash.keys.gist;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -1240,7 +1268,7 @@ say "FakeSignature fired";
 #			self._Signature( $p.hash.<signature> )
 		}
 		else {
-say $p.hash.keys.gist;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -1286,7 +1314,7 @@ say $p.hash.keys.gist;
 			)
 		}
 		else {
-say $p.hash.keys.gist;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -1304,6 +1332,7 @@ say $p.hash.keys.gist;
 			)
 		}
 		else {
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -1324,6 +1353,7 @@ say "Infixish fired";
 			)
 		}
 		else {
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -1345,6 +1375,7 @@ say "Infixish fired";
 			)
 		}
 		else {
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -1399,7 +1430,7 @@ say "Left fired";
 #			self._TermSeq( $p.hash.<termseq> )
 		}
 		else {
-say $p.hash.keys.gist;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -1415,6 +1446,7 @@ say $p.hash.keys.gist;
 			)
 		}
 		else {
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -1448,7 +1480,7 @@ say "MetaChar fired";
 #			self._Statement( $p.hash.<statement> )
 		}
 		else {
-say $p.hash.keys.gist;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -1473,7 +1505,7 @@ say "MethodOp fired";
 #			self._Variable( $p.hash.<variable> )
 		}
 		else {
-say $p.hash.keys.gist;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -1489,7 +1521,7 @@ say "ModifierExpr fired";
 #			self._EXPR( $p.hash.<EXPR> )
 		}
 		else {
-say $p.hash.keys.gist;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -1500,7 +1532,7 @@ say "ModuleName fired";
 #			self._LongName( $p.hash.<longname> )
 		}
 		else {
-say $p.hash.keys.gist;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -1524,7 +1556,7 @@ say "MultiDeclarator fired";
 #			self._Declarator( $p.hash.<declarator> )
 		}
 		else {
-say $p.hash.keys.gist;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -1535,7 +1567,7 @@ say "MultiSig fired";
 #			self._Signature( $p.hash.<signature> )
 		}
 		else {
-say $p.hash.keys.gist;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -1546,7 +1578,7 @@ say "NamedParam fired";
 #			self._ParamVar( $p.hash.<param_var> )
 		}
 		else {
-say $p.hash.keys.gist;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -1571,7 +1603,7 @@ say $p.hash.keys.gist;
 			)
 		}
 		else {
-say $p.hash.keys.gist;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	
@@ -1591,7 +1623,7 @@ say "Nibbler fired";
 #			self._TermSeq( $p.hash.<termseq> )
 		}
 		else {
-say $p.hash.keys.gist;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -1619,7 +1651,7 @@ say "Noun fired";
 			self._Numish( $p.hash.<numish> )
 		}
 		else {
-say $p.hash.keys.gist;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -1635,7 +1667,7 @@ say $p.hash.keys.gist;
 			self._Integer( $p.hash.<integer> )
 		}
 		else {
-say $p.hash.keys.gist;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -1737,7 +1769,7 @@ say "OPER fired";
 			).flat
 		}
 		else {
-say $p.hash.keys.gist;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -1759,7 +1791,7 @@ say $p.hash.keys.gist;
 			).flat
 		}
 		else {
-say $p.hash.keys.gist;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -1806,7 +1838,7 @@ say "ParamVar fired";
 #			self._Sigil( $p.hash.<sigil> )
 		}
 		else {
-say $p.hash.keys.gist;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -1821,7 +1853,7 @@ say "PBlock fired";
 #			self._Blockoid( $p.hash.<blockoid> )
 		}
 		else {
-say $p.hash.keys.gist;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -1834,9 +1866,21 @@ say "PostCircumfix fired";
 	}
 
 	method _Postfix( Mu $p ) {
-say "Postfix fired";
+#`(
 		return True if self.assert-hash-keys( $p, [< dig O >] );
 		return True if self.assert-hash-keys( $p, [< sym O >] );
+)
+		if self.assert-hash-keys( $p, [< sym O >] ) {
+			Perl6::Operator.new(
+				:from( $p.hash.<sym>.from ),
+				:to( $p.hash.<sym>.to ),
+				:content( $p.hash.<sym>.Str )
+			)
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
 	method _PostOp( Mu $p ) {
@@ -1856,7 +1900,7 @@ say "PostOp fired";
 			)
 		}
 		else {
-say $p.hash.keys.gist;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -1897,7 +1941,7 @@ say "Quibble fired";
 			)
 		}
 		else {
-say $p.hash.keys.gist;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -1915,7 +1959,7 @@ say "QuotePair fired";
 #			self._Identifier( $p.hash.<identifier> )
 		}
 		else {
-say $p.hash.keys.gist;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -2002,7 +2046,7 @@ say "RxAdverbs fired";
 			self._Declarator( $p.hash.<declarator> )
 		}
 		else {
-say $p.hash.keys.gist;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -2084,7 +2128,7 @@ say "SMExpr fired";
 #			self._EXPR( $p.hash.<EXPR> )
 		}
 		else {
-say $p.hash.keys.gist;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -2186,7 +2230,7 @@ say "SubShortName fired";
 #			self._DeSigilName( $p.hash.<desigilname> )
 		}
 		else {
-say $p.hash.keys.gist;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -2209,7 +2253,7 @@ say $p.hash.keys.gist;
 			)
 		}
 		else {
-say $p.hash.keys.gist;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -2220,7 +2264,7 @@ say "Term fired";
 #			self._MethodOp( $p.hash.<methodop> )
 		}
 		else {
-say $p.hash.keys.gist;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -2238,7 +2282,7 @@ say "TermAltSeq fired";
 #			self._TermConjSeq( $p.hash.<termconjseq> )
 		}
 		else {
-say $p.hash.keys.gist;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -2259,7 +2303,7 @@ say "TermConjSeq fired";
 #			self._TermAlt( $p.hash.<termalt> )
 		}
 		else {
-say $p.hash.keys.gist;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -2278,7 +2322,7 @@ say "Termish fired";
 #			self._Noun( $p.hash.<noun> )
 		}
 		else {
-say $p.hash.keys.gist;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -2289,7 +2333,7 @@ say "TermSeq fired";
 #			self._TermAltSeq( $p.hash.<termaltseq> )
 		}
 		else {
-say $p.hash.keys.gist;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -2309,7 +2353,7 @@ say "TypeConstraint fired";
 #			self._TypeName( $p.hash.<typename> )
 		}
 		else {
-say $p.hash.keys.gist;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -2339,7 +2383,7 @@ say "TypeName fired";
 #			self._LongName( $p.hash.<longname> )
 		}
 		else {
-say $p.hash.keys.gist;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -2354,7 +2398,7 @@ say $p.hash.keys.gist;
 			self._Value( $p.hash.<value> )
 		}
 		else {
-say $p.hash.keys.gist;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -2374,7 +2418,7 @@ say $p.hash.keys.gist;
 			self._Quote( $p.hash.<quote> )
 		}
 		else {
-say $p.hash.keys.gist;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -2387,7 +2431,7 @@ say "Var fired";
 #			self._Variable( $p.hash.<variable> )
 		}
 		else {
-say $p.hash.keys.gist;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -2408,7 +2452,7 @@ say $p.hash.keys.gist;
 			self._Variable( $p.hash.<variable> );
 		}
 		else {
-say $p.hash.keys.gist;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -2499,7 +2543,7 @@ say "XBlock fired";
 #			self._Blockoid( $p.hash.<blockoid> )
 		}
 		else {
-say $p.hash.keys.gist;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
