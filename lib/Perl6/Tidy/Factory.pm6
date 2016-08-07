@@ -231,7 +231,25 @@ class Perl6::String does Token {
 
 class Perl6::Bareword does Token {
 }
-class Perl6::Operator does Token {
+class Perl6::Operator {
+}
+class Perl6::Operator::Prefix does Token {
+	also is Perl6::Operator;
+}
+class Perl6::Operator::Infix does Token {
+	also is Perl6::Operator;
+}
+class Perl6::Operator::Postfix does Token {
+	also is Perl6::Operator;
+}
+class Perl6::Operator::PostCircumfix does Branching {
+	also is Perl6::Operator;
+	has @.delimiter;
+	method perl6( $f ) {
+		@.delimiter.[0] ~
+		join( '', map { $_.perl6( $f ) }, @.child ) ~
+		@.delimiter.[1]
+	}
 }
 class Perl6::PackageName does Token {
 	method namespaces() returns Array {
@@ -523,7 +541,6 @@ class Perl6::Tidy::Factory {
 		if self.assert-hash-keys( $p, [ ], [< semiarglist >] );
 		if self.assert-hash-keys( $p, [< EXPR >] );
 		if self.assert-Bool( $p );
-		if self.assert-Str( $p );
 )
 		if self.assert-hash-keys( $p, [< arglist >] ) {
 			self._ArgList( $p.hash.<arglist> );
@@ -532,8 +549,8 @@ class Perl6::Tidy::Factory {
 			$p.Str
 		}
 		else {
-say $p.Int if $p.Int;
-say $p.hash.keys.gist;
+			say $p.Int if $p.Int;
+			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -642,11 +659,9 @@ say "CharSpec fired";
 		return True if $p.list;
 	}
 
-	method _Circumfix( Mu $p ) returns Bool {
-say "Circumfix fired";
-		return True if self.assert-hash-keys( $p, [< nibble >] );
+	method _Circumfix( Mu $p ) {
+#`(
 		return True if self.assert-hash-keys( $p, [< pblock >] );
-		return True if self.assert-hash-keys( $p, [< semilist >] );
 		# _BinInt is a Str/Int leaf
 		# _VALUE is a Str/Int leaf
 		return True if self.assert-hash-keys( $p, [< binint VALUE >] );
@@ -656,6 +671,45 @@ say "Circumfix fired";
 		# _HexInt is Str/Int leaf
 		# _VALUE is a Str/Int leaf
 		return True if self.assert-hash-keys( $p, [< hexint VALUE >] );
+)
+		if self.assert-hash-keys( $p, [< pblock >] ) {
+			# XXX <semilist> can probably be worked with
+			Perl6::Operator::PostCircumfix.new(
+				:delimiter( '{', '}' ),
+				:child(
+					self._PBlock( $p.hash.<pblock> )
+				)
+			)
+		}
+		elsif self.assert-hash-keys( $p, [< semilist >] ) {
+			# XXX <semilist> can probably be worked with
+			$p.Str ~~ m{ ^ (.) }; my $front = $0;
+			$p.Str ~~ m{ (.) $ }; my $back = $0;
+			Perl6::Operator::PostCircumfix.new(
+				:delimiter( $front, $back ),
+				:child(
+self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
+				)
+			)
+		}
+		elsif self.assert-hash-keys( $p, [< nibble >] ) {
+			# XXX <nibble> can probably be worked with
+			# XXX delimiters need to be fixed
+			Perl6::Operator::PostCircumfix.new(
+				:delimiter( '<', '>' ),
+				:child(
+					Perl6::Operator::Prefix.new(
+						:from( $p.hash.<nibble>.from ),
+						:to( $p.hash.<nibble>.to ),
+						:content( $p.hash.<nibble>.Str )
+					)
+				)
+			)
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
 	method _CodeBlock( Mu $p ) returns Bool {
@@ -680,10 +734,16 @@ say "Coercee fired";
 		}
 	}
 
-	method _ColonCircumfix( Mu $p ) returns Bool {
-say "ColonCircumfix fired";
+	method _ColonCircumfix( Mu $p ) {
 		if self.assert-hash-keys( $p, [< circumfix >] ) {
-#			self._Circumfix( $p.hash.<circumfix> )
+			(
+				Perl6::Operator::Infix.new(
+					:from( -42 ),
+					:to( -42 ),
+					:content( Q{:} )
+				),
+				self._Circumfix( $p.hash.<circumfix> )
+			).flat
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -692,10 +752,14 @@ say "ColonCircumfix fired";
 	}
 
 	method _ColonPair( Mu $p ) {
-say "ColonPair fired";
-		return True if self.assert-hash-keys( $p,
-				     [< identifier coloncircumfix >] );
-		if self.assert-hash-keys( $p, [< identifier >] ) {
+		if self.assert-hash-keys( $p,
+				     [< identifier coloncircumfix >] ) {
+			self._ColonCircumfix( $p.hash.<coloncircumfix> )
+		}
+		elsif self.assert-hash-keys( $p, [< coloncircumfix >] ) {
+			self._ColonCircumfix( $p.hash.<coloncircumfix> )
+		}
+		elsif self.assert-hash-keys( $p, [< identifier >] ) {
 #			self._Identifier( $p.hash.<identifier> )
 		}
 		elsif self.assert-hash-keys( $p, [< fakesignature >] ) {
@@ -883,7 +947,7 @@ say "Dig fired";
 	method _Dotty( Mu $p ) {
 		if self.assert-hash-keys( $p, [< sym dottyop O >] ) {
 			(
-				Perl6::Operator.new(
+				Perl6::Operator::Prefix.new(
 					:from( $p.hash.<sym>.from ),
 					:to( $p.hash.<sym>.to ),
 					:content( $p.hash.<sym>.Str )
@@ -901,9 +965,11 @@ say "Dig fired";
 #`(
 		return True if self.assert-hash-keys( $p,
 				[< sym postop >], [< O >] );
-		return True if self.assert-hash-keys( $p, [< colonpair >] );
 )
-		if self.assert-hash-keys( $p, [< methodop >] ) {
+		if self.assert-hash-keys( $p, [< colonpair >] ) {
+			self._ColonPair( $p.hash.<colonpair> )
+		}
+		elsif self.assert-hash-keys( $p, [< methodop >] ) {
 			self._MethodOp( $p.hash.<methodop> )
 		}
 		else {
@@ -1163,7 +1229,7 @@ say "EScale fired";
 			if substr( $p.orig, $p.from, 2 ) eq '>>' {
 				@child = (
 					self.__Term( $p.list.[0] ),
-					Perl6::Operator.new(
+					Perl6::Operator::Prefix.new(
 						:from( $p.from ),
 						:to( $p.from + 2 ),
 						:content( 
@@ -1189,6 +1255,22 @@ say "EScale fired";
 			).flat
 		}
 		elsif self.assert-hash-keys( $p,
+				[< postcircumfix OPER >],
+				[< postfix_prefix_meta_operator >] ) {
+			# XXX Work on this
+			$p.hash.<postcircumfix>.Str ~~ m{ ^ (.) }; my $front = $0;
+			$p.hash.<postcircumfix>.Str ~~ m{ (.) $ }; my $back = $0;
+			@child = (
+				self.__Term( $p.list.[0] ),
+				Perl6::Operator::PostCircumfix.new(
+					:delimiter( $front, $back ),
+					:child(
+						self._PostCircumfix( $p.hash.<postcircumfix> )
+					)
+				)
+			).flat
+		}
+		elsif self.assert-hash-keys( $p,
 				[< postfix OPER >],
 				[< postfix_prefix_meta_operator >] ) {
 			@child = (
@@ -1211,13 +1293,13 @@ say "EScale fired";
 			if $p.list.elems == 3 {
 				@child = (
 					self.__Term( $p.list.[0] ),
-					Perl6::Operator.new(
+					Perl6::Operator::Infix.new(
 						:from( $p.list.[0].to + 1 ),
 						:to( $p.list.[1].from - 1 ),
 						:content( Q{??} )
 					),
 					self.__Term( $p.list.[1] ),
-					Perl6::Operator.new(
+					Perl6::Operator::Infix.new(
 						:from( $p.list.[1].to + 1 ),
 						:to( $p.list.[2].from - 1 ),
 						:content( Q{!!} )
@@ -1233,10 +1315,20 @@ say "EScale fired";
 				).flat
 			}
 		}
-		elsif self.assert-hash-keys( $p, [< sym args >] ) {
-note "Skipping args for the time being";
+		elsif self.assert-hash-keys( $p, [< identifier args >] ) {
 			@child = (
-				Perl6::Operator.new(
+				self._Identifier( $p.hash.<identifier> ),
+				# XXX Work on this later
+				Perl6::Operator::PostCircumfix.new(
+					:delimiter( '(', ')' ),
+					:child( )
+				)
+			)
+		}
+		elsif self.assert-hash-keys( $p, [< sym args >] ) {
+			note "Skipping args for the time being";
+			@child = (
+				Perl6::Operator::Infix.new(
 					:from( $p.hash.<sym>.from ),
 					:to( $p.hash.<sym>.to ),
 					:content( $p.hash.<sym>.Str )
@@ -1247,6 +1339,13 @@ note "Skipping args for the time being";
 			@child = (
 				self._LongName( $p.hash.<longname> ),
 				self._Args( $p.hash.<args> )
+			)
+		}
+		elsif self.assert-hash-keys( $p, [< circumfix >] ) {
+			@child = (
+				self._Circumfix(
+					$p.hash.<circumfix>
+				)
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< fatarrow >] ) {
@@ -1318,7 +1417,7 @@ say "FakeSignature fired";
 			(
 				self._Key( $p.hash.<key> ),
 				# XXX Note that we synthesize here.
-				Perl6::Operator.new(
+				Perl6::Operator::Infix.new(
 					:from( $p.hash.<key>.to + 1 ),
 					:to( $p.hash.<val>.from - 1 ),
 					:content( Q{=>} )
@@ -1365,7 +1464,7 @@ say "FakeSignature fired";
 		if self.assert-hash-keys( $p, [< infix OPER >] );
 )
 		if self.assert-hash-keys( $p, [< sym O >] ) {
-			Perl6::Operator.new(
+			Perl6::Operator::Infix.new(
 				:from( $p.hash.<sym>.from ),
 				:to( $p.hash.<sym>.to ),
 				:content( $p.hash.<sym>.Str )
@@ -1384,7 +1483,7 @@ say "Infixish fired";
 
 	method _InfixPrefixMetaOperator( Mu $p ) {
 		if self.assert-hash-keys( $p, [< sym infixish O >] ) {
-			Perl6::Operator.new(
+			Perl6::Operator::Infix.new(
 				:from( $p.hash.<sym>.from ),
 				:to( $p.hash.<sym>.to ),
 				:content(
@@ -1404,7 +1503,7 @@ say "Infixish fired";
 )
 		if self.assert-hash-keys( $p, [< sym EXPR >] ) {
 			(
-				Perl6::Operator.new(
+				Perl6::Operator::Infix.new(
 					:from( $p.hash.<sym>.from ),
 					:to( $p.hash.<sym>.to )
 					:content(
@@ -1810,7 +1909,7 @@ say "OPER fired";
 )
 		if self.assert-hash-keys( $p, [< sym dottyop O >] ) {
 			(
-				Perl6::Operator.new(
+				Perl6::Operator::Infix.new(
 					:from( $p.hash.<sym>.from ),
 					:to( $p.hash.<sym>.to ),
 					:content( $p.hash.<sym>.str )
@@ -1903,13 +2002,12 @@ say "ParamVar fired";
 	}
 
 	method _PBlock( Mu $p ) {
-say "PBlock fired";
 #`(
 		return True if self.assert-hash-keys( $p,
 				     [< lambda blockoid signature >] );
 )
 		if self.assert-hash-keys( $p, [< blockoid >] ) {
-#			self._Blockoid( $p.hash.<blockoid> )
+			self._Blockoid( $p.hash.<blockoid> )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -1918,10 +2016,34 @@ say "PBlock fired";
 	}
 
 	method _PostCircumfix( Mu $p ) {
-say "PostCircumfix fired";
-		return True if self.assert-hash-keys( $p, [< nibble O >] );
+#`(
 		return True if self.assert-hash-keys( $p, [< semilist O >] );
 		return True if self.assert-hash-keys( $p, [< arglist O >] );
+)
+		if self.assert-hash-keys( $p, [< semilist O >] ) {
+			my $x = $p.hash.<semilist>.Str;
+			$x ~~ s{ ^ \s+ } = '';
+			$x ~~ s{ \s+ $ } = '';
+			Perl6::Bareword.new(
+				:from( $p.hash.<semilist>.from ),
+				:to( $p.hash.<semilist>.to ),
+				:content( $x )
+			)
+		}
+		elsif self.assert-hash-keys( $p, [< nibble O >] ) {
+			my $x = $p.hash.<nibble>.Str;
+			$x ~~ s{ ^ \s+ } = '';
+			$x ~~ s{ \s+ $ } = '';
+			Perl6::Bareword.new(
+				:from( $p.hash.<nibble>.from ),
+				:to( $p.hash.<nibble>.to ),
+				:content( $x )
+			)
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
 	method _Postfix( Mu $p ) {
@@ -1930,7 +2052,7 @@ say "PostCircumfix fired";
 		return True if self.assert-hash-keys( $p, [< sym O >] );
 )
 		if self.assert-hash-keys( $p, [< sym O >] ) {
-			Perl6::Operator.new(
+			Perl6::Operator::Infix.new(
 				:from( $p.hash.<sym>.from ),
 				:to( $p.hash.<sym>.to ),
 				:content( $p.hash.<sym>.Str )
@@ -1952,7 +2074,7 @@ say "PostOp fired";
 
 	method _Prefix( Mu $p ) {
 		if self.assert-hash-keys( $p, [< sym O >] ) {
-			Perl6::Operator.new(
+			Perl6::Operator::Infix.new(
 				:from( $p.hash.<sym>.from ),
 				:to( $p.hash.<sym>.to ),
 				:content( $p.hash.<sym>.Str )
@@ -2127,12 +2249,23 @@ say "SemiArgList fired";
 	}
 
 	method _SemiList( Mu $p ) {
-say "SemiList fired";
+		CATCH {
+			when X::Multi::NoMatch { }
+		}
+#`(
 		for $p.list {
 			next if self.assert-hash-keys( $_, [< statement >] );
 		}
 		return True if self.assert-hash-keys( $p, [ ],
 			[< statement >] );
+);
+		if self.assert-hash-keys( $p, [< statement >] ) {
+			self._EXPR( $p.hash.<statement>.list.[0].<EXPR> )
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
 	method _Separator( Mu $p ) {
