@@ -881,19 +881,30 @@ say "Dig fired";
 	method _Doc( Mu $p ) returns Bool { $p.hash.<doc>.Bool }
 
 	method _Dotty( Mu $p ) {
-say "Dotty fired";
-		return True if self.assert-hash-keys( $p, [< sym dottyop O >] );
+		if self.assert-hash-keys( $p, [< sym dottyop O >] ) {
+			(
+				Perl6::Operator.new(
+					:from( $p.hash.<sym>.from ),
+					:to( $p.hash.<sym>.to ),
+					:content( $p.hash.<sym>.Str )
+				),
+				self._DottyOp( $p.hash.<dottyop> )
+			)
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
 	method _DottyOp( Mu $p ) {
-say "DottyOp fired";
+#`(
 		return True if self.assert-hash-keys( $p,
 				[< sym postop >], [< O >] );
+		return True if self.assert-hash-keys( $p, [< colonpair >] );
+)
 		if self.assert-hash-keys( $p, [< methodop >] ) {
-#			self._MethodOp( $p.hash.<methodop> )
-		}
-		elsif self.assert-hash-keys( $p, [< colonpair >] ) {
-#			self._ColonPair( $p.hash.<colonpair> )
+			self._MethodOp( $p.hash.<methodop> )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -954,6 +965,11 @@ say "EScale fired";
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< longname >], [< args >] ) {
+			(
+				self._LongName( $p.hash.<longname> )
+			)
+		}
+		elsif self.assert-hash-keys( $p, [< longname >] ) {
 			(
 				self._LongName( $p.hash.<longname> )
 			)
@@ -1141,6 +1157,14 @@ say "EScale fired";
 
 		my @child;
 		if self.assert-hash-keys( $p,
+				[< dotty OPER >],
+				[< postfix_prefix_meta_operator >] ) {
+			@child = (
+				self.__Term( $p.list.[0] ),
+				self._Dotty( $p.hash.<dotty> )
+			).flat
+		}
+		elsif self.assert-hash-keys( $p,
 				[< prefix OPER >],
 				[< prefix_postfix_meta_operator >] ) {
 			@child = (
@@ -1496,13 +1520,20 @@ say "MethodDef fired";
 	}
 
 	method _MethodOp( Mu $p ) {
-say "MethodOp fired";
+#`(
 		return True if self.assert-hash-keys( $p, [< longname args >] );
 		if self.assert-hash-keys( $p, [< longname >] ) {
 #			self._LongName( $p.hash.<longname> )
 		}
 		elsif self.assert-hash-keys( $p, [< variable >] ) {
 #			self._Variable( $p.hash.<variable> )
+		}
+)
+		if self.assert-hash-keys( $p, [< variable >] ) {
+			self._Variable( $p.hash.<variable> )
+		}
+		elsif self.assert-hash-keys( $p, [< longname >] ) {
+			self._LongName( $p.hash.<longname> )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -1747,6 +1778,7 @@ say "Op fired";
 	}
 
 	method _OPER( Mu $p ) {
+#`(
 say "OPER fired";
 		return True if self.assert-hash-keys( $p, [< sym dottyop O >] );
 		return True if self.assert-hash-keys( $p,
@@ -1759,6 +1791,17 @@ say "OPER fired";
 		return True if self.assert-hash-keys( $p, [< arglist O >] );
 		return True if self.assert-hash-keys( $p, [< dig O >] );;
 		return True if self.assert-hash-keys( $p, [< O >] );
+)
+		if self.assert-hash-keys( $p, [< sym dottyop O >] ) {
+			(
+				Perl6::Operator.new(
+					:from( $p.hash.<sym>.from ),
+					:to( $p.hash.<sym>.to ),
+					:content( $p.hash.<sym>.str )
+				),
+				self._DottyOp( $p.hash.<dottyop> )
+			)
+		}
 	}
 
 	method _PackageDeclarator( Mu $p ) {

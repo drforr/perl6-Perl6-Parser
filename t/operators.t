@@ -91,7 +91,7 @@ _END_
 }, Q{Term Precedence};
 
 subtest {
-	plan 0;
+	plan 2;
 #`(
 	subtest {
 		plan 3;
@@ -168,6 +168,7 @@ _END_
 #		is $pt.format( $tree ), Q{chomp( )}, Q{formatted};
 		is $pt.format( $tree ), Q{chomp()}, Q{formatted};
 	}, Q{()};
+)
 
 	subtest {
 		plan 3;
@@ -201,7 +202,7 @@ _END_
 		plan 3;
 
 		my $parsed = $pt.parse-source( Q:to[_END_] );
-Int.&round
+Int.=round
 _END_
 		my $tree = $pt.build-tree( $parsed );
 		ok $pt.validate( $parsed ), Q{valid};
@@ -267,6 +268,7 @@ _END_
 		is $pt.format( $tree ), Q{42.*name}, Q{formatted};
 	}, Q{.*};
 
+#`(
 	subtest {
 		plan 3;
 
