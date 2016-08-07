@@ -61,15 +61,14 @@ _END_
 	}, Q{()};
 
 	subtest {
-		plan 3;
+		plan 2;
 
 		my $parsed = $pt.parse-source( Q:to[_END_] );
 { 1 }
 _END_
 		my $tree = $pt.build-tree( $parsed );
 		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
+		# XXX Technically it's an operator, but that could confuse.
 #		is $pt.format( $tree ), Q[{ 1 }], Q{formatted};
 		is $pt.format( $tree ), Q[{1}], Q{formatted};
 	}, Q[{}];
@@ -1842,42 +1841,19 @@ _END_
 #`(
 
 my $x; $x.say
-
 my $x; $x.()
-
 my $x; $x.[]
-
 my $x; $x.{}
-
 my $x; $x.<>
-
 my $x; $x.«»
-
 my $x; ||$x
 
-my $x; ~^$x
-
-my $x; ?$x
-
-3 +& 2
-
-3 +< 2
-
-3 +> 2
-
 3 ~& 2
-
 3 ~< 2
-
 3 ~> 2
-
 3 ?& 2
-
 3 ~| 2
-_END_
-
 3 ~^ 2
-
 3 ?^ 2
 
 3 !eqv 2
@@ -1885,23 +1861,14 @@ _END_
 substr('a': 2)
 
 my @a; my @b; @a minmax @b
-
 my @a; my @b; @a X~ @b
-
 my @a; my @b; @a X* @b
-
 my @a; my @b; @a Xeqv @b
-
 my @a; print @a
-
 my @a; push @a, 1
-
 my @a; say @a
-
 my @a; die @a
-
 my @a; map @a, {}
-
 my @a; substr @a
 
 )

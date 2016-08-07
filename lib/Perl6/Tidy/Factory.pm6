@@ -256,6 +256,16 @@ class Perl6::PackageName does Token {
 		$.content.split( '::' )
 	}
 }
+class Perl6::Block does Branching {
+	# XXX Figure out a better way
+	#
+	has @.delimiter;
+	method perl6( $f ) {
+		@.delimiter.[0] ~
+		join( '', map { $_.perl6( $f ) }, @.child ) ~
+		@.delimiter.[1]
+	}
+}
 
 # Semicolons should only occur at statement boundaries.
 # So they're only generated in the _Statement handler.
@@ -279,6 +289,10 @@ class Perl6::Variable::Scalar::Dynamic {
 class Perl6::Variable::Scalar::Attribute {
 	also is Perl6::Variable::Scalar;
 	has $.twigil = Q{!};
+}
+class Perl6::Variable::Scalar::Accessor {
+	also is Perl6::Variable::Scalar;
+	has $.twigil = Q{.};
 }
 class Perl6::Variable::Scalar::CompileTime {
 	also is Perl6::Variable::Scalar;
@@ -315,6 +329,10 @@ class Perl6::Variable::Array::Attribute {
 	also is Perl6::Variable::Array;
 	has $.twigil = Q{!};
 }
+class Perl6::Variable::Array::Accessor {
+	also is Perl6::Variable::Array;
+	has $.twigil = Q{.};
+}
 class Perl6::Variable::Array::CompileTime {
 	also is Perl6::Variable::Array;
 	has $.twigil = Q{?};
@@ -350,6 +368,10 @@ class Perl6::Variable::Hash::Attribute {
 	also is Perl6::Variable::Hash;
 	has $.twigil = Q{!};
 }
+class Perl6::Variable::Hash::Accessor {
+	also is Perl6::Variable::Hash;
+	has $.twigil = Q{.};
+}
 class Perl6::Variable::Hash::CompileTime {
 	also is Perl6::Variable::Hash;
 	has $.twigil = Q{?};
@@ -384,6 +406,10 @@ class Perl6::Variable::Callable::Dynamic {
 class Perl6::Variable::Callable::Attribute {
 	also is Perl6::Variable::Callable;
 	has $.twigil = Q{!};
+}
+class Perl6::Variable::Callable::Accessor {
+	also is Perl6::Variable::Callable;
+	has $.twigil = Q{.};
 }
 class Perl6::Variable::Callable::CompileTime {
 	also is Perl6::Variable::Callable;
@@ -607,7 +633,12 @@ say "BackSlash fired";
 
 	method _Blockoid( Mu $p ) {
 		if self.assert-hash-keys( $p, [< statementlist >] ) {
-			self._StatementList( $p.hash.<statementlist> )
+			Perl6::Block.new(
+				:delimiter( '{', '}' ),
+				:child(
+					self._StatementList( $p.hash.<statementlist> )
+				)
+			)
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -673,13 +704,7 @@ say "CharSpec fired";
 		return True if self.assert-hash-keys( $p, [< hexint VALUE >] );
 )
 		if self.assert-hash-keys( $p, [< pblock >] ) {
-			# XXX <semilist> can probably be worked with
-			Perl6::Operator::PostCircumfix.new(
-				:delimiter( '{', '}' ),
-				:child(
-					self._PBlock( $p.hash.<pblock> )
-				)
-			)
+			self._PBlock( $p.hash.<pblock> )
 		}
 		elsif self.assert-hash-keys( $p, [< semilist >] ) {
 			# XXX <semilist> can probably be worked with
@@ -1355,6 +1380,13 @@ say "EScale fired";
 				)
 			)
 		}
+		elsif self.assert-hash-keys( $p, [< routine_declarator >] ) {
+			@child = (
+				self._RoutineDeclarator(
+					$p.hash.<routine_declarator>
+				)
+			)
+		}
 		elsif self.assert-hash-keys( $p, [< scope_declarator >] ) {
 			@child = (
 				self._ScopeDeclarator(
@@ -1625,13 +1657,26 @@ say "MetaChar fired";
 	}
 
 	method _MethodDef( Mu $p ) {
-say "MethodDef fired";
+#`(
 		return True if self.assert-hash-keys( $p,
 			     [< specials longname blockoid multisig >],
 			     [< trait >] );
 		return True if self.assert-hash-keys( $p,
 			     [< specials longname blockoid >],
 			     [< trait >] );
+)
+		if self.assert-hash-keys( $p,
+			     [< specials longname blockoid >],
+			     [< trait >] ) {
+			(
+				self._LongName( $p.hash.<longname> ),
+				self._Blockoid( $p.hash.<blockoid> )
+			).flat
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
 	method _MethodOp( Mu $p ) {
@@ -1917,6 +1962,10 @@ say "OPER fired";
 				self._DottyOp( $p.hash.<dottyop> )
 			)
 		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
 	method _PackageDeclarator( Mu $p ) {
@@ -2180,11 +2229,22 @@ say "RegexDef fired";
 	}
 
 	method _RoutineDeclarator( Mu $p ) {
-say "RoutineDeclarator fired";
+#`(
 		return True if self.assert-hash-keys( $p,
 				[< sym method_def >] );
 		return True if self.assert-hash-keys( $p,
 				[< sym routine_def >] );
+)
+		if self.assert-hash-keys( $p, [< sym method_def >] ) {
+			(
+				self._Sym( $p.hash.<sym> ),
+				self._MethodDef( $p.hash.<method_def> )
+			).flat
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
 	method _RoutineDef( Mu $p ) {
@@ -2238,6 +2298,10 @@ say "RxAdverbs fired";
 				self._Sym( $p.hash.<sym> ),
 				self._Scoped( $p.hash.<scoped> )
 			).flat
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -2641,7 +2705,7 @@ say "Var fired";
 				[< variable >],
 				[< semilist postcircumfix signature
 				   trait post_constraint >] ) {
-			self._Variable( $p.hash.<variable> );
+			self._Variable( $p.hash.<variable> )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -2665,6 +2729,7 @@ say "Var fired";
 		my %lookup = (
 			'$' => Perl6::Variable::Scalar,
 			'$*' => Perl6::Variable::Scalar::Dynamic,
+			'$.' => Perl6::Variable::Scalar::Accessor,
 			'$!' => Perl6::Variable::Scalar::Attribute,
 			'$?' => Perl6::Variable::Scalar::CompileTime,
 			'$<' => Perl6::Variable::Scalar::MatchIndex,
@@ -2674,6 +2739,7 @@ say "Var fired";
 			'$~' => Perl6::Variable::Scalar::SubLanguage,
 			'%' => Perl6::Variable::Hash,
 			'%*' => Perl6::Variable::Hash::Dynamic,
+			'%.' => Perl6::Variable::Hash::Accessor,
 			'%!' => Perl6::Variable::Hash::Attribute,
 			'%?' => Perl6::Variable::Hash::CompileTime,
 			'%<' => Perl6::Variable::Hash::MatchIndex,
@@ -2683,6 +2749,7 @@ say "Var fired";
 			'%~' => Perl6::Variable::Hash::SubLanguage,
 			'@' => Perl6::Variable::Array,
 			'@*' => Perl6::Variable::Array::Dynamic,
+			'@.' => Perl6::Variable::Array::Accessor,
 			'@!' => Perl6::Variable::Array::Attribute,
 			'@?' => Perl6::Variable::Array::CompileTime,
 			'@<' => Perl6::Variable::Array::MatchIndex,
@@ -2692,6 +2759,7 @@ say "Var fired";
 			'@~' => Perl6::Variable::Array::SubLanguage,
 			'&' => Perl6::Variable::Callable,
 			'&*' => Perl6::Variable::Callable::Dynamic,
+			'&.' => Perl6::Variable::Callable::Accessor,
 			'&!' => Perl6::Variable::Callable::Attribute,
 			'&?' => Perl6::Variable::Callable::CompileTime,
 			'&<' => Perl6::Variable::Callable::MatchIndex,
