@@ -1159,10 +1159,26 @@ say "EScale fired";
 		if self.assert-hash-keys( $p,
 				[< dotty OPER >],
 				[< postfix_prefix_meta_operator >] ) {
-			@child = (
-				self.__Term( $p.list.[0] ),
-				self._Dotty( $p.hash.<dotty> )
-			).flat
+			# XXX Look into this at some point.
+			if substr( $p.orig, $p.from, 2 ) eq '>>' {
+				@child = (
+					self.__Term( $p.list.[0] ),
+					Perl6::Operator.new(
+						:from( $p.from ),
+						:to( $p.from + 2 ),
+						:content( 
+							substr( $p.orig, $p.from, 2 )
+						)
+					),
+					self._Dotty( $p.hash.<dotty> )
+				).flat
+			}
+			else {
+				@child = (
+					self.__Term( $p.list.[0] ),
+					self._Dotty( $p.hash.<dotty> )
+				).flat
+			}
 		}
 		elsif self.assert-hash-keys( $p,
 				[< prefix OPER >],

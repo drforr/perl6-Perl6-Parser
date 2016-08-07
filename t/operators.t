@@ -268,7 +268,6 @@ _END_
 		is $pt.format( $tree ), Q{42.*name}, Q{formatted};
 	}, Q{.*};
 
-#`(
 	subtest {
 		plan 3;
 
@@ -283,6 +282,7 @@ _END_
 		is $pt.format( $tree ), Q{42>>.say}, Q{formatted};
 	}, Q{>>.};
 
+#`(
 	subtest {
 		plan 3;
 
