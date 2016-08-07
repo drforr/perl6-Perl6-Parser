@@ -141,6 +141,13 @@ Just to keep the hierarchy reasonably clean, classes do only the preprocessing n
 
 =end DEVELOPER_NOTES
 
+=begin DEBUGGING_NOTES
+
+Should you brave the internals in search of a missing term, the first thing you should probably do is get an idea of what your parse tree looks like with the C<.dump> method. After that, you should be aware that C<.dump> only displays keys that actually have content, so there may be other keys that are merely defined. Those go in the third argument of C<.assert-hash-keys>.
+
+
+=end DEBUGGING_NOTES
+
 =end pod
 
 #`(
@@ -216,6 +223,10 @@ class Perl6::Number::Hexadecimal {
 }
 class Perl6::Number::Radix {
 	also is Perl6::Number;
+}
+
+class Perl6::String does Token {
+	has Str $.bare; # Easier to grab it from the parser.
 }
 
 class Perl6::Bareword does Token {
@@ -516,7 +527,12 @@ class Perl6::Tidy::Factory {
 		if self.assert-hash-keys( $p, [< arglist >] ) {
 			self._ArgList( $p.hash.<arglist> );
 		}
+		elsif self.assert-Str( $p ) {
+			$p.Str
+		}
 		else {
+say $p.Int if $p.Int;
+say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -553,6 +569,8 @@ say "BackSlash fired";
 
 	method _BinInt( Mu $p ) {
 		Perl6::Number::Binary.new(
+			:from( $p.from ),
+			:to( $p.to ),
 			:content(
 				$p.Str eq '0' ?? 0 !! $p.Int
 			)
@@ -564,6 +582,7 @@ say "BackSlash fired";
 			self._Blockoid( $p.hash.<blockoid> )
 		}
 		else {
+say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -573,6 +592,7 @@ say "BackSlash fired";
 			self._StatementList( $p.hash.<statementlist> )
 		}
 		else {
+say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -581,11 +601,13 @@ say "BackSlash fired";
 say "Blorst fired";
 		if self.assert-hash-keys( $p, [< statement >] ) {
 #			self._Statement( $p.hash.<statement> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
-		if self.assert-hash-keys( $p, [< block >] ) {
+		elsif self.assert-hash-keys( $p, [< block >] ) {
 #			self._Block( $p.hash.<block> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
+		}
+		else {
+say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -593,7 +615,10 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 say "Bracket fired";
 		if self.assert-hash-keys( $p, [< semilist >] ) {
 #			self._SemiList( $p.hash.<semilist> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
+		}
+		else {
+say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -636,7 +661,10 @@ say "Circumfix fired";
 say "CodeBlock fired";
 		if self.assert-hash-keys( $p, [< block >] ) {
 #			self._Block( $p.hash.<block> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
+		}
+		else {
+say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -644,7 +672,10 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 say "Coercee fired";
 		if self.assert-hash-keys( $p, [< semilist >] ) {
 #			self._SemiList( $p.hash.<semilist> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
+		}
+		else {
+say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -652,7 +683,10 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 say "ColonCircumfix fired";
 		if self.assert-hash-keys( $p, [< circumfix >] ) {
 #			self._Circumfix( $p.hash.<circumfix> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
+		}
+		else {
+say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -662,15 +696,16 @@ say "ColonPair fired";
 				     [< identifier coloncircumfix >] );
 		if self.assert-hash-keys( $p, [< identifier >] ) {
 #			self._Identifier( $p.hash.<identifier> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
-		if self.assert-hash-keys( $p, [< fakesignature >] ) {
+		elsif self.assert-hash-keys( $p, [< fakesignature >] ) {
 #			self._FakeSignature( $p.hash.<fakesignature> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
-		if self.assert-hash-keys( $p, [< var >] ) {
+		elsif self.assert-hash-keys( $p, [< var >] ) {
 #			self._Var( $p.hash.<var> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
+		}
+		else {
+say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -679,6 +714,10 @@ say "ColonPairs fired";
 		if $p ~~ Hash {
 			return True if $p.<D>;
 			return True if $p.<U>;
+		}
+		else {
+say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -732,6 +771,7 @@ say "Contextualizer fired";
 			)
 		}
 		else {
+say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -764,7 +804,6 @@ say "DECL fired";
 					  [< package_def sym >] );
 		if self.assert-hash-keys( $p, [< declarator >] ) {
 #			self._Declarator( $p.hash.<declarator> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 	}
 
@@ -811,7 +850,10 @@ say "DefTerm fired";
 say "DefTermNow fired";
 		if self.assert-hash-keys( $p, [< defterm >] ) {
 #			self._DefTerm( $p.hash.<defterm> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
+		}
+		else {
+say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -848,11 +890,13 @@ say "DottyOp fired";
 				[< sym postop >], [< O >] );
 		if self.assert-hash-keys( $p, [< methodop >] ) {
 #			self._MethodOp( $p.hash.<methodop> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
-		if self.assert-hash-keys( $p, [< colonpair >] ) {
+		elsif self.assert-hash-keys( $p, [< colonpair >] ) {
 #			self._ColonPair( $p.hash.<colonpair> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
+		}
+		else {
+say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -860,7 +904,10 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 say "DottyOpish fired";
 		if self.assert-hash-keys( $p, [< term >] ) {
 #			self._Term( $p.hash.<term> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
+		}
+		else {
+say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -868,7 +915,10 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 say "E1 fired";
 		if self.assert-hash-keys( $p, [< scope_declarator >] ) {
 #			self._ScopeDeclarator( $p.hash.<scope_declarator> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
+		}
+		else {
+say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -1089,17 +1139,53 @@ say $p.hash.keys.gist;
 )
 
 		my @child;
-		if self.assert-hash-keys( $p, [< infix OPER >] ) {
+		if self.assert-hash-keys( $p,
+				[< prefix OPER >],
+				[< prefix_postfix_meta_operator >] ) {
+			@child = (
+				self._Prefix( $p.hash.<prefix> ),
+				self.__Term( $p.list.[0] )
+			).flat
+		}
+		elsif self.assert-hash-keys( $p,
+				[< infix_prefix_meta_operator OPER >] ) {
+			@child = (
+				self.__Term( $p.list.[0] ),
+				self._InfixPrefixMetaOperator(
+					$p.hash.<infix_prefix_meta_operator>
+				),
+				self.__Term( $p.list.[1] )
+			).flat
+		}
+		elsif self.assert-hash-keys( $p, [< infix OPER >] ) {
 			@child = (
 				self.__Term( $p.list.[0] ),
 				self._Infix( $p.hash.<infix> ),
 				self.__Term( $p.list.[1] )
 			).flat
 		}
+		elsif self.assert-hash-keys( $p, [< sym args >] ) {
+note "Skipping args for the time being";
+			@child = (
+				Perl6::Operator.new(
+					:from( $p.hash.<sym>.from ),
+					:to( $p.hash.<sym>.to ),
+					:content( $p.hash.<sym>.Str )
+				)
+			)
+		}
 		elsif self.assert-hash-keys( $p, [< longname args >] ) {
 			@child = (
 				self._LongName( $p.hash.<longname> ),
 				self._Args( $p.hash.<args> )
+			)
+		}
+		elsif self.assert-hash-keys( $p, [< fatarrow >] ) {
+say $p.dump;
+			@child = (
+				self._FatArrow(
+					$p.hash.<fatarrow>
+				)
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< scope_declarator >] ) {
@@ -1123,7 +1209,15 @@ say $p.hash.keys.gist;
 				)
 			)
 		}
+		elsif self.assert-hash-keys( $p, [< variable >] ) {
+			@child = (
+				self._Variable(
+					$p.hash.<variable>
+				)
+			)
+		}
 		else {
+say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 		@child
@@ -1133,7 +1227,10 @@ say $p.hash.keys.gist;
 say "FakeInfix fired";
 		if self.assert-hash-keys( $p, [< O >] ) {
 #			self._O( $p.hash.<O> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
+		}
+		else {
+say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -1141,18 +1238,32 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 say "FakeSignature fired";
 		if self.assert-hash-keys( $p, [< signature >] ) {
 #			self._Signature( $p.hash.<signature> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
+		}
+		else {
+say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
 	method _FatArrow( Mu $p ) {
-say "FatArrow fired";
-		# _Key is a Str leaf
-		return True if self.assert-hash-keys( $p, [< val key >] );
+		if self.assert-hash-keys( $p, [< key val >] ) {
+			(
+				self._Key( $p.hash.<key> ),
+				# XXX Note that we synthesize here.
+				Perl6::Operator.new(
+					:from( $p.hash.<key>.to + 1 ),
+					:to( $p.hash.<val>.from - 1 ),
+					:content( Q{=>} )
+				),
+				self._Val( $p.hash.<val> )
+			)
+		}
 	}
 
 	method _HexInt( Mu $p ) {
 		Perl6::Number::Hexadecimal.new(
+			:from( $p.from ),
+			:to( $p.to ),
 			:content(
 				$p.Str eq '0' ?? 0 !! $p.Int
 			)
@@ -1173,6 +1284,10 @@ say "FatArrow fired";
 					$p.Str
 				)
 			)
+		}
+		else {
+say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -1199,9 +1314,18 @@ say "Infixish fired";
 	}
 
 	method _InfixPrefixMetaOperator( Mu $p ) {
-say "InfixPrefixMetaOperator fired";
-		return True if self.assert-hash-keys( $p,
-			[< sym infixish O >] );
+		if self.assert-hash-keys( $p, [< sym infixish O >] ) {
+			Perl6::Operator.new(
+				:from( $p.hash.<sym>.from ),
+				:to( $p.hash.<sym>.to ),
+				:content(
+					$p.hash.<sym>.Str ~ $p.hash.<infixish>
+				)
+			)
+		}
+		else {
+			warn "Unhandled case"
+		}
 	}
 
 	method _Initializer( Mu $p ) {
@@ -1259,13 +1383,24 @@ say "Invocant fired";
 return True;
 	}
 
+	method _Key( Mu $p ) {
+		Perl6::Bareword.new(
+			:from( $p.from ),
+			:to( $p.to ),
+			:content( $p.Str )
+		)
+	}
+
 	method _Lambda( Mu $p ) returns Str { $p.hash.<lambda>.Str }
 
 	method _Left( Mu $p ) {
 say "Left fired";
 		if self.assert-hash-keys( $p, [< termseq >] ) {
 #			self._TermSeq( $p.hash.<termseq> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
+		}
+		else {
+say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -1290,35 +1425,31 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 say "MetaChar fired";
 		if self.assert-hash-keys( $p, [< sym >] ) {
 #			self._Sym( $p.hash.<sym> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
-		if self.assert-hash-keys( $p, [< codeblock >] ) {
+		elsif self.assert-hash-keys( $p, [< codeblock >] ) {
 #			self._CodeBlock( $p.hash.<codeblock> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
-		if self.assert-hash-keys( $p, [< backslash >] ) {
+		elsif self.assert-hash-keys( $p, [< backslash >] ) {
 #			self._BackSlash( $p.hash.<backslash> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
-		if self.assert-hash-keys( $p, [< assertion >] ) {
+		elsif self.assert-hash-keys( $p, [< assertion >] ) {
 #			self._Assertion( $p.hash.<assertion> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
-		if self.assert-hash-keys( $p, [< nibble >] ) {
+		elsif self.assert-hash-keys( $p, [< nibble >] ) {
 #			self._Nibble( $p.hash.<nibble> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
-		if self.assert-hash-keys( $p, [< quote >] ) {
+		elsif self.assert-hash-keys( $p, [< quote >] ) {
 #			self._Quote( $p.hash.<quote> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
-		if self.assert-hash-keys( $p, [< nibbler >] ) {
+		elsif self.assert-hash-keys( $p, [< nibbler >] ) {
 #			self._Nibbler( $p.hash.<nibbler> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
-		if self.assert-hash-keys( $p, [< statement >] ) {
+		elsif self.assert-hash-keys( $p, [< statement >] ) {
 #			self._Statement( $p.hash.<statement> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
+		}
+		else {
+say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -1337,11 +1468,13 @@ say "MethodOp fired";
 		return True if self.assert-hash-keys( $p, [< longname args >] );
 		if self.assert-hash-keys( $p, [< longname >] ) {
 #			self._LongName( $p.hash.<longname> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
-		if self.assert-hash-keys( $p, [< variable >] ) {
+		elsif self.assert-hash-keys( $p, [< variable >] ) {
 #			self._Variable( $p.hash.<variable> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
+		}
+		else {
+say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -1354,7 +1487,10 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 say "ModifierExpr fired";
 		if self.assert-hash-keys( $p, [< EXPR >] ) {
 #			self._EXPR( $p.hash.<EXPR> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
+		}
+		else {
+say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -1362,7 +1498,10 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 say "ModuleName fired";
 		if self.assert-hash-keys( $p, [< longname >] ) {
 #			self._LongName( $p.hash.<longname> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
+		}
+		else {
+say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -1375,13 +1514,18 @@ say "MoreName fired";
 
 	method _MultiDeclarator( Mu $p ) {
 say "MultiDeclarator fired";
+#`(
 		return True if self.assert-hash-keys( $p,
 				[< sym routine_def >] );
 		return True if self.assert-hash-keys( $p,
 				[< sym declarator >] );
+)
 		if self.assert-hash-keys( $p, [< declarator >] ) {
 #			self._Declarator( $p.hash.<declarator> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
+		}
+		else {
+say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -1389,7 +1533,10 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 say "MultiSig fired";
 		if self.assert-hash-keys( $p, [< signature >] ) {
 #			self._Signature( $p.hash.<signature> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
+		}
+		else {
+say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -1397,7 +1544,10 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 say "NamedParam fired";
 		if self.assert-hash-keys( $p, [< param_var >] ) {
 #			self._ParamVar( $p.hash.<param_var> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
+		}
+		else {
+say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -1413,34 +1563,36 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 )
 		if self.assert-Str( $p ) {
 			Perl6::Bareword.new(
+				:from( $p.from ),
+				:to( $p.to ),
 				:content(
 					$p.Str
 				)
 			)
 		}
 		else {
+say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
+	
 	}
 
 	method _Nibble( Mu $p ) {
+say "_Nibble fired";
 #`(
 		if self.assert-hash-keys( $p, [< termseq >] );
 		if $p.Bool;
 )
-		if $p.Str {
-			$p.Str
-		}
-		else {
-			warn "Unhandled case"
-		}
 	}
 
 	method _Nibbler( Mu $p ) {
 say "Nibbler fired";
 		if self.assert-hash-keys( $p, [< termseq >] ) {
 #			self._TermSeq( $p.hash.<termseq> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
+		}
+		else {
+say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -1467,6 +1619,7 @@ say "Noun fired";
 			self._Numish( $p.hash.<numish> )
 		}
 		else {
+say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -1482,6 +1635,7 @@ say "Noun fired";
 			self._Integer( $p.hash.<integer> )
 		}
 		else {
+say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
@@ -1545,6 +1699,8 @@ say "O fired";
 
 	method _OctInt( Mu $p ) {
 		Perl6::Number::Octal.new(
+			:from( $p.from ),
+			:to( $p.to ),
 			:content(
 				$p.Str eq '0' ?? 0 !! $p.Int
 			)
@@ -1580,6 +1736,10 @@ say "OPER fired";
 				self._PackageDef( $p.hash.<package_def> )
 			).flat
 		}
+		else {
+say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
 	method _PackageDef( Mu $p ) {
@@ -1597,6 +1757,10 @@ say "OPER fired";
 				self._LongName( $p.hash.<longname> ),
 				self._Blockoid( $p.hash.<blockoid> )
 			).flat
+		}
+		else {
+say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -1637,21 +1801,28 @@ say "ParamVar fired";
 		return True if self.assert-hash-keys( $p, [< name sigil >] );
 		if self.assert-hash-keys( $p, [< signature >] ) {
 #			self._Signature( $p.hash.<signature> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
-		if self.assert-hash-keys( $p, [< sigil >] ) {
+		elsif self.assert-hash-keys( $p, [< sigil >] ) {
 #			self._Sigil( $p.hash.<sigil> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
+		}
+		else {
+say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
 	method _PBlock( Mu $p ) {
 say "PBlock fired";
+#`(
 		return True if self.assert-hash-keys( $p,
 				     [< lambda blockoid signature >] );
+)
 		if self.assert-hash-keys( $p, [< blockoid >] ) {
 #			self._Blockoid( $p.hash.<blockoid> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
+		}
+		else {
+say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -1677,8 +1848,17 @@ say "PostOp fired";
 	}
 
 	method _Prefix( Mu $p ) {
-say "Prefix fired";
-		return True if self.assert-hash-keys( $p, [< sym O >] );
+		if self.assert-hash-keys( $p, [< sym O >] ) {
+			Perl6::Operator.new(
+				:from( $p.hash.<sym>.from ),
+				:to( $p.hash.<sym>.to ),
+				:content( $p.hash.<sym>.Str )
+			)
+		}
+		else {
+say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
 	method _Quant( Mu $p ) returns Bool { $p.hash.<quant>.Bool }
@@ -1706,24 +1886,37 @@ say "Quibble fired";
 		if self.assert-hash-keys( $p, [< sym rx_adverbs sibble >] );
 		if self.assert-hash-keys( $p, [< quibble >] ) {
 #			self._Quibble( $p.hash.<quibble> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
 		}
 )
 		if self.assert-hash-keys( $p, [< nibble >] ) {
-			self._Nibble( $p.hash.<nibble> )
+			Perl6::String.new(
+				:from( $p.from ),
+				:to( $p.to ),
+				:content( $p.Str ),
+				:bare( $p.hash.<nibble>.Str )
+			)
+		}
+		else {
+say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
 	method _QuotePair( Mu $p ) {
 say "QuotePair fired";
+#`(
 		for $p.list {
 			next if self.assert-hash-keys( $_, [< identifier >] );
 		}
 		return True if self.assert-hash-keys( $p,
 				[< circumfix bracket radix >], [< exp base >] );
+)
 		if self.assert-hash-keys( $p, [< identifier >] ) {
 #			self._Identifier( $p.hash.<identifier> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
+		}
+		else {
+say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -1808,20 +2001,25 @@ say "RxAdverbs fired";
 				[< declarator DECL >], [< typename >] ) {
 			self._Declarator( $p.hash.<declarator> )
 		}
+		else {
+say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
 	method _ScopeDeclarator( Mu $p ) {
-		(
-			self._Sym( $p.hash.<sym> ),
-			self._Scoped( $p.hash.<scoped> )
-		).flat
+		if self.assert-hash-keys( $p, [< sym scoped >] ) {
+			(
+				self._Sym( $p.hash.<sym> ),
+				self._Scoped( $p.hash.<scoped> )
+			).flat
+		}
 	}
 
 	method _SemiArgList( Mu $p ) {
 say "SemiArgList fired";
 #		if self.assert-hash-keys( $p, [< arglist >] ) {
 #			self._ArgList( $p.hash.<arglist> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
 #		}
 	}
 
@@ -1854,7 +2052,6 @@ say "Sibble fired";
 say "SigFinal fired";
 #		if self.assert-hash-keys( $p, [< normspace >] ) {
 #			self._NormSpace( $p.hash.<normspace> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
 #		}
 	}
 
@@ -1885,7 +2082,10 @@ say "Signature fired";
 say "SMExpr fired";
 		if self.assert-hash-keys( $p, [< EXPR >] ) {
 #			self._EXPR( $p.hash.<EXPR> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
+		}
+		else {
+say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -1984,7 +2184,10 @@ say "StatementPrefix fired";
 say "SubShortName fired";
 		if self.assert-hash-keys( $p, [< desigilname >] ) {
 #			self._DeSigilName( $p.hash.<desigilname> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
+		}
+		else {
+say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -2005,13 +2208,20 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 				)
 			)
 		}
+		else {
+say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
 	method _Term( Mu $p ) {
 say "Term fired";
 		if self.assert-hash-keys( $p, [< methodop >] ) {
 #			self._MethodOp( $p.hash.<methodop> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
+		}
+		else {
+say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -2026,7 +2236,10 @@ say "TermAlt fired";
 say "TermAltSeq fired";
 		if self.assert-hash-keys( $p, [< termconjseq >] ) {
 #			self._TermConjSeq( $p.hash.<termconjseq> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
+		}
+		else {
+say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -2045,6 +2258,10 @@ say "TermConjSeq fired";
 		if self.assert-hash-keys( $p, [< termalt >] ) {
 #			self._TermAlt( $p.hash.<termalt> )
 		}
+		else {
+say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
 	method _TermInit( Mu $p ) {
@@ -2060,12 +2277,20 @@ say "Termish fired";
 		if self.assert-hash-keys( $p, [< noun >] ) {
 #			self._Noun( $p.hash.<noun> )
 		}
+		else {
+say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
 	method _TermSeq( Mu $p ) {
 say "TermSeq fired";
 		if self.assert-hash-keys( $p, [< termaltseq >] ) {
 #			self._TermAltSeq( $p.hash.<termaltseq> )
+		}
+		else {
+say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -2082,6 +2307,10 @@ say "TypeConstraint fired";
 		}
 		elsif self.assert-hash-keys( $p, [< typename >] ) {
 #			self._TypeName( $p.hash.<typename> )
+		}
+		else {
+say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -2108,18 +2337,25 @@ say "TypeName fired";
 		if self.assert-hash-keys( $p,
 				[< longname >], [< colonpair >] ) {
 #			self._LongName( $p.hash.<longname> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
+		}
+		else {
+say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
 	method _Val( Mu $p ) {
-say "Val fired";
+#`(
 		return True if self.assert-hash-keys( $p,
 				[< prefix OPER >],
 				[< prefix_postfix_meta_operator >] );
+)
 		if self.assert-hash-keys( $p, [< value >] ) {
-#			self._Value( $p.hash.<value> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
+			self._Value( $p.hash.<value> )
+		}
+		else {
+say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -2137,6 +2373,10 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 		elsif self.assert-hash-keys( $p, [< quote >] ) {
 			self._Quote( $p.hash.<quote> )
 		}
+		else {
+say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
 	method _Var( Mu $p ) {
@@ -2145,7 +2385,10 @@ say "Var fired";
 				[< sigil desigilname >] );
 		if self.assert-hash-keys( $p, [< variable >] ) {
 #			self._Variable( $p.hash.<variable> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
+		}
+		else {
+say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -2163,6 +2406,10 @@ Perl6::Unimplemented.new(:content( "_Declarator") );
 				[< semilist postcircumfix signature
 				   trait post_constraint >] ) {
 			self._Variable( $p.hash.<variable> );
+		}
+		else {
+say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -2250,7 +2497,10 @@ say "XBlock fired";
 		return True if self.assert-hash-keys( $p, [< pblock EXPR >] );
 		if self.assert-hash-keys( $p, [< blockoid >] ) {
 #			self._Blockoid( $p.hash.<blockoid> )
-Perl6::Unimplemented.new(:content( "_Declarator") );
+		}
+		else {
+say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 }
