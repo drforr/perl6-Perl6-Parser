@@ -105,9 +105,8 @@ _END_
 			is $pt.format( $tree ), Q{classUnqualified{has$.a;has$.b;}}, Q{formatted};
 		}, Q{multiple};
 
-#`(
 		subtest {
-			plan 3;
+			plan 2;
 
 			my $parsed = $pt.parse-source( Q:to[_END_].chomp );
 class Unqualified { has ( $.a, $.b ) }
@@ -118,18 +117,16 @@ _END_
 #				Q{class Unqualified { has ( $.a, $.b ) }},
 #				Q{formatted};
 			is $pt.format( $tree ),
-				Q{class Unqualified { has ( $.a, $.b ) }},
+				Q{classUnqualified{has($.a,$.b)}},
 				Q{formatted};
 		}, Q{list};
-)
 	}, Q{$};
 
-#`(
 	subtest {
-		plan 3;
+		plan 2;
 
 		my $parsed = $pt.parse-source( Q:to[_END_].chomp );
-my @a; 'a' ==> @a
+class Unqualified { has @.a }
 _END_
 		my $tree = $pt.build-tree( $parsed );
 		ok $pt.validate( $parsed ), Q{valid};
@@ -140,10 +137,10 @@ _END_
 	}, Q{@};
 
 	subtest {
-		plan 3;
+		plan 2;
 
 		my $parsed = $pt.parse-source( Q:to[_END_].chomp );
-my %a; 'a' ==> %a
+class Unqualified { has %.a }
 _END_
 		my $tree = $pt.build-tree( $parsed );
 		ok $pt.validate( $parsed ), Q{valid};
@@ -154,7 +151,7 @@ _END_
 	}, Q{%};
 
 	subtest {
-		plan 3;
+		plan 2;
 
 		my $parsed = $pt.parse-source( Q:to[_END_] );
 class Unqualified { has &.a }
@@ -166,7 +163,6 @@ _END_
 		is $pt.format( $tree ), Q{classUnqualified{has&.a}},
 			Q{formatted};
 	}, Q{&};
-)
 }, Q{Attribute};
 
 # vim: ft=perl6

@@ -860,6 +860,12 @@ say "Contextualizer fired";
 				$p.hash.<variable_declarator>
 			)
 		}
+		elsif self.assert-hash-keys( $p,
+				[< signature >], [< trait >] ) {
+			self._Signature(
+				$p.hash.<signature>
+			)
+		}
 		else {
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
@@ -2004,6 +2010,10 @@ say "OPER fired";
 	}
 
 	method _Parameter( Mu $p ) {
+		CATCH {
+			when X::Multi::NoMatch { .resume }
+		}
+#`(
 say "Parameter fired";
 		for $p.list {
 			next if self.assert-hash-keys( $_,
@@ -2031,18 +2041,110 @@ say "Parameter fired";
 				[< param_var quant default_value						   modifier post_constraint trait
 				   type_constraint >] );
 		}
+)
+		my @child;
+		my $count = 0;
+		for $p.list {
+			if self.assert-hash-keys( $_,
+				[< param_var quant >],
+				[< default_value modifier trait
+				   type_constraint
+				   post_constraint >] ) {
+				# XXX
+				@child.append(
+					Perl6::Operator::Infix.new(
+						:from( $_.to + 1 ),
+						:to( $_.to + 2 ),
+						:content( Q{,} )
+					)
+				) if $count++ > 0;
+				@child.append(
+					self._ParamVar( $_.hash.<param_var> )#,
+#					self._Quant( $_.hash.<quant> )
+				);
+			}
+			else {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
+		}
+		Perl6::Operator::PostCircumfix.new(
+			:delimiter( '(', ')' ),
+			:child(
+				@child
+			)
+		)
 	}
 
 	method _ParamVar( Mu $p ) {
-say "ParamVar fired";
-		return True if self.assert-hash-keys( $p,
-				[< name twigil sigil >] );
+#`(
 		return True if self.assert-hash-keys( $p, [< name sigil >] );
 		if self.assert-hash-keys( $p, [< signature >] ) {
 #			self._Signature( $p.hash.<signature> )
 		}
 		elsif self.assert-hash-keys( $p, [< sigil >] ) {
 #			self._Sigil( $p.hash.<sigil> )
+		}
+)
+		if self.assert-hash-keys( $p, [< name twigil sigil >] ) {
+			# XXX refactor back to a method
+			my $sigil       = $p.hash.<sigil>.Str;
+			my $twigil      = $p.hash.<twigil> ??
+					  $p.hash.<twigil>.Str !! '';
+			my $desigilname = $p.hash.<name> ??
+					  $p.hash.<name>.Str !! '';
+			my $content     = $p.hash.<sigil> ~
+					  $twigil ~
+					  $desigilname;
+			my %lookup = (
+				'$' => Perl6::Variable::Scalar,
+				'$*' => Perl6::Variable::Scalar::Dynamic,
+				'$.' => Perl6::Variable::Scalar::Accessor,
+				'$!' => Perl6::Variable::Scalar::Attribute,
+				'$?' => Perl6::Variable::Scalar::CompileTime,
+				'$<' => Perl6::Variable::Scalar::MatchIndex,
+				'$^' => Perl6::Variable::Scalar::Positional,
+				'$:' => Perl6::Variable::Scalar::Named,
+				'$=' => Perl6::Variable::Scalar::Pod,
+				'$~' => Perl6::Variable::Scalar::SubLanguage,
+				'%' => Perl6::Variable::Hash,
+				'%*' => Perl6::Variable::Hash::Dynamic,
+				'%.' => Perl6::Variable::Hash::Accessor,
+				'%!' => Perl6::Variable::Hash::Attribute,
+				'%?' => Perl6::Variable::Hash::CompileTime,
+				'%<' => Perl6::Variable::Hash::MatchIndex,
+				'%^' => Perl6::Variable::Hash::Positional,
+				'%:' => Perl6::Variable::Hash::Named,
+				'%=' => Perl6::Variable::Hash::Pod,
+				'%~' => Perl6::Variable::Hash::SubLanguage,
+				'@' => Perl6::Variable::Array,
+				'@*' => Perl6::Variable::Array::Dynamic,
+				'@.' => Perl6::Variable::Array::Accessor,
+				'@!' => Perl6::Variable::Array::Attribute,
+				'@?' => Perl6::Variable::Array::CompileTime,
+				'@<' => Perl6::Variable::Array::MatchIndex,
+				'@^' => Perl6::Variable::Array::Positional,
+				'@:' => Perl6::Variable::Array::Named,
+				'@=' => Perl6::Variable::Array::Pod,
+				'@~' => Perl6::Variable::Array::SubLanguage,
+				'&' => Perl6::Variable::Callable,
+				'&*' => Perl6::Variable::Callable::Dynamic,
+				'&.' => Perl6::Variable::Callable::Accessor,
+				'&!' => Perl6::Variable::Callable::Attribute,
+				'&?' => Perl6::Variable::Callable::CompileTime,
+				'&<' => Perl6::Variable::Callable::MatchIndex,
+				'&^' => Perl6::Variable::Callable::Positional,
+				'&:' => Perl6::Variable::Callable::Named,
+				'&=' => Perl6::Variable::Callable::Pod,
+				'&~' => Perl6::Variable::Callable::SubLanguage,
+			);
+
+			my $leaf = %lookup{$sigil ~ $twigil}.new(
+				:from( $p.from ),
+				:to( $p.to ),
+				:content( $content )
+			);
+			$leaf
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -2367,6 +2469,7 @@ say "SigMaybe fired";
 	}
 
 	method _Signature( Mu $p ) {
+#`(
 say "Signature fired";
 		return True if self.assert-hash-keys( $p,
 				[< parameter typename >],
@@ -2376,6 +2479,16 @@ say "Signature fired";
 				[< param_sep >] );
 		return True if self.assert-hash-keys( $p, [],
 				[< param_sep parameter >] );
+)
+		if self.assert-hash-keys( $p,
+				[< parameter >],
+				[< param_sep >] ) {
+			self._Parameter( $p.hash.<parameter> )
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
 	method _SMExpr( Mu $p ) {
