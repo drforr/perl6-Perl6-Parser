@@ -855,6 +855,12 @@ say "Contextualizer fired";
 			)
 		}
 		elsif self.assert-hash-keys( $p,
+				[< regex_declarator >], [< trait >] ) {
+			self._RegexDeclarator(
+				$p.hash.<regex_declarator>
+			)
+		}
+		elsif self.assert-hash-keys( $p,
 				[< variable_declarator >], [< trait >] ) {
 			self._VariableDeclarator(
 				$p.hash.<variable_declarator>
@@ -929,9 +935,14 @@ say "DecNumber fired";
 	}
 
 	method _DefLongName( Mu $p ) {
-say "DefLongName fired";
-		return True if self.assert-hash-keys( $p,
-				[< name >], [< colonpair >] );
+		if self.assert-hash-keys( $p,
+				[< name >], [< colonpair >] ) {
+			self._Name( $p.hash.<name> )
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
 	method _DefTerm( Mu $p ) {
@@ -1057,36 +1068,24 @@ say "EScale fired";
 
 	method __Term( Mu $p ) {
 		if self.assert-hash-keys( $p, [< identifier >], [< args >] ) {
-			(
-				self._Identifier( $p.hash.<identifier> )
-			)
+			self._Identifier( $p.hash.<identifier> )
 		}
 		elsif self.assert-hash-keys( $p, [< longname >], [< args >] ) {
-			(
-				self._LongName( $p.hash.<longname> )
-			)
+			self._LongName( $p.hash.<longname> )
 		}
 		elsif self.assert-hash-keys( $p, [< longname >] ) {
-			(
-				self._LongName( $p.hash.<longname> )
-			)
+			self._LongName( $p.hash.<longname> )
 		}
 		elsif self.assert-hash-keys( $p, [< variable >] ) {
-			(
-				self._Variable( $p.hash.<variable> )
-			)
+			self._Variable( $p.hash.<variable> )
 		}
 		elsif self.assert-hash-keys( $p, [< value >] ) {
 			my $v = $p.hash.<value>;
 			if self.assert-hash-keys( $v, [< number >] ) {
-				(
-					self._Number( $v.hash.<number> )
-				)
+				self._Number( $v.hash.<number> )
 			}
 			elsif self.assert-hash-keys( $v, [< quote >] ) {
-				(
-					self._Quote( $v.hash.<quote> )
-				)
+				self._Quote( $v.hash.<quote> )
 			}
 			else {
 				say $p.hash.keys.gist;
@@ -1383,6 +1382,13 @@ say "EScale fired";
 			@child = (
 				self._FatArrow(
 					$p.hash.<fatarrow>
+				)
+			)
+		}
+		elsif self.assert-hash-keys( $p, [< regex_declarator >] ) {
+			@child = (
+				self._RegexDeclarator(
+					$p.hash.<regex_declarator>
 				)
 			)
 		}
@@ -1790,7 +1796,11 @@ say "NamedParam fired";
 		if self.assert-hash-keys( $p, [< subshortname >] );
 		if self.assert-hash-keys( $p, [< morename >] );
 )
-		if self.assert-Str( $p ) {
+		if self.assert-hash-keys( $p,
+			[< identifier >], [< morename >] ) {
+			self._Identifier( $p.hash.<identifier> )
+		}
+		elsif self.assert-Str( $p ) {
 			Perl6::Bareword.new(
 				:from( $p.from ),
 				:to( $p.to ),
@@ -1803,15 +1813,19 @@ say "NamedParam fired";
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
-	
 	}
 
 	method _Nibble( Mu $p ) {
-say "_Nibble fired";
 #`(
-		if self.assert-hash-keys( $p, [< termseq >] );
 		if $p.Bool;
 )
+		if self.assert-hash-keys( $p, [< termseq >] ) {
+			self._TermSeq( $p.hash.<termseq> )
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
 	method _Nibbler( Mu $p ) {
@@ -2307,15 +2321,36 @@ say "RadNumber fired";
 	}
 
 	method _RegexDeclarator( Mu $p ) {
-say "RegexDeclarator fired";
-		return True if self.assert-hash-keys( $p, [< sym regex_def >] );
+		if self.assert-hash-keys( $p, [< sym regex_def >] ) {
+			(
+				self._Sym( $p.hash.<sym> ),
+				self._RegexDef( $p.hash.<regex_def> )
+			).flat
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
 	method _RegexDef( Mu $p ) {
-say "RegexDef fired";
-		return True if self.assert-hash-keys( $p,
+		if self.assert-hash-keys( $p,
 				[< deflongname nibble >],
-				[< signature trait >] );
+				[< signature trait >] ) {
+			(
+				self._DefLongName( $p.hash.<deflongname> ),
+				Perl6::Block.new(
+					:delimiter( '{', '}' ),
+					:child(
+						self._Nibble( $p.hash.<nibble> )
+					)
+				)
+			).flat
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
 	method _Right( Mu $p ) returns Bool { $p.hash.<right>.Bool }
@@ -2646,9 +2681,8 @@ say "TermAlt fired";
 	}
 
 	method _TermAltSeq( Mu $p ) {
-say "TermAltSeq fired";
 		if self.assert-hash-keys( $p, [< termconjseq >] ) {
-#			self._TermConjSeq( $p.hash.<termconjseq> )
+			self._TermConjSeq( $p.hash.<termconjseq> )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -2664,7 +2698,8 @@ say "TermConj fired";
 	}
 
 	method _TermConjSeq( Mu $p ) {
-say "TermConjSeq fired";
+		# XXX Work on this later.
+#`(
 		for $p.list {
 			next if self.assert-hash-keys( $_, [< termalt >] );
 		}
@@ -2675,6 +2710,15 @@ say "TermConjSeq fired";
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
+)
+		# XXX
+		my $str = $p.Str;
+		$str ~~ s{\s+ $} = '';
+		Perl6::Bareword.new(
+			:from( $p.from ),
+			:to( $p.to ),
+			:content( $str )
+		)
 	}
 
 	method _TermInit( Mu $p ) {
@@ -2697,9 +2741,8 @@ say "Termish fired";
 	}
 
 	method _TermSeq( Mu $p ) {
-say "TermSeq fired";
 		if self.assert-hash-keys( $p, [< termaltseq >] ) {
-#			self._TermAltSeq( $p.hash.<termaltseq> )
+			self._TermAltSeq( $p.hash.<termaltseq> )
 		}
 		else {
 			say $p.hash.keys.gist;

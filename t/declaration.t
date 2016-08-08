@@ -365,11 +365,6 @@ _END_
 	}, Q{grammar};
 
 	subtest {
-		plan 1;
-
-		my $parsed = $pt.parse-source( Q[my token foo {a}] );
-		ok $pt.validate( $parsed );
-#`(
 		plan 2;
 
 		my $parsed = $pt.parse-source( Q:to[_END_].chomp );
@@ -377,21 +372,15 @@ my token foo { a }
 _END_
 		my $tree = $pt.build-tree( $parsed );
 		ok $pt.validate( $parsed ), Q{valid};
-#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
 #my token foo { a }
 #_END_
-		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
-mytokenfoo{a};
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+mytokenfoo{a}
 _END_
-)
 	}, Q{my token foo {a} (null regex not allowed, must give it content.)};
 
 	subtest {
-		plan 1;
-
-		my $parsed = $pt.parse-source( Q[my rule foo {a}] );
-		ok $pt.validate( $parsed );
-#`(
 		plan 2;
 
 		my $parsed = $pt.parse-source( Q:to[_END_].chomp );
@@ -399,13 +388,12 @@ my rule foo { a }
 _END_
 		my $tree = $pt.build-tree( $parsed );
 		ok $pt.validate( $parsed ), Q{valid};
-#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
 #my rule foo { a }
 #_END_
-		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
-myrulefoo{a};
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+myrulefoo{a}
 _END_
-)
 	}, Q{my rule foo {a}};
 }, Q{braced things};
 
