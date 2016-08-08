@@ -138,7 +138,7 @@ subtest {
 					:content( Q{$a} ),
 					:headless( Q{a} )
 				),
-				Perl6::Operator.new(
+				Perl6::Operator::Infix.new(
 					:from( 6 ),
 					:to( 7 ),
 					:content( Q{=} )
@@ -174,7 +174,7 @@ subtest {
 					:content( Q{$a} ),
 					:headless( Q{a} )
 				),
-				Perl6::Operator.new(
+				Perl6::Operator::Infix.new(
 					:from( 6 ),
 					:to( 7 ),
 					:content( Q{=} )
@@ -184,7 +184,7 @@ subtest {
 					:to( 9 ),
 					:content( 1e0 )
 				),
-				Perl6::Operator.new(
+				Perl6::Operator::Infix.new(
 					:from( 10 ),
 					:to( 11 ),
 					:content( Q{+} )
