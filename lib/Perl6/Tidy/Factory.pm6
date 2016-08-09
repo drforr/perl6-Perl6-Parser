@@ -870,8 +870,10 @@ say "Contextualizer fired";
 		}
 		elsif self.assert-hash-keys( $p,
 				[< regex_declarator >], [< trait >] ) {
-			self._RegexDeclarator(
-				$p.hash.<regex_declarator>
+			(
+				self._RegexDeclarator(
+					$p.hash.<regex_declarator>
+				)
 			)
 		}
 		elsif self.assert-hash-keys( $p,
@@ -1762,7 +1764,6 @@ say "MoreName fired";
 	}
 
 	method _MultiDeclarator( Mu $p ) {
-say "MultiDeclarator fired";
 #`(
 		return True if self.assert-hash-keys( $p,
 				[< sym routine_def >] );
@@ -1770,7 +1771,7 @@ say "MultiDeclarator fired";
 				[< sym declarator >] );
 )
 		if self.assert-hash-keys( $p, [< declarator >] ) {
-#			self._Declarator( $p.hash.<declarator> )
+			self._Declarator( $p.hash.<declarator> )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -2460,22 +2461,22 @@ say "RxAdverbs fired";
 	}
 
 	method _Scoped( Mu $p ) {
-#`(
 		# XXX DECL seems to be a mirror of declarator. This probably
 		# XXX will turn out to be not true later on.
 		#
 		if self.assert-hash-keys( $p,
 					[< multi_declarator DECL typename >] ) {
-		}
-)
-		if self.assert-hash-keys( $p,
-				[< package_declarator DECL >],
-				[< typename >] ) {
 			(
-				self._PackageDeclarator(
-					$p.hash.<package_declarator>
+				self._TypeName( $p.hash.<typename> ),
+				self._MultiDeclarator(
+					$p.hash.<multi_declarator>
 				)
 			)
+		}
+		elsif self.assert-hash-keys( $p,
+				[< package_declarator DECL >],
+				[< typename >] ) {
+			self._PackageDeclarator( $p.hash.<package_declarator> )
 		}
 		elsif self.assert-hash-keys( $p,
 				[< package_declarator sym >] ) {
@@ -2888,6 +2889,14 @@ say "TypeDeclarator fired";
 					[< colonpair >] );
 		}
 )
+		for $p.list {
+			if self.assert-hash-keys( $_,
+					[< longname >], [< colonpair >] ) {
+				# XXX Fix this later.
+				return
+					self._LongName( $_.hash.<longname> )
+			}
+		}
 		if self.assert-hash-keys( $p,
 				[< longname >], [< colonpair >] ) {
 			self._LongName( $p.hash.<longname> )

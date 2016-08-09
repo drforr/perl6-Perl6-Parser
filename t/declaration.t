@@ -56,11 +56,6 @@ subtest {
 		plan 3;
 
 		subtest {
-			plan 1;
-
-			my $parsed = $pt.parse-source( Q{my Int $a} );
-			ok $pt.validate( $parsed );
-#`(
 			plan 2;
 
 			my $parsed = $pt.parse-source( Q{my Int $a} );
@@ -68,7 +63,6 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 #			is $pt.format( $tree ), Q{my Int $a}, Q{formatted};
 			is $pt.format( $tree ), Q{myInt$a}, Q{formatted};
-)
 		}, Q{regular};
 
 		subtest {
@@ -160,11 +154,6 @@ subtest {
 		plan 2;
 
 		subtest {
-			plan 1;
-
-			my $parsed = $pt.parse-source( Q[unit module foo;] );
-			ok $pt.validate( $parsed );
-#`(
 			plan 2;
 
 			my $parsed = $pt.parse-source( Q:to[_END_].chomp );
@@ -175,10 +164,9 @@ _END_
 #			is $pt.format( $tree ), Q:to[_END_], Q{formatted};
 #unit module foo;
 #_END_
-			is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+			is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
 unitmodulefoo;
 _END_
-)
 		}, Q{unit module foo;};
 
 		subtest {
@@ -202,11 +190,6 @@ _END_
 		plan 2;
 
 		subtest {
-			plan 1;
-
-			my $parsed = $pt.parse-source(  Q[unit class foo;] );
-			ok $pt.validate( $parsed );
-#`(
 			plan 2;
 
 			my $parsed = $pt.parse-source( Q:to[_END_].chomp );
@@ -217,10 +200,9 @@ _END_
 #			is $pt.format( $tree ), Q:to[_END_], Q{formatted};
 #unit class foo;
 #_END_
-			is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+			is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
 unitclassfoo;
 _END_
-)
 		}, Q{unit class foo;};
 
 		subtest {
@@ -244,11 +226,6 @@ _END_
 		plan 2;
 
 		subtest {
-			plan 1;
-
-			my $parsed = $pt.parse-source( Q[unit role foo;] );
-			ok $pt.validate( $parsed );
-#`(
 	plan 2;
 
 			my $parsed = $pt.parse-source( Q:to[_END_].chomp );
@@ -259,10 +236,9 @@ _END_
 #			is $pt.format( $tree ), Q:to[_END_], Q{formatted};
 #unit role foo;
 #_END_
-			is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+			is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
 unitrolefoo;
 _END_
-)
 		}, Q{unit role foo;};
 
 		subtest {
@@ -283,11 +259,6 @@ _END_
 	}, Q{role};
 
 	subtest {
-		plan 1;
-
-		my $parsed = $pt.parse-source( Q[my regex foo { a }] );
-		ok $pt.validate( $parsed );
-#`(
 		plan 2;
 
 		my $parsed = $pt.parse-source( Q:to[_END_].chomp );
@@ -298,10 +269,9 @@ _END_
 #		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
 #my regex foo { a }
 #_END_
-		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
-myregexfoo{a};
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+myregexfoo{a}
 _END_
-)
 	}, Q{my regex foo {a} (null regex not allowed)};
 
 	subtest {
