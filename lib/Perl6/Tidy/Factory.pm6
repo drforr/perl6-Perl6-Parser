@@ -256,6 +256,8 @@ class Perl6::PackageName does Token {
 		$.content.split( '::' )
 	}
 }
+class Perl6::ColonBareword does Token {
+}
 class Perl6::Block does Branching {
 	# XXX Figure out a better way
 	#
@@ -799,7 +801,12 @@ say "Coercee fired";
 			self._ColonCircumfix( $p.hash.<coloncircumfix> )
 		}
 		elsif self.assert-hash-keys( $p, [< identifier >] ) {
-#			self._Identifier( $p.hash.<identifier> )
+			# XXX fix later
+			Perl6::ColonBareword.new(
+				:from( $p.from ),
+				:to( $p.to ),
+				:content( $p.Str )
+			)
 		}
 		elsif self.assert-hash-keys( $p, [< fakesignature >] ) {
 #			self._FakeSignature( $p.hash.<fakesignature> )
@@ -1440,6 +1447,13 @@ say "EScale fired";
 			@child = (
 				self._Variable(
 					$p.hash.<variable>
+				)
+			)
+		}
+		elsif self.assert-hash-keys( $p, [< colonpair >] ) {
+			@child = (
+				self._ColonPair(
+					$p.hash.<colonpair>
 				)
 			)
 		}
