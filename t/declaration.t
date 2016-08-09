@@ -133,11 +133,6 @@ subtest {
 	plan 2;
 
 	subtest {
-		plan 1;
-
-		my $parsed = $pt.parse-source( Q[sub foo {}] );
-		ok $pt.validate( $parsed );
-#`(
 		plan 2;
 
 		my $parsed = $pt.parse-source( Q[sub foo {}] );
@@ -145,15 +140,9 @@ subtest {
 		ok $pt.validate( $parsed ), Q{valid};
 #		is $pt.format( $tree ), Q[sub foo {}], Q{formatted};
 		is $pt.format( $tree ), Q[subfoo{}], Q{formatted};
-)
 	}, Q{sub foo {}};
 
 	subtest {
-		plan 1;
-
-		my $parsed = $pt.parse-source( Q[sub foo returns Int {}] );
-		ok $pt.validate( $parsed );
-#`(
 		plan 2;
 
 		my $parsed = $pt.parse-source( Q:to[_END_].chomp );
@@ -161,13 +150,12 @@ sub foo returns Int {}
 _END_
 		my $tree = $pt.build-tree( $parsed );
 		ok $pt.validate( $parsed ), Q{valid};
-#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
 #sub foo returns Int {}
 #_END_
-		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
 subfooreturnsInt{}
 _END_
-)
 	}, Q{sub foo returns Int {}};
 }, Q{subroutine};
 

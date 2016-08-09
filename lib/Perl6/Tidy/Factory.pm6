@@ -2372,7 +2372,14 @@ say "RadNumber fired";
 		return True if self.assert-hash-keys( $p,
 				[< sym routine_def >] );
 )
-		if self.assert-hash-keys( $p, [< sym method_def >] ) {
+		if self.assert-hash-keys( $p,
+				[< sym routine_def >] ) {
+			(
+				self._Sym( $p.hash.<sym> ),
+				self._RoutineDef( $p.hash.<routine_def> )
+			).flat
+		}
+		elsif self.assert-hash-keys( $p, [< sym method_def >] ) {
 			(
 				self._Sym( $p.hash.<sym> ),
 				self._MethodDef( $p.hash.<method_def> )
@@ -2385,7 +2392,7 @@ say "RadNumber fired";
 	}
 
 	method _RoutineDef( Mu $p ) {
-say "RoutineDef fired";
+#`(
 		return True if self.assert-hash-keys( $p,
 				[< blockoid deflongname multisig >],
 				[< trait >] );
@@ -2397,6 +2404,26 @@ say "RoutineDef fired";
 				[< trait >] );
 		return True if self.assert-hash-keys( $p,
 				[< blockoid >], [< trait >] );
+)
+		if self.assert-hash-keys( $p,
+				[< blockoid deflongname trait >] ) {
+			(
+				self._DefLongName( $p.hash.<deflongname> ),
+				self._Trait( $p.hash.<trait> ),
+				self._Blockoid( $p.hash.<blockoid> )
+			).flat
+		}
+		elsif self.assert-hash-keys( $p,
+				[< blockoid deflongname >],[< trait >] ) {
+			(
+				self._DefLongName( $p.hash.<deflongname> ),
+				self._Blockoid( $p.hash.<blockoid> )
+			).flat
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
 	method _RxAdverbs( Mu $p ) {
@@ -2750,6 +2777,36 @@ say "Termish fired";
 		}
 	}
 
+	method _Trait( Mu $p ) {
+		# XXX Sigh, something else to fix.
+#`(
+		my @child = map {
+#			if self.assert-hash-keys( $_, [< trait_mod >] ) {
+				self._TraitMod( $_.hash.<trait_mod> )
+#			}
+#			else {
+#				say $_.hash.keys.gist;
+#				warn "Unhandled case"
+#			}
+		}, $p.list;
+		@child
+)
+		self._TraitMod( $p.list.[0].hash.<trait_mod> )
+	}
+
+	method _TraitMod( Mu $p ) {
+		if self.assert-hash-keys( $p, [< sym typename >] ) {
+			(
+				self._Sym( $p.hash.<sym> ),
+				self._TypeName( $p.hash.<typename> )
+			).flat
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
+	}
+
 	method _Twigil( Mu $p ) returns Str { $p.hash.<sym>.Str }
 
 	method _TypeConstraint( Mu $p ) {
@@ -2781,7 +2838,7 @@ say "TypeDeclarator fired";
 	}
 
 	method _TypeName( Mu $p ) {
-say "TypeName fired";
+#`(
 		for $p.list {
 			next if self.assert-hash-keys( $_,
 					[< longname colonpairs >],
@@ -2790,9 +2847,10 @@ say "TypeName fired";
 					[< longname >],
 					[< colonpair >] );
 		}
+)
 		if self.assert-hash-keys( $p,
 				[< longname >], [< colonpair >] ) {
-#			self._LongName( $p.hash.<longname> )
+			self._LongName( $p.hash.<longname> )
 		}
 		else {
 			say $p.hash.keys.gist;
