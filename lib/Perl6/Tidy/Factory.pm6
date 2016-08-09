@@ -799,7 +799,14 @@ say "Coercee fired";
 			).flat
 		}
 		elsif self.assert-hash-keys( $p, [< coloncircumfix >] ) {
-			self._ColonCircumfix( $p.hash.<coloncircumfix> )
+			(
+				Perl6::Operator::Infix.new(
+					:from( -43 ),
+					:to( -42 ),
+					:content( Q{:} )
+				),
+				self._ColonCircumfix( $p.hash.<coloncircumfix> )
+			).flat
 		}
 		elsif self.assert-hash-keys( $p, [< identifier >] ) {
 			# XXX fix later
@@ -813,7 +820,14 @@ say "Coercee fired";
 #			self._FakeSignature( $p.hash.<fakesignature> )
 		}
 		elsif self.assert-hash-keys( $p, [< var >] ) {
-			self._Var( $p.hash.<var> )
+			(
+				Perl6::Operator::Infix.new(
+					:from( -43 ),
+					:to( -42 ),
+					:content( Q{:} )
+				),
+				self._Var( $p.hash.<var> )
+			).flat
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -2927,7 +2941,6 @@ say "TypeDeclarator fired";
 			}
 			elsif self.assert-hash-keys( $_,
 					[< longname >], [< colonpairs >] ) {
-say 1;
 				# XXX Fix this later.
 				return
 					Perl6::Bareword.new(

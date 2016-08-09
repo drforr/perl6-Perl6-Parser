@@ -170,13 +170,6 @@ _END_
 }, Q{:a{'a' => 'b'}};
 
 subtest {
-	plan 1;
-
-	my $parsed = $pt.parse-source( Q:to[_END_] );
-my $a; :$a
-_END_
-	ok $pt.validate( $parsed );
-#`(
 	plan 2;
 
 	my $parsed = $pt.parse-source( Q:to[_END_].chomp );
@@ -190,17 +183,9 @@ _END_
 	is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
 my$a;:$a
 _END_
-)
 }, Q{:$a};
 
 subtest {
-	plan 1;
-
-	my $parsed = $pt.parse-source( Q:to[_END_] );
-my @a; :@a
-_END_
-	ok $pt.validate( $parsed );
-#`(
 	plan 2;
 
 	my $parsed = $pt.parse-source( Q:to[_END_].chomp );
@@ -214,17 +199,9 @@ _END_
 	is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
 my@a;:@a
 _END_
-)
 }, Q{:@a};
 
 subtest {
-	plan 1;
-
-	my $parsed = $pt.parse-source( Q:to[_END_] );
-my %a; :%a
-_END_
-	ok $pt.validate( $parsed );
-#`(
 	plan 2;
 
 	my $parsed = $pt.parse-source( Q:to[_END_].chomp );
@@ -238,25 +215,15 @@ _END_
 	is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
 my%a;:%a
 _END_
-)
 }, Q{:%a};
 
 subtest {
-	plan 1;
-
-	my $parsed = $pt.parse-source( Q:to[_END_] );
-my $a; :$a
-_END_
-	ok $pt.validate( $parsed );
-#`(
 	plan 2;
 
 	my $parsed = $pt.parse-source( Q:to[_END_].chomp );
 my sub a { }; :&a
 _END_
-say $parsed.dump;
 	my $tree = $pt.build-tree( $parsed );
-say $tree.perl;
 	ok $pt.validate( $parsed ), Q{valid};
 #	is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
 #my sub a { }; :&a
@@ -264,7 +231,6 @@ say $tree.perl;
 	is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
 mysuba{};:&a
 _END_
-)
 }, Q{:&a};
 
 # vim: ft=perl6
