@@ -106,18 +106,10 @@ _END_
 }, Q{:a<b c>};
 
 subtest {
-	plan 1;
-
-	my $parsed = $pt.parse-source( Q:to[_END_] );
-my $a; :a{$a}
-_END_
-	ok $pt.validate( $parsed );
-#`(
 	plan 2;
 
 	my $parsed = $pt.parse-source( Q:to[_END_].chomp );
 my $a; :a{$a}
-my rule foo { a }
 _END_
 	my $tree = $pt.build-tree( $parsed );
 	ok $pt.validate( $parsed ), Q{valid};
@@ -127,17 +119,9 @@ _END_
 	is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
 my$a;:a{$a}
 _END_
-)
 }, Q{:a{$a}};
 
 subtest {
-	plan 1;
-
-	my $parsed = $pt.parse-source( Q:to[_END_] );
-:a{'a', 'b'}
-_END_
-	ok $pt.validate( $parsed );
-#`(
 	plan 2;
 
 	my $parsed = $pt.parse-source( Q:to[_END_].chomp );
@@ -151,17 +135,9 @@ _END_
 	is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
 :a{'a','b'}
 _END_
-)
 }, Q{:a{'a', 'b'}};
 
 subtest {
-	plan 1;
-
-	my $parsed = $pt.parse-source( Q:to[_END_] );
-:a{'a' => 'b'}
-_END_
-	ok $pt.validate( $parsed );
-#`(
 	plan 2;
 
 	my $parsed = $pt.parse-source( Q:to[_END_].chomp );
@@ -175,17 +151,9 @@ _END_
 	is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
 :a{'a'=>'b'}
 _END_
-)
 }, Q{:a{'a' => 'b'}};
 
 subtest {
-	plan 1;
-
-	my $parsed = $pt.parse-source( Q:to[_END_] );
-:a{'a' => 'b'}
-_END_
-	ok $pt.validate( $parsed );
-#`(
 	plan 2;
 
 	my $parsed = $pt.parse-source( Q:to[_END_].chomp );
@@ -199,7 +167,6 @@ _END_
 	is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
 :a{'a'=>'b'}
 _END_
-)
 }, Q{:a{'a' => 'b'}};
 
 subtest {
@@ -278,7 +245,7 @@ subtest {
 	plan 1;
 
 	my $parsed = $pt.parse-source( Q:to[_END_] );
-my sub a { }; :&a
+my $a; :$a
 _END_
 	ok $pt.validate( $parsed );
 #`(
@@ -287,7 +254,9 @@ _END_
 	my $parsed = $pt.parse-source( Q:to[_END_].chomp );
 my sub a { }; :&a
 _END_
+say $parsed.dump;
 	my $tree = $pt.build-tree( $parsed );
+say $tree.perl;
 	ok $pt.validate( $parsed ), Q{valid};
 #	is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
 #my sub a { }; :&a

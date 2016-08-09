@@ -813,7 +813,7 @@ say "Coercee fired";
 #			self._FakeSignature( $p.hash.<fakesignature> )
 		}
 		elsif self.assert-hash-keys( $p, [< var >] ) {
-#			self._Var( $p.hash.<var> )
+			self._Var( $p.hash.<var> )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -873,6 +873,14 @@ say "Contextualizer fired";
 				),
 				self._Initializer(
 					$p.hash.<initializer>
+				)
+			)
+		}
+		elsif self.assert-hash-keys( $p,
+				[< routine_declarator >], [< trait >] ) {
+			(
+				self._RoutineDeclarator(
+					$p.hash.<routine_declarator>
 				)
 			)
 		}
@@ -2992,10 +3000,65 @@ return
 	}
 
 	method _Var( Mu $p ) {
-say "Var fired";
-		return True if self.assert-hash-keys( $p,
-				[< sigil desigilname >] );
-		if self.assert-hash-keys( $p, [< variable >] ) {
+		if self.assert-hash-keys( $p,
+				[< sigil desigilname >] ) {
+			# XXX For heavens' sake refactor.
+			my $sigil       = $p.hash.<sigil>.Str;
+			my $twigil      = $p.hash.<twigil> ??
+					  $p.hash.<twigil>.Str !! '';
+			my $desigilname = $p.hash.<desigilname> ??
+					  $p.hash.<desigilname>.Str !! '';
+			my $content     = $p.hash.<sigil> ~ $twigil ~ $desigilname;
+			my %lookup = (
+				'$' => Perl6::Variable::Scalar,
+				'$*' => Perl6::Variable::Scalar::Dynamic,
+				'$.' => Perl6::Variable::Scalar::Accessor,
+				'$!' => Perl6::Variable::Scalar::Attribute,
+				'$?' => Perl6::Variable::Scalar::CompileTime,
+				'$<' => Perl6::Variable::Scalar::MatchIndex,
+				'$^' => Perl6::Variable::Scalar::Positional,
+				'$:' => Perl6::Variable::Scalar::Named,
+				'$=' => Perl6::Variable::Scalar::Pod,
+				'$~' => Perl6::Variable::Scalar::SubLanguage,
+				'%' => Perl6::Variable::Hash,
+				'%*' => Perl6::Variable::Hash::Dynamic,
+				'%.' => Perl6::Variable::Hash::Accessor,
+				'%!' => Perl6::Variable::Hash::Attribute,
+				'%?' => Perl6::Variable::Hash::CompileTime,
+				'%<' => Perl6::Variable::Hash::MatchIndex,
+				'%^' => Perl6::Variable::Hash::Positional,
+				'%:' => Perl6::Variable::Hash::Named,
+				'%=' => Perl6::Variable::Hash::Pod,
+				'%~' => Perl6::Variable::Hash::SubLanguage,
+				'@' => Perl6::Variable::Array,
+				'@*' => Perl6::Variable::Array::Dynamic,
+				'@.' => Perl6::Variable::Array::Accessor,
+				'@!' => Perl6::Variable::Array::Attribute,
+				'@?' => Perl6::Variable::Array::CompileTime,
+				'@<' => Perl6::Variable::Array::MatchIndex,
+				'@^' => Perl6::Variable::Array::Positional,
+				'@:' => Perl6::Variable::Array::Named,
+				'@=' => Perl6::Variable::Array::Pod,
+				'@~' => Perl6::Variable::Array::SubLanguage,
+				'&' => Perl6::Variable::Callable,
+				'&*' => Perl6::Variable::Callable::Dynamic,
+				'&.' => Perl6::Variable::Callable::Accessor,
+				'&!' => Perl6::Variable::Callable::Attribute,
+				'&?' => Perl6::Variable::Callable::CompileTime,
+				'&<' => Perl6::Variable::Callable::MatchIndex,
+				'&^' => Perl6::Variable::Callable::Positional,
+				'&:' => Perl6::Variable::Callable::Named,
+				'&=' => Perl6::Variable::Callable::Pod,
+				'&~' => Perl6::Variable::Callable::SubLanguage,
+			);
+
+			%lookup{$sigil ~ $twigil}.new(
+				:from( $p.from ),
+				:to( $p.to ),
+				:content( $content )
+			)
+		}
+		elsif self.assert-hash-keys( $p, [< variable >] ) {
 #			self._Variable( $p.hash.<variable> )
 		}
 		else {
