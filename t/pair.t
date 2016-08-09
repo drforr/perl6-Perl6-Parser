@@ -74,13 +74,6 @@ _END_
 }, Q{:!a};
 
 subtest {
-	plan 1;
-
-	my $parsed = $pt.parse-source( Q:to[_END_] );
-:a<b>
-_END_
-	ok $pt.validate( $parsed );
-#`(
 	plan 2;
 
 	my $parsed = $pt.parse-source( Q:to[_END_].chomp );
@@ -94,17 +87,9 @@ _END_
 	is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
 :a<b>
 _END_
-)
 }, Q{:a<b>};
 
 subtest {
-	plan 1;
-
-	my $parsed = $pt.parse-source( Q:to[_END_] );
-:a<b c>
-_END_
-	ok $pt.validate( $parsed );
-#`(
 	plan 2;
 
 	my $parsed = $pt.parse-source( Q:to[_END_].chomp );
@@ -118,7 +103,6 @@ _END_
 	is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
 :a<b c>
 _END_
-)
 }, Q{:a<b c>};
 
 subtest {

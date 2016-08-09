@@ -777,14 +777,7 @@ say "Coercee fired";
 
 	method _ColonCircumfix( Mu $p ) {
 		if self.assert-hash-keys( $p, [< circumfix >] ) {
-			(
-				Perl6::Operator::Infix.new(
-					:from( -42 ),
-					:to( -42 ),
-					:content( Q{:} )
-				),
-				self._Circumfix( $p.hash.<circumfix> )
-			).flat
+			self._Circumfix( $p.hash.<circumfix> )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -795,7 +788,15 @@ say "Coercee fired";
 	method _ColonPair( Mu $p ) {
 		if self.assert-hash-keys( $p,
 				     [< identifier coloncircumfix >] ) {
-			self._ColonCircumfix( $p.hash.<coloncircumfix> )
+			(
+				Perl6::Operator::Infix.new(
+					:from( -43 ),
+					:to( -42 ),
+					:content( Q{:} )
+				),
+				self._Identifier( $p.hash.<identifier> ),
+				self._ColonCircumfix( $p.hash.<coloncircumfix> )
+			).flat
 		}
 		elsif self.assert-hash-keys( $p, [< coloncircumfix >] ) {
 			self._ColonCircumfix( $p.hash.<coloncircumfix> )
