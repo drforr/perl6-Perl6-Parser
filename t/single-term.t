@@ -768,11 +768,6 @@ subtest {
 	plan 2;
 
 	subtest {
-		plan 1;
-
-		my $parsed = $pt.parse-source( Q{Int} );
-		ok $pt.validate( $parsed );
-#`(
 		plan 2;
 
 		my $parsed = $pt.parse-source( Q{Int} );
@@ -780,15 +775,9 @@ subtest {
 		ok $pt.validate( $parsed ), Q{valid};
 #		is $pt.format( $tree ), Q{Int}, Q{formatted};
 		is $pt.format( $tree ), Q{Int}, Q{formatted};
-)
 	}, Q{Int};
 
 	subtest {
-		plan 1;
-
-		my $parsed = $pt.parse-source( Q{IO::Handle} );
-		ok $pt.validate( $parsed );
-#`(
 		plan 2;
 
 		my $parsed = $pt.parse-source( Q{IO::Handle} );
@@ -796,7 +785,6 @@ subtest {
 		ok $pt.validate( $parsed ), Q{valid};
 #		is $pt.format( $tree ), Q{IO::Handle}, Q{formatted};
 		is $pt.format( $tree ), Q{IO::Handle}, Q{formatted};
-)
 	}, Q{IO::Handle (Two package names)};
 }, Q{type};
 
@@ -804,11 +792,6 @@ subtest {
 	plan 1;
 
 	subtest {
-		plan 1;
-
-		my $parsed = $pt.parse-source( Q{pi} );
-		ok $pt.validate( $parsed );
-#`(
 		plan 2;
 
 		my $parsed = $pt.parse-source( Q{pi} );
@@ -816,7 +799,6 @@ subtest {
 		ok $pt.validate( $parsed ), Q{valid};
 #		is $pt.format( $tree ), Q{pi}, Q{formatted};
 		is $pt.format( $tree ), Q{pi}, Q{formatted};
-)
 	}, Q{pi};
 }, Q{constant};
 
@@ -824,11 +806,6 @@ subtest {
 	plan 1;
 
 	subtest {
-		plan 1;
-
-		my $parsed = $pt.parse-source( Q{sum} );
-		ok $pt.validate( $parsed );
-#`(
 		plan 2;
 
 		my $parsed = $pt.parse-source( Q{sum} );
@@ -836,7 +813,6 @@ subtest {
 		ok $pt.validate( $parsed ), Q{valid};
 #		is $pt.format( $tree ), Q{sum}, Q{formatted};
 		is $pt.format( $tree ), Q{sum}, Q{formatted};
-)
 	}, Q{sum};
 }, Q{function call};
 

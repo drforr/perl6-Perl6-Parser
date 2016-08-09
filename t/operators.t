@@ -285,9 +285,7 @@ _END_
 		my $parsed = $pt.parse-source( Q:to[_END_] );
 my $a; $a.:<++>
 _END_
-say $parsed.dump;
 		my $tree = $pt.build-tree( $parsed );
-say $tree.perl;
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[1].child),
 			Q{found operator};

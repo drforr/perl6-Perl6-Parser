@@ -591,11 +591,20 @@ class Perl6::Tidy::Factory {
 		if self.assert-hash-keys( $p, [< EXPR >] );
 		if self.assert-Bool( $p );
 )
-		if self.assert-hash-keys( $p, [< arglist >] ) {
+		if self.assert-hash-keys( $p, [< semiarglist >] ) {
+			Perl6::Operator::PostCircumfix.new(
+				:delimiter( '(', ')' ),
+				:child( )
+			)
+		}
+		elsif self.assert-hash-keys( $p, [< arglist >] ) {
 			self._ArgList( $p.hash.<arglist> );
 		}
-		elsif self.assert-Str( $p ) {
+		elsif $p.Str { #self.assert-Str( $p ) {
 			$p.Str
+		}
+		elsif $p.Bool {
+			return ()
 		}
 		else {
 			say $p.Int if $p.Int;
@@ -1435,11 +1444,7 @@ say "EScale fired";
 		elsif self.assert-hash-keys( $p, [< identifier args >] ) {
 			@child = (
 				self._Identifier( $p.hash.<identifier> ),
-				# XXX Work on this later
-				Perl6::Operator::PostCircumfix.new(
-					:delimiter( '(', ')' ),
-					:child( )
-				)
+				self._Args( $p.hash.<args> )
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< sym args >] ) {
@@ -1453,10 +1458,14 @@ say "EScale fired";
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< longname args >] ) {
+			# XXX Needs work later on
 			@child = (
-				self._LongName( $p.hash.<longname> ),
-				self._Args( $p.hash.<args> )
-			)
+				self._LongName( $p.hash.<longname> )
+			);
+			if $p.hash.<args> and
+			   $p.hash.<args>.hash.<semiarglist> {
+				@child.push( self._Args( $p.hash.<args> ) )
+			}
 		}
 		elsif self.assert-hash-keys( $p, [< circumfix >] ) {
 			@child = (
@@ -1518,6 +1527,13 @@ say "EScale fired";
 			@child = (
 				self._ColonPair(
 					$p.hash.<colonpair>
+				)
+			)
+		}
+		elsif self.assert-hash-keys( $p, [< longname >] ) {
+			@child = (
+				self._LongName(
+					$p.hash.<longname>
 				)
 			)
 		}
