@@ -456,6 +456,20 @@ class Perl6::Tidy::Factory {
 		}
 	}
 
+	method semicolon-at-end( Mu $p ) {
+		my $to   = $p.to;
+		my $orig = $p.orig;
+		my $key  = substr($orig, $to, $orig.chars);
+
+		if $p.Str ~~ / \; $/ {
+			Perl6::Semicolon.new(
+				:from( $to ),
+				:to( $to + 1 ),
+				:content( Q{;} )
+			)
+		}
+	}
+
 	sub dump( Mu $parsed ) {
 		say $parsed.hash.keys.gist;
 	}
@@ -1992,7 +2006,8 @@ say "OPER fired";
 		if self.assert-hash-keys( $p, [< sym package_def >] ) {
 			(
 				self._Sym( $p.hash.<sym> ),
-				self._PackageDef( $p.hash.<package_def> )
+				self._PackageDef( $p.hash.<package_def> ),
+				self.semicolon-at-end( $p.hash.<package_def> )
 			).flat
 		}
 		else {
@@ -2011,6 +2026,13 @@ say "OPER fired";
 				[< blockoid >], [< trait >] );
 )
 		if self.assert-hash-keys( $p,
+				[< longname statementlist >], [< trait >] ) {
+			(
+				self._LongName( $p.hash.<longname> ),
+				self._StatementList( $p.hash.<statementlist> )
+			).flat
+		}
+		elsif self.assert-hash-keys( $p,
 				[< blockoid longname >], [< trait >] ) {
 			(
 				self._LongName( $p.hash.<longname> ),
@@ -2209,6 +2231,11 @@ say "Parameter fired";
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
+	}
+
+	method _PostConstraint( Mu $p ) {
+		# XXX fix later
+		self._EXPR( $p.list.[0].hash.<EXPR> )
 	}
 
 	method _Postfix( Mu $p ) {
@@ -2440,13 +2467,26 @@ say "RxAdverbs fired";
 		if self.assert-hash-keys( $p,
 					[< multi_declarator DECL typename >] ) {
 		}
-		elsif self.assert-hash-keys( $p,
+)
+		if self.assert-hash-keys( $p,
 				[< package_declarator DECL >],
 				[< typename >] ) {
+			(
+				self._PackageDeclarator(
+					$p.hash.<package_declarator>
+				)
+			)
 		}
-)
-		
-		if self.assert-hash-keys( $p,
+		elsif self.assert-hash-keys( $p,
+				[< package_declarator sym >] ) {
+			(
+				self._Sym( $p.hash.<sym> ),
+				self._PackageDeclarator(
+					$p.hash.<package_declarator>
+				)
+			)
+		}
+		elsif self.assert-hash-keys( $p,
 				[< declarator DECL >], [< typename >] ) {
 			self._Declarator( $p.hash.<declarator> )
 		}
@@ -2916,6 +2956,21 @@ say "Var fired";
 )
 
 		if self.assert-hash-keys( $p,
+				[< variable post_constraint >],
+				[< semilist postcircumfix signature trait >] ) {
+			(
+				self._Variable( $p.hash.<variable> ),
+				Perl6::Bareword.new(
+					:from( -42 ),
+					:to( -42 ),
+					:content( Q{where} )
+				),
+				self._PostConstraint(
+					$p.hash.<post_constraint>
+				)
+			)
+		}
+		elsif self.assert-hash-keys( $p,
 				[< variable >],
 				[< semilist postcircumfix signature
 				   trait post_constraint >] ) {

@@ -112,11 +112,6 @@ subtest {
 		plan 1;
 
 		subtest {
-			plan 1;
-
-			my $parsed = $pt.parse-source( Q{my $a where 1} );
-			ok $pt.validate( $parsed );
-#`(
 			plan 2;
 
 			my $parsed = $pt.parse-source( Q{my $a where 1} );
@@ -124,7 +119,6 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 #			is $pt.format( $tree ), Q{my $a where 1}, Q{formatted};
 			is $pt.format( $tree ), Q{my$awhere1}, Q{formatted};
-)
 		}, Q{my $a where 1};
 	}, Q{constrained};
 }, Q{variable};
@@ -314,11 +308,6 @@ _END_
 		plan 2;
 
 		subtest {
-			plan 1;
-
-			my $parsed = $pt.parse-source( Q[unit grammar foo;] );
-			ok $pt.validate( $parsed );
-#`(
 			plan 2;
 
 			my $parsed = $pt.parse-source( Q:to[_END_].chomp );
@@ -329,10 +318,9 @@ _END_
 #			is $pt.format( $tree ), Q:to[_END_], Q{formatted};
 #unit grammar foo;
 #_END_
-			is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+			is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
 unitgrammarfoo;
 _END_
-)
 		}, Q{unit grammar foo;};
 
 		subtest {
