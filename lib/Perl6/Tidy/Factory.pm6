@@ -586,12 +586,11 @@ class Perl6::Tidy::Factory {
 	method _Args( Mu $p ) {
 #`(
 		if self.assert-hash-keys( $p, [< invocant semiarglist >] );
-		if self.assert-hash-keys( $p, [< semiarglist >] );
-		if self.assert-hash-keys( $p, [ ], [< semiarglist >] );
 		if self.assert-hash-keys( $p, [< EXPR >] );
 		if self.assert-Bool( $p );
 )
 		if self.assert-hash-keys( $p, [< semiarglist >] ) {
+			# XXX Needs work
 			Perl6::Operator::PostCircumfix.new(
 				:delimiter( '(', ')' ),
 				:child( )
@@ -724,15 +723,8 @@ say "CharSpec fired";
 
 	method _Circumfix( Mu $p ) {
 #`(
-		return True if self.assert-hash-keys( $p, [< pblock >] );
-		# _BinInt is a Str/Int leaf
-		# _VALUE is a Str/Int leaf
 		return True if self.assert-hash-keys( $p, [< binint VALUE >] );
-		# _OctInt is a Str/Int leaf
-		# _VALUE is a Str/Int leaf
 		return True if self.assert-hash-keys( $p, [< octint VALUE >] );
-		# _HexInt is Str/Int leaf
-		# _VALUE is a Str/Int leaf
 		return True if self.assert-hash-keys( $p, [< hexint VALUE >] );
 )
 		if self.assert-hash-keys( $p, [< pblock >] ) {
@@ -742,12 +734,21 @@ say "CharSpec fired";
 			# XXX <semilist> can probably be worked with
 			$p.Str ~~ m{ ^ (.) }; my $front = $0;
 			$p.Str ~~ m{ (.) $ }; my $back = $0;
+if $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> {
 			Perl6::Operator::PostCircumfix.new(
 				:delimiter( $front, $back ),
 				:child(
 self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 				)
 			)
+}
+else {
+			Perl6::Operator::PostCircumfix.new(
+				:delimiter( $front, $back ),
+				:child(
+				)
+			)
+}
 		}
 		elsif self.assert-hash-keys( $p, [< nibble >] ) {
 			# XXX <nibble> can probably be worked with
@@ -833,7 +834,14 @@ say "Coercee fired";
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< fakesignature >] ) {
-#			self._FakeSignature( $p.hash.<fakesignature> )
+			(
+				Perl6::Operator::Infix.new(
+					:from( -43 ),
+					:to( -42 ),
+					:content( Q{:} )
+				),
+				self._FakeSignature( $p.hash.<fakesignature> )
+			).flat
 		}
 		elsif self.assert-hash-keys( $p, [< var >] ) {
 			(
@@ -887,11 +895,6 @@ say "Contextualizer fired";
 				[< trait >] );
 		if self.assert-hash-keys( $p,
 				[< initializer signature >], [< trait >] );
-		if self.assert-hash-keys( $p,
-				[< regex_declarator >], [< trait >] );
-		if self.assert-hash-keys( $p,
-				[< routine_declarator >], [< trait >] );
-		if self.assert-hash-keys( $p, [< signature >], [< trait >] );
 )
 
 		if self.assert-hash-keys( $p,
@@ -972,30 +975,6 @@ say "DECL fired";
 	}
 
 	method _DecNumber( Mu $p ) {
-#`(
-say "DecNumber fired";
-		# _Coeff is a Str/Int leaf
-		# _Frac is a Str/Int leaf
-		# _Int is a Str/Int leaf
-		return True if self.assert-hash-keys( $p,
-				  [< int coeff frac escale >] );
-		# _Coeff is a Str/Int leaf
-		# _Frac is a Str/Int leaf
-		return True if self.assert-hash-keys( $p,
-				  [< coeff frac escale >] );
-		# _Coeff is a Str/Int leaf
-		# _Frac is a Str/Int leaf
-		# _Int is a Str/Int leaf
-		return True if self.assert-hash-keys( $p,
-				  [< int coeff frac >] );
-		# _Coeff is a Str/Int leaf
-		# _Int is a Str/Int leaf
-		return True if self.assert-hash-keys( $p,
-				  [< int coeff escale >] );
-		# _Coeff is a Str/Int leaf
-		# _Frac is a Str/Int leaf
-		return True if self.assert-hash-keys( $p, [< coeff frac >] );
-)
 		if self.assert-hash-keys( $p, [< int coeff escale frac >] ) {
 			Perl6::Number::Floating.new(
 				:from( $p.from ),
@@ -1031,8 +1010,7 @@ say "DecNumber fired";
 	}
 
 	method _DefLongName( Mu $p ) {
-		if self.assert-hash-keys( $p,
-				[< name >], [< colonpair >] ) {
+		if self.assert-hash-keys( $p, [< name >], [< colonpair >] ) {
 			self._Name( $p.hash.<name> )
 		}
 		else {
@@ -1195,165 +1173,12 @@ say "EScale fired";
 	}
 
 	method _EXPR( Mu $p ) {
-#`(
-		if $p.list {
-			for $p.list {
-				if self.assert-hash-keys( $_,
-						[< dotty OPER >],
-						[< postfix_prefix_meta_operator >] ) {
-				}
-				elsif self.assert-hash-keys( $_,
-					[< postcircumfix OPER >],
-					[< postfix_prefix_meta_operator >] ) {
-				}
-				elsif self.assert-hash-keys( $_,
-						[< infix OPER >],
-						[< infix_postfix_meta_operator >] ) {
-				}
-				elsif self.assert-hash-keys( $_,
-						[< prefix OPER >],
-						[< prefix_postfix_meta_operator >] ) {
-				}
-				elsif self.assert-hash-keys( $_,
-						[< postfix OPER >],
-						[< postfix_prefix_meta_operator >] ) {
-				}
-				elsif self.assert-hash-keys( $_,
-						[< identifier args >] ) {
-				}
-				elsif self.assert-hash-keys( $_,
-					[< infix_prefix_meta_operator OPER >] ) {
-				}
-				elsif self.assert-hash-keys( $_,
-						[< longname args >] ) {
-				}
-				elsif self.assert-hash-keys( $_,
-						[< args op >] ) {
-				}
-				elsif self.assert-hash-keys( $_, [< value >] ) {
-				}
-				elsif self.assert-hash-keys( $_,
-						[< variable >] ) {
-				}
-				elsif self.assert-hash-keys( $_,
-						[< methodop >] ) {
-				}
-				elsif self.assert-hash-keys( $_,
-						[< package_declarator >] ) {
-				}
-				elsif self.assert-hash-keys( $_, [< sym >] ) {
-				}
-				elsif self.assert-hash-keys( $_,
-						[< scope_declarator >] ) {
-				}
-				elsif self.assert-hash-keys( $_, [< dotty >] ) {
-				}
-				elsif self.assert-hash-keys( $_,
-						[< circumfix >] ) {
-				}
-				elsif self.assert-hash-keys( $_,
-						[< fatarrow >] ) {
-				}
-				elsif self.assert-hash-keys( $_,
-						[< statement_prefix >] ) {
-				}
-				elsif self.assert-Str( $_ ) {
-				}
-			}
-			if self.assert-hash-keys(
-					$p,
-					[< fake_infix OPER colonpair >] ) {
-			}
-			elsif self.assert-hash-keys(
-					$p,
-					[< OPER dotty >],
-					[< postfix_prefix_meta_operator >] ) {
-			}
-			elsif self.assert-hash-keys(
-					$p,
-					[< postfix OPER >],
-					[< postfix_prefix_meta_operator >] ) {
-			}
-			elsif self.assert-hash-keys(
-					$p,
-					[< infix OPER >],
-					[< prefix_postfix_meta_operator >] ) {
-			}
-			elsif self.assert-hash-keys(
-					$p,
-					[< prefix OPER >],
-					[< prefix_postfix_meta_operator >] ) {
-			}
-			elsif self.assert-hash-keys(
-					$p,
-					[< postcircumfix OPER >],
-					[< postfix_prefix_meta_operator >] ) {
-			}
-			elsif self.assert-hash-keys( $p,
-					[< OPER >],
-					[< infix_prefix_meta_operator >] ) {
-			}
-		}
-		# _Triangle is a Str leaf
-		if self.assert-hash-keys( $p, [< args op triangle >] ) {
-		}
-		elsif self.assert-hash-keys( $p, [< identifier args >] ) {
-		}
-		elsif self.assert-hash-keys( $p, [< args op >] ) {
-		}
-		elsif self.assert-hash-keys( $p, [< sym args >] ) {
-		}
-		elsif self.assert-hash-keys( $p, [< statement_prefix >] ) {
-#			self._StatementPrefix( $p.hash.<statement_prefix> )
-		}
-		elsif self.assert-hash-keys( $p, [< type_declarator >] ) {
-#			self._TypeDeclarator( $p.hash.<type_declarator> )
-		}
-		elsif self.assert-hash-keys( $p, [< longname >] ) {
-#			self._LongName( $p.hash.<longname> )
-		}
-		elsif self.assert-hash-keys( $p, [< value >] ) {
-#			self._Value( $p.hash.<value> )
-		}
-		elsif self.assert-hash-keys( $p, [< variable >] ) {
-#			self._Variable( $p.hash.<variable> )
-		}
-		elsif self.assert-hash-keys( $p, [< circumfix >] ) {
-#			self._Circumfix( $p.hash.<circumfix> )
-		}
-		elsif self.assert-hash-keys( $p, [< colonpair >] ) {
-#			self._ColonPair( $p.hash.<colonpair> )
-		}
-		elsif self.assert-hash-keys( $p, [< scope_declarator >] ) {
-#			self._ScopeDeclarator( $p.hash.<scope_declarator> )
-		}
-		elsif self.assert-hash-keys( $p, [< routine_declarator >] ) {
-#			self._RoutineDeclarator( $p.hash.<routine_declarator> )
-		}
-		elsif self.assert-hash-keys( $p, [< package_declarator >] ) {
-#			self._PackageDeclarator( $p.hash.<package_declarator> )
-		}
-		elsif self.assert-hash-keys( $p, [< fatarrow >] ) {
-#			self._FatArrow( $p.hash.<fatarrow> )
-		}
-		elsif self.assert-hash-keys( $p, [< multi_declarator >] ) {
-#			self._MultiDeclarator( $p.hash.<multi_declarator> )
-		}
-		elsif self.assert-hash-keys( $p, [< regex_declarator >] ) {
-#			self._RegexDeclarator( $p.hash.<regex_declarator> )
-		}
-		elsif self.assert-hash-keys( $p, [< dotty >] ) {
-#			self._Dotty( $p.hash.<dotty> )
-		}
-)
-
-		my @child;
 		if self.assert-hash-keys( $p,
 				[< dotty OPER >],
 				[< postfix_prefix_meta_operator >] ) {
 			# XXX Look into this at some point.
 			if substr( $p.orig, $p.from, 2 ) eq '>>' {
-				@child = (
+				(
 					self.__Term( $p.list.[0] ),
 					Perl6::Operator::Prefix.new(
 						:from( $p.from ),
@@ -1366,7 +1191,7 @@ say "EScale fired";
 				).flat
 			}
 			else {
-				@child = (
+				(
 					self.__Term( $p.list.[0] ),
 					self._Dotty( $p.hash.<dotty> )
 				).flat
@@ -1375,7 +1200,7 @@ say "EScale fired";
 		elsif self.assert-hash-keys( $p,
 				[< prefix OPER >],
 				[< prefix_postfix_meta_operator >] ) {
-			@child = (
+			(
 				self._Prefix( $p.hash.<prefix> ),
 				self.__Term( $p.list.[0] )
 			).flat
@@ -1386,7 +1211,7 @@ say "EScale fired";
 			# XXX Work on this
 			$p.hash.<postcircumfix>.Str ~~ m{ ^ (.) }; my $front = $0;
 			$p.hash.<postcircumfix>.Str ~~ m{ (.) $ }; my $back = $0;
-			@child = (
+			(
 				self.__Term( $p.list.[0] ),
 				Perl6::Operator::PostCircumfix.new(
 					:delimiter( $front, $back ),
@@ -1399,14 +1224,14 @@ say "EScale fired";
 		elsif self.assert-hash-keys( $p,
 				[< postfix OPER >],
 				[< postfix_prefix_meta_operator >] ) {
-			@child = (
+			(
 				self.__Term( $p.list.[0] ),
 				self._Postfix( $p.hash.<postfix> )
 			).flat
 		}
 		elsif self.assert-hash-keys( $p,
 				[< infix_prefix_meta_operator OPER >] ) {
-			@child = (
+			(
 				self.__Term( $p.list.[0] ),
 				self._InfixPrefixMetaOperator(
 					$p.hash.<infix_prefix_meta_operator>
@@ -1417,7 +1242,7 @@ say "EScale fired";
 		elsif self.assert-hash-keys( $p, [< infix OPER >] ) {
 			# XXX fix later
 			if $p.list.elems == 3 {
-				@child = (
+				(
 					self.__Term( $p.list.[0] ),
 					Perl6::Operator::Infix.new(
 						:from( $p.list.[0].to + 1 ),
@@ -1434,7 +1259,7 @@ say "EScale fired";
 				).flat
 			}
 			else {
-				@child = (
+				(
 					self.__Term( $p.list.[0] ),
 					self._Infix( $p.hash.<infix> ),
 					self.__Term( $p.list.[1] )
@@ -1442,14 +1267,14 @@ say "EScale fired";
 			}
 		}
 		elsif self.assert-hash-keys( $p, [< identifier args >] ) {
-			@child = (
+			(
 				self._Identifier( $p.hash.<identifier> ),
 				self._Args( $p.hash.<args> )
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< sym args >] ) {
 			note "Skipping args for the time being";
-			@child = (
+			(
 				Perl6::Operator::Infix.new(
 					:from( $p.hash.<sym>.from ),
 					:to( $p.hash.<sym>.to ),
@@ -1459,89 +1284,81 @@ say "EScale fired";
 		}
 		elsif self.assert-hash-keys( $p, [< longname args >] ) {
 			# XXX Needs work later on
-			@child = (
-				self._LongName( $p.hash.<longname> )
-			);
 			if $p.hash.<args> and
 			   $p.hash.<args>.hash.<semiarglist> {
-				@child.push( self._Args( $p.hash.<args> ) )
+				(
+					self._LongName( $p.hash.<longname> ),
+					self._Args( $p.hash.<args> )
+				)
+			}
+			else {
+				(
+					self._LongName( $p.hash.<longname> )
+				)
 			}
 		}
 		elsif self.assert-hash-keys( $p, [< circumfix >] ) {
-			@child = (
-				self._Circumfix(
-					$p.hash.<circumfix>
-				)
+			(
+				self._Circumfix( $p.hash.<circumfix> )
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< fatarrow >] ) {
-			@child = (
-				self._FatArrow(
-					$p.hash.<fatarrow>
-				)
+			(
+				self._FatArrow( $p.hash.<fatarrow> )
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< regex_declarator >] ) {
-			@child = (
+			(
 				self._RegexDeclarator(
 					$p.hash.<regex_declarator>
 				)
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< routine_declarator >] ) {
-			@child = (
+			(
 				self._RoutineDeclarator(
 					$p.hash.<routine_declarator>
 				)
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< scope_declarator >] ) {
-			@child = (
+			(
 				self._ScopeDeclarator(
 					$p.hash.<scope_declarator>
 				)
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< package_declarator >] ) {
-			@child = (
+			(
 				self._PackageDeclarator(
 					$p.hash.<package_declarator>
 				)
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< value >] ) {
-			@child = (
-				self._Value(
-					$p.hash.<value>
-				)
+			(
+				self._Value( $p.hash.<value> )
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< variable >] ) {
-			@child = (
-				self._Variable(
-					$p.hash.<variable>
-				)
+			(
+				self._Variable( $p.hash.<variable> )
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< colonpair >] ) {
-			@child = (
-				self._ColonPair(
-					$p.hash.<colonpair>
-				)
+			(
+				self._ColonPair( $p.hash.<colonpair> )
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< longname >] ) {
-			@child = (
-				self._LongName(
-					$p.hash.<longname>
-				)
+			(
+				self._LongName( $p.hash.<longname> )
 			)
 		}
 		else {
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
-		@child
 	}
 
 	method _FakeInfix( Mu $p ) {
@@ -1556,9 +1373,12 @@ say "FakeInfix fired";
 	}
 
 	method _FakeSignature( Mu $p ) {
-say "FakeSignature fired";
 		if self.assert-hash-keys( $p, [< signature >] ) {
-#			self._Signature( $p.hash.<signature> )
+			# XXX Fix
+			Perl6::Operator::PostCircumfix.new(
+				:delimiter( '(', ')' ),
+				:child( )
+			)
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -2006,13 +1826,14 @@ say "Noun fired";
 
 	method _Numish( Mu $p ) {
 #`(
-		if self.assert-hash-keys( $p, [< rad_number >] );
-		if self.assert-hash-keys( $p, [< dec_number >] );
 		if self.assert-Num( $p );
 )
 
 		if self.assert-hash-keys( $p, [< dec_number >] ) {
 			self._DecNumber( $p.hash.<dec_number> )
+		}
+		elsif self.assert-hash-keys( $p, [< rad_number >] ) {
+			self._RadNumber( $p.hash.<rad_number> )
 		}
 		elsif self.assert-hash-keys( $p, [< integer >] ) {
 			self._Integer( $p.hash.<integer> )
@@ -2471,11 +2292,31 @@ say "QuotePair fired";
 	method _Radix( Mu $p ) returns Int { $p.hash.<radix>.Int }
 
 	method _RadNumber( Mu $p ) {
-say "RadNumber fired";
-		return True if self.assert-hash-keys( $p,
-				[< circumfix bracket radix >], [< exp base >] );
+#`(
 		return True if self.assert-hash-keys( $p,
 				[< circumfix radix >], [< exp base >] );
+)
+		if self.assert-hash-keys( $p,
+				[< circumfix bracket radix >],
+				[< exp base >] ) {
+			Perl6::Number::Radix.new(
+				:from( $p.from ),
+				:to( $p.to ),
+				:content( $p.Str )
+			)
+		}
+		elsif self.assert-hash-keys( $p,
+				[< circumfix radix >], [< exp base >] ) {
+			Perl6::Number::Radix.new(
+				:from( $p.from ),
+				:to( $p.to ),
+				:content( $p.Str )
+			)
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
 	method _RegexDeclarator( Mu $p ) {

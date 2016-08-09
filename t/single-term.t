@@ -82,11 +82,6 @@ subtest {
 		}, Q{1};
 
 		subtest {
-			plan 1;
-
-			my $parsed = $pt.parse-source( Q{-0b1} );
-			ok $pt.validate( $parsed );
-#`(
 			plan 2;
 
 			my $parsed = $pt.parse-source( Q{-0b1} );
@@ -94,7 +89,6 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 #			is $pt.format( $tree ), Q{-0b1}, Q{formatted};
 			is $pt.format( $tree ), Q{-0b1}, Q{formatted};
-)
 		}, Q{-1};
 	}, Q{binary};
 
@@ -122,11 +116,6 @@ subtest {
 		}, Q{1};
 
 		subtest {
-			plan 1;
-
-			my $parsed = $pt.parse-source( Q{-0o1} );
-			ok $pt.validate( $parsed );
-#`(
 			plan 2;
 
 			my $parsed = $pt.parse-source( Q{-0o1} );
@@ -134,7 +123,6 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 #			is $pt.format( $tree ), Q{-0o1}, Q{formatted};
 			is $pt.format( $tree ), Q{-0o1}, Q{formatted};
-)
 		}, Q{-1};
 	}, Q{octal};
 
@@ -142,11 +130,6 @@ subtest {
 		plan 3;
 
 		subtest {
-			plan 1;
-
-			my $parsed = $pt.parse-source( Q{0d0} );
-			ok $pt.validate( $parsed );
-#`(
 			plan 2;
 
 			my $parsed = $pt.parse-source( Q{0d0} );
@@ -154,15 +137,9 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 #			is $pt.format( $tree ), Q{0d0}, Q{formatted};
 			is $pt.format( $tree ), Q{0d0}, Q{formatted};
-)
 		}, Q{zero};
 
 		subtest {
-			plan 1;
-
-			my $parsed = $pt.parse-source( Q{0d1} );
-			ok $pt.validate( $parsed );
-#`(
 			plan 2;
 
 			my $parsed = $pt.parse-source( Q{0d1} );
@@ -170,15 +147,9 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 #			is $pt.format( $tree ), Q{0d1}, Q{formatted};
 			is $pt.format( $tree ), Q{0d1}, Q{formatted};
-)
 		}, Q{1};
 
 		subtest {
-			plan 1;
-
-			my $parsed = $pt.parse-source( Q{-0d1} );
-			ok $pt.validate( $parsed );
-#`(
 			plan 2;
 
 			my $parsed = $pt.parse-source( Q{-0d1} );
@@ -186,7 +157,6 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 #			is $pt.format( $tree ), Q{-0d1}, Q{formatted};
 			is $pt.format( $tree ), Q{-0d1}, Q{formatted};
-)
 		}, Q{-1};
 	}, Q{explicit decimal};
 
@@ -214,11 +184,6 @@ subtest {
 		}, Q{1};
 
 		subtest {
-			plan 1;
-
-			my $parsed = $pt.parse-source( Q{-1} );
-			ok $pt.validate( $parsed );
-#`(
 			plan 2;
 
 			my $parsed = $pt.parse-source( Q{-1} );
@@ -226,7 +191,6 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 #			is $pt.format( $tree ), Q{-1}, Q{formatted};
 			is $pt.format( $tree ), Q{-1}, Q{formatted};
-)
 		}, Q{-1};
 	}, Q{implicit decimal};
 
@@ -254,11 +218,6 @@ subtest {
 		}, Q{1};
 
 		subtest {
-			plan 1;
-
-			my $parsed = $pt.parse-source( Q{-0x1} );
-			ok $pt.validate( $parsed );
-#`(
 			plan 2;
 
 			my $parsed = $pt.parse-source( Q{-0x1} );
@@ -266,7 +225,6 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 #			is $pt.format( $tree ), Q{-0x1}, Q{formatted};
 			is $pt.format( $tree ), Q{-0x1}, Q{formatted};
-)
 		}, Q{-1};
 	}, Q{hexadecimal};
 
@@ -274,11 +232,6 @@ subtest {
 		plan 3;
 
 		subtest {
-			plan 1;
-
-			my $parsed = $pt.parse-source( Q{:13(0)} );
-			ok $pt.validate( $parsed );
-#`(
 			plan 2;
 
 			my $parsed = $pt.parse-source( Q{:13(0)} );
@@ -286,15 +239,9 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 #			is $pt.format( $tree ), Q{:13(0)}, Q{formatted};
 			is $pt.format( $tree ), Q{:13(0)}, Q{formatted};
-)
 		}, Q{zero};
 
 		subtest {
-			plan 1;
-
-			my $parsed = $pt.parse-source( Q{:13(1)} );
-			ok $pt.validate( $parsed );
-#`(
 			plan 2;
 
 			my $parsed = $pt.parse-source( Q{:13(1)} );
@@ -302,15 +249,9 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 #			is $pt.format( $tree ), Q{:13(1)}, Q{formatted};
 			is $pt.format( $tree ), Q{:13(1)}, Q{formatted};
-)
 		}, Q{1};
 
 		subtest {
-			plan 1;
-
-			my $parsed = $pt.parse-source( Q{:13(-1)} );
-			ok $pt.validate( $parsed );
-#`(
 			plan 2;
 
 			my $parsed = $pt.parse-source( Q{:13(-1)} );
@@ -318,7 +259,6 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 #			is $pt.format( $tree ), Q{:13(-1)}, Q{formatted};
 			is $pt.format( $tree ), Q{:13(-1)}, Q{formatted};
-)
 		}, Q{-1};
 	}, Q{base-13};
 
@@ -366,11 +306,6 @@ subtest {
 		}, Q{1.0};
 
 		subtest {
-			plan 1;
-
-			my $parsed = $pt.parse-source( Q{-1.0} );
-			ok $pt.validate( $parsed );
-#`(
 			plan 2;
 
 			my $parsed = $pt.parse-source( Q{-1.0} );
@@ -378,7 +313,6 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 #			is $pt.format( $tree ), Q{-1.0}, Q{formatted};
 			is $pt.format( $tree ), Q{-1.0}, Q{formatted};
-)
 		}, Q{-1.0};
 	}, Q{rational};
 
@@ -436,11 +370,6 @@ subtest {
 		}, Q{1.0e0};
 
 		subtest {
-			plan 1;
-
-			my $parsed = $pt.parse-source( Q{-1e0} );
-			ok $pt.validate( $parsed );
-#`(
 			plan 2;
 
 			my $parsed = $pt.parse-source( Q{-1e0} );
@@ -448,7 +377,6 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 #			is $pt.format( $tree ), Q{-1e0}, Q{formatted};
 			is $pt.format( $tree ), Q{-1e0}, Q{formatted};
-)
 		}, Q{-1.0e0};
 	}, Q{Num};
 
@@ -642,11 +570,11 @@ END}
 			);
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q{q:to/END/Hello world!END},
+#			is $pt.format( $tree ), Q{q:to/END/
+#Hello world!
+#END},
 #				Q{formatted};
-			is $pt.format( $tree ), Q{q:to/END/
-Hello world!
-END},
+			is $pt.format( $tree ), Q{q:to/END/Hello world!END},
 				Q{formatted};
 )
 		}, Q{q:to/END/, no spaces};
@@ -848,19 +776,13 @@ subtest {
 	plan 1;
 
 	subtest {
-		plan 1;
-
-		my $parsed = $pt.parse-source( Q{:()} );
-		ok $pt.validate( $parsed );
-#`(
 		plan 2;
 
 		my $parsed = $pt.parse-source( Q{:()} );
 		my $tree = $pt.build-tree( $parsed );
 		ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q{:()}, Q{formatted};
+#		is $pt.format( $tree ), Q{:()}, Q{formatted};
 		is $pt.format( $tree ), Q{:()}, Q{formatted};
-)
 	}, Q{:()};
 }, Q{signature};
 
