@@ -208,20 +208,27 @@ class Perl6::Number does Token {
 }
 class Perl6::Number::Binary {
 	also is Perl6::Number;
+	has $.headless is required;
 }
 class Perl6::Number::Octal {
 	also is Perl6::Number;
+	has $.headless is required;
 }
 class Perl6::Number::Decimal {
 	also is Perl6::Number;
 }
 class Perl6::Number::Decimal::Explicit {
 	also is Perl6::Number::Decimal;
+	has $.headless is required;
 }
 class Perl6::Number::Hexadecimal {
 	also is Perl6::Number;
+	has $.headless is required;
 }
 class Perl6::Number::Radix {
+	also is Perl6::Number;
+}
+class Perl6::Number::Floating {
 	also is Perl6::Number;
 }
 
@@ -632,7 +639,7 @@ say "BackSlash fired";
 			:from( $p.from ),
 			:to( $p.to ),
 			:content(
-				$p.Str eq '0' ?? 0 !! $p.Int
+				$p.Str
 			)
 		)
 	}
@@ -859,7 +866,7 @@ say "Contextualizer fired";
 			:from( $p.from ),
 			:to( $p.to ),
 			:content(
-				$p.Str eq '0' ?? 0 !! $p.Int
+				$p.Str
 			)
 		)
 	}
@@ -956,6 +963,7 @@ say "DECL fired";
 	}
 
 	method _DecNumber( Mu $p ) {
+#`(
 say "DecNumber fired";
 		# _Coeff is a Str/Int leaf
 		# _Frac is a Str/Int leaf
@@ -978,6 +986,39 @@ say "DecNumber fired";
 		# _Coeff is a Str/Int leaf
 		# _Frac is a Str/Int leaf
 		return True if self.assert-hash-keys( $p, [< coeff frac >] );
+)
+		if self.assert-hash-keys( $p, [< int coeff escale frac >] ) {
+			Perl6::Number::Floating.new(
+				:from( $p.from ),
+				:to( $p.to ),
+				:content( $p.Str )
+			)
+		}
+		elsif self.assert-hash-keys( $p, [< coeff frac escale >] ) {
+			Perl6::Number::Floating.new(
+				:from( $p.from ),
+				:to( $p.to ),
+				:content( $p.Str )
+			)
+		}
+		elsif self.assert-hash-keys( $p, [< int coeff frac >] ) {
+			Perl6::Number::Floating.new(
+				:from( $p.from ),
+				:to( $p.to ),
+				:content( $p.Str )
+			)
+		}
+		elsif self.assert-hash-keys( $p, [< int coeff escale >] ) {
+			Perl6::Number::Floating.new(
+				:from( $p.from ),
+				:to( $p.to ),
+				:content( $p.Str )
+			)
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
 	method _DefLongName( Mu $p ) {
@@ -1618,16 +1659,44 @@ say "Infixish fired";
 
 	method _Integer( Mu $p ) {
 		if self.assert-hash-keys( $p, [< binint VALUE >] ) {
-			self._BinInt( $p.hash.<binint> )
+			Perl6::Number::Binary.new(
+				:from( $p.from ),
+				:to( $p.to ),
+				:content(
+					$p.Str
+				),
+				:headless( $p.hash.<binint>.Str )
+			)
 		}
 		elsif self.assert-hash-keys( $p, [< octint VALUE >] ) {
-			self._OctInt( $p.hash.<octint> )
+			Perl6::Number::Octal.new(
+				:from( $p.from ),
+				:to( $p.to ),
+				:content(
+					$p.Str
+				),
+				:headless( $p.hash.<octint>.Str )
+			)
 		}
 		elsif self.assert-hash-keys( $p, [< decint VALUE >] ) {
-			self._DecInt( $p.hash.<decint> )
+			Perl6::Number::Decimal.new(
+				:from( $p.from ),
+				:to( $p.to ),
+				:content(
+					$p.Str
+				),
+				:headless( $p.hash.<decint>.Str )
+			)
 		}
 		elsif self.assert-hash-keys( $p, [< hexint VALUE >] ) {
-			self._HexInt( $p.hash.<hexint> )
+			Perl6::Number::Hexadecimal.new(
+				:from( $p.from ),
+				:to( $p.to ),
+				:content(
+					$p.Str
+				),
+				:headless( $p.hash.<hexint>.Str )
+			)
 		}
 		else {
 			Perl6::Unimplemented.new(
@@ -1926,7 +1995,10 @@ say "Noun fired";
 		if self.assert-Num( $p );
 )
 
-		if self.assert-hash-keys( $p, [< integer >] ) {
+		if self.assert-hash-keys( $p, [< dec_number >] ) {
+			self._DecNumber( $p.hash.<dec_number> )
+		}
+		elsif self.assert-hash-keys( $p, [< integer >] ) {
 			self._Integer( $p.hash.<integer> )
 		}
 		else {
@@ -2339,11 +2411,16 @@ say "Quibble fired";
 #`(
 		if self.assert-hash-keys( $p, [< sym quibble rx_adverbs >] );
 		if self.assert-hash-keys( $p, [< sym rx_adverbs sibble >] );
-		if self.assert-hash-keys( $p, [< quibble >] ) {
-#			self._Quibble( $p.hash.<quibble> )
-		}
 )
-		if self.assert-hash-keys( $p, [< nibble >] ) {
+		if self.assert-hash-keys( $p, [< quibble >] ) {
+			Perl6::String.new(
+				:from( $p.from ),
+				:to( $p.to ),
+				:content( $p.Str ),
+				:bare( $p.hash.<quibble>.Str )
+			)
+		}
+		elsif self.assert-hash-keys( $p, [< nibble >] ) {
 			Perl6::String.new(
 				:from( $p.from ),
 				:to( $p.to ),

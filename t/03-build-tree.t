@@ -146,7 +146,7 @@ subtest {
 				Perl6::Number::Decimal.new(
 					:from( 8 ),
 					:to( 9 ),
-					:content( 1e0 )
+					:content( '1' )
 				)
 			) )
 		) ),
@@ -182,7 +182,7 @@ subtest {
 				Perl6::Number::Decimal.new(
 					:from( 8 ),
 					:to( 9 ),
-					:content( 1e0 )
+					:content( '1' )
 				),
 				Perl6::Operator::Infix.new(
 					:from( 10 ),
@@ -192,7 +192,7 @@ subtest {
 				Perl6::Number::Decimal.new(
 					:from( 12 ),
 					:to( 13 ),
-					:content( 2e0 )
+					:content( '2' )
 				)
 			) )
 		) ),
