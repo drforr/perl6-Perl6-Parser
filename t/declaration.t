@@ -66,15 +66,12 @@ subtest {
 		}, Q{regular};
 
 		subtest {
-			plan 1;
-
-			my $parsed = $pt.parse-source( Q{my Int:D $a = 0} );
-			ok $pt.validate( $parsed );
-#`(
 			plan 2;
 
 			my $parsed = $pt.parse-source( Q{my Int:D $a = 0} );
+say $parsed.dump;
 			my $tree = $pt.build-tree( $parsed );
+say $tree.perl;
 			ok $pt.validate( $parsed ), Q{valid};
 #			is $pt.format( $tree ),
 #				Q{my Int:D $a = 0},
@@ -82,15 +79,9 @@ subtest {
 			is $pt.format( $tree ),
 				Q{myInt:D$a=0},
 				Q{formatted};
-)
 		}, Q{defined};
 
 		subtest {
-			plan 1;
-
-			my $parsed = $pt.parse-source( Q{my Int:U $a} );
-			ok $pt.validate( $parsed );
-#`(
 			plan 2;
 
 			my $parsed = $pt.parse-source( Q{my Int:U $a} );
@@ -98,7 +89,6 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 #			is $pt.format( $tree ), Q{my Int:U $a}, Q{formatted};
 			is $pt.format( $tree ), Q{myInt:U$a}, Q{formatted};
-)
 		}, Q{undefined};
 	}, Q{typed};
 

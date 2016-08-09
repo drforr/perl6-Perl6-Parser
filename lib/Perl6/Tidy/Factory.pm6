@@ -2879,26 +2879,60 @@ say "TypeDeclarator fired";
 	}
 
 	method _TypeName( Mu $p ) {
-#`(
-		for $p.list {
-			next if self.assert-hash-keys( $_,
-					[< longname colonpairs >],
-					[< colonpair >] );
-			next if self.assert-hash-keys( $_,
-					[< longname >],
-					[< colonpair >] );
-		}
-)
+		CATCH { when X::Hash::Store::OddNumber { .resume } } # XXX ?...
 		for $p.list {
 			if self.assert-hash-keys( $_,
+					[< longname colonpairs >],
+					[< colonpair >] ) {
+				# XXX Fix this later.
+				return
+					Perl6::Bareword.new(
+						:from( -42 ),
+						:to( -42 ),
+						:content( $_.Str )
+					)
+			}
+			elsif self.assert-hash-keys( $_,
+					[< longname colonpair >] ) {
+				# XXX Fix this later.
+				return
+					Perl6::Bareword.new(
+						:from( -42 ),
+						:top( -42 ),
+						:content( $_.Str )
+					)
+			}
+			elsif self.assert-hash-keys( $_,
+					[< longname >], [< colonpairs >] ) {
+say 1;
+				# XXX Fix this later.
+				return
+					Perl6::Bareword.new(
+						:from( -42 ),
+						:to( -42 ),
+						:content( $_.Str )
+					)
+			}
+			elsif self.assert-hash-keys( $_,
 					[< longname >], [< colonpair >] ) {
 				# XXX Fix this later.
 				return
 					self._LongName( $_.hash.<longname> )
 			}
+			else {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
+
 		if self.assert-hash-keys( $p,
+				[< longname colonpairs >] ) {
+return
+			self._LongName( $p.hash.<longname> )
+		}
+		elsif self.assert-hash-keys( $p,
 				[< longname >], [< colonpair >] ) {
+return
 			self._LongName( $p.hash.<longname> )
 		}
 		else {
