@@ -1141,7 +1141,16 @@ say "EScale fired";
 	}
 
 	method __Term( Mu $p ) {
-		if self.assert-hash-keys( $p, [< identifier >], [< args >] ) {
+		if self.assert-hash-keys( $p,
+				[< postfix OPER >],
+				[< postfix_prefix_meta_operator >] ) {
+			(
+				self.__Term( $p.list.[0] ),
+				self._Postfix( $p.hash.<postfix> )
+			)
+		}
+		elsif self.assert-hash-keys( $p,
+				[< identifier >], [< args >] ) {
 			self._Identifier( $p.hash.<identifier> )
 		}
 		elsif self.assert-hash-keys( $p, [< longname >], [< args >] ) {
@@ -2213,7 +2222,7 @@ say "PostOp fired";
 
 	method _Prefix( Mu $p ) {
 		if self.assert-hash-keys( $p, [< sym O >] ) {
-			Perl6::Operator::Infix.new(
+			Perl6::Operator::Prefix.new(
 				:from( $p.hash.<sym>.from ),
 				:to( $p.hash.<sym>.to ),
 				:content( $p.hash.<sym>.Str )

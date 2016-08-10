@@ -404,11 +404,6 @@ subtest {
 		}, Q{11};
 
 		subtest {
-			plan 1;
-
-			my $parsed = $pt.parse-source( Q{-1i} );
-			ok $pt.validate( $parsed );
-#`(
 			plan 2;
 
 			my $parsed = $pt.parse-source( Q{-1i} );
@@ -416,7 +411,6 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 #			is $pt.format( $tree ), Q{-1i}, Q{formatted};
 			is $pt.format( $tree ), Q{-1i}, Q{formatted};
-)
 		}, Q{-11};
 	}, Q{imaginary};
 }, Q{integer};
