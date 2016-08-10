@@ -176,10 +176,22 @@ class Perl6::Variable::Contextualizer::Callable {
 }
 )
 
-role Branching {
+# XXX There should be a better way to do this.
+#
+role Child {
 	has @.child;
+}
+role Branching does Child {
 	method perl6( $f ) {
 		join( '', map { $_.perl6( $f ) }, @.child )
+	}
+}
+role Branching_Delimited does Child {
+	has @.delimiter;
+	method perl6( $f ) {
+		@.delimiter.[0] ~
+		join( '', map { $_.perl6( $f ) }, @.child ) ~
+		@.delimiter.[1]
 	}
 }
 
@@ -192,19 +204,26 @@ role Token {
 	}
 }
 
+
 class Perl6::Unimplemented {
 	has $.content
 }
 
+class Perl6::Element {
+}
+
 class Perl6::Document does Branching {
+	also is Perl6::Element
 }
 
 class Perl6::Statement does Branching {
+	also is Perl6::Element
 }
 
 # And now for the most basic tokens...
 #
 class Perl6::Number does Token {
+	also is Perl6::Element
 }
 class Perl6::Number::Binary {
 	also is Perl6::Number;
@@ -233,12 +252,15 @@ class Perl6::Number::Floating {
 }
 
 class Perl6::String does Token {
+	also is Perl6::Element;
 	has Str $.bare; # Easier to grab it from the parser.
 }
 
 class Perl6::Bareword does Token {
+	also is Perl6::Element;
 }
 class Perl6::Operator {
+	also is Perl6::Element;
 }
 class Perl6::Operator::Prefix does Token {
 	also is Perl6::Operator;
@@ -249,40 +271,34 @@ class Perl6::Operator::Infix does Token {
 class Perl6::Operator::Postfix does Token {
 	also is Perl6::Operator;
 }
-class Perl6::Operator::PostCircumfix does Branching {
+class Perl6::Operator::Circumfix does Branching_Delimited {
 	also is Perl6::Operator;
-	has @.delimiter;
-	method perl6( $f ) {
-		@.delimiter.[0] ~
-		join( '', map { $_.perl6( $f ) }, @.child ) ~
-		@.delimiter.[1]
-	}
+}
+class Perl6::Operator::PostCircumfix does Branching_Delimited {
+	also is Perl6::Operator;
 }
 class Perl6::PackageName does Token {
+	also is Perl6::Element;
 	method namespaces() returns Array {
 		$.content.split( '::' )
 	}
 }
 class Perl6::ColonBareword does Token {
+	also is Perl6::Bareword;
 }
-class Perl6::Block does Branching {
-	# XXX Figure out a better way
-	#
-	has @.delimiter;
-	method perl6( $f ) {
-		@.delimiter.[0] ~
-		join( '', map { $_.perl6( $f ) }, @.child ) ~
-		@.delimiter.[1]
-	}
+class Perl6::Block does Branching_Delimited {
+	also is Perl6::Element;
 }
 
 # Semicolons should only occur at statement boundaries.
 # So they're only generated in the _Statement handler.
 #
 class Perl6::Semicolon does Token {
+	also is Perl6::Element;
 }
 
 class Perl6::Variable {
+	also is Perl6::Element;
 	method headless() returns Str {
 		$.content ~~ m/ <[$%@&]> <[*!?<^:=~]>? (.+) /;
 		$0
@@ -590,9 +606,10 @@ class Perl6::Tidy::Factory {
 		if self.assert-Bool( $p );
 )
 		if self.assert-hash-keys( $p, [< semiarglist >] ) {
-			# XXX Needs work
+			$p.Str ~~ m{ ^ (.) }; my $front = $0;
+			$p.Str ~~ m{ (.) $ }; my $back = $0;
 			Perl6::Operator::PostCircumfix.new(
-				:delimiter( '(', ')' ),
+				:delimiter( $front, $back ),
 				:child( )
 			)
 		}
@@ -664,8 +681,10 @@ say "BackSlash fired";
 
 	method _Blockoid( Mu $p ) {
 		if self.assert-hash-keys( $p, [< statementlist >] ) {
+			$p.Str ~~ m{ ^ (.) }; my $front = $0;
+			$p.Str ~~ m{ (.) $ }; my $back = $0;
 			Perl6::Block.new(
-				:delimiter( '{', '}' ),
+				:delimiter( $front, $back ),
 				:child(
 					self._StatementList( $p.hash.<statementlist> )
 				)
@@ -734,31 +753,32 @@ say "CharSpec fired";
 			# XXX <semilist> can probably be worked with
 			$p.Str ~~ m{ ^ (.) }; my $front = $0;
 			$p.Str ~~ m{ (.) $ }; my $back = $0;
-if $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> {
-			Perl6::Operator::PostCircumfix.new(
-				:delimiter( $front, $back ),
-				:child(
+			if $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> {
+				Perl6::Operator::PostCircumfix.new(
+					:delimiter( $front, $back ),
+					:child(
 self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
+					)
 				)
-			)
-}
-else {
-			Perl6::Operator::PostCircumfix.new(
-				:delimiter( $front, $back ),
-				:child(
+			}
+			else {
+				Perl6::Operator::PostCircumfix.new(
+					:delimiter( $front, $back ),
+					:child(
+					)
 				)
-			)
-}
+			}
 		}
 		elsif self.assert-hash-keys( $p, [< nibble >] ) {
 			# XXX <nibble> can probably be worked with
-			# XXX delimiters need to be fixed
-			Perl6::Operator::PostCircumfix.new(
-				:delimiter( '<', '>' ),
+			$p.Str ~~ m{ ^ (.) }; my $front = $0;
+			$p.Str ~~ m{ (.) $ }; my $back = $0;
+			Perl6::Operator::Circumfix.new(
+				:delimiter( $front, $back ),
 				:child(
 					Perl6::Operator::Prefix.new(
-						:from( $p.hash.<nibble>.from ),
-						:to( $p.hash.<nibble>.to ),
+						:from( $p.from ),
+						:to( $p.to ),
 						:content( $p.hash.<nibble>.Str )
 					)
 				)
@@ -2508,6 +2528,16 @@ say "SemiArgList fired";
 		return True if self.assert-hash-keys( $p, [ ],
 			[< statement >] );
 );
+		if $p.hash.<statement>.list.[0].hash.<EXPR> {
+			$p.Str ~~ m{ ^ (.) }; my $front = $0;
+			$p.Str ~~ m{ (.) $ }; my $back = $0;
+			Perl6::Operator::PostCircumfix.new(
+				:delimiter( $front, $back ),
+				:child(
+self._EXPR( $p.hash.<statement>.list.[0].hash.<EXPR> )
+				)
+			)
+		}
 		if self.assert-hash-keys( $p, [< statement >] ) {
 			self._EXPR( $p.hash.<statement>.list.[0].<EXPR> )
 		}
