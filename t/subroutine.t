@@ -156,13 +156,6 @@ _END_
 		}, Q{typed};
 
 		subtest {
-			plan 1;
-
-			my $parsed = $pt.parse-source( Q:to[_END_] );
-sub foo( $a = 0 ) { }
-_END_
-			ok $pt.validate( $parsed );
-#`(
 			plan 2;
 
 			my $parsed = $pt.parse-source( Q:to[_END_].chomp );
@@ -174,7 +167,6 @@ _END_
 #sub foo( $a = 0 ) { }
 #_END_
 			is $pt.format( $tree ), Q{subfoo($a=0){}}, Q{formatted};
-)
 		}, Q{default};
 
 		subtest {

@@ -176,10 +176,13 @@ class Perl6::Variable::Contextualizer::Callable {
 }
 )
 
+class Perl6::Element {
+}
+
 # XXX There should be a better way to do this.
 #
 role Child {
-	has @.child;
+	has Perl6::Element @.child;
 }
 role Branching does Child {
 	method perl6( $f ) {
@@ -209,21 +212,17 @@ class Perl6::Unimplemented {
 	has $.content
 }
 
-class Perl6::Element {
-}
-
 class Perl6::Document does Branching {
-	also is Perl6::Element
 }
 
 class Perl6::Statement does Branching {
-	also is Perl6::Element
+	also is Perl6::Element;
 }
 
 # And now for the most basic tokens...
 #
 class Perl6::Number does Token {
-	also is Perl6::Element
+	also is Perl6::Element;
 }
 class Perl6::Number::Binary {
 	also is Perl6::Number;
@@ -287,7 +286,7 @@ class Perl6::ColonBareword does Token {
 	also is Perl6::Bareword;
 }
 class Perl6::Block does Branching_Delimited {
-	also is Perl6::Element;
+	also is Perl6::Element
 }
 
 # Semicolons should only occur at statement boundaries.
@@ -305,6 +304,7 @@ class Perl6::Variable {
 	}
 }
 class Perl6::Variable::Scalar does Token {
+	also is Perl6::Variable;
 	has $.sigil = Q{$};
 }
 class Perl6::Variable::Scalar::Dynamic {
@@ -344,6 +344,7 @@ class Perl6::Variable::Scalar::SubLanguage {
 	has $.twigil = Q{~};
 }
 class Perl6::Variable::Array does Token {
+	also is Perl6::Variable;
 	has $.sigil = Q{@};
 }
 class Perl6::Variable::Array::Dynamic {
@@ -383,6 +384,7 @@ class Perl6::Variable::Array::SubLanguage {
 	has $.twigil = Q{~};
 }
 class Perl6::Variable::Hash does Token {
+	also is Perl6::Variable;
 	has $.sigil = Q{%};
 }
 class Perl6::Variable::Hash::Dynamic {
@@ -422,6 +424,7 @@ class Perl6::Variable::Hash::SubLanguage {
 	has $.twigil = Q{~};
 }
 class Perl6::Variable::Callable does Token {
+	also is Perl6::Variable;
 	has $.sigil = Q{&};
 }
 class Perl6::Variable::Callable::Dynamic {
@@ -1000,6 +1003,23 @@ say "DECL fired";
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
+	}
+
+	method _DefaultValue( Mu $p ) {
+		CATCH { when X::Hash::Store::OddNumber { .resume } }
+		my @child;
+		for $p.list {
+			if self.assert-hash-keys( $_, [< EXPR >] ) {
+				@child.push(
+					self._EXPR( $_.hash.<EXPR> )
+				)
+			}
+			else {
+				say $p.hash.keys.gist;
+				warn "Unhandled case"
+			}
+		}
+		@child.flat
 	}
 
 	method _DefLongName( Mu $p ) {
@@ -1981,6 +2001,35 @@ say "Op fired";
 						$_.hash.<type_constraint>
 					)#,
 #					self._Quant( $_.hash.<quant> )
+				);
+			}
+			elsif self.assert-hash-keys( $_,
+				[< param_var quant default_value >],
+				[< modifier trait
+				   type_constraint
+				   post_constraint >] ) {
+				# XXX
+				@child.append(
+					Perl6::Operator::Infix.new(
+						:from( $_.to + 1 ),
+						:to( $_.to + 2 ),
+						:content( Q{,} )
+					)
+				) if $count++ > 0;
+				@child.append(
+					self._ParamVar( $_.hash.<param_var> )
+				);
+				@child.append(
+					Perl6::Operator::Infix.new(
+						:from( -42 ),
+						:to( -42 ),
+						:content( Q{=} )
+					)
+				);
+				@child.append(
+					self._DefaultValue(
+						$_.hash.<default_value>
+					).flat
 				);
 			}
 			elsif self.assert-hash-keys( $_,
