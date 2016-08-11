@@ -482,14 +482,10 @@ class Perl6::Tidy::Factory {
 	}
 
 	method semicolon-at-end( Mu $p ) {
-		my $to   = $p.to;
-		my $orig = $p.orig;
-		my $key  = substr($orig, $to, $orig.chars);
-
 		if $p.Str ~~ / \; $/ {
 			Perl6::Semicolon.new(
-				:from( $to ),
-				:to( $to + 1 ),
+				:from( $p.to ),
+				:to( $p.to + 1 ),
 				:content( Q{;} )
 			)
 		}
@@ -603,11 +599,10 @@ class Perl6::Tidy::Factory {
 #`(
 		if self.assert-hash-keys( $p, [< invocant semiarglist >] );
 		if self.assert-hash-keys( $p, [< EXPR >] );
-		if self.assert-Bool( $p );
 )
 		if self.assert-hash-keys( $p, [< semiarglist >] ) {
-			$p.Str ~~ m{ ^ (.) }; my $front = $0;
-			$p.Str ~~ m{ (.) $ }; my $back = $0;
+			$p.Str ~~ m{ ^ (.) }; my $front = ~$0;
+			$p.Str ~~ m{ (.) $ }; my $back = ~$0;
 			Perl6::Operator::PostCircumfix.new(
 				:delimiter( $front, $back ),
 				:child( )
@@ -616,7 +611,7 @@ class Perl6::Tidy::Factory {
 		elsif self.assert-hash-keys( $p, [< arglist >] ) {
 			self._ArgList( $p.hash.<arglist> );
 		}
-		elsif $p.Str { #self.assert-Str( $p ) {
+		elsif $p.Str {
 			$p.Str
 		}
 		elsif $p.Bool {
@@ -631,32 +626,38 @@ class Perl6::Tidy::Factory {
 
 	method _Assertion( Mu $p ) returns Bool {
 say "Assertion fired";
-		return True if self.assert-hash-keys( $p, [< var >] );
-		return True if self.assert-hash-keys( $p, [< longname >] );
-		return True if self.assert-hash-keys( $p, [< cclass_elem >] );
-		return True if self.assert-hash-keys( $p, [< codeblock >] );
-		return True if $p.Str;
+#`(
+		if self.assert-hash-keys( $p, [< var >] );
+		if self.assert-hash-keys( $p, [< longname >] );
+		if self.assert-hash-keys( $p, [< cclass_elem >] );
+		if self.assert-hash-keys( $p, [< codeblock >] );
+		if $p.Str;
+)
 	}
 
 	method _Atom( Mu $p ) returns Bool {
 say "Atom fired";
-		return True if self.assert-hash-keys( $p, [< metachar >] );
-		return True if self.assert-Str( $p );
+#`(
+		if self.assert-hash-keys( $p, [< metachar >] );
+		if self.assert-Str( $p );
+)
 	}
 
 	method _Babble( Mu $p ) returns Bool {
 say "Babble fired";
-		# _B is a Bool leaf
-		return True if self.assert-hash-keys( $p,
-				[< B >], [< quotepair >] );
+#`(
+		if self.assert-hash-keys( $p, [< B >], [< quotepair >] );
+)
 	}
 
 	method _BackMod( Mu $p ) returns Bool { $p.hash.<backmod>.Bool }
 
 	method _BackSlash( Mu $p ) returns Bool {
 say "BackSlash fired";
-		return True if self.assert-hash-keys( $p, [< sym >] );
-		return True if self.assert-Str( $p );
+#`(
+		if self.assert-hash-keys( $p, [< sym >] );
+		if self.assert-Str( $p );
+)
 	}
 
 	method _BinInt( Mu $p ) {
@@ -681,8 +682,8 @@ say "BackSlash fired";
 
 	method _Blockoid( Mu $p ) {
 		if self.assert-hash-keys( $p, [< statementlist >] ) {
-			$p.Str ~~ m{ ^ (.) }; my $front = $0;
-			$p.Str ~~ m{ (.) $ }; my $back = $0;
+			$p.Str ~~ m{ ^ (.) }; my $front = ~$0;
+			$p.Str ~~ m{ (.) $ }; my $back = ~$0;
 			Perl6::Block.new(
 				:delimiter( $front, $back ),
 				:child(
@@ -699,10 +700,10 @@ say "BackSlash fired";
 	method _Blorst( Mu $p ) returns Bool {
 say "Blorst fired";
 		if self.assert-hash-keys( $p, [< statement >] ) {
-#			self._Statement( $p.hash.<statement> )
+			self._Statement( $p.hash.<statement> )
 		}
 		elsif self.assert-hash-keys( $p, [< block >] ) {
-#			self._Block( $p.hash.<block> )
+			self._Block( $p.hash.<block> )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -713,7 +714,7 @@ say "Blorst fired";
 	method _Bracket( Mu $p ) returns Bool {
 say "Bracket fired";
 		if self.assert-hash-keys( $p, [< semilist >] ) {
-#			self._SemiList( $p.hash.<semilist> )
+			self._SemiList( $p.hash.<semilist> )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -742,17 +743,17 @@ say "CharSpec fired";
 
 	method _Circumfix( Mu $p ) {
 #`(
-		return True if self.assert-hash-keys( $p, [< binint VALUE >] );
-		return True if self.assert-hash-keys( $p, [< octint VALUE >] );
-		return True if self.assert-hash-keys( $p, [< hexint VALUE >] );
+		if self.assert-hash-keys( $p, [< binint VALUE >] );
+		if self.assert-hash-keys( $p, [< octint VALUE >] );
+		if self.assert-hash-keys( $p, [< hexint VALUE >] );
 )
 		if self.assert-hash-keys( $p, [< pblock >] ) {
 			self._PBlock( $p.hash.<pblock> )
 		}
 		elsif self.assert-hash-keys( $p, [< semilist >] ) {
 			# XXX <semilist> can probably be worked with
-			$p.Str ~~ m{ ^ (.) }; my $front = $0;
-			$p.Str ~~ m{ (.) $ }; my $back = $0;
+			$p.Str ~~ m{ ^ (.) }; my $front = ~$0;
+			$p.Str ~~ m{ (.) $ }; my $back = ~$0;
 			if $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> {
 				Perl6::Operator::PostCircumfix.new(
 					:delimiter( $front, $back ),
@@ -771,8 +772,8 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 		}
 		elsif self.assert-hash-keys( $p, [< nibble >] ) {
 			# XXX <nibble> can probably be worked with
-			$p.Str ~~ m{ ^ (.) }; my $front = $0;
-			$p.Str ~~ m{ (.) $ }; my $back = $0;
+			$p.Str ~~ m{ ^ (.) }; my $front = ~$0;
+			$p.Str ~~ m{ (.) $ }; my $back = ~$0;
 			Perl6::Operator::Circumfix.new(
 				:delimiter( $front, $back ),
 				:child(
@@ -793,7 +794,7 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 	method _CodeBlock( Mu $p ) returns Bool {
 say "CodeBlock fired";
 		if self.assert-hash-keys( $p, [< block >] ) {
-#			self._Block( $p.hash.<block> )
+			self._Block( $p.hash.<block> )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -804,7 +805,7 @@ say "CodeBlock fired";
 	method _Coercee( Mu $p ) returns Bool {
 say "Coercee fired";
 		if self.assert-hash-keys( $p, [< semilist >] ) {
-#			self._SemiList( $p.hash.<semilist> )
+			self._SemiList( $p.hash.<semilist> )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -893,9 +894,9 @@ say "ColonPairs fired";
 
 	method _Contextualizer( Mu $p ) {
 say "Contextualizer fired";
-		# _Sigil is a Str leaf
-		return True if self.assert-hash-keys( $p,
-				[< coercee circumfix sigil >] );
+#`(
+		if self.assert-hash-keys( $p, [< coercee circumfix sigil >] );
+)
 	}
 
 	method _DecInt( Mu $p ) {
@@ -924,26 +925,16 @@ say "Contextualizer fired";
 				self._VariableDeclarator(
 					$p.hash.<variable_declarator>
 				),
-				self._Initializer(
-					$p.hash.<initializer>
-				)
+				self._Initializer( $p.hash.<initializer> )
 			)
 		}
 		elsif self.assert-hash-keys( $p,
 				[< routine_declarator >], [< trait >] ) {
-			(
-				self._RoutineDeclarator(
-					$p.hash.<routine_declarator>
-				)
-			)
+			self._RoutineDeclarator( $p.hash.<routine_declarator> )
 		}
 		elsif self.assert-hash-keys( $p,
 				[< regex_declarator >], [< trait >] ) {
-			(
-				self._RegexDeclarator(
-					$p.hash.<regex_declarator>
-				)
-			)
+			self._RegexDeclarator( $p.hash.<regex_declarator> )
 		}
 		elsif self.assert-hash-keys( $p,
 				[< variable_declarator >], [< trait >] ) {
@@ -953,9 +944,7 @@ say "Contextualizer fired";
 		}
 		elsif self.assert-hash-keys( $p,
 				[< signature >], [< trait >] ) {
-			self._Signature(
-				$p.hash.<signature>
-			)
+			self._Signature( $p.hash.<signature> )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -965,63 +954,47 @@ say "Contextualizer fired";
 
 	method _DECL( Mu $p ) {
 say "DECL fired";
-		return True if self.assert-hash-keys( $p,
+#`(
+		if self.assert-hash-keys( $p,
 				[< deftermnow initializer term_init >],
 				[< trait >] );
-		return True if self.assert-hash-keys( $p,
+		if self.assert-hash-keys( $p,
 				[< deftermnow initializer signature >],
 				[< trait >] );
-		return True if self.assert-hash-keys( $p,
+		if self.assert-hash-keys( $p,
 				[< initializer signature >], [< trait >] );
-		return True if self.assert-hash-keys( $p,
-					  [< initializer variable_declarator >],
-					  [< trait >] );
-		return True if self.assert-hash-keys( $p,
-				[< signature >], [< trait >] );
-		return True if self.assert-hash-keys( $p,
-					  [< variable_declarator >],
-					  [< trait >] );
-		return True if self.assert-hash-keys( $p,
-					  [< regex_declarator >],
-					  [< trait >] );
-		return True if self.assert-hash-keys( $p,
-					  [< routine_declarator >],
-					  [< trait >] );
-		return True if self.assert-hash-keys( $p,
-					  [< package_def sym >] );
+		if self.assert-hash-keys( $p,
+				[< initializer variable_declarator >],
+				[< trait >] );
+		if self.assert-hash-keys( $p, [< signature >], [< trait >] );
+		if self.assert-hash-keys( $p,
+				[< variable_declarator >],
+				[< trait >] );
+		if self.assert-hash-keys( $p,
+				[< regex_declarator >],
+				[< trait >] );
+		if self.assert-hash-keys( $p,
+				[< routine_declarator >],
+				[< trait >] );
+		if self.assert-hash-keys( $p, [< package_def sym >] );
+)
 		if self.assert-hash-keys( $p, [< declarator >] ) {
-#			self._Declarator( $p.hash.<declarator> )
+			self._Declarator( $p.hash.<declarator> )
 		}
 	}
 
 	method _DecNumber( Mu $p ) {
 		if self.assert-hash-keys( $p, [< int coeff escale frac >] ) {
-			Perl6::Number::Floating.new(
-				:from( $p.from ),
-				:to( $p.to ),
-				:content( $p.Str )
-			)
+			self.__FloatingPoint( $p )
 		}
 		elsif self.assert-hash-keys( $p, [< coeff frac escale >] ) {
-			Perl6::Number::Floating.new(
-				:from( $p.from ),
-				:to( $p.to ),
-				:content( $p.Str )
-			)
+			self.__FloatingPoint( $p )
 		}
 		elsif self.assert-hash-keys( $p, [< int coeff frac >] ) {
-			Perl6::Number::Floating.new(
-				:from( $p.from ),
-				:to( $p.to ),
-				:content( $p.Str )
-			)
+			self.__FloatingPoint( $p )
 		}
 		elsif self.assert-hash-keys( $p, [< int coeff escale >] ) {
-			Perl6::Number::Floating.new(
-				:from( $p.from ),
-				:to( $p.to ),
-				:content( $p.Str )
-			)
+			self.__FloatingPoint( $p )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -1041,16 +1014,17 @@ say "DECL fired";
 
 	method _DefTerm( Mu $p ) {
 say "DefTerm fired";
-		return True if self.assert-hash-keys( $p,
-				[< identifier colonpair >] );
-		return True if self.assert-hash-keys( $p,
+#`(
+		if self.assert-hash-keys( $p, [< identifier colonpair >] );
+		if self.assert-hash-keys( $p,
 				[< identifier >], [< colonpair >] );
+)
 	}
 
 	method _DefTermNow( Mu $p ) {
 say "DefTermNow fired";
 		if self.assert-hash-keys( $p, [< defterm >] ) {
-#			self._DefTerm( $p.hash.<defterm> )
+			self._DefTerm( $p.hash.<defterm> )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -1060,8 +1034,10 @@ say "DefTermNow fired";
 
 	method _DeSigilName( Mu $p ) {
 say "DeSigilName fired";
-		return True if self.assert-hash-keys( $p, [< longname >] );
-		return True if $p.Str;
+#`(
+		if self.assert-hash-keys( $p, [< longname >] );
+		if $p.Str;
+)
 	}
 
 	method _Dig( Mu $p ) {
@@ -1117,7 +1093,7 @@ say "Dig fired";
 	method _DottyOpish( Mu $p ) {
 say "DottyOpish fired";
 		if self.assert-hash-keys( $p, [< term >] ) {
-#			self._Term( $p.hash.<term> )
+			self._Term( $p.hash.<term> )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -1128,7 +1104,7 @@ say "DottyOpish fired";
 	method _E1( Mu $p ) {
 say "E1 fired";
 		if self.assert-hash-keys( $p, [< scope_declarator >] ) {
-#			self._ScopeDeclarator( $p.hash.<scope_declarator> )
+			self._ScopeDeclarator( $p.hash.<scope_declarator> )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -1138,26 +1114,32 @@ say "E1 fired";
 
 	method _E2( Mu $p ) {
 say "E2 fired";
-		return True if self.assert-hash-keys( $p, [< infix OPER >] );
+#`(
+		if self.assert-hash-keys( $p, [< infix OPER >] );
+)
 	}
 
 	method _E3( Mu $p ) {
 say "E3 fired";
-		return True if self.assert-hash-keys( $p, [< postfix OPER >],
+#`(
+		if self.assert-hash-keys( $p, [< postfix OPER >],
 				[< postfix_prefix_meta_operator >] );
+)
 	}
 
 	method _Else( Mu $p ) {
 say "Else fired";
-		return True if self.assert-hash-keys( $p, [< sym blorst >] );
-		return True if self.assert-hash-keys( $p, [< blockoid >] );
+#`(
+		if self.assert-hash-keys( $p, [< sym blorst >] );
+		if self.assert-hash-keys( $p, [< blockoid >] );
+)
 	}
 
 	method _EScale( Mu $p ) {
 say "EScale fired";
-		# _DecInt is a Str/Int leaf
-		# _Sign is a Str/Bool leaf
-		return True if self.assert-hash-keys( $p, [< sign decint >] );
+#`(
+		if self.assert-hash-keys( $p, [< sign decint >] );
+)
 	}
 
 	method __Term( Mu $p ) {
@@ -1238,8 +1220,8 @@ say "EScale fired";
 				[< postcircumfix OPER >],
 				[< postfix_prefix_meta_operator >] ) {
 			# XXX Work on this
-			$p.hash.<postcircumfix>.Str ~~ m{ ^ (.) }; my $front = $0;
-			$p.hash.<postcircumfix>.Str ~~ m{ (.) $ }; my $back = $0;
+			$p.hash.<postcircumfix>.Str ~~ m{ ^ (.) }; my $front = ~$0;
+			$p.hash.<postcircumfix>.Str ~~ m{ (.) $ }; my $back = ~$0;
 			(
 				self.__Term( $p.list.[0] ),
 				Perl6::Operator::PostCircumfix.new(
@@ -1303,12 +1285,10 @@ say "EScale fired";
 		}
 		elsif self.assert-hash-keys( $p, [< sym args >] ) {
 			note "Skipping args for the time being";
-			(
-				Perl6::Operator::Infix.new(
-					:from( $p.hash.<sym>.from ),
-					:to( $p.hash.<sym>.to ),
-					:content( $p.hash.<sym>.Str )
-				)
+			Perl6::Operator::Infix.new(
+				:from( $p.hash.<sym>.from ),
+				:to( $p.hash.<sym>.to ),
+				:content( $p.hash.<sym>.Str )
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< longname args >] ) {
@@ -1321,68 +1301,38 @@ say "EScale fired";
 				)
 			}
 			else {
-				(
-					self._LongName( $p.hash.<longname> )
-				)
+				self._LongName( $p.hash.<longname> )
 			}
 		}
 		elsif self.assert-hash-keys( $p, [< circumfix >] ) {
-			(
-				self._Circumfix( $p.hash.<circumfix> )
-			)
+			self._Circumfix( $p.hash.<circumfix> )
 		}
 		elsif self.assert-hash-keys( $p, [< fatarrow >] ) {
-			(
-				self._FatArrow( $p.hash.<fatarrow> )
-			)
+			self._FatArrow( $p.hash.<fatarrow> )
 		}
 		elsif self.assert-hash-keys( $p, [< regex_declarator >] ) {
-			(
-				self._RegexDeclarator(
-					$p.hash.<regex_declarator>
-				)
-			)
+			self._RegexDeclarator( $p.hash.<regex_declarator> )
 		}
 		elsif self.assert-hash-keys( $p, [< routine_declarator >] ) {
-			(
-				self._RoutineDeclarator(
-					$p.hash.<routine_declarator>
-				)
-			)
+			self._RoutineDeclarator( $p.hash.<routine_declarator> )
 		}
 		elsif self.assert-hash-keys( $p, [< scope_declarator >] ) {
-			(
-				self._ScopeDeclarator(
-					$p.hash.<scope_declarator>
-				)
-			)
+			self._ScopeDeclarator( $p.hash.<scope_declarator> )
 		}
 		elsif self.assert-hash-keys( $p, [< package_declarator >] ) {
-			(
-				self._PackageDeclarator(
-					$p.hash.<package_declarator>
-				)
-			)
+			self._PackageDeclarator( $p.hash.<package_declarator> )
 		}
 		elsif self.assert-hash-keys( $p, [< value >] ) {
-			(
-				self._Value( $p.hash.<value> )
-			)
+			self._Value( $p.hash.<value> )
 		}
 		elsif self.assert-hash-keys( $p, [< variable >] ) {
-			(
-				self._Variable( $p.hash.<variable> )
-			)
+			self._Variable( $p.hash.<variable> )
 		}
 		elsif self.assert-hash-keys( $p, [< colonpair >] ) {
-			(
-				self._ColonPair( $p.hash.<colonpair> )
-			)
+			self._ColonPair( $p.hash.<colonpair> )
 		}
 		elsif self.assert-hash-keys( $p, [< longname >] ) {
-			(
-				self._LongName( $p.hash.<longname> )
-			)
+			self._LongName( $p.hash.<longname> )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -1393,7 +1343,7 @@ say "EScale fired";
 	method _FakeInfix( Mu $p ) {
 say "FakeInfix fired";
 		if self.assert-hash-keys( $p, [< O >] ) {
-#			self._O( $p.hash.<O> )
+			self._O( $p.hash.<O> )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -1428,6 +1378,14 @@ say "FakeInfix fired";
 				self._Val( $p.hash.<val> )
 			)
 		}
+	}
+
+	method __FloatingPoint( Mu $p ) {
+		Perl6::Number::Floating.new(
+			:from( $p.from ),
+			:to( $p.to ),
+			:content( $p.Str )
+		)
 	}
 
 	method _HexInt( Mu $p ) {
@@ -1481,7 +1439,9 @@ say "FakeInfix fired";
 
 	method _Infixish( Mu $p ) {
 say "Infixish fired";
-		return True if self.assert-hash-keys( $p, [< infix OPER >] );
+#`(
+		if self.assert-hash-keys( $p, [< infix OPER >] );
+)
 	}
 
 	method _InfixPrefixMetaOperator( Mu $p ) {
@@ -1597,7 +1557,7 @@ return True;
 	method _Left( Mu $p ) {
 say "Left fired";
 		if self.assert-hash-keys( $p, [< termseq >] ) {
-#			self._TermSeq( $p.hash.<termseq> )
+			self._TermSeq( $p.hash.<termseq> )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -1626,28 +1586,28 @@ say "Left fired";
 	method _MetaChar( Mu $p ) {
 say "MetaChar fired";
 		if self.assert-hash-keys( $p, [< sym >] ) {
-#			self._Sym( $p.hash.<sym> )
+			self._Sym( $p.hash.<sym> )
 		}
 		elsif self.assert-hash-keys( $p, [< codeblock >] ) {
-#			self._CodeBlock( $p.hash.<codeblock> )
+			self._CodeBlock( $p.hash.<codeblock> )
 		}
 		elsif self.assert-hash-keys( $p, [< backslash >] ) {
-#			self._BackSlash( $p.hash.<backslash> )
+			self._BackSlash( $p.hash.<backslash> )
 		}
 		elsif self.assert-hash-keys( $p, [< assertion >] ) {
-#			self._Assertion( $p.hash.<assertion> )
+			self._Assertion( $p.hash.<assertion> )
 		}
 		elsif self.assert-hash-keys( $p, [< nibble >] ) {
-#			self._Nibble( $p.hash.<nibble> )
+			self._Nibble( $p.hash.<nibble> )
 		}
 		elsif self.assert-hash-keys( $p, [< quote >] ) {
-#			self._Quote( $p.hash.<quote> )
+			self._Quote( $p.hash.<quote> )
 		}
 		elsif self.assert-hash-keys( $p, [< nibbler >] ) {
-#			self._Nibbler( $p.hash.<nibbler> )
+			self._Nibbler( $p.hash.<nibbler> )
 		}
 		elsif self.assert-hash-keys( $p, [< statement >] ) {
-#			self._Statement( $p.hash.<statement> )
+			self._Statement( $p.hash.<statement> )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -1657,11 +1617,8 @@ say "MetaChar fired";
 
 	method _MethodDef( Mu $p ) {
 #`(
-		return True if self.assert-hash-keys( $p,
+		if self.assert-hash-keys( $p,
 			     [< specials longname blockoid multisig >],
-			     [< trait >] );
-		return True if self.assert-hash-keys( $p,
-			     [< specials longname blockoid >],
 			     [< trait >] );
 )
 		if self.assert-hash-keys( $p,
@@ -1680,13 +1637,7 @@ say "MetaChar fired";
 
 	method _MethodOp( Mu $p ) {
 #`(
-		return True if self.assert-hash-keys( $p, [< longname args >] );
-		if self.assert-hash-keys( $p, [< longname >] ) {
-#			self._LongName( $p.hash.<longname> )
-		}
-		elsif self.assert-hash-keys( $p, [< variable >] ) {
-#			self._Variable( $p.hash.<variable> )
-		}
+		if self.assert-hash-keys( $p, [< longname args >] );
 )
 		if self.assert-hash-keys( $p, [< variable >] ) {
 			self._Variable( $p.hash.<variable> )
@@ -1708,7 +1659,7 @@ say "MetaChar fired";
 	method _ModifierExpr( Mu $p ) {
 say "ModifierExpr fired";
 		if self.assert-hash-keys( $p, [< EXPR >] ) {
-#			self._EXPR( $p.hash.<EXPR> )
+			self._EXPR( $p.hash.<EXPR> )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -1719,7 +1670,7 @@ say "ModifierExpr fired";
 	method _ModuleName( Mu $p ) {
 say "ModuleName fired";
 		if self.assert-hash-keys( $p, [< longname >] ) {
-#			self._LongName( $p.hash.<longname> )
+			self._LongName( $p.hash.<longname> )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -1736,10 +1687,8 @@ say "MoreName fired";
 
 	method _MultiDeclarator( Mu $p ) {
 #`(
-		return True if self.assert-hash-keys( $p,
-				[< sym routine_def >] );
-		return True if self.assert-hash-keys( $p,
-				[< sym declarator >] );
+		if self.assert-hash-keys( $p, [< sym routine_def >] );
+		if self.assert-hash-keys( $p, [< sym declarator >] );
 )
 		if self.assert-hash-keys( $p, [< declarator >] ) {
 			self._Declarator( $p.hash.<declarator> )
@@ -1751,9 +1700,8 @@ say "MoreName fired";
 	}
 
 	method _MultiSig( Mu $p ) {
-say "MultiSig fired";
 		if self.assert-hash-keys( $p, [< signature >] ) {
-#			self._Signature( $p.hash.<signature> )
+			self._Signature( $p.hash.<signature> )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -1764,7 +1712,7 @@ say "MultiSig fired";
 	method _NamedParam( Mu $p ) {
 say "NamedParam fired";
 		if self.assert-hash-keys( $p, [< param_var >] ) {
-#			self._ParamVar( $p.hash.<param_var> )
+			self._ParamVar( $p.hash.<param_var> )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -1777,8 +1725,6 @@ say "NamedParam fired";
 		if self.assert-hash-keys( $p,
 			[< param_var type_constraint quant >],
 			[< default_value modifier trait post_constraint >] );
-		if self.assert-hash-keys( $p,
-			[< identifier >], [< morename >] );
 		if self.assert-hash-keys( $p, [< subshortname >] );
 		if self.assert-hash-keys( $p, [< morename >] );
 )
@@ -1817,7 +1763,7 @@ say "NamedParam fired";
 	method _Nibbler( Mu $p ) {
 say "Nibbler fired";
 		if self.assert-hash-keys( $p, [< termseq >] ) {
-#			self._TermSeq( $p.hash.<termseq> )
+			self._TermSeq( $p.hash.<termseq> )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -1942,25 +1888,23 @@ say "O fired";
 
 	method _Op( Mu $p ) {
 say "Op fired";
-		return True if self.assert-hash-keys( $p,
+#`(
+		if self.assert-hash-keys( $p,
 			     [< infix_prefix_meta_operator OPER >] );
-		return True if self.assert-hash-keys( $p, [< infix OPER >] );
+		if self.assert-hash-keys( $p, [< infix OPER >] );
+)
 	}
 
 	method _OPER( Mu $p ) {
 #`(
-say "OPER fired";
-		return True if self.assert-hash-keys( $p, [< sym dottyop O >] );
-		return True if self.assert-hash-keys( $p,
-				[< sym infixish O >] );
-		return True if self.assert-hash-keys( $p, [< sym O >] );
-		return True if self.assert-hash-keys( $p, [< EXPR O >] );
-		return True if self.assert-hash-keys( $p,
-				[< semilist O >] );
-		return True if self.assert-hash-keys( $p, [< nibble O >] );
-		return True if self.assert-hash-keys( $p, [< arglist O >] );
-		return True if self.assert-hash-keys( $p, [< dig O >] );;
-		return True if self.assert-hash-keys( $p, [< O >] );
+		if self.assert-hash-keys( $p, [< sym infixish O >] );
+		if self.assert-hash-keys( $p, [< sym O >] );
+		if self.assert-hash-keys( $p, [< EXPR O >] );
+		if self.assert-hash-keys( $p, [< semilist O >] );
+		if self.assert-hash-keys( $p, [< nibble O >] );
+		if self.assert-hash-keys( $p, [< arglist O >] );
+		if self.assert-hash-keys( $p, [< dig O >] );;
+		if self.assert-hash-keys( $p, [< O >] );
 )
 		if self.assert-hash-keys( $p, [< sym dottyop O >] ) {
 			(
@@ -1994,12 +1938,7 @@ say "OPER fired";
 
 	method _PackageDef( Mu $p ) {
 #`(
-		return True if self.assert-hash-keys( $p,
-				[< blockoid longname >], [< trait >] );
-		return True if self.assert-hash-keys( $p,
-				[< longname statementlist >], [< trait >] );
-		return True if self.assert-hash-keys( $p,
-				[< blockoid >], [< trait >] );
+		if self.assert-hash-keys( $p, [< blockoid >], [< trait >] );
 )
 		if self.assert-hash-keys( $p,
 				[< longname statementlist >], [< trait >] ) {
@@ -2022,20 +1961,11 @@ say "OPER fired";
 	}
 
 	method _Parameter( Mu $p ) {
-		CATCH {
-			when X::Multi::NoMatch { .resume }
-		}
 #`(
-say "Parameter fired";
 		for $p.list {
 			next if self.assert-hash-keys( $_,
 				[< param_var type_constraint quant >],
 				[< default_value modifier trait
-				   post_constraint >] );
-			next if self.assert-hash-keys( $_,
-				[< param_var quant >],
-				[< default_value modifier trait
-				   type_constraint
 				   post_constraint >] );
 
 			next if self.assert-hash-keys( $_,
@@ -2058,6 +1988,16 @@ say "Parameter fired";
 		my $count = 0;
 		for $p.list {
 			if self.assert-hash-keys( $_,
+				[< type_constraint >],
+				[< default_value modifier trait
+				   post_constraint >] ) {
+				@child.append(
+					self._TypeConstraint(
+						$_.hash.<type_constraint>
+					)
+				)
+			}
+			elsif self.assert-hash-keys( $_,
 				[< param_var quant >],
 				[< default_value modifier trait
 				   type_constraint
@@ -2080,22 +2020,60 @@ say "Parameter fired";
 				warn "Unhandled case"
 			}
 		}
-		Perl6::Operator::PostCircumfix.new(
-			:delimiter( '(', ')' ),
-			:child(
-				@child
-			)
-		)
+		@child
 	}
+
+	my %sigil-map = (
+		'$' => Perl6::Variable::Scalar,
+		'$*' => Perl6::Variable::Scalar::Dynamic,
+		'$.' => Perl6::Variable::Scalar::Accessor,
+		'$!' => Perl6::Variable::Scalar::Attribute,
+		'$?' => Perl6::Variable::Scalar::CompileTime,
+		'$<' => Perl6::Variable::Scalar::MatchIndex,
+		'$^' => Perl6::Variable::Scalar::Positional,
+		'$:' => Perl6::Variable::Scalar::Named,
+		'$=' => Perl6::Variable::Scalar::Pod,
+		'$~' => Perl6::Variable::Scalar::SubLanguage,
+		'%' => Perl6::Variable::Hash,
+		'%*' => Perl6::Variable::Hash::Dynamic,
+		'%.' => Perl6::Variable::Hash::Accessor,
+		'%!' => Perl6::Variable::Hash::Attribute,
+		'%?' => Perl6::Variable::Hash::CompileTime,
+		'%<' => Perl6::Variable::Hash::MatchIndex,
+		'%^' => Perl6::Variable::Hash::Positional,
+		'%:' => Perl6::Variable::Hash::Named,
+		'%=' => Perl6::Variable::Hash::Pod,
+		'%~' => Perl6::Variable::Hash::SubLanguage,
+		'@' => Perl6::Variable::Array,
+		'@*' => Perl6::Variable::Array::Dynamic,
+		'@.' => Perl6::Variable::Array::Accessor,
+		'@!' => Perl6::Variable::Array::Attribute,
+		'@?' => Perl6::Variable::Array::CompileTime,
+		'@<' => Perl6::Variable::Array::MatchIndex,
+		'@^' => Perl6::Variable::Array::Positional,
+		'@:' => Perl6::Variable::Array::Named,
+		'@=' => Perl6::Variable::Array::Pod,
+		'@~' => Perl6::Variable::Array::SubLanguage,
+		'&' => Perl6::Variable::Callable,
+		'&*' => Perl6::Variable::Callable::Dynamic,
+		'&.' => Perl6::Variable::Callable::Accessor,
+		'&!' => Perl6::Variable::Callable::Attribute,
+		'&?' => Perl6::Variable::Callable::CompileTime,
+		'&<' => Perl6::Variable::Callable::MatchIndex,
+		'&^' => Perl6::Variable::Callable::Positional,
+		'&:' => Perl6::Variable::Callable::Named,
+		'&=' => Perl6::Variable::Callable::Pod,
+		'&~' => Perl6::Variable::Callable::SubLanguage,
+	);
 
 	method _ParamVar( Mu $p ) {
 #`(
-		return True if self.assert-hash-keys( $p, [< name sigil >] );
+		if self.assert-hash-keys( $p, [< name sigil >] );
 		if self.assert-hash-keys( $p, [< signature >] ) {
-#			self._Signature( $p.hash.<signature> )
+			self._Signature( $p.hash.<signature> )
 		}
 		elsif self.assert-hash-keys( $p, [< sigil >] ) {
-#			self._Sigil( $p.hash.<sigil> )
+			self._Sigil( $p.hash.<sigil> )
 		}
 )
 		if self.assert-hash-keys( $p, [< name twigil sigil >] ) {
@@ -2108,50 +2086,8 @@ say "Parameter fired";
 			my $content     = $p.hash.<sigil> ~
 					  $twigil ~
 					  $desigilname;
-			my %lookup = (
-				'$' => Perl6::Variable::Scalar,
-				'$*' => Perl6::Variable::Scalar::Dynamic,
-				'$.' => Perl6::Variable::Scalar::Accessor,
-				'$!' => Perl6::Variable::Scalar::Attribute,
-				'$?' => Perl6::Variable::Scalar::CompileTime,
-				'$<' => Perl6::Variable::Scalar::MatchIndex,
-				'$^' => Perl6::Variable::Scalar::Positional,
-				'$:' => Perl6::Variable::Scalar::Named,
-				'$=' => Perl6::Variable::Scalar::Pod,
-				'$~' => Perl6::Variable::Scalar::SubLanguage,
-				'%' => Perl6::Variable::Hash,
-				'%*' => Perl6::Variable::Hash::Dynamic,
-				'%.' => Perl6::Variable::Hash::Accessor,
-				'%!' => Perl6::Variable::Hash::Attribute,
-				'%?' => Perl6::Variable::Hash::CompileTime,
-				'%<' => Perl6::Variable::Hash::MatchIndex,
-				'%^' => Perl6::Variable::Hash::Positional,
-				'%:' => Perl6::Variable::Hash::Named,
-				'%=' => Perl6::Variable::Hash::Pod,
-				'%~' => Perl6::Variable::Hash::SubLanguage,
-				'@' => Perl6::Variable::Array,
-				'@*' => Perl6::Variable::Array::Dynamic,
-				'@.' => Perl6::Variable::Array::Accessor,
-				'@!' => Perl6::Variable::Array::Attribute,
-				'@?' => Perl6::Variable::Array::CompileTime,
-				'@<' => Perl6::Variable::Array::MatchIndex,
-				'@^' => Perl6::Variable::Array::Positional,
-				'@:' => Perl6::Variable::Array::Named,
-				'@=' => Perl6::Variable::Array::Pod,
-				'@~' => Perl6::Variable::Array::SubLanguage,
-				'&' => Perl6::Variable::Callable,
-				'&*' => Perl6::Variable::Callable::Dynamic,
-				'&.' => Perl6::Variable::Callable::Accessor,
-				'&!' => Perl6::Variable::Callable::Attribute,
-				'&?' => Perl6::Variable::Callable::CompileTime,
-				'&<' => Perl6::Variable::Callable::MatchIndex,
-				'&^' => Perl6::Variable::Callable::Positional,
-				'&:' => Perl6::Variable::Callable::Named,
-				'&=' => Perl6::Variable::Callable::Pod,
-				'&~' => Perl6::Variable::Callable::SubLanguage,
-			);
 
-			my $leaf = %lookup{$sigil ~ $twigil}.new(
+			my $leaf = %sigil-map{$sigil ~ $twigil}.new(
 				:from( $p.from ),
 				:to( $p.to ),
 				:content( $content )
@@ -2166,8 +2102,7 @@ say "Parameter fired";
 
 	method _PBlock( Mu $p ) {
 #`(
-		return True if self.assert-hash-keys( $p,
-				     [< lambda blockoid signature >] );
+		if self.assert-hash-keys( $p, [< lambda blockoid signature >] );
 )
 		if self.assert-hash-keys( $p, [< blockoid >] ) {
 			self._Blockoid( $p.hash.<blockoid> )
@@ -2180,7 +2115,6 @@ say "Parameter fired";
 
 	method _PostCircumfix( Mu $p ) {
 #`(
-		return True if self.assert-hash-keys( $p, [< semilist O >] );
 		return True if self.assert-hash-keys( $p, [< arglist O >] );
 )
 		if self.assert-hash-keys( $p, [< semilist O >] ) {
@@ -2216,8 +2150,7 @@ say "Parameter fired";
 
 	method _Postfix( Mu $p ) {
 #`(
-		return True if self.assert-hash-keys( $p, [< dig O >] );
-		return True if self.assert-hash-keys( $p, [< sym O >] );
+		if self.assert-hash-keys( $p, [< dig O >] );
 )
 		if self.assert-hash-keys( $p, [< sym O >] ) {
 			Perl6::Operator::Infix.new(
@@ -2258,19 +2191,24 @@ say "PostOp fired";
 
 	method _QuantifiedAtom( Mu $p ) {
 say "QuantifiedAtom fired";
-		return True if self.assert-hash-keys( $p, [< sigfinal atom >] );
+#`(
+		if self.assert-hash-keys( $p, [< sigfinal atom >] );
+)
 	}
 
 	method _Quantifier( Mu $p ) {
 say "Quantifier fired";
-		return True if self.assert-hash-keys( $p,
-				[< sym min max backmod >] );
-		return True if self.assert-hash-keys( $p, [< sym backmod >] );
+#`(
+		if self.assert-hash-keys( $p, [< sym min max backmod >] );
+		if self.assert-hash-keys( $p, [< sym backmod >] );
+)
 	}
 
 	method _Quibble( Mu $p ) {
 say "Quibble fired";
-		return True if self.assert-hash-keys( $p, [< babble nibble >] );
+#`(
+		if self.assert-hash-keys( $p, [< babble nibble >] );
+)
 	}
 
 	method _Quote( Mu $p ) {
@@ -2310,7 +2248,7 @@ say "QuotePair fired";
 				[< circumfix bracket radix >], [< exp base >] );
 )
 		if self.assert-hash-keys( $p, [< identifier >] ) {
-#			self._Identifier( $p.hash.<identifier> )
+			self._Identifier( $p.hash.<identifier> )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -2321,10 +2259,6 @@ say "QuotePair fired";
 	method _Radix( Mu $p ) returns Int { $p.hash.<radix>.Int }
 
 	method _RadNumber( Mu $p ) {
-#`(
-		return True if self.assert-hash-keys( $p,
-				[< circumfix radix >], [< exp base >] );
-)
 		if self.assert-hash-keys( $p,
 				[< circumfix bracket radix >],
 				[< exp base >] ) {
@@ -2394,12 +2328,6 @@ say "QuotePair fired";
 	}
 
 	method _RoutineDeclarator( Mu $p ) {
-#`(
-		return True if self.assert-hash-keys( $p,
-				[< sym method_def >] );
-		return True if self.assert-hash-keys( $p,
-				[< sym routine_def >] );
-)
 		if self.assert-hash-keys( $p,
 				[< sym routine_def >] ) {
 			(
@@ -2421,19 +2349,21 @@ say "QuotePair fired";
 
 	method _RoutineDef( Mu $p ) {
 #`(
-		return True if self.assert-hash-keys( $p,
-				[< blockoid deflongname multisig >],
-				[< trait >] );
-		return True if self.assert-hash-keys( $p,
-				[< blockoid deflongname >],
-				[< trait >] );
-		return True if self.assert-hash-keys( $p,
+		if self.assert-hash-keys( $p,
 				[< blockoid multisig >],
 				[< trait >] );
-		return True if self.assert-hash-keys( $p,
-				[< blockoid >], [< trait >] );
+		if self.assert-hash-keys( $p, [< blockoid >], [< trait >] );
 )
 		if self.assert-hash-keys( $p,
+				[< blockoid deflongname multisig >],
+				[< trait >] ) {
+			(
+				self._DefLongName( $p.hash.<deflongname> ),
+				self._MultiSig( $p.hash.<multisig> ),
+				self._Blockoid( $p.hash.<blockoid> )
+			).flat
+		}
+		elsif self.assert-hash-keys( $p,
 				[< blockoid deflongname trait >] ) {
 			(
 				self._DefLongName( $p.hash.<deflongname> ),
@@ -2442,7 +2372,7 @@ say "QuotePair fired";
 			).flat
 		}
 		elsif self.assert-hash-keys( $p,
-				[< blockoid deflongname >],[< trait >] ) {
+				[< blockoid deflongname >], [< trait >] ) {
 			(
 				self._DefLongName( $p.hash.<deflongname> ),
 				self._Blockoid( $p.hash.<blockoid> )
@@ -2456,8 +2386,10 @@ say "QuotePair fired";
 
 	method _RxAdverbs( Mu $p ) {
 say "RxAdverbs fired";
-		return True if self.assert-hash-keys( $p, [< quotepair >] );
-		return True if self.assert-hash-keys( $p, [], [< quotepair >] );
+#`(
+		if self.assert-hash-keys( $p, [< quotepair >] );
+		if self.assert-hash-keys( $p, [], [< quotepair >] );
+)
 	}
 
 	method _Scoped( Mu $p ) {
@@ -2512,9 +2444,11 @@ say "RxAdverbs fired";
 
 	method _SemiArgList( Mu $p ) {
 say "SemiArgList fired";
-#		if self.assert-hash-keys( $p, [< arglist >] ) {
-#			self._ArgList( $p.hash.<arglist> )
-#		}
+#`(
+		if self.assert-hash-keys( $p, [< arglist >] ) {
+			self._ArgList( $p.hash.<arglist> )
+		}
+)
 	}
 
 	method _SemiList( Mu $p ) {
@@ -2529,8 +2463,8 @@ say "SemiArgList fired";
 			[< statement >] );
 );
 		if $p.hash.<statement>.list.[0].hash.<EXPR> {
-			$p.Str ~~ m{ ^ (.) }; my $front = $0;
-			$p.Str ~~ m{ (.) $ }; my $back = $0;
+			$p.Str ~~ m{ ^ (.) }; my $front = ~$0;
+			$p.Str ~~ m{ (.) $ }; my $back = ~$0;
 			Perl6::Operator::PostCircumfix.new(
 				:delimiter( $front, $back ),
 				:child(
@@ -2549,8 +2483,9 @@ self._EXPR( $p.hash.<statement>.list.[0].hash.<EXPR> )
 
 	method _Separator( Mu $p ) {
 say "Separator fired";
-		return True if self.assert-hash-keys( $p,
-				[< septype quantified_atom >] );
+#`(
+		if self.assert-hash-keys( $p, [< septype quantified_atom >] );
+)
 	}
 
 	method _SepType( Mu $p ) returns Str { $p.hash.<septype>.Str }
@@ -2559,44 +2494,64 @@ say "Separator fired";
 
 	method _Sibble( Mu $p ) {
 say "Sibble fired";
-		return True if self.assert-hash-keys( $p,
-				[< right babble left >] );
+#`(
+		if self.assert-hash-keys( $p, [< right babble left >] );
+)
 	}
 
 	method _SigFinal( Mu $p ) {
 say "SigFinal fired";
-#		if self.assert-hash-keys( $p, [< normspace >] ) {
-#			self._NormSpace( $p.hash.<normspace> )
-#		}
+#`(
+		if self.assert-hash-keys( $p, [< normspace >] ) {
+			self._NormSpace( $p.hash.<normspace> )
+		}
+)
 	}
 
 	method _Sigil( Mu $p ) returns Str { $p.hash.<sym>.Str }
 
 	method _SigMaybe( Mu $p ) {
 say "SigMaybe fired";
-		return True if self.assert-hash-keys( $p,
+#`(
+		if self.assert-hash-keys( $p,
 				[< parameter typename >],
 				[< param_sep >] );
-		return True if self.assert-hash-keys( $p, [],
-				[< param_sep parameter >] );
+		if self.assert-hash-keys( $p, [], [< param_sep parameter >] );
+)
 	}
 
 	method _Signature( Mu $p ) {
 #`(
-say "Signature fired";
 		return True if self.assert-hash-keys( $p,
 				[< parameter typename >],
 				[< param_sep >] );
-		return True if self.assert-hash-keys( $p,
-				[< parameter >],
-				[< param_sep >] );
-		return True if self.assert-hash-keys( $p, [],
-				[< param_sep parameter >] );
 )
 		if self.assert-hash-keys( $p,
 				[< parameter >],
 				[< param_sep >] ) {
-			self._Parameter( $p.hash.<parameter> )
+			Perl6::Operator::Circumfix.new(
+				:delimiter( '(', ')' ),
+				:child(
+					self._Parameter( $p.hash.<parameter> )
+				)
+			)
+		}
+		elsif self.assert-hash-keys( $p,
+				[< param_sep >],
+				[< parameter >] ) {
+			Perl6::Operator::Circumfix.new(
+				:delimiter( '(', ')' ),
+				:child(
+					self._Parameter( $p.hash.<parameter> )
+				)
+			)
+		}
+		elsif self.assert-hash-keys( $p, [< >],
+				[< param_sep parameter >] ) {
+			Perl6::Operator::Circumfix.new(
+				:delimiter( '(', ')' ),
+				:child( )
+			)
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -2607,7 +2562,7 @@ say "Signature fired";
 	method _SMExpr( Mu $p ) {
 say "SMExpr fired";
 		if self.assert-hash-keys( $p, [< EXPR >] ) {
-#			self._EXPR( $p.hash.<EXPR> )
+			self._EXPR( $p.hash.<EXPR> )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -2619,19 +2574,16 @@ say "SMExpr fired";
 
 	method _StatementControl( Mu $p ) {
 say "StatementControl fired";
-		return True if self.assert-hash-keys( $p,
-				[< block sym e1 e2 e3 >] );
-		return True if self.assert-hash-keys( $p,
-				[< pblock sym EXPR wu >] );
-		return True if self.assert-hash-keys( $p,
-				[< doc sym module_name >] );
-		return True if self.assert-hash-keys( $p,
-				[< doc sym version >] );
-		return True if self.assert-hash-keys( $p,
-				[< sym else xblock >] );
-		return True if self.assert-hash-keys( $p, [< xblock sym wu >] );
-		return True if self.assert-hash-keys( $p, [< sym xblock >] );
-		return True if self.assert-hash-keys( $p, [< block sym >] );
+#`(
+		if self.assert-hash-keys( $p, [< block sym e1 e2 e3 >] );
+		if self.assert-hash-keys( $p, [< pblock sym EXPR wu >] );
+		if self.assert-hash-keys( $p, [< doc sym module_name >] );
+		if self.assert-hash-keys( $p, [< doc sym version >] );
+		if self.assert-hash-keys( $p, [< sym else xblock >] );
+		if self.assert-hash-keys( $p, [< xblock sym wu >] );
+		if self.assert-hash-keys( $p, [< sym xblock >] );
+		if self.assert-hash-keys( $p, [< block sym >] );
+)
 	}
 
 	method _Statement( Mu $p ) {
@@ -2647,9 +2599,7 @@ say "StatementControl fired";
 					[< statement_mod_cond EXPR >] ) {
 			}
 			elsif self.assert-hash-keys( $_, [< EXPR >] ) {
-#				self._EXPR(
-#					$_.hash.<EXPR>
-#				)
+				self._EXPR( $_.hash.<EXPR> )
 			}
 			elsif self.assert-hash-keys( $_,
 					[< statement_control >] ) {
@@ -2665,7 +2615,7 @@ say "StatementControl fired";
 
 #`(
 		if self.assert-hash-keys( $p, [< statement_control >] ) {
-#			self._StatementControl( $p.hash.<statement_control> )
+			self._StatementControl( $p.hash.<statement_control> )
 		}
 )
 
@@ -2692,24 +2642,29 @@ say "StatementControl fired";
 
 	method _StatementModCond( Mu $p ) {
 say "StatementModCond fired";
-		return True if self.assert-hash-keys( $p,
-				[< sym modifier_expr >] );
+#`(
+		if self.assert-hash-keys( $p, [< sym modifier_expr >] );
+)
 	}
 
 	method _StatementModLoop( Mu $p ) {
 say "StatementModLoop fired";
-		return True if self.assert-hash-keys( $p, [< sym smexpr >] )
+#`(
+		if self.assert-hash-keys( $p, [< sym smexpr >] )
+)
 	}
 
 	method _StatementPrefix( Mu $p ) {
 say "StatementPrefix fired";
-		return True if self.assert-hash-keys( $p, [< sym blorst >] );
+#`(
+		if self.assert-hash-keys( $p, [< sym blorst >] );
+)
 	}
 
 	method _SubShortName( Mu $p ) {
 say "SubShortName fired";
 		if self.assert-hash-keys( $p, [< desigilname >] ) {
-#			self._DeSigilName( $p.hash.<desigilname> )
+			self._DeSigilName( $p.hash.<desigilname> )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -2743,7 +2698,7 @@ say "SubShortName fired";
 	method _Term( Mu $p ) {
 say "Term fired";
 		if self.assert-hash-keys( $p, [< methodop >] ) {
-#			self._MethodOp( $p.hash.<methodop> )
+			self._MethodOp( $p.hash.<methodop> )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -2782,7 +2737,7 @@ say "TermConj fired";
 			next if self.assert-hash-keys( $_, [< termalt >] );
 		}
 		if self.assert-hash-keys( $p, [< termalt >] ) {
-#			self._TermAlt( $p.hash.<termalt> )
+			self._TermAlt( $p.hash.<termalt> )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -2801,7 +2756,9 @@ say "TermConj fired";
 
 	method _TermInit( Mu $p ) {
 say "TermInit fired";
-		return True if self.assert-hash-keys( $p, [< sym EXPR >] );
+#`(
+		if self.assert-hash-keys( $p, [< sym EXPR >] );
+)
 	}
 
 	method _Termish( Mu $p ) {
@@ -2810,7 +2767,7 @@ say "Termish fired";
 			next if self.assert-hash-keys( $_, [< noun >] );
 		}
 		if self.assert-hash-keys( $p, [< noun >] ) {
-#			self._Noun( $p.hash.<noun> )
+			self._Noun( $p.hash.<noun> )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -2861,31 +2818,45 @@ say "Termish fired";
 	method _Twigil( Mu $p ) returns Str { $p.hash.<sym>.Str }
 
 	method _TypeConstraint( Mu $p ) {
-say "TypeConstraint fired";
+		my @child;
 		for $p.list {
-			next if self.assert-hash-keys( $_, [< typename >] );
-			next if self.assert-hash-keys( $_, [< value >] );
+			if self.assert-hash-keys( $_, [< typename >] ) {
+				@child.push(
+					self._TypeName( $_.hash.<typename> )
+				)
+			}
+			elsif self.assert-hash-keys( $_, [< value >] ) {
+				@child.push(
+					self._Value( $_.hash.<value> )
+				)
+			}
+			else {
+				say $p.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
-		if self.assert-hash-keys( $p, [< value >] ) {
+#		if self.assert-hash-keys( $p, [< value >] ) {
 #			self._Value( $p.hash.<value> )
-		}
-		elsif self.assert-hash-keys( $p, [< typename >] ) {
+#		}
+#		elsif self.assert-hash-keys( $p, [< typename >] ) {
 #			self._TypeName( $p.hash.<typename> )
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
-		}
+#		}
+#		else {
+#			say $p.hash.keys.gist;
+#			warn "Unhandled case"
+#		}
+		@child
 	}
 
 	method _TypeDeclarator( Mu $p ) {
 say "TypeDeclarator fired";
-		return True if self.assert-hash-keys( $p,
+#`(
+		if self.assert-hash-keys( $p,
 				[< sym initializer variable >], [< trait >] );
-		return True if self.assert-hash-keys( $p,
+		if self.assert-hash-keys( $p,
 				[< sym initializer defterm >], [< trait >] );
-		return True if self.assert-hash-keys( $p,
-				[< sym initializer >] );
+		if self.assert-hash-keys( $p, [< sym initializer >] );
+)
 	}
 
 	method _TypeName( Mu $p ) {
@@ -2934,14 +2905,11 @@ say "TypeDeclarator fired";
 			}
 		}
 
-		if self.assert-hash-keys( $p,
-				[< longname colonpairs >] ) {
-return
+		if self.assert-hash-keys( $p, [< longname colonpairs >] ) {
 			self._LongName( $p.hash.<longname> )
 		}
 		elsif self.assert-hash-keys( $p,
 				[< longname >], [< colonpair >] ) {
-return
 			self._LongName( $p.hash.<longname> )
 		}
 		else {
@@ -2995,57 +2963,14 @@ return
 			my $desigilname = $p.hash.<desigilname> ??
 					  $p.hash.<desigilname>.Str !! '';
 			my $content     = $p.hash.<sigil> ~ $twigil ~ $desigilname;
-			my %lookup = (
-				'$' => Perl6::Variable::Scalar,
-				'$*' => Perl6::Variable::Scalar::Dynamic,
-				'$.' => Perl6::Variable::Scalar::Accessor,
-				'$!' => Perl6::Variable::Scalar::Attribute,
-				'$?' => Perl6::Variable::Scalar::CompileTime,
-				'$<' => Perl6::Variable::Scalar::MatchIndex,
-				'$^' => Perl6::Variable::Scalar::Positional,
-				'$:' => Perl6::Variable::Scalar::Named,
-				'$=' => Perl6::Variable::Scalar::Pod,
-				'$~' => Perl6::Variable::Scalar::SubLanguage,
-				'%' => Perl6::Variable::Hash,
-				'%*' => Perl6::Variable::Hash::Dynamic,
-				'%.' => Perl6::Variable::Hash::Accessor,
-				'%!' => Perl6::Variable::Hash::Attribute,
-				'%?' => Perl6::Variable::Hash::CompileTime,
-				'%<' => Perl6::Variable::Hash::MatchIndex,
-				'%^' => Perl6::Variable::Hash::Positional,
-				'%:' => Perl6::Variable::Hash::Named,
-				'%=' => Perl6::Variable::Hash::Pod,
-				'%~' => Perl6::Variable::Hash::SubLanguage,
-				'@' => Perl6::Variable::Array,
-				'@*' => Perl6::Variable::Array::Dynamic,
-				'@.' => Perl6::Variable::Array::Accessor,
-				'@!' => Perl6::Variable::Array::Attribute,
-				'@?' => Perl6::Variable::Array::CompileTime,
-				'@<' => Perl6::Variable::Array::MatchIndex,
-				'@^' => Perl6::Variable::Array::Positional,
-				'@:' => Perl6::Variable::Array::Named,
-				'@=' => Perl6::Variable::Array::Pod,
-				'@~' => Perl6::Variable::Array::SubLanguage,
-				'&' => Perl6::Variable::Callable,
-				'&*' => Perl6::Variable::Callable::Dynamic,
-				'&.' => Perl6::Variable::Callable::Accessor,
-				'&!' => Perl6::Variable::Callable::Attribute,
-				'&?' => Perl6::Variable::Callable::CompileTime,
-				'&<' => Perl6::Variable::Callable::MatchIndex,
-				'&^' => Perl6::Variable::Callable::Positional,
-				'&:' => Perl6::Variable::Callable::Named,
-				'&=' => Perl6::Variable::Callable::Pod,
-				'&~' => Perl6::Variable::Callable::SubLanguage,
-			);
-
-			%lookup{$sigil ~ $twigil}.new(
+			%sigil-map{$sigil ~ $twigil}.new(
 				:from( $p.from ),
 				:to( $p.to ),
 				:content( $content )
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< variable >] ) {
-#			self._Variable( $p.hash.<variable> )
+			self._Variable( $p.hash.<variable> )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -3056,9 +2981,9 @@ return
 	method _VariableDeclarator( Mu $p ) {
 #`(
 		if self.assert-hash-keys( $p,
-				[< semilist variable shape >],
-				[< postcircumfix signature trait
-				   post_constraint >] ) {
+			[< semilist variable shape >],
+			[< postcircumfix signature trait
+			   post_constraint >] ) {
 		}
 )
 
@@ -3092,7 +3017,6 @@ return
 	method _Variable( Mu $p ) {
 
 		if self.assert-hash-keys( $p, [< contextualizer >] ) {
-#die $p.dump;
 			return;
 		}
 
@@ -3102,50 +3026,7 @@ return
 		my $desigilname = $p.hash.<desigilname> ??
 				  $p.hash.<desigilname>.Str !! '';
 		my $content     = $p.hash.<sigil> ~ $twigil ~ $desigilname;
-		my %lookup = (
-			'$' => Perl6::Variable::Scalar,
-			'$*' => Perl6::Variable::Scalar::Dynamic,
-			'$.' => Perl6::Variable::Scalar::Accessor,
-			'$!' => Perl6::Variable::Scalar::Attribute,
-			'$?' => Perl6::Variable::Scalar::CompileTime,
-			'$<' => Perl6::Variable::Scalar::MatchIndex,
-			'$^' => Perl6::Variable::Scalar::Positional,
-			'$:' => Perl6::Variable::Scalar::Named,
-			'$=' => Perl6::Variable::Scalar::Pod,
-			'$~' => Perl6::Variable::Scalar::SubLanguage,
-			'%' => Perl6::Variable::Hash,
-			'%*' => Perl6::Variable::Hash::Dynamic,
-			'%.' => Perl6::Variable::Hash::Accessor,
-			'%!' => Perl6::Variable::Hash::Attribute,
-			'%?' => Perl6::Variable::Hash::CompileTime,
-			'%<' => Perl6::Variable::Hash::MatchIndex,
-			'%^' => Perl6::Variable::Hash::Positional,
-			'%:' => Perl6::Variable::Hash::Named,
-			'%=' => Perl6::Variable::Hash::Pod,
-			'%~' => Perl6::Variable::Hash::SubLanguage,
-			'@' => Perl6::Variable::Array,
-			'@*' => Perl6::Variable::Array::Dynamic,
-			'@.' => Perl6::Variable::Array::Accessor,
-			'@!' => Perl6::Variable::Array::Attribute,
-			'@?' => Perl6::Variable::Array::CompileTime,
-			'@<' => Perl6::Variable::Array::MatchIndex,
-			'@^' => Perl6::Variable::Array::Positional,
-			'@:' => Perl6::Variable::Array::Named,
-			'@=' => Perl6::Variable::Array::Pod,
-			'@~' => Perl6::Variable::Array::SubLanguage,
-			'&' => Perl6::Variable::Callable,
-			'&*' => Perl6::Variable::Callable::Dynamic,
-			'&.' => Perl6::Variable::Callable::Accessor,
-			'&!' => Perl6::Variable::Callable::Attribute,
-			'&?' => Perl6::Variable::Callable::CompileTime,
-			'&<' => Perl6::Variable::Callable::MatchIndex,
-			'&^' => Perl6::Variable::Callable::Positional,
-			'&:' => Perl6::Variable::Callable::Named,
-			'&=' => Perl6::Variable::Callable::Pod,
-			'&~' => Perl6::Variable::Callable::SubLanguage,
-		);
-
-		my $leaf = %lookup{$sigil ~ $twigil}.new(
+		my $leaf = %sigil-map{$sigil ~ $twigil}.new(
 			:from( $p.from ),
 			:to( $p.to ),
 			:content( $content )
