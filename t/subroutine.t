@@ -49,9 +49,7 @@ _END_
 			my $parsed = $pt.parse-source( Q:to[_END_].chomp );
 sub foo( 0 ) { }
 _END_
-say $parsed.dump;
 			my $tree = $pt.build-tree( $parsed );
-say $tree.perl;
 			ok $pt.validate( $parsed ), Q{valid};
 #			is $pt.format( $tree ), Q:to[_END_], Q{formatted};
 #sub foo( 0 ) { }
@@ -60,13 +58,6 @@ say $tree.perl;
 		}, Q{constant};
 
 		subtest {
-			plan 1;
-
-			my $parsed = $pt.parse-source( Q:to[_END_] );
-sub foo( $a ) { }
-_END_
-			ok $pt.validate( $parsed );
-#`(
 			plan 2;
 
 			my $parsed = $pt.parse-source( Q:to[_END_].chomp );
@@ -78,7 +69,6 @@ _END_
 #sub foo( $a ) { }
 #_END_
 			is $pt.format( $tree ), Q{subfoo($a){}}, Q{formatted};
-)
 		}, Q{untyped};
 
 		subtest {
@@ -129,13 +119,6 @@ _END_
 			}, Q{type-capture};
 
 			subtest {
-				plan 1;
-
-				my $parsed = $pt.parse-source( Q:to[_END_] );
-sub foo( Str ) { }
-_END_
-				ok $pt.validate( $parsed );
-#`(
 				plan 2;
 
 				my $parsed = $pt.parse-source( Q:to[_END_].chomp );
@@ -147,7 +130,6 @@ _END_
 #sub foo( Str ) { }
 #_END_
 				is $pt.format( $tree ), Q{subfoo(Str){}}, Q{formatted};
-)
 			}, Q{type-only};
 
 			subtest {
@@ -196,13 +178,6 @@ _END_
 		}, Q{default};
 
 		subtest {
-			plan 1;
-
-			my $parsed = $pt.parse-source( Q:to[_END_] );
-sub foo( :$a ) { }
-_END_
-			ok $pt.validate( $parsed );
-#`(
 			plan 2;
 
 			my $parsed = $pt.parse-source( Q:to[_END_].chomp );
@@ -214,18 +189,10 @@ _END_
 #sub foo( :$a ) { }
 #_END_
 			is $pt.format( $tree ), Q{subfoo(:$a){}}, Q{formatted};
-)
 		}, Q{optional};
 	}, Q{single};
 
 	subtest {
-		plan 1;
-
-		my $parsed = $pt.parse-source( Q:to[_END_] );
-sub foo( $a, $b ) { }
-_END_
-		ok $pt.validate( $parsed );
-#`(
 		plan 2;
 
 		my $parsed = $pt.parse-source( Q:to[_END_].chomp );
@@ -237,7 +204,6 @@ _END_
 #sub foo( $a, $b ) { }
 #_END_
 		is $pt.format( $tree ), Q{subfoo($a,$b){}}, Q{formatted};
-)
 	}, Q{multiple};
 }, Q{scalar arguments};
 

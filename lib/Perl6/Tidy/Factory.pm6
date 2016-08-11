@@ -1710,7 +1710,6 @@ say "MoreName fired";
 	}
 
 	method _NamedParam( Mu $p ) {
-say "NamedParam fired";
 		if self.assert-hash-keys( $p, [< param_var >] ) {
 			self._ParamVar( $p.hash.<param_var> )
 		}
@@ -1961,41 +1960,28 @@ say "Op fired";
 	}
 
 	method _Parameter( Mu $p ) {
-#`(
-		for $p.list {
-			next if self.assert-hash-keys( $_,
-				[< param_var type_constraint quant >],
-				[< default_value modifier trait
-				   post_constraint >] );
-
-			next if self.assert-hash-keys( $_,
-				[< named_param quant >],
-				[< default_value modifier
-				   post_constraint trait
-				   type_constraint >] );
-			next if self.assert-hash-keys( $_,
-				[< defterm quant >],
-				[< default_value modifier
-				   post_constraint trait
-				   type_constraint >] );
-			next if self.assert-hash-keys( $_,
-				[< type_constraint >],
-				[< param_var quant default_value						   modifier post_constraint trait
-				   type_constraint >] );
-		}
-)
 		my @child;
 		my $count = 0;
 		for $p.list {
 			if self.assert-hash-keys( $_,
-				[< type_constraint >],
+				[< param_var type_constraint quant >],
 				[< default_value modifier trait
 				   post_constraint >] ) {
+				# XXX
 				@child.append(
+					Perl6::Operator::Infix.new(
+						:from( $_.to + 1 ),
+						:to( $_.to + 2 ),
+						:content( Q{,} )
+					)
+				) if $count++ > 0;
+				@child.append(
+					self._ParamVar( $_.hash.<param_var> ),
 					self._TypeConstraint(
 						$_.hash.<type_constraint>
-					)
-				)
+					)#,
+#					self._Quant( $_.hash.<quant> )
+				);
 			}
 			elsif self.assert-hash-keys( $_,
 				[< param_var quant >],
@@ -2014,6 +2000,39 @@ say "Op fired";
 					self._ParamVar( $_.hash.<param_var> )#,
 #					self._Quant( $_.hash.<quant> )
 				);
+			}
+			elsif self.assert-hash-keys( $_,
+				[< named_param quant >],
+				[< default_value type_constraint modifier
+				   trait post_constraint >] ) {
+				# XXX
+				@child.append(
+					Perl6::Operator::Infix.new(
+						:from( $_.to + 1 ),
+						:to( $_.to + 2 ),
+						:content( Q{,} )
+					)
+				) if $count++ > 0;
+				@child.append(
+					Perl6::Operator::Infix.new(
+						:from( -43 ),
+						:to( -42 ),
+						:content( Q{:} )
+					),
+					self._NamedParam(
+						$_.hash.<named_param>
+					)
+				);
+			}
+			elsif self.assert-hash-keys( $_,
+				[< type_constraint >],
+				[< default_value modifier trait
+				   post_constraint >] ) {
+				@child.append(
+					self._TypeConstraint(
+						$_.hash.<type_constraint>
+					)
+				)
 			}
 			else {
 				say $_.hash.keys.gist;
@@ -2077,6 +2096,24 @@ say "Op fired";
 		}
 )
 		if self.assert-hash-keys( $p, [< name twigil sigil >] ) {
+			# XXX refactor back to a method
+			my $sigil       = $p.hash.<sigil>.Str;
+			my $twigil      = $p.hash.<twigil> ??
+					  $p.hash.<twigil>.Str !! '';
+			my $desigilname = $p.hash.<name> ??
+					  $p.hash.<name>.Str !! '';
+			my $content     = $p.hash.<sigil> ~
+					  $twigil ~
+					  $desigilname;
+
+			my $leaf = %sigil-map{$sigil ~ $twigil}.new(
+				:from( $p.from ),
+				:to( $p.to ),
+				:content( $content )
+			);
+			$leaf
+		}
+		elsif self.assert-hash-keys( $p, [< name sigil >] ) {
 			# XXX refactor back to a method
 			my $sigil       = $p.hash.<sigil>.Str;
 			my $twigil      = $p.hash.<twigil> ??
@@ -2821,12 +2858,12 @@ say "Termish fired";
 		my @child;
 		for $p.list {
 			if self.assert-hash-keys( $_, [< typename >] ) {
-				@child.push(
+				@child.append(
 					self._TypeName( $_.hash.<typename> )
 				)
 			}
 			elsif self.assert-hash-keys( $_, [< value >] ) {
-				@child.push(
+				@child.append(
 					self._Value( $_.hash.<value> )
 				)
 			}
