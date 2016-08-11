@@ -180,6 +180,7 @@ class Perl6::Element {
 }
 
 # XXX There should be a better way to do this.
+# XXX I could use wrap() probably...
 #
 role Child {
 	has Perl6::Element @.child;
@@ -199,7 +200,7 @@ role Branching_Delimited does Child {
 }
 
 role Token {
-	has $.content is required;
+	has Str $.content is required;
 	has Int $.from is required;
 	has Int $.to is required;
 	method perl6( $f ) {
