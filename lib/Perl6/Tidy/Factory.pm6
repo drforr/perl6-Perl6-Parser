@@ -1587,13 +1587,7 @@ say "Left fired";
 
 	method _LongName( Mu $p ) {
 		if self.assert-hash-keys( $p, [< name >], [< colonpair >] ) {
-			Perl6::PackageName.new(
-				:from( $p.hash.<name>.from ),
-				:to( $p.hash.<name>.to ),
-				:content(
-					$p.hash.<name>.Str
-				)
-			)
+			self._Name( $p.hash.<name> )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -1749,7 +1743,13 @@ say "MoreName fired";
 )
 		if self.assert-hash-keys( $p,
 			[< identifier >], [< morename >] ) {
-			self._Identifier( $p.hash.<identifier> )
+			Perl6::Bareword.new(
+				:from( $p.from ),
+				:to( $p.to ),
+				:content(
+					$p.Str
+				)
+			)
 		}
 		elsif self.assert-Str( $p ) {
 			Perl6::Bareword.new(
@@ -1996,11 +1996,12 @@ say "Op fired";
 					)
 				) if $count++ > 0;
 				@child.append(
-					self._ParamVar( $_.hash.<param_var> ),
 					self._TypeConstraint(
 						$_.hash.<type_constraint>
-					)#,
-#					self._Quant( $_.hash.<quant> )
+					)
+				);
+				@child.append(
+					self._ParamVar( $_.hash.<param_var> )
 				);
 			}
 			elsif self.assert-hash-keys( $_,
