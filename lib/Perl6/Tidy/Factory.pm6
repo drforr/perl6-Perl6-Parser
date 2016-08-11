@@ -1751,6 +1751,15 @@ say "MoreName fired";
 				)
 			)
 		}
+		elsif self.assert-hash-keys( $p, [< morename >] ) {
+			Perl6::Bareword.new(
+				:from( $p.from ),
+				:to( $p.to ),
+				:content(
+					$p.Str
+				)
+			)
+		}
 		elsif self.assert-Str( $p ) {
 			Perl6::Bareword.new(
 				:from( $p.from ),
@@ -1984,6 +1993,39 @@ say "Op fired";
 		my $count = 0;
 		for $p.list {
 			if self.assert-hash-keys( $_,
+				[< param_var type_constraint
+				   quant post_constraint >],
+				[< default_value modifier trait >] ) {
+				# XXX
+				@child.append(
+					Perl6::Operator::Infix.new(
+						:from( $_.to + 1 ),
+						:to( $_.to + 2 ),
+						:content( Q{,} )
+					)
+				) if $count++ > 0;
+				@child.append(
+					self._TypeConstraint(
+						$_.hash.<type_constraint>
+					)
+				);
+				@child.append(
+					self._ParamVar( $_.hash.<param_var> )
+				);
+				@child.append(
+					Perl6::Bareword.new(
+						:from( -42 ),
+						:to( -42 ),
+						:content( Q{where} )
+					)
+				);
+				@child.append(
+					self._PostConstraint(
+						$_.hash.<post_constraint>
+					)
+				);
+			}
+			elsif self.assert-hash-keys( $_,
 				[< param_var type_constraint quant >],
 				[< default_value modifier trait
 				   post_constraint >] ) {

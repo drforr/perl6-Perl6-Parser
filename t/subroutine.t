@@ -89,13 +89,6 @@ _END_
 			}, Q{typed};
 
 			subtest {
-				plan 1;
-
-				my $parsed = $pt.parse-source( Q:to[_END_] );
-sub foo( ::T $a ) { }
-_END_
-				ok $pt.validate( $parsed );
-#`(
 				plan 2;
 
 				my $parsed = $pt.parse-source( Q:to[_END_].chomp );
@@ -107,7 +100,6 @@ _END_
 #sub foo( ::T $a ) { }
 #_END_
 				is $pt.format( $tree ), Q{subfoo(::T$a){}}, Q{formatted};
-)
 			}, Q{type-capture};
 
 			subtest {
@@ -125,13 +117,6 @@ _END_
 			}, Q{type-only};
 
 			subtest {
-				plan 1;
-
-				my $parsed = $pt.parse-source( Q:to[_END_] );
-sub foo( Str $a where "foo" ) { }
-_END_
-				ok $pt.validate( $parsed );
-#`(
 				plan 2;
 
 				my $parsed = $pt.parse-source( Q:to[_END_].chomp );
@@ -143,7 +128,6 @@ _END_
 #sub foo( Str $a where "foo" ) { }
 #_END_
 				is $pt.format( $tree ), Q{subfoo(Str$awhere"foo"){}}, Q{formatted};
-)
 			}, Q{type-constrained};
 		}, Q{typed};
 
