@@ -171,7 +171,7 @@ _END_
 #		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
 #sub foo( $a, $b ) { }
 #_END_
-		is $pt.format( $tree ), Q{subfoo($a,$b){}}, Q{formatted};
+		is $pt.format( $tree ), Q{subfoo($a$b){}}, Q{formatted};
 	}, Q{multiple};
 }, Q{scalar arguments};
 

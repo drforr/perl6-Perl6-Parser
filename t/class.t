@@ -102,7 +102,7 @@ _END_
 #	has $.b;
 #}
 #_END_
-			is $pt.format( $tree ), Q{classUnqualified{has$.a;has$.b;}}, Q{formatted};
+			is $pt.format( $tree ), Q{classUnqualified{has$.ahas$.b}}, Q{formatted};
 		}, Q{multiple};
 
 		subtest {
@@ -117,7 +117,7 @@ _END_
 #				Q{class Unqualified { has ( $.a, $.b ) }},
 #				Q{formatted};
 			is $pt.format( $tree ),
-				Q{classUnqualified{has($.a,$.b)}},
+				Q{classUnqualified{has($.a$.b)}},
 				Q{formatted};
 		}, Q{list};
 	}, Q{$};

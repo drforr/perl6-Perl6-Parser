@@ -80,11 +80,6 @@ subtest {
 					:sigil( Q{$} ),
 					:content( Q{$a} ),
 					:headless( Q{a} )
-				),
-				Perl6::Semicolon.new(
-					:from( 4 ),
-					:to( 5 ),
-					:content( Q{;} )
 				)
 			) )
 		) ),
@@ -106,11 +101,6 @@ subtest {
 					:sigil( Q{$} ),
 					:content( Q{$a} ),
 					:headless( Q{a} )
-				),
-				Perl6::Semicolon.new(
-					:from( 5 ),
-					:to( 6 ),
-					:content( Q{;} )
 				)
 			) )
 		) ),

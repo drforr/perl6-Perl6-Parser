@@ -103,7 +103,7 @@ _END_
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[1].child),
 			Q{found operator};
 #		is $pt.format( $tree ), Q{my @a; @a[ 2 ]}, Q{formatted};
-		is $pt.format( $tree ), Q{my@a;@a[2]}, Q{formatted};
+		is $pt.format( $tree ), Q{my@a@a[2]}, Q{formatted};
 	}, Q{[]};
 
 	subtest {
@@ -119,7 +119,7 @@ _END_
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[1].child),
 			Q{found operator};
 #		is $pt.format( $tree ), Q[my %a; %a{ "foo" }], Q{formatted};
-		is $pt.format( $tree ), Q[my%a;%a{"foo"}], Q{formatted};
+		is $pt.format( $tree ), Q[my%a%a{"foo"}], Q{formatted};
 	}, Q[%a{}];
 
 	subtest {
@@ -134,7 +134,7 @@ _END_
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[1].child),
 			Q{found operator};
 #		is $pt.format( $tree ), Q[my %a; %a< foo >], Q{formatted};
-		is $pt.format( $tree ), Q[my%a;%a<foo>], Q{formatted};
+		is $pt.format( $tree ), Q[my%a%a<foo>], Q{formatted};
 	}, Q[%a<>];
 
 	subtest {
@@ -149,7 +149,7 @@ _END_
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[1].child),
 			Q{found operator};
 #		is $pt.format( $tree ), Q[my %a; %a« foo »], Q{formatted};
-		is $pt.format( $tree ), Q[my%a;%a«foo»], Q{formatted};
+		is $pt.format( $tree ), Q[my%a%a«foo»], Q{formatted};
 	}, Q[%a«»];
 
 	subtest {
@@ -290,7 +290,7 @@ _END_
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[1].child),
 			Q{found operator};
 #		is $pt.format( $tree ), Q{my $a; $a.:<++>}, Q{formatted};
-		is $pt.format( $tree ), Q{my$a;$a.:<++>}, Q{formatted};
+		is $pt.format( $tree ), Q{my$a$a.:<++>}, Q{formatted};
 	}, Q{.:};
 
 	subtest {
@@ -304,7 +304,7 @@ _END_
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[1].child),
 			Q{found operator};
 #		is $pt.format( $tree ), Q{my $a; $a.Foo::Bar}, Q{formatted};
-		is $pt.format( $tree ), Q{my$a;$a.Foo::Bar}, Q{formatted};
+		is $pt.format( $tree ), Q{my$a$a.Foo::Bar}, Q{formatted};
 	}, Q{.::};
 }, Q{Method Postfix Precedence};
 
@@ -322,7 +322,7 @@ _END_
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[1].child),
 			Q{found operator};
 #		is $pt.format( $tree ), Q{my $a; ++ $a}, Q{formatted};
-		is $pt.format( $tree ), Q{my$a;++$a}, Q{formatted};
+		is $pt.format( $tree ), Q{my$a++$a}, Q{formatted};
 	}, Q{++$a};
 
 	subtest {
@@ -336,7 +336,7 @@ _END_
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[1].child),
 			Q{found operator};
 #		is $pt.format( $tree ), Q{my $a; -- $a}, Q{formatted};
-		is $pt.format( $tree ), Q{my$a;--$a}, Q{formatted};
+		is $pt.format( $tree ), Q{my$a--$a}, Q{formatted};
 	}, Q{--$a};
 
 	subtest {
@@ -351,7 +351,7 @@ _END_
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[1].child),
 			Q{found operator};
 #		is $pt.format( $tree ), Q{my $a; $a++}, Q{formatted};
-		is $pt.format( $tree ), Q{my$a;$a++}, Q{formatted};
+		is $pt.format( $tree ), Q{my$a$a++}, Q{formatted};
 	}, Q{$a++};
 
 	subtest {
@@ -366,7 +366,7 @@ _END_
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[1].child),
 			Q{found operator};
 #		is $pt.format( $tree ), Q{my $a; $a--}, Q{formatted};
-		is $pt.format( $tree ), Q{my$a;$a--}, Q{formatted};
+		is $pt.format( $tree ), Q{my$a$a--}, Q{formatted};
 	}, Q{$a--};
 }, Q{Autoincrement Precedence};
 
@@ -864,7 +864,7 @@ _END_
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[1].child),
 			Q{found operator};
 #		is $pt.format( $tree ), Q{my $a; temp $a}, Q{formatted};
-		is $pt.format( $tree ), Q{my$a;temp$a}, Q{formatted};
+		is $pt.format( $tree ), Q{my$atemp$a}, Q{formatted};
 	}, Q{temp};
 
 	subtest {
@@ -878,7 +878,7 @@ _END_
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[1].child),
 			Q{found operator};
 #		is $pt.format( $tree ), Q{my $a; let $a}, Q{formatted};
-		is $pt.format( $tree ), Q{my$a;let$a}, Q{formatted};
+		is $pt.format( $tree ), Q{my$alet$a}, Q{formatted};
 	}, Q{let};
 }, Q{Named Unary Precedence};
 
@@ -1820,7 +1820,7 @@ _END_
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[1].child),
 			Q{found operator};
 #		is $pt.format( $tree ), Q{my @a; @a <== 'a'}, Q{formatted};
-		is $pt.format( $tree ), Q[my@a;@a<=='a'], Q{formatted};
+		is $pt.format( $tree ), Q[my@a@a<=='a'], Q{formatted};
 	}, Q{<==};
 
 	subtest {
@@ -1834,7 +1834,7 @@ _END_
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[1].child),
 			Q{found operator};
 #		is $pt.format( $tree ), Q{my @a; 'a' ==> @a}, Q{formatted};
-		is $pt.format( $tree ), Q{my@a;'a'==>@a}, Q{formatted};
+		is $pt.format( $tree ), Q{my@a'a'==>@a}, Q{formatted};
 	}, Q{==>};
 }, Q{Sequencer Precedence};
 

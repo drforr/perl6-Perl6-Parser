@@ -192,7 +192,7 @@ role Branching does Child {
 	}
 }
 role Branching_Delimited does Child {
-	has @.delimiter;
+	has Str @.delimiter;
 	method perl6( $f ) {
 		@.delimiter.[0] ~
 		join( '', map { $_.perl6( $f ) }, @.child ) ~
@@ -221,29 +221,29 @@ class Perl6::Statement does Branching {
 	also is Perl6::Element;
 }
 
+role Prefixed {
+	has Str $.headless is required;
+}
+
 # And now for the most basic tokens...
 #
 class Perl6::Number does Token {
 	also is Perl6::Element;
 }
-class Perl6::Number::Binary {
+class Perl6::Number::Binary does Prefixed {
 	also is Perl6::Number;
-	has $.headless is required;
 }
-class Perl6::Number::Octal {
+class Perl6::Number::Octal does Prefixed {
 	also is Perl6::Number;
-	has $.headless is required;
 }
 class Perl6::Number::Decimal {
 	also is Perl6::Number;
 }
-class Perl6::Number::Decimal::Explicit {
+class Perl6::Number::Decimal::Explicit does Prefixed {
 	also is Perl6::Number::Decimal;
-	has $.headless is required;
 }
-class Perl6::Number::Hexadecimal {
+class Perl6::Number::Hexadecimal does Prefixed {
 	also is Perl6::Number;
-	has $.headless is required;
 }
 class Perl6::Number::Radix {
 	also is Perl6::Number;
@@ -307,193 +307,169 @@ class Perl6::Variable {
 }
 class Perl6::Variable::Scalar does Token {
 	also is Perl6::Variable;
-	has $.sigil = Q{$};
+	has Str $.sigil = Q{$};
 }
 class Perl6::Variable::Scalar::Dynamic {
 	also is Perl6::Variable::Scalar;
-	has $.twigil = Q{*};
+	has Str $.twigil = Q{*};
 }
 class Perl6::Variable::Scalar::Attribute {
 	also is Perl6::Variable::Scalar;
-	has $.twigil = Q{!};
+	has Str $.twigil = Q{!};
 }
 class Perl6::Variable::Scalar::Accessor {
 	also is Perl6::Variable::Scalar;
-	has $.twigil = Q{.};
+	has Str $.twigil = Q{.};
 }
 class Perl6::Variable::Scalar::CompileTime {
 	also is Perl6::Variable::Scalar;
-	has $.twigil = Q{?};
+	has Str $.twigil = Q{?};
 }
 class Perl6::Variable::Scalar::MatchIndex {
 	also is Perl6::Variable::Scalar;
-	has $.twigil = Q{<};
+	has Str $.twigil = Q{<};
 }
 class Perl6::Variable::Scalar::Positional {
 	also is Perl6::Variable::Scalar;
-	has $.twigil = Q{^};
+	has Str $.twigil = Q{^};
 }
 class Perl6::Variable::Scalar::Named {
 	also is Perl6::Variable::Scalar;
-	has $.twigil = Q{:};
+	has Str $.twigil = Q{:};
 }
 class Perl6::Variable::Scalar::Pod {
 	also is Perl6::Variable::Scalar;
-	has $.twigil = Q{=};
+	has Str $.twigil = Q{=};
 }
 class Perl6::Variable::Scalar::SubLanguage {
 	also is Perl6::Variable::Scalar;
-	has $.twigil = Q{~};
+	has Str $.twigil = Q{~};
 }
 class Perl6::Variable::Array does Token {
 	also is Perl6::Variable;
-	has $.sigil = Q{@};
+	has Str $.sigil = Q{@};
 }
 class Perl6::Variable::Array::Dynamic {
 	also is Perl6::Variable::Array;
-	has $.twigil = Q{*};
+	has Str $.twigil = Q{*};
 }
 class Perl6::Variable::Array::Attribute {
 	also is Perl6::Variable::Array;
-	has $.twigil = Q{!};
+	has Str $.twigil = Q{!};
 }
 class Perl6::Variable::Array::Accessor {
 	also is Perl6::Variable::Array;
-	has $.twigil = Q{.};
+	has Str $.twigil = Q{.};
 }
 class Perl6::Variable::Array::CompileTime {
 	also is Perl6::Variable::Array;
-	has $.twigil = Q{?};
+	has Str $.twigil = Q{?};
 }
 class Perl6::Variable::Array::MatchIndex {
 	also is Perl6::Variable::Array;
-	has $.twigil = Q{<};
+	has Str $.twigil = Q{<};
 }
 class Perl6::Variable::Array::Positional {
 	also is Perl6::Variable::Array;
-	has $.twigil = Q{^};
+	has Str $.twigil = Q{^};
 }
 class Perl6::Variable::Array::Named {
 	also is Perl6::Variable::Array;
-	has $.twigil = Q{:};
+	has Str $.twigil = Q{:};
 }
 class Perl6::Variable::Array::Pod {
 	also is Perl6::Variable::Array;
-	has $.twigil = Q{=};
+	has Str $.twigil = Q{=};
 }
 class Perl6::Variable::Array::SubLanguage {
 	also is Perl6::Variable::Array;
-	has $.twigil = Q{~};
+	has Str $.twigil = Q{~};
 }
 class Perl6::Variable::Hash does Token {
 	also is Perl6::Variable;
-	has $.sigil = Q{%};
+	has Str $.sigil = Q{%};
 }
 class Perl6::Variable::Hash::Dynamic {
 	also is Perl6::Variable::Hash;
-	has $.twigil = Q{*};
+	has Str $.twigil = Q{*};
 }
 class Perl6::Variable::Hash::Attribute {
 	also is Perl6::Variable::Hash;
-	has $.twigil = Q{!};
+	has Str $.twigil = Q{!};
 }
 class Perl6::Variable::Hash::Accessor {
 	also is Perl6::Variable::Hash;
-	has $.twigil = Q{.};
+	has Str $.twigil = Q{.};
 }
 class Perl6::Variable::Hash::CompileTime {
 	also is Perl6::Variable::Hash;
-	has $.twigil = Q{?};
+	has Str $.twigil = Q{?};
 }
 class Perl6::Variable::Hash::MatchIndex {
 	also is Perl6::Variable::Hash;
-	has $.twigil = Q{<};
+	has Str $.twigil = Q{<};
 }
 class Perl6::Variable::Hash::Positional {
 	also is Perl6::Variable::Hash;
-	has $.twigil = Q{^};
+	has Str $.twigil = Q{^};
 }
 class Perl6::Variable::Hash::Named {
 	also is Perl6::Variable::Hash;
-	has $.twigil = Q{:};
+	has Str $.twigil = Q{:};
 }
 class Perl6::Variable::Hash::Pod {
 	also is Perl6::Variable::Hash;
-	has $.twigil = Q{=};
+	has Str $.twigil = Q{=};
 }
 class Perl6::Variable::Hash::SubLanguage {
 	also is Perl6::Variable::Hash;
-	has $.twigil = Q{~};
+	has Str $.twigil = Q{~};
 }
 class Perl6::Variable::Callable does Token {
 	also is Perl6::Variable;
-	has $.sigil = Q{&};
+	has Str $.sigil = Q{&};
 }
 class Perl6::Variable::Callable::Dynamic {
 	also is Perl6::Variable::Callable;
-	has $.twigil = Q{*};
+	has Str $.twigil = Q{*};
 }
 class Perl6::Variable::Callable::Attribute {
 	also is Perl6::Variable::Callable;
-	has $.twigil = Q{!};
+	has Str $.twigil = Q{!};
 }
 class Perl6::Variable::Callable::Accessor {
 	also is Perl6::Variable::Callable;
-	has $.twigil = Q{.};
+	has Str $.twigil = Q{.};
 }
 class Perl6::Variable::Callable::CompileTime {
 	also is Perl6::Variable::Callable;
-	has $.twigil = Q{?};
+	has Str $.twigil = Q{?};
 }
 class Perl6::Variable::Callable::MatchIndex {
 	also is Perl6::Variable::Callable;
-	has $.twigil = Q{<};
+	has Str $.twigil = Q{<};
 }
 class Perl6::Variable::Callable::Positional {
 	also is Perl6::Variable::Callable;
-	has $.twigil = Q{^};
+	has Str $.twigil = Q{^};
 }
 class Perl6::Variable::Callable::Named {
 	also is Perl6::Variable::Callable;
-	has $.twigil = Q{:};
+	has Str $.twigil = Q{:};
 }
 class Perl6::Variable::Callable::Pod {
 	also is Perl6::Variable::Callable;
-	has $.twigil = Q{=};
+	has Str $.twigil = Q{=};
 }
 class Perl6::Variable::Callable::SubLanguage {
 	also is Perl6::Variable::Callable;
-	has $.twigil = Q{~};
+	has Str $.twigil = Q{~};
 }
 
 class Perl6::Tidy::Factory {
 
 	sub key-boundary( Mu $p ) {
 		say "{$p.from} {$p.to} [{substr($p.orig,$p.from,$p.to-$p.from)}]";
-	}
-
-	method semicolon-after( Mu $p ) {
-		my $to   = $p.to;
-		my $orig = $p.orig;
-		my $key  = substr($orig, $to, $orig.chars);
-
-		if $key ~~ /^ \; / {
-			Perl6::Semicolon.new(
-				:from( $to ),
-				:to( $to + 1 ),
-				:content( Q{;} )
-			)
-		}
-	}
-
-	method semicolon-at-end( Mu $p ) {
-		if $p.Str ~~ / \; $/ {
-			Perl6::Semicolon.new(
-				:from( $p.to ),
-				:to( $p.to + 1 ),
-				:content( Q{;} )
-			)
-		}
 	}
 
 	sub dump( Mu $parsed ) {
@@ -698,9 +674,7 @@ say "BackSlash fired";
 		Perl6::Number::Binary.new(
 			:from( $p.from ),
 			:to( $p.to ),
-			:content(
-				$p.Str
-			)
+			:content( $p.Str )
 		)
 	}
 
@@ -944,9 +918,7 @@ say "Contextualizer fired";
 		Perl6::Number::Decimal.new(
 			:from( $p.from ),
 			:to( $p.to ),
-			:content(
-				$p.Str
-			)
+			:content( $p.Str )
 		)
 	}
 
@@ -1489,9 +1461,7 @@ say "FakeInfix fired";
 		Perl6::Number::Hexadecimal.new(
 			:from( $p.from ),
 			:to( $p.to ),
-			:content(
-				$p.Str eq '0' ?? 0 !! $p.Int
-			)
+			:content( $p.Str eq '0' ?? 0 !! $p.Int )
 		)
 	}
 
@@ -1505,9 +1475,7 @@ say "FakeInfix fired";
 			Perl6::Bareword.new(
 				:from( $p.from ),
 				:to( $p.to ),
-				:content(
-					$p.Str
-				)
+				:content( $p.Str )
 			)
 		}
 		else {
@@ -1572,9 +1540,7 @@ say "Infixish fired";
 				Perl6::Operator::Infix.new(
 					:from( $p.hash.<sym>.from ),
 					:to( $p.hash.<sym>.to )
-					:content(
-						$p.hash.<sym>.Str
-					)
+					:content( $p.hash.<sym>.Str )
 				),
 				self._EXPR( $p.hash.<EXPR> )
 			)
@@ -1590,9 +1556,7 @@ say "Infixish fired";
 			Perl6::Number::Binary.new(
 				:from( $p.from ),
 				:to( $p.to ),
-				:content(
-					$p.Str
-				),
+				:content( $p.Str ),
 				:headless( $p.hash.<binint>.Str )
 			)
 		}
@@ -1600,9 +1564,7 @@ say "Infixish fired";
 			Perl6::Number::Octal.new(
 				:from( $p.from ),
 				:to( $p.to ),
-				:content(
-					$p.Str
-				),
+				:content( $p.Str ),
 				:headless( $p.hash.<octint>.Str )
 			)
 		}
@@ -1610,9 +1572,7 @@ say "Infixish fired";
 			Perl6::Number::Decimal.new(
 				:from( $p.from ),
 				:to( $p.to ),
-				:content(
-					$p.Str
-				),
+				:content( $p.Str ),
 				:headless( $p.hash.<decint>.Str )
 			)
 		}
@@ -1620,9 +1580,7 @@ say "Infixish fired";
 			Perl6::Number::Hexadecimal.new(
 				:from( $p.from ),
 				:to( $p.to ),
-				:content(
-					$p.Str
-				),
+				:content( $p.Str ),
 				:headless( $p.hash.<hexint>.Str )
 			)
 		}
@@ -2001,9 +1959,7 @@ say "O fired";
 		Perl6::Number::Octal.new(
 			:from( $p.from ),
 			:to( $p.to ),
-			:content(
-				$p.Str eq '0' ?? 0 !! $p.Int
-			)
+			:content( $p.Str eq '0' ?? 0 !! $p.Int )
 		)
 	}
 
@@ -2047,8 +2003,7 @@ say "Op fired";
 		if self.assert-hash-keys( $p, [< sym package_def >] ) {
 			(
 				self._Sym( $p.hash.<sym> ),
-				self._PackageDef( $p.hash.<package_def> ),
-				self.semicolon-at-end( $p.hash.<package_def> )
+				self._PackageDef( $p.hash.<package_def> )
 			).flat
 		}
 		else {
@@ -2091,13 +2046,6 @@ say "Op fired";
 				[< default_value modifier trait >] ) {
 				# XXX
 				@child.append(
-					Perl6::Operator::Infix.new(
-						:from( $_.to + 1 ),
-						:to( $_.to + 2 ),
-						:content( Q{,} )
-					)
-				) if $count++ > 0;
-				@child.append(
 					self._TypeConstraint(
 						$_.hash.<type_constraint>
 					)
@@ -2122,14 +2070,6 @@ say "Op fired";
 				[< param_var type_constraint quant >],
 				[< default_value modifier trait
 				   post_constraint >] ) {
-				# XXX
-				@child.append(
-					Perl6::Operator::Infix.new(
-						:from( $_.to + 1 ),
-						:to( $_.to + 2 ),
-						:content( Q{,} )
-					)
-				) if $count++ > 0;
 				@child.append(
 					self._TypeConstraint(
 						$_.hash.<type_constraint>
@@ -2144,14 +2084,6 @@ say "Op fired";
 				[< modifier trait
 				   type_constraint
 				   post_constraint >] ) {
-				# XXX
-				@child.append(
-					Perl6::Operator::Infix.new(
-						:from( $_.to + 1 ),
-						:to( $_.to + 2 ),
-						:content( Q{,} )
-					)
-				) if $count++ > 0;
 				@child.append(
 					self._ParamVar( $_.hash.<param_var> )
 				);
@@ -2173,14 +2105,6 @@ say "Op fired";
 				[< default_value modifier trait
 				   type_constraint
 				   post_constraint >] ) {
-				# XXX
-				@child.append(
-					Perl6::Operator::Infix.new(
-						:from( $_.to + 1 ),
-						:to( $_.to + 2 ),
-						:content( Q{,} )
-					)
-				) if $count++ > 0;
 				@child.append(
 					self._ParamVar( $_.hash.<param_var> )#,
 #					self._Quant( $_.hash.<quant> )
@@ -2190,14 +2114,6 @@ say "Op fired";
 				[< named_param quant >],
 				[< default_value type_constraint modifier
 				   trait post_constraint >] ) {
-				# XXX
-				@child.append(
-					Perl6::Operator::Infix.new(
-						:from( $_.to + 1 ),
-						:to( $_.to + 2 ),
-						:content( Q{,} )
-					)
-				) if $count++ > 0;
 				@child.append(
 					Perl6::Operator::Infix.new(
 						:from( -43 ),
@@ -2851,8 +2767,7 @@ say "StatementControl fired";
 
 		my @child;
 		if self.assert-hash-keys( $p, [< EXPR >] ) {
-			@child.append( self._EXPR( $p.hash.<EXPR> ) );
-			@child.append( self.semicolon-after( $p.hash.<EXPR> ) )
+			@child.append( self._EXPR( $p.hash.<EXPR> ) )
 		}
 		elsif self.assert-hash-keys( $p, [< statement_control >] ) {
 			@child.append(
@@ -2921,9 +2836,7 @@ say "SubShortName fired";
 			Perl6::Bareword.new(
 				:from( $p.from ),
 				:to( $p.to ),
-				:content(
-					$p.Str
-				)
+				:content( $p.Str )
 			)
 		}
 		else {

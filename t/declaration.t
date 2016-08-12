@@ -155,7 +155,7 @@ _END_
 #unit module foo;
 #_END_
 			is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-unitmodulefoo;
+unitmodulefoo
 _END_
 		}, Q{unit module foo;};
 
@@ -191,7 +191,7 @@ _END_
 #unit class foo;
 #_END_
 			is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-unitclassfoo;
+unitclassfoo
 _END_
 		}, Q{unit class foo;};
 
@@ -227,7 +227,7 @@ _END_
 #unit role foo;
 #_END_
 			is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-unitrolefoo;
+unitrolefoo
 _END_
 		}, Q{unit role foo;};
 
@@ -279,7 +279,7 @@ _END_
 #unit grammar foo;
 #_END_
 			is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-unitgrammarfoo;
+unitgrammarfoo
 _END_
 		}, Q{unit grammar foo;};
 
