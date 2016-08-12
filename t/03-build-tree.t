@@ -18,10 +18,11 @@ subtest {
 }, Q{Empty file};
 
 subtest {
-	plan 4;
+	plan 5;
 
 	my ($p, $t);
 
+	#                        0123
 	$p = $pt.parse-source( Q{my$a} );
 	$t = $pt.build-tree( $p );
 	is-deeply $t,
@@ -43,6 +44,29 @@ subtest {
 		) ),
 	Q{without semi, without ws};
 
+	#                        01234
+	$p = $pt.parse-source( Q{ my$a} );
+	$t = $pt.build-tree( $p );
+	is-deeply $t,
+		Perl6::Document.new( :child(
+			Perl6::Statement.new( :child(
+				Perl6::Bareword.new(
+					:from( 1 ),
+					:to( 3 ),
+					:content( Q{my} )
+				),
+				Perl6::Variable::Scalar.new(
+					:from( 3 ),
+					:to( 5 ),
+					:sigil( Q{$} ),
+					:content( Q{$a} ),
+					:headless( Q{a} )
+				)
+			) )
+		) ),
+	Q{leading whitespace};
+
+	#                        01234
 	$p = $pt.parse-source( Q{my $a} );
 	$t = $pt.build-tree( $p );
 	is-deeply $t,
@@ -64,6 +88,7 @@ subtest {
 		) ),
 	Q{without semi, with ws};
 
+	#                        01234
 	$p = $pt.parse-source( Q{my$a;} );
 	$t = $pt.build-tree( $p );
 	is-deeply $t,
@@ -85,6 +110,7 @@ subtest {
 		) ),
 	Q{with semi, without ws};
 
+	#                        012345
 	$p = $pt.parse-source( Q{my $a;} );
 	$t = $pt.build-tree( $p );
 	is-deeply $t,
@@ -110,6 +136,7 @@ subtest {
 subtest {
 	plan 1;
 
+	#                           012345678
 	my $p = $pt.parse-source( Q{my $a = 1} );
 #say $p.hash.<statementlist>.hash.<statement>.list.[0].dump;
 	my $t = $pt.build-tree( $p );
@@ -144,49 +171,100 @@ subtest {
 }, Q{Initialization};
 
 subtest {
-	plan 1;
+	plan 2;
 
-	my $p = $pt.parse-source( Q{my $a = 1 + 2} );
-#say $p.hash.<statementlist>.hash.<statement>.list.[0].dump;
-	my $t = $pt.build-tree( $p );
-	is-deeply $t,
-		Perl6::Document.new( :child(
-			Perl6::Statement.new( :child(
-				Perl6::Bareword.new(
-					:from( 0 ),
-					:to( 2 ),
-					:content( Q{my} )
-				),
-				Perl6::Variable::Scalar.new(
-					:from( 3 ),
-					:to( 5 ),
-					:sigil( Q{$} ),
-					:content( Q{$a} ),
-					:headless( Q{a} )
-				),
-				Perl6::Operator::Infix.new(
-					:from( 6 ),
-					:to( 7 ),
-					:content( Q{=} )
-				),
-				Perl6::Number::Decimal.new(
-					:from( 8 ),
-					:to( 9 ),
-					:content( '1' )
-				),
-				Perl6::Operator::Infix.new(
-					:from( 10 ),
-					:to( 11 ),
-					:content( Q{+} )
-				),
-				Perl6::Number::Decimal.new(
-					:from( 12 ),
-					:to( 13 ),
-					:content( '2' )
-				)
-			) )
-		) ),
-	Q{tree built};
+	subtest {
+		plan 1;
+
+		#                           01234567
+		my $p = $pt.parse-source( Q{my$a=1+2} );
+		my $t = $pt.build-tree( $p );
+		is-deeply $t,
+			Perl6::Document.new( :child(
+				Perl6::Statement.new( :child(
+					Perl6::Bareword.new(
+						:from( 0 ),
+						:to( 2 ),
+						:content( Q{my} )
+					),
+					Perl6::Variable::Scalar.new(
+						:from( 2 ),
+						:to( 4 ),
+						:sigil( Q{$} ),
+						:content( Q{$a} ),
+						:headless( Q{a} )
+					),
+					Perl6::Operator::Infix.new(
+						:from( 4 ),
+						:to( 5 ),
+						:content( Q{=} )
+					),
+					Perl6::Number::Decimal.new(
+						:from( 5 ),
+						:to( 6 ),
+						:content( '1' )
+					),
+					Perl6::Operator::Infix.new(
+						:from( 6 ),
+						:to( 7 ),
+						:content( Q{+} )
+					),
+					Perl6::Number::Decimal.new(
+						:from( 7 ),
+						:to( 8 ),
+						:content( '2' )
+					)
+				) )
+			) ),
+		Q{tree built};
+	}, Q{No whitespace};
+
+	subtest {
+		plan 1;
+
+		#                                     1  
+		#                           0123456789012
+		my $p = $pt.parse-source( Q{my $a = 1 + 2} );
+		my $t = $pt.build-tree( $p );
+		is-deeply $t,
+			Perl6::Document.new( :child(
+				Perl6::Statement.new( :child(
+					Perl6::Bareword.new(
+						:from( 0 ),
+						:to( 2 ),
+						:content( Q{my} )
+					),
+					Perl6::Variable::Scalar.new(
+						:from( 3 ),
+						:to( 5 ),
+						:sigil( Q{$} ),
+						:content( Q{$a} ),
+						:headless( Q{a} )
+					),
+					Perl6::Operator::Infix.new(
+						:from( 6 ),
+						:to( 7 ),
+						:content( Q{=} )
+					),
+					Perl6::Number::Decimal.new(
+						:from( 8 ),
+						:to( 9 ),
+						:content( '1' )
+					),
+					Perl6::Operator::Infix.new(
+						:from( 10 ),
+						:to( 11 ),
+						:content( Q{+} )
+					),
+					Perl6::Number::Decimal.new(
+						:from( 12 ),
+						:to( 13 ),
+						:content( '2' )
+					)
+				) )
+			) ),
+		Q{tree built};
+	}, Q{With whitespace};
 }, Q{Initialization};
 
 # vim: ft=perl6

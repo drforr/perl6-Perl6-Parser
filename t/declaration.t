@@ -69,9 +69,7 @@ subtest {
 			plan 2;
 
 			my $parsed = $pt.parse-source( Q{my Int:D $a = 0} );
-say $parsed.dump;
 			my $tree = $pt.build-tree( $parsed );
-say $tree.perl;
 			ok $pt.validate( $parsed ), Q{valid};
 #			is $pt.format( $tree ),
 #				Q{my Int:D $a = 0},

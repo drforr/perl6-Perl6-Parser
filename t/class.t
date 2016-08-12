@@ -26,6 +26,20 @@ _END_
 subtest {
 	plan 2;
 
+	my $parsed = $pt.parse-source( Q:to[_END_].chomp );
+class Qual::Ified { }
+_END_
+	my $tree = $pt.build-tree( $parsed );
+	ok $pt.validate( $parsed ), Q{valid};
+#	is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#class Qual::Ified { }
+#_END_
+	is $pt.format( $tree ), Q{classQual::Ified{}}, Q{formatted};
+}, Q{empty, multiple namespaces};
+
+subtest {
+	plan 2;
+
 	subtest {
 		plan 2;
 
@@ -69,7 +83,21 @@ subtest {
 	plan 4;
 
 	subtest {
-		plan 3;
+		plan 4;
+
+		subtest {
+			plan 2;
+
+			my $parsed = $pt.parse-source( Q:to[_END_].chomp );
+class Unqualified{has$.a}
+_END_
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+#			is $pt.format( $tree ),
+#				Q{class Unqualified{has$.a}}, Q{formatted};
+			is $pt.format( $tree ),
+				Q{classUnqualified{has$.a}}, Q{formatted};
+		}, Q{single, no WS};
 
 		subtest {
 			plan 2;

@@ -257,6 +257,11 @@ class Perl6::String does Token {
 	has Str $.bare; # Easier to grab it from the parser.
 }
 
+# XXX Needs work
+class Perl6::Regex does Token {
+	also is Perl6::Element;
+}
+
 class Perl6::Bareword does Token {
 	also is Perl6::Element;
 }
@@ -671,6 +676,8 @@ say "BackSlash fired";
 	}
 
 	method _BinInt( Mu $p ) {
+key-boundary $p;
+warn 1;
 		Perl6::Number::Binary.new(
 			:from( $p.from ),
 			:to( $p.to ),
@@ -695,7 +702,9 @@ say "BackSlash fired";
 			Perl6::Block.new(
 				:delimiter( $front, $back ),
 				:child(
-					self._StatementList( $p.hash.<statementlist> )
+					self._StatementList(
+						$p.hash.<statementlist>
+					)
 				)
 			)
 		}
@@ -792,6 +801,7 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			Perl6::Operator::Circumfix.new(
 				:delimiter( $front, $back ),
 				:child(
+					# leading and trailing space elided
 					Perl6::Operator::Prefix.new(
 						:from( $p.from ),
 						:to( $p.to ),
@@ -841,6 +851,8 @@ say "Coercee fired";
 	method _ColonPair( Mu $p ) {
 		if self.assert-hash-keys( $p,
 				     [< identifier coloncircumfix >] ) {
+key-boundary $p;
+warn 3;
 			(
 				Perl6::Operator::Infix.new(
 					:from( -43 ),
@@ -853,9 +865,11 @@ say "Coercee fired";
 		}
 		elsif self.assert-hash-keys( $p, [< coloncircumfix >] ) {
 			(
+				# leading and trailing space elided
+				# XXX Note that ':' is part of the expression.
 				Perl6::Operator::Infix.new(
-					:from( -43 ),
-					:to( -42 ),
+					:from( $p.from ),
+					:to( $p.from + 1 ),
 					:content( Q{:} )
 				),
 				self._ColonCircumfix( $p.hash.<coloncircumfix> )
@@ -863,6 +877,8 @@ say "Coercee fired";
 		}
 		elsif self.assert-hash-keys( $p, [< identifier >] ) {
 			# XXX fix later
+key-boundary $p;
+warn 5;
 			Perl6::ColonBareword.new(
 				:from( $p.from ),
 				:to( $p.to ),
@@ -870,6 +886,8 @@ say "Coercee fired";
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< fakesignature >] ) {
+key-boundary $p;
+warn 6;
 			(
 				Perl6::Operator::Infix.new(
 					:from( -43 ),
@@ -880,6 +898,8 @@ say "Coercee fired";
 			).flat
 		}
 		elsif self.assert-hash-keys( $p, [< var >] ) {
+key-boundary $p;
+warn 7;
 			(
 				Perl6::Operator::Infix.new(
 					:from( -43 ),
@@ -915,6 +935,8 @@ say "Contextualizer fired";
 	}
 
 	method _DecInt( Mu $p ) {
+key-boundary $p;
+warn 8;
 		Perl6::Number::Decimal.new(
 			:from( $p.from ),
 			:to( $p.to ),
@@ -1117,6 +1139,7 @@ say "Dig fired";
 	method _Dotty( Mu $p ) {
 		if self.assert-hash-keys( $p, [< sym dottyop O >] ) {
 			(
+				# leading and trailing space elided
 				Perl6::Operator::Prefix.new(
 					:from( $p.hash.<sym>.from ),
 					:to( $p.hash.<sym>.to ),
@@ -1256,6 +1279,8 @@ say "EScale fired";
 			if substr( $p.orig, $p.from, 2 ) eq '>>' {
 				(
 					self.__Term( $p.list.[0] ),
+					# leading and trailing space elided
+					# XXX note that '>>' is a substring
 					Perl6::Operator::Prefix.new(
 						:from( $p.from ),
 						:to( $p.from + 2 ),
@@ -1318,17 +1343,20 @@ say "EScale fired";
 		elsif self.assert-hash-keys( $p, [< infix OPER >] ) {
 			# XXX fix later
 			if $p.list.elems == 3 {
+				$p.Str ~~ m{ ('??') .+ ('!!') };
+				my ( $from-q ) = $0.from;
+				my ( $from-e ) = $1.from;
 				(
 					self.__Term( $p.list.[0] ),
 					Perl6::Operator::Infix.new(
-						:from( $p.list.[0].to + 1 ),
-						:to( $p.list.[1].from - 1 ),
+						:from( $p.from + $from-q ),
+						:to( $p.from + $from-q + 2 ),
 						:content( Q{??} )
 					),
 					self.__Term( $p.list.[1] ),
 					Perl6::Operator::Infix.new(
-						:from( $p.list.[1].to + 1 ),
-						:to( $p.list.[2].from - 1 ),
+						:from( $p.from + $from-e ),
+						:to( $p.from + $from-e + 2 ),
 						:content( Q{!!} )
 					),
 					self.__Term( $p.list.[2] )
@@ -1349,7 +1377,7 @@ say "EScale fired";
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< sym args >] ) {
-			note "Skipping args for the time being";
+			# leading and trailing space elided
 			Perl6::Operator::Infix.new(
 				:from( $p.hash.<sym>.from ),
 				:to( $p.hash.<sym>.to ),
@@ -1432,12 +1460,14 @@ say "FakeInfix fired";
 
 	method _FatArrow( Mu $p ) {
 		if self.assert-hash-keys( $p, [< key val >] ) {
+			$p.Str ~~ m{ ('=>') };
+			my ( $from ) = $0.from;
 			(
 				self._Key( $p.hash.<key> ),
 				# XXX Note that we synthesize here.
 				Perl6::Operator::Infix.new(
-					:from( $p.hash.<key>.to + 1 ),
-					:to( $p.hash.<val>.from - 1 ),
+					:from( $p.from + $from ),
+					:to( $p.from + $from + 2 ),
 					:content( Q{=>} )
 				),
 				self._Val( $p.hash.<val> )
@@ -1450,6 +1480,8 @@ say "FakeInfix fired";
 	}
 
 	method __FloatingPoint( Mu $p ) {
+key-boundary $p;
+warn 14;
 		Perl6::Number::Floating.new(
 			:from( $p.from ),
 			:to( $p.to ),
@@ -1458,6 +1490,8 @@ say "FakeInfix fired";
 	}
 
 	method _HexInt( Mu $p ) {
+key-boundary $p;
+warn 15;
 		Perl6::Number::Hexadecimal.new(
 			:from( $p.from ),
 			:to( $p.to ),
@@ -1472,6 +1506,7 @@ say "FakeInfix fired";
 		}
 )
 		if $p.Str {
+			# leading and trailing space elided
 			Perl6::Bareword.new(
 				:from( $p.from ),
 				:to( $p.to ),
@@ -1489,6 +1524,7 @@ say "FakeInfix fired";
 		if self.assert-hash-keys( $p, [< infix OPER >] );
 )
 		if self.assert-hash-keys( $p, [< sym O >] ) {
+			# leading and trailing space elided
 			Perl6::Operator::Infix.new(
 				:from( $p.hash.<sym>.from ),
 				:to( $p.hash.<sym>.to ),
@@ -1496,6 +1532,8 @@ say "FakeInfix fired";
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< EXPR O >] ) {
+key-boundary $p.hash.<EXPR>;
+warn 18;
 			Perl6::Operator::Infix.new(
 				:from( $p.hash.<EXPR>.from ),
 				:to( $p.hash.<EXPR>.to ),
@@ -1517,6 +1555,8 @@ say "Infixish fired";
 
 	method _InfixPrefixMetaOperator( Mu $p ) {
 		if self.assert-hash-keys( $p, [< sym infixish O >] ) {
+key-boundary $p.hash.<sym>;
+warn 19;
 			Perl6::Operator::Infix.new(
 				:from( $p.hash.<sym>.from ),
 				:to( $p.hash.<sym>.to ),
@@ -1537,6 +1577,8 @@ say "Infixish fired";
 )
 		if self.assert-hash-keys( $p, [< sym EXPR >] ) {
 			(
+				# XXX refactor down?
+				# leading and trailing space elided
 				Perl6::Operator::Infix.new(
 					:from( $p.hash.<sym>.from ),
 					:to( $p.hash.<sym>.to )
@@ -1553,6 +1595,8 @@ say "Infixish fired";
 
 	method _Integer( Mu $p ) {
 		if self.assert-hash-keys( $p, [< binint VALUE >] ) {
+key-boundary $p.hash.<binint>;
+warn 21;
 			Perl6::Number::Binary.new(
 				:from( $p.from ),
 				:to( $p.to ),
@@ -1561,6 +1605,8 @@ say "Infixish fired";
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< octint VALUE >] ) {
+key-boundary $p.hash.<octint>;
+warn 22;
 			Perl6::Number::Octal.new(
 				:from( $p.from ),
 				:to( $p.to ),
@@ -1569,6 +1615,7 @@ say "Infixish fired";
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< decint VALUE >] ) {
+			# leading and trailing space elided
 			Perl6::Number::Decimal.new(
 				:from( $p.from ),
 				:to( $p.to ),
@@ -1577,6 +1624,8 @@ say "Infixish fired";
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< hexint VALUE >] ) {
+key-boundary $p.hash.<hexint>;
+warn 24;
 			Perl6::Number::Hexadecimal.new(
 				:from( $p.from ),
 				:to( $p.to ),
@@ -1606,6 +1655,7 @@ return True;
 	}
 
 	method _Key( Mu $p ) {
+		# leading and trailing space elided
 		Perl6::Bareword.new(
 			:from( $p.from ),
 			:to( $p.to ),
@@ -1800,6 +1850,7 @@ say "MoreName fired";
 )
 		if self.assert-hash-keys( $p,
 			[< identifier >], [< morename >] ) {
+			# leading and trailing space elided
 			Perl6::Bareword.new(
 				:from( $p.from ),
 				:to( $p.to ),
@@ -1807,6 +1858,8 @@ say "MoreName fired";
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< morename >] ) {
+key-boundary $p;
+warn 27;
 			Perl6::Bareword.new(
 				:from( $p.from ),
 				:to( $p.to ),
@@ -1814,6 +1867,8 @@ say "MoreName fired";
 			)
 		}
 		elsif self.assert-Str( $p ) {
+key-boundary $p;
+warn 28;
 			Perl6::Bareword.new(
 				:from( $p.from ),
 				:to( $p.to ),
@@ -1956,6 +2011,8 @@ say "O fired";
 	}
 
 	method _OctInt( Mu $p ) {
+key-boundary $p;
+warn 29;
 		Perl6::Number::Octal.new(
 			:from( $p.from ),
 			:to( $p.to ),
@@ -1984,6 +2041,8 @@ say "Op fired";
 		if self.assert-hash-keys( $p, [< O >] );
 )
 		if self.assert-hash-keys( $p, [< sym dottyop O >] ) {
+key-boundary $p.hash.<sym>;
+warn 30;
 			(
 				Perl6::Operator::Infix.new(
 					:from( $p.hash.<sym>.from ),
@@ -2053,6 +2112,8 @@ say "Op fired";
 				@child.append(
 					self._ParamVar( $_.hash.<param_var> )
 				);
+key-boundary $p;
+warn 31;
 				@child.append(
 					Perl6::Bareword.new(
 						:from( -42 ),
@@ -2087,6 +2148,8 @@ say "Op fired";
 				@child.append(
 					self._ParamVar( $_.hash.<param_var> )
 				);
+key-boundary $p;
+warn 32;
 				@child.append(
 					Perl6::Operator::Infix.new(
 						:from( -42 ),
@@ -2114,6 +2177,8 @@ say "Op fired";
 				[< named_param quant >],
 				[< default_value type_constraint modifier
 				   trait post_constraint >] ) {
+key-boundary $p;
+warn 33;
 				@child.append(
 					Perl6::Operator::Infix.new(
 						:from( -43 ),
@@ -2198,10 +2263,11 @@ say "Op fired";
 					  $twigil ~
 					  $desigilname;
 
+			# leading and trailing space elided
 			my $leaf = %sigil-map{$sigil ~ $twigil}.new(
 				:from( $p.from ),
 				:to( $p.to ),
-				:content( $content )
+				:content( $p.Str )
 			);
 			$leaf
 		}
@@ -2216,6 +2282,8 @@ say "Op fired";
 					  $twigil ~
 					  $desigilname;
 
+key-boundary $p;
+warn 35;
 			my $leaf = %sigil-map{$sigil ~ $twigil}.new(
 				:from( $p.from ),
 				:to( $p.to ),
@@ -2254,21 +2322,25 @@ say "Op fired";
 )
 		if self.assert-hash-keys( $p, [< semilist O >] ) {
 			my $x = $p.hash.<semilist>.Str;
-			$x ~~ s{ ^ \s+ } = '';
-			$x ~~ s{ \s+ $ } = '';
+			$x ~~ s{ ^ (\s*) } = ''; my $leading = $0.chars;
+			$x ~~ s{ (\s+) $ } = ''; my $trailing = $0.chars;
+			# leading and trailing space elided
+			# XXX whitespace around text could be done differently?
 			Perl6::Bareword.new(
-				:from( $p.hash.<semilist>.from ),
-				:to( $p.hash.<semilist>.to ),
+				:from( $p.hash.<semilist>.from + $leading ),
+				:to( $p.hash.<semilist>.to - $trailing ),
 				:content( $x )
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< nibble O >] ) {
 			my $x = $p.hash.<nibble>.Str;
-			$x ~~ s{ ^ \s+ } = '';
-			$x ~~ s{ \s+ $ } = '';
+			$x ~~ s{ ^ (\s*) } = ''; my $leading = $0.chars;
+			$x ~~ s{ (\s+) $ } = ''; my $trailing = $0.chars;
+			# leading and trailing space elided
+			# XXX whitespace around text could be done differently?
 			Perl6::Bareword.new(
-				:from( $p.hash.<nibble>.from ),
-				:to( $p.hash.<nibble>.to ),
+				:from( $p.hash.<nibble>.from + $leading ),
+				:to( $p.hash.<nibble>.to - $trailing ),
 				:content( $x )
 			)
 		}
@@ -2285,6 +2357,7 @@ say "Op fired";
 
 	method _Postfix( Mu $p ) {
 		if self.assert-hash-keys( $p, [< sym O >] ) {
+			# leading and trailing space elided
 			Perl6::Operator::Infix.new(
 				:from( $p.hash.<sym>.from ),
 				:to( $p.hash.<sym>.to ),
@@ -2292,6 +2365,8 @@ say "Op fired";
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< dig O >] ) {
+key-boundary $p.hash.<dig>;
+warn 39;
 			Perl6::Operator::Infix.new(
 				:from( $p.hash.<dig>.from ),
 				:to( $p.hash.<dig>.to ),
@@ -2314,6 +2389,7 @@ say "PostOp fired";
 
 	method _Prefix( Mu $p ) {
 		if self.assert-hash-keys( $p, [< sym O >] ) {
+			# leading and trailing space elided
 			Perl6::Operator::Prefix.new(
 				:from( $p.hash.<sym>.from ),
 				:to( $p.hash.<sym>.to ),
@@ -2356,6 +2432,8 @@ say "Quibble fired";
 		if self.assert-hash-keys( $p, [< sym rx_adverbs sibble >] );
 )
 		if self.assert-hash-keys( $p, [< quibble >] ) {
+key-boundary $p.hash.<quibble>;
+warn 41;
 			Perl6::String.new(
 				:from( $p.from ),
 				:to( $p.to ),
@@ -2365,8 +2443,8 @@ say "Quibble fired";
 		}
 		elsif self.assert-hash-keys( $p, [< nibble >] ) {
 			Perl6::String.new(
-				:from( $p.from ),
-				:to( $p.to ),
+				:from( $p.hash.<nibble>.from ),
+				:to( $p.hash.<nibble>.to ),
 				:content( $p.Str ),
 				:bare( $p.hash.<nibble>.Str )
 			)
@@ -2401,6 +2479,8 @@ say "QuotePair fired";
 		if self.assert-hash-keys( $p,
 				[< circumfix bracket radix >],
 				[< exp base >] ) {
+key-boundary $p;
+warn 43;
 			Perl6::Number::Radix.new(
 				:from( $p.from ),
 				:to( $p.to ),
@@ -2409,6 +2489,8 @@ say "QuotePair fired";
 		}
 		elsif self.assert-hash-keys( $p,
 				[< circumfix radix >], [< exp base >] ) {
+key-boundary $p;
+warn 44;
 			Perl6::Number::Radix.new(
 				:from( $p.from ),
 				:to( $p.to ),
@@ -2438,12 +2520,21 @@ say "QuotePair fired";
 		if self.assert-hash-keys( $p,
 				[< deflongname nibble >],
 				[< signature trait >] ) {
+			# leading and trailing space elided
+			my $nibble = $p.hash.<nibble>.Str;
+			$nibble ~~ s{ (\s+) } = ''; my $inset = $0.chars;
 			(
 				self._DefLongName( $p.hash.<deflongname> ),
 				Perl6::Block.new(
 					:delimiter( '{', '}' ),
 					:child(
-						self._Nibble( $p.hash.<nibble> )
+						# XXX Should this be expanded?
+						# XXX And if so, as an attribute
+						Perl6::Regex.new(
+							:from( $p.hash.<nibble>.from ),
+							:to( $p.hash.<nibble>.to - $inset ),
+							:content( $nibble )
+						)
 					)
 				)
 			).flat
@@ -2833,6 +2924,7 @@ say "SubShortName fired";
 		if $p.Bool and $p.Str eq '';
 )
 		if $p.Str {
+			# leading and trailing space elided
 			Perl6::Bareword.new(
 				:from( $p.from ),
 				:to( $p.to ),
@@ -2894,14 +2986,21 @@ say "TermConj fired";
 			warn "Unhandled case"
 		}
 )
-		# XXX
-		my $str = $p.Str;
-		$str ~~ s{\s+ $} = '';
-		Perl6::Bareword.new(
-			:from( $p.from ),
-			:to( $p.to ),
-			:content( $str )
-		)
+
+		if $p.list {
+		}
+		elsif $p.Str {
+			# XXX
+			my $str = $p.Str;
+			$str ~~ s{\s+ $} = '';
+key-boundary $p if $p.Str;
+warn 46;
+			Perl6::Bareword.new(
+				:from( $p.from ),
+				:to( $p.to ),
+				:content( $str )
+			)
+		}
 	}
 
 	method _TermInit( Mu $p ) {
@@ -3015,17 +3114,20 @@ say "TypeDeclarator fired";
 			if self.assert-hash-keys( $_,
 					[< longname colonpairs >],
 					[< colonpair >] ) {
-				# XXX Fix this later.
+				# XXX Probably could be narrowed.
+				# leading and trailing space elided
 				return
 					Perl6::Bareword.new(
-						:from( -42 ),
-						:to( -42 ),
+						:from( $_.from ),
+						:to( $_.to ),
 						:content( $_.Str )
 					)
 			}
 			elsif self.assert-hash-keys( $_,
 					[< longname colonpair >] ) {
 				# XXX Fix this later.
+key-boundary $_;
+warn 48;
 				return
 					Perl6::Bareword.new(
 						:from( -42 ),
@@ -3035,11 +3137,12 @@ say "TypeDeclarator fired";
 			}
 			elsif self.assert-hash-keys( $_,
 					[< longname >], [< colonpairs >] ) {
-				# XXX Fix this later.
+				# XXX Can probably be narrowed
+				# leading and trailing space elided
 				return
 					Perl6::Bareword.new(
-						:from( -42 ),
-						:to( -42 ),
+						:from( $_.from ),
+						:to( $_.to ),
 						:content( $_.Str )
 					)
 			}
@@ -3113,6 +3216,8 @@ say "TypeDeclarator fired";
 			my $desigilname = $p.hash.<desigilname> ??
 					  $p.hash.<desigilname>.Str !! '';
 			my $content     = $p.hash.<sigil> ~ $twigil ~ $desigilname;
+key-boundary $p;
+warn 50;
 			%sigil-map{$sigil ~ $twigil}.new(
 				:from( $p.from ),
 				:to( $p.to ),
@@ -3140,11 +3245,14 @@ say "TypeDeclarator fired";
 		if self.assert-hash-keys( $p,
 				[< variable post_constraint >],
 				[< semilist postcircumfix signature trait >] ) {
+			$p.Str ~~ m{ << (where) >> };
+			my ( $from ) = $0.from;
 			(
 				self._Variable( $p.hash.<variable> ),
+				# leading and trailing space elided
 				Perl6::Bareword.new(
-					:from( -42 ),
-					:to( -42 ),
+					:from( $p.from + $from ),
+					:to( $p.from + $from + 5 ),
 					:content( Q{where} )
 				),
 				self._PostConstraint(
@@ -3176,6 +3284,8 @@ warn "*** contextualizer fired";
 		my $desigilname = $p.hash.<desigilname> ??
 				  $p.hash.<desigilname>.Str !! '';
 		my $content     = $p.hash.<sigil> ~ $twigil ~ $desigilname;
+
+		# leading and trailing space elided
 		my $leaf = %sigil-map{$sigil ~ $twigil}.new(
 			:from( $p.from ),
 			:to( $p.to ),
