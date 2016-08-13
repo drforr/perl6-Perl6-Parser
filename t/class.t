@@ -3,7 +3,7 @@ use v6;
 use Test;
 use Perl6::Tidy;
 
-plan 3;
+plan 4;
 
 my $pt = Perl6::Tidy.new;
 #my $*TRACE = 1;

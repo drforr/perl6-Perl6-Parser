@@ -1857,9 +1857,8 @@ say "MoreName fired";
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< morename >] ) {
-key-boundary $p;
-warn 27;
-			Perl6::Bareword.new(
+			# leading and trailing space elided
+			Perl6::PackageName.new(
 				:from( $p.from ),
 				:to( $p.to ),
 				:content( $p.Str )
@@ -2102,7 +2101,9 @@ warn 30;
 				[< param_var type_constraint
 				   quant post_constraint >],
 				[< default_value modifier trait >] ) {
-				# XXX
+				# Synthesize the 'from' and 'to' markers for 'where'
+				$p.Str ~~ m{ << (where) >> };
+				my ( $from ) = $0.from;
 				@child.append(
 					self._TypeConstraint(
 						$_.hash.<type_constraint>
@@ -2111,12 +2112,10 @@ warn 30;
 				@child.append(
 					self._ParamVar( $_.hash.<param_var> )
 				);
-key-boundary $p;
-warn 31;
 				@child.append(
 					Perl6::Bareword.new(
-						:from( -42 ),
-						:to( -42 ),
+						:from( $from ),
+						:to( $from + 5 ),
 						:content( Q{where} )
 					)
 				);
@@ -2147,12 +2146,14 @@ warn 31;
 				@child.append(
 					self._ParamVar( $_.hash.<param_var> )
 				);
-key-boundary $p;
-warn 32;
+				# XXX Should be possible to refactor...
+				# Synthesize the 'from' and 'to' markers for '=>'
+				$p.Str ~~ m{ ('=') };
+				my ( $from ) = $0.from;
 				@child.append(
 					Perl6::Operator::Infix.new(
-						:from( -42 ),
-						:to( -42 ),
+						:from( $from ),
+						:to( $from + 1 ),
 						:content( Q{=} )
 					)
 				);
@@ -2176,12 +2177,13 @@ warn 32;
 				[< named_param quant >],
 				[< default_value type_constraint modifier
 				   trait post_constraint >] ) {
-key-boundary $p;
-warn 33;
+				# Synthesize the 'from' and 'to' markers for '=>'
+				$p.Str ~~ m{ (':') };
+				my ( $from ) = $0.from;
 				@child.append(
 					Perl6::Operator::Infix.new(
-						:from( -43 ),
-						:to( -42 ),
+						:from( $from ),
+						:to( $from + 1 ),
 						:content( Q{:} )
 					),
 					self._NamedParam(
@@ -2281,8 +2283,7 @@ warn 33;
 					  $twigil ~
 					  $desigilname;
 
-key-boundary $p;
-warn 35;
+			# leading and trailing space elided
 			my $leaf = %sigil-map{$sigil ~ $twigil}.new(
 				:from( $p.from ),
 				:to( $p.to ),
