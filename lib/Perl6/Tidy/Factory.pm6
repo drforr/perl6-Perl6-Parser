@@ -182,6 +182,9 @@ class Perl6::Element {
 role Child {
 	has Perl6::Element @.child;
 }
+role Delimited {
+	has Str @.delimiter is required;
+}
 
 # XXX There should be a better way to do this.
 # XXX I could use wrap() probably...
@@ -191,8 +194,7 @@ role Branching does Child {
 		join( '', map { $_.perl6( $f ) }, @.child )
 	}
 }
-role Branching_Delimited does Child {
-	has Str @.delimiter;
+role Branching_Delimited does Child does Delimited {
 	method perl6( $f ) {
 		@.delimiter.[0] ~
 		join( '', map { $_.perl6( $f ) }, @.child ) ~
@@ -252,7 +254,7 @@ class Perl6::Number::Floating {
 	also is Perl6::Number;
 }
 
-class Perl6::String does Token {
+class Perl6::String does Token {# does Delimited {
 	also is Perl6::Element;
 	has Str $.bare; # Easier to grab it from the parser.
 }
@@ -851,12 +853,11 @@ say "Coercee fired";
 	method _ColonPair( Mu $p ) {
 		if self.assert-hash-keys( $p,
 				     [< identifier coloncircumfix >] ) {
-key-boundary $p;
-warn 3;
+			# Synthesize the 'from' marker for ':'
 			(
-				Perl6::Operator::Infix.new(
-					:from( -43 ),
-					:to( -42 ),
+				Perl6::Operator::Prefix.new(
+					:from( $p.from ),
+					:to( $p.from + 1 ),
 					:content( Q{:} )
 				),
 				self._Identifier( $p.hash.<identifier> ),
@@ -876,9 +877,7 @@ warn 3;
 			).flat
 		}
 		elsif self.assert-hash-keys( $p, [< identifier >] ) {
-			# XXX fix later
-key-boundary $p;
-warn 5;
+			# leading and trailing space elided
 			Perl6::ColonBareword.new(
 				:from( $p.from ),
 				:to( $p.to ),
@@ -886,24 +885,24 @@ warn 5;
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< fakesignature >] ) {
-key-boundary $p;
-warn 6;
+			# Synthesize the 'from' marker for ':'
 			(
 				Perl6::Operator::Infix.new(
-					:from( -43 ),
-					:to( -42 ),
+					:from( $p.from ),
+					:to( $p.from + 1 ),
 					:content( Q{:} )
 				),
 				self._FakeSignature( $p.hash.<fakesignature> )
 			).flat
 		}
 		elsif self.assert-hash-keys( $p, [< var >] ) {
-key-boundary $p;
-warn 7;
+			# Synthesize the 'from' marker for ':'
 			(
-				Perl6::Operator::Infix.new(
-					:from( -43 ),
-					:to( -42 ),
+				# XXX is this actually a single token?
+				# XXX I think it is.
+				Perl6::Operator::Prefix.new(
+					:from( $p.from ),
+					:to( $p.from + 1 ),
 					:content( Q{:} )
 				),
 				self._Var( $p.hash.<var> )
@@ -1343,6 +1342,7 @@ say "EScale fired";
 		elsif self.assert-hash-keys( $p, [< infix OPER >] ) {
 			# XXX fix later
 			if $p.list.elems == 3 {
+				# Synthesize the 'from' and 'to' markers for 'where'
 				$p.Str ~~ m{ ('??') .+ ('!!') };
 				my ( $from-q ) = $0.from;
 				my ( $from-e ) = $1.from;
@@ -1460,6 +1460,7 @@ say "FakeInfix fired";
 
 	method _FatArrow( Mu $p ) {
 		if self.assert-hash-keys( $p, [< key val >] ) {
+			# Synthesize the 'from' and 'to' markers for '=>'
 			$p.Str ~~ m{ ('=>') };
 			my ( $from ) = $0.from;
 			(
@@ -1480,8 +1481,7 @@ say "FakeInfix fired";
 	}
 
 	method __FloatingPoint( Mu $p ) {
-key-boundary $p;
-warn 14;
+		# leading and trailing space elided
 		Perl6::Number::Floating.new(
 			:from( $p.from ),
 			:to( $p.to ),
@@ -1595,8 +1595,8 @@ warn 19;
 
 	method _Integer( Mu $p ) {
 		if self.assert-hash-keys( $p, [< binint VALUE >] ) {
-key-boundary $p.hash.<binint>;
-warn 21;
+			# XXX Probably should make 'headless' lazy later.
+			# leading and trailing space elided
 			Perl6::Number::Binary.new(
 				:from( $p.from ),
 				:to( $p.to ),
@@ -1605,8 +1605,8 @@ warn 21;
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< octint VALUE >] ) {
-key-boundary $p.hash.<octint>;
-warn 22;
+			# XXX Probably should make 'headless' lazy later.
+			# leading and trailing space elided
 			Perl6::Number::Octal.new(
 				:from( $p.from ),
 				:to( $p.to ),
@@ -1620,12 +1620,11 @@ warn 22;
 				:from( $p.from ),
 				:to( $p.to ),
 				:content( $p.Str ),
-				:headless( $p.hash.<decint>.Str )
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< hexint VALUE >] ) {
-key-boundary $p.hash.<hexint>;
-warn 24;
+			# XXX Probably should make 'headless' lazy later.
+			# leading and trailing space elided
 			Perl6::Number::Hexadecimal.new(
 				:from( $p.from ),
 				:to( $p.to ),
@@ -2432,13 +2431,14 @@ say "Quibble fired";
 		if self.assert-hash-keys( $p, [< sym rx_adverbs sibble >] );
 )
 		if self.assert-hash-keys( $p, [< quibble >] ) {
-key-boundary $p.hash.<quibble>;
-warn 41;
+			# XXX This should properly call quibble, but that's
+			# XXX for later.
+			# leading and trailing space elided
 			Perl6::String.new(
 				:from( $p.from ),
 				:to( $p.to ),
 				:content( $p.Str ),
-				:bare( $p.hash.<quibble>.Str )
+				:bare( $p.hash.<quibble>.hash.<nibble>.Str )
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< nibble >] ) {
@@ -2489,8 +2489,7 @@ warn 43;
 		}
 		elsif self.assert-hash-keys( $p,
 				[< circumfix radix >], [< exp base >] ) {
-key-boundary $p;
-warn 44;
+			# leading and trailing space elided
 			Perl6::Number::Radix.new(
 				:from( $p.from ),
 				:to( $p.to ),
@@ -3216,8 +3215,7 @@ warn 48;
 			my $desigilname = $p.hash.<desigilname> ??
 					  $p.hash.<desigilname>.Str !! '';
 			my $content     = $p.hash.<sigil> ~ $twigil ~ $desigilname;
-key-boundary $p;
-warn 50;
+			# leading and trailing space elided
 			%sigil-map{$sigil ~ $twigil}.new(
 				:from( $p.from ),
 				:to( $p.to ),
@@ -3245,6 +3243,7 @@ warn 50;
 		if self.assert-hash-keys( $p,
 				[< variable post_constraint >],
 				[< semilist postcircumfix signature trait >] ) {
+			# Synthesize the 'from' and 'to' markers for 'where'
 			$p.Str ~~ m{ << (where) >> };
 			my ( $from ) = $0.from;
 			(

@@ -69,7 +69,7 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 #			is $pt.format( $tree ), Q{0b0}, Q{formatted};
 			is $pt.format( $tree ), Q{0b0}, Q{formatted};
-		}, Q{zero};
+		}, Q{0b0};
 
 		subtest {
 			plan 2;
@@ -79,7 +79,7 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 #			is $pt.format( $tree ), Q{0b1}, Q{formatted};
 			is $pt.format( $tree ), Q{0b1}, Q{formatted};
-		}, Q{1};
+		}, Q{0b1};
 
 		subtest {
 			plan 2;
@@ -89,7 +89,7 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 #			is $pt.format( $tree ), Q{-0b1}, Q{formatted};
 			is $pt.format( $tree ), Q{-0b1}, Q{formatted};
-		}, Q{-1};
+		}, Q{-0b1};
 	}, Q{binary};
 
 	subtest {
@@ -103,7 +103,7 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 #			is $pt.format( $tree ), Q{0o0}, Q{formatted};
 			is $pt.format( $tree ), Q{0o0}, Q{formatted};
-		}, Q{zero};
+		}, Q{0o0};
 
 		subtest {
 			plan 2;
@@ -113,7 +113,7 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 #			is $pt.format( $tree ), Q{0o1}, Q{formatted};
 			is $pt.format( $tree ), Q{0o1}, Q{formatted};
-		}, Q{1};
+		}, Q{0o1};
 
 		subtest {
 			plan 2;
@@ -123,7 +123,7 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 #			is $pt.format( $tree ), Q{-0o1}, Q{formatted};
 			is $pt.format( $tree ), Q{-0o1}, Q{formatted};
-		}, Q{-1};
+		}, Q{-0o1};
 	}, Q{octal};
 
 	subtest {
@@ -137,7 +137,7 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 #			is $pt.format( $tree ), Q{0d0}, Q{formatted};
 			is $pt.format( $tree ), Q{0d0}, Q{formatted};
-		}, Q{zero};
+		}, Q{0d0};
 
 		subtest {
 			plan 2;
@@ -147,7 +147,7 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 #			is $pt.format( $tree ), Q{0d1}, Q{formatted};
 			is $pt.format( $tree ), Q{0d1}, Q{formatted};
-		}, Q{1};
+		}, Q{0d1};
 
 		subtest {
 			plan 2;
@@ -157,7 +157,7 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 #			is $pt.format( $tree ), Q{-0d1}, Q{formatted};
 			is $pt.format( $tree ), Q{-0d1}, Q{formatted};
-		}, Q{-1};
+		}, Q{-0d1};
 	}, Q{explicit decimal};
 
 	subtest {
@@ -171,7 +171,7 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 #			is $pt.format( $tree ), Q{0}, Q{formatted};
 			is $pt.format( $tree ), Q{0}, Q{formatted};
-		}, Q{zero};
+		}, Q{0};
 
 		subtest {
 			plan 2;
@@ -205,7 +205,7 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 #			is $pt.format( $tree ), Q{0x0}, Q{formatted};
 			is $pt.format( $tree ), Q{0x0}, Q{formatted};
-		}, Q{zero};
+		}, Q{0x0};
 
 		subtest {
 			plan 2;
@@ -215,7 +215,7 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 #			is $pt.format( $tree ), Q{0x1}, Q{formatted};
 			is $pt.format( $tree ), Q{0x1}, Q{formatted};
-		}, Q{1};
+		}, Q{0x1};
 
 		subtest {
 			plan 2;
@@ -225,7 +225,7 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 #			is $pt.format( $tree ), Q{-0x1}, Q{formatted};
 			is $pt.format( $tree ), Q{-0x1}, Q{formatted};
-		}, Q{-1};
+		}, Q{-0x1};
 	}, Q{hexadecimal};
 
 	subtest {
@@ -239,7 +239,7 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 #			is $pt.format( $tree ), Q{:13(0)}, Q{formatted};
 			is $pt.format( $tree ), Q{:13(0)}, Q{formatted};
-		}, Q{zero};
+		}, Q{:13(0)};
 
 		subtest {
 			plan 2;
@@ -249,7 +249,7 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 #			is $pt.format( $tree ), Q{:13(1)}, Q{formatted};
 			is $pt.format( $tree ), Q{:13(1)}, Q{formatted};
-		}, Q{1};
+		}, Q{:13(1)};
 
 		subtest {
 			plan 2;
@@ -259,7 +259,7 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 #			is $pt.format( $tree ), Q{:13(-1)}, Q{formatted};
 			is $pt.format( $tree ), Q{:13(-1)}, Q{formatted};
-		}, Q{-1};
+		}, Q{:13(-1)};
 	}, Q{base-13};
 
 	subtest {
@@ -273,7 +273,7 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 #			is $pt.format( $tree ), Q{0.0}, Q{formatted};
 			is $pt.format( $tree ), Q{0.0}, Q{formatted};
-		}, Q{zero};
+		}, Q{0.0};
 
 		subtest {
 			plan 2;
@@ -293,7 +293,7 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 #			is $pt.format( $tree ), Q{-1}, Q{formatted};
 			is $pt.format( $tree ), Q{-1}, Q{formatted};
-		}, Q{.1};
+		}, Q{-1};
 
 		subtest {
 			plan 2;
@@ -327,7 +327,7 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 #			is $pt.format( $tree ), Q{0e0}, Q{formatted};
 			is $pt.format( $tree ), Q{0e0}, Q{formatted};
-		}, Q{zero};
+		}, Q{0e0};
 
 		subtest {
 			plan 2;
@@ -337,7 +337,7 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 #			is $pt.format( $tree ), Q{0.0e0}, Q{formatted};
 			is $pt.format( $tree ), Q{0.0e0}, Q{formatted};
-		}, Q{rational zero};
+		}, Q{0.0e0};
 
 		subtest {
 			plan 2;
@@ -347,7 +347,7 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 #			is $pt.format( $tree ), Q{.1e0}, Q{formatted};
 			is $pt.format( $tree ), Q{.1e0}, Q{formatted};
-		}, Q{rational .1};
+		}, Q{.1e0 (no leading zero)};
 
 		subtest {
 			plan 2;
@@ -357,7 +357,7 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 #			is $pt.format( $tree ), Q{0.1e0}, Q{formatted};
 			is $pt.format( $tree ), Q{0.1e0}, Q{formatted};
-		}, Q{rational 0.1};
+		}, Q{0.1e0 (with leading 0)};
 
 		subtest {
 			plan 2;
@@ -367,7 +367,7 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 #			is $pt.format( $tree ), Q{1e0}, Q{formatted};
 			is $pt.format( $tree ), Q{1e0}, Q{formatted};
-		}, Q{1.0e0};
+		}, Q{1e0};
 
 		subtest {
 			plan 2;
@@ -377,7 +377,7 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 #			is $pt.format( $tree ), Q{-1e0}, Q{formatted};
 			is $pt.format( $tree ), Q{-1e0}, Q{formatted};
-		}, Q{-1.0e0};
+		}, Q{-1e0};
 	}, Q{Num};
 
 	subtest {
@@ -401,7 +401,7 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 #			is $pt.format( $tree ), Q{1i}, Q{formatted};
 			is $pt.format( $tree ), Q{1i}, Q{formatted};
-		}, Q{11};
+		}, Q{1i};
 
 		subtest {
 			plan 2;
@@ -411,7 +411,7 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 #			is $pt.format( $tree ), Q{-1i}, Q{formatted};
 			is $pt.format( $tree ), Q{-1i}, Q{formatted};
-		}, Q{-11};
+		}, Q{-1i};
 	}, Q{imaginary};
 }, Q{integer};
 
