@@ -479,9 +479,7 @@ class Perl6::Tidy::Factory {
 		my @child =
 			self._statementlist( $p.hash.<statementlist> );
 		Perl6::Document.new(
-			:child(
-				@child
-			)
+			:child( @child )
 		)
 	}
 
@@ -711,13 +709,15 @@ warn 1;
 		if self.assert-hash-keys( $p, [< statementlist >] ) {
 			$p.Str ~~ m{ ^ (.) }; my $front = ~$0;
 			$p.Str ~~ m{ (.) $ }; my $back = ~$0;
+			my @child;
+			@child.append(
+				self._statementlist(
+					$p.hash.<statementlist>
+				)
+			);
 			Perl6::Block.new(
 				:delimiter( $front, $back ),
-				:child(
-					self._statementlist(
-						$p.hash.<statementlist>
-					)
-				)
+				:child( @child )
 			)
 		}
 		else {
@@ -791,18 +791,19 @@ say "CharSpec fired";
 			$p.Str ~~ m{ ^ (.) }; my $front = ~$0;
 			$p.Str ~~ m{ (.) $ }; my $back = ~$0;
 			if $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> {
+				my @child;
+				@child.push(
+self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
+				);
 				Perl6::Operator::PostCircumfix.new(
 					:delimiter( $front, $back ),
-					:child(
-self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
-					)
+					:child( @child )
 				)
 			}
 			else {
 				Perl6::Operator::PostCircumfix.new(
 					:delimiter( $front, $back ),
-					:child(
-					)
+					:child( )
 				)
 			}
 		}
@@ -810,16 +811,18 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			# XXX <nibble> can probably be worked with
 			$p.Str ~~ m{ ^ (.) }; my $front = ~$0;
 			$p.Str ~~ m{ (.) $ }; my $back = ~$0;
+			my @child;
+			@child.push(
+				# leading and trailing space elided
+				Perl6::Operator::Prefix.new(
+					:from( $p.from ),
+					:to( $p.to ),
+					:content( $p.hash.<nibble>.Str )
+				)
+			);
 			Perl6::Operator::Circumfix.new(
 				:delimiter( $front, $back ),
-				:child(
-					# leading and trailing space elided
-					Perl6::Operator::Prefix.new(
-						:from( $p.from ),
-						:to( $p.to ),
-						:content( $p.hash.<nibble>.Str )
-					)
-				)
+				:child( @child )
 			)
 		}
 		else {
@@ -1321,13 +1324,15 @@ say "EScale fired";
 			# XXX Work on this
 			$p.hash.<postcircumfix>.Str ~~ m{ ^ (.) }; my $front = ~$0;
 			$p.hash.<postcircumfix>.Str ~~ m{ (.) $ }; my $back = ~$0;
+			my @child;
+			@child.push(
+				self._postcircumfix( $p.hash.<postcircumfix> )
+			);
 			(
 				self.__Term( $p.list.[0] ),
 				Perl6::Operator::PostCircumfix.new(
 					:delimiter( $front, $back ),
-					:child(
-						self._postcircumfix( $p.hash.<postcircumfix> )
-					)
+					:child( @child )
 				)
 			).flat
 		}
@@ -2533,19 +2538,21 @@ warn 43;
 			# leading and trailing space elided
 			my $nibble = $p.hash.<nibble>.Str;
 			$nibble ~~ s{ (\s+) } = ''; my $inset = $0.chars;
+			my @child;
+			@child.push(
+				# XXX Should this be expanded?
+				# XXX And if so, as an attribute
+				Perl6::Regex.new(
+					:from( $p.hash.<nibble>.from ),
+					:to( $p.hash.<nibble>.to - $inset ),
+					:content( $nibble )
+				)
+			);
 			(
 				self._deflongname( $p.hash.<deflongname> ),
 				Perl6::Block.new(
 					:delimiter( '{', '}' ),
-					:child(
-						# XXX Should this be expanded?
-						# XXX And if so, as an attribute
-						Perl6::Regex.new(
-							:from( $p.hash.<nibble>.from ),
-							:to( $p.hash.<nibble>.to - $inset ),
-							:content( $nibble )
-						)
-					)
+					:child( @child )
 				)
 			).flat
 		}
@@ -2700,11 +2707,13 @@ say "SemiArgList fired";
 		if $p.hash.<statement>.list.[0].hash.<EXPR> {
 			$p.Str ~~ m{ ^ (.) }; my $front = ~$0;
 			$p.Str ~~ m{ (.) $ }; my $back = ~$0;
+			my @child;
+			@child.push(
+				self._EXPR( $p.hash.<statement>.list.[0].hash.<EXPR> )
+			);
 			Perl6::Operator::PostCircumfix.new(
 				:delimiter( $front, $back ),
-				:child(
-self._EXPR( $p.hash.<statement>.list.[0].hash.<EXPR> )
-				)
+	    			:child( @child )
 			)
 		}
 		if self.assert-hash-keys( $p, [< statement >] ) {
@@ -2761,32 +2770,32 @@ say "SigMaybe fired";
 		if self.assert-hash-keys( $p,
 				[< parameter typename >],
 				[< param_sep >] ) {
+			my @child;
+			@child.push( self._typename( $p.hash.<typename> ) );
+			@child.push( self._parameter( $p.hash.<parameter> ) );
 			Perl6::Operator::Circumfix.new(
 				:delimiter( '(', ')' ),
-				:child(
-					self._typename( $p.hash.<typename> ),
-					self._parameter( $p.hash.<parameter> )
-				)
+				:child( @child )
 			)
 		}
 		elsif self.assert-hash-keys( $p,
 				[< parameter >],
 				[< param_sep >] ) {
+			my @child;
+			@child.append( self._parameter( $p.hash.<parameter> ) );
 			Perl6::Operator::Circumfix.new(
 				:delimiter( '(', ')' ),
-				:child(
-					self._parameter( $p.hash.<parameter> )
-				)
+				:child( @child )
 			)
 		}
 		elsif self.assert-hash-keys( $p,
 				[< param_sep >],
 				[< parameter >] ) {
+			my @child;
+			@child.push( self._parameter( $p.hash.<parameter> ) );
 			Perl6::Operator::Circumfix.new(
 				:delimiter( '(', ')' ),
-				:child(
-					self._parameter( $p.hash.<parameter> )
-				)
+				:child( @child )
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< >],
@@ -2869,9 +2878,7 @@ say "StatementControl fired";
 		}
 
 		Perl6::Statement.new(
-			:child(
-				@child
-			)
+			:child( @child )
 		)
 	}
 
