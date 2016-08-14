@@ -216,6 +216,10 @@ class Perl6::Unimplemented {
 	has $.content
 }
 
+class Perl6::WS does Token {
+	also is Perl6::Element;
+}
+
 class Perl6::Document does Branching {
 }
 
@@ -481,6 +485,40 @@ class Perl6::Tidy::Factory {
 		Perl6::Document.new(
 			:child( @child )
 		)
+	}
+
+	method add-whitespace( $orig, $from, $to, @child ) {
+		my Perl6::Element @ws;
+		my $start = $from;
+		my $end = $to;
+		for @child {
+			if $_.from > $start {
+				@ws.push(
+					Perl6::WS.new(
+						:from( $start ),
+						:to( $_.from ),
+						:content(
+							substr( $orig, $start, $_.from - $start )
+						)
+					)
+				)
+			}
+			@ws.push( $_ );
+			$start = $_.from;
+		}
+		$start = @child[*-1].to;
+		if $start < $end {
+			@ws.push(
+				Perl6::WS.new(
+					:from( $start ),
+					:to( $end ),
+					:content(
+						substr( $orig, $start, $end - $start )
+					)
+				)
+			)
+		}
+		@ws
 	}
 
 	sub key-boundary( Mu $p ) {
@@ -795,9 +833,13 @@ say "CharSpec fired";
 				@child.push(
 self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 				);
+				my @ws = self.add-whitespace(
+					$p.Str,
+					$p.from + 1, $p.to - 1, @child
+				);
 				Perl6::Operator::PostCircumfix.new(
 					:delimiter( $front, $back ),
-					:child( @child )
+					:child( @ws )
 				)
 			}
 			else {
