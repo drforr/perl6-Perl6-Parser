@@ -99,7 +99,7 @@ L<Perl6::Variable>
 
 Children: L<Perl6::Variable::Contextualizer::Scalar> and so forth.
 
-(a side note - These really should be L<Perl6::Variable::Scalar:Contextualizer::>, but that would mean that these were both a Leaf (from the parent L<Perl6::Variable::Scalar> and Branching (because they have children). Resolving this would mean removing the L<Perl6::Leaf> role from the L<Perl6::Variable::Scalar> class, which means that I either have to create a longer class name for L<Perl6::Variable::JustAPlainScalarVariable> or manually add the L<Perl6::Leaf>'s contents to the L<Perl6::Variable::Scalar>, and forget to update it when I change my mind in a few weeks' time about what L<Perl6::Leaf> does. Adding a separate class for this seems the lesser of two evils, especially given how often they'll appear in "real world" code.)
+(a side note - These really should be L<Perl6::Variable::Scalar:Contextualizer::>, but that would mean that these were both a Leaf (from the parent L<Perl6::Variable::Scalar> and Branching because they have children). Resolving this would mean removing the L<Perl6::Leaf> role from the L<Perl6::Variable::Scalar> class, which means that I either have to create a longer class name for L<Perl6::Variable::JustAPlainScalarVariable> or manually add the L<Perl6::Leaf>'s contents to the L<Perl6::Variable::Scalar>, and forget to update it when I change my mind in a few weeks' time about what L<Perl6::Leaf> does. Adding a separate class for this seems the lesser of two evils, especially given how often they'll appear in "real world" code.)
 
 =cut
 
@@ -258,7 +258,7 @@ class Perl6::Number::Floating {
 	also is Perl6::Number;
 }
 
-class Perl6::String does Token {# does Delimited {
+class Perl6::String does Token {
 	also is Perl6::Element;
 	has Str $.bare; # Easier to grab it from the parser.
 }
@@ -480,41 +480,88 @@ class Perl6::Variable::Callable::SubLanguage {
 class Perl6::Tidy::Factory {
 
 	method build( Mu $p ) {
-		my @child =
+		my Perl6::Element @child =
 			self._statementlist( $p.hash.<statementlist> );
 		Perl6::Document.new(
 			:child( @child )
 		)
 	}
 
-	method add-whitespace( $orig, $from, $to, @child ) {
+	multi method make-prefix-from( Mu $p ) {
+		Perl6::Operator::Prefix.new(
+			:from( $p.from ),
+			:to( $p.to ),
+			:content( $p.Str )
+		)
+	}
+
+	multi method make-infix-from( Mu $p ) {
+		Perl6::Operator::Infix.new(
+			:from( $p.from ),
+			:to( $p.to ),
+			:content( $p.Str )
+		)
+	}
+
+	multi method make-infix-from( Mu $p, Str $token ) {
+		$p.Str ~~ m{ ($token) };
+		my ( $offset ) = $0.from;
+		Perl6::Operator::Infix.new(
+			:from( $p.from + $offset ),
+			:to( $p.from + $offset + 2 ),
+			:content( $token )
+		)
+	}
+
+	method make-postcircumfix( Mu $p, @child ) {
+		$p.Str ~~ m{ ^ (.) }; my $front = ~$0;
+		$p.Str ~~ m{ (.) $ }; my $back = ~$0;
+		Perl6::Operator::PostCircumfix.new(
+			# XXX What is it "post"? Hmm.
+			:delimiter( $front, $back ),
+			:child( @child )
+		)
+	}
+
+	method make-circumfix( Mu $p, @child ) {
+		$p.Str ~~ m{ ^ (.) }; my $front = ~$0;
+		$p.Str ~~ m{ (.) $ }; my $back = ~$0;
+		Perl6::Operator::Circumfix.new(
+			:delimiter( $front, $back ),
+			:child( @child )
+		)
+	}
+
+	method make-whitespace( Str $orig, Int $from, Int $to ) {
+		Perl6::WS.new(
+			:from( $from ),
+			:to( $to ),
+			:content(
+				substr( $orig, $from, $to - $from )
+			)
+		)
+	}
+
+	method populate-whitespace( Str $orig, Int $from, Int $to, @child ) {
 		my Perl6::Element @ws;
 		my $start = $from;
 		my $end = $to;
+
 		for @child {
-			if $_.from > $start {
+			if $start < $_.from {
 				@ws.push(
-					Perl6::WS.new(
-						:from( $start ),
-						:to( $_.from ),
-						:content(
-							substr( $orig, $start, $_.from - $start )
-						)
+					self.make-whitespace(
+						$orig, $start, $_.from
 					)
 				)
 			}
-			@ws.push( $_ );
-			$start = $_.from;
+			$start = $_.to;
+			@ws.push( $_ )
 		}
-		$start = @child[*-1].to;
 		if $start < $end {
 			@ws.push(
-				Perl6::WS.new(
-					:from( $start ),
-					:to( $end ),
-					:content(
-						substr( $orig, $start, $end - $start )
-					)
+				self.make-whitespace(
+					$orig, $start, $end
 				)
 			)
 		}
@@ -607,20 +654,35 @@ class Perl6::Tidy::Factory {
 		return True
 	}
 
-	method _arglist( Mu $p ) {
-#`(
-		for $parsed.list {
-			next if self.assert-hash-keys( $_, [< EXPR >] );
-			next if self.assert-Bool( $_ );
+	method _arglist( Mu $p ) returns Array[Perl6::Element] {
+		if $p.list {
+			my Perl6::Element @child;
+			for $p.list {
+				if self.assert-hash-keys( $_, [< EXPR >] ) {
+					@child.push(
+						self._EXPR( $_.hash.<EXPR> )
+					)
+				}
+				elsif $_.Bool {
+					# XXX Boolean represents blank?
+				}
+				else {
+					say $_.hash.keys.gist;
+					warn "Unhandled case"
+				}
+			}
+			@child
 		}
-		if self.assert-hash-keys( $parsed,
+		elsif self.assert-hash-keys( $p,
 				[< deftermnow initializer term_init >],
-				[< trait >] );
-		if self.assert-Int( $parsed );
-		if self.assert-Bool( $parsed );
-)
-		if self.assert-hash-keys( $p, [< EXPR >] ) {
-			self._EXPR( $p.hash.<EXPR> )
+				[< trait >] ) {
+			die "Not implemented yet";
+		}
+		elsif self.assert-Int( $p ) {
+			die "Not implemented yet";
+		}
+		elsif self.assert-Bool( $p ) {
+			die "Not implemented yet";
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -629,16 +691,15 @@ class Perl6::Tidy::Factory {
 	}
 
 	method _args( Mu $p ) {
-#`(
-		if self.assert-hash-keys( $p, [< invocant semiarglist >] );
-)
-		if self.assert-hash-keys( $p, [< semiarglist >] ) {
-			$p.Str ~~ m{ ^ (.) }; my $front = ~$0;
-			$p.Str ~~ m{ (.) $ }; my $back = ~$0;
-			Perl6::Operator::PostCircumfix.new(
-				:delimiter( $front, $back ),
-				:child( )
-			)
+		if self.assert-hash-keys( $p, [< invocant semiarglist >] ) {
+			die "Not implemented yet";
+		}
+		elsif self.assert-hash-keys( $p, [< semiarglist >] ) {
+			my Perl6::Element @child;
+			@child.append(
+				self._semiarglist( $p.hash.<semiarglist> )
+			);
+			self.make-postcircumfix( $p, @child )
 		}
 		elsif self.assert-hash-keys( $p, [< arglist >] ) {
 			self._arglist( $p.hash.<arglist> );
@@ -647,10 +708,10 @@ class Perl6::Tidy::Factory {
 			self._EXPR( $p.hash.<EXPR> );
 		}
 		elsif $p.Str {
-			$p.Str
+			die "Not implemented yet"
 		}
 		elsif $p.Bool {
-			return ()
+			die "Not implemented yet"
 		}
 		else {
 			say $p.Int if $p.Int;
@@ -659,11 +720,8 @@ class Perl6::Tidy::Factory {
 		}
 	}
 
-	method _assertion( Mu $p ) returns Bool {
-say "Assertion fired";
-#`(
-		if $p.Str;
-)
+	method _assertion( Mu $p ) {
+		warn "Untested method";
 		if self.assert-hash-keys( $p, [< var >] ) {
 			self._var( $p.hash.<var> )
 		}
@@ -676,28 +734,31 @@ say "Assertion fired";
 		elsif self.assert-hash-keys( $p, [< codeblock >] ) {
 			self._codeblock( $p.hash.<codeblock> )
 		}
+		elsif $p.Str {
+			die "Not implemented yet";
+		}
 		else {
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
 
-	method _atom( Mu $p ) returns Bool {
-say "Atom fired";
-#`(
-		if self.assert-Str( $p );
-)
+	method _atom( Mu $p ) {
+		warn "Untested method";
 		if self.assert-hash-keys( $p, [< metachar >] ) {
 			self._metachar( $p.hash.<metachar> )
 		}
+		elsif $p.Str {
+			die "Not implemented yet";
+		}
 		else {
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
 	}
 
-	method _babble( Mu $p ) returns Bool {
-say "Babble fired";
+	method _babble( Mu $p ) {
+		warn "Untested method";
 		if self.assert-hash-keys( $p, [< B >], [< quotepair >] ) {
 			self._B( $p.hash.<B> )
 		}
@@ -707,15 +768,15 @@ say "Babble fired";
 		}
 	}
 
-	method _backmod( Mu $p ) returns Bool { $p.hash.<backmod>.Bool }
+	method _backmod( Mu $p ) { $p.hash.<backmod>.Bool }
 
-	method _backslash( Mu $p ) returns Bool {
-say "BackSlash fired";
-#`(
-		if self.assert-Str( $p );
-)
+	method _backslash( Mu $p ) {
+		warn "Untested method";
 		if self.assert-hash-keys( $p, [< sym >] ) {
 			self._sym( $p.hash.<sym> )
+		}
+		elsif $p.Str {
+			die "Not implemented yet";
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -723,9 +784,8 @@ say "BackSlash fired";
 		}
 	}
 
-	method _binint( Mu $p ) {
-key-boundary $p;
-warn 1;
+	# XXX Unused
+	method _binint( Mu $p ) returns Perl6::Element {
 		Perl6::Number::Binary.new(
 			:from( $p.from ),
 			:to( $p.to ),
@@ -745,14 +805,14 @@ warn 1;
 
 	method _blockoid( Mu $p ) {
 		if self.assert-hash-keys( $p, [< statementlist >] ) {
-			$p.Str ~~ m{ ^ (.) }; my $front = ~$0;
-			$p.Str ~~ m{ (.) $ }; my $back = ~$0;
-			my @child;
+			my Perl6::Element @child;
 			@child.append(
 				self._statementlist(
 					$p.hash.<statementlist>
 				)
 			);
+			$p.Str ~~ m{ ^ (.) }; my $front = ~$0;
+			$p.Str ~~ m{ (.) $ }; my $back = ~$0;
 			Perl6::Block.new(
 				:delimiter( $front, $back ),
 				:child( @child )
@@ -764,8 +824,8 @@ warn 1;
 		}
 	}
 
-	method _blorst( Mu $p ) returns Bool {
-say "Blorst fired";
+	method _blorst( Mu $p ) {
+		warn "Untested method";
 		if self.assert-hash-keys( $p, [< statement >] ) {
 			self._statement( $p.hash.<statement> )
 		}
@@ -778,8 +838,8 @@ say "Blorst fired";
 		}
 	}
 
-	method _bracket( Mu $p ) returns Bool {
-say "Bracket fired";
+	method _bracket( Mu $p ) {
+		warn "Untested method";
 		if self.assert-hash-keys( $p, [< semilist >] ) {
 			self._semilist( $p.hash.<semilist> )
 		}
@@ -787,23 +847,37 @@ say "Bracket fired";
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
-	}
+	} 
 
-	method _cclass_elem( Mu $p ) returns Bool {
-say "CClassElem fired";
-		for $p.list {
-			# _Sign is a Str/Bool leaf
-			next if self.assert-hash-keys( $_,
-					[< identifier name sign >],
-					[< charspec >] );
-			# _Sign is a Str/Bool leaf
-			next if self.assert-hash-keys( $_,
-					[< sign charspec >] );
+	method _cclass_elem( Mu $p ) {
+		warn "Untested method";
+		if $p.list {
+			my Perl6::Element @child;
+			for $p.list {
+				if self.assert-hash-keys( $_,
+						[< identifier name sign >],
+						[< charspec >] ) {
+					die "Not implemented yet"
+				}
+				elsif self.assert-hash-keys( $_,
+						[< sign charspec >] ) {
+					die "Not implemented yet"
+				}
+				else {
+					say $p.hash.keys.gist;
+					warn "Unhandled case"
+				}
+			}
+			@child
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
-	method _charspec( Mu $p ) returns Bool {
-say "CharSpec fired";
+	method _charspec( Mu $p ) {
+		warn "Untested method";
 # XXX work on this, of course.
 		return True if $p.list;
 	}
@@ -826,34 +900,22 @@ say "CharSpec fired";
 		}
 		elsif self.assert-hash-keys( $p, [< semilist >] ) {
 			# XXX <semilist> can probably be worked with
-			$p.Str ~~ m{ ^ (.) }; my $front = ~$0;
-			$p.Str ~~ m{ (.) $ }; my $back = ~$0;
+			my @ws;
 			if $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> {
-				my @child;
+				my Perl6::Element @child;
 				@child.push(
 self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 				);
-				my @ws = self.add-whitespace(
+				@ws = self.populate-whitespace(
 					$p.Str,
 					$p.from + 1, $p.to - 1, @child
-				);
-				Perl6::Operator::PostCircumfix.new(
-					:delimiter( $front, $back ),
-					:child( @ws )
 				)
 			}
-			else {
-				Perl6::Operator::PostCircumfix.new(
-					:delimiter( $front, $back ),
-					:child( )
-				)
-			}
+			self.make-postcircumfix( $p, @ws )
 		}
 		elsif self.assert-hash-keys( $p, [< nibble >] ) {
 			# XXX <nibble> can probably be worked with
-			$p.Str ~~ m{ ^ (.) }; my $front = ~$0;
-			$p.Str ~~ m{ (.) $ }; my $back = ~$0;
-			my @child;
+			my Perl6::Element @child;
 			@child.push(
 				# leading and trailing space elided
 				Perl6::Operator::Prefix.new(
@@ -862,10 +924,7 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 					:content( $p.hash.<nibble>.Str )
 				)
 			);
-			Perl6::Operator::Circumfix.new(
-				:delimiter( $front, $back ),
-				:child( @child )
-			)
+			self.make-circumfix( $p, @child )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -873,8 +932,8 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 		}
 	}
 
-	method _codeblock( Mu $p ) returns Bool {
-say "CodeBlock fired";
+	method _codeblock( Mu $p ) {
+		warn "Untested method";
 		if self.assert-hash-keys( $p, [< block >] ) {
 			self._block( $p.hash.<block> )
 		}
@@ -884,8 +943,8 @@ say "CodeBlock fired";
 		}
 	}
 
-	method _coercee( Mu $p ) returns Bool {
-say "Coercee fired";
+	method _coercee( Mu $p ) {
+		warn "Untested method";
 		if self.assert-hash-keys( $p, [< semilist >] ) {
 			self._semilist( $p.hash.<semilist> )
 		}
@@ -923,7 +982,7 @@ say "Coercee fired";
 			(
 				# leading and trailing space elided
 				# XXX Note that ':' is part of the expression.
-				Perl6::Operator::Infix.new(
+				Perl6::Operator::Prefix.new(
 					:from( $p.from ),
 					:to( $p.from + 1 ),
 					:content( Q{:} )
@@ -942,7 +1001,7 @@ say "Coercee fired";
 		elsif self.assert-hash-keys( $p, [< fakesignature >] ) {
 			# Synthesize the 'from' marker for ':'
 			(
-				Perl6::Operator::Infix.new(
+				Perl6::Operator::Prefix.new(
 					:from( $p.from ),
 					:to( $p.from + 1 ),
 					:content( Q{:} )
@@ -970,7 +1029,7 @@ say "Coercee fired";
 	}
 
 	method _colonpairs( Mu $p ) {
-say "ColonPairs fired";
+		warn "Untested method";
 		if $p ~~ Hash {
 			return True if $p.<D>;
 			return True if $p.<U>;
@@ -982,15 +1041,17 @@ say "ColonPairs fired";
 	}
 
 	method _contextualizer( Mu $p ) {
-say "Contextualizer fired";
-#`(
-		if self.assert-hash-keys( $p, [< coercee circumfix sigil >] );
-)
+		warn "Untested method";
+		if self.assert-hash-keys( $p, [< coercee circumfix sigil >] ) {
+			die "Not implemented yet";
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
-	method _decint( Mu $p ) {
-key-boundary $p;
-warn 8;
+	method _decint( Mu $p ) returns Perl6::Element {
 		Perl6::Number::Decimal.new(
 			:from( $p.from ),
 			:to( $p.to ),
@@ -999,15 +1060,16 @@ warn 8;
 	}
 
 	method _declarator( Mu $p ) {
-#`(
 		if self.assert-hash-keys( $p,
 				[< deftermnow initializer term_init >],
-				[< trait >] );
-		if self.assert-hash-keys( $p,
-				[< initializer signature >], [< trait >] );
-)
-
-		if self.assert-hash-keys( $p,
+				[< trait >] ) {
+			die "Not implemented yet";
+		}
+		elsif self.assert-hash-keys( $p,
+				[< initializer signature >], [< trait >] ) {
+			die "Not implemented yet";
+		}
+		elsif self.assert-hash-keys( $p,
 				  [< initializer variable_declarator >],
 				  [< trait >] ) {
 			(
@@ -1042,22 +1104,30 @@ warn 8;
 	}
 
 	method _DECL( Mu $p ) {
-say "DECL fired";
-#`(
+		warn "Untested method";
 		if self.assert-hash-keys( $p,
 				[< deftermnow initializer term_init >],
-				[< trait >] );
-		if self.assert-hash-keys( $p,
+				[< trait >] ) {
+			die "Not implemented yet";
+		}
+		elsif self.assert-hash-keys( $p,
 				[< deftermnow initializer signature >],
-				[< trait >] );
-		if self.assert-hash-keys( $p,
-				[< initializer signature >], [< trait >] );
-		if self.assert-hash-keys( $p,
+				[< trait >] ) {
+			die "Not implemented yet";
+		}
+		elsif self.assert-hash-keys( $p,
+				[< initializer signature >], [< trait >] ) {
+			die "Not implemented yet";
+		}
+		elsif self.assert-hash-keys( $p,
 				[< initializer variable_declarator >],
-				[< trait >] );
-		if self.assert-hash-keys( $p, [< package_def sym >] );
-)
-		if self.assert-hash-keys( $p,
+				[< trait >] ) {
+			die "Not implemented yet";
+		}
+		elsif self.assert-hash-keys( $p, [< package_def sym >] ) {
+			die "Not implemented yet";
+		}
+		elsif self.assert-hash-keys( $p,
 				[< regex_declarator >],
 				[< trait >] ) {
 			self._regex_declarator( $p.hash.<regex_declarator> )
@@ -1085,7 +1155,7 @@ say "DECL fired";
 		}
 	}
 
-	method _dec_number( Mu $p ) {
+	method _dec_number( Mu $p ) returns Perl6::Element {
 		if self.assert-hash-keys( $p, [< int coeff escale frac >] ) {
 			self.__FloatingPoint( $p )
 		}
@@ -1105,19 +1175,25 @@ say "DECL fired";
 	}
 
 	method _default_value( Mu $p ) {
-		my @child;
-		for $p.list {
-			if self.assert-hash-keys( $_, [< EXPR >] ) {
-				@child.push(
-					self._EXPR( $_.hash.<EXPR> )
-				)
+		if $p.list {
+			my Perl6::Element @child;
+			for $p.list {
+				if self.assert-hash-keys( $_, [< EXPR >] ) {
+					@child.push(
+						self._EXPR( $_.hash.<EXPR> )
+					)
+				}
+				else {
+					say $p.hash.keys.gist;
+					warn "Unhandled case"
+				}
 			}
-			else {
-				say $p.hash.keys.gist;
-				warn "Unhandled case"
-			}
+			@child.flat
 		}
-		@child.flat
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
 	method _deflongname( Mu $p ) {
@@ -1131,7 +1207,7 @@ say "DECL fired";
 	}
 
 	method _defterm( Mu $p ) {
-say "DefTerm fired";
+		warn "Untested method";
 		if self.assert-hash-keys( $p, [< identifier colonpair >] ) {
 			(
 				self._identifier( $p.hash.<identifier> ),
@@ -1150,7 +1226,7 @@ say "DefTerm fired";
 	}
 
 	method _deftermnow( Mu $p ) {
-say "DefTermNow fired";
+		warn "Untested method";
 		if self.assert-hash-keys( $p, [< defterm >] ) {
 			self._defterm( $p.hash.<defterm> )
 		}
@@ -1161,12 +1237,11 @@ say "DefTermNow fired";
 	}
 
 	method _desigilname( Mu $p ) {
-say "DeSigilName fired";
-#`(
-		if $p.Str;
-)
 		if self.assert-hash-keys( $p, [< longname >] ) {
 			self._longname( $p.hash.<longname> )
+		}
+		elsif $p.Str {
+			die "Not implemented yet"
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -1175,7 +1250,7 @@ say "DeSigilName fired";
 	}
 
 	method _dig( Mu $p ) {
-say "Dig fired";
+		warn "Untested method";
 		for $p.list {
 			# UTF-8....
 			if $_ {
@@ -1188,17 +1263,15 @@ say "Dig fired";
 		}
 	}
 
-	method _doc( Mu $p ) returns Bool { $p.hash.<doc>.Bool }
+	method _doc( Mu $p ) returns Bool {
+		$p.hash.<doc>.Bool
+	}
 
 	method _dotty( Mu $p ) {
 		if self.assert-hash-keys( $p, [< sym dottyop O >] ) {
 			(
 				# leading and trailing space elided
-				Perl6::Operator::Prefix.new(
-					:from( $p.hash.<sym>.from ),
-					:to( $p.hash.<sym>.to ),
-					:content( $p.hash.<sym>.Str )
-				),
+				self.make-prefix-from( $p.hash.<sym> ),
 				self._dottyop( $p.hash.<dottyop> )
 			)
 		}
@@ -1209,11 +1282,10 @@ say "Dig fired";
 	}
 
 	method _dottyop( Mu $p ) {
-#`(
-		return True if self.assert-hash-keys( $p,
-				[< sym postop >], [< O >] );
-)
-		if self.assert-hash-keys( $p, [< colonpair >] ) {
+		if self.assert-hash-keys( $p, [< sym postop >], [< O >] ) {
+			die "Not implemented yet"
+		}
+		elsif self.assert-hash-keys( $p, [< colonpair >] ) {
 			self._colonpair( $p.hash.<colonpair> )
 		}
 		elsif self.assert-hash-keys( $p, [< methodop >] ) {
@@ -1226,7 +1298,7 @@ say "Dig fired";
 	}
 
 	method _dottyopish( Mu $p ) {
-say "DottyOpish fired";
+		warn "Untested method";
 		if self.assert-hash-keys( $p, [< term >] ) {
 			self._term( $p.hash.<term> )
 		}
@@ -1237,7 +1309,7 @@ say "DottyOpish fired";
 	}
 
 	method _e1( Mu $p ) {
-say "E1 fired";
+		warn "Untested method";
 		if self.assert-hash-keys( $p, [< scope_declarator >] ) {
 			self._scope_declarator( $p.hash.<scope_declarator> )
 		}
@@ -1248,27 +1320,34 @@ say "E1 fired";
 	}
 
 	method _e2( Mu $p ) {
-say "E2 fired";
-#`(
-		if self.assert-hash-keys( $p, [< infix OPER >] );
-)
+		warn "Untested method";
+		if self.assert-hash-keys( $p, [< infix OPER >] ) {
+			die "Not implemented yet"
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
 	method _e3( Mu $p ) {
-say "E3 fired";
-#`(
+		warn "Untested method";
 		if self.assert-hash-keys( $p, [< postfix OPER >],
-				[< postfix_prefix_meta_operator >] );
-)
+				[< postfix_prefix_meta_operator >] ) {
+			die "Not implemented yet"
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
 	method _else( Mu $p ) {
-say "Else fired";
-#`(
-		if self.assert-hash-keys( $p, [< sym blorst >] );
-		if self.assert-hash-keys( $p, [< blockoid >] );
-)
-		if self.assert-hash-keys( $p, [< blockoid >] ) {
+		warn "Untested method";
+		if self.assert-hash-keys( $p, [< sym blorst >] ) {
+			die "Not implemented yet"
+		}
+		elsif self.assert-hash-keys( $p, [< blockoid >] ) {
 			self._blockoid( $p.hash.<blockoid> )
 		}
 		else {
@@ -1278,10 +1357,14 @@ say "Else fired";
 	}
 
 	method _escale( Mu $p ) {
-say "EScale fired";
-#`(
-		if self.assert-hash-keys( $p, [< sign decint >] );
-)
+		warn "Untested method";
+		if self.assert-hash-keys( $p, [< sign decint >] ) {
+			die "Not implemented yet"
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
 	method __Term( Mu $p ) {
@@ -1364,17 +1447,15 @@ say "EScale fired";
 				[< postcircumfix OPER >],
 				[< postfix_prefix_meta_operator >] ) {
 			# XXX Work on this
-			$p.hash.<postcircumfix>.Str ~~ m{ ^ (.) }; my $front = ~$0;
-			$p.hash.<postcircumfix>.Str ~~ m{ (.) $ }; my $back = ~$0;
-			my @child;
+			my Perl6::Element @child;
 			@child.push(
 				self._postcircumfix( $p.hash.<postcircumfix> )
 			);
 			(
 				self.__Term( $p.list.[0] ),
-				Perl6::Operator::PostCircumfix.new(
-					:delimiter( $front, $back ),
-					:child( @child )
+				self.make-postcircumfix(
+					$p.hash.<postcircumfix>,
+					@child
 				)
 			).flat
 		}
@@ -1399,23 +1480,11 @@ say "EScale fired";
 		elsif self.assert-hash-keys( $p, [< infix OPER >] ) {
 			# XXX fix later
 			if $p.list.elems == 3 {
-				# Synthesize the 'from' and 'to' markers for 'where'
-				$p.Str ~~ m{ ('??') .+ ('!!') };
-				my ( $from-q ) = $0.from;
-				my ( $from-e ) = $1.from;
 				(
 					self.__Term( $p.list.[0] ),
-					Perl6::Operator::Infix.new(
-						:from( $p.from + $from-q ),
-						:to( $p.from + $from-q + 2 ),
-						:content( Q{??} )
-					),
+					self.make-infix-from( $p, Q{??} ),
 					self.__Term( $p.list.[1] ),
-					Perl6::Operator::Infix.new(
-						:from( $p.from + $from-e ),
-						:to( $p.from + $from-e + 2 ),
-						:content( Q{!!} )
-					),
+					self.make-infix-from( $p, Q{!!} ),
 					self.__Term( $p.list.[2] )
 				).flat
 			}
@@ -1435,11 +1504,7 @@ say "EScale fired";
 		}
 		elsif self.assert-hash-keys( $p, [< sym args >] ) {
 			# leading and trailing space elided
-			Perl6::Operator::Infix.new(
-				:from( $p.hash.<sym>.from ),
-				:to( $p.hash.<sym>.to ),
-				:content( $p.hash.<sym>.Str )
-			)
+			self.make-infix-from( $p.hash.<sym> )
 		}
 		elsif self.assert-hash-keys( $p, [< longname args >] ) {
 			# XXX Needs work later on
@@ -1491,7 +1556,7 @@ say "EScale fired";
 	}
 
 	method _fake_infix( Mu $p ) {
-say "FakeInfix fired";
+		warn "Untested method";
 		if self.assert-hash-keys( $p, [< O >] ) {
 			self._O( $p.hash.<O> )
 		}
@@ -1503,11 +1568,7 @@ say "FakeInfix fired";
 
 	method _fakesignature( Mu $p ) {
 		if self.assert-hash-keys( $p, [< signature >] ) {
-			# XXX Fix
-			Perl6::Operator::PostCircumfix.new(
-				:delimiter( '(', ')' ),
-				:child( )
-			)
+			self._signature( $p.hash.<signature> )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -1517,19 +1578,17 @@ say "FakeInfix fired";
 
 	method _fatarrow( Mu $p ) {
 		if self.assert-hash-keys( $p, [< key val >] ) {
-			# Synthesize the 'from' and 'to' markers for '=>'
-			$p.Str ~~ m{ ('=>') };
-			my ( $from ) = $0.from;
-			(
+say $p.Str;
+			my @child = (
 				self._key( $p.hash.<key> ),
-				# XXX Note that we synthesize here.
-				Perl6::Operator::Infix.new(
-					:from( $p.from + $from ),
-					:to( $p.from + $from + 2 ),
-					:content( Q{=>} )
-				),
+				self.make-infix-from( $p, Q{=>} ),
 				self._val( $p.hash.<val> )
-			)
+			);
+			my @ws = self.populate-whitespace(
+				$p.Str,
+				$p.from, $p.to, @child
+			);
+			@ws
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -1537,7 +1596,7 @@ say "FakeInfix fired";
 		}
 	}
 
-	method __FloatingPoint( Mu $p ) {
+	method __FloatingPoint( Mu $p ) returns Perl6::Element {
 		# leading and trailing space elided
 		Perl6::Number::Floating.new(
 			:from( $p.from ),
@@ -1546,9 +1605,8 @@ say "FakeInfix fired";
 		)
 	}
 
-	method _hexint( Mu $p ) {
-key-boundary $p;
-warn 15;
+	# XXX Unused
+	method _hexint( Mu $p ) returns Perl6::Element {
 		Perl6::Number::Hexadecimal.new(
 			:from( $p.from ),
 			:to( $p.to ),
@@ -1557,12 +1615,20 @@ warn 15;
 	}
 
 	method _identifier( Mu $p ) {
-#`(
-		for $p.list {
-			next if self.assert-Str( $_ );
+		if $p.list {
+			my Perl6::Element @child;
+			for $p.list {
+				if self.assert-Str( $_ ) {
+					die "Not implemented yet"
+				}
+				else {
+					say $p.hash.keys.gist;
+					warn "Unhandled case"
+				}
+			}
+			@child
 		}
-)
-		if $p.Str {
+		elsif $p.Str {
 			# leading and trailing space elided
 			Perl6::Bareword.new(
 				:from( $p.from ),
@@ -1577,25 +1643,16 @@ warn 15;
 	}
 
 	method _infix( Mu $p ) {
-#`(
-		if self.assert-hash-keys( $p, [< infix OPER >] );
-)
-		if self.assert-hash-keys( $p, [< sym O >] ) {
+		if self.assert-hash-keys( $p, [< infix OPER >] ) {
+			die "Not implemented yet";
+		}
+		elsif self.assert-hash-keys( $p, [< sym O >] ) {
 			# leading and trailing space elided
-			Perl6::Operator::Infix.new(
-				:from( $p.hash.<sym>.from ),
-				:to( $p.hash.<sym>.to ),
-				:content( $p.hash.<sym>.Str )
-			)
+			self.make-infix-from( $p.hash.<sym> )
 		}
 		elsif self.assert-hash-keys( $p, [< EXPR O >] ) {
-key-boundary $p.hash.<EXPR>;
-warn 18;
-			Perl6::Operator::Infix.new(
-				:from( $p.hash.<EXPR>.from ),
-				:to( $p.hash.<EXPR>.to ),
-				:content( $p.hash.<EXPR>.Str )
-			)
+			# XXX Untested
+			self.make-infix-from( $p.hash.<EXPR> )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -1604,16 +1661,19 @@ warn 18;
 	}
 
 	method _infixish( Mu $p ) {
-say "Infixish fired";
-#`(
-		if self.assert-hash-keys( $p, [< infix OPER >] );
-)
+		warn "Untested method";
+		if self.assert-hash-keys( $p, [< infix OPER >] ) {
+			die "Not implemented yet";
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
 	method _infix_prefix_meta_operator( Mu $p ) {
 		if self.assert-hash-keys( $p, [< sym infixish O >] ) {
-key-boundary $p.hash.<sym>;
-warn 19;
+			# XXX Untested
 			Perl6::Operator::Infix.new(
 				:from( $p.hash.<sym>.from ),
 				:to( $p.hash.<sym>.to ),
@@ -1629,18 +1689,14 @@ warn 19;
 	}
 
 	method _initializer( Mu $p ) {
-#`(
-		if self.assert-hash-keys( $p, [< dottyopish sym >] );
-)
-		if self.assert-hash-keys( $p, [< sym EXPR >] ) {
+		if self.assert-hash-keys( $p, [< dottyopish sym >] ) {
+			die "Not implemented yet"
+		}
+		elsif self.assert-hash-keys( $p, [< sym EXPR >] ) {
 			(
 				# XXX refactor down?
 				# leading and trailing space elided
-				Perl6::Operator::Infix.new(
-					:from( $p.hash.<sym>.from ),
-					:to( $p.hash.<sym>.to )
-					:content( $p.hash.<sym>.Str )
-				),
+				self.make-infix-from( $p.hash.<sym> ),
 				self._EXPR( $p.hash.<EXPR> )
 			)
 		}
@@ -1692,17 +1748,17 @@ warn 19;
 		else {
 			Perl6::Unimplemented.new(
 				:content( "Unknown integer type" )
-			);
+			)
 		}
 	}
 
 	method _invocant( Mu $p ) {
-say "Invocant fired";
+		warn "Untested method";
 		CATCH {
 			when X::Multi::NoMatch { }
 		}
-		#return True if $p ~~ QAST::Want;
-		#return True if self.assert-hash-keys( $p, [< XXX >] );
+		#if $p ~~ QAST::Want;
+		#if self.assert-hash-keys( $p, [< XXX >] );
 # XXX Fixme
 #say $p.dump;
 #say $p.dump_annotations;
@@ -1710,7 +1766,7 @@ say "Invocant fired";
 return True;
 	}
 
-	method _key( Mu $p ) {
+	method _key( Mu $p ) returns Perl6::Element {
 		# leading and trailing space elided
 		Perl6::Bareword.new(
 			:from( $p.from ),
@@ -1719,10 +1775,12 @@ return True;
 		)
 	}
 
-	method _lambda( Mu $p ) returns Str { $p.hash.<lambda>.Str }
+	method _lambda( Mu $p ) returns Str {
+		$p.hash.<lambda>.Str
+	}
 
 	method _left( Mu $p ) {
-say "Left fired";
+		warn "Untested method";
 		if self.assert-hash-keys( $p, [< termseq >] ) {
 			self._termseq( $p.hash.<termseq> )
 		}
@@ -1742,10 +1800,12 @@ say "Left fired";
 		}
 	}
 
-	method _max( Mu $p ) returns Str { $p.hash.<max>.Str }
+	method _max( Mu $p ) returns Str {
+		$p.hash.<max>.Str
+	}
 
 	method _metachar( Mu $p ) {
-say "MetaChar fired";
+		warn "Untested method";
 		if self.assert-hash-keys( $p, [< sym >] ) {
 			self._sym( $p.hash.<sym> )
 		}
@@ -1807,7 +1867,7 @@ say "MetaChar fired";
 				self._args( $p.hash.<args> )
 			)
 		}
-		if self.assert-hash-keys( $p, [< variable >] ) {
+		elsif self.assert-hash-keys( $p, [< variable >] ) {
 			self._variable( $p.hash.<variable> )
 		}
 		elsif self.assert-hash-keys( $p, [< longname >] ) {
@@ -1820,8 +1880,7 @@ say "MetaChar fired";
 	}
 
 	method _min( Mu $p ) {
-say "Min fired";
-		# _decint is a Str/Int leaf
+		warn "Untested method";
 		if self.assert-hash-keys( $p, [< decint VALUE >] ) {
 			self._decint( $p.hash.<decint> )
 		}
@@ -1832,7 +1891,7 @@ say "Min fired";
 	}
 
 	method _modifier_expr( Mu $p ) {
-say "ModifierExpr fired";
+		warn "Untested method";
 		if self.assert-hash-keys( $p, [< EXPR >] ) {
 			self._EXPR( $p.hash.<EXPR> )
 		}
@@ -1843,7 +1902,7 @@ say "ModifierExpr fired";
 	}
 
 	method _module_name( Mu $p ) {
-say "ModuleName fired";
+		warn "Untested method";
 		if self.assert-hash-keys( $p, [< longname >] ) {
 			self._longname( $p.hash.<longname> )
 		}
@@ -1854,17 +1913,32 @@ say "ModuleName fired";
 	}
 
 	method _morename( Mu $p ) {
-say "MoreName fired";
-		for $p.list {
-			next if self.assert-hash-keys( $_, [< identifier >] );
+		warn "Untested method";
+		if $p.list {
+			my Perl6::Element @child;
+			for $p.list {
+				if self.assert-hash-keys( $_,
+					[< identifier >] ) {
+					die "Not implemented yet"
+				}
+				else {
+					say $p.hash.keys.gist;
+					warn "Unhandled case"
+				}
+			}
+			@child
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
 	method _multi_declarator( Mu $p ) {
-#`(
-		if self.assert-hash-keys( $p, [< sym routine_def >] );
-)
-		if self.assert-hash-keys( $p, [< sym declarator >] ) {
+		if self.assert-hash-keys( $p, [< sym routine_def >] ) {
+			die "Not implemented yet"
+		}
+		elsif self.assert-hash-keys( $p, [< sym declarator >] ) {
 			self._sym( $p.hash.<sym> ),
 			self._declarator( $p.hash.<declarator> )
 		}
@@ -1898,13 +1972,12 @@ say "MoreName fired";
 	}
 
 	method _name( Mu $p ) {
-#`(
 		if self.assert-hash-keys( $p,
 			[< param_var type_constraint quant >],
-			[< default_value modifier trait post_constraint >] );
-		if self.assert-hash-keys( $p, [< subshortname >] );
-)
-		if self.assert-hash-keys( $p,
+			[< default_value modifier trait post_constraint >] ) {
+			die "Not implemented yet"
+		}
+		elsif self.assert-hash-keys( $p,
 			[< identifier >], [< morename >] ) {
 			# leading and trailing space elided
 			Perl6::Bareword.new(
@@ -1912,6 +1985,9 @@ say "MoreName fired";
 				:to( $p.to ),
 				:content( $p.Str )
 			)
+		}
+		elsif self.assert-hash-keys( $p, [< subshortname >] ) {
+			die "Not implemented yet"
 		}
 		elsif self.assert-hash-keys( $p, [< morename >] ) {
 			# leading and trailing space elided
@@ -1937,11 +2013,11 @@ warn 28;
 	}
 
 	method _nibble( Mu $p ) {
-#`(
-		if $p.Bool;
-)
 		if self.assert-hash-keys( $p, [< termseq >] ) {
 			self._termseq( $p.hash.<termseq> )
+		}
+		elsif $p.Bool {
+			die "Not implemented yet"
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -1950,7 +2026,7 @@ warn 28;
 	}
 
 	method _nibbler( Mu $p ) {
-say "Nibbler fired";
+		warn "Untested method";
 		if self.assert-hash-keys( $p, [< termseq >] ) {
 			self._termseq( $p.hash.<termseq> )
 		}
@@ -1960,21 +2036,48 @@ say "Nibbler fired";
 		}
 	}
 
-	method _normspace( Mu $p ) returns Str { $p.hash.<normspace>.Str }
+	method _normspace( Mu $p ) returns Str {
+		$p.hash.<normspace>.Str
+	}
 
 	method _noun( Mu $p ) {
-say "Noun fired";
-		for $p.list {
-			next if self.assert-hash-keys( $_,
-				[< sigmaybe sigfinal quantifier atom >] );
-			next if self.assert-hash-keys( $_,
-				[< sigfinal quantifier separator atom >] );
-			next if self.assert-hash-keys( $_,
-				[< sigmaybe sigfinal separator atom >] );
-			next if self.assert-hash-keys( $_,
-				[< atom sigfinal quantifier >] );
-			next if self.assert-hash-keys( $_,
-				[< atom >], [< sigfinal >] );
+		warn "Untested method";
+		if $p.list {
+			my Perl6::Element @child;
+			for $p.list {
+				if self.assert-hash-keys( $_,
+					[< sigmaybe sigfinal
+					   quantifier atom >] ) {
+					die "Not implemented yet"
+				}
+				elsif self.assert-hash-keys( $_,
+					[< sigfinal quantifier
+					   separator atom >] ) {
+					die "Not implemented yet"
+				}
+				elsif self.assert-hash-keys( $_,
+					[< sigmaybe sigfinal
+					   separator atom >] ) {
+					die "Not implemented yet"
+				}
+				elsif self.assert-hash-keys( $_,
+					[< atom sigfinal quantifier >] ) {
+					die "Not implemented yet"
+				}
+				elsif self.assert-hash-keys( $_,
+					[< atom >], [< sigfinal >] ) {
+					die "Not implemented yet"
+				}
+				else {
+					say $p.hash.keys.gist;
+					warn "Unhandled case"
+				}
+			}
+			@child;
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -1989,10 +2092,6 @@ say "Noun fired";
 	}
 
 	method _numish( Mu $p ) {
-#`(
-		if self.assert-Num( $p );
-)
-
 		if self.assert-hash-keys( $p, [< dec_number >] ) {
 			self._dec_number( $p.hash.<dec_number> )
 		}
@@ -2002,6 +2101,9 @@ say "Noun fired";
 		elsif self.assert-hash-keys( $p, [< integer >] ) {
 			self._integer( $p.hash.<integer> )
 		}
+		elsif $p.Bool {
+			die "Not implemented yet"
+		}
 		else {
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
@@ -2009,7 +2111,7 @@ say "Noun fired";
 	}
 
 	method _O( Mu $p ) {
-say "O fired";
+		warn "Untested method";
 		CATCH {
 			when X::Multi::NoMatch { .resume }
 			#default { .resume }
@@ -2065,9 +2167,7 @@ say "O fired";
 			and $p.<assoc>;
 	}
 
-	method _octint( Mu $p ) {
-key-boundary $p;
-warn 29;
+	method _octint( Mu $p ) returns Perl6::Element {
 		Perl6::Number::Octal.new(
 			:from( $p.from ),
 			:to( $p.to ),
@@ -2076,36 +2176,50 @@ warn 29;
 	}
 
 	method _op( Mu $p ) {
-say "Op fired";
-#`(
+		warn "Untested method";
 		if self.assert-hash-keys( $p,
-			     [< infix_prefix_meta_operator OPER >] );
-		if self.assert-hash-keys( $p, [< infix OPER >] );
-)
+			     [< infix_prefix_meta_operator OPER >] ) {
+			die "Not implemented yet"
+		}
+		elsif self.assert-hash-keys( $p, [< infix OPER >] ) {
+			die "Not implemented yet"
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
 	method _OPER( Mu $p ) {
-#`(
-		if self.assert-hash-keys( $p, [< sym infixish O >] );
-		if self.assert-hash-keys( $p, [< sym O >] );
-		if self.assert-hash-keys( $p, [< EXPR O >] );
-		if self.assert-hash-keys( $p, [< semilist O >] );
-		if self.assert-hash-keys( $p, [< nibble O >] );
-		if self.assert-hash-keys( $p, [< arglist O >] );
-		if self.assert-hash-keys( $p, [< dig O >] );;
-		if self.assert-hash-keys( $p, [< O >] );
-)
-		if self.assert-hash-keys( $p, [< sym dottyop O >] ) {
-key-boundary $p.hash.<sym>;
-warn 30;
+		if self.assert-hash-keys( $p, [< sym infixish O >] ) {
+			die "Not implemented yet"
+		}
+		elsif self.assert-hash-keys( $p, [< sym dottyop O >] ) {
 			(
-				Perl6::Operator::Infix.new(
-					:from( $p.hash.<sym>.from ),
-					:to( $p.hash.<sym>.to ),
-					:content( $p.hash.<sym>.str )
-				),
+				self.make-infix-from( $p.hash.<sym> ),
 				self._dottyop( $p.hash.<dottyop> )
 			)
+		}
+		elsif self.assert-hash-keys( $p, [< sym O >] ) {
+			die "Not implemented yet"
+		}
+		elsif self.assert-hash-keys( $p, [< EXPR O >] ) {
+			die "Not implemented yet"
+		}
+		elsif self.assert-hash-keys( $p, [< semilist O >] ) {
+			die "Not implemented yet"
+		}
+		elsif self.assert-hash-keys( $p, [< nibble O >] ) {
+			die "Not implemented yet"
+		}
+		elsif self.assert-hash-keys( $p, [< arglist O >] ) {
+			die "Not implemented yet"
+		}
+		elsif self.assert-hash-keys( $p, [< dig O >] ) {
+			die "Not implemented yet"
+		}
+		elsif self.assert-hash-keys( $p, [< O >] ) {
+			die "Not implemented yet"
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -2151,7 +2265,7 @@ warn 30;
 	}
 
 	method _parameter( Mu $p ) {
-		my @child;
+		my Perl6::Element @child;
 		my $count = 0;
 		for $p.list {
 			if self.assert-hash-keys( $_,
@@ -2204,15 +2318,8 @@ warn 30;
 					self._param_var( $_.hash.<param_var> )
 				);
 				# XXX Should be possible to refactor...
-				# Synthesize the 'from' and 'to' markers for '=>'
-				$p.Str ~~ m{ ('=') };
-				my ( $from ) = $0.from;
 				@child.append(
-					Perl6::Operator::Infix.new(
-						:from( $from ),
-						:to( $from + 1 ),
-						:content( Q{=} )
-					)
+					self.make-infix-from( $p, Q{=} )
 				);
 				@child.append(
 					self._default_value(
@@ -2234,11 +2341,11 @@ warn 30;
 				[< named_param quant >],
 				[< default_value type_constraint modifier
 				   trait post_constraint >] ) {
-				# Synthesize the 'from' and 'to' markers for '=>'
+				# Synthesize the 'from' and 'to' markers for ':'
 				$p.Str ~~ m{ (':') };
 				my ( $from ) = $0.from;
 				@child.append(
-					Perl6::Operator::Infix.new(
+					Perl6::Operator::Prefix.new(
 						:from( $from ),
 						:to( $from + 1 ),
 						:content( Q{:} )
@@ -2352,7 +2459,7 @@ warn 30;
 			self._signature( $p.hash.<signature> )
 		}
 		elsif self.assert-hash-keys( $p, [< sigil >] ) {
-			self.sSigil( $p.hash.<sigil> )
+			self._sigil( $p.hash.<sigil> )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -2361,10 +2468,11 @@ warn 30;
 	}
 
 	method _pblock( Mu $p ) {
-#`(
-		if self.assert-hash-keys( $p, [< lambda blockoid signature >] );
-)
-		if self.assert-hash-keys( $p, [< blockoid >] ) {
+		if self.assert-hash-keys( $p,
+				[< lambda blockoid signature >] ) {
+			die "Not implemented yet"
+		}
+		elsif self.assert-hash-keys( $p, [< blockoid >] ) {
 			self._blockoid( $p.hash.<blockoid> )
 		}
 		else {
@@ -2374,10 +2482,10 @@ warn 30;
 	}
 
 	method _postcircumfix( Mu $p ) {
-#`(
-		return True if self.assert-hash-keys( $p, [< arglist O >] );
-)
-		if self.assert-hash-keys( $p, [< semilist O >] ) {
+		if self.assert-hash-keys( $p, [< arglist O >] ) {
+			die "Not implemented yet"
+		}
+		elsif self.assert-hash-keys( $p, [< semilist O >] ) {
 			my $x = $p.hash.<semilist>.Str;
 			$x ~~ s{ ^ (\s*) } = ''; my $leading = $0.chars;
 			$x ~~ s{ (\s+) $ } = ''; my $trailing = $0.chars;
@@ -2415,20 +2523,10 @@ warn 30;
 	method _postfix( Mu $p ) {
 		if self.assert-hash-keys( $p, [< sym O >] ) {
 			# leading and trailing space elided
-			Perl6::Operator::Infix.new(
-				:from( $p.hash.<sym>.from ),
-				:to( $p.hash.<sym>.to ),
-				:content( $p.hash.<sym>.Str )
-			)
+			self.make-infix-from( $p.hash.<sym> )
 		}
 		elsif self.assert-hash-keys( $p, [< dig O >] ) {
-key-boundary $p.hash.<dig>;
-warn 39;
-			Perl6::Operator::Infix.new(
-				:from( $p.hash.<dig>.from ),
-				:to( $p.hash.<dig>.to ),
-				:content( $p.hash.<dig>.Str )
-			)
+			self.make-infix-from( $p.hash.<dig> )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -2437,21 +2535,14 @@ warn 39;
 	}
 
 	method _postop( Mu $p ) {
-say "PostOp fired";
-		return True if self.assert-hash-keys( $p,
-				[< sym postcircumfix O >] );
-		return True if self.assert-hash-keys( $p,
-				[< sym postcircumfix >], [< O >] );
-	}
-
-	method _prefix( Mu $p ) {
-		if self.assert-hash-keys( $p, [< sym O >] ) {
-			# leading and trailing space elided
-			Perl6::Operator::Prefix.new(
-				:from( $p.hash.<sym>.from ),
-				:to( $p.hash.<sym>.to ),
-				:content( $p.hash.<sym>.Str )
-			)
+		warn "Untested method";
+		if self.assert-hash-keys( $p,
+				[< sym postcircumfix O >] ) {
+			die "Not implemented yet"
+		}
+		elsif self.assert-hash-keys( $p,
+				[< sym postcircumfix >], [< O >] ) {
+			die "Not implemented yet"
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -2459,36 +2550,65 @@ say "PostOp fired";
 		}
 	}
 
-	method _quant( Mu $p ) returns Bool { $p.hash.<quant>.Bool }
+	method _prefix( Mu $p ) {
+		if self.assert-hash-keys( $p, [< sym O >] ) {
+			# leading and trailing space elided
+			self.make-prefix-from( $p.hash.<sym> )
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
+	}
+
+	method _quant( Mu $p ) returns Bool {
+		$p.hash.<quant>.Bool
+	}
 
 	method _quantified_atom( Mu $p ) {
-say "QuantifiedAtom fired";
-#`(
-		if self.assert-hash-keys( $p, [< sigfinal atom >] );
-)
+		warn "Untested method";
+		if self.assert-hash-keys( $p, [< sigfinal atom >] ) {
+			die "Not implemented yet"
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
 	method _quantifier( Mu $p ) {
-say "Quantifier fired";
-#`(
-		if self.assert-hash-keys( $p, [< sym min max backmod >] );
-		if self.assert-hash-keys( $p, [< sym backmod >] );
-)
+		warn "Untested method";
+		if self.assert-hash-keys( $p, [< sym min max backmod >] ) {
+			die "Not implemented yet"
+		}
+		elsif self.assert-hash-keys( $p, [< sym backmod >] ) {
+			die "Not implemented yet"
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
 	method _quibble( Mu $p ) {
-say "Quibble fired";
-#`(
-		if self.assert-hash-keys( $p, [< babble nibble >] );
-)
+		warn "Untested method";
+		if self.assert-hash-keys( $p, [< babble nibble >] ) {
+			die "Not implemented yet"
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
 	method _quote( Mu $p ) {
-#`(
-		if self.assert-hash-keys( $p, [< sym quibble rx_adverbs >] );
-		if self.assert-hash-keys( $p, [< sym rx_adverbs sibble >] );
-)
-		if self.assert-hash-keys( $p, [< quibble >] ) {
+		if self.assert-hash-keys( $p, [< sym quibble rx_adverbs >] ) {
+			die "Not implemented yet"
+		}
+		elsif self.assert-hash-keys( $p, [< sym rx_adverbs sibble >] ) {
+			die "Not implemented yet"
+		}
+		elsif self.assert-hash-keys( $p, [< quibble >] ) {
 			# XXX This should properly call quibble, but that's
 			# XXX for later.
 			# leading and trailing space elided
@@ -2514,15 +2634,27 @@ say "Quibble fired";
 	}
 
 	method _quotepair( Mu $p ) {
-say "QuotePair fired";
-#`(
-		for $p.list {
-			next if self.assert-hash-keys( $_, [< identifier >] );
+		warn "Untested method";
+		if $p.list {
+			my Perl6::Element @child;
+			for $p.list {
+				if self.assert-hash-keys( $_,
+						[< identifier >] ) {
+					die "Not implemented yet"
+				}
+				else {
+					say $p.hash.keys.gist;
+					warn "Unhandled case"
+				}
+			}
+			@child
 		}
-		return True if self.assert-hash-keys( $p,
-				[< circumfix bracket radix >], [< exp base >] );
-)
-		if self.assert-hash-keys( $p, [< identifier >] ) {
+		elsif self.assert-hash-keys( $p,
+				[< circumfix bracket radix >],
+				[< exp base >] ) {
+			die "Not implemented yet"
+		}
+		elsif self.assert-hash-keys( $p, [< identifier >] ) {
 			self._identifier( $p.hash.<identifier> )
 		}
 		else {
@@ -2531,14 +2663,14 @@ say "QuotePair fired";
 		}
 	}
 
-	method _radix( Mu $p ) returns Int { $p.hash.<radix>.Int }
+	method _radix( Mu $p ) returns Int {
+		$p.hash.<radix>.Int
+	}
 
-	method _rad_number( Mu $p ) {
+	method _rad_number( Mu $p ) returns Perl6::Element {
 		if self.assert-hash-keys( $p,
 				[< circumfix bracket radix >],
 				[< exp base >] ) {
-key-boundary $p;
-warn 43;
 			Perl6::Number::Radix.new(
 				:from( $p.from ),
 				:to( $p.to ),
@@ -2580,7 +2712,7 @@ warn 43;
 			# leading and trailing space elided
 			my $nibble = $p.hash.<nibble>.Str;
 			$nibble ~~ s{ (\s+) } = ''; my $inset = $0.chars;
-			my @child;
+			my Perl6::Element @child;
 			@child.push(
 				# XXX Should this be expanded?
 				# XXX And if so, as an attribute
@@ -2604,7 +2736,9 @@ warn 43;
 		}
 	}
 
-	method _right( Mu $p ) returns Bool { $p.hash.<right>.Bool }
+	method _right( Mu $p ) returns Perl6::Element {
+		$p.hash.<right>.Bool
+	}
 
 	method _routine_declarator( Mu $p ) {
 		if self.assert-hash-keys( $p,
@@ -2668,12 +2802,12 @@ warn 43;
 	}
 
 	method _rx_adverbs( Mu $p ) {
-say "RxAdverbs fired";
+		warn "Untested method";
 		if self.assert-hash-keys( $p, [< quotepair >] ) {
 			self._quotepair( $p.hash.<quotepair> )
 		}
 		elsif self.assert-hash-keys( $p, [< >], [< quotepair >] ) {
-die "New branch";
+			die "Not implemented yet"
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -2732,7 +2866,6 @@ die "New branch";
 	}
 
 	method _semiarglist( Mu $p ) {
-say "SemiArgList fired";
 		if self.assert-hash-keys( $p, [< arglist >] ) {
 			self._arglist( $p.hash.<arglist> )
 		}
@@ -2747,18 +2880,13 @@ say "SemiArgList fired";
 			when X::Multi::NoMatch { }
 		}
 		if $p.hash.<statement>.list.[0].hash.<EXPR> {
-			$p.Str ~~ m{ ^ (.) }; my $front = ~$0;
-			$p.Str ~~ m{ (.) $ }; my $back = ~$0;
-			my @child;
+			my Perl6::Element @child;
 			@child.push(
 				self._EXPR( $p.hash.<statement>.list.[0].hash.<EXPR> )
 			);
-			Perl6::Operator::PostCircumfix.new(
-				:delimiter( $front, $back ),
-	    			:child( @child )
-			)
+			self.make-postcircumfix( $p, @child )
 		}
-		if self.assert-hash-keys( $p, [< statement >] ) {
+		elsif self.assert-hash-keys( $p, [< statement >] ) {
 			self._EXPR( $p.hash.<statement>.list.[0].<EXPR> )
 		}
 		else {
@@ -2768,25 +2896,37 @@ say "SemiArgList fired";
 	}
 
 	method _separator( Mu $p ) {
-say "Separator fired";
-#`(
-		if self.assert-hash-keys( $p, [< septype quantified_atom >] );
-)
+		warn "Untested method";
+		if self.assert-hash-keys( $p, [< septype quantified_atom >] ) {
+			die "Not implemented yet"
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
-	method _septype( Mu $p ) returns Str { $p.hash.<septype>.Str }
+	method _septype( Mu $p ) returns Str {
+		$p.hash.<septype>.Str
+	}
 
-	method _shape( Mu $p ) returns Str { $p.hash.<shape>.Str }
+	method _shape( Mu $p ) returns Str {
+		$p.hash.<shape>.Str
+	}
 
 	method _sibble( Mu $p ) {
-say "Sibble fired";
-#`(
-		if self.assert-hash-keys( $p, [< right babble left >] );
-)
+		warn "Untested method";
+		if self.assert-hash-keys( $p, [< right babble left >] ) {
+			die "Not implemented yet"
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
 	method _sigfinal( Mu $p ) {
-say "SigFinal fired";
+		warn "Untested method";
 		if self.assert-hash-keys( $p, [< normspace >] ) {
 			self._normspace( $p.hash.<normspace> )
 		}
@@ -2796,23 +2936,33 @@ say "SigFinal fired";
 		}
 	}
 
-	method _sigil( Mu $p ) returns Str { $p.hash.<sym>.Str }
-
-	method _sigmaybe( Mu $p ) {
-say "SigMaybe fired";
-#`(
-		if self.assert-hash-keys( $p,
-				[< parameter typename >],
-				[< param_sep >] );
-		if self.assert-hash-keys( $p, [], [< param_sep parameter >] );
-)
+	method _sigil( Mu $p ) returns Str {
+		$p.hash.<sym>.Str
 	}
 
+	method _sigmaybe( Mu $p ) {
+		warn "Untested method";
+		if self.assert-hash-keys( $p,
+				[< parameter typename >],
+				[< param_sep >] ) {
+			die "Not implemented yet"
+		}
+		elsif self.assert-hash-keys( $p, [],
+				[< param_sep parameter >] ) {
+			die "Not implemented yet"
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
+	}
+
+	# XXX Move Circumfix out
 	method _signature( Mu $p ) {
 		if self.assert-hash-keys( $p,
 				[< parameter typename >],
 				[< param_sep >] ) {
-			my @child;
+			my Perl6::Element @child;
 			@child.push( self._typename( $p.hash.<typename> ) );
 			@child.push( self._parameter( $p.hash.<parameter> ) );
 			Perl6::Operator::Circumfix.new(
@@ -2823,7 +2973,7 @@ say "SigMaybe fired";
 		elsif self.assert-hash-keys( $p,
 				[< parameter >],
 				[< param_sep >] ) {
-			my @child;
+			my Perl6::Element @child;
 			@child.append( self._parameter( $p.hash.<parameter> ) );
 			Perl6::Operator::Circumfix.new(
 				:delimiter( '(', ')' ),
@@ -2833,7 +2983,7 @@ say "SigMaybe fired";
 		elsif self.assert-hash-keys( $p,
 				[< param_sep >],
 				[< parameter >] ) {
-			my @child;
+			my Perl6::Element @child;
 			@child.push( self._parameter( $p.hash.<parameter> ) );
 			Perl6::Operator::Circumfix.new(
 				:delimiter( '(', ')' ),
@@ -2854,7 +3004,7 @@ say "SigMaybe fired";
 	}
 
 	method _smexpr( Mu $p ) {
-say "SMExpr fired";
+		warn "Untested method";
 		if self.assert-hash-keys( $p, [< EXPR >] ) {
 			self._EXPR( $p.hash.<EXPR> )
 		}
@@ -2864,97 +3014,146 @@ say "SMExpr fired";
 		}
 	}
 
-	method _specials( Mu $p ) returns Bool { $p.hash.<specials>.Bool }
+	method _specials( Mu $p ) {
+		$p.hash.<specials>.Bool
+	}
 
 	method _statement_control( Mu $p ) {
-say "StatementControl fired";
-#`(
-		if self.assert-hash-keys( $p, [< block sym e1 e2 e3 >] );
-		if self.assert-hash-keys( $p, [< pblock sym EXPR wu >] );
-		if self.assert-hash-keys( $p, [< doc sym module_name >] );
-		if self.assert-hash-keys( $p, [< doc sym version >] );
-		if self.assert-hash-keys( $p, [< sym else xblock >] );
-		if self.assert-hash-keys( $p, [< xblock sym wu >] );
-		if self.assert-hash-keys( $p, [< sym xblock >] );
-		if self.assert-hash-keys( $p, [< block sym >] );
-)
+		warn "Untested method";
+		if self.assert-hash-keys( $p, [< block sym e1 e2 e3 >] ) {
+			die "Not implemented yet"
+		}
+		elsif self.assert-hash-keys( $p, [< pblock sym EXPR wu >] ) {
+			die "Not implemented yet"
+		}
+		elsif self.assert-hash-keys( $p, [< doc sym module_name >] ) {
+			die "Not implemented yet"
+		}
+		elsif self.assert-hash-keys( $p, [< doc sym version >] ) {
+			die "Not implemented yet"
+		}
+		elsif self.assert-hash-keys( $p, [< sym else xblock >] ) {
+			die "Not implemented yet"
+		}
+		elsif self.assert-hash-keys( $p, [< xblock sym wu >] ) {
+			die "Not implemented yet"
+		}
+		elsif self.assert-hash-keys( $p, [< sym xblock >] ) {
+			die "Not implemented yet"
+		}
+		elsif self.assert-hash-keys( $p, [< block sym >] ) {
+			die "Not implemented yet"
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
 	method _statement( Mu $p ) {
 		# N.B. we don't care so much *if* there's a list as *what's*
 		# in the list. In other words we can assume that the content
 		# is what we consider valid, so we can relax our requirements.
-#`(
-		for $p.list {
-			if self.assert-hash-keys( $_,
-					[< statement_mod_loop EXPR >] ) {
+		if $p.list {
+			my Perl6::Element @child;
+			for $p.list {
+				if self.assert-hash-keys( $_,
+						[< statement_mod_loop
+						   EXPR >] ) {
+					die "Not implemented yet"
+				}
+				elsif self.assert-hash-keys( $_,
+						[< statement_mod_cond
+						   EXPR >] ) {
+					die "Not implemented yet"
+				}
+				elsif self.assert-hash-keys( $_, [< EXPR >] ) {
+					@child.append(
+						self._EXPR( $_.hash.<EXPR> )
+					)
+				}
+				elsif self.assert-hash-keys( $_,
+						[< statement_control >] ) {
+#					self._statement_control(
+#						$_.hash.<statement_control>
+#					)
+				}
+				elsif self.assert-hash-keys( $_, [],
+						[< statement_control >] ) {push
+					die "Not implemented yet"
+				}
+				else {
+					say $p.hash.keys.gist;
+					warn "Unhandled case"
+				}
 			}
-			elsif self.assert-hash-keys( $_,
-					[< statement_mod_cond EXPR >] ) {
-			}
-			elsif self.assert-hash-keys( $_, [< EXPR >] ) {
-				self._EXPR( $_.hash.<EXPR> )
-			}
-			elsif self.assert-hash-keys( $_,
-					[< statement_control >] ) {
-#				self._statement_control(
-#					$_.hash.<statement_control>
-#				)
-			}
-			elsif self.assert-hash-keys( $_, [],
-					[< statement_control >] ) {
-			}
+			@child
 		}
-)
-
-		my @child;
-		if self.assert-hash-keys( $p, [< EXPR >] ) {
-			@child.append( self._EXPR( $p.hash.<EXPR> ) )
-		}
-		elsif self.assert-hash-keys( $p, [< statement_control >] ) {
-			@child.append(
-				self._statement_control(
-					$p.hash.<statement_control>
+		elsif self.assert-hash-keys( $p, [< EXPR >] ) {
+			Perl6::Statement.new(
+				:child(
+					self._EXPR( $p.hash.<EXPR> )
 				)
 			)
 		}
-
-		Perl6::Statement.new(
-			:child( @child )
-		)
+		elsif self.assert-hash-keys( $p, [< statement_control >] ) {
+			Perl6::Statement.new(
+				:child(
+					self._statement_control(
+						$p.hash.<statement_control>
+					)
+				)
+			)
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
-	method _statementlist( Mu $p ) {
+	method _statementlist( Mu $p ) returns Array[Perl6::Element] {
 		my $statement = $p.hash.<statement>;
-		my @child = map {
+		my Perl6::Element @child = map {
 			self._statement( $_ )
 		}, $statement.list;
 		@child
 	}
 
 	method _statement_mod_cond( Mu $p ) {
-say "StatementModCond fired";
-#`(
-		if self.assert-hash-keys( $p, [< sym modifier_expr >] );
-)
+		warn "Untested method";
+		if self.assert-hash-keys( $p, [< sym modifier_expr >] ) {
+			die "Not implemented yet"
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
 	method _statement_mod_loop( Mu $p ) {
-say "StatementModLoop fired";
-#`(
-		if self.assert-hash-keys( $p, [< sym smexpr >] )
-)
+		warn "Untested method";
+		if self.assert-hash-keys( $p, [< sym smexpr >] ) {
+			die "Not implemented yet"
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
 	method _statement_prefix( Mu $p ) {
-say "StatementPrefix fired";
-#`(
-		if self.assert-hash-keys( $p, [< sym blorst >] );
-)
+		warn "Untested method";
+		if self.assert-hash-keys( $p, [< sym blorst >] ) {
+			die "Not implemented yet"
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
 	method _subshortname( Mu $p ) {
-say "SubShortName fired";
+		warn "Untested method";
 		if self.assert-hash-keys( $p, [< desigilname >] ) {
 			self._desigilname( $p.hash.<desigilname> )
 		}
@@ -2965,20 +3164,32 @@ say "SubShortName fired";
 	}
 
 	method _sym( Mu $p ) {
-#`(
-		for $p.list {
-			next if $_.Str;
+		if $p.list {
+			my Perl6::Element @child;
+			for $p.list {
+				if $_.Str {
+					die "Not implemented yet"
+				}
+				else {
+					say $p.hash.keys.gist;
+					warn "Unhandled case"
+				}
+			}
+			@child
 		}
-		if $p.Bool and $p.Str eq '+';
-		if $p.Bool and $p.Str eq '';
-)
-		if $p.Str {
+		elsif $p.Str {
 			# leading and trailing space elided
 			Perl6::Bareword.new(
 				:from( $p.from ),
 				:to( $p.to ),
 				:content( $p.Str )
 			)
+		}
+		elsif $p.Bool and $p.Str eq '+' {
+			die "Not implemented yet"
+		}
+		elsif $p.Bool and $p.Str eq '' {
+			die "Not implemented yet"
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -2987,7 +3198,7 @@ say "SubShortName fired";
 	}
 
 	method _term( Mu $p ) {
-say "Term fired";
+		warn "Untested method";
 		if self.assert-hash-keys( $p, [< methodop >] ) {
 			self._methodop( $p.hash.<methodop> )
 		}
@@ -2998,9 +3209,23 @@ say "Term fired";
 	}
 
 	method _termalt( Mu $p ) {
-say "TermAlt fired";
-		for $p.list {
-			next if self.assert-hash-keys( $_, [< termconj >] );
+		warn "Untested method";
+		if $p.list {
+			my Perl6::Element @child;
+			for $p.list {
+				if self.assert-hash-keys( $_, [< termconj >] ) {
+					die "Not implemented yet"
+				}
+				else {
+					say $p.hash.keys.gist;
+					warn "Unhandled case"
+				}
+			}
+			@child
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -3015,28 +3240,47 @@ say "TermAlt fired";
 	}
 
 	method _termconj( Mu $p ) {
-say "TermConj fired";
-		for $p.list {
-			next if self.assert-hash-keys( $_, [< termish >] );
-		}
-	}
-
-	method _termconjseq( Mu $p ) {
-		# XXX Work on this later.
-#`(
-		for $p.list {
-			next if self.assert-hash-keys( $_, [< termalt >] );
-		}
-		if self.assert-hash-keys( $p, [< termalt >] ) {
-			self._termalt( $p.hash.<termalt> )
+		warn "Untested method";
+		if $p.list {
+			my Perl6::Element @child;
+			for $p.list {
+				if self.assert-hash-keys( $_, [< termish >] ) {
+					@child.push(
+						self._termish(
+							$p.hash.<termish>
+						)
+					)
+				}
+				else {
+					say $p.hash.keys.gist;
+					warn "Unhandled case"
+				}
+			}
+			@child
 		}
 		else {
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
-)
+	}
 
+	method _termconjseq( Mu $p ) {
+		# XXX Work on this later.
 		if $p.list {
+			my Perl6::Element @child;
+			for $p.list {
+				if self.assert-hash-keys( $_, [< termalt >] ) {
+					die "Not implemented yet"
+				}
+				else {
+					say $p.hash.keys.gist;
+					warn "Unhandled case"
+				}
+			}
+			@child
+		}
+		elsif self.assert-hash-keys( $p, [< termalt >] ) {
+			self._termalt( $p.hash.<termalt> )
 		}
 		elsif $p.Str {
 			# XXX
@@ -3050,17 +3294,25 @@ warn 46;
 				:content( $str )
 			)
 		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
 	method _term_init( Mu $p ) {
-say "TermInit fired";
-#`(
-		if self.assert-hash-keys( $p, [< sym EXPR >] );
-)
+		warn "Untested method";
+		if self.assert-hash-keys( $p, [< sym EXPR >] ) {
+			die "Not implemented yet"
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
 	method _termish( Mu $p ) {
-say "Termish fired";
+		warn "Untested method";
 		for $p.list {
 			next if self.assert-hash-keys( $_, [< noun >] );
 		}
@@ -3086,7 +3338,7 @@ say "Termish fired";
 	method _trait( Mu $p ) {
 		# XXX Sigh, something else to fix.
 #`(
-		my @child = map {
+		my Perl6::Element @child = map {
 #			if self.assert-hash-keys( $_, [< trait_mod >] ) {
 				self._trait_mod( $_.hash.<trait_mod> )
 #			}
@@ -3113,10 +3365,12 @@ say "Termish fired";
 		}
 	}
 
-	method _twigi( Mu $p ) returns Str { $p.hash.<sym>.Str }
+	method _twigi( Mu $p ) returns Str {
+		$p.hash.<sym>.Str
+	}
 
 	method _type_constraint( Mu $p ) {
-		my @child;
+		my Perl6::Element @child;
 		for $p.list {
 			if self.assert-hash-keys( $_, [< typename >] ) {
 				@child.append(
@@ -3147,14 +3401,22 @@ say "Termish fired";
 	}
 
 	method _type_declarator( Mu $p ) {
-say "TypeDeclarator fired";
-#`(
+		warn "Untested method";
 		if self.assert-hash-keys( $p,
-				[< sym initializer variable >], [< trait >] );
-		if self.assert-hash-keys( $p,
-				[< sym initializer defterm >], [< trait >] );
-		if self.assert-hash-keys( $p, [< sym initializer >] );
-)
+				[< sym initializer variable >], [< trait >] ) {
+			die "Not implemented yet"
+		}
+		elsif self.assert-hash-keys( $p,
+				[< sym initializer defterm >], [< trait >] ) {
+			die "Not implemented yet"
+		}
+		elsif self.assert-hash-keys( $p, [< sym initializer >] ) {
+			die "Not implemented yet"
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
 	method _typename( Mu $p ) {
@@ -3221,12 +3483,12 @@ warn 48;
 	}
 
 	method _val( Mu $p ) {
-#`(
-		return True if self.assert-hash-keys( $p,
+		if self.assert-hash-keys( $p,
 				[< prefix OPER >],
-				[< prefix_postfix_meta_operator >] );
-)
-		if self.assert-hash-keys( $p, [< value >] ) {
+				[< prefix_postfix_meta_operator >] ) {
+			die "Not implemented yet"
+		}
+		elsif self.assert-hash-keys( $p, [< value >] ) {
 			self._value( $p.hash.<value> )
 		}
 		else {
@@ -3242,7 +3504,7 @@ warn 48;
 		$p.hash.<VALUE>.Str || $p.hash.<VALUE>.Int
 	}
 
-	method _value( Mu $p ) {
+	method _value( Mu $p ) returns Perl6::Element {
 		if self.assert-hash-keys( $p, [< number >] ) {
 			self._number( $p.hash.<number> )
 		}
@@ -3255,7 +3517,7 @@ warn 48;
 		}
 	}
 
-	method _var( Mu $p ) {
+	method _var( Mu $p ) returns Perl6::Element {
 		if self.assert-hash-keys( $p,
 				[< sigil desigilname >] ) {
 			# XXX For heavens' sake refactor.
@@ -3282,15 +3544,13 @@ warn 48;
 	}
 
 	method _variable_declarator( Mu $p ) {
-#`(
 		if self.assert-hash-keys( $p,
 			[< semilist variable shape >],
 			[< postcircumfix signature trait
 			   post_constraint >] ) {
+			die "Not implemented yet"
 		}
-)
-
-		if self.assert-hash-keys( $p,
+		elsif self.assert-hash-keys( $p,
 				[< variable post_constraint >],
 				[< semilist postcircumfix signature trait >] ) {
 			# Synthesize the 'from' and 'to' markers for 'where'
@@ -3344,28 +3604,65 @@ warn "*** contextualizer fired";
 	}
 
 	method _version( Mu $p ) {
-say "Version fired";
-		return True if self.assert-hash-keys( $p, [< vnum vstr >] );
+		warn "Untested method";
+		if self.assert-hash-keys( $p, [< vnum vstr >] ) {
+			die "Not implemented yet"
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
-	method _vstr( Mu $p ) returns Int { $p.hash.<vstr>.Int }
+	method _vstr( Mu $p ) returns Int {
+		$p.hash.<vstr>.Int
+	}
 
 	method _vnum( Mu $p ) {
-say "VNum fired";
-		for $p.list {
-			next if self.assert-Int( $_ );
+		warn "Untested method";
+		if $p.list {
+			my Perl6::Element @child;
+			for $p.list {
+				if self.assert-Int( $_ ) {
+					die "Not implemented yet";
+				}
+				else {
+					say $p.hash.keys.gist;
+					warn "Unhandled case"
+				}
+			}
+			@child
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
-	method _wu( Mu $p ) returns Str { $p.hash.<wu>.Str }
+	method _wu( Mu $p ) returns Str {
+		$p.hash.<wu>.Str
+	}
 
-	method _xblock( Mu $p ) returns Bool {
-say "XBlock fired";
-		for $p.list {
-			next if self.assert-hash-keys( $_, [< pblock EXPR >] );
+	method _xblock( Mu $p ) {
+		warn "Untested method";
+		if $p.list {
+			my Perl6::Element @child;
+			for $p.list {
+				if self.assert-hash-keys( $_,
+						[< pblock EXPR >] ) {
+					die "Not implemented yet";
+				}
+				else {
+					say $p.hash.keys.gist;
+					warn "Unhandled case"
+				}
+			}
+			@child
 		}
-		return True if self.assert-hash-keys( $p, [< pblock EXPR >] );
-		if self.assert-hash-keys( $p, [< blockoid >] ) {
+		elsif self.assert-hash-keys( $p, [< pblock EXPR >] ) {
+			die "Not implemented yet";
+		}
+		elsif self.assert-hash-keys( $p, [< blockoid >] ) {
 #			self._blockoid( $p.hash.<blockoid> )
 		}
 		else {
@@ -3374,3 +3671,1195 @@ say "XBlock fired";
 		}
 	}
 }
+
+#`(
+
+Here's a collection of all the terms I could find in the grammars, with the
+ones I've caught marked with 'XXX' just so they'll stand out.
+
+I actually expect most of these to be unreachable.
+
+role STD {
+    token opener {}
+    method balanced {}
+    method unbalanced {}
+
+    token starter {}
+    token stopper {}
+
+    method quote_lang {}
+    token babble {}
+
+    my class Herestub {
+        method delim {}
+        method orignode {}
+        method lang {}
+    }
+
+    role herestop {
+        method parsing_heredoc {}
+    }
+
+    method heredoc {}
+    token cheat_heredoc {}
+    method queue_heredoc {}
+    token quibble {}
+    method nibble {}
+    token obsbrace {}
+
+    method FAILGOAL {}
+
+    method security($payload) {}
+
+    method malformed($what) {}
+    method missing_block() {}
+    method missing($what) {}
+
+    token experimental($feature) {}
+
+    method EXPR_nonassoc($cur, $left, $right) {}
+
+    method obs($old, $new, $when = 'in Perl 6') {}
+    method obsvar($name) {}
+
+    method dupprefix($prefixes) {}
+
+    method mark_variable_used($name) {}
+
+    method check_variable($var) {}
+
+    token RESTRICTED {}
+}
+
+grammar Perl6::Grammar {
+    method TOP { }
+
+    ## Lexer stuff
+
+    token apostrophe { }
+    token identifier { }
+    token name { }
+    token morename { }
+    token longname { }
+    token deflongname { }
+    token subshortname { }
+    token sublongname { }
+    token deftermnow { }
+    token defterm { }
+    token module_name { }
+    token end_keyword { }
+    token end_prefix { }
+    token spacey { }
+    token kok { }
+    token tok { }
+    token ENDSTMT { }
+    method ws() { }
+    token _ws { }
+    token unsp { }
+    token vws { }
+    token unv { }
+
+    proto token comment {}
+
+    token comment:sym<#> { }
+    token comment:sym<#`(...)> { }
+    token comment:sym<#|(...)> { }
+    token comment:sym<#|> { }
+    token comment:sym<#=(...)> { }
+    token comment:sym<#=> { }
+
+    method attach_leading_docs() { }
+    method attach_trailing_docs($doc) { }
+    token pod_content_toplevel { }
+
+    proto token pod_content { }
+    token pod_content:sym<block> { }
+    token pod_content:sym<text> { }
+    token pod_content:sym<config> { }
+
+    proto token pod_textcontent { }
+    token pod_textcontent:sym<regular> { }
+    token pod_textcontent:sym<code> { }
+    token pod_formatting_code { }
+    token pod_balanced_braces { }
+    token pod_string { }
+    token pod_string_character { }
+
+    proto token pod_block { }
+    token pod_configuration($spaces = '') { }
+    token pod_block:sym<delimited_comment> { }
+    token pod_block:sym<delimited> { }
+    token pod_block:sym<delimited_table> { }
+    token pod_block:sym<delimited_code> { }
+
+    token delimited_code_content($spaces = '') { }
+    token table_row { }
+    token table_row_or_blank { }
+
+    token pod_block:sym<finish> { }
+    token pod_block:sym<paragraph> { }
+    token pod_block:sym<paragraph_comment> { }
+    token pod_block:sym<paragraph_table> { }
+    token pod_block:sym<paragraph_code> { }
+    token pod_block:sym<abbreviated> { }
+    token pod_block:sym<abbreviated_comment> { }
+    token pod_block:sym<abbreviated_table> { }
+    token pod_block:sym<abbreviated_code> { }
+
+    token pod_line { }
+    token pod_newline { }
+    token pod_code_parent { }
+
+    token install_doc_phaser { }
+    token vnum { }
+    token version { }
+
+    ## Top-level rules
+
+    token comp_unit { }
+    rule statementlist { }
+    method shallow_copy { }
+    rule semilist { }
+    rule sequence { }
+    token label { }
+    token statement { }
+    token eat_terminator { }
+    token xblock { }
+    token pblock { }
+    token lambda { }
+    token block { }
+    token blockoid { }
+    token unitstart { }
+    token you_are_here { }
+    token newpad { }
+    token finishpad { }
+
+    token bom { }
+
+    proto token terminator { }
+
+    token terminator:sym<;> {}
+    token terminator:sym<()> { }
+    token terminator:sym<[]> { }
+    token terminator:sym<{}> { }
+    token terminator:sym<ang> { }
+    token terminator:sym<if>     {  }
+    token terminator:sym<unless> {  }
+    token terminator:sym<while>  {  }
+    token terminator:sym<until>  {  }
+    token terminator:sym<for>    {  }
+    token terminator:sym<given>  {  }
+    token terminator:sym<when>   {  }
+    token terminator:sym<with>   {  }
+    token terminator:sym<without> { }
+    token terminator:sym<arrow>  { }
+
+
+    token stdstopper { }
+
+    ## Statement control
+
+    proto rule statement_control { <...> }
+
+    rule statement_control:sym<if> { }
+
+    rule statement_control:sym<unless> { }
+
+    rule statement_control:sym<while> { }
+
+    rule statement_control:sym<repeat> { }
+
+    rule statement_control:sym<for> { }
+
+    rule statement_control:sym<whenever> { }
+
+    rule statement_control:sym<foreach> { }
+
+    token statement_control:sym<loop> { }
+
+    rule statement_control:sym<need> { }
+
+    token statement_control:sym<import> { }
+
+    token statement_control:sym<no> { }
+
+    token statement_control:sym<use> { }
+
+    method FOREIGN_LANG($lang, $regex, *@args) { }
+
+    rule statement_control:sym<require> { }
+
+    rule statement_control:sym<given> { }
+    rule statement_control:sym<when> { }
+    rule statement_control:sym<default> { }
+
+    rule statement_control:sym<CATCH> {}
+    rule statement_control:sym<CONTROL> {}
+    rule statement_control:sym<QUIT> {}
+
+    proto token statement_prefix {}
+    token statement_prefix:sym<BEGIN>   { }
+    token statement_prefix:sym<COMPOSE> { }
+    token statement_prefix:sym<TEMP>    { }
+    token statement_prefix:sym<CHECK>   { }
+    token statement_prefix:sym<INIT>    { }
+    token statement_prefix:sym<ENTER>   { }
+    token statement_prefix:sym<FIRST>   { }
+
+    token statement_prefix:sym<END>   {  }
+    token statement_prefix:sym<LEAVE> {  }
+    token statement_prefix:sym<KEEP>  {  }
+    token statement_prefix:sym<UNDO>  {  }
+    token statement_prefix:sym<NEXT>  {  }
+    token statement_prefix:sym<LAST>  {  }
+    token statement_prefix:sym<PRE>   {  }
+    token statement_prefix:sym<POST>  {  }
+    token statement_prefix:sym<CLOSE> {  }
+
+    token statement_prefix:sym<race>    { }
+    token statement_prefix:sym<hyper>   { }
+    token statement_prefix:sym<eager>   { }
+    token statement_prefix:sym<lazy>    { }
+    token statement_prefix:sym<sink>    { }
+    token statement_prefix:sym<try>     { }
+    token statement_prefix:sym<quietly> { }
+    token statement_prefix:sym<gather>  { }
+    token statement_prefix:sym<once>    { }
+    token statement_prefix:sym<start>   { }
+    token statement_prefix:sym<supply>  { }
+    token statement_prefix:sym<react>   { }
+    token statement_prefix:sym<do>      { }
+    token statement_prefix:sym<DOC>     { }
+
+    token blorst { }
+
+    ## Statement modifiers
+
+    proto rule statement_mod_cond { }
+
+    token modifier_expr { }
+    token smexpr { }
+
+    rule statement_mod_cond:sym<if>     { }
+    rule statement_mod_cond:sym<unless> { }
+    rule statement_mod_cond:sym<when>   { }
+    rule statement_mod_cond:sym<with>   { }
+    rule statement_mod_cond:sym<without>{ }
+
+    proto rule statement_mod_loop  { }
+
+    rule statement_mod_loop:sym<while> { }
+    rule statement_mod_loop:sym<until> { }
+    rule statement_mod_loop:sym<for>   { }
+    rule statement_mod_loop:sym<given> { }
+
+    ## Terms
+
+    token term:sym<fatarrow>           { }
+    token term:sym<colonpair>          { }
+    token term:sym<variable>           { }
+    token term:sym<package_declarator> { }
+    token term:sym<scope_declarator>   { }
+    token term:sym<routine_declarator> { }
+    token term:sym<multi_declarator>   { }
+    token term:sym<regex_declarator>   { }
+    token term:sym<circumfix>          { }
+    token term:sym<statement_prefix>   { }
+    token term:sym<**>                 { }
+    token term:sym<*>                  { }
+    token term:sym<lambda>             { }
+    token term:sym<type_declarator>    { }
+    token term:sym<value>              { }
+    token term:sym<unquote>            { }
+    token term:sym<!!>                 { }
+    token term:sym<∞>                  { }
+
+    token term:sym<::?IDENT> { }
+    token term:sym<p5end> { }
+    token term:sym<p5data> { }
+
+    token infix:sym<lambda> { }
+
+    token term:sym<undef> { }
+
+    token term:sym<new> { }
+
+    token fatarrow { }
+
+    token coloncircumfix { }
+
+    token colonpair { }
+
+    token colonpair_variable { }
+
+    proto token special_variable { }
+
+    token special_variable:sym<$!{ }> { }
+
+    token special_variable:sym<$~> { }
+
+    token special_variable:sym<$`> { }
+
+    token special_variable:sym<$@> { }
+
+    # TODO: use actual variable in error message
+    token special_variable:sym<$#> { }
+
+    token special_variable:sym<$$> { }
+    token special_variable:sym<$%> { }
+
+    # TODO: $^X and other "caret" variables
+
+    token special_variable:sym<$^> { }
+    token special_variable:sym<$&> { }
+    token special_variable:sym<$*> { }
+    token special_variable:sym<$=> { }
+    token special_variable:sym<@+> { }
+    token special_variable:sym<%+> { }
+    token special_variable:sym<$+[ ]> { }
+    token special_variable:sym<@+[ ]> { }
+    token special_variable:sym<@+{ }> { }
+    token special_variable:sym<@-> { }
+    token special_variable:sym<%-> { }
+    token special_variable:sym<$-[ ]> { }
+    token special_variable:sym<@-[ ]> { }
+    token special_variable:sym<%-{ }> { }
+    token special_variable:sym<$/> { }
+    token special_variable:sym<$\\> { }
+    token special_variable:sym<$|> { }
+    token special_variable:sym<$:> { }
+    token special_variable:sym<$;> { }
+    token special_variable:sym<$'> { }
+    token special_variable:sym<$"> { }
+    token special_variable:sym<$,> { }
+    token special_variable:sym<$.> { }
+    token special_variable:sym<$?> { }
+    token special_variable:sym<$]> { }
+    regex special_variable:sym<${ }> { }
+
+    token desigilname { }
+
+    token variable { }
+
+    token contextualizer { }
+
+    token sigil { }
+
+    proto token twigil { }
+    token twigil:sym<.> { }
+    token twigil:sym<!> { }
+    token twigil:sym<^> { }
+    token twigil:sym<:> { }
+    token twigil:sym<*> { }
+    token twigil:sym<?> { }
+    token twigil:sym<=> { }
+    token twigil:sym<~> { }
+
+    proto token package_declarator { }
+    token package_declarator:sym<package> { }
+    token package_declarator:sym<module> { }
+    token package_declarator:sym<class> { }
+    token package_declarator:sym<grammar> { }
+    token package_declarator:sym<role> { }
+    token package_declarator:sym<knowhow> { }
+    token package_declarator:sym<native> { }
+    token package_declarator:sym<slang> { }
+    token package_declarator:sym<trusts> { }
+    rule package_declarator:sym<also> { }
+
+    rule package_def { }
+
+    token declarator { }
+
+    proto token multi_declarator { }
+    token multi_declarator:sym<multi> { }
+    token multi_declarator:sym<proto> { }
+    token multi_declarator:sym<only> { }
+    token multi_declarator:sym<null> { }
+
+    proto token scope_declarator { }
+    token scope_declarator:sym<my>        { }
+    token scope_declarator:sym<our>       { }
+    token scope_declarator:sym<has>       { }
+    token scope_declarator:sym<HAS>       { }
+    token scope_declarator:sym<augment>   { }
+    token scope_declarator:sym<anon>      { }
+    token scope_declarator:sym<state>     { }
+    token scope_declarator:sym<supersede> { }
+    token scope_declarator:sym<unit>      { }
+
+    token scoped($*SCOPE) { }
+
+    token variable_declarator { }
+
+    proto token routine_declarator { }
+    token routine_declarator:sym<sub> { }
+    token routine_declarator:sym<method> { }
+    token routine_declarator:sym<submethod> { }
+    token routine_declarator:sym<macro> { }
+
+    rule routine_def { }
+
+    rule method_def { }
+
+    rule macro_def { }
+
+    token onlystar { }
+
+    ###########################
+    # Captures and Signatures #
+    ###########################
+
+    token capterm { }
+
+    rule param_sep { }
+
+    # XXX Not really implemented yet.
+    token multisig { }
+
+    token sigterm { }
+
+    token fakesignature { }
+
+    token signature { }
+
+    token parameter { }
+
+    token param_var { }
+
+    token named_param { }
+
+    rule default_value { }
+
+    token type_constraint { }
+
+    rule post_constraint { } 
+    proto token regex_declarator { <...> }
+    token regex_declarator:sym<rule> { }
+    token regex_declarator:sym<token> { }
+    token regex_declarator:sym<regex> { }
+
+    rule regex_def { }
+
+    proto token type_declarator { <...> }
+
+    token type_declarator:sym<enum> { }
+
+    rule type_declarator:sym<subset> { }
+
+    token type_declarator:sym<constant> { }
+
+    proto token initializer { <...> }
+    token initializer:sym<=> { }
+    token initializer:sym<:=> { }
+    token initializer:sym<::=> { }
+    token initializer:sym<.=> { }
+
+    rule trait { }
+
+    proto rule trait_mod { <...> }
+    rule trait_mod:sym<is> { }
+    rule trait_mod:sym<hides>   {  }
+    rule trait_mod:sym<does>    {  }
+    rule trait_mod:sym<will>    { }
+    rule trait_mod:sym<of>      {  }
+    rule trait_mod:sym<returns> {  }
+    rule trait_mod:sym<handles> { }
+
+    token bad_trait_typename { }
+
+    ## Terms
+
+    proto token term { }
+
+    token term:sym<self> { }
+
+    token term:sym<now> { }
+
+    token term:sym<time> { }
+
+    token term:sym<empty_set> { }
+
+    token term:sym<rand> { }
+
+    token term:sym<...> { }
+    token term:sym<???> { }
+    token term:sym<!!!> { }
+
+    token term:sym<identifier> { }
+
+    token term:sym<nqp::op> { }
+
+    token term:sym<nqp::const> { }
+
+    token term:sym<name> { }
+
+    token term:sym<dotty> { }
+
+    token term:sym<capterm> { }
+
+    token term:sym<onlystar> { }
+
+    token args($*INVOCANT_OK = 0) { }
+
+    token semiarglist { }
+
+    token arglist { }
+
+    proto token value { }
+    token value:sym<quote>  { }
+    token value:sym<number> { }
+    token value:sym<version> { }
+
+    proto token number { }
+    token number:sym<numish>   { }
+
+    token signed-number { }
+
+    token numish { }
+
+    token dec_number { }
+
+    token signed-integer { }
+
+    token integer { }
+
+    token rad_number { }
+
+    token radint { }
+
+    token escale { }
+
+    token sign { }
+
+    token rat_number { }
+    token bare_rat_number { }
+
+    token complex_number { }
+    token bare_complex_number { }
+
+    token typename { }
+
+    token typo_typename($panic = 0) { }
+
+
+    token quotepair($*purpose = 'quoteadverb') { }
+
+    token rx_adverbs { }
+
+    token qok($x) { }
+
+    proto token quote_mod   { }
+    token quote_mod:sym<w>  {  }
+    token quote_mod:sym<ww> {  }
+    #token quote_mod:sym<p>  { }
+    token quote_mod:sym<x>  {  }
+    token quote_mod:sym<to> {  }
+    token quote_mod:sym<s>  {  }
+    token quote_mod:sym<a>  {  }
+    token quote_mod:sym<h>  {  }
+    token quote_mod:sym<f>  {  }
+    token quote_mod:sym<c>  {  }
+    token quote_mod:sym<b>  {  }
+
+    proto token quote { }
+    token quote:sym<apos>  { }
+    token quote:sym<sapos> { }
+    token quote:sym<lapos> { }
+    token quote:sym<hapos> { }
+    token quote:sym<dblq>  { }
+    token quote:sym<sdblq> { }
+    token quote:sym<ldblq> { }
+    token quote:sym<hdblq> { }
+    token quote:sym<crnr>  { }
+    token quote:sym<q> { }
+    token quote:sym<qq> { }
+    token quote:sym<Q> { }
+
+    token quote:sym</null/> { }
+    token quote:sym</ />  { }
+    token quote:sym<rx>   { }
+
+    token quote:sym<m> { }
+
+    token quote:sym<qr> { }
+
+    token setup_quotepair { '' }
+
+    token sibble($l, $lang2, @lang2tweaks?) { }
+
+    token quote:sym<s> { }
+
+    token tribble ($l, $lang2 = $l, @lang2tweaks?) { }
+
+    token quote:sym<tr> { }
+
+    token quote:sym<y> { }
+
+    token old_rx_mods { }
+
+    token quote:sym<quasi> { }
+
+    token circumfix:sym<STATEMENT_LIST( )> { }
+
+    token circumfix:sym<( )> { }
+    token circumfix:sym<[ ]> { }
+    token circumfix:sym<ang> { }
+    token circumfix:sym«<< >>» { }
+    token circumfix:sym<« »> { }
+    token circumfix:sym<{ }> { }
+
+    ## Operators
+
+    INIT {
+        Perl6::Grammar.O(':prec<y=>, :assoc<unary>, :dba<methodcall>, :fiddly<1>', '%methodcall');
+        Perl6::Grammar.O(':prec<x=>, :assoc<unary>, :dba<autoincrement>', '%autoincrement');
+        Perl6::Grammar.O(':prec<w=>, :assoc<right>, :dba<exponentiation>', '%exponentiation');
+        Perl6::Grammar.O(':prec<v=>, :assoc<unary>, :dba<symbolic unary>', '%symbolic_unary');
+        Perl6::Grammar.O(':prec<v=>, :assoc<left>, :dba<dotty infix>, :nextterm<dottyopish>, :sub<z=>, :fiddly<1>', '%dottyinfix');
+        Perl6::Grammar.O(':prec<u=>, :assoc<left>, :dba<multiplicative>',  '%multiplicative');
+        Perl6::Grammar.O(':prec<t=>, :assoc<left>, :dba<additive>',  '%additive');
+        Perl6::Grammar.O(':prec<s=>, :assoc<left>, :dba<replication>', '%replication');
+        Perl6::Grammar.O(':prec<s=>, :assoc<left>, :dba<replication> :thunky<t.>', '%replication_xx');
+        Perl6::Grammar.O(':prec<r=>, :assoc<left>, :dba<concatenation>',  '%concatenation');
+        Perl6::Grammar.O(':prec<q=>, :assoc<list>, :dba<junctive and>', '%junctive_and');
+        Perl6::Grammar.O(':prec<p=>, :assoc<list>, :dba<junctive or>', '%junctive_or');
+        Perl6::Grammar.O(':prec<o=>, :assoc<unary>, :dba<named unary>', '%named_unary');
+        Perl6::Grammar.O(':prec<n=>, :assoc<non>, :dba<structural infix>, :diffy<1>',  '%structural');
+        Perl6::Grammar.O(':prec<m=>, :assoc<left>, :dba<chaining>, :iffy<1>, :diffy<1> :pasttype<chain>',  '%chaining');
+        Perl6::Grammar.O(':prec<l=>, :assoc<left>, :dba<tight and>, :thunky<.t>',  '%tight_and');
+        Perl6::Grammar.O(':prec<k=>, :assoc<list>, :dba<tight or>, :thunky<.t>',  '%tight_or');
+        Perl6::Grammar.O(':prec<k=>, :assoc<list>, :dba<tight or>',  '%tight_or_minmax');
+        Perl6::Grammar.O(':prec<j=>, :assoc<right>, :dba<conditional>, :fiddly<1>, :thunky<.tt>', '%conditional');
+        Perl6::Grammar.O(':prec<j=>, :assoc<right>, :dba<conditional>, :fiddly<1>, :thunky<tt>', '%conditional_ff');
+        Perl6::Grammar.O(':prec<i=>, :assoc<right>, :dba<item assignment>', '%item_assignment');
+        Perl6::Grammar.O(':prec<i=>, :assoc<right>, :dba<list assignment>, :sub<e=>, :fiddly<1>', '%list_assignment');
+        Perl6::Grammar.O(':prec<h=>, :assoc<unary>, :dba<loose unary>', '%loose_unary');
+        Perl6::Grammar.O(':prec<g=>, :assoc<list>, :dba<comma>, :nextterm<nulltermish>, :fiddly<1>',  '%comma');
+        Perl6::Grammar.O(':prec<f=>, :assoc<list>, :dba<list infix>',  '%list_infix');
+        Perl6::Grammar.O(':prec<e=>, :assoc<right>, :dba<list prefix>', '%list_prefix');
+        Perl6::Grammar.O(':prec<d=>, :assoc<left>, :dba<loose and>, :thunky<.t>',  '%loose_and');
+        Perl6::Grammar.O(':prec<d=>, :assoc<left>, :dba<loose and>, :thunky<.b>',  '%loose_andthen');
+        Perl6::Grammar.O(':prec<c=>, :assoc<list>, :dba<loose or>, :thunky<.t>',  '%loose_or');
+        Perl6::Grammar.O(':prec<c=>, :assoc<list>, :dba<loose or>, :thunky<.b>',  '%loose_orelse');
+        Perl6::Grammar.O(':prec<b=>, :assoc<list>, :dba<sequencer>',  '%sequencer');
+    }
+
+    token termish { }
+
+    token arg_flat_nok { }
+
+    sub bracket_ending($matches) { }
+
+    method EXPR(str $preclim = '') { }
+
+    token prefixish { }
+
+    token infixish($in_meta = nqp::getlexdyn('$*IN_META')) { }
+
+    token fake_infix { }
+
+    regex infixstopper { }
+
+    token postfixish { }
+
+    token postop { }
+
+    proto token prefix_circumfix_meta_operator { }
+
+    proto token infix_postfix_meta_operator { }
+
+    proto token infix_prefix_meta_operator { }
+
+    proto token infix_circumfix_meta_operator {}
+
+    proto token postfix_prefix_meta_operator { }
+
+    proto token prefix_postfix_meta_operator { }
+
+    method can_meta($op, $meta, $reason = "fiddly") { }
+
+    regex term:sym<reduce> { }
+
+    token postfix_prefix_meta_operator:sym<»> { }
+
+    token prefix_postfix_meta_operator:sym<«> { }
+
+    token infix_circumfix_meta_operator:sym<« »> { }
+
+    token infix_circumfix_meta_operator:sym«<< >>» { }
+
+    method AS_MATCH($v) { }
+    method revO($from) { }
+
+    proto token dotty { } 
+    token dotty:sym<.> { }
+
+    token dotty:sym<.*> { }
+
+    token dottyop { }
+
+    token privop { }
+
+    token methodop { }
+
+    token dottyopish { }
+
+    token postcircumfix:sym<[ ]> { }
+
+    token postcircumfix:sym<{ }> { }
+
+    token postcircumfix:sym<ang> { }
+
+    token postcircumfix:sym«<< >>» { }
+
+    token postcircumfix:sym<« »> { }
+
+    token postcircumfix:sym<( )> { }
+
+    token postcircumfix:sym<[; ]> { }
+
+    token postfix:sym<i>  { }
+
+    token prefix:sym<++>  {  }
+    token prefix:sym<-->  {  }
+    token postfix:sym<++> {  }
+    token postfix:sym<--> {  }
+    token postfix:sym<ⁿ> { }
+
+    token postfix:sym«->» { }
+
+    token infix:sym<**>   { }
+
+    token prefix:sym<+>   { }
+    token prefix:sym<~~>  { }
+    token prefix:sym<~>   { }
+    token prefix:sym<->   {}
+    token prefix:sym<−>   {}
+    token prefix:sym<??>  {}
+    token prefix:sym<?>   {}
+    token prefix:sym<!>   {}
+    token prefix:sym<|>   { }
+    token prefix:sym<+^>  { }
+    token prefix:sym<~^>  { }
+    token prefix:sym<?^>  { }
+    token prefix:sym<^^>  {}
+    token prefix:sym<^>   { }
+
+    token infix:sym<*>    {  }
+    token infix:sym<×>    {  }
+    token infix:sym</>    {  }
+    token infix:sym<÷>    {  }
+    token infix:sym<div>  {  }
+    token infix:sym<gcd>  {  }
+    token infix:sym<lcm>  {  }
+    token infix:sym<%>    {  }
+    token infix:sym<mod>  {  }
+    token infix:sym<%%>   {  }
+    token infix:sym<+&>   {  }
+    token infix:sym<~&>   {  }
+    token infix:sym<?&>   {  }
+    token infix:sym«+<»   {  }
+    token infix:sym«+>»   {  }
+    token infix:sym«~<»   {  }
+    token infix:sym«~>»   {  }
+
+    token infix:sym«<<» { }
+
+    token infix:sym«>>» { }
+
+    token infix:sym<+>    { }
+    token infix:sym<->    { }
+    token infix:sym<−>    {  }
+    token infix:sym<+|>   {  }
+    token infix:sym<+^>   {  }
+    token infix:sym<~|>   {  }
+    token infix:sym<~^>   {  }
+    token infix:sym<?|>   { }
+    token infix:sym<?^>   { }
+
+    token infix:sym<x>    { }
+    token infix:sym<xx>    { }
+
+    token infix:sym<~>    {  }
+    token infix:sym<.>    { }
+    token infix:sym<∘>   {  }
+    token infix:sym<o>   {  }
+
+    token infix:sym<&>   { }
+    token infix:sym<(&)> {  }
+    token infix:sym«∩»   {  }
+    token infix:sym<(.)> {  }
+    token infix:sym«⊍»   {  }
+
+    token infix:sym<|>    {  }
+    token infix:sym<^>    {  }
+    token infix:sym<(|)>  {  }
+    token infix:sym«∪»    {  }
+    token infix:sym<(^)>  {  }
+    token infix:sym«⊖»    {  }
+    token infix:sym<(+)>  {  }
+    token infix:sym«⊎»    {  }
+    token infix:sym<(-)>  {  }
+    token infix:sym«∖»    {  }
+
+    token prefix:sym<let>  { }
+    token prefix:sym<temp> { }
+
+    token infix:sym«=~=»  {  }
+    token infix:sym«≅»    {  }
+    token infix:sym«==»   {  }
+    token infix:sym«!=»   { }
+    token infix:sym«<=»   {  }
+    token infix:sym«>=»   {  }
+    token infix:sym«<»    {  }
+    token infix:sym«>»    {  }
+    token infix:sym«eq»   {  }
+    token infix:sym«ne»   {  }
+    token infix:sym«le»   {  }
+    token infix:sym«ge»   {  }
+    token infix:sym«lt»   {  }
+    token infix:sym«gt»   {  }
+    token infix:sym«=:=»  {  }
+    token infix:sym<===>  {  }
+    token infix:sym<eqv>    {  }
+    token infix:sym<before> {  }
+    token infix:sym<after>  {  }
+    token infix:sym<~~>   { }
+    token infix:sym<!~~>  { }
+    token infix:sym<(elem)> {  }
+    token infix:sym«∈»      {  }
+    token infix:sym«∉»      {  }
+    token infix:sym<(cont)> {  }
+    token infix:sym«∋»      {  }
+    token infix:sym«∌»      {  }
+    token infix:sym«(<)»    {  }
+    token infix:sym«⊂»      {  }
+    token infix:sym«⊄»      {  }
+    token infix:sym«(>)»    {  }
+    token infix:sym«⊃»      {  }
+    token infix:sym«⊅»      {  }
+    token infix:sym«(<=)»   {  }
+    token infix:sym«⊆»      {  }
+    token infix:sym«⊈»      {  }
+    token infix:sym«(>=)»   {  }
+    token infix:sym«⊇»      {  }
+    token infix:sym«⊉»      {  }
+    token infix:sym«(<+)»   {  }
+    token infix:sym«≼»      {  }
+    token infix:sym«(>+)»   {  }
+    token infix:sym«≽»      {  }
+
+    token infix:sym<&&>   {  }
+
+    token infix:sym<||>   {  }
+    token infix:sym<^^>   {  }
+    token infix:sym<//>   { }
+    token infix:sym<min>  {  }
+    token infix:sym<max>  {  }
+
+    token infix:sym<?? !!> { }
+
+    token infix_prefix_meta_operator:sym<!> { }
+
+    token infix_prefix_meta_operator:sym<R> { }
+
+    token infix_prefix_meta_operator:sym<S> { }
+
+    token infix_prefix_meta_operator:sym<X> { }
+
+    token infix_prefix_meta_operator:sym<Z> { }
+
+    token infix:sym<minmax> { }
+
+    token infix:sym<:=> { }
+
+    token infix:sym<::=> { }
+
+    token infix:sym<.=> { }
+
+    # Should probably have <!after '='> to agree w/spec, but after NYI.
+    # Modified infix != below instead to prevent misparse
+    # token infix_postfix_meta_operator:sym<=>($op) { }
+    # use $*OPER until NQP/Rakudo supports proto tokens with arguments
+    token infix_postfix_meta_operator:sym<=> { }
+
+    token infix:sym«=>» { }
+
+    token prefix:sym<so> { }
+    token prefix:sym<not>  { }
+
+    token infix:sym<,>    { }
+    token infix:sym<:>    { }
+
+    token infix:sym<Z>    { }
+    token infix:sym<X>    { }
+
+    token infix:sym<...>  { }
+    token infix:sym<…>    { }
+    token infix:sym<...^> {  }
+    token infix:sym<…^>   {  }
+    # token term:sym<...>   {}
+
+    token infix:sym<?>    { }
+
+    token infix:sym<ff> { }
+    token infix:sym<^ff> { }
+    token infix:sym<ff^> { }
+    token infix:sym<^ff^> { }
+
+    token infix:sym<fff> { }
+    token infix:sym<^fff> { }
+    token infix:sym<fff^> { }
+    token infix:sym<^fff^> { }
+
+    
+    token infix:sym<and>  { }
+    token infix:sym<andthen> { }
+    token infix:sym<notandthen> { }
+
+    token infix:sym<or>   {  }
+    token infix:sym<xor>  {  }
+    token infix:sym<orelse> { }
+
+    token infix:sym«<==»  { }
+    token infix:sym«==>»  { }
+    token infix:sym«<<==» { }
+    token infix:sym«==>>» { }
+
+    token infix:sym<..>   {}
+    token infix:sym<^..>  {  }
+    token infix:sym<..^>  {  }
+    token infix:sym<^..^> {  }
+
+    token infix:sym<leg>  { }
+    token infix:sym<cmp>  {  }
+    token infix:sym«<=>»  { }
+
+    token infix:sym<but>  {  }
+    token infix:sym<does> {  }
+
+    token infix:sym<!~> { }
+    token infix:sym<=~> { }
+
+    method add_mystery { }
+
+    method explain_mystery { }
+
+    method cry_sorrows { }
+
+    method add_variable { }
+
+    # Called when we add a new choice to an existing syntactic category, for
+    # example new infix operators add to the infix category. Augments the
+    # grammar as needed.
+    method add_categorical { }
+
+    method genO($default, $declarand) { }
+}
+
+grammar Perl6::QGrammar {
+
+    method throw_unrecog_backslash_seq ($sequence) { }
+
+    proto token escape { }
+    proto token backslash { }
+
+    role b1 {
+        token escape:sym<\\> { }
+        token backslash:sym<qq> { }
+        token backslash:sym<\\> {} 
+        token backslash:delim { }
+        token backslash:sym<a> { }
+        token backslash:sym<b> { }
+        token backslash:sym<c> { }
+        token backslash:sym<e> { }
+        token backslash:sym<f> { }
+        token backslash:sym<N> { }
+        token backslash:sym<n> { }
+        token backslash:sym<o> { }
+        token backslash:sym<r> { }
+        token backslash:sym<rn> { }
+        token backslash:sym<t> { }
+        token backslash:sym<x> { }
+        token backslash:sym<0> { }
+        token backslash:sym<1> { }
+    }
+
+    role b0 { token escape:sym<\\> { } }
+    role c1 { token escape:sym<{ }> { } }
+    role c0 { token escape:sym<{ }> { } }
+    role s1 { token escape:sym<$> { } }
+    role s0 { token escape:sym<$> { } }
+    role a1 { token escape:sym<@> { } }
+    role a0 { token escape:sym<@> { } }
+    role h1 { token escape:sym<%> { } }
+    role h0 { token escape:sym<%> { } }
+    role f1 { token escape:sym<&> { } }
+    role f0 { token escape:sym<&> { } }
+
+    role ww {
+        token escape:sym<' '> { }
+        token escape:sym<‘ ’> { }
+        token escape:sym<" "> { }
+        token escape:sym<“ ”> { }
+        token escape:sym<colonpair> { }
+        token escape:sym<#> { }
+    }
+
+    role to[$herelang] {
+        method herelang() { }
+        method postprocessors () {}
+    }
+
+    role q {
+        token starter { }
+        token stopper { }
+
+        token escape:sym<\\> { }
+
+        token backslash:sym<qq> {}
+        token backslash:sym<\\> {}
+        token backslash:delim { }
+
+        token backslash:sym<miscq> {}
+
+        method tweak_q($v) { }
+        method tweak_qq($v) { }
+    }
+
+    role qq does b1 does c1 does s1 does a1 does h1 does f1 {
+        token starter { }
+        token stopper { }
+        token backslash:sym<unrec> { }
+        token backslash:sym<misc> { }
+        method tweak_q($v) { }
+        method tweak_qq($v) { }
+    }
+
+    token nibbler { }
+
+    token do_nibbling { }
+
+    role cc {
+        method ccstate ($s) { }
+
+        token escape:ws { }
+        token escape:sym<#> { }
+        token escape:sym<\\> { }
+        token escape:sym<..> { }
+
+        token escape:sym<-> { }
+        token escape:ch { }
+
+        token backslash:delim { }
+        token backslash:<\\> { }
+        token backslash:sym<a> {  }
+        token backslash:sym<b> {  }
+        token backslash:sym<c> {  }
+        token backslash:sym<d> {  }
+        token backslash:sym<e> {  }
+        token backslash:sym<f> {  }
+        token backslash:sym<h> {  }
+        token backslash:sym<N> {  }
+        token backslash:sym<n> {  }
+        token backslash:sym<o> {  }
+        token backslash:sym<r> {  }
+        token backslash:sym<s> {  }
+        token backslash:sym<t> {  }
+        token backslash:sym<v> {  }
+        token backslash:sym<w> {  }
+        token backslash:sym<x> {  }
+        token backslash:sym<0> {  }
+
+        # keep random backslashes like qq does
+        token backslash:misc {  }
+    }
+
+    method truly($bool, $opt) { }
+
+    method apply_tweak($role) { }
+
+    method tweak_q          { }
+    method tweak_single     { }
+    method tweak_qq        { }
+    method tweak_double     { }
+
+    method tweak_b          { }
+    method tweak_backslash  {  }
+    method tweak_s          { }
+    method tweak_scalar     {  }
+    method tweak_a          { }
+    method tweak_array      {  }
+    method tweak_h          { }
+    method tweak_hash       {  }
+    method tweak_f          { }
+    method tweak_function   {  }
+    method tweak_c          { }
+    method tweak_closure    {  }
+
+    method add-postproc(str $newpp) { }
+
+# path() NYI
+#    method tweak_p          {  }
+#    method tweak_path       {  }
+
+    method tweak_x          { }
+    method tweak_exec       { }
+    method tweak_w          { }
+    method tweak_words      { }
+    method tweak_ww         { }
+    method tweak_quotewords { }
+
+    method tweak_v          { }
+    method tweak_val        { }
+
+    method tweak_cc         {}
+
+    method tweak_to { }
+    method tweak_heredoc    {}
+
+    method tweak_regex { }
+}
+
+my role CursorPackageNibbler {
+    method nibble-in-cursor { }
+}
+
+grammar Perl6::RegexGrammar {
+    method nibbler { }
+
+    token normspace { }
+
+    token rxstopper { }
+
+    token metachar:sym<:my> { }
+    token metachar:sym<{ }> { }
+    token metachar:sym<rakvar> { }
+    token metachar:sym<qw> { }
+    token metachar:sym<'> { }
+    token metachar:sym<{}> { }
+    token backslash:sym<1> { }
+    token assertion:sym<{ }> { }
+    token assertion:sym<?{ }> { }
+    token assertion:sym<!{ }> { }
+    token assertion:sym<var> { }
+    token assertion:sym<~~> { }
+
+    token codeblock { }
+    token arglist { }
+    token assertion:sym<name> { }
+}
+
+grammar Perl6::P5RegexGrammar {
+    method nibbler { } 
+    token rxstopper { <stopper> }
+
+    token p5metachar:sym<(?{ })> { }
+    token p5metachar:sym<(??{ })> { }
+    token p5metachar:sym<var> { }
+
+    token codeblock { }
+}
+
+)

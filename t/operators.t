@@ -56,8 +56,7 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{( 1 )}, Q{formatted};
-		is $pt.format( $tree ), Q{(1)}, Q{formatted};
+		is $pt.format( $tree ), Q{( 1 )}, Q{formatted};
 	}, Q{()};
 
 	subtest {
@@ -83,8 +82,7 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{[ 1 ]}, Q{formatted};
-		is $pt.format( $tree ), Q{[1]}, Q{formatted};
+		is $pt.format( $tree ), Q{[ 1 ]}, Q{formatted};
 	}, Q{[]}
 }, Q{Term Precedence};
 
@@ -153,19 +151,38 @@ _END_
 	}, Q[%a«»];
 
 	subtest {
-		plan 3;
+		plan 2;
 
-		# Whitespace sensitive between 'chomp' and '(' ')'
-		my $parsed = $pt.parse-source( Q:to[_END_] );
+		subtest {
+			plan 3;
+
+			# Whitespace sensitive between 'chomp' and '(' ')'
+			my $parsed = $pt.parse-source( Q:to[_END_] );
 chomp( )
 _END_
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-#		is $pt.format( $tree ), Q{chomp( )}, Q{formatted};
-		is $pt.format( $tree ), Q{chomp()}, Q{formatted};
-	}, Q{()};
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+#			is $pt.format( $tree ), Q{chomp( )}, Q{formatted};
+			is $pt.format( $tree ), Q{chomp()}, Q{formatted};
+		}, Q{no arguments};
+
+		subtest {
+			plan 3;
+
+			# Whitespace sensitive between 'chomp' and '(' ')'
+			my $parsed = $pt.parse-source( Q:to[_END_] );
+chomp( 1 )
+_END_
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+#			is $pt.format( $tree ), Q{chomp( 1 )}, Q{formatted};
+			is $pt.format( $tree ), Q{chomp(1)}, Q{formatted};
+		}, Q{with arguments};
+	}, Q{func()};
 
 	subtest {
 		plan 3;
@@ -1559,8 +1576,9 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{a => 1}, Q{formatted};
-		is $pt.format( $tree ), Q{a=>1}, Q{formatted};
+		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+a => 1
+_END_
 	}, Q{=>};
 }, Q{Item Assignment Precedence};
 
@@ -1612,8 +1630,6 @@ _END_
 #		is $pt.format( $tree ), Q{3 , 2}, Q{formatted};
 		is $pt.format( $tree ), Q{3,2}, Q{formatted};
 	}, Q{,};
-
-	note ": may need list context";
 }, Q{Comma Operator Precedence};
 
 # XXX 'X' and 'Z' have a lot of variants, test separately?
@@ -1695,7 +1711,7 @@ _END_
 		is $pt.format( $tree ), Q{my$a:=1}, Q{formatted};
 	}, Q{:=};
 
-	note "::= NIY";
+	# XXX "::= NIY";
 
 	subtest {
 		plan 3;
@@ -1739,7 +1755,7 @@ _END_
 		is $pt.format( $tree ), Q{???}, Q{formatted};
 	}, Q{???};
 
-	note "Undecided on [+] implementation";
+	# XXX Undecided on [+] implementation
 }, Q{List Prefix Precedence};
 
 subtest {
