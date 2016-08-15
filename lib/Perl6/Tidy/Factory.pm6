@@ -1060,13 +1060,13 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 		}
 		elsif self.assert-hash-keys( $p, [< fakesignature >] ) {
 			# XXX May not really be "post" in the P6 sense?
+			my @child =
+				self._fakesignature(
+					$p.hash.<fakesignature>
+				);
 			Perl6::Operator::PostCircumfix.new(
 				:delimiter( ':(', ')' ),
-				:child(
-					self._fakesignature(
-						$p.hash.<fakesignature>
-					)
-				)
+				:child( @child )
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< var >] ) {
@@ -1141,11 +1141,15 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 		}
 		elsif self.assert-hash-keys( $p,
 				[< routine_declarator >], [< trait >] ) {
-			self._routine_declarator( $p.hash.<routine_declarator> )
+			self._routine_declarator(
+				$p.hash.<routine_declarator>
+			)
 		}
 		elsif self.assert-hash-keys( $p,
 				[< regex_declarator >], [< trait >] ) {
-			self._regex_declarator( $p.hash.<regex_declarator> )
+			self._regex_declarator(
+				$p.hash.<regex_declarator>
+			)
 		}
 		elsif self.assert-hash-keys( $p,
 				[< variable_declarator >], [< trait >] ) {
@@ -1897,6 +1901,7 @@ return True;
 		if self.assert-hash-keys( $p,
 			     [< specials longname blockoid multisig >],
 			     [< trait >] ) {
+			my @child = self._multisig( $p.hash.<multisig> );
 			(
 				self._longname( $p.hash.<longname> ),
 				Perl6::Operator::Circumfix.new(
@@ -1904,11 +1909,7 @@ return True;
 					:from( $p.from ),
 					:to( $p.to ),
 					:delimiter( '(', ')' ),
-					:child(
-						self._multisig(
-							$p.hash.<multisig>
-						)
-					)
+					:child( @child )
 				),
 				self._blockoid( $p.hash.<blockoid> )
 			).flat
@@ -2518,13 +2519,12 @@ warn 28;
 			$leaf
 		}
 		elsif self.assert-hash-keys( $p, [< signature >] ) {
+			my @child = self._signature( $p.hash.<signature> );
 			Perl6::Operator::Circumfix.new(
 				:from( $p.from ),
 				:to( $p.to ),
 				:delimiter( '(', ')' ),
-				:child(
-					self._signature( $p.hash.<signature> )
-				)
+				:child( @child )
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< sigil >] ) {
@@ -2840,17 +2840,14 @@ warn 28;
 		if self.assert-hash-keys( $p,
 				[< blockoid deflongname multisig >],
 				[< trait >] ) {
+			my @child = self._multisig( $p.hash.<multisig> );
 			(
 				self._deflongname( $p.hash.<deflongname> ),
 				Perl6::Operator::Circumfix.new(
 					:from( $p.hash.<blockoid>.from ),
 					:to( $p.hash.<blockoid>.to ),
 					:delimiter( '(', ')' ),
-					:child(
-						self._multisig(
-							$p.hash.<multisig>
-						)
-					)
+					:child( @child )
 				),
 				self._blockoid( $p.hash.<blockoid> )
 			).flat
@@ -2865,14 +2862,11 @@ warn 28;
 		}
 		elsif self.assert-hash-keys( $p,
 				[< blockoid multisig >], [< trait >] ) {
+			my @child = self._multisig( $p.hash.<multisig> );
 			(
 				Perl6::Operator::Circumfix.new(
 					:delimiter( '(', ')' ),
-					:child(
-						self._multisig(
-							$p.hash.<multisig>
-						)
-					)
+					:child( @child )
 				),
 				self._blockoid( $p.hash.<blockoid> )
 			).flat
@@ -3177,19 +3171,18 @@ warn 28;
 			@child
 		}
 		elsif self.assert-hash-keys( $p, [< EXPR >] ) {
+			my @child = self._EXPR( $p.hash.<EXPR> );
 			Perl6::Statement.new(
-				:child(
-					self._EXPR( $p.hash.<EXPR> )
-				)
+				:child( @child )
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< statement_control >] ) {
+			my @child =
+				self._statement_control(
+					$p.hash.<statement_control>
+				);
 			Perl6::Statement.new(
-				:child(
-					self._statement_control(
-						$p.hash.<statement_control>
-					)
-				)
+				:child( @child )
 			)
 		}
 		else {
