@@ -20,7 +20,9 @@ _END_
 #	is $pt.format( $tree ), Q:to[_END_], Q{formatted};
 #class Unqualified { }
 #_END_
-	is $pt.format( $tree ), Q{classUnqualified{}}, Q{formatted};
+	is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+classUnqualified{}
+_END_
 }, Q{empty};
 
 subtest {
@@ -34,7 +36,9 @@ _END_
 #	is $pt.format( $tree ), Q:to[_END_], Q{formatted};
 #class Qual::Ified { }
 #_END_
-	is $pt.format( $tree ), Q{classQual::Ified{}}, Q{formatted};
+	is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+classQual::Ified{}
+_END_
 }, Q{empty, multiple namespaces};
 
 subtest {
@@ -51,9 +55,9 @@ _END_
 #		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
 #class Unqualified { method foo { } }
 #_END_
-		is $pt.format( $tree ),
-			Q{classUnqualified{methodfoo{}}},
-			Q{formatted};
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+classUnqualified{methodfoo{}}
+_END_
 	}, Q{single};
 
 	subtest {
@@ -73,9 +77,9 @@ _END_
 #	method bar { }
 #}
 #_END_
-		is $pt.format( $tree ),
-			Q{classUnqualified{methodfoo{}methodbar{}}},
-			Q{formatted};
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+classUnqualified{methodfoo{}methodbar{}}
+_END_
 	}, Q{multiple};
 }, Q{method};
 
@@ -95,8 +99,9 @@ _END_
 			ok $pt.validate( $parsed ), Q{valid};
 #			is $pt.format( $tree ),
 #				Q{class Unqualified{has$.a}}, Q{formatted};
-			is $pt.format( $tree ),
-				Q{classUnqualified{has$.a}}, Q{formatted};
+			is $pt.format( $tree ),Q:to[_END_].chomp, Q{formatted};
+classUnqualified{has$.a}
+_END_
 		}, Q{single, no WS};
 
 		subtest {
@@ -109,8 +114,9 @@ _END_
 			ok $pt.validate( $parsed ), Q{valid};
 #			is $pt.format( $tree ),
 #				Q{class Unqualified { has $.a }}, Q{formatted};
-			is $pt.format( $tree ),
-				Q{classUnqualified{has $.a}}, Q{formatted};
+			is $pt.format( $tree ),Q:to[_END_].chomp, Q{formatted};
+classUnqualified{has $.a}
+_END_
 		}, Q{single};
 
 		subtest {
@@ -130,7 +136,9 @@ _END_
 #	has $.b;
 #}
 #_END_
-			is $pt.format( $tree ), Q{classUnqualified{has $.ahas $.b}}, Q{formatted};
+			is $pt.format( $tree ),Q:to[_END_].chomp, Q{formatted};
+classUnqualified{has $.ahas $.b}
+_END_
 		}, Q{multiple};
 
 		subtest {
@@ -144,9 +152,9 @@ _END_
 #			is $pt.format( $tree ),
 #				Q{class Unqualified { has ( $.a, $.b ) }},
 #				Q{formatted};
-			is $pt.format( $tree ),
-				Q{classUnqualified{has ($.a$.b)}},
-				Q{formatted};
+			is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+classUnqualified{has ($.a$.b)}
+_END_
 		}, Q{list};
 	}, Q{$};
 
@@ -160,8 +168,9 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 #		is $pt.format( $tree ), Q{class Unqualified { has @.a }},
 #			Q{formatted};
-		is $pt.format( $tree ), Q{classUnqualified{has @.a}},
-			Q{formatted};
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+classUnqualified{has @.a}
+_END_
 	}, Q{@};
 
 	subtest {
@@ -174,8 +183,9 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 #		is $pt.format( $tree ), Q{class Unqualified { has %.a }},
 #			Q{formatted};
-		is $pt.format( $tree ), Q{classUnqualified{has %.a}},
-			Q{formatted};
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+classUnqualified{has %.a}
+_END_
 	}, Q{%};
 
 	subtest {
@@ -188,8 +198,9 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 #		is $pt.format( $tree ), Q{class Unqualified { has &.a }},
 #			Q{formatted};
-		is $pt.format( $tree ), Q{classUnqualified{has &.a}},
-			Q{formatted};
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+classUnqualified{has &.a}
+_END_
 	}, Q{&};
 }, Q{Attribute};
 
