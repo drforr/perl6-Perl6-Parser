@@ -590,7 +590,9 @@ class Perl6::Tidy::Factory {
 			if $start < $_.from {
 				@ws.push(
 					self.make-whitespace(
-						$orig, $start - $offset, $_.from - $offset
+						$orig,
+						$start - $offset,
+						$_.from - $offset
 					)
 				)
 			}
@@ -793,12 +795,15 @@ class Perl6::Tidy::Factory {
 	}
 
 	method _atom( Mu $p ) {
-		warn "Untested method";
 		if self.assert-hash-keys( $p, [< metachar >] ) {
 			self._metachar( $p.hash.<metachar> )
 		}
 		elsif $p.Str {
-			die "Not implemented yet";
+			Perl6::Bareword.new(
+				:from( $p.from ),
+				:to( $p.to ),
+				:content( $p.Str )
+			)
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -915,7 +920,7 @@ class Perl6::Tidy::Factory {
 					die "Not implemented yet"
 				}
 				else {
-					say $p.hash.keys.gist;
+					say $_.hash.keys.gist;
 					warn "Unhandled case"
 				}
 			}
@@ -1241,7 +1246,7 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 					)
 				}
 				else {
-					say $p.hash.keys.gist;
+					say $_.hash.keys.gist;
 					warn "Unhandled case"
 				}
 			}
@@ -1678,7 +1683,7 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 					die "Not implemented yet"
 				}
 				else {
-					say $p.hash.keys.gist;
+					say $_.hash.keys.gist;
 					warn "Unhandled case"
 				}
 			}
@@ -1988,7 +1993,7 @@ return True;
 					die "Not implemented yet"
 				}
 				else {
-					say $p.hash.keys.gist;
+					say $_.hash.keys.gist;
 					warn "Unhandled case"
 				}
 			}
@@ -2109,7 +2114,6 @@ warn 28;
 	}
 
 	method _noun( Mu $p ) {
-		warn "Untested method";
 		if $p.list {
 			my Perl6::Element @child;
 			for $p.list {
@@ -2134,14 +2138,16 @@ warn 28;
 				}
 				elsif self.assert-hash-keys( $_,
 					[< atom >], [< sigfinal >] ) {
-					die "Not implemented yet"
+					@child.push(
+						self._atom( $_.hash.<atom> )
+					)
 				}
 				else {
-					say $p.hash.keys.gist;
+					say $_.hash.keys.gist;
 					warn "Unhandled case"
 				}
 			}
-			@child;
+			@child
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -2718,7 +2724,7 @@ warn 28;
 					die "Not implemented yet"
 				}
 				else {
-					say $p.hash.keys.gist;
+					say $_.hash.keys.gist;
 					warn "Unhandled case"
 				}
 			}
@@ -2784,29 +2790,30 @@ warn 28;
 		if self.assert-hash-keys( $p,
 				[< deflongname nibble >],
 				[< signature trait >] ) {
-			# leading and trailing space elided
 			my $nibble = $p.hash.<nibble>.Str;
-			$nibble ~~ s{ (\s+) } = ''; my $inset = $0.chars;
-			my Perl6::Element @child;
-			@child.push(
-				# XXX Should this be expanded?
-				# XXX And if so, as an attribute
-				Perl6::Regex.new(
-					:from( $p.hash.<nibble>.from ),
-					:to( $p.hash.<nibble>.to - $inset ),
-					:content( $nibble )
-				)
+			$nibble ~~ s{ \s+ $ } = '';
+			my $x = substr(
+				$p.Str, $p.hash.<deflongname>.Str.chars
 			);
+			$x ~~ m{ ^ (.+) '{' }; my $offset = $0.chars;
+
 			(
 				self._deflongname( $p.hash.<deflongname> ),
-				# XXX Careful of delimiters here.
 				Perl6::Block.new(
-					:from( @child[0].from ),
-					:to( @child[*-1].to ),
+					:from(
+						$p.hash.<deflongname>.to +
+						$offset
+					),
+					:to( $p.to ),
 					:delimiter( '{', '}' ),
-					:child( @child )
+					:child(
+						self._nibble(
+							$p.hash.<nibble>
+						)
+					)
 				)
-			).flat
+	
+			)
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -2950,8 +2957,6 @@ warn 28;
 				self._sym( $p.hash.<sym> ),
 				self._scoped( $p.hash.<scoped> )
 			).flat;
-key-boundary $p;
-say @child.perl;
 			my @ws = self.populate-whitespace(
 				$p.Str, $p.from, # XXX Offset to start
 				$p.from, $p.to, @child
@@ -3172,7 +3177,7 @@ say @child.perl;
 					die "Not implemented yet"
 				}
 				else {
-					say $p.hash.keys.gist;
+					say $_.hash.keys.gist;
 					warn "Unhandled case"
 				}
 			}
@@ -3260,7 +3265,7 @@ say @child.perl;
 					die "Not implemented yet"
 				}
 				else {
-					say $p.hash.keys.gist;
+					say $_.hash.keys.gist;
 					warn "Unhandled case"
 				}
 			}
@@ -3298,15 +3303,18 @@ say @child.perl;
 	}
 
 	method _termalt( Mu $p ) {
-		warn "Untested method";
 		if $p.list {
 			my Perl6::Element @child;
 			for $p.list {
 				if self.assert-hash-keys( $_, [< termconj >] ) {
-					die "Not implemented yet"
+					@child.append(
+						self._termconj(
+							$_.hash.<termconj>
+						)
+					)
 				}
 				else {
-					say $p.hash.keys.gist;
+					say $_.hash.keys.gist;
 					warn "Unhandled case"
 				}
 			}
@@ -3329,19 +3337,19 @@ say @child.perl;
 	}
 
 	method _termconj( Mu $p ) {
-		warn "Untested method";
+		CATCH { when X::Hash::Store::OddNumber { .resume } } # XXX ?...
 		if $p.list {
 			my Perl6::Element @child;
 			for $p.list {
 				if self.assert-hash-keys( $_, [< termish >] ) {
-					@child.push(
+					@child.append(
 						self._termish(
-							$p.hash.<termish>
+							$_.hash.<termish>
 						)
 					)
 				}
 				else {
-					say $p.hash.keys.gist;
+					say $_.hash.keys.gist;
 					warn "Unhandled case"
 				}
 			}
@@ -3359,10 +3367,14 @@ say @child.perl;
 			my Perl6::Element @child;
 			for $p.list {
 				if self.assert-hash-keys( $_, [< termalt >] ) {
-					die "Not implemented yet"
+					@child.append(
+						self._termalt(
+							$_.hash.<termalt>
+						)
+					)
 				}
 				else {
-					say $p.hash.keys.gist;
+					say $_.hash.keys.gist;
 					warn "Unhandled case"
 				}
 			}
@@ -3401,11 +3413,24 @@ warn 46;
 	}
 
 	method _termish( Mu $p ) {
-		warn "Untested method";
-		for $p.list {
-			next if self.assert-hash-keys( $_, [< noun >] );
+		if $p.list {
+			my Perl6::Element @child;
+			for $p.list {
+				if self.assert-hash-keys( $_, [< noun >] ) {
+					@child.append(
+						self._noun(
+							$_.hash.<noun>
+						)
+					)
+				}
+				else {
+					say $_.hash.keys.gist;
+					warn "Unhandled case"
+				}
+			}
+			@child
 		}
-		if self.assert-hash-keys( $p, [< noun >] ) {
+		elsif self.assert-hash-keys( $p, [< noun >] ) {
 			self._noun( $p.hash.<noun> )
 		}
 		else {
@@ -3460,23 +3485,25 @@ warn 46;
 
 	method _type_constraint( Mu $p ) {
 		my Perl6::Element @child;
-		for $p.list {
-			if self.assert-hash-keys( $_, [< typename >] ) {
-				@child.append(
-					self._typename( $_.hash.<typename> )
-				)
-			}
-			elsif self.assert-hash-keys( $_, [< value >] ) {
-				@child.append(
-					self._value( $_.hash.<value> )
-				)
-			}
-			else {
-				say $p.hash.keys.gist;
-				warn "Unhandled case"
+		if $p.list {
+			for $p.list {
+				if self.assert-hash-keys( $_, [< typename >] ) {
+					@child.append(
+						self._typename( $_.hash.<typename> )
+					)
+				}
+				elsif self.assert-hash-keys( $_, [< value >] ) {
+					@child.append(
+						self._value( $_.hash.<value> )
+					)
+				}
+				else {
+					say $_.hash.keys.gist;
+					warn "Unhandled case"
+				}
 			}
 		}
-#		if self.assert-hash-keys( $p, [< value >] ) {
+#		elsif self.assert-hash-keys( $p, [< value >] ) {
 #			self._value( $p.hash.<value> )
 #		}
 #		elsif self.assert-hash-keys( $p, [< typename >] ) {
@@ -3526,8 +3553,6 @@ warn 46;
 			elsif self.assert-hash-keys( $_,
 					[< longname colonpair >] ) {
 				# XXX Fix this later.
-key-boundary $_;
-warn 48;
 				return
 					Perl6::Bareword.new(
 						:from( -42 ),
@@ -3716,7 +3741,7 @@ warn "*** contextualizer fired";
 					die "Not implemented yet";
 				}
 				else {
-					say $p.hash.keys.gist;
+					say $_.hash.keys.gist;
 					warn "Unhandled case"
 				}
 			}
@@ -3742,7 +3767,7 @@ warn "*** contextualizer fired";
 					die "Not implemented yet";
 				}
 				else {
-					say $p.hash.keys.gist;
+					say $_.hash.keys.gist;
 					warn "Unhandled case"
 				}
 			}

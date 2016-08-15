@@ -249,7 +249,7 @@ _END_
 #my regex foo { a }
 #_END_
 		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-myregexfoo{a}
+my regex foo {a}
 _END_
 	}, Q{my regex foo {a} (null regex not allowed)};
 
@@ -296,13 +296,12 @@ _END_
 my token foo { a }
 _END_
 		my $tree = $pt.build-tree( $parsed );
-say $tree.perl;
 		ok $pt.validate( $parsed ), Q{valid};
 #		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
 #my token foo { a }
 #_END_
 		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-mytokenfoo{a}
+my token foo {a}
 _END_
 	}, Q{my token foo {a} (null regex not allowed, must give it content.)};
 
@@ -318,7 +317,7 @@ _END_
 #my rule foo { a }
 #_END_
 		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-myrulefoo{a}
+my rule foo {a}
 _END_
 	}, Q{my rule foo {a}};
 }, Q{braced things};
