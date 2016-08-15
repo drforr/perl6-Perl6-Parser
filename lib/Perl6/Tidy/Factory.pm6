@@ -518,7 +518,15 @@ class Perl6::Tidy::Factory {
 		)
 	}
 
-	multi method make-prefix-from( Mu $p ) {
+	method make-bareword-from( Mu $p ) {
+		Perl6::Bareword.new(
+			:from( $p.from ),
+			:to( $p.to ),
+			:content( $p.Str )
+		)
+	}
+
+	method make-prefix-from( Mu $p ) {
 		Perl6::Operator::Prefix.new(
 			:from( $p.from ),
 			:to( $p.to ),
@@ -799,11 +807,7 @@ class Perl6::Tidy::Factory {
 			self._metachar( $p.hash.<metachar> )
 		}
 		elsif $p.Str {
-			Perl6::Bareword.new(
-				:from( $p.from ),
-				:to( $p.to ),
-				:content( $p.Str )
-			)
+			self.make-bareword-from( $p )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -1691,11 +1695,7 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 		}
 		elsif $p.Str {
 			# leading and trailing space elided
-			Perl6::Bareword.new(
-				:from( $p.from ),
-				:to( $p.to ),
-				:content( $p.Str )
-			)
+			self.make-bareword-from( $p )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -1829,11 +1829,7 @@ return True;
 
 	method _key( Mu $p ) returns Perl6::Element {
 		# leading and trailing space elided
-		Perl6::Bareword.new(
-			:from( $p.from ),
-			:to( $p.to ),
-			:content( $p.Str )
-		)
+		self.make-bareword-from( $p )
 	}
 
 	method _lambda( Mu $p ) returns Str {
@@ -2053,11 +2049,7 @@ return True;
 		elsif self.assert-hash-keys( $p,
 			[< identifier >], [< morename >] ) {
 			# leading and trailing space elided
-			Perl6::Bareword.new(
-				:from( $p.from ),
-				:to( $p.to ),
-				:content( $p.Str )
-			)
+			self.make-bareword-from( $p )
 		}
 		elsif self.assert-hash-keys( $p, [< subshortname >] ) {
 			die "Not implemented yet"
@@ -2073,11 +2065,7 @@ return True;
 		elsif self.assert-Str( $p ) {
 key-boundary $p;
 warn 28;
-			Perl6::Bareword.new(
-				:from( $p.from ),
-				:to( $p.to ),
-				:content( $p.Str )
-			)
+			self.make-bareword-from( $p )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -2790,13 +2778,20 @@ warn 28;
 		if self.assert-hash-keys( $p,
 				[< deflongname nibble >],
 				[< signature trait >] ) {
-			my $nibble = $p.hash.<nibble>.Str;
-			$nibble ~~ s{ \s+ $ } = '';
 			my $x = substr(
 				$p.Str, $p.hash.<deflongname>.Str.chars
 			);
 			$x ~~ m{ ^ (.+) '{' }; my $offset = $0.chars;
 
+			my Perl6::Element @child;
+			@child.append(
+				self._nibble( $p.hash.<nibble> )
+			);
+#			my @ws = self.populate-whitespace(
+#				$p.Str, $offset + 1, #$p.from, # XXX Offset to start
+#				#$p.from, $p.to, @child
+#				$p.from + 1, $p.to - 1, @child
+#			);
 			(
 				self._deflongname( $p.hash.<deflongname> ),
 				Perl6::Block.new(
@@ -2806,13 +2801,9 @@ warn 28;
 					),
 					:to( $p.to ),
 					:delimiter( '{', '}' ),
-					:child(
-						self._nibble(
-							$p.hash.<nibble>
-						)
-					)
+					:child( @child )
+					#:child( @ws )
 				)
-	
 			)
 		}
 		else {
@@ -2852,6 +2843,8 @@ warn 28;
 			(
 				self._deflongname( $p.hash.<deflongname> ),
 				Perl6::Operator::Circumfix.new(
+					:from( $p.hash.<blockoid>.from ),
+					:to( $p.hash.<blockoid>.to ),
 					:delimiter( '(', ')' ),
 					:child(
 						self._multisig(
@@ -3273,11 +3266,7 @@ warn 28;
 		}
 		elsif $p.Str {
 			# leading and trailing space elided
-			Perl6::Bareword.new(
-				:from( $p.from ),
-				:to( $p.to ),
-				:content( $p.Str )
-			)
+			self.make-bareword-from( $p )
 		}
 		elsif $p.Bool and $p.Str eq '+' {
 			die "Not implemented yet"
@@ -3544,11 +3533,7 @@ warn 46;
 				# XXX Probably could be narrowed.
 				# leading and trailing space elided
 				return
-					Perl6::Bareword.new(
-						:from( $_.from ),
-						:to( $_.to ),
-						:content( $_.Str )
-					)
+					self.make-bareword-from( $_ )
 			}
 			elsif self.assert-hash-keys( $_,
 					[< longname colonpair >] ) {
@@ -3565,11 +3550,7 @@ warn 46;
 				# XXX Can probably be narrowed
 				# leading and trailing space elided
 				return
-					Perl6::Bareword.new(
-						:from( $_.from ),
-						:to( $_.to ),
-						:content( $_.Str )
-					)
+					self.make-bareword-from( $_ )
 			}
 			elsif self.assert-hash-keys( $_,
 					[< longname >], [< colonpair >] ) {
