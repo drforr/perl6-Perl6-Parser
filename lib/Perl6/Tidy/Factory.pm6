@@ -999,15 +999,15 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< fakesignature >] ) {
-			# Synthesize the 'from' marker for ':'
-			(
-				Perl6::Operator::Prefix.new(
-					:from( $p.from ),
-					:to( $p.from + 1 ),
-					:content( Q{:} )
-				),
-				self._fakesignature( $p.hash.<fakesignature> )
-			).flat
+			# XXX May not really be "post" in the P6 sense?
+			Perl6::Operator::PostCircumfix.new(
+				:delimiter( ':(', ')' ),
+				:child(
+					self._fakesignature(
+						$p.hash.<fakesignature>
+					)
+				)
+			)
 		}
 		elsif self.assert-hash-keys( $p, [< var >] ) {
 			# Synthesize the 'from' marker for ':'
@@ -1095,7 +1095,11 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 		}
 		elsif self.assert-hash-keys( $p,
 				[< signature >], [< trait >] ) {
-			self._signature( $p.hash.<signature> )
+			self.make-circumfix( $p,
+				(
+					self._signature( $p.hash.<signature> )
+				)
+			)
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -1578,7 +1582,6 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 
 	method _fatarrow( Mu $p ) {
 		if self.assert-hash-keys( $p, [< key val >] ) {
-say $p.Str;
 			my @child = (
 				self._key( $p.hash.<key> ),
 				self.make-infix-from( $p, Q{=>} ),
@@ -1842,7 +1845,14 @@ return True;
 			     [< trait >] ) {
 			(
 				self._longname( $p.hash.<longname> ),
-				self._multisig( $p.hash.<multisig> ),
+				Perl6::Operator::Circumfix.new(
+					:delimiter( '(', ')' ),
+					:child(
+						self._multisig(
+							$p.hash.<multisig>
+						)
+					)
+				),
 				self._blockoid( $p.hash.<blockoid> )
 			).flat
 		}
@@ -2456,7 +2466,14 @@ warn 28;
 			$leaf
 		}
 		elsif self.assert-hash-keys( $p, [< signature >] ) {
-			self._signature( $p.hash.<signature> )
+say $p.Str;
+warn 4;
+			Perl6::Operator::Circumfix.new(
+				:delimiter( '(', ')' ),
+				:child(
+					self._signature( $p.hash.<signature> )
+				)
+			)
 		}
 		elsif self.assert-hash-keys( $p, [< sigil >] ) {
 			self._sigil( $p.hash.<sigil> )
@@ -2766,7 +2783,14 @@ warn 28;
 				[< trait >] ) {
 			(
 				self._deflongname( $p.hash.<deflongname> ),
-				self._multisig( $p.hash.<multisig> ),
+				Perl6::Operator::Circumfix.new(
+					:delimiter( '(', ')' ),
+					:child(
+						self._multisig(
+							$p.hash.<multisig>
+						)
+					)
+				),
 				self._blockoid( $p.hash.<blockoid> )
 			).flat
 		}
@@ -2781,7 +2805,14 @@ warn 28;
 		elsif self.assert-hash-keys( $p,
 				[< blockoid multisig >], [< trait >] ) {
 			(
-				self._multisig( $p.hash.<multisig> ),
+				Perl6::Operator::Circumfix.new(
+					:delimiter( '(', ')' ),
+					:child(
+						self._multisig(
+							$p.hash.<multisig>
+						)
+					)
+				),
 				self._blockoid( $p.hash.<blockoid> )
 			).flat
 		}
@@ -2962,40 +2993,28 @@ warn 28;
 		if self.assert-hash-keys( $p,
 				[< parameter typename >],
 				[< param_sep >] ) {
-			my Perl6::Element @child;
-			@child.push( self._typename( $p.hash.<typename> ) );
-			@child.push( self._parameter( $p.hash.<parameter> ) );
-			Perl6::Operator::Circumfix.new(
-				:delimiter( '(', ')' ),
-				:child( @child )
+			(
+				self._typename( $p.hash.<typename> ),
+				self._parameter( $p.hash.<parameter> )
 			)
 		}
 		elsif self.assert-hash-keys( $p,
 				[< parameter >],
 				[< param_sep >] ) {
-			my Perl6::Element @child;
-			@child.append( self._parameter( $p.hash.<parameter> ) );
-			Perl6::Operator::Circumfix.new(
-				:delimiter( '(', ')' ),
-				:child( @child )
+			(
+				self._parameter( $p.hash.<parameter> )
 			)
 		}
 		elsif self.assert-hash-keys( $p,
 				[< param_sep >],
 				[< parameter >] ) {
-			my Perl6::Element @child;
-			@child.push( self._parameter( $p.hash.<parameter> ) );
-			Perl6::Operator::Circumfix.new(
-				:delimiter( '(', ')' ),
-				:child( @child )
+			(
+				self._parameter( $p.hash.<parameter> )
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< >],
 				[< param_sep parameter >] ) {
-			Perl6::Operator::Circumfix.new(
-				:delimiter( '(', ')' ),
-				:child( )
-			)
+			()
 		}
 		else {
 			say $p.hash.keys.gist;
