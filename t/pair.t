@@ -114,7 +114,7 @@ _END_
 #my $a; :a{$a}
 #_END_
 	is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-my$a:a{$a}
+my $a:a{$a}
 _END_
 }, Q{:a{$a}};
 
@@ -178,7 +178,7 @@ _END_
 #my $a; :$a
 #_END_
 	is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-my$a:$a
+my $a:$a
 _END_
 }, Q{:$a};
 
@@ -194,7 +194,7 @@ _END_
 #my @a; :@a
 #_END_
 	is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-my@a:@a
+my @a:@a
 _END_
 }, Q{:@a};
 
@@ -210,7 +210,7 @@ _END_
 #my %a; :%a
 #_END_
 	is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-my%a:%a
+my %a:%a
 _END_
 }, Q{:%a};
 
@@ -226,7 +226,7 @@ _END_
 #my sub a { }; :&a
 #_END_
 	is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-mysuba{}:&a
+my sub a {}:&a
 _END_
 }, Q{:&a};
 

@@ -50,6 +50,11 @@ subtest {
 	is-deeply $t,
 		Perl6::Document.new( :child(
 			Perl6::Statement.new( :child(
+#				Perl6::WS.new(
+#					:from( 0 ),
+#					:to( 1 ),
+#					:content( Q{ } )
+#				),
 				Perl6::Bareword.new(
 					:from( 1 ),
 					:to( 3 ),
@@ -76,6 +81,11 @@ subtest {
 					:from( 0 ),
 					:to( 2 ),
 					:content( Q{my} )
+				),
+				Perl6::WS.new(
+					:from( 2 ),
+					:to( 3 ),
+					:content( Q{ } )
 				),
 				Perl6::Variable::Scalar.new(
 					:from( 3 ),
@@ -121,6 +131,11 @@ subtest {
 					:to( 2 ),
 					:content( Q{my} )
 				),
+				Perl6::WS.new(
+					:from( 2 ),
+					:to( 3 ),
+					:content( Q{ } )
+				),
 				Perl6::Variable::Scalar.new(
 					:from( 3 ),
 					:to( 5 ),
@@ -148,6 +163,11 @@ subtest {
 					:to( 2 ),
 					:content( Q{my} )
 				),
+				Perl6::WS.new(
+					:from( 2 ),
+					:to( 3 ),
+					:content( Q{ } )
+				),
 				Perl6::Variable::Scalar.new(
 					:from( 3 ),
 					:to( 5 ),
@@ -155,10 +175,20 @@ subtest {
 					:content( Q{$a} ),
 					:headless( Q{a} )
 				),
+				Perl6::WS.new(
+					:from( 5 ),
+					:to( 6 ),
+					:content( Q{ } )
+				),
 				Perl6::Operator::Infix.new(
 					:from( 6 ),
 					:to( 7 ),
 					:content( Q{=} )
+				),
+				Perl6::WS.new(
+					:from( 7 ),
+					:to( 8 ),
+					:content( Q{ } )
 				),
 				Perl6::Number::Decimal.new(
 					:from( 8 ),
@@ -234,6 +264,11 @@ subtest {
 						:to( 2 ),
 						:content( Q{my} )
 					),
+					Perl6::WS.new(
+						:from( 2 ),
+						:to( 3 ),
+						:content( Q{ } )
+					),
 					Perl6::Variable::Scalar.new(
 						:from( 3 ),
 						:to( 5 ),
@@ -241,20 +276,40 @@ subtest {
 						:content( Q{$a} ),
 						:headless( Q{a} )
 					),
+					Perl6::WS.new(
+						:from( 5 ),
+						:to( 6 ),
+						:content( Q{ } )
+					),
 					Perl6::Operator::Infix.new(
 						:from( 6 ),
 						:to( 7 ),
 						:content( Q{=} )
+					),
+					Perl6::WS.new(
+						:from( 7 ),
+						:to( 8 ),
+						:content( Q{ } )
 					),
 					Perl6::Number::Decimal.new(
 						:from( 8 ),
 						:to( 9 ),
 						:content( '1' )
 					),
+					Perl6::WS.new(
+						:from( 9 ),
+						:to( 10 ),
+						:content( Q{ } )
+					),
 					Perl6::Operator::Infix.new(
 						:from( 10 ),
 						:to( 11 ),
 						:content( Q{+} )
+					),
+					Perl6::WS.new(
+						:from( 11 ),
+						:to( 12 ),
+						:content( Q{ } )
 					),
 					Perl6::Number::Decimal.new(
 						:from( 12 ),

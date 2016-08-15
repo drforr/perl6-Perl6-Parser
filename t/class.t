@@ -110,7 +110,7 @@ _END_
 #			is $pt.format( $tree ),
 #				Q{class Unqualified { has $.a }}, Q{formatted};
 			is $pt.format( $tree ),
-				Q{classUnqualified{has$.a}}, Q{formatted};
+				Q{classUnqualified{has $.a}}, Q{formatted};
 		}, Q{single};
 
 		subtest {
@@ -130,7 +130,7 @@ _END_
 #	has $.b;
 #}
 #_END_
-			is $pt.format( $tree ), Q{classUnqualified{has$.ahas$.b}}, Q{formatted};
+			is $pt.format( $tree ), Q{classUnqualified{has $.ahas $.b}}, Q{formatted};
 		}, Q{multiple};
 
 		subtest {
@@ -145,7 +145,7 @@ _END_
 #				Q{class Unqualified { has ( $.a, $.b ) }},
 #				Q{formatted};
 			is $pt.format( $tree ),
-				Q{classUnqualified{has($.a$.b)}},
+				Q{classUnqualified{has ($.a$.b)}},
 				Q{formatted};
 		}, Q{list};
 	}, Q{$};
@@ -160,7 +160,7 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 #		is $pt.format( $tree ), Q{class Unqualified { has @.a }},
 #			Q{formatted};
-		is $pt.format( $tree ), Q{classUnqualified{has@.a}},
+		is $pt.format( $tree ), Q{classUnqualified{has @.a}},
 			Q{formatted};
 	}, Q{@};
 
@@ -174,7 +174,7 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 #		is $pt.format( $tree ), Q{class Unqualified { has %.a }},
 #			Q{formatted};
-		is $pt.format( $tree ), Q{classUnqualified{has%.a}},
+		is $pt.format( $tree ), Q{classUnqualified{has %.a}},
 			Q{formatted};
 	}, Q{%};
 
@@ -188,7 +188,7 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 #		is $pt.format( $tree ), Q{class Unqualified { has &.a }},
 #			Q{formatted};
-		is $pt.format( $tree ), Q{classUnqualified{has&.a}},
+		is $pt.format( $tree ), Q{classUnqualified{has &.a}},
 			Q{formatted};
 	}, Q{&};
 }, Q{Attribute};

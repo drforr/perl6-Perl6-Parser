@@ -42,8 +42,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{<a b>}, Q{formatted};
-		is $pt.format( $tree ), Q{<a b>}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#<a b>
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+<a b>
+_END_
 	}, Q{<>};
 
 	subtest {
@@ -56,7 +60,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-		is $pt.format( $tree ), Q{( 1 )}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#( 1 )
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+( 1 )
+_END_
 	}, Q{()};
 
 	subtest {
@@ -68,8 +77,12 @@ _END_
 		my $tree = $pt.build-tree( $parsed );
 		ok $pt.validate( $parsed ), Q{valid};
 		# XXX Technically it's an operator, but that could confuse.
-#		is $pt.format( $tree ), Q[{ 1 }], Q{formatted};
-		is $pt.format( $tree ), Q[{1}], Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#{ 1 }
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+{1}
+_END_
 	}, Q[{}];
 
 	subtest {
@@ -82,7 +95,9 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-		is $pt.format( $tree ), Q{[ 1 ]}, Q{formatted};
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+[ 1 ]
+_END_
 	}, Q{[]}
 }, Q{Term Precedence};
 
@@ -100,8 +115,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[1].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{my @a; @a[ 2 ]}, Q{formatted};
-		is $pt.format( $tree ), Q{my@a@a[2]}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#my @a; @a[ 2 ]
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+my @a@a[2]
+_END_
 	}, Q{[]};
 
 	subtest {
@@ -116,8 +135,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[1].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q[my %a; %a{ "foo" }], Q{formatted};
-		is $pt.format( $tree ), Q[my%a%a{"foo"}], Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#my %a; %a{ "foo" }
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+my %a%a{"foo"}
+_END_
 	}, Q[%a{}];
 
 	subtest {
@@ -131,8 +154,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[1].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q[my %a; %a< foo >], Q{formatted};
-		is $pt.format( $tree ), Q[my%a%a<foo>], Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#my %a; %a< foo >
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+my %a%a<foo>
+_END_
 	}, Q[%a<>];
 
 	subtest {
@@ -146,8 +173,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[1].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q[my %a; %a« foo »], Q{formatted};
-		is $pt.format( $tree ), Q[my%a%a«foo»], Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#my %a; %a« foo »
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+my %a%a«foo»
+_END_
 	}, Q[%a«»];
 
 	subtest {
@@ -164,8 +195,12 @@ _END_
 			ok $pt.validate( $parsed ), Q{valid};
 			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 				Q{found operator};
-#			is $pt.format( $tree ), Q{chomp( )}, Q{formatted};
-			is $pt.format( $tree ), Q{chomp()}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#chomp( )
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+chomp()
+_END_
 		}, Q{no arguments};
 
 		subtest {
@@ -179,8 +214,12 @@ _END_
 			ok $pt.validate( $parsed ), Q{valid};
 			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 				Q{found operator};
-#			is $pt.format( $tree ), Q{chomp( 1 )}, Q{formatted};
-			is $pt.format( $tree ), Q{chomp(1)}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#chomp( 1 )
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+chomp(1)
+_END_
 		}, Q{with arguments};
 	}, Q{func()};
 
@@ -194,8 +233,9 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{42.round}, Q{formatted};
-		is $pt.format( $tree ), Q{42.round}, Q{formatted};
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+42.round
+_END_
 	}, Q{.};
 
 	subtest {
@@ -208,8 +248,9 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{42.&round}, Q{formatted};
-		is $pt.format( $tree ), Q{42.&round}, Q{formatted};
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+42.&round
+_END_
 	}, Q{.&};
 
 	subtest {
@@ -222,8 +263,9 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{Int.=round}, Q{formatted};
-		is $pt.format( $tree ), Q{Int.=round}, Q{formatted};
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+Int.=round
+_END_
 	}, Q{.=};
 
 	subtest {
@@ -236,8 +278,9 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{42.^name}, Q{formatted};
-		is $pt.format( $tree ), Q{42.^name}, Q{formatted};
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+42.^name
+_END_
 	}, Q{.^};
 
 	subtest {
@@ -250,8 +293,9 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{42.?name}, Q{formatted};
-		is $pt.format( $tree ), Q{42.?name}, Q{formatted};
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+42.?name
+_END_
 	}, Q{.?};
 
 	subtest {
@@ -264,8 +308,9 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{42.+name}, Q{formatted};
-		is $pt.format( $tree ), Q{42.+name}, Q{formatted};
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+42.+name
+_END_
 	}, Q{.+};
 
 	subtest {
@@ -278,8 +323,9 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{42.*name}, Q{formatted};
-		is $pt.format( $tree ), Q{42.*name}, Q{formatted};
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+42.*name
+_END_
 	}, Q{.*};
 
 	subtest {
@@ -292,8 +338,9 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{42>>.say}, Q{formatted};
-		is $pt.format( $tree ), Q{42>>.say}, Q{formatted};
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+42>>.say
+_END_
 	}, Q{>>.};
 
 	subtest {
@@ -306,8 +353,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[1].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{my $a; $a.:<++>}, Q{formatted};
-		is $pt.format( $tree ), Q{my$a$a.:<++>}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#my $a; $a.:<++>
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+my $a$a.:<++>
+_END_
 	}, Q{.:};
 
 	subtest {
@@ -320,8 +371,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[1].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{my $a; $a.Foo::Bar}, Q{formatted};
-		is $pt.format( $tree ), Q{my$a$a.Foo::Bar}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#my $a; $a.Foo::Bar
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+my $a$a.Foo::Bar
+_END_
 	}, Q{.::};
 }, Q{Method Postfix Precedence};
 
@@ -338,8 +393,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[1].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{my $a; ++ $a}, Q{formatted};
-		is $pt.format( $tree ), Q{my$a++$a}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#my $a; ++ $a
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+my $a++$a
+_END_
 	}, Q{++$a};
 
 	subtest {
@@ -352,8 +411,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[1].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{my $a; -- $a}, Q{formatted};
-		is $pt.format( $tree ), Q{my$a--$a}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#my $a; -- $a
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+my $a--$a
+_END_
 	}, Q{--$a};
 
 	subtest {
@@ -367,8 +430,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[1].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{my $a; $a++}, Q{formatted};
-		is $pt.format( $tree ), Q{my$a$a++}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#my $a; $a++
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+my $a$a++
+_END_
 	}, Q{$a++};
 
 	subtest {
@@ -382,8 +449,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[1].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{my $a; $a--}, Q{formatted};
-		is $pt.format( $tree ), Q{my$a$a--}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#my $a; $a--
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+my $a$a--
+_END_
 	}, Q{$a--};
 }, Q{Autoincrement Precedence};
 
@@ -400,8 +471,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 ** 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1**2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 ** 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1**2
+_END_
 	}, Q{?};
 }, Q{Exponentiation Precedence};
 
@@ -418,8 +493,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{? 2}, Q{formatted};
-		is $pt.format( $tree ), Q{?2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#? 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+?2
+_END_
 	}, Q{?};
 
 	subtest {
@@ -432,8 +511,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{! 2}, Q{formatted};
-		is $pt.format( $tree ), Q{!2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#! 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+!2
+_END_
 	}, Q{!};
 
 	subtest {
@@ -446,8 +529,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{+ 2}, Q{formatted};
-		is $pt.format( $tree ), Q{+2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#+ 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
++2
+_END_
 	}, Q{+};
 
 	subtest {
@@ -460,8 +547,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{- 2}, Q{formatted};
-		is $pt.format( $tree ), Q{-2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#- 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+-2
+_END_
 	}, Q{-};
 
 	subtest {
@@ -474,8 +565,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{~ 2}, Q{formatted};
-		is $pt.format( $tree ), Q{~2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#~ 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+~2
+_END_
 	}, Q{~};
 
 	subtest {
@@ -488,8 +583,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{| 2}, Q{formatted};
-		is $pt.format( $tree ), Q{|2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#| 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+|2
+_END_
 	}, Q{|};
 
 	subtest {
@@ -502,8 +601,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{+^ 2}, Q{formatted};
-		is $pt.format( $tree ), Q{+^2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#+^ 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
++^2
+_END_
 	}, Q{+^};
 
 	subtest {
@@ -516,8 +619,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{?^ 2}, Q{formatted};
-		is $pt.format( $tree ), Q{?^2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#?^ 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+?^2
+_END_
 	}, Q{?^};
 
 	subtest {
@@ -530,8 +637,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{^ 2}, Q{formatted};
-		is $pt.format( $tree ), Q{^2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#^ 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+^2
+_END_
 	}, Q{^};
 }, Q{Symbolic Unary Precedence};
 
@@ -548,8 +659,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 * 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1*2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 * 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1*2
+_END_
 	}, Q{*};
 
 	subtest {
@@ -562,8 +677,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 / 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1/2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 / 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1/2
+_END_
 	}, Q{/};
 
 	subtest {
@@ -576,8 +695,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 div 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1div2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 div 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1div2
+_END_
 	}, Q{div};
 
 	subtest {
@@ -590,8 +713,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 % 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1%2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 % 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1%2
+_END_
 	}, Q{%};
 
 	subtest {
@@ -604,8 +731,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 %% 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1%%2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 %% 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1%%2
+_END_
 	}, Q{%%};
 
 	subtest {
@@ -618,8 +749,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 mod 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1mod2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 mod 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1mod2
+_END_
 	}, Q{mod};
 
 	subtest {
@@ -632,8 +767,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 +& 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1+&2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 +& 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1+&2
+_END_
 	}, Q{+&};
 
 	subtest {
@@ -646,8 +785,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 +< 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1+<2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 +< 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1+<2
+_END_
 	}, Q{+<};
 
 	subtest {
@@ -660,8 +803,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 +> 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1+>2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 +> 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1+>2
+_END_
 	}, Q{+>};
 
 	subtest {
@@ -674,8 +821,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 gcd 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1gcd2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 gcd 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1gcd2
+_END_
 	}, Q{gcd};
 
 	subtest {
@@ -688,8 +839,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 lcm 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1lcm2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 lcm 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1lcm2
+_END_
 	}, Q{lcm};
 }, Q{Multipicative Precedence};
 
@@ -706,8 +861,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 + 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1+2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 + 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1+2
+_END_
 	}, Q{+};
 
 	subtest {
@@ -720,8 +879,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 - 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1-2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 - 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1-2
+_END_
 	}, Q{-};
 
 	subtest {
@@ -734,8 +897,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 +| 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1+|2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 +| 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1+|2
+_END_
 	}, Q{+|};
 
 	subtest {
@@ -748,8 +915,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 +^ 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1+^2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 +^ 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1+^2
+_END_
 	}, Q{+^};
 
 	subtest {
@@ -762,8 +933,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 ?| 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1?|2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 ?| 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1?|2
+_END_
 	}, Q{?|};
 }, Q{Additive Precedence};
 
@@ -780,8 +955,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 x 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1x2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 x 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1x2
+_END_
 	}, Q{x};
 
 	subtest {
@@ -794,8 +973,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 xx 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1xx2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 xx 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1xx2
+_END_
 	}, Q{xx};
 }, Q{Replication Precedence};
 
@@ -812,8 +995,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 ~ 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1~2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 ~ 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1~2
+_END_
 	}, Q{~};
 }, Q{Concatenation Precedence};
 
@@ -830,8 +1017,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 & 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1&2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 & 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1&2
+_END_
 	}, Q{&};
 }, Q{Junctive AND Precedence};
 
@@ -848,8 +1039,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 | 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1|2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 | 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1|2
+_END_
 	}, Q{|};
 
 	subtest {
@@ -862,8 +1057,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 ^ 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1^2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 ^ 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1^2
+_END_
 	}, Q{^};
 }, Q{Junctive OR Precedence};
 
@@ -880,8 +1079,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[1].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{my $a; temp $a}, Q{formatted};
-		is $pt.format( $tree ), Q{my$atemp$a}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#my $a; temp $a
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+my $atemp$a
+_END_
 	}, Q{temp};
 
 	subtest {
@@ -894,8 +1097,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[1].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{my $a; let $a}, Q{formatted};
-		is $pt.format( $tree ), Q{my$alet$a}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#my $a; let $a
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+my $alet$a
+_END_
 	}, Q{let};
 }, Q{Named Unary Precedence};
 
@@ -912,8 +1119,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 does 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1does2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 does 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1does2
+_END_
 	}, Q{does};
 
 	subtest {
@@ -926,8 +1137,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 but 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1but2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 but 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1but2
+_END_
 	}, Q{but};
 
 	subtest {
@@ -940,8 +1155,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 cmp 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1cmp2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 cmp 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1cmp2
+_END_
 	}, Q{cmp};
 
 	subtest {
@@ -954,8 +1173,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 leg 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1leg2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 leg 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1leg2
+_END_
 	}, Q{leg};
 
 	subtest {
@@ -968,8 +1191,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 <=> 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1<=>2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 <=> 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1<=>2
+_END_
 	}, Q{<=>};
 
 	subtest {
@@ -982,8 +1209,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 .. 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1..2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 .. 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1..2
+_END_
 	}, Q{..};
 
 	subtest {
@@ -996,8 +1227,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 ^.. 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1^..2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 ^.. 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1^..2
+_END_
 	}, Q{^..};
 
 	subtest {
@@ -1010,8 +1245,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 ..^ 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1..^2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 ..^ 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1..^2
+_END_
 	}, Q{..^};
 
 	subtest {
@@ -1024,8 +1263,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 ^..^ 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1^..^2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 ^..^ 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1^..^2
+_END_
 	}, Q{^..^};
 }, Q{Nonchaining Binary Precedence};
 
@@ -1042,8 +1285,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 == 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1==2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 == 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1==2
+_END_
 	}, Q{==};
 
 	subtest {
@@ -1056,8 +1303,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 != 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1!=2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 != 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1!=2
+_END_
 	}, Q{!=};
 
 	subtest {
@@ -1070,8 +1321,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 < 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1<2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 < 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1<2
+_END_
 	}, Q{<};
 
 	subtest {
@@ -1084,8 +1339,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 <= 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1<=2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 <= 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1<=2
+_END_
 	}, Q{<=};
 
 	subtest {
@@ -1098,8 +1357,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 > 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1>2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 > 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1>2
+_END_
 	}, Q{>};
 
 	subtest {
@@ -1112,8 +1375,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 <= 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1<=2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 <= 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1<=2
+_END_
 	}, Q{<=};
 
 	subtest {
@@ -1126,8 +1393,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 > 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1>2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 > 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1>2
+_END_
 	}, Q{>};
 
 	subtest {
@@ -1140,8 +1411,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 >= 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1>=2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 >= 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1>=2
+_END_
 	}, Q{>=};
 
 	subtest {
@@ -1154,8 +1429,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 eq 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1eq2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 eq 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1eq2
+_END_
 	}, Q{eq};
 
 	subtest {
@@ -1168,8 +1447,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 ne 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1ne2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 ne 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1ne2
+_END_
 	}, Q{ne};
 
 	subtest {
@@ -1182,8 +1465,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 gt 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1gt2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 gt 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1gt2
+_END_
 	}, Q{gt};
 
 	subtest {
@@ -1196,8 +1483,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 ge 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1ge2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 ge 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1ge2
+_END_
 	}, Q{ge};
 
 	subtest {
@@ -1210,8 +1501,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 lt 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1lt2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 lt 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1lt2
+_END_
 	}, Q{lt};
 
 	subtest {
@@ -1224,8 +1519,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 le 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1le2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 le 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1le2
+_END_
 	}, Q{le};
 
 	subtest {
@@ -1238,8 +1537,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 before 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1before2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 before 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1before2
+_END_
 	}, Q{before};
 
 	subtest {
@@ -1252,8 +1555,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 after 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1after2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 after 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1after2
+_END_
 	}, Q{after};
 
 	subtest {
@@ -1266,8 +1573,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 eqv 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1eqv2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 eqv 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1eqv2
+_END_
 	}, Q{eqv};
 
 	subtest {
@@ -1280,8 +1591,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 === 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1===2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 === 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1===2
+_END_
 	}, Q{===};
 
 	subtest {
@@ -1294,8 +1609,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 =:= 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1=:=2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 =:= 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1=:=2
+_END_
 	}, Q{=:=};
 
 	subtest {
@@ -1308,8 +1627,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 ~~ 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1~~2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 ~~ 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1~~2
+_END_
 	}, Q{~~};
 
 	subtest {
@@ -1322,8 +1645,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 =~= 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1=~=2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 =~= 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1=~=2
+_END_
 	}, Q{=~=};
 }, Q{Chaining Binary Precedence};
 
@@ -1340,8 +1667,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 && 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1&&2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 && 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1&&2
+_END_
 	}, Q{&&};
 }, Q{Tight AND Precedence};
 
@@ -1358,8 +1689,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 || 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1||2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 || 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1||2
+_END_
 	}, Q{||};
 
 	subtest {
@@ -1372,8 +1707,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 ^^ 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1^^2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 ^^ 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1^^2
+_END_
 	}, Q{^^};
 
 	subtest {
@@ -1386,8 +1725,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 // 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1//2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 // 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1//2
+_END_
 	}, Q{//};
 
 	subtest {
@@ -1400,8 +1743,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 min 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1min2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 min 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1min2
+_END_
 	}, Q{min};
 
 	subtest {
@@ -1414,8 +1761,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 max 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1max2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 max 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1max2
+_END_
 	}, Q{max};
 }, Q{Tight OR Precedence};
 
@@ -1432,8 +1783,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 ?? 2 !! 3}, Q{formatted};
-		is $pt.format( $tree ), Q{1??2!!3}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 ?? 2 !! 3
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1??2!!3
+_END_
 	}, Q{?? !!};
 
 	subtest {
@@ -1446,8 +1801,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 ff 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1ff2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 ff 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1ff2
+_END_
 	}, Q{ff};
 
 	subtest {
@@ -1460,8 +1819,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 ^ff 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1^ff2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 ^ff 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1^ff2
+_END_
 	}, Q{^ff};
 
 	subtest {
@@ -1474,8 +1837,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 ff^ 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1ff^2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 ff^ 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1ff^2
+_END_
 	}, Q{ff^};
 
 	subtest {
@@ -1488,8 +1855,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 ^ff^ 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1^ff^2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 ^ff^ 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1^ff^2
+_END_
 	}, Q{^ff^};
 
 	subtest {
@@ -1502,8 +1873,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 fff 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1fff2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 fff 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1fff2
+_END_
 	}, Q{fff};
 
 	subtest {
@@ -1516,8 +1891,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 ^fff 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1^fff2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 ^fff 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1^fff2
+_END_
 	}, Q{^fff};
 
 	subtest {
@@ -1530,8 +1909,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 fff^ 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1fff^2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 fff^ 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1fff^2
+_END_
 	}, Q{fff^};
 
 	subtest {
@@ -1544,8 +1927,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 ^fff^ 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1^fff^2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 ^fff^ 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1^fff^2
+_END_
 	}, Q{^fff^};
 }, Q{Conditional Operator Precedence};
 
@@ -1562,8 +1949,9 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{my $a = 1}, Q{formatted};
-		is $pt.format( $tree ), Q{my$a=1}, Q{formatted};
+		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+my $a = 1
+_END_
 	}, Q{=};
 
 	subtest {
@@ -1595,8 +1983,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{not 1}, Q{formatted};
-		is $pt.format( $tree ), Q{not1}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#not 1
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+not1
+_END_
 	}, Q{not};
 
 	subtest {
@@ -1609,8 +2001,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{so 1}, Q{formatted};
-		is $pt.format( $tree ), Q{so1}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#so 1
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+so1
+_END_
 	}, Q{so};
 }, Q{Loose Unary Precedence};
 
@@ -1627,8 +2023,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{3 , 2}, Q{formatted};
-		is $pt.format( $tree ), Q{3,2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#3 , 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+3,2
+_END_
 	}, Q{,};
 }, Q{Comma Operator Precedence};
 
@@ -1647,8 +2047,12 @@ _END_
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
 		ok $pt.validate( $parsed ), Q{valid};
-#		is $pt.format( $tree ), Q{3 Z 2}, Q{formatted};
-		is $pt.format( $tree ), Q{3Z2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#3 Z 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+3Z2
+_END_
 	}, Q{Z};
 
 	subtest {
@@ -1661,8 +2065,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{3 X 2}, Q{formatted};
-		is $pt.format( $tree ), Q{3X2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#3 X 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+3X2
+_END_
 	}, Q{X};
 
 	subtest {
@@ -1675,8 +2083,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{1 ... 2}, Q{formatted};
-		is $pt.format( $tree ), Q{1...2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#1 ... 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+1...2
+_END_
 	}, Q{...};
 }, Q{List Infix Precedence};
 
@@ -1693,8 +2105,9 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{my $a = 1}, Q{formatted};
-		is $pt.format( $tree ), Q{my$a=1}, Q{formatted};
+		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+my $a = 1
+_END_
 	}, Q{=};
 
 	subtest {
@@ -1707,8 +2120,9 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{my $a := 1}, Q{formatted};
-		is $pt.format( $tree ), Q{my$a:=1}, Q{formatted};
+		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+my $a := 1
+_END_
 	}, Q{:=};
 
 	# XXX "::= NIY";
@@ -1723,8 +2137,9 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{...}, Q{formatted};
-		is $pt.format( $tree ), Q{...}, Q{formatted};
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+...
+_END_
 	}, Q{...};
 
 	subtest {
@@ -1737,8 +2152,9 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{!!!}, Q{formatted};
-		is $pt.format( $tree ), Q{!!!}, Q{formatted};
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+!!!
+_END_
 	}, Q{!!!};
 
 	subtest {
@@ -1751,8 +2167,9 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{???}, Q{formatted};
-		is $pt.format( $tree ), Q{???}, Q{formatted};
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+???
+_END_
 	}, Q{???};
 
 	# XXX Undecided on [+] implementation
@@ -1771,8 +2188,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{3 and 2}, Q{formatted};
-		is $pt.format( $tree ), Q{3and2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#3 and 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+3and2
+_END_
 	}, Q{and};
 
 	subtest {
@@ -1785,8 +2206,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{3 andthen 2}, Q{formatted};
-		is $pt.format( $tree ), Q{3andthen2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#3 andthen 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+3andthen2
+_END_
 	}, Q{andthen};
 }, Q{Loose AND Precedence};
 
@@ -1803,8 +2228,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{3 or 2}, Q{formatted};
-		is $pt.format( $tree ), Q{3or2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#3 or 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+3or2
+_END_
 	}, Q{or};
 
 	subtest {
@@ -1817,8 +2246,12 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{3 orelse 2}, Q{formatted};
-		is $pt.format( $tree ), Q{3orelse2}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#3 orelse 2
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+3orelse2
+_END_
 	}, Q{orelse};
 }, Q{Loose OR Precedence};
 
@@ -1828,29 +2261,37 @@ subtest {
 	subtest {
 		plan 3;
 
-		my $parsed = $pt.parse-source( Q:to[_END_].chomp );
+		my $parsed = $pt.parse-source( Q:to[_END_] );
 my @a; @a <== 'a'
 _END_
 		my $tree = $pt.build-tree( $parsed );
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[1].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{my @a; @a <== 'a'}, Q{formatted};
-		is $pt.format( $tree ), Q[my@a@a<=='a'], Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#my @a; @a <== 'a'
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+my @a@a<=='a'
+_END_
 	}, Q{<==};
 
 	subtest {
 		plan 3;
 
-		my $parsed = $pt.parse-source( Q:to[_END_].chomp );
+		my $parsed = $pt.parse-source( Q:to[_END_] );
 my @a; 'a' ==> @a
 _END_
 		my $tree = $pt.build-tree( $parsed );
 		ok $pt.validate( $parsed ), Q{valid};
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[1].child),
 			Q{found operator};
-#		is $pt.format( $tree ), Q{my @a; 'a' ==> @a}, Q{formatted};
-		is $pt.format( $tree ), Q{my@a'a'==>@a}, Q{formatted};
+#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#my @a; 'a' ==> @a
+#_END_
+		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+my @a'a'==>@a
+_END_
 	}, Q{==>};
 }, Q{Sequencer Precedence};
 

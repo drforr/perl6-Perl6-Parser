@@ -21,8 +21,7 @@ subtest {
 			my $parsed = $pt.parse-source( Q{my $a} );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q{my $a}, Q{formatted};
-			is $pt.format( $tree ), Q{my$a}, Q{formatted};
+			is $pt.format( $tree ), Q{my $a}, Q{formatted};
 		}, Q{my $a};
 
 		subtest {
@@ -31,8 +30,7 @@ subtest {
 			my $parsed = $pt.parse-source( Q{our $a} );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q{our $a}, Q{formatted};
-			is $pt.format( $tree ), Q{our$a}, Q{formatted};
+			is $pt.format( $tree ), Q{our $a}, Q{formatted};
 		}, Q{our $a};
 
 		todo Q{'anon $a' not implemented yet, maybe not ever.};
@@ -43,8 +41,7 @@ subtest {
 			my $parsed = $pt.parse-source( Q{state $a} );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q{state $a}, Q{formatted};
-			is $pt.format( $tree ), Q{state$a}, Q{formatted};
+			is $pt.format( $tree ), Q{state $a}, Q{formatted};
 		}, Q{state $a};
 
 		todo Q{'augment $a' not implemented yet, maybe not ever.};
@@ -61,8 +58,7 @@ subtest {
 			my $parsed = $pt.parse-source( Q{my Int $a} );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q{my Int $a}, Q{formatted};
-			is $pt.format( $tree ), Q{myInt$a}, Q{formatted};
+			is $pt.format( $tree ), Q{my Int $a}, Q{formatted};
 		}, Q{regular};
 
 		subtest {
@@ -71,11 +67,8 @@ subtest {
 			my $parsed = $pt.parse-source( Q{my Int:D $a = 0} );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ),
-#				Q{my Int:D $a = 0},
-#				Q{formatted};
 			is $pt.format( $tree ),
-				Q{myInt:D$a=0},
+				Q{my Int:D $a = 0},
 				Q{formatted};
 		}, Q{defined};
 
@@ -85,8 +78,7 @@ subtest {
 			my $parsed = $pt.parse-source( Q{my Int:U $a} );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q{my Int:U $a}, Q{formatted};
-			is $pt.format( $tree ), Q{myInt:U$a}, Q{formatted};
+			is $pt.format( $tree ), Q{my Int:U $a}, Q{formatted};
 		}, Q{undefined};
 	}, Q{typed};
 
@@ -99,8 +91,7 @@ subtest {
 			my $parsed = $pt.parse-source( Q{my $a where 1} );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q{my $a where 1}, Q{formatted};
-			is $pt.format( $tree ), Q{my$awhere1}, Q{formatted};
+			is $pt.format( $tree ), Q{my $a where 1}, Q{formatted};
 		}, Q{my $a where 1};
 	}, Q{constrained};
 }, Q{variable};
@@ -153,7 +144,7 @@ _END_
 #unit module foo;
 #_END_
 			is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-unitmodulefoo
+unit module foo;
 _END_
 		}, Q{unit module foo;};
 
@@ -189,7 +180,7 @@ _END_
 #unit class foo;
 #_END_
 			is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-unitclassfoo
+unit class foo;
 _END_
 		}, Q{unit class foo;};
 
@@ -214,7 +205,7 @@ _END_
 		plan 2;
 
 		subtest {
-	plan 2;
+			plan 2;
 
 			my $parsed = $pt.parse-source( Q:to[_END_].chomp );
 unit role foo;
@@ -225,7 +216,7 @@ _END_
 #unit role foo;
 #_END_
 			is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-unitrolefoo
+unit role foo;
 _END_
 		}, Q{unit role foo;};
 
@@ -277,7 +268,7 @@ _END_
 #unit grammar foo;
 #_END_
 			is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-unitgrammarfoo
+unit grammar foo;
 _END_
 		}, Q{unit grammar foo;};
 
@@ -305,6 +296,7 @@ _END_
 my token foo { a }
 _END_
 		my $tree = $pt.build-tree( $parsed );
+say $tree.perl;
 		ok $pt.validate( $parsed ), Q{valid};
 #		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
 #my token foo { a }

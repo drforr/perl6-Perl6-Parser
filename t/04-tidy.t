@@ -22,8 +22,7 @@ subtest {
 			Q{no WS};
 
 		is $pt.tidy( Q{my $a} ),
-#			Q{my $a},
-			Q{my$a},
+			Q{my $a},
 			Q{single WS};
 
 		is $pt.tidy( Q{my$a;} ),
@@ -33,7 +32,7 @@ subtest {
 
 		is $pt.tidy( Q{my $a;} ),
 #			Q{my $a;},
-			Q{my$a},
+			Q{my $a},
 			Q{semi, single WS};
 	}, Q{simple declaration};
 
@@ -45,8 +44,7 @@ subtest {
 			Q{no WS};
 
 		is $pt.tidy( Q{my $a=1} ),
-#			Q{my $a=1},
-			Q{my$a=1},
+			Q{my $a=1},
 			Q{single WS};
 
 		is $pt.tidy( Q{my$a=1;} ),
@@ -56,7 +54,7 @@ subtest {
 
 		is $pt.tidy( Q{my $a=1;} ),
 #			Q{my $a=1;},
-			Q{my$a=1},
+			Q{my $a=1},
 			Q{semi, single WS};
 	}, Q{initializer};
 }, Q{passthrough};

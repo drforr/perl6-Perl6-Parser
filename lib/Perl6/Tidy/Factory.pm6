@@ -202,10 +202,13 @@ role Branching_Delimited does Child does Delimited {
 	}
 }
 
-role Token {
-	has Str $.content is required;
+role Bounded {
 	has Int $.from is required;
 	has Int $.to is required;
+}
+
+role Token does Bounded {
+	has Str $.content is required;
 	method perl6( $f ) {
 		~$.content
 	}
@@ -218,6 +221,21 @@ class Perl6::Unimplemented {
 
 class Perl6::WS does Token {
 	also is Perl6::Element;
+	multi method new( Int $from, Int $to, Str $content ) {
+		die "*** Inserting empty whitespace!"
+			if $content eq '';
+		die "*** Inserting non-whitespace '$content'!"
+			if $content ~~ /\S/;
+		die "*** Content '$content' too short for [$from .. $to]"
+			if $content.chars < $to - $from;
+		die "*** Content '$content' too long for [$from .. $to]"
+			if $content.chars > $to - $from;
+		self.bless(
+			:from( $from ),
+			:to( $to ),
+			:content( $content )
+		)
+	}
 }
 
 class Perl6::Document does Branching {
@@ -283,7 +301,7 @@ class Perl6::Operator::Infix does Token {
 class Perl6::Operator::Postfix does Token {
 	also is Perl6::Operator;
 }
-class Perl6::Operator::Circumfix does Branching_Delimited {
+class Perl6::Operator::Circumfix does Branching_Delimited does Bounded {
 	also is Perl6::Operator;
 }
 class Perl6::Operator::PostCircumfix does Branching_Delimited {
@@ -298,7 +316,7 @@ class Perl6::PackageName does Token {
 class Perl6::ColonBareword does Token {
 	also is Perl6::Bareword;
 }
-class Perl6::Block does Branching_Delimited {
+class Perl6::Block does Branching_Delimited does Bounded {
 	also is Perl6::Element
 }
 
@@ -307,6 +325,19 @@ class Perl6::Block does Branching_Delimited {
 #
 class Perl6::Semicolon does Token {
 	also is Perl6::Element;
+	multi method new( Int $from, Int $to, Str $content ) {
+		die "*** Inserting non-semicolon!"
+			if $content ne ';';
+		die "*** Content '$content' too short for [$from .. $to]"
+			if $content.chars < $to - $from;
+		die "*** Content '$content' too long for [$from .. $to]"
+			if $content.chars > $to - $from;
+		self.bless(
+			:from( $from ),
+			:to( $to ),
+			:content( $content )
+		)
+	}
 }
 
 class Perl6::Variable {
@@ -527,31 +558,39 @@ class Perl6::Tidy::Factory {
 		$p.Str ~~ m{ ^ (.) }; my $front = ~$0;
 		$p.Str ~~ m{ (.) $ }; my $back = ~$0;
 		Perl6::Operator::Circumfix.new(
+			:from( $p.from ),
+			:to( $p.to ),
 			:delimiter( $front, $back ),
 			:child( @child )
 		)
 	}
 
-	method make-whitespace( Str $orig, Int $from, Int $to ) {
-		Perl6::WS.new(
-			:from( $from ),
-			:to( $to ),
-			:content(
-				substr( $orig, $from, $to - $from )
-			)
-		)
+	method make-semicolon( Str $orig, Int $from, Int $to ) {
+		my $content = substr( $orig, $from, $to - $from );
+		die "Semicolon '$content' is not a semicolon!"
+			if $content ne ';';
+		Perl6::Semicolon.new( $from, $to, $content )
 	}
 
-	method populate-whitespace( Str $orig, Int $from, Int $to, @child ) {
+	method make-whitespace( Str $orig, Int $from, Int $to ) {
+		my $content = substr( $orig, $from, $to - $from );
+		die "Whitespace '$content' is not white!"
+			if $content ~~ /\S/;
+		Perl6::WS.new( $from, $to, $content )
+	}
+
+	method populate-whitespace( Str $orig, Int $offset, Int $from, Int $to, @child ) {
 		my Perl6::Element @ws;
 		my $start = $from;
 		my $end = $to;
 
 		for @child {
+			warn "repopulating list" if
+				$_ ~~ Perl6::WS;
 			if $start < $_.from {
 				@ws.push(
 					self.make-whitespace(
-						$orig, $start, $_.from
+						$orig, $start - $offset, $_.from - $offset
 					)
 				)
 			}
@@ -559,11 +598,21 @@ class Perl6::Tidy::Factory {
 			@ws.push( $_ )
 		}
 		if $start < $end {
-			@ws.push(
-				self.make-whitespace(
-					$orig, $start, $end
+			my $content = substr( $orig, $start, $end );
+			if $content ~~ Q{;} {
+				@ws.push(
+					self.make-semicolon(
+						$orig, $start, $end
+					)
 				)
-			)
+			}
+			else {
+				@ws.push(
+					self.make-whitespace(
+						$orig, $start, $end
+					)
+				)
+			}
 		}
 		@ws
 	}
@@ -814,6 +863,8 @@ class Perl6::Tidy::Factory {
 			$p.Str ~~ m{ ^ (.) }; my $front = ~$0;
 			$p.Str ~~ m{ (.) $ }; my $back = ~$0;
 			Perl6::Block.new(
+				:from( $p.from ),
+				:to( $p.to ),
 				:delimiter( $front, $back ),
 				:child( @child )
 			)
@@ -907,7 +958,7 @@ class Perl6::Tidy::Factory {
 self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 				);
 				@ws = self.populate-whitespace(
-					$p.Str,
+					$p.Str, 0, # XXX No offset? Why?
 					$p.from + 1, $p.to - 1, @child
 				)
 			}
@@ -1139,7 +1190,9 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 		elsif self.assert-hash-keys( $p,
 				[< variable_declarator >],
 				[< trait >] ) {
-			self._variable_declarator( $p.hash.<variable_declarator> )
+			self._variable_declarator(
+				$p.hash.<variable_declarator>
+			)
 		}
 		elsif self.assert-hash-keys( $p,
 				[< routine_declarator >],
@@ -1588,7 +1641,7 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 				self._val( $p.hash.<val> )
 			);
 			my @ws = self.populate-whitespace(
-				$p.Str,
+				$p.Str, 0, # XXX No offset? Why?
 				$p.from, $p.to, @child
 			);
 			@ws
@@ -1846,6 +1899,9 @@ return True;
 			(
 				self._longname( $p.hash.<longname> ),
 				Perl6::Operator::Circumfix.new(
+					# XXX Verify from/to
+					:from( $p.from ),
+					:to( $p.to ),
 					:delimiter( '(', ')' ),
 					:child(
 						self._multisig(
@@ -1949,8 +2005,10 @@ return True;
 			die "Not implemented yet"
 		}
 		elsif self.assert-hash-keys( $p, [< sym declarator >] ) {
-			self._sym( $p.hash.<sym> ),
-			self._declarator( $p.hash.<declarator> )
+			(
+				self._sym( $p.hash.<sym> ),
+				self._declarator( $p.hash.<declarator> )
+			)
 		}
 		elsif self.assert-hash-keys( $p, [< declarator >] ) {
 			self._declarator( $p.hash.<declarator> )
@@ -2466,9 +2524,9 @@ warn 28;
 			$leaf
 		}
 		elsif self.assert-hash-keys( $p, [< signature >] ) {
-say $p.Str;
-warn 4;
 			Perl6::Operator::Circumfix.new(
+				:from( $p.from ),
+				:to( $p.to ),
 				:delimiter( '(', ')' ),
 				:child(
 					self._signature( $p.hash.<signature> )
@@ -2741,7 +2799,10 @@ warn 4;
 			);
 			(
 				self._deflongname( $p.hash.<deflongname> ),
+				# XXX Careful of delimiters here.
 				Perl6::Block.new(
+					:from( @child[0].from ),
+					:to( @child[*-1].to ),
 					:delimiter( '{', '}' ),
 					:child( @child )
 				)
@@ -2885,10 +2946,17 @@ warn 4;
 
 	method _scope_declarator( Mu $p ) {
 		if self.assert-hash-keys( $p, [< sym scoped >] ) {
-			(
+			my @child = (
 				self._sym( $p.hash.<sym> ),
 				self._scoped( $p.hash.<scoped> )
-			).flat
+			).flat;
+key-boundary $p;
+say @child.perl;
+			my @ws = self.populate-whitespace(
+				$p.Str, $p.from, # XXX Offset to start
+				$p.from, $p.to, @child
+			);
+			@ws
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -2913,7 +2981,9 @@ warn 4;
 		if $p.hash.<statement>.list.[0].hash.<EXPR> {
 			my Perl6::Element @child;
 			@child.push(
-				self._EXPR( $p.hash.<statement>.list.[0].hash.<EXPR> )
+				self._EXPR(
+					$p.hash.<statement>.list.[0].hash.<EXPR>
+				)
 			);
 			self.make-postcircumfix( $p, @child )
 		}
