@@ -21,7 +21,7 @@ _END_
 #sub foo { }
 #_END_
 	is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-subfoo{}
+sub foo {}
 _END_
 }, Q{empty};
 
@@ -43,7 +43,7 @@ _END_
 #sub foo( ) { }
 #_END_
 			is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-subfoo(){}
+sub foo() {}
 _END_
 		}, Q{empty};
 
@@ -59,7 +59,7 @@ _END_
 #sub foo( 0 ) { }
 #_END_
 			is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-subfoo(0){}
+sub foo(0) {}
 _END_
 		}, Q{constant};
 
@@ -75,7 +75,7 @@ _END_
 #sub foo( $a ) { }
 #_END_
 			is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-subfoo($a){}
+sub foo($a) {}
 _END_
 		}, Q{untyped};
 
@@ -94,7 +94,7 @@ _END_
 #sub foo( Str $a ) { }
 #_END_
 				is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-subfoo(Str$a){}
+sub foo(Str$a) {}
 _END_
 			}, Q{typed};
 
@@ -110,7 +110,7 @@ _END_
 #sub foo( ::T $a ) { }
 #_END_
 				is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-subfoo(::T$a){}
+sub foo(::T$a) {}
 _END_
 			}, Q{type-capture};
 
@@ -126,7 +126,7 @@ _END_
 #sub foo( Str ) { }
 #_END_
 				is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-subfoo(Str){}
+sub foo(Str) {}
 _END_
 			}, Q{type-only};
 
@@ -142,7 +142,7 @@ _END_
 #sub foo( Str $a where "foo" ) { }
 #_END_
 				is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-subfoo(Str$awhere"foo"){}
+sub foo(Str$awhere"foo") {}
 _END_
 			}, Q{type-constrained};
 		}, Q{typed};
@@ -159,7 +159,7 @@ _END_
 #sub foo( $a = 0 ) { }
 #_END_
 			is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-subfoo($a=0){}
+sub foo($a=0) {}
 _END_
 		}, Q{default};
 
@@ -175,7 +175,7 @@ _END_
 #sub foo( :$a ) { }
 #_END_
 			is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-subfoo(:$a){}
+sub foo(:$a) {}
 _END_
 		}, Q{optional};
 	}, Q{single};
@@ -187,13 +187,12 @@ _END_
 sub foo( $a, $b ) { }
 _END_
 		my $tree = $pt.build-tree( $parsed );
-say $tree.perl;
 		ok $pt.validate( $parsed ), Q{valid};
 #		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
 #sub foo( $a, $b ) { }
 #_END_
 		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-subfoo($a$b){}
+sub foo($a$b) {}
 _END_
 	}, Q{multiple};
 }, Q{scalar arguments};

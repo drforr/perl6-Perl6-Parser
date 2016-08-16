@@ -42,45 +42,45 @@ _END_
 }, Q{empty, multiple namespaces};
 
 subtest {
-	plan 2;
+	plan 0;
 
-	subtest {
-		plan 2;
-
-		my $parsed = $pt.parse-source( Q:to[_END_].chomp );
-class Unqualified { method foo { } }
-_END_
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#	subtest {
+#		plan 2;
+#
+#		my $parsed = $pt.parse-source( Q:to[_END_].chomp );
 #class Unqualified { method foo { } }
 #_END_
-		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-classUnqualified{methodfoo{}}
-_END_
-	}, Q{single};
+#		my $tree = $pt.build-tree( $parsed );
+#		ok $pt.validate( $parsed ), Q{valid};
+##		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+##class Unqualified { method foo { } }
+##_END_
+#		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+#classUnqualified{methodfoo{}}
+#_END_
+#	}, Q{single};
 
-	subtest {
-		plan 2;
-
-		my $parsed = $pt.parse-source( Q:to[_END_].chomp );
-class Unqualified {
-	method foo { }
-	method bar { }
-}
-_END_
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-#		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+#	subtest {
+#		plan 2;
+#
+#		my $parsed = $pt.parse-source( Q:to[_END_].chomp );
 #class Unqualified {
 #	method foo { }
 #	method bar { }
 #}
 #_END_
-		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-classUnqualified{methodfoo{}methodbar{}}
-_END_
-	}, Q{multiple};
+#		my $tree = $pt.build-tree( $parsed );
+#		ok $pt.validate( $parsed ), Q{valid};
+##		is $pt.format( $tree ), Q:to[_END_], Q{formatted};
+##class Unqualified {
+##	method foo { }
+##	method bar { }
+##}
+##_END_
+#		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
+#classUnqualified{methodfoo{}methodbar{}}
+#_END_
+#	}, Q{multiple};
 }, Q{method};
 
 subtest {

@@ -1210,7 +1210,7 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 		elsif self.assert-hash-keys( $p,
 				[< routine_declarator >],
 				[< trait >] ) {
-			self._routine_declarator( $p.hash.<routine_declarator> )
+			self._routine_declarator( $p.hash.<routine_declarator>)
 		}
 		elsif self.assert-hash-keys( $p, [< declarator >] ) {
 			self._declarator( $p.hash.<declarator> )
@@ -1599,7 +1599,14 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			self._regex_declarator( $p.hash.<regex_declarator> )
 		}
 		elsif self.assert-hash-keys( $p, [< routine_declarator >] ) {
-			self._routine_declarator( $p.hash.<routine_declarator> )
+			my @child = self._routine_declarator(
+				$p.hash.<routine_declarator>
+			);
+			my @ws = self.populate-whitespace(
+				$p.Str, 0, # XXX No offset? Why?
+				$p.from, $p.to, @child
+			);
+			@ws
 		}
 		elsif self.assert-hash-keys( $p, [< scope_declarator >] ) {
 			self._scope_declarator( $p.hash.<scope_declarator> )
@@ -2064,8 +2071,6 @@ return True;
 			)
 		}
 		elsif self.assert-Str( $p ) {
-key-boundary $p;
-warn 28;
 			self.make-bareword-from( $p )
 		}
 		else {
@@ -2841,11 +2846,20 @@ warn 28;
 				[< blockoid deflongname multisig >],
 				[< trait >] ) {
 			my @child = self._multisig( $p.hash.<multisig> );
+			my $x = substr(
+				$p.Str, 0, $p.hash.<blockoid>.from - $p.from
+			);
+			my $offset = 0;
+			if $x {
+				$x ~~ m{ ')' (.*) $ }; $offset = $0.chars;
+			}
 			(
 				self._deflongname( $p.hash.<deflongname> ),
 				Perl6::Operator::Circumfix.new(
-					:from( $p.hash.<blockoid>.from ),
-					:to( $p.hash.<blockoid>.to ),
+					:from( $p.hash.<deflongname>.to ),
+					:to(
+						$p.hash.<blockoid>.from - $offset
+					),
 					:delimiter( '(', ')' ),
 					:child( @child )
 				),
@@ -3369,8 +3383,6 @@ warn 28;
 			# XXX
 			my $str = $p.Str;
 			$str ~~ s{\s+ $} = '';
-key-boundary $p if $p.Str;
-warn 46;
 			Perl6::Bareword.new(
 				:from( $p.from ),
 				:to( $p.to ),
@@ -3671,7 +3683,6 @@ warn 46;
 
 	method _variable( Mu $p ) {
 		if self.assert-hash-keys( $p, [< contextualizer >] ) {
-warn "*** contextualizer fired";
 			return;
 		}
 

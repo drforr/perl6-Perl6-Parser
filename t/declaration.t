@@ -105,8 +105,7 @@ subtest {
 		my $parsed = $pt.parse-source( Q[sub foo {}] );
 		my $tree = $pt.build-tree( $parsed );
 		ok $pt.validate( $parsed ), Q{valid};
-#		is $pt.format( $tree ), Q[sub foo {}], Q{formatted};
-		is $pt.format( $tree ), Q[subfoo{}], Q{formatted};
+		is $pt.format( $tree ), Q[sub foo {}], Q{formatted};
 	}, Q{sub foo {}};
 
 	subtest {
@@ -117,11 +116,8 @@ sub foo returns Int {}
 _END_
 		my $tree = $pt.build-tree( $parsed );
 		ok $pt.validate( $parsed ), Q{valid};
-#		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-#sub foo returns Int {}
-#_END_
 		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-subfooreturnsInt{}
+sub foo returns Int {}
 _END_
 	}, Q{sub foo returns Int {}};
 }, Q{subroutine};
