@@ -21,7 +21,7 @@ _END_
 #class Unqualified { }
 #_END_
 	is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-classUnqualified{}
+classUnqualified {}
 _END_
 }, Q{empty};
 
@@ -37,7 +37,7 @@ _END_
 #class Qual::Ified { }
 #_END_
 	is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-classQual::Ified{}
+classQual::Ified {}
 _END_
 }, Q{empty, multiple namespaces};
 
@@ -115,7 +115,7 @@ _END_
 #			is $pt.format( $tree ),
 #				Q{class Unqualified { has $.a }}, Q{formatted};
 			is $pt.format( $tree ),Q:to[_END_].chomp, Q{formatted};
-classUnqualified{has $.a}
+classUnqualified {has $.a}
 _END_
 		}, Q{single};
 
@@ -137,7 +137,7 @@ _END_
 #}
 #_END_
 			is $pt.format( $tree ),Q:to[_END_].chomp, Q{formatted};
-classUnqualified{has $.ahas $.b}
+classUnqualified {has $.ahas $.b}
 _END_
 		}, Q{multiple};
 
@@ -153,7 +153,7 @@ _END_
 #				Q{class Unqualified { has ( $.a, $.b ) }},
 #				Q{formatted};
 			is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-classUnqualified{has ($.a$.b)}
+classUnqualified {has ($.a$.b)}
 _END_
 		}, Q{list};
 	}, Q{$};
@@ -169,7 +169,7 @@ _END_
 #		is $pt.format( $tree ), Q{class Unqualified { has @.a }},
 #			Q{formatted};
 		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-classUnqualified{has @.a}
+classUnqualified {has @.a}
 _END_
 	}, Q{@};
 
@@ -184,7 +184,7 @@ _END_
 #		is $pt.format( $tree ), Q{class Unqualified { has %.a }},
 #			Q{formatted};
 		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-classUnqualified{has %.a}
+classUnqualified {has %.a}
 _END_
 	}, Q{%};
 
@@ -199,7 +199,7 @@ _END_
 #		is $pt.format( $tree ), Q{class Unqualified { has &.a }},
 #			Q{formatted};
 		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-classUnqualified{has &.a}
+classUnqualified {has &.a}
 _END_
 	}, Q{&};
 }, Q{Attribute};

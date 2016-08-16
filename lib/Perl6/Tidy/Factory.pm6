@@ -584,7 +584,7 @@ class Perl6::Tidy::Factory {
 		for @child {
 			warn "repopulating list" if
 				$_ ~~ Perl6::WS;
-			if $start < $_.from {
+			if $start < $_.from and $_ !~~ Perl6::WS {
 				@ws.push(
 					self.make-whitespace(
 						$orig,
@@ -2308,6 +2308,7 @@ return True;
 	method _package_def( Mu $p ) {
 		if self.assert-hash-keys( $p,
 				[< longname statementlist >], [< trait >] ) {
+say 1;
 			(
 				self._longname( $p.hash.<longname> ),
 				self._statementlist( $p.hash.<statementlist> )
@@ -2315,12 +2316,18 @@ return True;
 		}
 		elsif self.assert-hash-keys( $p,
 				[< blockoid longname >], [< trait >] ) {
-			(
+			my Perl6::Element @child = (
 				self._longname( $p.hash.<longname> ),
 				self._blockoid( $p.hash.<blockoid> )
-			).flat
+			).flat;
+			my Perl6::Element  @ws = self.populate-whitespace(
+				$p.Str, $p.from,
+				$p.from, $p.to, @child
+			);
+			@ws
 		}
 		elsif self.assert-hash-keys( $p, [< blockoid >], [< trait >] ) {
+say 3;
 			self._blockoid( $p.hash.<blockoid> )
 		}
 		else {
