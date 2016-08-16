@@ -239,6 +239,7 @@ class Perl6::WS does Token {
 }
 
 class Perl6::Document does Branching {
+	also is Perl6::Element;
 }
 
 class Perl6::Statement does Branching {
@@ -298,6 +299,9 @@ class Perl6::Bareword does Token {
 }
 class Perl6::Operator {
 	also is Perl6::Element;
+}
+class Perl6::Operator::Prefix does Token {
+	also is Perl6::Operator;
 	multi method new( Mu $p ) {
 		self.bless(
 			:from( $p.from ),
@@ -306,14 +310,34 @@ class Perl6::Operator {
 		)
 	}
 }
-class Perl6::Operator::Prefix does Token {
-	also is Perl6::Operator;
-}
 class Perl6::Operator::Infix does Token {
 	also is Perl6::Operator;
+	multi method new( Mu $p ) {
+		self.bless(
+			:from( $p.from ),
+			:to( $p.to ),
+			:content( $p.Str )
+		)
+	}
+	multi method new( Mu $p, Str $token ) {
+		$p.Str ~~ m{ ($token) };
+		my Int $offset = $0.from;
+		self.bless(
+			:from( $p.from + $offset ),
+			:to( $p.from + $offset + $token.chars ),
+			:content( $token )
+		)
+	}
 }
 class Perl6::Operator::Postfix does Token {
 	also is Perl6::Operator;
+	multi method new( Mu $p ) {
+		self.bless(
+			:from( $p.from ),
+			:to( $p.to ),
+			:content( $p.Str )
+		)
+	}
 }
 class Perl6::Operator::Circumfix does Branching_Delimited does Bounded {
 	also is Perl6::Operator;
@@ -539,16 +563,6 @@ class Perl6::Tidy::Factory {
 			self._statementlist( $p.hash.<statementlist> );
 		Perl6::Document.new(
 			:child( @child )
-		)
-	}
-
-	multi method make-infix-from( Mu $p, Str $token ) {
-		$p.Str ~~ m{ ($token) };
-		my Int $offset = $0.from;
-		Perl6::Operator::Infix.new(
-			:from( $p.from + $offset ),
-			:to( $p.from + $offset + 2 ),
-			:content( $token )
 		)
 	}
 
@@ -977,8 +991,8 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			@child.push(
 				# leading and trailing space elided
 				Perl6::Operator::Prefix.new(
-					:from( $p.from ),
-					:to( $p.to ),
+					:from( $p.hash.<nibble>.from ),
+					:to( $p.hash.<nibble>.to ),
 					:content( $p.hash.<nibble>.Str )
 				)
 			);
@@ -1029,7 +1043,7 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			(
 				Perl6::Operator::Prefix.new(
 					:from( $p.from ),
-					:to( $p.from + 1 ),
+					:to( $p.from + Q{:}.chars ),
 					:content( Q{:} )
 				),
 				self._identifier( $p.hash.<identifier> ),
@@ -1549,9 +1563,9 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			if $p.list.elems == 3 {
 				(
 					self.__Term( $p.list.[0] ),
-					self.make-infix-from( $p, Q{??} ),
+					Perl6::Operator::Infix.new( $p, Q{??} ),
 					self.__Term( $p.list.[1] ),
-					self.make-infix-from( $p, Q{!!} ),
+					Perl6::Operator::Infix.new( $p, Q{!!} ),
 					self.__Term( $p.list.[2] )
 				).flat
 			}
@@ -1654,7 +1668,7 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 		if self.assert-hash-keys( $p, [< key val >] ) {
 			my Perl6::Element @child = (
 				self._key( $p.hash.<key> ),
-				self.make-infix-from( $p, Q{=>} ),
+				Perl6::Operator::Infix.new( $p, Q{=>} ),
 				self._val( $p.hash.<val> )
 			);
 			my Perl6::Element @ws = self.populate-whitespace(
@@ -2308,7 +2322,6 @@ return True;
 	method _package_def( Mu $p ) {
 		if self.assert-hash-keys( $p,
 				[< longname statementlist >], [< trait >] ) {
-say 1;
 			(
 				self._longname( $p.hash.<longname> ),
 				self._statementlist( $p.hash.<statementlist> )
@@ -2327,7 +2340,6 @@ say 1;
 			@ws
 		}
 		elsif self.assert-hash-keys( $p, [< blockoid >], [< trait >] ) {
-say 3;
 			self._blockoid( $p.hash.<blockoid> )
 		}
 		else {
@@ -2391,7 +2403,7 @@ say 3;
 				);
 				# XXX Should be possible to refactor...
 				@child.append(
-					self.make-infix-from( $p, Q{=} )
+					Perl6::Operator::Infix.new( $p, Q{=} )
 				);
 				@child.append(
 					self._default_value(
@@ -2693,17 +2705,27 @@ say 3;
 			# XXX This should properly call quibble, but that's
 			# XXX for later.
 			# leading and trailing space elided
-			Perl6::String.new(
-				:from( $p.from ),
-				:to( $p.to ),
-				:content( $p.Str ),
-				:bare( $p.hash.<quibble>.hash.<nibble>.Str )
-			)
+			if $p.Str ~~ m:i/^Q/ {
+				Perl6::String.new(
+					:from( $p.from ),
+					:to( $p.to ),
+					:content( $p.Str ),
+					:bare( $p.hash.<quibble>.hash.<nibble>.Str )
+				)
+			}
+			else {
+				Perl6::String.new(
+					:from( $p.hash.<quibble>.from ),
+					:to( $p.hash.<quibble>.to ),
+					:content( $p.Str ),
+					:bare( $p.hash.<quibble>.hash.<nibble>.Str )
+				)
+			}
 		}
 		elsif self.assert-hash-keys( $p, [< nibble >] ) {
 			Perl6::String.new(
-				:from( $p.hash.<nibble>.from ),
-				:to( $p.hash.<nibble>.to ),
+				:from( $p.from ),
+				:to( $p.to ),
 				:content( $p.Str ),
 				:bare( $p.hash.<nibble>.Str )
 			)

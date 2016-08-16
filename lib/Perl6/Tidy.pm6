@@ -128,7 +128,36 @@ class Perl6::Tidy {
 		my $factory = Perl6::Tidy::Factory.new;
 		my $tree    = $factory.build( $parsed );
 
+		self.check-tree( $tree );
 		$tree
+	}
+
+	method check-tree( Perl6::Element $root ) {
+		if $root.^can('delimiter') {
+			unless $root.delimiter.[0] {
+				say $root.perl;
+				die "Opening delimiter missing" 
+			}
+			unless $root.delimiter.[1] {
+				say $root.perl;
+				die "Closing delimiter missing" 
+			}
+		}
+		if $root.^can('child') {
+			for $root.child {
+				self.check-tree( $_ )
+			}
+		}
+		if $root.^can('content') {
+			if $root.content.chars < $root.to - $root.from {
+				say $root.perl;
+				die "String '{$root.content}' too short for element ({$root.from} - {$root.to})"
+			}
+			if $root.content.chars > $root.to - $root.from {
+				say $root.perl;
+				die "String '{$root.content}' too long for element ({$root.from} - {$root.to})"
+			}
+		}
 	}
 
 	method format( $tree, $formatting = { } ) {
