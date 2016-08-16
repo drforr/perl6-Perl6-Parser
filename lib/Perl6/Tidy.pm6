@@ -145,17 +145,21 @@ class Perl6::Tidy {
 		}
 		if $root.^can('child') {
 			for $root.child {
-				self.check-tree( $_ )
+				self.check-tree( $_ );
+				unless $_.^can('from') {
+					say $_.perl;
+					note "Element in list does not have 'from' accessor"
+				}
 			}
 		}
 		if $root.^can('content') {
 			if $root.content.chars < $root.to - $root.from {
 				say $root.perl;
-				die "String '{$root.content}' too short for element ({$root.from} - {$root.to})"
+				die "Content '{$root.content}' too short for element ({$root.from} - {$root.to})"
 			}
 			if $root.content.chars > $root.to - $root.from {
 				say $root.perl;
-				die "String '{$root.content}' too long for element ({$root.from} - {$root.to})"
+				die "Content '{$root.content}' too long for element ({$root.from} - {$root.to})"
 			}
 		}
 	}

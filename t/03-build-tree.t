@@ -27,7 +27,7 @@ subtest {
 	$t = $pt.build-tree( $p );
 	is-deeply $t,
 		Perl6::Document.new( :child(
-			Perl6::Statement.new( :child(
+			Perl6::Statement.new( :from( 0 ), :to( 4 ), :child(
 				Perl6::Bareword.new(
 					:from( 0 ),
 					:to( 2 ),
@@ -49,7 +49,7 @@ subtest {
 	$t = $pt.build-tree( $p );
 	is-deeply $t,
 		Perl6::Document.new( :child(
-			Perl6::Statement.new( :child(
+			Perl6::Statement.new( :from( 1 ), :to( 5 ), :child(
 #				Perl6::WS.new(
 #					:from( 0 ),
 #					:to( 1 ),
@@ -76,7 +76,7 @@ subtest {
 	$t = $pt.build-tree( $p );
 	is-deeply $t,
 		Perl6::Document.new( :child(
-			Perl6::Statement.new( :child(
+			Perl6::Statement.new( :from( 0 ), :to( 5 ), :child(
 				Perl6::Bareword.new(
 					:from( 0 ),
 					:to( 2 ),
@@ -103,7 +103,7 @@ subtest {
 	$t = $pt.build-tree( $p );
 	is-deeply $t,
 		Perl6::Document.new( :child(
-			Perl6::Statement.new( :child(
+			Perl6::Statement.new( :from( 0 ), :to( 4 ), :child(
 				Perl6::Bareword.new(
 					:from( 0 ),
 					:to( 2 ),
@@ -125,7 +125,7 @@ subtest {
 	$t = $pt.build-tree( $p );
 	is-deeply $t,
 		Perl6::Document.new( :child(
-			Perl6::Statement.new( :child(
+			Perl6::Statement.new( :from( 0 ), :to( 5 ), :child(
 				Perl6::Bareword.new(
 					:from( 0 ),
 					:to( 2 ),
@@ -157,7 +157,7 @@ subtest {
 	my $t = $pt.build-tree( $p );
 	is-deeply $t,
 		Perl6::Document.new( :child(
-			Perl6::Statement.new( :child(
+			Perl6::Statement.new( :from( 0 ), :to( 9 ), :child(
 				Perl6::Bareword.new(
 					:from( 0 ),
 					:to( 2 ),
@@ -211,7 +211,7 @@ subtest {
 		my $t = $pt.build-tree( $p );
 		is-deeply $t,
 			Perl6::Document.new( :child(
-				Perl6::Statement.new( :child(
+				Perl6::Statement.new( :from( 0 ), :to( 8 ), :child(
 					Perl6::Bareword.new(
 						:from( 0 ),
 						:to( 2 ),
@@ -258,7 +258,7 @@ subtest {
 		my $t = $pt.build-tree( $p );
 		is-deeply $t,
 			Perl6::Document.new( :child(
-				Perl6::Statement.new( :child(
+				Perl6::Statement.new( :from( 0 ), :to( 13 ), :child(
 					Perl6::Bareword.new(
 						:from( 0 ),
 						:to( 2 ),

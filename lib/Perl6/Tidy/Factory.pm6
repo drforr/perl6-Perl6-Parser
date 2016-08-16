@@ -242,7 +242,7 @@ class Perl6::Document does Branching {
 	also is Perl6::Element;
 }
 
-class Perl6::Statement does Branching {
+class Perl6::Statement does Branching does Bounded {
 	also is Perl6::Element;
 }
 
@@ -352,7 +352,7 @@ class Perl6::Operator::Circumfix does Branching_Delimited does Bounded {
 		)
 	}
 }
-class Perl6::Operator::PostCircumfix does Branching_Delimited {
+class Perl6::Operator::PostCircumfix does Branching_Delimited does Bounded {
 	also is Perl6::Operator;
 }
 class Perl6::PackageName does Token {
@@ -571,6 +571,8 @@ class Perl6::Tidy::Factory {
 		$p.Str ~~ m{ (.) $ }; my Str $back = ~$0;
 		Perl6::Operator::PostCircumfix.new(
 			# XXX What is it "post"? Hmm.
+			:from( $p.from ),
+			:to( $p.to ),
 			:delimiter( $front, $back ),
 			:child( @child )
 		)
@@ -1077,6 +1079,8 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 					$p.hash.<fakesignature>
 				);
 			Perl6::Operator::PostCircumfix.new(
+				:from( $p.from ),
+				:to( $p.to ),
 				:delimiter( ':(', ')' ),
 				:child( @child )
 			)
@@ -3217,16 +3221,25 @@ return True;
 		}
 		elsif self.assert-hash-keys( $p, [< EXPR >] ) {
 			my Perl6::Element @child = self._EXPR( $p.hash.<EXPR> );
+			# Note that statements will eventually encompass the
+			# optional final semicolon.
 			Perl6::Statement.new(
+				:from( @child[0].from ),
+				:to( @child[*-1].to ),
 				:child( @child )
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< statement_control >] ) {
-			my Perl6::Element @child =
+			my Perl6::Element @child = (
 				self._statement_control(
 					$p.hash.<statement_control>
-				);
+				)
+			).flat;
+			# Note that statements will eventually encompass the
+			# optional final semicolon.
 			Perl6::Statement.new(
+				:from( @child[0].from ),
+				:to( @child[*-1].to ),
 				:child( @child )
 			)
 		}
