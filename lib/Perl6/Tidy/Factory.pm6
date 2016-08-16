@@ -288,9 +288,23 @@ class Perl6::Regex does Token {
 
 class Perl6::Bareword does Token {
 	also is Perl6::Element;
+	multi method new( Mu $p ) {
+		self.bless(
+			:from( $p.from ),
+			:to( $p.to ),
+			:content( $p.Str )
+		)
+	}
 }
 class Perl6::Operator {
 	also is Perl6::Element;
+	multi method new( Mu $p ) {
+		self.bless(
+			:from( $p.from ),
+			:to( $p.to ),
+			:content( $p.Str )
+		)
+	}
 }
 class Perl6::Operator::Prefix does Token {
 	also is Perl6::Operator;
@@ -303,13 +317,23 @@ class Perl6::Operator::Postfix does Token {
 }
 class Perl6::Operator::Circumfix does Branching_Delimited does Bounded {
 	also is Perl6::Operator;
+	multi method new( Mu $p, @child ) {
+		$p.Str ~~ m{ ^ (.) }; my Str $front = ~$0;
+		$p.Str ~~ m{ (.) $ }; my Str $back = ~$0;
+		self.bless(
+			:from( $p.from ),
+			:to( $p.to ),
+			:delimiter( $front, $back ),
+			:child( @child )
+		)
+	}
 }
 class Perl6::Operator::PostCircumfix does Branching_Delimited {
 	also is Perl6::Operator;
 }
 class Perl6::PackageName does Token {
 	also is Perl6::Element;
-	method namespaces() returns Array {
+	method namespaces() {
 		$.content.split( '::' )
 	}
 }
@@ -342,7 +366,7 @@ class Perl6::Semicolon does Token {
 
 class Perl6::Variable {
 	also is Perl6::Element;
-	method headless() returns Str {
+	method headless() {
 		$.content ~~ m/ <[$%@&]> <[*!?<^:=~]>? (.+) /;
 		$0
 	}
@@ -518,33 +542,9 @@ class Perl6::Tidy::Factory {
 		)
 	}
 
-	method make-bareword-from( Mu $p ) {
-		Perl6::Bareword.new(
-			:from( $p.from ),
-			:to( $p.to ),
-			:content( $p.Str )
-		)
-	}
-
-	method make-prefix-from( Mu $p ) {
-		Perl6::Operator::Prefix.new(
-			:from( $p.from ),
-			:to( $p.to ),
-			:content( $p.Str )
-		)
-	}
-
-	multi method make-infix-from( Mu $p ) {
-		Perl6::Operator::Infix.new(
-			:from( $p.from ),
-			:to( $p.to ),
-			:content( $p.Str )
-		)
-	}
-
 	multi method make-infix-from( Mu $p, Str $token ) {
 		$p.Str ~~ m{ ($token) };
-		my ( $offset ) = $0.from;
+		my Int $offset = $0.from;
 		Perl6::Operator::Infix.new(
 			:from( $p.from + $offset ),
 			:to( $p.from + $offset + 2 ),
@@ -553,8 +553,8 @@ class Perl6::Tidy::Factory {
 	}
 
 	method make-postcircumfix( Mu $p, @child ) {
-		$p.Str ~~ m{ ^ (.) }; my $front = ~$0;
-		$p.Str ~~ m{ (.) $ }; my $back = ~$0;
+		$p.Str ~~ m{ ^ (.) }; my Str $front = ~$0;
+		$p.Str ~~ m{ (.) $ }; my Str $back = ~$0;
 		Perl6::Operator::PostCircumfix.new(
 			# XXX What is it "post"? Hmm.
 			:delimiter( $front, $back ),
@@ -562,26 +562,15 @@ class Perl6::Tidy::Factory {
 		)
 	}
 
-	method make-circumfix( Mu $p, @child ) {
-		$p.Str ~~ m{ ^ (.) }; my $front = ~$0;
-		$p.Str ~~ m{ (.) $ }; my $back = ~$0;
-		Perl6::Operator::Circumfix.new(
-			:from( $p.from ),
-			:to( $p.to ),
-			:delimiter( $front, $back ),
-			:child( @child )
-		)
-	}
-
 	method make-semicolon( Str $orig, Int $from, Int $to ) {
-		my $content = substr( $orig, $from, $to - $from );
+		my Str $content = substr( $orig, $from, $to - $from );
 		die "Semicolon '$content' is not a semicolon!"
 			if $content ne ';';
 		Perl6::Semicolon.new( $from, $to, $content )
 	}
 
 	method make-whitespace( Str $orig, Int $from, Int $to ) {
-		my $content = substr( $orig, $from, $to - $from );
+		my Str $content = substr( $orig, $from, $to - $from );
 		die "Whitespace '$content' is not white!"
 			if $content ~~ /\S/;
 		Perl6::WS.new( $from, $to, $content )
@@ -589,8 +578,8 @@ class Perl6::Tidy::Factory {
 
 	method populate-whitespace( Str $orig, Int $offset, Int $from, Int $to, @child ) {
 		my Perl6::Element @ws;
-		my $start = $from;
-		my $end = $to;
+		my Int $start = $from;
+		my Int $end = $to;
 
 		for @child {
 			warn "repopulating list" if
@@ -608,7 +597,7 @@ class Perl6::Tidy::Factory {
 			@ws.push( $_ )
 		}
 		if $start < $end {
-			my $content = substr( $orig, $start, $end );
+			my Str $content = substr( $orig, $start, $end );
 			if $content ~~ Q{;} {
 				@ws.push(
 					self.make-semicolon(
@@ -625,6 +614,15 @@ class Perl6::Tidy::Factory {
 			}
 		}
 		@ws
+	}
+
+	method has-no-gaps( Perl6::Element @child ) returns Bool {
+		return True if @child.elems <= 1;
+		for 0..@child.elems - 1 {
+			die "Gap between $_ and {$_+1}"
+				if @child[$_].to != @child[$_+1].from - 1
+		}
+		return True
 	}
 
 	sub key-boundary( Mu $p ) {
@@ -686,8 +684,8 @@ class Perl6::Tidy::Factory {
 	method assert-hash-keys( Mu $parsed, $keys, $defined-keys = [] ) {
 		return False unless $parsed and $parsed.hash;
 
-		my @keys;
-		my @defined-keys;
+		my Str @keys;
+		my Str @defined-keys;
 		for $parsed.hash.keys {
 			if $parsed.hash.{$_} {
 				@keys.push( $_ );
@@ -713,7 +711,7 @@ class Perl6::Tidy::Factory {
 		return True
 	}
 
-	method _arglist( Mu $p ) returns Array[Perl6::Element] {
+	method _arglist( Mu $p ) {
 		if $p.list {
 			my Perl6::Element @child;
 			for $p.list {
@@ -807,7 +805,7 @@ class Perl6::Tidy::Factory {
 			self._metachar( $p.hash.<metachar> )
 		}
 		elsif $p.Str {
-			self.make-bareword-from( $p )
+			Perl6::Bareword.new( $p )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -843,7 +841,7 @@ class Perl6::Tidy::Factory {
 	}
 
 	# XXX Unused
-	method _binint( Mu $p ) returns Perl6::Element {
+	method _binint( Mu $p ) {
 		Perl6::Number::Binary.new(
 			:from( $p.from ),
 			:to( $p.to ),
@@ -869,8 +867,8 @@ class Perl6::Tidy::Factory {
 					$p.hash.<statementlist>
 				)
 			);
-			$p.Str ~~ m{ ^ (.) }; my $front = ~$0;
-			$p.Str ~~ m{ (.) $ }; my $back = ~$0;
+			$p.Str ~~ m{ ^ (.) }; my Str $front = ~$0;
+			$p.Str ~~ m{ (.) $ }; my Str $back = ~$0;
 			Perl6::Block.new(
 				:from( $p.from ),
 				:to( $p.to ),
@@ -960,7 +958,7 @@ class Perl6::Tidy::Factory {
 		}
 		elsif self.assert-hash-keys( $p, [< semilist >] ) {
 			# XXX <semilist> can probably be worked with
-			my @ws;
+			my Perl6::Element @ws;
 			if $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> {
 				my Perl6::Element @child;
 				@child.push(
@@ -984,7 +982,7 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 					:content( $p.hash.<nibble>.Str )
 				)
 			);
-			self.make-circumfix( $p, @child )
+			Perl6::Operator::Circumfix.new( $p, @child )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -1060,7 +1058,7 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 		}
 		elsif self.assert-hash-keys( $p, [< fakesignature >] ) {
 			# XXX May not really be "post" in the P6 sense?
-			my @child =
+			my Perl6::Element @child =
 				self._fakesignature(
 					$p.hash.<fakesignature>
 				);
@@ -1111,7 +1109,7 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 		}
 	}
 
-	method _decint( Mu $p ) returns Perl6::Element {
+	method _decint( Mu $p ) {
 		Perl6::Number::Decimal.new(
 			:from( $p.from ),
 			:to( $p.to ),
@@ -1159,11 +1157,10 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 		}
 		elsif self.assert-hash-keys( $p,
 				[< signature >], [< trait >] ) {
-			self.make-circumfix( $p,
-				(
-					self._signature( $p.hash.<signature> )
-				)
-			)
+			my Perl6::Element @child = (
+				self._signature( $p.hash.<signature> )
+			);
+			Perl6::Operator::Circumfix.new( $p, @child )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -1225,7 +1222,7 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 		}
 	}
 
-	method _dec_number( Mu $p ) returns Perl6::Element {
+	method _dec_number( Mu $p ) {
 		if self.assert-hash-keys( $p, [< int coeff escale frac >] ) {
 			self.__FloatingPoint( $p )
 		}
@@ -1333,7 +1330,7 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 		}
 	}
 
-	method _doc( Mu $p ) returns Bool {
+	method _doc( Mu $p ) {
 		$p.hash.<doc>.Bool
 	}
 
@@ -1341,7 +1338,7 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 		if self.assert-hash-keys( $p, [< sym dottyop O >] ) {
 			(
 				# leading and trailing space elided
-				self.make-prefix-from( $p.hash.<sym> ),
+				Perl6::Operator::Prefix.new( $p.hash.<sym> ),
 				self._dottyop( $p.hash.<dottyop> )
 			)
 		}
@@ -1574,7 +1571,7 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 		}
 		elsif self.assert-hash-keys( $p, [< sym args >] ) {
 			# leading and trailing space elided
-			self.make-infix-from( $p.hash.<sym> )
+			Perl6::Operator::Infix.new( $p.hash.<sym> )
 		}
 		elsif self.assert-hash-keys( $p, [< longname args >] ) {
 			# XXX Needs work later on
@@ -1599,10 +1596,10 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			self._regex_declarator( $p.hash.<regex_declarator> )
 		}
 		elsif self.assert-hash-keys( $p, [< routine_declarator >] ) {
-			my @child = self._routine_declarator(
+			my Perl6::Element @child = self._routine_declarator(
 				$p.hash.<routine_declarator>
 			);
-			my @ws = self.populate-whitespace(
+			my Perl6::Element @ws = self.populate-whitespace(
 				$p.Str, 0, # XXX No offset? Why?
 				$p.from, $p.to, @child
 			);
@@ -1655,12 +1652,12 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 
 	method _fatarrow( Mu $p ) {
 		if self.assert-hash-keys( $p, [< key val >] ) {
-			my @child = (
+			my Perl6::Element @child = (
 				self._key( $p.hash.<key> ),
 				self.make-infix-from( $p, Q{=>} ),
 				self._val( $p.hash.<val> )
 			);
-			my @ws = self.populate-whitespace(
+			my Perl6::Element @ws = self.populate-whitespace(
 				$p.Str, 0, # XXX No offset? Why?
 				$p.from, $p.to, @child
 			);
@@ -1672,7 +1669,7 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 		}
 	}
 
-	method __FloatingPoint( Mu $p ) returns Perl6::Element {
+	method __FloatingPoint( Mu $p ) {
 		# leading and trailing space elided
 		Perl6::Number::Floating.new(
 			:from( $p.from ),
@@ -1682,7 +1679,7 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 	}
 
 	# XXX Unused
-	method _hexint( Mu $p ) returns Perl6::Element {
+	method _hexint( Mu $p ) {
 		Perl6::Number::Hexadecimal.new(
 			:from( $p.from ),
 			:to( $p.to ),
@@ -1706,7 +1703,7 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 		}
 		elsif $p.Str {
 			# leading and trailing space elided
-			self.make-bareword-from( $p )
+			Perl6::Bareword.new( $p )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -1720,11 +1717,11 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 		}
 		elsif self.assert-hash-keys( $p, [< sym O >] ) {
 			# leading and trailing space elided
-			self.make-infix-from( $p.hash.<sym> )
+			Perl6::Operator::Infix.new( $p.hash.<sym> )
 		}
 		elsif self.assert-hash-keys( $p, [< EXPR O >] ) {
 			# XXX Untested
-			self.make-infix-from( $p.hash.<EXPR> )
+			Perl6::Operator::Infix.new( $p.hash.<EXPR> )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -1768,7 +1765,7 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			(
 				# XXX refactor down?
 				# leading and trailing space elided
-				self.make-infix-from( $p.hash.<sym> ),
+				Perl6::Operator::Infix.new( $p.hash.<sym> ),
 				self._EXPR( $p.hash.<EXPR> )
 			)
 		}
@@ -1838,12 +1835,12 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 return True;
 	}
 
-	method _key( Mu $p ) returns Perl6::Element {
+	method _key( Mu $p ) {
 		# leading and trailing space elided
-		self.make-bareword-from( $p )
+		Perl6::Bareword.new( $p )
 	}
 
-	method _lambda( Mu $p ) returns Str {
+	method _lambda( Mu $p ) {
 		$p.hash.<lambda>.Str
 	}
 
@@ -1868,7 +1865,7 @@ return True;
 		}
 	}
 
-	method _max( Mu $p ) returns Str {
+	method _max( Mu $p ) {
 		$p.hash.<max>.Str
 	}
 
@@ -1908,7 +1905,7 @@ return True;
 		if self.assert-hash-keys( $p,
 			     [< specials longname blockoid multisig >],
 			     [< trait >] ) {
-			my @child = self._multisig( $p.hash.<multisig> );
+			my Perl6::Element @child = self._multisig( $p.hash.<multisig> );
 			(
 				self._longname( $p.hash.<longname> ),
 				Perl6::Operator::Circumfix.new(
@@ -2057,7 +2054,7 @@ return True;
 		elsif self.assert-hash-keys( $p,
 			[< identifier >], [< morename >] ) {
 			# leading and trailing space elided
-			self.make-bareword-from( $p )
+			Perl6::Bareword.new( $p )
 		}
 		elsif self.assert-hash-keys( $p, [< subshortname >] ) {
 			die "Not implemented yet"
@@ -2071,7 +2068,7 @@ return True;
 			)
 		}
 		elsif self.assert-Str( $p ) {
-			self.make-bareword-from( $p )
+			Perl6::Bareword.new( $p )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -2103,7 +2100,7 @@ return True;
 		}
 	}
 
-	method _normspace( Mu $p ) returns Str {
+	method _normspace( Mu $p ) {
 		$p.hash.<normspace>.Str
 	}
 
@@ -2235,7 +2232,7 @@ return True;
 			and $p.<assoc>;
 	}
 
-	method _octint( Mu $p ) returns Perl6::Element {
+	method _octint( Mu $p ) {
 		Perl6::Number::Octal.new(
 			:from( $p.from ),
 			:to( $p.to ),
@@ -2264,7 +2261,7 @@ return True;
 		}
 		elsif self.assert-hash-keys( $p, [< sym dottyop O >] ) {
 			(
-				self.make-infix-from( $p.hash.<sym> ),
+				Perl6::Operator::Infix.new( $p.hash.<sym> ),
 				self._dottyop( $p.hash.<dottyop> )
 			)
 		}
@@ -2334,7 +2331,7 @@ return True;
 
 	method _parameter( Mu $p ) {
 		my Perl6::Element @child;
-		my $count = 0;
+		my Int $count = 0;
 		for $p.list {
 			if self.assert-hash-keys( $_,
 				[< param_var type_constraint
@@ -2342,7 +2339,7 @@ return True;
 				[< default_value modifier trait >] ) {
 				# Synthesize the 'from' and 'to' markers for 'where'
 				$p.Str ~~ m{ << (where) >> };
-				my ( $from ) = $0.from;
+				my Int $from = $0.from;
 				@child.append(
 					self._type_constraint(
 						$_.hash.<type_constraint>
@@ -2411,7 +2408,7 @@ return True;
 				   trait post_constraint >] ) {
 				# Synthesize the 'from' and 'to' markers for ':'
 				$p.Str ~~ m{ (':') };
-				my ( $from ) = $0.from;
+				my Int $from = $0.from;
 				@child.append(
 					Perl6::Operator::Prefix.new(
 						:from( $from ),
@@ -2487,44 +2484,47 @@ return True;
 	method _param_var( Mu $p ) {
 		if self.assert-hash-keys( $p, [< name twigil sigil >] ) {
 			# XXX refactor back to a method
-			my $sigil       = $p.hash.<sigil>.Str;
-			my $twigil      = $p.hash.<twigil> ??
-					  $p.hash.<twigil>.Str !! '';
-			my $desigilname = $p.hash.<name> ??
-					  $p.hash.<name>.Str !! '';
-			my $content     = $p.hash.<sigil> ~
-					  $twigil ~
-					  $desigilname;
+			my Str $sigil       = $p.hash.<sigil>.Str;
+			my Str $twigil      = $p.hash.<twigil> ??
+					      $p.hash.<twigil>.Str !! '';
+			my Str $desigilname = $p.hash.<name> ??
+					      $p.hash.<name>.Str !! '';
+			my Str $content     = $p.hash.<sigil> ~
+					      $twigil ~
+					      $desigilname;
 
 			# leading and trailing space elided
-			my $leaf = %sigil-map{$sigil ~ $twigil}.new(
-				:from( $p.from ),
-				:to( $p.to ),
-				:content( $p.Str )
-			);
+			my Perl6::Element $leaf =
+				%sigil-map{$sigil ~ $twigil}.new(
+					:from( $p.from ),
+					:to( $p.to ),
+					:content( $p.Str )
+				);
 			$leaf
 		}
 		elsif self.assert-hash-keys( $p, [< name sigil >] ) {
 			# XXX refactor back to a method
-			my $sigil       = $p.hash.<sigil>.Str;
-			my $twigil      = $p.hash.<twigil> ??
-					  $p.hash.<twigil>.Str !! '';
-			my $desigilname = $p.hash.<name> ??
-					  $p.hash.<name>.Str !! '';
-			my $content     = $p.hash.<sigil> ~
-					  $twigil ~
-					  $desigilname;
+			my Str $sigil       = $p.hash.<sigil>.Str;
+			my Str $twigil      = $p.hash.<twigil> ??
+					      $p.hash.<twigil>.Str !! '';
+			my Str $desigilname = $p.hash.<name> ??
+					      $p.hash.<name>.Str !! '';
+			my Str $content     = $p.hash.<sigil> ~
+					      $twigil ~
+					      $desigilname;
 
 			# leading and trailing space elided
-			my $leaf = %sigil-map{$sigil ~ $twigil}.new(
-				:from( $p.from ),
-				:to( $p.to ),
-				:content( $content )
-			);
+			my Perl6::Element $leaf =
+				%sigil-map{$sigil ~ $twigil}.new(
+					:from( $p.from ),
+					:to( $p.to ),
+					:content( $content )
+				);
 			$leaf
 		}
 		elsif self.assert-hash-keys( $p, [< signature >] ) {
-			my @child = self._signature( $p.hash.<signature> );
+			my Perl6::Element @child =
+				self._signature( $p.hash.<signature> );
 			Perl6::Operator::Circumfix.new(
 				:from( $p.from ),
 				:to( $p.to ),
@@ -2560,9 +2560,9 @@ return True;
 			die "Not implemented yet"
 		}
 		elsif self.assert-hash-keys( $p, [< semilist O >] ) {
-			my $x = $p.hash.<semilist>.Str;
-			$x ~~ s{ ^ (\s*) } = ''; my $leading = $0.chars;
-			$x ~~ s{ (\s+) $ } = ''; my $trailing = $0.chars;
+			my Str $x = $p.hash.<semilist>.Str;
+			$x ~~ s{ ^ (\s*) } = ''; my Int $leading = $0.chars;
+			$x ~~ s{ (\s+) $ } = ''; my Int $trailing = $0.chars;
 			# leading and trailing space elided
 			# XXX whitespace around text could be done differently?
 			Perl6::Bareword.new(
@@ -2572,9 +2572,9 @@ return True;
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< nibble O >] ) {
-			my $x = $p.hash.<nibble>.Str;
-			$x ~~ s{ ^ (\s*) } = ''; my $leading = $0.chars;
-			$x ~~ s{ (\s+) $ } = ''; my $trailing = $0.chars;
+			my Str $x = $p.hash.<nibble>.Str;
+			$x ~~ s{ ^ (\s*) } = ''; my Int $leading = $0.chars;
+			$x ~~ s{ (\s+) $ } = ''; my Int $trailing = $0.chars;
 			# leading and trailing space elided
 			# XXX whitespace around text could be done differently?
 			Perl6::Bareword.new(
@@ -2597,10 +2597,10 @@ return True;
 	method _postfix( Mu $p ) {
 		if self.assert-hash-keys( $p, [< sym O >] ) {
 			# leading and trailing space elided
-			self.make-infix-from( $p.hash.<sym> )
+			Perl6::Operator::Infix.new( $p.hash.<sym> )
 		}
 		elsif self.assert-hash-keys( $p, [< dig O >] ) {
-			self.make-infix-from( $p.hash.<dig> )
+			Perl6::Operator::Infix.new( $p.hash.<dig> )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -2627,7 +2627,7 @@ return True;
 	method _prefix( Mu $p ) {
 		if self.assert-hash-keys( $p, [< sym O >] ) {
 			# leading and trailing space elided
-			self.make-prefix-from( $p.hash.<sym> )
+			Perl6::Operator::Prefix.new( $p.hash.<sym> )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -2635,7 +2635,7 @@ return True;
 		}
 	}
 
-	method _quant( Mu $p ) returns Bool {
+	method _quant( Mu $p ) {
 		$p.hash.<quant>.Bool
 	}
 
@@ -2737,11 +2737,11 @@ return True;
 		}
 	}
 
-	method _radix( Mu $p ) returns Int {
+	method _radix( Mu $p ) {
 		$p.hash.<radix>.Int
 	}
 
-	method _rad_number( Mu $p ) returns Perl6::Element {
+	method _rad_number( Mu $p ) {
 		if self.assert-hash-keys( $p,
 				[< circumfix bracket radix >],
 				[< exp base >] ) {
@@ -2783,16 +2783,16 @@ return True;
 		if self.assert-hash-keys( $p,
 				[< deflongname nibble >],
 				[< signature trait >] ) {
-			my $x = substr(
+			my Str $x = substr(
 				$p.Str, $p.hash.<deflongname>.Str.chars
 			);
-			$x ~~ m{ ^ (.+) '{' }; my $offset = $0.chars;
+			$x ~~ m{ ^ (.+) '{' }; my Int $offset = $0.chars;
 
 			my Perl6::Element @child;
 			@child.append(
 				self._nibble( $p.hash.<nibble> )
 			);
-#			my @ws = self.populate-whitespace(
+#			my Perl6::Element  @ws = self.populate-whitespace(
 #				$p.Str, $offset + 1, #$p.from, # XXX Offset to start
 #				#$p.from, $p.to, @child
 #				$p.from + 1, $p.to - 1, @child
@@ -2817,7 +2817,7 @@ return True;
 		}
 	}
 
-	method _right( Mu $p ) returns Perl6::Element {
+	method _right( Mu $p ) {
 		$p.hash.<right>.Bool
 	}
 
@@ -2845,11 +2845,12 @@ return True;
 		if self.assert-hash-keys( $p,
 				[< blockoid deflongname multisig >],
 				[< trait >] ) {
-			my @child = self._multisig( $p.hash.<multisig> );
-			my $x = substr(
+			my Perl6::Element @child =
+				self._multisig( $p.hash.<multisig> );
+			my Str $x = substr(
 				$p.Str, 0, $p.hash.<blockoid>.from - $p.from
 			);
-			my $offset = 0;
+			my Int $offset = 0;
 			if $x {
 				$x ~~ m{ ')' (.*) $ }; $offset = $0.chars;
 			}
@@ -2876,7 +2877,8 @@ return True;
 		}
 		elsif self.assert-hash-keys( $p,
 				[< blockoid multisig >], [< trait >] ) {
-			my @child = self._multisig( $p.hash.<multisig> );
+			my Perl6::Element  @child =
+				self._multisig( $p.hash.<multisig> );
 			(
 				Perl6::Operator::Circumfix.new(
 					:delimiter( '(', ')' ),
@@ -2954,11 +2956,11 @@ return True;
 
 	method _scope_declarator( Mu $p ) {
 		if self.assert-hash-keys( $p, [< sym scoped >] ) {
-			my @child = (
+			my Perl6::Element @child = (
 				self._sym( $p.hash.<sym> ),
 				self._scoped( $p.hash.<scoped> )
 			).flat;
-			my @ws = self.populate-whitespace(
+			my Perl6::Element @ws = self.populate-whitespace(
 				$p.Str, $p.from, # XXX Offset to start
 				$p.from, $p.to, @child
 			);
@@ -3013,11 +3015,11 @@ return True;
 		}
 	}
 
-	method _septype( Mu $p ) returns Str {
+	method _septype( Mu $p ) {
 		$p.hash.<septype>.Str
 	}
 
-	method _shape( Mu $p ) returns Str {
+	method _shape( Mu $p ) {
 		$p.hash.<shape>.Str
 	}
 
@@ -3043,7 +3045,7 @@ return True;
 		}
 	}
 
-	method _sigil( Mu $p ) returns Str {
+	method _sigil( Mu $p ) {
 		$p.hash.<sym>.Str
 	}
 
@@ -3185,13 +3187,13 @@ return True;
 			@child
 		}
 		elsif self.assert-hash-keys( $p, [< EXPR >] ) {
-			my @child = self._EXPR( $p.hash.<EXPR> );
+			my Perl6::Element @child = self._EXPR( $p.hash.<EXPR> );
 			Perl6::Statement.new(
 				:child( @child )
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< statement_control >] ) {
-			my @child =
+			my Perl6::Element @child =
 				self._statement_control(
 					$p.hash.<statement_control>
 				);
@@ -3205,7 +3207,7 @@ return True;
 		}
 	}
 
-	method _statementlist( Mu $p ) returns Array[Perl6::Element] {
+	method _statementlist( Mu $p ) {
 		my $statement = $p.hash.<statement>;
 		my Perl6::Element @child = map {
 			self._statement( $_ )
@@ -3273,7 +3275,7 @@ return True;
 		}
 		elsif $p.Str {
 			# leading and trailing space elided
-			self.make-bareword-from( $p )
+			Perl6::Bareword.new( $p )
 		}
 		elsif $p.Bool and $p.Str eq '+' {
 			die "Not implemented yet"
@@ -3381,7 +3383,7 @@ return True;
 		}
 		elsif $p.Str {
 			# XXX
-			my $str = $p.Str;
+			my Str $str = $p.Str;
 			$str ~~ s{\s+ $} = '';
 			Perl6::Bareword.new(
 				:from( $p.from ),
@@ -3473,7 +3475,7 @@ return True;
 		}
 	}
 
-	method _twigi( Mu $p ) returns Str {
+	method _twigi( Mu $p ) {
 		$p.hash.<sym>.Str
 	}
 
@@ -3538,7 +3540,7 @@ return True;
 				# XXX Probably could be narrowed.
 				# leading and trailing space elided
 				return
-					self.make-bareword-from( $_ )
+					Perl6::Bareword.new( $_ )
 			}
 			elsif self.assert-hash-keys( $_,
 					[< longname colonpair >] ) {
@@ -3555,7 +3557,7 @@ return True;
 				# XXX Can probably be narrowed
 				# leading and trailing space elided
 				return
-					self.make-bareword-from( $_ )
+					Perl6::Bareword.new( $_ )
 			}
 			elsif self.assert-hash-keys( $_,
 					[< longname >], [< colonpair >] ) {
@@ -3597,14 +3599,14 @@ return True;
 		}
 	}
 
-	method _VALUE( Mu $p ) returns Int {
+	method _VALUE( Mu $p ) {
 #		return $p.hash.<VALUE>.Str if
 #			$p.hash.<VALUE>.Str and $p.hash.<VALUE>.Str eq '0';
 #		$p.hash.<VALUE>.Int
 		$p.hash.<VALUE>.Str || $p.hash.<VALUE>.Int
 	}
 
-	method _value( Mu $p ) returns Perl6::Element {
+	method _value( Mu $p ) {
 		if self.assert-hash-keys( $p, [< number >] ) {
 			self._number( $p.hash.<number> )
 		}
@@ -3617,16 +3619,17 @@ return True;
 		}
 	}
 
-	method _var( Mu $p ) returns Perl6::Element {
+	method _var( Mu $p ) {
 		if self.assert-hash-keys( $p,
 				[< sigil desigilname >] ) {
 			# XXX For heavens' sake refactor.
-			my $sigil       = $p.hash.<sigil>.Str;
-			my $twigil      = $p.hash.<twigil> ??
+			my Str $sigil	= $p.hash.<sigil>.Str;
+			my Str $twigil	= $p.hash.<twigil> ??
 					  $p.hash.<twigil>.Str !! '';
-			my $desigilname = $p.hash.<desigilname> ??
-					  $p.hash.<desigilname>.Str !! '';
-			my $content     = $p.hash.<sigil> ~ $twigil ~ $desigilname;
+			my Str $desigilname = $p.hash.<desigilname> ??
+					      $p.hash.<desigilname>.Str !! '';
+			my Str $content =
+				$p.hash.<sigil> ~ $twigil ~ $desigilname;
 			# leading and trailing space elided
 			%sigil-map{$sigil ~ $twigil}.new(
 				:from( $p.from ),
@@ -3655,7 +3658,7 @@ return True;
 				[< semilist postcircumfix signature trait >] ) {
 			# Synthesize the 'from' and 'to' markers for 'where'
 			$p.Str ~~ m{ << (where) >> };
-			my ( $from ) = $0.from;
+			my Int $from = $0.from;
 			(
 				self._variable( $p.hash.<variable> ),
 				# leading and trailing space elided
@@ -3686,15 +3689,17 @@ return True;
 			return;
 		}
 
-		my $sigil       = $p.hash.<sigil>.Str;
-		my $twigil      = $p.hash.<twigil> ??
+		my Str $sigil	= $p.hash.<sigil>.Str;
+		my Str $twigil	= $p.hash.<twigil> ??
 			          $p.hash.<twigil>.Str !! '';
-		my $desigilname = $p.hash.<desigilname> ??
-				  $p.hash.<desigilname>.Str !! '';
-		my $content     = $p.hash.<sigil> ~ $twigil ~ $desigilname;
+		my Str $desigilname =
+			$p.hash.<desigilname> ??
+			$p.hash.<desigilname>.Str !! '';
+		my Str $content =
+			$p.hash.<sigil> ~ $twigil ~ $desigilname;
 
 		# leading and trailing space elided
-		my $leaf = %sigil-map{$sigil ~ $twigil}.new(
+		my Perl6::Element $leaf = %sigil-map{$sigil ~ $twigil}.new(
 			:from( $p.from ),
 			:to( $p.to ),
 			:content( $content )
@@ -3713,7 +3718,7 @@ return True;
 		}
 	}
 
-	method _vstr( Mu $p ) returns Int {
+	method _vstr( Mu $p ) {
 		$p.hash.<vstr>.Int
 	}
 
@@ -3738,7 +3743,7 @@ return True;
 		}
 	}
 
-	method _wu( Mu $p ) returns Str {
+	method _wu( Mu $p ) {
 		$p.hash.<wu>.Str
 	}
 
