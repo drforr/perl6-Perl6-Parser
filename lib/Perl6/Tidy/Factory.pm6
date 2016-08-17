@@ -3179,9 +3179,31 @@ return True;
 					$p.hash.<type_constraint>
 				)
 			);
+			if $p.hash.<type_constraint>.to < $p.hash.<param_var>.from {
+				@child.append(
+					Perl6::WS.new(
+						:from( $p.hash.<type_constraint>.to ),
+						:to( $p.hash.<param_var>.from ),
+						:content(
+							substr( $p.Str, 0,
+								$p.hash.<param_var>.from - $p.hash.<type_constraint>.to
+							)
+						)
+					)
+				)
+			}
 			@child.append(
 				self._param_var( $p.hash.<param_var> )
 			);
+			if $p.Str ~~ m{ (\s+) ('where') } {
+				@child.append(
+					Perl6::WS.new(
+						:from( $p.hash.<param_var>.from ),
+						:to( $p.hash.<param_var>.from + $0.chars ),
+						:content( ~$0 )
+					)
+				)
+			}
 			@child.append(
 				Perl6::Bareword.new(
 					:from( $from ),
@@ -3189,6 +3211,15 @@ return True;
 					:content( Q{where} )
 				)
 			);
+			if $p.Str ~~ m{ ('where') (\s+) } {
+				@child.append(
+					Perl6::WS.new(
+						:from( $p.from + $0.to ),
+						:to( $p.from + $1.to ),
+						:content( ~$1 )
+					)
+				)
+			}
 			@child.append(
 				self._post_constraint(
 					$p.hash.<post_constraint>
@@ -3225,10 +3256,27 @@ return True;
 			@child.append(
 				self._param_var( $p.hash.<param_var> )
 			);
-			# XXX Should be possible to refactor...
+			if $p.Str ~~ m{ (\s+) ('=') } {
+				@child.append(
+					Perl6::WS.new(
+						:from( $p.hash.<param_var>.from ),
+						:to( $p.hash.<param_var>.from + $0.chars ),
+						:content( ~$0 )
+					)
+				)
+			}
 			@child.append(
 				Perl6::Operator::Infix.new( $p, Q{=} )
 			);
+			if $p.Str ~~ m{ ('=') (\s+) } {
+				@child.append(
+					Perl6::WS.new(
+						:from( $p.from + $0.to ),
+						:to( $p.from + $1.to ),
+						:content( ~$1 )
+					)
+				)
+			}
 			@child.append(
 				self._default_value(
 					$p.hash.<default_value>
@@ -3930,18 +3978,24 @@ return True;
 			# Synthesize the 'from' and 'to' markers for 'where'
 			$p.Str ~~ m{ << (where) >> };
 			my Int $from = $0.from;
-			(
+			my @child;
+			@child.append(
 				self._variable( $p.hash.<variable> ),
+			);
+			@child.append(
 				# leading and trailing space elided
 				Perl6::Bareword.new(
 					:from( $p.from + $from ),
 					:to( $p.from + $from + 5 ),
 					:content( Q{where} )
-				),
+				)
+			);
+			@child.append(
 				self._post_constraint(
 					$p.hash.<post_constraint>
 				)
-			)
+			);
+			@child.flat
 		}
 		elsif self.assert-hash-keys( $p,
 				[< variable >],
