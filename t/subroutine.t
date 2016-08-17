@@ -12,17 +12,13 @@ my $pt = Perl6::Tidy.new;
 subtest {
 	plan 2;
 
-	my $parsed = $pt.parse-source( Q:to[_END_].chomp );
+	my $source = Q:to[_END_];
 sub foo { }
 _END_
+	my $parsed = $pt.parse-source( $source );
 	my $tree = $pt.build-tree( $parsed );
 	ok $pt.validate( $parsed ), Q{valid};
-#	is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-#sub foo { }
-#_END_
-	is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-sub foo {}
-_END_
+	is $pt.format( $tree ), $source, Q{formatted};
 }, Q{empty};
 
 subtest {
@@ -34,49 +30,37 @@ subtest {
 		subtest {
 			plan 2;
 
-			my $parsed = $pt.parse-source( Q:to[_END_] );
+			my $source = Q:to[_END_];
 sub foo( ) { }
 _END_
+			my $parsed = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q:to[_END_], Q{formatted};
-#sub foo( ) { }
-#_END_
-			is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-sub foo() {}
-_END_
+			is $pt.format( $tree ), $source, Q{formatted};
 		}, Q{empty};
 
 		subtest {
 			plan 2;
 
-			my $parsed = $pt.parse-source( Q:to[_END_] );
+			my $source = Q:to[_END_];
 sub foo( 0 ) { }
 _END_
+			my $parsed = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q:to[_END_], Q{formatted};
-#sub foo( 0 ) { }
-#_END_
-			is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-sub foo(0) {}
-_END_
+			is $pt.format( $tree ), $source, Q{formatted};
 		}, Q{constant};
 
 		subtest {
 			plan 2;
 
-			my $parsed = $pt.parse-source( Q:to[_END_] );
+			my $source = Q:to[_END_];
 sub foo( $a ) { }
 _END_
+			my $parsed = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q:to[_END_], Q{formatted};
-#sub foo( $a ) { }
-#_END_
-			is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-sub foo($a) {}
-_END_
+			is $pt.format( $tree ), $source, Q{formatted};
 		}, Q{untyped};
 
 		subtest {
@@ -85,115 +69,87 @@ _END_
 			subtest {
 				plan 2;
 
-				my $parsed = $pt.parse-source( Q:to[_END_].chomp );
+				my $source = Q:to[_END_];
 sub foo( Str $a ) { }
 _END_
+				my $parsed = $pt.parse-source( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
-#				is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-#sub foo( Str $a ) { }
-#_END_
-				is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-sub foo(Str$a) {}
-_END_
+				is $pt.format( $tree ), $source, Q{formatted};
 			}, Q{typed};
 
 			subtest {
 				plan 2;
 
-				my $parsed = $pt.parse-source( Q:to[_END_].chomp );
+				my $source = Q:to[_END_];
 sub foo( ::T $a ) { }
 _END_
+				my $parsed = $pt.parse-source( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
-#				is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-#sub foo( ::T $a ) { }
-#_END_
-				is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-sub foo(::T$a) {}
-_END_
+				is $pt.format( $tree ), $source, Q{formatted};
 			}, Q{type-capture};
 
 			subtest {
 				plan 2;
 
-				my $parsed = $pt.parse-source( Q:to[_END_].chomp );
+				my $source = Q:to[_END_];
 sub foo( Str ) { }
 _END_
+				my $parsed = $pt.parse-source( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
-#				is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-#sub foo( Str ) { }
-#_END_
-				is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-sub foo(Str) {}
-_END_
+				is $pt.format( $tree ), $source, Q{formatted};
 			}, Q{type-only};
 
 			subtest {
 				plan 2;
 
-				my $parsed = $pt.parse-source( Q:to[_END_].chomp );
+				my $source = Q:to[_END_];
 sub foo( Str $a where "foo" ) { }
 _END_
+				my $parsed = $pt.parse-source( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
-#				is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-#sub foo( Str $a where "foo" ) { }
-#_END_
-				is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-sub foo(Str$awhere"foo") {}
-_END_
+				is $pt.format( $tree ), $source, Q{formatted};
 			}, Q{type-constrained};
 		}, Q{typed};
 
 		subtest {
 			plan 2;
 
-			my $parsed = $pt.parse-source( Q:to[_END_].chomp );
+			my $source = Q:to[_END_];
 sub foo( $a = 0 ) { }
 _END_
+			my $parsed = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-#sub foo( $a = 0 ) { }
-#_END_
-			is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-sub foo($a=0) {}
-_END_
+			is $pt.format( $tree ), $source, Q{formatted};
 		}, Q{default};
 
 		subtest {
 			plan 2;
 
-			my $parsed = $pt.parse-source( Q:to[_END_].chomp );
+			my $source = Q:to[_END_];
 sub foo( :$a ) { }
 _END_
+			my $parsed = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-#sub foo( :$a ) { }
-#_END_
-			is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-sub foo(:$a) {}
-_END_
+			is $pt.format( $tree ), $source, Q{formatted};
 		}, Q{optional};
 	}, Q{single};
 
 	subtest {
 		plan 2;
 
-		my $parsed = $pt.parse-source( Q:to[_END_].chomp );
+		my $source = Q:to[_END_];
 sub foo( $a, $b ) { }
 _END_
+		my $parsed = $pt.parse-source( $source );
 		my $tree = $pt.build-tree( $parsed );
 		ok $pt.validate( $parsed ), Q{valid};
-#		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-#sub foo( $a, $b ) { }
-#_END_
-		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-sub foo($a$b) {}
-_END_
+		is $pt.format( $tree ), $source, Q{formatted};
 	}, Q{multiple};
 }, Q{scalar arguments};
 

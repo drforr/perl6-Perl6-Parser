@@ -221,21 +221,6 @@ class Perl6::Unimplemented {
 
 class Perl6::WS does Token {
 	also is Perl6::Element;
-	multi method new( Int $from, Int $to, Str $content ) {
-		die "*** Inserting empty whitespace!"
-			if $content eq '';
-		die "*** Inserting non-whitespace '$content'!"
-			if $content ~~ /\S/;
-		die "*** Content '$content' too short for [$from .. $to]"
-			if $content.chars < $to - $from;
-		die "*** Content '$content' too long for [$from .. $to]"
-			if $content.chars > $to - $from;
-		self.bless(
-			:from( $from ),
-			:to( $to ),
-			:content( $content )
-		)
-	}
 }
 
 class Perl6::Document does Branching {
@@ -558,6 +543,42 @@ class Perl6::Variable::Callable::SubLanguage {
 
 class Perl6::Tidy::Factory {
 
+	sub comma-to-whitespace( Int $offset, Str $split-me ) {
+		constant COMMA = Q{,};
+		my Int $start = $offset;
+		my ( $lhs, $rhs ) = split( COMMA, $split-me );
+		my @child;
+		if $lhs and $lhs ne '' {
+			@child.append(
+				Perl6::WS.new(
+					:from( $start ),
+					:to( $start + $lhs.chars ),
+					:content( $lhs )
+				)
+			);
+			$start += $lhs.chars;
+		}
+		@child.append(
+			Perl6::Operator::Infix.new(
+				:from( $start ),
+				:to( $start + COMMA.chars ),
+				:content( COMMA )
+			)
+		);
+		$start += COMMA.chars;
+		if $rhs and $rhs ne '' {
+			@child.append(
+				Perl6::WS.new(
+					:from( $start ),
+					:to( $start + $rhs.chars ),
+					:content( $rhs )
+				)
+			);
+			$start += $rhs.chars;
+		}
+		@child.flat
+	}
+
 	method build( Mu $p ) {
 		my Perl6::Element @child =
 			self._statementlist( $p.hash.<statementlist> );
@@ -576,69 +597,6 @@ class Perl6::Tidy::Factory {
 			:delimiter( $front, $back ),
 			:child( @child )
 		)
-	}
-
-	method make-semicolon( Str $orig, Int $from, Int $to ) {
-		my Str $content = substr( $orig, $from, $to - $from );
-		die "Semicolon '$content' is not a semicolon!"
-			if $content ne ';';
-		Perl6::Semicolon.new( $from, $to, $content )
-	}
-
-	method make-whitespace( Str $orig, Int $from, Int $to ) {
-		my Str $content = substr( $orig, $from, $to - $from );
-		die "Whitespace '$content' is not white!"
-			if $content ~~ /\S/;
-		Perl6::WS.new( $from, $to, $content )
-	}
-
-	method populate-whitespace( Str $orig, Int $offset, Int $from, Int $to, @child ) {
-		my Perl6::Element @ws;
-		my Int $start = $from;
-		my Int $end = $to;
-
-		for @child {
-			warn "repopulating list" if
-				$_ ~~ Perl6::WS;
-			if $start < $_.from and $_ !~~ Perl6::WS {
-				@ws.push(
-					self.make-whitespace(
-						$orig,
-						$start - $offset,
-						$_.from - $offset
-					)
-				)
-			}
-			$start = $_.to;
-			@ws.push( $_ )
-		}
-		if $start < $end {
-			my Str $content = substr( $orig, $start, $end );
-			if $content ~~ Q{;} {
-				@ws.push(
-					self.make-semicolon(
-						$orig, $start, $end
-					)
-				)
-			}
-			else {
-				@ws.push(
-					self.make-whitespace(
-						$orig, $start, $end
-					)
-				)
-			}
-		}
-		@ws
-	}
-
-	method has-no-gaps( Perl6::Element @child ) returns Bool {
-		return True if @child.elems <= 1;
-		for 0..@child.elems - 1 {
-			die "Gap between $_ and {$_+1}"
-				if @child[$_].to != @child[$_+1].from - 1
-		}
-		return True
 	}
 
 	sub key-boundary( Mu $p ) {
@@ -878,6 +836,21 @@ class Perl6::Tidy::Factory {
 	method _blockoid( Mu $p ) {
 		if self.assert-hash-keys( $p, [< statementlist >] ) {
 			my Perl6::Element @child;
+			if $p.from < $p.hash.<statementlist>.from {
+				my $offset = $p.from;
+				@child.append(
+					Perl6::WS.new(
+						:from( $p.from + 1 ),
+						:to( $p.hash.<statementlist>.from + 1 ),
+						:content(
+							substr( $p.Str,
+								$p.from - $offset + 1,
+								$p.hash.<statementlist>.from - $p.from
+							)
+						)
+					)
+				)
+			}
 			@child.append(
 				self._statementlist(
 					$p.hash.<statementlist>
@@ -980,10 +953,11 @@ class Perl6::Tidy::Factory {
 				@child.push(
 self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 				);
-				@ws = self.populate-whitespace(
-					$p.Str, 0, # XXX No offset? Why?
-					$p.from + 1, $p.to - 1, @child
-				)
+#				@ws = self.populate-whitespace(
+#					$p.Str, 0, # XXX No offset? Why?
+#					$p.from + 1, $p.to - 1, @child
+#				)
+				@child
 			}
 			self.make-postcircumfix( $p, @ws )
 		}
@@ -1617,11 +1591,12 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			my Perl6::Element @child = self._routine_declarator(
 				$p.hash.<routine_declarator>
 			);
-			my Perl6::Element @ws = self.populate-whitespace(
-				$p.Str, 0, # XXX No offset? Why?
-				$p.from, $p.to, @child
-			);
-			@ws
+#			my Perl6::Element @ws = self.populate-whitespace(
+#				$p.Str, 0, # XXX No offset? Why?
+#				$p.from, $p.to, @child
+#			);
+#			@ws
+			@child
 		}
 		elsif self.assert-hash-keys( $p, [< scope_declarator >] ) {
 			self._scope_declarator( $p.hash.<scope_declarator> )
@@ -1675,11 +1650,12 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 				Perl6::Operator::Infix.new( $p, Q{=>} ),
 				self._val( $p.hash.<val> )
 			);
-			my Perl6::Element @ws = self.populate-whitespace(
-				$p.Str, 0, # XXX No offset? Why?
-				$p.from, $p.to, @child
-			);
-			@ws
+#			my Perl6::Element @ws = self.populate-whitespace(
+#				$p.Str, 0, # XXX No offset? Why?
+#				$p.from, $p.to, @child
+#			);
+#			@ws
+			@child
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -2337,11 +2313,12 @@ return True;
 				self._longname( $p.hash.<longname> ),
 				self._blockoid( $p.hash.<blockoid> )
 			).flat;
-			my Perl6::Element  @ws = self.populate-whitespace(
-				$p.Str, $p.from,
-				$p.from, $p.to, @child
-			);
-			@ws
+#			my Perl6::Element  @ws = self.populate-whitespace(
+#				$p.Str, $p.from,
+#				$p.from, $p.to, @child
+#			);
+#			@ws
+			@child
 		}
 		elsif self.assert-hash-keys( $p, [< blockoid >], [< trait >] ) {
 			self._blockoid( $p.hash.<blockoid> )
@@ -2385,7 +2362,7 @@ return True;
 				);
 			}
 			elsif self.assert-hash-keys( $_,
-				[< param_var type_constraint quant >],
+				[< type_constraint param_var quant >],
 				[< default_value modifier trait
 				   post_constraint >] ) {
 				@child.append(
@@ -2393,6 +2370,15 @@ return True;
 						$_.hash.<type_constraint>
 					)
 				);
+				if $_.Str ~~ m{ (\s+) } {
+					@child.append(
+						Perl6::WS.new(
+							:from( $_.from + $0.from ),
+							:to( $_.from + $0.from + $0.chars ),
+							:content( ~$0 )
+						)
+					)
+				}
 				@child.append(
 					self._param_var( $_.hash.<param_var> )
 				);
@@ -2840,7 +2826,6 @@ return True;
 					:to( $p.to ),
 					:delimiter( '{', '}' ),
 					:child( @child )
-					#:child( @ws )
 				)
 			)
 		}
@@ -2876,10 +2861,8 @@ return True;
 
 	method _routine_def( Mu $p ) {
 		if self.assert-hash-keys( $p,
-				[< blockoid deflongname multisig >],
+				[< deflongname multisig blockoid >],
 				[< trait >] ) {
-			my Perl6::Element @child =
-				self._multisig( $p.hash.<multisig> );
 			my Str $x = substr(
 				$p.Str, 0, $p.hash.<blockoid>.from - $p.from
 			);
@@ -2887,21 +2870,72 @@ return True;
 			if $x {
 				$x ~~ m{ ')' (.*) $ }; $offset = $0.chars;
 			}
-			(
-				self._deflongname( $p.hash.<deflongname> ),
+			my @child;
+			if $p.from < $p.hash.<deflongname>.from {
+				@child.append(
+					Perl6::WS.new(
+						:from( $p.from ),
+						:to( $p.hash.<deflongname>.from ),
+						:content(
+							substr( $p.Str, 0,
+								$p.hash.<deflongname>.from - $p.from
+							)
+						)
+					)
+				)
+			}
+			@child.append(
+				self._deflongname( $p.hash.<deflongname> )
+			);
+			my Perl6::Element @multisig;
+			if $p.hash.<deflongname>.to + 1 < $p.hash.<multisig>.from {
+				@multisig.append(
+					Perl6::WS.new(
+						:from( $p.hash.<deflongname>.to + 1 ),
+						:to( $p.hash.<multisig>.from ),
+						:content(
+							substr( $p.Str,
+								$p.hash.<deflongname>.to + 1 - $p.from,
+								$p.hash.<multisig>.from - $p.hash.<deflongname>.to - 1
+							)
+						)
+					)
+				)
+			}
+			@multisig.append(
+				self._multisig( $p.hash.<multisig> )
+			);
+			@child.append(
 				Perl6::Operator::Circumfix.new(
 					:from( $p.hash.<deflongname>.to ),
 					:to(
 						$p.hash.<blockoid>.from - $offset
 					),
 					:delimiter( '(', ')' ),
-					:child( @child )
+					:child( @multisig )
 				),
+			);
+			if @child[*-1].to < $p.hash.<blockoid>.from {
+				my $_offset = @child[*-1].to;
+				@child.append(
+					Perl6::WS.new(
+						:from( @child[*-1].to ),
+						:to( $p.hash.<blockoid>.from ),
+						:content(
+							substr( $p.Str,
+								@child[*-1].to - $_offset,
+								$p.hash.<blockoid>.from - @child[*-1].to )
+						)
+					)
+				)
+			}
+			@child.append(
 				self._blockoid( $p.hash.<blockoid> )
-			).flat
+			);
+			@child.flat
 		}
 		elsif self.assert-hash-keys( $p,
-				[< blockoid deflongname trait >] ) {
+				[< deflongname trait blockoid >] ) {
 			(
 				self._deflongname( $p.hash.<deflongname> ),
 				self._trait( $p.hash.<trait> ),
@@ -2921,11 +2955,42 @@ return True;
 			).flat
 		}
 		elsif self.assert-hash-keys( $p,
-				[< blockoid deflongname >], [< trait >] ) {
-			(
-				self._deflongname( $p.hash.<deflongname> ),
+				[< deflongname blockoid >], [< trait >] ) {
+			my @child;
+			if $p.from < $p.hash.<deflongname>.from {
+				@child.append(
+					Perl6::WS.new(
+						:from( $p.from ),
+						:to( $p.hash.<deflongname>.from ),
+						:content(
+							substr( $p.Str, 0,
+								$p.hash.<deflongname>.from - $p.from
+							)
+						)
+					)
+				)
+			}
+			@child.append(
+				self._deflongname( $p.hash.<deflongname> )
+			);
+			if @child[*-1].to < $p.hash.<blockoid>.from {
+				my $_offset = @child[*-1].to;
+				@child.append(
+					Perl6::WS.new(
+						:from( @child[*-1].to ),
+						:to( $p.hash.<blockoid>.from ),
+						:content(
+							substr( $p.Str,
+								@child[*-1].to - $_offset,
+								$p.hash.<blockoid>.from - @child[*-1].to )
+						)
+					)
+				)
+			}
+			@child.append(
 				self._blockoid( $p.hash.<blockoid> )
-			).flat
+			);
+			@child.flat
 		}
 		elsif self.assert-hash-keys( $p, [< blockoid >], [< trait >] ) {
 			self._blockoid( $p.hash.<blockoid> )
@@ -2993,11 +3058,12 @@ return True;
 				self._sym( $p.hash.<sym> ),
 				self._scoped( $p.hash.<scoped> )
 			).flat;
-			my Perl6::Element @ws = self.populate-whitespace(
-				$p.Str, $p.from, # XXX Offset to start
-				$p.from, $p.to, @child
-			);
-			@ws
+#			my Perl6::Element @ws = self.populate-whitespace(
+#				$p.Str, $p.from, # XXX Offset to start
+#				$p.from, $p.to, @child
+#			);
+#			@ws
+			@child
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -3099,7 +3165,121 @@ return True;
 		}
 	}
 
-	# XXX Move Circumfix out
+	method __Parameter( Mu $p ) {
+		my @child;
+		if self.assert-hash-keys( $p,
+			[< param_var type_constraint
+			   quant post_constraint >],
+			[< default_value modifier trait >] ) {
+			# Synthesize the 'from' and 'to' markers for 'where'
+			$p.Str ~~ m{ << (where) >> };
+			my Int $from = $0.from;
+			@child.append(
+				self._type_constraint(
+					$p.hash.<type_constraint>
+				)
+			);
+			@child.append(
+				self._param_var( $p.hash.<param_var> )
+			);
+			@child.append(
+				Perl6::Bareword.new(
+					:from( $from ),
+					:to( $from + 5 ),
+					:content( Q{where} )
+				)
+			);
+			@child.append(
+				self._post_constraint(
+					$p.hash.<post_constraint>
+				)
+			);
+		}
+		elsif self.assert-hash-keys( $p,
+			[< type_constraint param_var quant >],
+			[< default_value modifier trait
+			   post_constraint >] ) {
+			@child.append(
+				self._type_constraint(
+					$p.hash.<type_constraint>
+				)
+			);
+			if $p.Str ~~ m{ (\s+) } {
+				@child.append(
+					Perl6::WS.new(
+						:from( $p.from + $0.from ),
+						:to( $p.from + $0.from + $0.chars ),
+						:content( ~$0 )
+					)
+				)
+			}
+			@child.append(
+				self._param_var( $p.hash.<param_var> )
+			);
+		}
+		elsif self.assert-hash-keys( $p,
+			[< param_var quant default_value >],
+			[< modifier trait
+			   type_constraint
+			   post_constraint >] ) {
+			@child.append(
+				self._param_var( $p.hash.<param_var> )
+			);
+			# XXX Should be possible to refactor...
+			@child.append(
+				Perl6::Operator::Infix.new( $p, Q{=} )
+			);
+			@child.append(
+				self._default_value(
+					$p.hash.<default_value>
+				).flat
+			);
+		}
+		elsif self.assert-hash-keys( $p,
+			[< param_var quant >],
+			[< default_value modifier trait
+			   type_constraint
+			   post_constraint >] ) {
+			@child.append(
+				self._param_var( $p.hash.<param_var> )#,
+#					self._quant( $p.hash.<quant> )
+			);
+		}
+		elsif self.assert-hash-keys( $p,
+			[< named_param quant >],
+			[< default_value type_constraint modifier
+			   trait post_constraint >] ) {
+			# Synthesize the 'from' and 'to' markers for ':'
+			$p.Str ~~ m{ (':') };
+			my Int $from = $0.from;
+			@child.append(
+				Perl6::Operator::Prefix.new(
+					:from( $from ),
+					:to( $from + 1 ),
+					:content( Q{:} )
+				),
+				self._named_param(
+					$p.hash.<named_param>
+				)
+			);
+		}
+		elsif self.assert-hash-keys( $p,
+			[< type_constraint >],
+			[< default_value modifier trait
+			   post_constraint >] ) {
+			@child.append(
+				self._type_constraint(
+					$p.hash.<type_constraint>
+				)
+			)
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
+		@child
+	}
+
 	method _signature( Mu $p ) {
 		if self.assert-hash-keys( $p,
 				[< parameter typename >],
@@ -3112,9 +3292,41 @@ return True;
 		elsif self.assert-hash-keys( $p,
 				[< parameter >],
 				[< param_sep >] ) {
-			(
-				self._parameter( $p.hash.<parameter> )
-			)
+			my Mu $parameter = $p.hash.<parameter>;
+			my Int $offset = $p.from;
+			my Perl6::Element @ws;
+			for $parameter.list.kv -> $index, $_ {
+				if $index > 0 {
+					my $start = $parameter.list.[$index-1].to;
+					my $end = $parameter.list.[$index].from;
+					my $str = substr(
+						$p.Str, $start - $offset, $end - $start
+					);
+					@ws.append(
+						comma-to-whitespace(
+							$start,
+							$str
+						)
+					)
+				}
+				@ws.append(
+					self.__Parameter(
+						$_
+					)
+				);
+			}
+			if @ws[*-1].to < $p.to {
+				@ws.push(
+					Perl6::WS.new(
+						:from( @ws[*-1].to ),
+						:to( $p.to ),
+						:content(
+							substr( $p.Str, @ws[*-1].to - $offset, $p.to - @ws[*-1].to + 1 )
+						)
+					)
+				)
+			}
+			@ws.flat
 		}
 		elsif self.assert-hash-keys( $p,
 				[< param_sep >],
@@ -3220,7 +3432,24 @@ return True;
 			@child
 		}
 		elsif self.assert-hash-keys( $p, [< EXPR >] ) {
-			my Perl6::Element @child = self._EXPR( $p.hash.<EXPR> );
+			my Perl6::Element @child = (
+				self._EXPR( $p.hash.<EXPR> )
+			);
+			if $p.hash.<EXPR>.to < $p.to {
+				my $offset = 0;
+				@child.append(
+					Perl6::WS.new(
+						:from( $p.hash.<EXPR>.to ),
+						:to( $p.to ),
+						:content(
+							substr( $p.Str,
+								$p.hash.<EXPR>.to - $offset,
+								$p.to - $p.hash.<EXPR>.to
+							)
+						)
+					)
+				)
+			}
 			# Note that statements will eventually encompass the
 			# optional final semicolon.
 			Perl6::Statement.new(
@@ -3809,7 +4038,7 @@ return True;
 			die "Not implemented yet";
 		}
 		elsif self.assert-hash-keys( $p, [< blockoid >] ) {
-#			self._blockoid( $p.hash.<blockoid> )
+			self._blockoid( $p.hash.<blockoid> )
 		}
 		else {
 			say $p.hash.keys.gist;
