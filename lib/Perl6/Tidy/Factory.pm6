@@ -735,8 +735,7 @@ class Perl6::Tidy::Factory {
 			die "Not implemented yet";
 		}
 		elsif self.assert-hash-keys( $p, [< semiarglist >] ) {
-			my Perl6::Element @child;
-			@child.append(
+			my Perl6::Element @child = (
 				self._semiarglist( $p.hash.<semiarglist> )
 			);
 			self.make-postcircumfix( $p, @child )
@@ -844,8 +843,7 @@ class Perl6::Tidy::Factory {
 
 	method _blockoid( Mu $p ) {
 		if self.assert-hash-keys( $p, [< statementlist >] ) {
-			my Perl6::Element @child;
-			@child.append(
+			my Perl6::Element @child = (
 				self._statementlist(
 					$p.hash.<statementlist>
 				)
@@ -866,8 +864,6 @@ class Perl6::Tidy::Factory {
 					)
 				)
 			}
-key-boundary $p.hash.<statementlist>;
-key-boundary $p;
 			$p.Str ~~ m{ ^ (.) }; my Str $front = ~$0;
 			$p.Str ~~ m{ (.) $ }; my Str $back = ~$0;
 			Perl6::Block.new(
@@ -2921,16 +2917,16 @@ return True;
 					:child( @multisig )
 				),
 			);
-			if @child[*-1].to < $p.hash.<blockoid>.from {
+			if $p.hash.<blockoid>.from - $p.hash.<multisig>.to - 1 > 0 {
 				my Int $_offset = @child[*-1].to;
 				@child.append(
 					Perl6::WS.new(
 						@child[*-1].to,
 						substr(
 							$p.Str,
-							@child[*-1].to - $_offset,
-							$p.hash.<blockoid>.from - @child[*-1].to
-						)
+							$p.hash.<multisig>.to - $p.from + 1,
+							$p.hash.<blockoid>.from - $p.hash.<multisig>.to - 1
+)
 					)
 				)
 			}

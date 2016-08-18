@@ -11,7 +11,7 @@ AST, and 'say $tree.perl' to view the generated Perl 6 structure.
 
 )
 
-plan 2;
+plan 3;
 
 my $pt = Perl6::Tidy.new;
 #my $*TRACE = 1;
@@ -178,7 +178,7 @@ _END_
 }, Q{scalar arguments};
 
 subtest {
-	plan 1;
+	plan 2;
 
 	subtest {
 		plan 2;
