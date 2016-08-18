@@ -221,6 +221,13 @@ class Perl6::Unimplemented {
 
 class Perl6::WS does Token {
 	also is Perl6::Element;
+	multi method new( Int $start, $content ) {
+		self.bless(
+			:from( $start ),
+			:to( $start + $content.chars ),
+			:content( $content )
+		)
+	}
 }
 
 class Perl6::Document does Branching {
@@ -302,6 +309,13 @@ class Perl6::Operator::Infix does Token {
 			:from( $p.from ),
 			:to( $p.to ),
 			:content( $p.Str )
+		)
+	}
+	multi method new( Int $from, Str $str ) {
+		self.bless(
+			:from( $from ),
+			:to( $from + $str.chars ),
+			:content( $str )
 		)
 	}
 	multi method new( Mu $p, Str $token ) {
@@ -550,29 +564,17 @@ class Perl6::Tidy::Factory {
 		my @child;
 		if $lhs and $lhs ne '' {
 			@child.append(
-				Perl6::WS.new(
-					:from( $start ),
-					:to( $start + $lhs.chars ),
-					:content( $lhs )
-				)
+				Perl6::WS.new( $start, $lhs )
 			);
 			$start += $lhs.chars;
 		}
 		@child.append(
-			Perl6::Operator::Infix.new(
-				:from( $start ),
-				:to( $start + COMMA.chars ),
-				:content( COMMA )
-			)
+			Perl6::Operator::Infix.new( $start, COMMA )
 		);
 		$start += COMMA.chars;
 		if $rhs and $rhs ne '' {
 			@child.append(
-				Perl6::WS.new(
-					:from( $start ),
-					:to( $start + $rhs.chars ),
-					:content( $rhs )
-				)
+				Perl6::WS.new( $start, $rhs )
 			);
 			$start += $rhs.chars;
 		}
@@ -837,16 +839,13 @@ class Perl6::Tidy::Factory {
 		if self.assert-hash-keys( $p, [< statementlist >] ) {
 			my Perl6::Element @child;
 			if $p.from < $p.hash.<statementlist>.from {
-				my $offset = $p.from;
+				my Int $offset = $p.from;
 				@child.append(
 					Perl6::WS.new(
-						:from( $p.from + 1 ),
-						:to( $p.hash.<statementlist>.from + 1 ),
-						:content(
-							substr( $p.Str,
-								$p.from - $offset + 1,
-								$p.hash.<statementlist>.from - $p.from
-							)
+						$p.from + 1,
+						substr( $p.Str,
+							$p.from - $offset + 1,
+							$p.hash.<statementlist>.from - $p.from
 						)
 					)
 				)
@@ -1449,7 +1448,7 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			self._variable( $p.hash.<variable> )
 		}
 		elsif self.assert-hash-keys( $p, [< value >] ) {
-			my $v = $p.hash.<value>;
+			my Mu $v = $p.hash.<value>;
 			if self.assert-hash-keys( $v, [< number >] ) {
 				self._number( $v.hash.<number> )
 			}
@@ -1738,11 +1737,8 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 		if self.assert-hash-keys( $p, [< sym infixish O >] ) {
 			# XXX Untested
 			Perl6::Operator::Infix.new(
-				:from( $p.hash.<sym>.from ),
-				:to( $p.hash.<sym>.to ),
-				:content(
-					$p.hash.<sym>.Str ~ $p.hash.<infixish>
-				)
+				$p.hash.<sym>.from,
+				$p.hash.<sym>.Str ~ $p.hash.<infixish>
 			)
 		}
 		else {
@@ -2350,8 +2346,8 @@ return True;
 				);
 				@child.append(
 					Perl6::Bareword.new(
-						:from( $from ),
-						:to( $from + 5 ),
+						:from( $p.from + $from ),
+						:to( $p.from + $from + Q{where}.chars ),
 						:content( Q{where} )
 					)
 				);
@@ -2373,9 +2369,8 @@ return True;
 				if $_.Str ~~ m{ (\s+) } {
 					@child.append(
 						Perl6::WS.new(
-							:from( $_.from + $0.from ),
-							:to( $_.from + $0.from + $0.chars ),
-							:content( ~$0 )
+							$_.from + $0.from,
+							$0.Str
 						)
 					)
 				}
@@ -2874,12 +2869,9 @@ return True;
 			if $p.from < $p.hash.<deflongname>.from {
 				@child.append(
 					Perl6::WS.new(
-						:from( $p.from ),
-						:to( $p.hash.<deflongname>.from ),
-						:content(
-							substr( $p.Str, 0,
-								$p.hash.<deflongname>.from - $p.from
-							)
+						$p.from,
+						substr( $p.Str, 0,
+							$p.hash.<deflongname>.from - $p.from
 						)
 					)
 				)
@@ -2891,13 +2883,10 @@ return True;
 			if $p.hash.<deflongname>.to + 1 < $p.hash.<multisig>.from {
 				@multisig.append(
 					Perl6::WS.new(
-						:from( $p.hash.<deflongname>.to + 1 ),
-						:to( $p.hash.<multisig>.from ),
-						:content(
-							substr( $p.Str,
-								$p.hash.<deflongname>.to + 1 - $p.from,
-								$p.hash.<multisig>.from - $p.hash.<deflongname>.to - 1
-							)
+						$p.hash.<deflongname>.to + 1,
+						substr( $p.Str,
+							$p.hash.<deflongname>.to + 1 - $p.from,
+							$p.hash.<multisig>.from - $p.hash.<deflongname>.to - 1
 						)
 					)
 				)
@@ -2916,15 +2905,14 @@ return True;
 				),
 			);
 			if @child[*-1].to < $p.hash.<blockoid>.from {
-				my $_offset = @child[*-1].to;
+				my Int $_offset = @child[*-1].to;
 				@child.append(
 					Perl6::WS.new(
-						:from( @child[*-1].to ),
-						:to( $p.hash.<blockoid>.from ),
-						:content(
-							substr( $p.Str,
-								@child[*-1].to - $_offset,
-								$p.hash.<blockoid>.from - @child[*-1].to )
+						@child[*-1].to,
+						substr(
+							$p.Str,
+							@child[*-1].to - $_offset,
+							$p.hash.<blockoid>.from - @child[*-1].to
 						)
 					)
 				)
@@ -2960,12 +2948,9 @@ return True;
 			if $p.from < $p.hash.<deflongname>.from {
 				@child.append(
 					Perl6::WS.new(
-						:from( $p.from ),
-						:to( $p.hash.<deflongname>.from ),
-						:content(
-							substr( $p.Str, 0,
-								$p.hash.<deflongname>.from - $p.from
-							)
+						$p.from,
+						substr( $p.Str, 0,
+							$p.hash.<deflongname>.from - $p.from
 						)
 					)
 				)
@@ -2974,15 +2959,14 @@ return True;
 				self._deflongname( $p.hash.<deflongname> )
 			);
 			if @child[*-1].to < $p.hash.<blockoid>.from {
-				my $_offset = @child[*-1].to;
+				my Int $_offset = @child[*-1].to;
 				@child.append(
 					Perl6::WS.new(
-						:from( @child[*-1].to ),
-						:to( $p.hash.<blockoid>.from ),
-						:content(
-							substr( $p.Str,
-								@child[*-1].to - $_offset,
-								$p.hash.<blockoid>.from - @child[*-1].to )
+						@child[*-1].to,
+						substr(
+							$p.Str,
+							@child[*-1].to - $_offset,
+							$p.hash.<blockoid>.from - @child[*-1].to
 						)
 					)
 				)
@@ -3179,16 +3163,12 @@ return True;
 					$p.hash.<type_constraint>
 				)
 			);
-			if $p.hash.<type_constraint>.to < $p.hash.<param_var>.from {
+			
+			if $p.hash.<type_constraint>.list.[*-1].Str ~~ m{ (\s+) $ } {
 				@child.append(
 					Perl6::WS.new(
-						:from( $p.hash.<type_constraint>.to ),
-						:to( $p.hash.<param_var>.from ),
-						:content(
-							substr( $p.Str, 0,
-								$p.hash.<param_var>.from - $p.hash.<type_constraint>.to
-							)
-						)
+						$p.hash.<type_constraint>.list.[*-1].to - $0.chars,
+						~$0
 					)
 				)
 			}
@@ -3198,26 +3178,21 @@ return True;
 			if $p.Str ~~ m{ (\s+) ('where') } {
 				@child.append(
 					Perl6::WS.new(
-						:from( $p.hash.<param_var>.from ),
-						:to( $p.hash.<param_var>.from + $0.chars ),
-						:content( ~$0 )
+						$p.hash.<param_var>.to,
+						~$0
 					)
 				)
 			}
 			@child.append(
 				Perl6::Bareword.new(
-					:from( $from ),
-					:to( $from + 5 ),
+					:from( $p.from + $from ),
+					:to( $p.from + $from + 5 ),
 					:content( Q{where} )
 				)
 			);
 			if $p.Str ~~ m{ ('where') (\s+) } {
 				@child.append(
-					Perl6::WS.new(
-						:from( $p.from + $0.to ),
-						:to( $p.from + $1.to ),
-						:content( ~$1 )
-					)
+					Perl6::WS.new( $p.from + $0.to, ~$1 )
 				)
 			}
 			@child.append(
@@ -3237,11 +3212,7 @@ return True;
 			);
 			if $p.Str ~~ m{ (\s+) } {
 				@child.append(
-					Perl6::WS.new(
-						:from( $p.from + $0.from ),
-						:to( $p.from + $0.from + $0.chars ),
-						:content( ~$0 )
-					)
+					Perl6::WS.new( $p.from + $0.from, ~$0 )
 				)
 			}
 			@child.append(
@@ -3259,9 +3230,8 @@ return True;
 			if $p.Str ~~ m{ (\s+) ('=') } {
 				@child.append(
 					Perl6::WS.new(
-						:from( $p.hash.<param_var>.from ),
-						:to( $p.hash.<param_var>.from + $0.chars ),
-						:content( ~$0 )
+						$p.hash.<param_var>.from,
+						~$0
 					)
 				)
 			}
@@ -3270,11 +3240,7 @@ return True;
 			);
 			if $p.Str ~~ m{ ('=') (\s+) } {
 				@child.append(
-					Perl6::WS.new(
-						:from( $p.from + $0.to ),
-						:to( $p.from + $1.to ),
-						:content( ~$1 )
-					)
+					Perl6::WS.new( $p.from + $0.to, ~$1 )
 				)
 			}
 			@child.append(
@@ -3345,9 +3311,13 @@ return True;
 			my Perl6::Element @ws;
 			for $parameter.list.kv -> $index, $_ {
 				if $index > 0 {
-					my $start = $parameter.list.[$index-1].to;
-					my $end = $parameter.list.[$index].from;
-					my $str = substr(
+					my Int $inset = 0;
+					if $parameter.list.[$index-1].Str ~~ m{ (\s+) $} {
+						$inset = $0.chars
+					}
+					my Int $start = $parameter.list.[$index-1].to - $inset;
+					my Int $end = $parameter.list.[$index].from;
+					my Str $str = substr(
 						$p.Str, $start - $offset, $end - $start
 					);
 					@ws.append(
@@ -3366,10 +3336,11 @@ return True;
 			if @ws[*-1].to < $p.to {
 				@ws.push(
 					Perl6::WS.new(
-						:from( @ws[*-1].to ),
-						:to( $p.to ),
-						:content(
-							substr( $p.Str, @ws[*-1].to - $offset, $p.to - @ws[*-1].to + 1 )
+						@ws[*-1].to,
+						substr(
+							$p.Str,
+							@ws[*-1].to - $offset,
+							$p.to - @ws[*-1].to + 1
 						)
 					)
 				)
@@ -3484,16 +3455,13 @@ return True;
 				self._EXPR( $p.hash.<EXPR> )
 			);
 			if $p.hash.<EXPR>.to < $p.to {
-				my $offset = 0;
+				my Int $offset = 0;
 				@child.append(
 					Perl6::WS.new(
-						:from( $p.hash.<EXPR>.to ),
-						:to( $p.to ),
-						:content(
-							substr( $p.Str,
-								$p.hash.<EXPR>.to - $offset,
-								$p.to - $p.hash.<EXPR>.to
-							)
+						$p.hash.<EXPR>.to,
+						substr( $p.Str,
+							$p.hash.<EXPR>.to - $offset,
+							$p.to - $p.hash.<EXPR>.to
 						)
 					)
 				)
@@ -3527,7 +3495,7 @@ return True;
 	}
 
 	method _statementlist( Mu $p ) {
-		my $statement = $p.hash.<statement>;
+		my Mu $statement = $p.hash.<statement>;
 		my Perl6::Element @child = map {
 			self._statement( $_ )
 		}, $statement.list;
@@ -4100,1195 +4068,3 @@ return True;
 		}
 	}
 }
-
-#`(
-
-Here's a collection of all the terms I could find in the grammars, with the
-ones I've caught marked with 'XXX' just so they'll stand out.
-
-I actually expect most of these to be unreachable.
-
-role STD {
-    token opener {}
-    method balanced {}
-    method unbalanced {}
-
-    token starter {}
-    token stopper {}
-
-    method quote_lang {}
-    token babble {}
-
-    my class Herestub {
-        method delim {}
-        method orignode {}
-        method lang {}
-    }
-
-    role herestop {
-        method parsing_heredoc {}
-    }
-
-    method heredoc {}
-    token cheat_heredoc {}
-    method queue_heredoc {}
-    token quibble {}
-    method nibble {}
-    token obsbrace {}
-
-    method FAILGOAL {}
-
-    method security($payload) {}
-
-    method malformed($what) {}
-    method missing_block() {}
-    method missing($what) {}
-
-    token experimental($feature) {}
-
-    method EXPR_nonassoc($cur, $left, $right) {}
-
-    method obs($old, $new, $when = 'in Perl 6') {}
-    method obsvar($name) {}
-
-    method dupprefix($prefixes) {}
-
-    method mark_variable_used($name) {}
-
-    method check_variable($var) {}
-
-    token RESTRICTED {}
-}
-
-grammar Perl6::Grammar {
-    method TOP { }
-
-    ## Lexer stuff
-
-    token apostrophe { }
-    token identifier { }
-    token name { }
-    token morename { }
-    token longname { }
-    token deflongname { }
-    token subshortname { }
-    token sublongname { }
-    token deftermnow { }
-    token defterm { }
-    token module_name { }
-    token end_keyword { }
-    token end_prefix { }
-    token spacey { }
-    token kok { }
-    token tok { }
-    token ENDSTMT { }
-    method ws() { }
-    token _ws { }
-    token unsp { }
-    token vws { }
-    token unv { }
-
-    proto token comment {}
-
-    token comment:sym<#> { }
-    token comment:sym<#`(...)> { }
-    token comment:sym<#|(...)> { }
-    token comment:sym<#|> { }
-    token comment:sym<#=(...)> { }
-    token comment:sym<#=> { }
-
-    method attach_leading_docs() { }
-    method attach_trailing_docs($doc) { }
-    token pod_content_toplevel { }
-
-    proto token pod_content { }
-    token pod_content:sym<block> { }
-    token pod_content:sym<text> { }
-    token pod_content:sym<config> { }
-
-    proto token pod_textcontent { }
-    token pod_textcontent:sym<regular> { }
-    token pod_textcontent:sym<code> { }
-    token pod_formatting_code { }
-    token pod_balanced_braces { }
-    token pod_string { }
-    token pod_string_character { }
-
-    proto token pod_block { }
-    token pod_configuration($spaces = '') { }
-    token pod_block:sym<delimited_comment> { }
-    token pod_block:sym<delimited> { }
-    token pod_block:sym<delimited_table> { }
-    token pod_block:sym<delimited_code> { }
-
-    token delimited_code_content($spaces = '') { }
-    token table_row { }
-    token table_row_or_blank { }
-
-    token pod_block:sym<finish> { }
-    token pod_block:sym<paragraph> { }
-    token pod_block:sym<paragraph_comment> { }
-    token pod_block:sym<paragraph_table> { }
-    token pod_block:sym<paragraph_code> { }
-    token pod_block:sym<abbreviated> { }
-    token pod_block:sym<abbreviated_comment> { }
-    token pod_block:sym<abbreviated_table> { }
-    token pod_block:sym<abbreviated_code> { }
-
-    token pod_line { }
-    token pod_newline { }
-    token pod_code_parent { }
-
-    token install_doc_phaser { }
-    token vnum { }
-    token version { }
-
-    ## Top-level rules
-
-    token comp_unit { }
-    rule statementlist { }
-    method shallow_copy { }
-    rule semilist { }
-    rule sequence { }
-    token label { }
-    token statement { }
-    token eat_terminator { }
-    token xblock { }
-    token pblock { }
-    token lambda { }
-    token block { }
-    token blockoid { }
-    token unitstart { }
-    token you_are_here { }
-    token newpad { }
-    token finishpad { }
-
-    token bom { }
-
-    proto token terminator { }
-
-    token terminator:sym<;> {}
-    token terminator:sym<()> { }
-    token terminator:sym<[]> { }
-    token terminator:sym<{}> { }
-    token terminator:sym<ang> { }
-    token terminator:sym<if>     {  }
-    token terminator:sym<unless> {  }
-    token terminator:sym<while>  {  }
-    token terminator:sym<until>  {  }
-    token terminator:sym<for>    {  }
-    token terminator:sym<given>  {  }
-    token terminator:sym<when>   {  }
-    token terminator:sym<with>   {  }
-    token terminator:sym<without> { }
-    token terminator:sym<arrow>  { }
-
-
-    token stdstopper { }
-
-    ## Statement control
-
-    proto rule statement_control { <...> }
-
-    rule statement_control:sym<if> { }
-
-    rule statement_control:sym<unless> { }
-
-    rule statement_control:sym<while> { }
-
-    rule statement_control:sym<repeat> { }
-
-    rule statement_control:sym<for> { }
-
-    rule statement_control:sym<whenever> { }
-
-    rule statement_control:sym<foreach> { }
-
-    token statement_control:sym<loop> { }
-
-    rule statement_control:sym<need> { }
-
-    token statement_control:sym<import> { }
-
-    token statement_control:sym<no> { }
-
-    token statement_control:sym<use> { }
-
-    method FOREIGN_LANG($lang, $regex, *@args) { }
-
-    rule statement_control:sym<require> { }
-
-    rule statement_control:sym<given> { }
-    rule statement_control:sym<when> { }
-    rule statement_control:sym<default> { }
-
-    rule statement_control:sym<CATCH> {}
-    rule statement_control:sym<CONTROL> {}
-    rule statement_control:sym<QUIT> {}
-
-    proto token statement_prefix {}
-    token statement_prefix:sym<BEGIN>   { }
-    token statement_prefix:sym<COMPOSE> { }
-    token statement_prefix:sym<TEMP>    { }
-    token statement_prefix:sym<CHECK>   { }
-    token statement_prefix:sym<INIT>    { }
-    token statement_prefix:sym<ENTER>   { }
-    token statement_prefix:sym<FIRST>   { }
-
-    token statement_prefix:sym<END>   {  }
-    token statement_prefix:sym<LEAVE> {  }
-    token statement_prefix:sym<KEEP>  {  }
-    token statement_prefix:sym<UNDO>  {  }
-    token statement_prefix:sym<NEXT>  {  }
-    token statement_prefix:sym<LAST>  {  }
-    token statement_prefix:sym<PRE>   {  }
-    token statement_prefix:sym<POST>  {  }
-    token statement_prefix:sym<CLOSE> {  }
-
-    token statement_prefix:sym<race>    { }
-    token statement_prefix:sym<hyper>   { }
-    token statement_prefix:sym<eager>   { }
-    token statement_prefix:sym<lazy>    { }
-    token statement_prefix:sym<sink>    { }
-    token statement_prefix:sym<try>     { }
-    token statement_prefix:sym<quietly> { }
-    token statement_prefix:sym<gather>  { }
-    token statement_prefix:sym<once>    { }
-    token statement_prefix:sym<start>   { }
-    token statement_prefix:sym<supply>  { }
-    token statement_prefix:sym<react>   { }
-    token statement_prefix:sym<do>      { }
-    token statement_prefix:sym<DOC>     { }
-
-    token blorst { }
-
-    ## Statement modifiers
-
-    proto rule statement_mod_cond { }
-
-    token modifier_expr { }
-    token smexpr { }
-
-    rule statement_mod_cond:sym<if>     { }
-    rule statement_mod_cond:sym<unless> { }
-    rule statement_mod_cond:sym<when>   { }
-    rule statement_mod_cond:sym<with>   { }
-    rule statement_mod_cond:sym<without>{ }
-
-    proto rule statement_mod_loop  { }
-
-    rule statement_mod_loop:sym<while> { }
-    rule statement_mod_loop:sym<until> { }
-    rule statement_mod_loop:sym<for>   { }
-    rule statement_mod_loop:sym<given> { }
-
-    ## Terms
-
-    token term:sym<fatarrow>           { }
-    token term:sym<colonpair>          { }
-    token term:sym<variable>           { }
-    token term:sym<package_declarator> { }
-    token term:sym<scope_declarator>   { }
-    token term:sym<routine_declarator> { }
-    token term:sym<multi_declarator>   { }
-    token term:sym<regex_declarator>   { }
-    token term:sym<circumfix>          { }
-    token term:sym<statement_prefix>   { }
-    token term:sym<**>                 { }
-    token term:sym<*>                  { }
-    token term:sym<lambda>             { }
-    token term:sym<type_declarator>    { }
-    token term:sym<value>              { }
-    token term:sym<unquote>            { }
-    token term:sym<!!>                 { }
-    token term:sym<∞>                  { }
-
-    token term:sym<::?IDENT> { }
-    token term:sym<p5end> { }
-    token term:sym<p5data> { }
-
-    token infix:sym<lambda> { }
-
-    token term:sym<undef> { }
-
-    token term:sym<new> { }
-
-    token fatarrow { }
-
-    token coloncircumfix { }
-
-    token colonpair { }
-
-    token colonpair_variable { }
-
-    proto token special_variable { }
-
-    token special_variable:sym<$!{ }> { }
-
-    token special_variable:sym<$~> { }
-
-    token special_variable:sym<$`> { }
-
-    token special_variable:sym<$@> { }
-
-    # TODO: use actual variable in error message
-    token special_variable:sym<$#> { }
-
-    token special_variable:sym<$$> { }
-    token special_variable:sym<$%> { }
-
-    # TODO: $^X and other "caret" variables
-
-    token special_variable:sym<$^> { }
-    token special_variable:sym<$&> { }
-    token special_variable:sym<$*> { }
-    token special_variable:sym<$=> { }
-    token special_variable:sym<@+> { }
-    token special_variable:sym<%+> { }
-    token special_variable:sym<$+[ ]> { }
-    token special_variable:sym<@+[ ]> { }
-    token special_variable:sym<@+{ }> { }
-    token special_variable:sym<@-> { }
-    token special_variable:sym<%-> { }
-    token special_variable:sym<$-[ ]> { }
-    token special_variable:sym<@-[ ]> { }
-    token special_variable:sym<%-{ }> { }
-    token special_variable:sym<$/> { }
-    token special_variable:sym<$\\> { }
-    token special_variable:sym<$|> { }
-    token special_variable:sym<$:> { }
-    token special_variable:sym<$;> { }
-    token special_variable:sym<$'> { }
-    token special_variable:sym<$"> { }
-    token special_variable:sym<$,> { }
-    token special_variable:sym<$.> { }
-    token special_variable:sym<$?> { }
-    token special_variable:sym<$]> { }
-    regex special_variable:sym<${ }> { }
-
-    token desigilname { }
-
-    token variable { }
-
-    token contextualizer { }
-
-    token sigil { }
-
-    proto token twigil { }
-    token twigil:sym<.> { }
-    token twigil:sym<!> { }
-    token twigil:sym<^> { }
-    token twigil:sym<:> { }
-    token twigil:sym<*> { }
-    token twigil:sym<?> { }
-    token twigil:sym<=> { }
-    token twigil:sym<~> { }
-
-    proto token package_declarator { }
-    token package_declarator:sym<package> { }
-    token package_declarator:sym<module> { }
-    token package_declarator:sym<class> { }
-    token package_declarator:sym<grammar> { }
-    token package_declarator:sym<role> { }
-    token package_declarator:sym<knowhow> { }
-    token package_declarator:sym<native> { }
-    token package_declarator:sym<slang> { }
-    token package_declarator:sym<trusts> { }
-    rule package_declarator:sym<also> { }
-
-    rule package_def { }
-
-    token declarator { }
-
-    proto token multi_declarator { }
-    token multi_declarator:sym<multi> { }
-    token multi_declarator:sym<proto> { }
-    token multi_declarator:sym<only> { }
-    token multi_declarator:sym<null> { }
-
-    proto token scope_declarator { }
-    token scope_declarator:sym<my>        { }
-    token scope_declarator:sym<our>       { }
-    token scope_declarator:sym<has>       { }
-    token scope_declarator:sym<HAS>       { }
-    token scope_declarator:sym<augment>   { }
-    token scope_declarator:sym<anon>      { }
-    token scope_declarator:sym<state>     { }
-    token scope_declarator:sym<supersede> { }
-    token scope_declarator:sym<unit>      { }
-
-    token scoped($*SCOPE) { }
-
-    token variable_declarator { }
-
-    proto token routine_declarator { }
-    token routine_declarator:sym<sub> { }
-    token routine_declarator:sym<method> { }
-    token routine_declarator:sym<submethod> { }
-    token routine_declarator:sym<macro> { }
-
-    rule routine_def { }
-
-    rule method_def { }
-
-    rule macro_def { }
-
-    token onlystar { }
-
-    ###########################
-    # Captures and Signatures #
-    ###########################
-
-    token capterm { }
-
-    rule param_sep { }
-
-    # XXX Not really implemented yet.
-    token multisig { }
-
-    token sigterm { }
-
-    token fakesignature { }
-
-    token signature { }
-
-    token parameter { }
-
-    token param_var { }
-
-    token named_param { }
-
-    rule default_value { }
-
-    token type_constraint { }
-
-    rule post_constraint { } 
-    proto token regex_declarator { <...> }
-    token regex_declarator:sym<rule> { }
-    token regex_declarator:sym<token> { }
-    token regex_declarator:sym<regex> { }
-
-    rule regex_def { }
-
-    proto token type_declarator { <...> }
-
-    token type_declarator:sym<enum> { }
-
-    rule type_declarator:sym<subset> { }
-
-    token type_declarator:sym<constant> { }
-
-    proto token initializer { <...> }
-    token initializer:sym<=> { }
-    token initializer:sym<:=> { }
-    token initializer:sym<::=> { }
-    token initializer:sym<.=> { }
-
-    rule trait { }
-
-    proto rule trait_mod { <...> }
-    rule trait_mod:sym<is> { }
-    rule trait_mod:sym<hides>   {  }
-    rule trait_mod:sym<does>    {  }
-    rule trait_mod:sym<will>    { }
-    rule trait_mod:sym<of>      {  }
-    rule trait_mod:sym<returns> {  }
-    rule trait_mod:sym<handles> { }
-
-    token bad_trait_typename { }
-
-    ## Terms
-
-    proto token term { }
-
-    token term:sym<self> { }
-
-    token term:sym<now> { }
-
-    token term:sym<time> { }
-
-    token term:sym<empty_set> { }
-
-    token term:sym<rand> { }
-
-    token term:sym<...> { }
-    token term:sym<???> { }
-    token term:sym<!!!> { }
-
-    token term:sym<identifier> { }
-
-    token term:sym<nqp::op> { }
-
-    token term:sym<nqp::const> { }
-
-    token term:sym<name> { }
-
-    token term:sym<dotty> { }
-
-    token term:sym<capterm> { }
-
-    token term:sym<onlystar> { }
-
-    token args($*INVOCANT_OK = 0) { }
-
-    token semiarglist { }
-
-    token arglist { }
-
-    proto token value { }
-    token value:sym<quote>  { }
-    token value:sym<number> { }
-    token value:sym<version> { }
-
-    proto token number { }
-    token number:sym<numish>   { }
-
-    token signed-number { }
-
-    token numish { }
-
-    token dec_number { }
-
-    token signed-integer { }
-
-    token integer { }
-
-    token rad_number { }
-
-    token radint { }
-
-    token escale { }
-
-    token sign { }
-
-    token rat_number { }
-    token bare_rat_number { }
-
-    token complex_number { }
-    token bare_complex_number { }
-
-    token typename { }
-
-    token typo_typename($panic = 0) { }
-
-
-    token quotepair($*purpose = 'quoteadverb') { }
-
-    token rx_adverbs { }
-
-    token qok($x) { }
-
-    proto token quote_mod   { }
-    token quote_mod:sym<w>  {  }
-    token quote_mod:sym<ww> {  }
-    #token quote_mod:sym<p>  { }
-    token quote_mod:sym<x>  {  }
-    token quote_mod:sym<to> {  }
-    token quote_mod:sym<s>  {  }
-    token quote_mod:sym<a>  {  }
-    token quote_mod:sym<h>  {  }
-    token quote_mod:sym<f>  {  }
-    token quote_mod:sym<c>  {  }
-    token quote_mod:sym<b>  {  }
-
-    proto token quote { }
-    token quote:sym<apos>  { }
-    token quote:sym<sapos> { }
-    token quote:sym<lapos> { }
-    token quote:sym<hapos> { }
-    token quote:sym<dblq>  { }
-    token quote:sym<sdblq> { }
-    token quote:sym<ldblq> { }
-    token quote:sym<hdblq> { }
-    token quote:sym<crnr>  { }
-    token quote:sym<q> { }
-    token quote:sym<qq> { }
-    token quote:sym<Q> { }
-
-    token quote:sym</null/> { }
-    token quote:sym</ />  { }
-    token quote:sym<rx>   { }
-
-    token quote:sym<m> { }
-
-    token quote:sym<qr> { }
-
-    token setup_quotepair { '' }
-
-    token sibble($l, $lang2, @lang2tweaks?) { }
-
-    token quote:sym<s> { }
-
-    token tribble ($l, $lang2 = $l, @lang2tweaks?) { }
-
-    token quote:sym<tr> { }
-
-    token quote:sym<y> { }
-
-    token old_rx_mods { }
-
-    token quote:sym<quasi> { }
-
-    token circumfix:sym<STATEMENT_LIST( )> { }
-
-    token circumfix:sym<( )> { }
-    token circumfix:sym<[ ]> { }
-    token circumfix:sym<ang> { }
-    token circumfix:sym«<< >>» { }
-    token circumfix:sym<« »> { }
-    token circumfix:sym<{ }> { }
-
-    ## Operators
-
-    INIT {
-        Perl6::Grammar.O(':prec<y=>, :assoc<unary>, :dba<methodcall>, :fiddly<1>', '%methodcall');
-        Perl6::Grammar.O(':prec<x=>, :assoc<unary>, :dba<autoincrement>', '%autoincrement');
-        Perl6::Grammar.O(':prec<w=>, :assoc<right>, :dba<exponentiation>', '%exponentiation');
-        Perl6::Grammar.O(':prec<v=>, :assoc<unary>, :dba<symbolic unary>', '%symbolic_unary');
-        Perl6::Grammar.O(':prec<v=>, :assoc<left>, :dba<dotty infix>, :nextterm<dottyopish>, :sub<z=>, :fiddly<1>', '%dottyinfix');
-        Perl6::Grammar.O(':prec<u=>, :assoc<left>, :dba<multiplicative>',  '%multiplicative');
-        Perl6::Grammar.O(':prec<t=>, :assoc<left>, :dba<additive>',  '%additive');
-        Perl6::Grammar.O(':prec<s=>, :assoc<left>, :dba<replication>', '%replication');
-        Perl6::Grammar.O(':prec<s=>, :assoc<left>, :dba<replication> :thunky<t.>', '%replication_xx');
-        Perl6::Grammar.O(':prec<r=>, :assoc<left>, :dba<concatenation>',  '%concatenation');
-        Perl6::Grammar.O(':prec<q=>, :assoc<list>, :dba<junctive and>', '%junctive_and');
-        Perl6::Grammar.O(':prec<p=>, :assoc<list>, :dba<junctive or>', '%junctive_or');
-        Perl6::Grammar.O(':prec<o=>, :assoc<unary>, :dba<named unary>', '%named_unary');
-        Perl6::Grammar.O(':prec<n=>, :assoc<non>, :dba<structural infix>, :diffy<1>',  '%structural');
-        Perl6::Grammar.O(':prec<m=>, :assoc<left>, :dba<chaining>, :iffy<1>, :diffy<1> :pasttype<chain>',  '%chaining');
-        Perl6::Grammar.O(':prec<l=>, :assoc<left>, :dba<tight and>, :thunky<.t>',  '%tight_and');
-        Perl6::Grammar.O(':prec<k=>, :assoc<list>, :dba<tight or>, :thunky<.t>',  '%tight_or');
-        Perl6::Grammar.O(':prec<k=>, :assoc<list>, :dba<tight or>',  '%tight_or_minmax');
-        Perl6::Grammar.O(':prec<j=>, :assoc<right>, :dba<conditional>, :fiddly<1>, :thunky<.tt>', '%conditional');
-        Perl6::Grammar.O(':prec<j=>, :assoc<right>, :dba<conditional>, :fiddly<1>, :thunky<tt>', '%conditional_ff');
-        Perl6::Grammar.O(':prec<i=>, :assoc<right>, :dba<item assignment>', '%item_assignment');
-        Perl6::Grammar.O(':prec<i=>, :assoc<right>, :dba<list assignment>, :sub<e=>, :fiddly<1>', '%list_assignment');
-        Perl6::Grammar.O(':prec<h=>, :assoc<unary>, :dba<loose unary>', '%loose_unary');
-        Perl6::Grammar.O(':prec<g=>, :assoc<list>, :dba<comma>, :nextterm<nulltermish>, :fiddly<1>',  '%comma');
-        Perl6::Grammar.O(':prec<f=>, :assoc<list>, :dba<list infix>',  '%list_infix');
-        Perl6::Grammar.O(':prec<e=>, :assoc<right>, :dba<list prefix>', '%list_prefix');
-        Perl6::Grammar.O(':prec<d=>, :assoc<left>, :dba<loose and>, :thunky<.t>',  '%loose_and');
-        Perl6::Grammar.O(':prec<d=>, :assoc<left>, :dba<loose and>, :thunky<.b>',  '%loose_andthen');
-        Perl6::Grammar.O(':prec<c=>, :assoc<list>, :dba<loose or>, :thunky<.t>',  '%loose_or');
-        Perl6::Grammar.O(':prec<c=>, :assoc<list>, :dba<loose or>, :thunky<.b>',  '%loose_orelse');
-        Perl6::Grammar.O(':prec<b=>, :assoc<list>, :dba<sequencer>',  '%sequencer');
-    }
-
-    token termish { }
-
-    token arg_flat_nok { }
-
-    sub bracket_ending($matches) { }
-
-    method EXPR(str $preclim = '') { }
-
-    token prefixish { }
-
-    token infixish($in_meta = nqp::getlexdyn('$*IN_META')) { }
-
-    token fake_infix { }
-
-    regex infixstopper { }
-
-    token postfixish { }
-
-    token postop { }
-
-    proto token prefix_circumfix_meta_operator { }
-
-    proto token infix_postfix_meta_operator { }
-
-    proto token infix_prefix_meta_operator { }
-
-    proto token infix_circumfix_meta_operator {}
-
-    proto token postfix_prefix_meta_operator { }
-
-    proto token prefix_postfix_meta_operator { }
-
-    method can_meta($op, $meta, $reason = "fiddly") { }
-
-    regex term:sym<reduce> { }
-
-    token postfix_prefix_meta_operator:sym<»> { }
-
-    token prefix_postfix_meta_operator:sym<«> { }
-
-    token infix_circumfix_meta_operator:sym<« »> { }
-
-    token infix_circumfix_meta_operator:sym«<< >>» { }
-
-    method AS_MATCH($v) { }
-    method revO($from) { }
-
-    proto token dotty { } 
-    token dotty:sym<.> { }
-
-    token dotty:sym<.*> { }
-
-    token dottyop { }
-
-    token privop { }
-
-    token methodop { }
-
-    token dottyopish { }
-
-    token postcircumfix:sym<[ ]> { }
-
-    token postcircumfix:sym<{ }> { }
-
-    token postcircumfix:sym<ang> { }
-
-    token postcircumfix:sym«<< >>» { }
-
-    token postcircumfix:sym<« »> { }
-
-    token postcircumfix:sym<( )> { }
-
-    token postcircumfix:sym<[; ]> { }
-
-    token postfix:sym<i>  { }
-
-    token prefix:sym<++>  {  }
-    token prefix:sym<-->  {  }
-    token postfix:sym<++> {  }
-    token postfix:sym<--> {  }
-    token postfix:sym<ⁿ> { }
-
-    token postfix:sym«->» { }
-
-    token infix:sym<**>   { }
-
-    token prefix:sym<+>   { }
-    token prefix:sym<~~>  { }
-    token prefix:sym<~>   { }
-    token prefix:sym<->   {}
-    token prefix:sym<−>   {}
-    token prefix:sym<??>  {}
-    token prefix:sym<?>   {}
-    token prefix:sym<!>   {}
-    token prefix:sym<|>   { }
-    token prefix:sym<+^>  { }
-    token prefix:sym<~^>  { }
-    token prefix:sym<?^>  { }
-    token prefix:sym<^^>  {}
-    token prefix:sym<^>   { }
-
-    token infix:sym<*>    {  }
-    token infix:sym<×>    {  }
-    token infix:sym</>    {  }
-    token infix:sym<÷>    {  }
-    token infix:sym<div>  {  }
-    token infix:sym<gcd>  {  }
-    token infix:sym<lcm>  {  }
-    token infix:sym<%>    {  }
-    token infix:sym<mod>  {  }
-    token infix:sym<%%>   {  }
-    token infix:sym<+&>   {  }
-    token infix:sym<~&>   {  }
-    token infix:sym<?&>   {  }
-    token infix:sym«+<»   {  }
-    token infix:sym«+>»   {  }
-    token infix:sym«~<»   {  }
-    token infix:sym«~>»   {  }
-
-    token infix:sym«<<» { }
-
-    token infix:sym«>>» { }
-
-    token infix:sym<+>    { }
-    token infix:sym<->    { }
-    token infix:sym<−>    {  }
-    token infix:sym<+|>   {  }
-    token infix:sym<+^>   {  }
-    token infix:sym<~|>   {  }
-    token infix:sym<~^>   {  }
-    token infix:sym<?|>   { }
-    token infix:sym<?^>   { }
-
-    token infix:sym<x>    { }
-    token infix:sym<xx>    { }
-
-    token infix:sym<~>    {  }
-    token infix:sym<.>    { }
-    token infix:sym<∘>   {  }
-    token infix:sym<o>   {  }
-
-    token infix:sym<&>   { }
-    token infix:sym<(&)> {  }
-    token infix:sym«∩»   {  }
-    token infix:sym<(.)> {  }
-    token infix:sym«⊍»   {  }
-
-    token infix:sym<|>    {  }
-    token infix:sym<^>    {  }
-    token infix:sym<(|)>  {  }
-    token infix:sym«∪»    {  }
-    token infix:sym<(^)>  {  }
-    token infix:sym«⊖»    {  }
-    token infix:sym<(+)>  {  }
-    token infix:sym«⊎»    {  }
-    token infix:sym<(-)>  {  }
-    token infix:sym«∖»    {  }
-
-    token prefix:sym<let>  { }
-    token prefix:sym<temp> { }
-
-    token infix:sym«=~=»  {  }
-    token infix:sym«≅»    {  }
-    token infix:sym«==»   {  }
-    token infix:sym«!=»   { }
-    token infix:sym«<=»   {  }
-    token infix:sym«>=»   {  }
-    token infix:sym«<»    {  }
-    token infix:sym«>»    {  }
-    token infix:sym«eq»   {  }
-    token infix:sym«ne»   {  }
-    token infix:sym«le»   {  }
-    token infix:sym«ge»   {  }
-    token infix:sym«lt»   {  }
-    token infix:sym«gt»   {  }
-    token infix:sym«=:=»  {  }
-    token infix:sym<===>  {  }
-    token infix:sym<eqv>    {  }
-    token infix:sym<before> {  }
-    token infix:sym<after>  {  }
-    token infix:sym<~~>   { }
-    token infix:sym<!~~>  { }
-    token infix:sym<(elem)> {  }
-    token infix:sym«∈»      {  }
-    token infix:sym«∉»      {  }
-    token infix:sym<(cont)> {  }
-    token infix:sym«∋»      {  }
-    token infix:sym«∌»      {  }
-    token infix:sym«(<)»    {  }
-    token infix:sym«⊂»      {  }
-    token infix:sym«⊄»      {  }
-    token infix:sym«(>)»    {  }
-    token infix:sym«⊃»      {  }
-    token infix:sym«⊅»      {  }
-    token infix:sym«(<=)»   {  }
-    token infix:sym«⊆»      {  }
-    token infix:sym«⊈»      {  }
-    token infix:sym«(>=)»   {  }
-    token infix:sym«⊇»      {  }
-    token infix:sym«⊉»      {  }
-    token infix:sym«(<+)»   {  }
-    token infix:sym«≼»      {  }
-    token infix:sym«(>+)»   {  }
-    token infix:sym«≽»      {  }
-
-    token infix:sym<&&>   {  }
-
-    token infix:sym<||>   {  }
-    token infix:sym<^^>   {  }
-    token infix:sym<//>   { }
-    token infix:sym<min>  {  }
-    token infix:sym<max>  {  }
-
-    token infix:sym<?? !!> { }
-
-    token infix_prefix_meta_operator:sym<!> { }
-
-    token infix_prefix_meta_operator:sym<R> { }
-
-    token infix_prefix_meta_operator:sym<S> { }
-
-    token infix_prefix_meta_operator:sym<X> { }
-
-    token infix_prefix_meta_operator:sym<Z> { }
-
-    token infix:sym<minmax> { }
-
-    token infix:sym<:=> { }
-
-    token infix:sym<::=> { }
-
-    token infix:sym<.=> { }
-
-    # Should probably have <!after '='> to agree w/spec, but after NYI.
-    # Modified infix != below instead to prevent misparse
-    # token infix_postfix_meta_operator:sym<=>($op) { }
-    # use $*OPER until NQP/Rakudo supports proto tokens with arguments
-    token infix_postfix_meta_operator:sym<=> { }
-
-    token infix:sym«=>» { }
-
-    token prefix:sym<so> { }
-    token prefix:sym<not>  { }
-
-    token infix:sym<,>    { }
-    token infix:sym<:>    { }
-
-    token infix:sym<Z>    { }
-    token infix:sym<X>    { }
-
-    token infix:sym<...>  { }
-    token infix:sym<…>    { }
-    token infix:sym<...^> {  }
-    token infix:sym<…^>   {  }
-    # token term:sym<...>   {}
-
-    token infix:sym<?>    { }
-
-    token infix:sym<ff> { }
-    token infix:sym<^ff> { }
-    token infix:sym<ff^> { }
-    token infix:sym<^ff^> { }
-
-    token infix:sym<fff> { }
-    token infix:sym<^fff> { }
-    token infix:sym<fff^> { }
-    token infix:sym<^fff^> { }
-
-    
-    token infix:sym<and>  { }
-    token infix:sym<andthen> { }
-    token infix:sym<notandthen> { }
-
-    token infix:sym<or>   {  }
-    token infix:sym<xor>  {  }
-    token infix:sym<orelse> { }
-
-    token infix:sym«<==»  { }
-    token infix:sym«==>»  { }
-    token infix:sym«<<==» { }
-    token infix:sym«==>>» { }
-
-    token infix:sym<..>   {}
-    token infix:sym<^..>  {  }
-    token infix:sym<..^>  {  }
-    token infix:sym<^..^> {  }
-
-    token infix:sym<leg>  { }
-    token infix:sym<cmp>  {  }
-    token infix:sym«<=>»  { }
-
-    token infix:sym<but>  {  }
-    token infix:sym<does> {  }
-
-    token infix:sym<!~> { }
-    token infix:sym<=~> { }
-
-    method add_mystery { }
-
-    method explain_mystery { }
-
-    method cry_sorrows { }
-
-    method add_variable { }
-
-    # Called when we add a new choice to an existing syntactic category, for
-    # example new infix operators add to the infix category. Augments the
-    # grammar as needed.
-    method add_categorical { }
-
-    method genO($default, $declarand) { }
-}
-
-grammar Perl6::QGrammar {
-
-    method throw_unrecog_backslash_seq ($sequence) { }
-
-    proto token escape { }
-    proto token backslash { }
-
-    role b1 {
-        token escape:sym<\\> { }
-        token backslash:sym<qq> { }
-        token backslash:sym<\\> {} 
-        token backslash:delim { }
-        token backslash:sym<a> { }
-        token backslash:sym<b> { }
-        token backslash:sym<c> { }
-        token backslash:sym<e> { }
-        token backslash:sym<f> { }
-        token backslash:sym<N> { }
-        token backslash:sym<n> { }
-        token backslash:sym<o> { }
-        token backslash:sym<r> { }
-        token backslash:sym<rn> { }
-        token backslash:sym<t> { }
-        token backslash:sym<x> { }
-        token backslash:sym<0> { }
-        token backslash:sym<1> { }
-    }
-
-    role b0 { token escape:sym<\\> { } }
-    role c1 { token escape:sym<{ }> { } }
-    role c0 { token escape:sym<{ }> { } }
-    role s1 { token escape:sym<$> { } }
-    role s0 { token escape:sym<$> { } }
-    role a1 { token escape:sym<@> { } }
-    role a0 { token escape:sym<@> { } }
-    role h1 { token escape:sym<%> { } }
-    role h0 { token escape:sym<%> { } }
-    role f1 { token escape:sym<&> { } }
-    role f0 { token escape:sym<&> { } }
-
-    role ww {
-        token escape:sym<' '> { }
-        token escape:sym<‘ ’> { }
-        token escape:sym<" "> { }
-        token escape:sym<“ ”> { }
-        token escape:sym<colonpair> { }
-        token escape:sym<#> { }
-    }
-
-    role to[$herelang] {
-        method herelang() { }
-        method postprocessors () {}
-    }
-
-    role q {
-        token starter { }
-        token stopper { }
-
-        token escape:sym<\\> { }
-
-        token backslash:sym<qq> {}
-        token backslash:sym<\\> {}
-        token backslash:delim { }
-
-        token backslash:sym<miscq> {}
-
-        method tweak_q($v) { }
-        method tweak_qq($v) { }
-    }
-
-    role qq does b1 does c1 does s1 does a1 does h1 does f1 {
-        token starter { }
-        token stopper { }
-        token backslash:sym<unrec> { }
-        token backslash:sym<misc> { }
-        method tweak_q($v) { }
-        method tweak_qq($v) { }
-    }
-
-    token nibbler { }
-
-    token do_nibbling { }
-
-    role cc {
-        method ccstate ($s) { }
-
-        token escape:ws { }
-        token escape:sym<#> { }
-        token escape:sym<\\> { }
-        token escape:sym<..> { }
-
-        token escape:sym<-> { }
-        token escape:ch { }
-
-        token backslash:delim { }
-        token backslash:<\\> { }
-        token backslash:sym<a> {  }
-        token backslash:sym<b> {  }
-        token backslash:sym<c> {  }
-        token backslash:sym<d> {  }
-        token backslash:sym<e> {  }
-        token backslash:sym<f> {  }
-        token backslash:sym<h> {  }
-        token backslash:sym<N> {  }
-        token backslash:sym<n> {  }
-        token backslash:sym<o> {  }
-        token backslash:sym<r> {  }
-        token backslash:sym<s> {  }
-        token backslash:sym<t> {  }
-        token backslash:sym<v> {  }
-        token backslash:sym<w> {  }
-        token backslash:sym<x> {  }
-        token backslash:sym<0> {  }
-
-        # keep random backslashes like qq does
-        token backslash:misc {  }
-    }
-
-    method truly($bool, $opt) { }
-
-    method apply_tweak($role) { }
-
-    method tweak_q          { }
-    method tweak_single     { }
-    method tweak_qq        { }
-    method tweak_double     { }
-
-    method tweak_b          { }
-    method tweak_backslash  {  }
-    method tweak_s          { }
-    method tweak_scalar     {  }
-    method tweak_a          { }
-    method tweak_array      {  }
-    method tweak_h          { }
-    method tweak_hash       {  }
-    method tweak_f          { }
-    method tweak_function   {  }
-    method tweak_c          { }
-    method tweak_closure    {  }
-
-    method add-postproc(str $newpp) { }
-
-# path() NYI
-#    method tweak_p          {  }
-#    method tweak_path       {  }
-
-    method tweak_x          { }
-    method tweak_exec       { }
-    method tweak_w          { }
-    method tweak_words      { }
-    method tweak_ww         { }
-    method tweak_quotewords { }
-
-    method tweak_v          { }
-    method tweak_val        { }
-
-    method tweak_cc         {}
-
-    method tweak_to { }
-    method tweak_heredoc    {}
-
-    method tweak_regex { }
-}
-
-my role CursorPackageNibbler {
-    method nibble-in-cursor { }
-}
-
-grammar Perl6::RegexGrammar {
-    method nibbler { }
-
-    token normspace { }
-
-    token rxstopper { }
-
-    token metachar:sym<:my> { }
-    token metachar:sym<{ }> { }
-    token metachar:sym<rakvar> { }
-    token metachar:sym<qw> { }
-    token metachar:sym<'> { }
-    token metachar:sym<{}> { }
-    token backslash:sym<1> { }
-    token assertion:sym<{ }> { }
-    token assertion:sym<?{ }> { }
-    token assertion:sym<!{ }> { }
-    token assertion:sym<var> { }
-    token assertion:sym<~~> { }
-
-    token codeblock { }
-    token arglist { }
-    token assertion:sym<name> { }
-}
-
-grammar Perl6::P5RegexGrammar {
-    method nibbler { } 
-    token rxstopper { <stopper> }
-
-    token p5metachar:sym<(?{ })> { }
-    token p5metachar:sym<(??{ })> { }
-    token p5metachar:sym<var> { }
-
-    token codeblock { }
-}
-
-)

@@ -3,6 +3,14 @@ use v6;
 use Test;
 use Perl6::Tidy;
 
+#`(
+
+In passing, please note that while it's trivially possible to bum down the
+tests, doing so makes it harder to insert 'say $parsed.dump' to view the
+AST, and 'say $tree.perl' to view the generated Perl 6 structure.
+
+)
+
 plan 2;
 
 my $pt = Perl6::Tidy.new;
@@ -152,5 +160,33 @@ _END_
 		is $pt.format( $tree ), $source, Q{formatted};
 	}, Q{multiple};
 }, Q{scalar arguments};
+
+subtest {
+	plan 1;
+
+	subtest {
+		plan 2;
+
+		my $source = Q:to[_END_];
+sub foo($a,Str$b,Str$c where"foo",Int$d=32){}
+_END_
+		my $parsed = $pt.parse-source( $source );
+		my $tree = $pt.build-tree( $parsed );
+		ok $pt.validate( $parsed ), Q{valid};
+		is $pt.format( $tree ), $source, Q{formatted};
+	}, Q{christmas tree, minimal spacing};
+
+	subtest {
+		plan 2;
+
+		my $source = Q:to[_END_];
+sub foo(  $a  ,  Str  $b  ,  Str  $c  where  "foo"  ,  Int  $d  =  32  )  {  }
+_END_
+		my $parsed = $pt.parse-source( $source );
+		my $tree = $pt.build-tree( $parsed );
+		ok $pt.validate( $parsed ), Q{valid};
+		is $pt.format( $tree ), $source, Q{formatted};
+	}, Q{christmas tree, maximal spacing};
+}, Q{christmas tree};
 
 # vim: ft=perl6

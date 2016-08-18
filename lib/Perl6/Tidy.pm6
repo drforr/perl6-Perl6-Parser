@@ -151,6 +151,19 @@ class Perl6::Tidy {
 					note "Element in list does not have 'from' accessor"
 				}
 			}
+			if $root.child.elems > 1 {
+				for $root.child.kv -> $index, $_ {
+					next if $index == 0;
+					next unless $root.child.[$index-1].^can('to');
+					next unless $root.child.[$index].^can('from');
+					if $root.child.[$index-1].to !=
+						$root.child.[$index].from {
+						say $root.child.[$index-1].perl;
+						say $root.child.[$index].perl;
+						say "Gap between two items"
+					}
+				}
+			}
 		}
 		if $root.^can('content') {
 			if $root.content.chars < $root.to - $root.from {
@@ -160,6 +173,16 @@ class Perl6::Tidy {
 			if $root.content.chars > $root.to - $root.from {
 				say $root.perl;
 				die "Content '{$root.content}' too long for element ({$root.from} - {$root.to})"
+			}
+			if $root !~~ Perl6::WS and
+					$root.content ~~ m{ ^ (\s+) } {
+				say $root.perl;
+				die "Content '{$root.content}' has leading whitespace"
+			}
+			if $root !~~ Perl6::WS and
+					$root.content ~~ m{ (\s+) $ } {
+				say $root.perl;
+				die "Content '{$root.content}' has trailing whitespace"
 			}
 		}
 	}
