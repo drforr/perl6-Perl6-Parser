@@ -845,23 +845,29 @@ class Perl6::Tidy::Factory {
 	method _blockoid( Mu $p ) {
 		if self.assert-hash-keys( $p, [< statementlist >] ) {
 			my Perl6::Element @child;
-			if $p.from < $p.hash.<statementlist>.from {
-				my Int $offset = $p.from;
-				@child.append(
-					Perl6::WS.new(
-						$p.from + 1,
-						substr( $p.Str,
-							$p.from - $offset + 1,
-							$p.hash.<statementlist>.from - $p.from
-						)
-					)
-				)
-			}
 			@child.append(
 				self._statementlist(
 					$p.hash.<statementlist>
 				)
 			);
+			if $p.hash.<statementlist>.to >
+					$p.hash.<statementlist>.from {
+				@child.append(
+					Perl6::WS.new(
+						:from( $p.from ),
+						:to( $p.from + $p.hash.<statementlist>.to - $p.hash.<statementlist>.from ),
+						:content(
+							substr(
+								$p.Str,
+								1,
+								$p.hash.<statementlist>.to - $p.hash.<statementlist>.from
+							)
+						)
+					)
+				)
+			}
+key-boundary $p.hash.<statementlist>;
+key-boundary $p;
 			$p.Str ~~ m{ ^ (.) }; my Str $front = ~$0;
 			$p.Str ~~ m{ (.) $ }; my Str $back = ~$0;
 			Perl6::Block.new(
