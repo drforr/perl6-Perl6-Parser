@@ -961,10 +961,6 @@ class Perl6::Tidy::Factory {
 				@child.push(
 self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 				);
-#				@ws = self.populate-whitespace(
-#					$p.Str, 0, # XXX No offset? Why?
-#					$p.from + 1, $p.to - 1, @child
-#				)
 				@child
 			}
 			self.make-postcircumfix( $p, @ws )
@@ -1531,16 +1527,21 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 		}
 		elsif self.assert-hash-keys( $p,
 				[< infix_prefix_meta_operator OPER >] ) {
-			(
+			my @child = (
 				self.__Term( $p.list.[0] ),
+			);
+			@child.append(
 				self._infix_prefix_meta_operator(
 					$p.hash.<infix_prefix_meta_operator>
 				),
+			);
+			@child.append(
 				self.__Term( $p.list.[1] )
-			).flat
+			);
+
+			@child.flat
 		}
 		elsif self.assert-hash-keys( $p, [< infix OPER >] ) {
-			# XXX fix later
 			if $p.list.elems == 3 {
 				(
 					self.__Term( $p.list.[0] ),
@@ -1555,11 +1556,34 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 				).flat
 			}
 			else {
-				(
-					self.__Term( $p.list.[0] ),
-					self._infix( $p.hash.<infix> ),
+				my @child = (
+					self.__Term( $p.list.[0] )
+				);
+				if $p.list.[0].to < $p.hash.<infix>.from {
+					# XXX THIS NEEDS TO CHANGE.
+					@child.append(
+						Perl6::WS.new(
+							$p.list.[0].to,
+							' ' x $p.hash.<infix>.from - $p.list.[0].to
+						)
+					)
+				}
+				@child.append(
+					self._infix( $p.hash.<infix> )
+				);
+				if $p.hash.<infix>.from < $p.list.[1].from {
+					# XXX THIS NEEDS TO CHANGE.
+					@child.append(
+						Perl6::WS.new(
+							$p.hash.<infix>.to,
+							' ' x $p.list.[1].from - $p.hash.<infix>.to
+						)
+					)
+				}
+				@child.append(
 					self.__Term( $p.list.[1] )
-				).flat
+				);
+				@child.flat
 			}
 		}
 		elsif self.assert-hash-keys( $p, [< identifier args >] ) {
@@ -1597,11 +1621,6 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			my Perl6::Element @child = self._routine_declarator(
 				$p.hash.<routine_declarator>
 			);
-#			my Perl6::Element @ws = self.populate-whitespace(
-#				$p.Str, 0, # XXX No offset? Why?
-#				$p.from, $p.to, @child
-#			);
-#			@ws
 			@child
 		}
 		elsif self.assert-hash-keys( $p, [< scope_declarator >] ) {
@@ -1651,16 +1670,52 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 
 	method _fatarrow( Mu $p ) {
 		if self.assert-hash-keys( $p, [< key val >] ) {
+			$p.Str ~~ m{ ('=>') };
 			my Perl6::Element @child = (
-				self._key( $p.hash.<key> ),
+				self._key( $p.hash.<key> )
+			);
+			if $p.hash.<key>.to < $0.from {
+				@child.append(
+					Perl6::WS.new(
+						$p.hash.<key>.to,
+						substr(
+							$p.Str,
+							$p.hash.<key>.to - $p.from,
+							$0.from - $p.hash.<key>.to
+						)
+					)
+				)
+			}
+			@child.append(
 				Perl6::Operator::Infix.new( $p, FATARROW ),
+			);
+			if $0.to < $p.hash.<val>.from {
+				@child.append(
+					Perl6::WS.new(
+						$0.to,
+						substr(
+							$p.Str,
+							$0.to - $p.from,
+							$p.hash.<val>.from - $0.to
+						)
+					)
+				)
+			}
+			@child.append(
 				self._val( $p.hash.<val> )
 			);
-#			my Perl6::Element @ws = self.populate-whitespace(
-#				$p.Str, 0, # XXX No offset? Why?
-#				$p.from, $p.to, @child
-#			);
-#			@ws
+			if $p.hash.<val>.to < $p.to {
+				@child.append(
+					Perl6::WS.new(
+						$p.hash.<val>.to,
+						substr(
+							$p.Str,
+							$p.hash.<val>.to - $p.from,
+							$p.to - $p.hash.<val>.to
+						)
+					)
+				)
+			}
 			@child
 		}
 		else {
@@ -2305,11 +2360,6 @@ return True;
 				self._longname( $p.hash.<longname> ),
 				self._blockoid( $p.hash.<blockoid> )
 			).flat;
-#			my Perl6::Element  @ws = self.populate-whitespace(
-#				$p.Str, $p.from,
-#				$p.from, $p.to, @child
-#			);
-#			@ws
 			@child
 		}
 		elsif self.assert-hash-keys( $p, [< blockoid >], [< trait >] ) {
@@ -2794,11 +2844,6 @@ return True;
 			@child.append(
 				self._nibble( $p.hash.<nibble> )
 			);
-#			my Perl6::Element  @ws = self.populate-whitespace(
-#				$p.Str, $offset + 1, #$p.from, # XXX Offset to start
-#				#$p.from, $p.to, @child
-#				$p.from + 1, $p.to - 1, @child
-#			);
 			(
 				self._deflongname( $p.hash.<deflongname> ),
 				Perl6::Block.new(
@@ -2993,6 +3038,7 @@ return True;
 		#
 		if self.assert-hash-keys( $p,
 					[< multi_declarator DECL typename >] ) {
+say 1;
 			(
 				self._typename( $p.hash.<typename> ),
 				self._multi_declarator(
@@ -3003,10 +3049,12 @@ return True;
 		elsif self.assert-hash-keys( $p,
 				[< package_declarator DECL >],
 				[< typename >] ) {
+say 2;
 			self._package_declarator( $p.hash.<package_declarator> )
 		}
 		elsif self.assert-hash-keys( $p,
 				[< package_declarator sym >] ) {
+say 3;
 			(
 				self._sym( $p.hash.<sym> ),
 				self._package_declarator(
@@ -3016,6 +3064,7 @@ return True;
 		}
 		elsif self.assert-hash-keys( $p,
 				[< declarator DECL >], [< typename >] ) {
+say 4;
 			self._declarator( $p.hash.<declarator> )
 		}
 		else {
@@ -3027,14 +3076,19 @@ return True;
 	method _scope_declarator( Mu $p ) {
 		if self.assert-hash-keys( $p, [< sym scoped >] ) {
 			my Perl6::Element @child = (
-				self._sym( $p.hash.<sym> ),
+				self._sym( $p.hash.<sym> )
+			);
+			if $p.hash.<scoped>.Str ~~ m{ ^ (\s+) } {
+				@child.append(
+					Perl6::WS.new(
+						$p.hash.<scoped>.from,
+						~$0
+					)
+				)
+			}
+			@child.append(
 				self._scoped( $p.hash.<scoped> )
 			).flat;
-#			my Perl6::Element @ws = self.populate-whitespace(
-#				$p.Str, $p.from, # XXX Offset to start
-#				$p.from, $p.to, @child
-#			);
-#			@ws
 			@child
 		}
 		else {
