@@ -557,8 +557,15 @@ class Perl6::Variable::Callable::SubLanguage {
 
 class Perl6::Tidy::Factory {
 
+	constant COMMA = Q{,};
+	constant COLON = Q{:};
+	constant EQUAL = Q{=};
+	constant WHERE = Q{where};
+	constant QUES-QUES = Q{??};
+	constant BANG-BANG = Q{!!};
+	constant FATARROW = Q{=>};
+
 	sub comma-to-whitespace( Int $offset, Str $split-me ) {
-		constant COMMA = Q{,};
 		my Int $start = $offset;
 		my ( $lhs, $rhs ) = split( COMMA, $split-me );
 		my @child;
@@ -1018,8 +1025,8 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			(
 				Perl6::Operator::Prefix.new(
 					:from( $p.from ),
-					:to( $p.from + Q{:}.chars ),
-					:content( Q{:} )
+					:to( $p.from + COLON.chars ),
+					:content( COLON )
 				),
 				self._identifier( $p.hash.<identifier> ),
 				self._coloncircumfix( $p.hash.<coloncircumfix> )
@@ -1032,7 +1039,7 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 				Perl6::Operator::Prefix.new(
 					:from( $p.from ),
 					:to( $p.from + 1 ),
-					:content( Q{:} )
+					:content( COLON )
 				),
 				self._coloncircumfix( $p.hash.<coloncircumfix> )
 			).flat
@@ -1066,7 +1073,7 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 				Perl6::Operator::Prefix.new(
 					:from( $p.from ),
 					:to( $p.from + 1 ),
-					:content( Q{:} )
+					:content( COLON )
 				),
 				self._var( $p.hash.<var> )
 			).flat
@@ -1540,9 +1547,13 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			if $p.list.elems == 3 {
 				(
 					self.__Term( $p.list.[0] ),
-					Perl6::Operator::Infix.new( $p, Q{??} ),
+					Perl6::Operator::Infix.new(
+						$p, QUES-QUES
+					),
 					self.__Term( $p.list.[1] ),
-					Perl6::Operator::Infix.new( $p, Q{!!} ),
+					Perl6::Operator::Infix.new(
+						$p, BANG-BANG
+					),
 					self.__Term( $p.list.[2] )
 				).flat
 			}
@@ -1646,7 +1657,7 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 		if self.assert-hash-keys( $p, [< key val >] ) {
 			my Perl6::Element @child = (
 				self._key( $p.hash.<key> ),
-				Perl6::Operator::Infix.new( $p, Q{=>} ),
+				Perl6::Operator::Infix.new( $p, FATARROW ),
 				self._val( $p.hash.<val> )
 			);
 #			my Perl6::Element @ws = self.populate-whitespace(
@@ -2347,8 +2358,8 @@ return True;
 				@child.append(
 					Perl6::Bareword.new(
 						:from( $p.from + $from ),
-						:to( $p.from + $from + Q{where}.chars ),
-						:content( Q{where} )
+						:to( $p.from + $from + WHERE.chars ),
+						:content( WHERE )
 					)
 				);
 				@child.append(
@@ -2388,7 +2399,7 @@ return True;
 				);
 				# XXX Should be possible to refactor...
 				@child.append(
-					Perl6::Operator::Infix.new( $p, Q{=} )
+					Perl6::Operator::Infix.new( $p, EQUAL )
 				);
 				@child.append(
 					self._default_value(
@@ -2416,8 +2427,8 @@ return True;
 				@child.append(
 					Perl6::Operator::Prefix.new(
 						:from( $from ),
-						:to( $from + 1 ),
-						:content( Q{:} )
+						:to( $from + COLON.chars ),
+						:content( COLON )
 					),
 					self._named_param(
 						$_.hash.<named_param>
@@ -3186,8 +3197,8 @@ return True;
 			@child.append(
 				Perl6::Bareword.new(
 					:from( $p.from + $from ),
-					:to( $p.from + $from + 5 ),
-					:content( Q{where} )
+					:to( $p.from + $from + WHERE.chars ),
+					:content( WHERE )
 				)
 			);
 			if $p.Str ~~ m{ ('where') (\s+) } {
@@ -3230,13 +3241,13 @@ return True;
 			if $p.Str ~~ m{ (\s+) ('=') } {
 				@child.append(
 					Perl6::WS.new(
-						$p.hash.<param_var>.from,
+						$p.hash.<param_var>.to,
 						~$0
 					)
 				)
 			}
 			@child.append(
-				Perl6::Operator::Infix.new( $p, Q{=} )
+				Perl6::Operator::Infix.new( $p, EQUAL )
 			);
 			if $p.Str ~~ m{ ('=') (\s+) } {
 				@child.append(
@@ -3268,9 +3279,9 @@ return True;
 			my Int $from = $0.from;
 			@child.append(
 				Perl6::Operator::Prefix.new(
-					:from( $from ),
-					:to( $from + 1 ),
-					:content( Q{:} )
+					:from( $p.from + $from ),
+					:to( $p.from + $from + COLON.chars ),
+					:content( COLON )
 				),
 				self._named_param(
 					$p.hash.<named_param>
@@ -3955,7 +3966,7 @@ return True;
 				Perl6::Bareword.new(
 					:from( $p.from + $from ),
 					:to( $p.from + $from + 5 ),
-					:content( Q{where} )
+					:content( WHERE )
 				)
 			);
 			@child.append(
