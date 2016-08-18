@@ -973,7 +973,6 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			# XXX <nibble> can probably be worked with
 			my Perl6::Element @child;
 			@child.push(
-				# leading and trailing space elided
 				Perl6::Operator::Prefix.new(
 					:from( $p.hash.<nibble>.from ),
 					:to( $p.hash.<nibble>.to ),
@@ -1036,7 +1035,6 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 		}
 		elsif self.assert-hash-keys( $p, [< coloncircumfix >] ) {
 			(
-				# leading and trailing space elided
 				# XXX Note that ':' is part of the expression.
 				Perl6::Operator::Prefix.new(
 					:from( $p.from ),
@@ -1047,7 +1045,6 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			).flat
 		}
 		elsif self.assert-hash-keys( $p, [< identifier >] ) {
-			# leading and trailing space elided
 			Perl6::ColonBareword.new(
 				:from( $p.from ),
 				:to( $p.to ),
@@ -1337,7 +1334,6 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 	method _dotty( Mu $p ) {
 		if self.assert-hash-keys( $p, [< sym dottyop O >] ) {
 			(
-				# leading and trailing space elided
 				Perl6::Operator::Prefix.new( $p.hash.<sym> ),
 				self._dottyop( $p.hash.<dottyop> )
 			)
@@ -1483,7 +1479,6 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			if substr( $p.orig, $p.from, 2 ) eq '>>' {
 				(
 					self.__Term( $p.list.[0] ),
-					# leading and trailing space elided
 					# XXX note that '>>' is a substring
 					Perl6::Operator::Prefix.new(
 						:from( $p.from ),
@@ -1574,7 +1569,6 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< sym args >] ) {
-			# leading and trailing space elided
 			Perl6::Operator::Infix.new( $p.hash.<sym> )
 		}
 		elsif self.assert-hash-keys( $p, [< longname args >] ) {
@@ -1676,7 +1670,6 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 	}
 
 	method __FloatingPoint( Mu $p ) {
-		# leading and trailing space elided
 		Perl6::Number::Floating.new(
 			:from( $p.from ),
 			:to( $p.to ),
@@ -1708,7 +1701,6 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			@child
 		}
 		elsif $p.Str {
-			# leading and trailing space elided
 			Perl6::Bareword.new( $p )
 		}
 		else {
@@ -1722,7 +1714,6 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			die "Not implemented yet";
 		}
 		elsif self.assert-hash-keys( $p, [< sym O >] ) {
-			# leading and trailing space elided
 			Perl6::Operator::Infix.new( $p.hash.<sym> )
 		}
 		elsif self.assert-hash-keys( $p, [< EXPR O >] ) {
@@ -1767,7 +1758,6 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 		elsif self.assert-hash-keys( $p, [< sym EXPR >] ) {
 			(
 				# XXX refactor down?
-				# leading and trailing space elided
 				Perl6::Operator::Infix.new( $p.hash.<sym> ),
 				self._EXPR( $p.hash.<EXPR> )
 			)
@@ -1781,7 +1771,6 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 	method _integer( Mu $p ) {
 		if self.assert-hash-keys( $p, [< binint VALUE >] ) {
 			# XXX Probably should make 'headless' lazy later.
-			# leading and trailing space elided
 			Perl6::Number::Binary.new(
 				:from( $p.from ),
 				:to( $p.to ),
@@ -1791,7 +1780,6 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 		}
 		elsif self.assert-hash-keys( $p, [< octint VALUE >] ) {
 			# XXX Probably should make 'headless' lazy later.
-			# leading and trailing space elided
 			Perl6::Number::Octal.new(
 				:from( $p.from ),
 				:to( $p.to ),
@@ -1800,7 +1788,6 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< decint VALUE >] ) {
-			# leading and trailing space elided
 			Perl6::Number::Decimal.new(
 				:from( $p.from ),
 				:to( $p.to ),
@@ -1809,7 +1796,6 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 		}
 		elsif self.assert-hash-keys( $p, [< hexint VALUE >] ) {
 			# XXX Probably should make 'headless' lazy later.
-			# leading and trailing space elided
 			Perl6::Number::Hexadecimal.new(
 				:from( $p.from ),
 				:to( $p.to ),
@@ -1839,7 +1825,6 @@ return True;
 	}
 
 	method _key( Mu $p ) {
-		# leading and trailing space elided
 		Perl6::Bareword.new( $p )
 	}
 
@@ -2056,14 +2041,12 @@ return True;
 		}
 		elsif self.assert-hash-keys( $p,
 			[< identifier >], [< morename >] ) {
-			# leading and trailing space elided
 			Perl6::Bareword.new( $p )
 		}
 		elsif self.assert-hash-keys( $p, [< subshortname >] ) {
 			die "Not implemented yet"
 		}
 		elsif self.assert-hash-keys( $p, [< morename >] ) {
-			# leading and trailing space elided
 			Perl6::PackageName.new(
 				:from( $p.from ),
 				:to( $p.to ),
@@ -2510,7 +2493,6 @@ return True;
 					      $twigil ~
 					      $desigilname;
 
-			# leading and trailing space elided
 			my Perl6::Element $leaf =
 				%sigil-map{$sigil ~ $twigil}.new(
 					:from( $p.from ),
@@ -2530,7 +2512,6 @@ return True;
 					      $twigil ~
 					      $desigilname;
 
-			# leading and trailing space elided
 			my Perl6::Element $leaf =
 				%sigil-map{$sigil ~ $twigil}.new(
 					:from( $p.from ),
@@ -2580,7 +2561,6 @@ return True;
 			my Str $x = $p.hash.<semilist>.Str;
 			$x ~~ s{ ^ (\s*) } = ''; my Int $leading = $0.chars;
 			$x ~~ s{ (\s+) $ } = ''; my Int $trailing = $0.chars;
-			# leading and trailing space elided
 			# XXX whitespace around text could be done differently?
 			Perl6::Bareword.new(
 				:from( $p.hash.<semilist>.from + $leading ),
@@ -2592,7 +2572,6 @@ return True;
 			my Str $x = $p.hash.<nibble>.Str;
 			$x ~~ s{ ^ (\s*) } = ''; my Int $leading = $0.chars;
 			$x ~~ s{ (\s+) $ } = ''; my Int $trailing = $0.chars;
-			# leading and trailing space elided
 			# XXX whitespace around text could be done differently?
 			Perl6::Bareword.new(
 				:from( $p.hash.<nibble>.from + $leading ),
@@ -2613,7 +2592,6 @@ return True;
 
 	method _postfix( Mu $p ) {
 		if self.assert-hash-keys( $p, [< sym O >] ) {
-			# leading and trailing space elided
 			Perl6::Operator::Infix.new( $p.hash.<sym> )
 		}
 		elsif self.assert-hash-keys( $p, [< dig O >] ) {
@@ -2643,7 +2621,6 @@ return True;
 
 	method _prefix( Mu $p ) {
 		if self.assert-hash-keys( $p, [< sym O >] ) {
-			# leading and trailing space elided
 			Perl6::Operator::Prefix.new( $p.hash.<sym> )
 		}
 		else {
@@ -2702,7 +2679,6 @@ return True;
 		elsif self.assert-hash-keys( $p, [< quibble >] ) {
 			# XXX This should properly call quibble, but that's
 			# XXX for later.
-			# leading and trailing space elided
 			if $p.Str ~~ m:i/^Q/ {
 				Perl6::String.new(
 					:from( $p.from ),
@@ -2780,7 +2756,6 @@ return True;
 		}
 		elsif self.assert-hash-keys( $p,
 				[< circumfix radix >], [< exp base >] ) {
-			# leading and trailing space elided
 			Perl6::Number::Radix.new(
 				:from( $p.from ),
 				:to( $p.to ),
@@ -3467,17 +3442,18 @@ return True;
 			my Perl6::Element @child = (
 				self._EXPR( $p.hash.<EXPR> )
 			);
-			if $p.hash.<EXPR>.to < $p.to {
-				my Int $offset = 0;
-				@child.append(
-					Perl6::WS.new(
-						$p.hash.<EXPR>.to,
-						substr( $p.Str,
-							$p.hash.<EXPR>.to - $offset,
-							$p.to - $p.hash.<EXPR>.to
+			if $p.hash.<EXPR>.hash.<routine_declarator> {
+				if $p.hash.<EXPR>.to < $p.to {
+					@child.append(
+						Perl6::WS.new(
+							$p.hash.<EXPR>.to,
+							substr( $p.Str,
+								$p.hash.<EXPR>.to,
+								$p.to - $p.hash.<EXPR>.to
+							)
 						)
 					)
-				)
+				}
 			}
 			# Note that statements will eventually encompass the
 			# optional final semicolon.
@@ -3574,7 +3550,6 @@ return True;
 			@child
 		}
 		elsif $p.Str {
-			# leading and trailing space elided
 			Perl6::Bareword.new( $p )
 		}
 		elsif $p.Bool and $p.Str eq '+' {
@@ -3838,7 +3813,6 @@ return True;
 					[< longname colonpairs >],
 					[< colonpair >] ) {
 				# XXX Probably could be narrowed.
-				# leading and trailing space elided
 				return
 					Perl6::Bareword.new( $_ )
 			}
@@ -3855,7 +3829,6 @@ return True;
 			elsif self.assert-hash-keys( $_,
 					[< longname >], [< colonpairs >] ) {
 				# XXX Can probably be narrowed
-				# leading and trailing space elided
 				return
 					Perl6::Bareword.new( $_ )
 			}
@@ -3930,7 +3903,6 @@ return True;
 					      $p.hash.<desigilname>.Str !! '';
 			my Str $content =
 				$p.hash.<sigil> ~ $twigil ~ $desigilname;
-			# leading and trailing space elided
 			%sigil-map{$sigil ~ $twigil}.new(
 				:from( $p.from ),
 				:to( $p.to ),
@@ -3964,7 +3936,6 @@ return True;
 				self._variable( $p.hash.<variable> ),
 			);
 			@child.append(
-				# leading and trailing space elided
 				Perl6::Bareword.new(
 					:from( $p.from + $from ),
 					:to( $p.from + $from + 5 ),
@@ -4004,7 +3975,6 @@ return True;
 		my Str $content =
 			$p.hash.<sigil> ~ $twigil ~ $desigilname;
 
-		# leading and trailing space elided
 		my Perl6::Element $leaf = %sigil-map{$sigil ~ $twigil}.new(
 			:from( $p.from ),
 			:to( $p.to ),
