@@ -20,33 +20,25 @@ my $pt = Perl6::Tidy.new;
 subtest {
 	plan 2;
 
-	my $parsed = $pt.parse-source( Q:to[_END_].chomp );
+	my $source = Q:to[_END_];
 class Unqualified { }
 _END_
+	my $parsed = $pt.parse-source( $source );
 	my $tree = $pt.build-tree( $parsed );
 	ok $pt.validate( $parsed ), Q{valid};
-#	is $pt.format( $tree ), Q:to[_END_], Q{formatted};
-#class Unqualified { }
-#_END_
-	is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-classUnqualified {}
-_END_
+	is $pt.format( $tree ), $source, Q{formatted};
 }, Q{empty};
 
 subtest {
 	plan 2;
 
-	my $parsed = $pt.parse-source( Q:to[_END_].chomp );
+	my $source = Q:to[_END_];
 class Qual::Ified { }
 _END_
+	my $parsed = $pt.parse-source( $source );
 	my $tree = $pt.build-tree( $parsed );
 	ok $pt.validate( $parsed ), Q{valid};
-#	is $pt.format( $tree ), Q:to[_END_], Q{formatted};
-#class Qual::Ified { }
-#_END_
-	is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-classQual::Ified {}
-_END_
+	is $pt.format( $tree ), $source, Q{formatted};
 }, Q{empty, multiple namespaces};
 
 subtest {
@@ -100,115 +92,89 @@ subtest {
 		subtest {
 			plan 2;
 
-			my $parsed = $pt.parse-source( Q:to[_END_].chomp );
+			my $source = Q:to[_END_];
 class Unqualified{has$.a}
 _END_
+			my $parsed = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ),
-#				Q{class Unqualified{has$.a}}, Q{formatted};
-			is $pt.format( $tree ),Q:to[_END_].chomp, Q{formatted};
-classUnqualified{has$.a}
-_END_
+			is $pt.format( $tree ), $source, Q{formatted};
 		}, Q{single, no WS};
 
 		subtest {
 			plan 2;
 
-			my $parsed = $pt.parse-source( Q:to[_END_].chomp );
+			my $source = Q:to[_END_];
 class Unqualified { has $.a }
 _END_
+			my $parsed = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ),
-#				Q{class Unqualified { has $.a }}, Q{formatted};
-			is $pt.format( $tree ),Q:to[_END_].chomp, Q{formatted};
-classUnqualified {has $.a}
-_END_
+			is $pt.format( $tree ), $source, Q{formatted};
 		}, Q{single};
 
 		subtest {
 			plan 2;
 
-			my $parsed = $pt.parse-source( Q:to[_END_].chomp );
+			my $source = Q:to[_END_];
 class Unqualified {
 	has $.a;
 	has $.b;
 }
 _END_
+			my $parsed = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q:to[_END_], Q{formatted};
-#class Unqualified {
-#	has $.a;
-#	has $.b;
-#}
-#_END_
-			is $pt.format( $tree ),Q:to[_END_].chomp, Q{formatted};
-classUnqualified {has $.ahas $.b}
-_END_
+			is $pt.format( $tree ), $source, Q{formatted};
 		}, Q{multiple};
 
 		subtest {
 			plan 2;
 
-			my $parsed = $pt.parse-source( Q:to[_END_].chomp );
+			my $source = Q:to[_END_];
 class Unqualified { has ( $.a, $.b ) }
 _END_
+			my $parsed = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ),
-#				Q{class Unqualified { has ( $.a, $.b ) }},
-#				Q{formatted};
-			is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-classUnqualified {has ($.a$.b)}
-_END_
+			is $pt.format( $tree ), $source, Q{formatted};
 		}, Q{list};
 	}, Q{$};
 
 	subtest {
 		plan 2;
 
-		my $parsed = $pt.parse-source( Q:to[_END_].chomp );
+		my $source = Q:to[_END_];
 class Unqualified { has @.a }
 _END_
+		my $parsed = $pt.parse-source( $source );
 		my $tree = $pt.build-tree( $parsed );
 		ok $pt.validate( $parsed ), Q{valid};
-#		is $pt.format( $tree ), Q{class Unqualified { has @.a }},
-#			Q{formatted};
-		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-classUnqualified {has @.a}
-_END_
+		is $pt.format( $tree ), $source, Q{formatted};
 	}, Q{@};
 
 	subtest {
 		plan 2;
 
-		my $parsed = $pt.parse-source( Q:to[_END_].chomp );
+		my $source = Q:to[_END_];
 class Unqualified { has %.a }
 _END_
+		my $parsed = $pt.parse-source( $source );
 		my $tree = $pt.build-tree( $parsed );
 		ok $pt.validate( $parsed ), Q{valid};
-#		is $pt.format( $tree ), Q{class Unqualified { has %.a }},
-#			Q{formatted};
-		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-classUnqualified {has %.a}
-_END_
+		is $pt.format( $tree ), $source, Q{formatted};
 	}, Q{%};
 
 	subtest {
-		plan 2;
+		plan 3;
 
-		my $parsed = $pt.parse-source( Q:to[_END_] );
+		my $source = Q:to[_END_];
 class Unqualified { has &.a }
 _END_
+		my $parsed = $pt.parse-source( $source );
 		my $tree = $pt.build-tree( $parsed );
 		ok $pt.validate( $parsed ), Q{valid};
-#		is $pt.format( $tree ), Q{class Unqualified { has &.a }},
-#			Q{formatted};
-		is $pt.format( $tree ), Q:to[_END_].chomp, Q{formatted};
-classUnqualified {has &.a}
-_END_
+		is $pt.format( $tree ), $source, Q{formatted};
 	}, Q{&};
 }, Q{Attribute};
 
