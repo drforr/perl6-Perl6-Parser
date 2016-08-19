@@ -955,15 +955,13 @@ class Perl6::Tidy::Factory {
 		}
 		elsif self.assert-hash-keys( $p, [< semilist >] ) {
 			# XXX <semilist> can probably be worked with
-			my Perl6::Element @ws;
+			my Perl6::Element @child;
 			if $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> {
-				my Perl6::Element @child;
-				@child.push(
+				@child = (
 self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
-				);
-				@child
+				)
 			}
-			self.make-postcircumfix( $p, @ws )
+			self.make-postcircumfix( $p, @child )
 		}
 		elsif self.assert-hash-keys( $p, [< nibble >] ) {
 			# XXX <nibble> can probably be worked with
@@ -1541,9 +1539,11 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 
 			@child.flat
 		}
+		# XXX ternary operators don't follow the string boundary rules
+		# XXX $p.list.[0] is actually the start of the expression.
 		elsif self.assert-hash-keys( $p, [< infix OPER >] ) {
 			if $p.list.elems == 3 {
-				(
+				my @child = (
 					self.__Term( $p.list.[0] ),
 					Perl6::Operator::Infix.new(
 						$p, QUES-QUES
@@ -1553,7 +1553,8 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 						$p, BANG-BANG
 					),
 					self.__Term( $p.list.[2] )
-				).flat
+				);
+				@child.flat
 			}
 			else {
 				my @child = (
@@ -2373,7 +2374,6 @@ return True;
 
 	method _parameter( Mu $p ) {
 		my Perl6::Element @child;
-		my Int $count = 0;
 		for $p.list {
 			if self.assert-hash-keys( $_,
 				[< param_var type_constraint
@@ -3038,7 +3038,6 @@ return True;
 		#
 		if self.assert-hash-keys( $p,
 					[< multi_declarator DECL typename >] ) {
-say 1;
 			(
 				self._typename( $p.hash.<typename> ),
 				self._multi_declarator(
@@ -3049,12 +3048,10 @@ say 1;
 		elsif self.assert-hash-keys( $p,
 				[< package_declarator DECL >],
 				[< typename >] ) {
-say 2;
 			self._package_declarator( $p.hash.<package_declarator> )
 		}
 		elsif self.assert-hash-keys( $p,
 				[< package_declarator sym >] ) {
-say 3;
 			(
 				self._sym( $p.hash.<sym> ),
 				self._package_declarator(
@@ -3064,7 +3061,6 @@ say 3;
 		}
 		elsif self.assert-hash-keys( $p,
 				[< declarator DECL >], [< typename >] ) {
-say 4;
 			self._declarator( $p.hash.<declarator> )
 		}
 		else {
@@ -3477,9 +3473,9 @@ say 4;
 				}
 				elsif self.assert-hash-keys( $_,
 						[< statement_control >] ) {
-#					self._statement_control(
-#						$_.hash.<statement_control>
-#					)
+					self._statement_control(
+						$_.hash.<statement_control>
+					)
 				}
 				elsif self.assert-hash-keys( $_, [],
 						[< statement_control >] ) {push
@@ -3508,6 +3504,19 @@ say 4;
 						)
 					)
 				}
+			}
+			elsif $p.hash.<EXPR>.list.elems == 2 and
+					$p.hash.<EXPR>.hash.<infix> {
+				@child.append(
+					Perl6::WS.new(
+						$p.hash.<EXPR>.list.[*-1].to,
+						substr(
+							$p.Str,
+							$p.hash.<EXPR>.list.[*-1].to - $p.from,
+							$p.to - $p.hash.<EXPR>.list.[*-1].to
+						)
+					)
+				)
 			}
 			# Note that statements will eventually encompass the
 			# optional final semicolon.
