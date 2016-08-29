@@ -178,7 +178,7 @@ _END_
 }, Q{scalar arguments};
 
 subtest {
-	plan 2;
+	plan 3;
 
 	subtest {
 		plan 2;
@@ -191,6 +191,31 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
 	}, Q{christmas tree, minimal spacing};
+
+	# Having differing whitespace on each side of an operator assures
+	# that Perl6::WS objects aren't being reused, and the WS isn't
+	# actually being copied from the wrong RE.
+	#
+	subtest {
+		plan 2;
+
+		my $source = Q:to[_END_];
+sub foo(
+$a  ,
+Str  $b
+,  Str
+$c  where
+"foo"  ,
+Int  $d
+=  32
+)  {
+}
+_END_
+		my $parsed = $pt.parse-source( $source );
+		my $tree = $pt.build-tree( $parsed );
+		ok $pt.validate( $parsed ), Q{valid};
+		is $pt.format( $tree ), $source, Q{formatted};
+	}, Q{christmas tree, alternating spacing};
 
 	subtest {
 		plan 2;

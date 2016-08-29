@@ -870,14 +870,6 @@ class Perl6::Tidy::Factory {
 					$p.hash.<statementlist>
 				)
 			);
-			if $p.hash.<statementlist>.Str ~~ m{ (\s+) $ } {
-				@child.append(
-					Perl6::WS.new(
-						$p.hash.<statementlist>.to,
-						$0.Str
-					)
-				)
-			}
 			$p.Str ~~ m{ ^ (.) }; my Str $front = ~$0;
 			$p.Str ~~ m{ (.) $ }; my Str $back = ~$0;
 			Perl6::Block.new(
@@ -2388,7 +2380,18 @@ return True;
 		elsif self.assert-hash-keys( $p,
 				[< blockoid longname >], [< trait >] ) {
 			my Perl6::Element @child = (
-				self._longname( $p.hash.<longname> ),
+				self._longname( $p.hash.<longname> )
+			);
+			if $p.hash.<longname>.to < $p.hash.<blockoid>.from {
+				@child.append(
+					self.whitespace-between(
+						$p,
+						$p.hash.<longname>,
+						$p.hash.<blockoid>
+					)
+				)
+			}
+			@child.append(
 				self._blockoid( $p.hash.<blockoid> )
 			).flat;
 			@child
@@ -3571,6 +3574,14 @@ return True;
 							$p.hash.<EXPR>.list.[*-1].to - $p.from,
 							$p.to - $p.hash.<EXPR>.list.[*-1].to
 						)
+					)
+				)
+			}
+			if $p.Str ~~ m{ (\s+) $ } {
+				@child.append(
+					Perl6::WS.new(
+						$p.to - $0.chars,
+						$0.Str
 					)
 				)
 			}
