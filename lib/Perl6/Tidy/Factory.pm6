@@ -364,7 +364,18 @@ class Perl6::ColonBareword does Token {
 	also is Perl6::Bareword;
 }
 class Perl6::Block does Branching_Delimited does Bounded {
-	also is Perl6::Element
+	also is Perl6::Element;
+
+	method from-match( Mu $p, @child ) {
+		$p.Str ~~ m{ ^ (.) }; my Str $front = ~$0;
+		$p.Str ~~ m{ (.) $ }; my Str $back = ~$0;
+		Perl6::Block.new(
+			:from( $p.from ),
+			:to( $p.to ),
+			:delimiter( $front, $back ),
+			:child( @child )
+		)
+	}
 }
 
 # Semicolons should only occur at statement boundaries.
@@ -570,7 +581,7 @@ class Perl6::Tidy::Factory {
 		warn "Unhandled case"
 	}
 
-	method whitespace-between( Mu $p, Mu $lhs, Mu $rhs ) {
+	sub whitespace-separator( Mu $p, Mu $lhs, Mu $rhs ) {
 		Perl6::WS.new(
 			$lhs.to,
 			substr(
@@ -582,7 +593,7 @@ class Perl6::Tidy::Factory {
 	}
 
 
-	sub comma-to-whitespace( Int $offset, Str $split-me ) {
+	sub comma-separator( Int $offset, Str $split-me ) {
 		my Int $start = $offset;
 		my ( $lhs, $rhs ) = split( COMMA, $split-me );
 		my Perl6::Element @child;
@@ -867,14 +878,15 @@ class Perl6::Tidy::Factory {
 					$p.hash.<statementlist>
 				)
 			);
-			$p.Str ~~ m{ ^ (.) }; my Str $front = ~$0;
-			$p.Str ~~ m{ (.) $ }; my Str $back = ~$0;
-			Perl6::Block.new(
-				:from( $p.from ),
-				:to( $p.to ),
-				:delimiter( $front, $back ),
-				:child( @child )
-			)
+			Perl6::Block.from-match( $p, @child )
+			if $p.Str ~~ m{ (\s+) $ } {
+				@child.append(
+					Perl6::WS.new(
+						$p.to - $0.chars,
+						$0.Str
+					)
+				)
+			}
 		}
 		else {
 			self.unhandled-case( $p )
@@ -2283,7 +2295,7 @@ return True;
 			);
 			if $p.hash.<sym>.to < $p.hash.<package_def>.from {
 				@child.append(
-					self.whitespace-between(
+					whitespace-separator(
 						$p,
 						$p.hash.<sym>,
 						$p.hash.<package_def>,
@@ -2314,7 +2326,7 @@ return True;
 			);
 			if $p.hash.<longname>.to < $p.hash.<blockoid>.from {
 				@child.append(
-					self.whitespace-between(
+					whitespace-separator(
 						$p,
 						$p.hash.<longname>,
 						$p.hash.<blockoid>
@@ -2774,7 +2786,7 @@ return True;
 			);
 			if $p.hash.<sym>.to < $p.hash.<regex_def>.from {
 				@child.append(
-					self.whitespace-between(
+					whitespace-separator(
 						$p,
 						$p.hash.<sym>,
 						$p.hash.<regex_def>
@@ -2824,6 +2836,14 @@ return True;
 					:child( @_child )
 				)
 			);
+			if $p.Str ~~ m{ (\s+) $ } {
+				@child.append(
+					Perl6::WS.new(
+						$p.to - $0.chars,
+						$0.Str
+					)
+				)
+			}
 			@child
 		}
 		else {
@@ -3329,7 +3349,7 @@ return True;
 						$p.Str, $start - $offset, $end - $start
 					);
 					@child.append(
-						comma-to-whitespace(
+						comma-separator(
 							$start,
 							$str
 						)

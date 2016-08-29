@@ -158,8 +158,8 @@ class Perl6::Tidy {
 					next unless $root.child.[$index].^can('from');
 					if $root.child.[$index-1].to !=
 						$root.child.[$index].from {
-						say $root.child.[$index-1].perl;
-						say $root.child.[$index].perl;
+#						say $root.child.[$index-1].perl;
+#						say $root.child.[$index].perl;
 						say "Gap between two items"
 					}
 				}
@@ -195,7 +195,7 @@ class Perl6::Tidy {
 
 	method _tidy( Str $source, $formatting = { } ) {
 		my $parsed    = self.parse-source( $source );
-say $parsed.hash.<statementlist>.hash.<statement>.list.[0].dump;
+#say $parsed.hash.<statementlist>.hash.<statement>.list.[0].dump;
 		my $valid     = self.validate( $parsed );
 		my $tree      = self.build-tree( $parsed );
 		my $formatted = self.format( $tree, $formatting );
