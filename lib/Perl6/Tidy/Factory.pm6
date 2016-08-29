@@ -1127,10 +1127,12 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 		elsif self.assert-hash-keys( $p,
 				  [< initializer variable_declarator >],
 				  [< trait >] ) {
-			(
+			my @child = (
 				self._variable_declarator(
 					$p.hash.<variable_declarator>
-				),
+				)
+			);
+			@child.append(
 				self._initializer( $p.hash.<initializer> )
 			)
 		}
@@ -1508,7 +1510,6 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 		elsif self.assert-hash-keys( $p,
 				[< postcircumfix OPER >],
 				[< postfix_prefix_meta_operator >] ) {
-			# XXX Work on this
 			my Perl6::Element @child = (
 				self._postcircumfix( $p.hash.<postcircumfix> )
 			);
@@ -1602,7 +1603,6 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			Perl6::Operator::Infix.new( $p.hash.<sym> )
 		}
 		elsif self.assert-hash-keys( $p, [< longname args >] ) {
-			# XXX Needs work later on
 			if $p.hash.<args> and
 			   $p.hash.<args>.hash.<semiarglist> {
 				(
@@ -1632,6 +1632,7 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			@child
 		}
 		elsif self.assert-hash-keys( $p, [< scope_declarator >] ) {
+
 			(
 				self._scope_declarator( $p.hash.<scope_declarator> )
 			).flat
@@ -3140,7 +3141,7 @@ return True;
 				@child.append(
 					Perl6::WS.new(
 						$p.hash.<scoped>.from,
-						~$0
+						$0.Str
 					)
 				)
 			}
@@ -3407,7 +3408,15 @@ return True;
 				[< param_sep >] ) {
 			my Mu $parameter = $p.hash.<parameter>;
 			my Int $offset = $p.from;
-			my Perl6::Element @ws;
+			my Perl6::Element @child;
+			if $p.Str ~~ m{ ^ ( \s+ ) } {
+				@child.append(
+					Perl6::WS.new(
+						$p.from,
+						$0.Str
+					)
+				)
+			}
 			for $parameter.list.kv -> $index, $_ {
 				if $index > 0 {
 					my Int $inset = 0;
@@ -3419,30 +3428,30 @@ return True;
 					my Str $str = substr(
 						$p.Str, $start - $offset, $end - $start
 					);
-					@ws.append(
+					@child.append(
 						comma-to-whitespace(
 							$start,
 							$str
 						)
 					)
 				}
-				@ws.append(
+				@child.append(
 					self.__Parameter( $_ )
 				);
 			}
-			if @ws[*-1].to < $p.to {
-				@ws.push(
+			if @child[*-1].to < $p.to {
+				@child.push(
 					Perl6::WS.new(
-						@ws[*-1].to,
+						@child[*-1].to,
 						substr(
 							$p.Str,
-							@ws[*-1].to - $offset,
-							$p.to - @ws[*-1].to + 1
+							@child[*-1].to - $offset,
+							$p.to - @child[*-1].to + 1
 						)
 					)
 				)
 			}
-			@ws.flat
+			@child.flat
 		}
 		elsif self.assert-hash-keys( $p,
 				[< param_sep >],
