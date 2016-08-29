@@ -582,14 +582,19 @@ class Perl6::Tidy::Factory {
 	}
 
 	sub whitespace-separator( Mu $p, Mu $lhs, Mu $rhs ) {
-		Perl6::WS.new(
-			$lhs.to,
-			substr(
-				$p.Str,
-				$lhs.to - $p.from,
-				$rhs.from - $lhs.to
+		if $lhs.to < $rhs.from {
+			Perl6::WS.new(
+				$lhs.to,
+				substr(
+					$p.Str,
+					$lhs.to - $p.from,
+					$rhs.from - $lhs.to
+				)
 			)
-		)
+		}
+		else {
+			()
+		}
 	}
 
 
@@ -878,7 +883,7 @@ class Perl6::Tidy::Factory {
 					$p.hash.<statementlist>
 				)
 			);
-			Perl6::Block.from-match( $p, @child )
+			Perl6::Block.from-match( $p, @child );
 			if $p.Str ~~ m{ (\s+) $ } {
 				@child.append(
 					Perl6::WS.new(
@@ -1127,6 +1132,13 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			my @child = (
 				self._variable_declarator(
 					$p.hash.<variable_declarator>
+				)
+			);
+			@child.append(
+				whitespace-separator(
+					$p,
+					$p.hash.<variable_declarator>,
+					$p.hash.<initializer>
 				)
 			);
 			@child.append(
@@ -1791,11 +1803,20 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			die "Not implemented yet"
 		}
 		elsif self.assert-hash-keys( $p, [< sym EXPR >] ) {
-			(
-				# XXX refactor down?
-				Perl6::Operator::Infix.new( $p.hash.<sym> ),
+			my @child = (
+				Perl6::Operator::Infix.new( $p.hash.<sym> )
+			);
+			@child.append(
+				whitespace-separator(
+					$p,
+					$p.hash.<sym>,
+					$p.hash.<EXPR>
+				)
+			);
+			@child.append(
 				self._EXPR( $p.hash.<EXPR> )
-			)
+			);
+			@child.flat
 		}
 		else {
 			self.unhandled-case( $p )
@@ -2293,15 +2314,13 @@ return True;
 			my Perl6::Element @child = (
 				self._sym( $p.hash.<sym> )
 			);
-			if $p.hash.<sym>.to < $p.hash.<package_def>.from {
-				@child.append(
-					whitespace-separator(
-						$p,
-						$p.hash.<sym>,
-						$p.hash.<package_def>,
-					)
+			@child.append(
+				whitespace-separator(
+					$p,
+					$p.hash.<sym>,
+					$p.hash.<package_def>,
 				)
-			}
+			);
 			@child.append(
 				self._package_def( $p.hash.<package_def> )
 			).flat
@@ -2324,15 +2343,13 @@ return True;
 			my Perl6::Element @child = (
 				self._longname( $p.hash.<longname> )
 			);
-			if $p.hash.<longname>.to < $p.hash.<blockoid>.from {
-				@child.append(
-					whitespace-separator(
-						$p,
-						$p.hash.<longname>,
-						$p.hash.<blockoid>
-					)
+			@child.append(
+				whitespace-separator(
+					$p,
+					$p.hash.<longname>,
+					$p.hash.<blockoid>
 				)
-			}
+			);
 			@child.append(
 				self._blockoid( $p.hash.<blockoid> )
 			).flat;
@@ -2784,15 +2801,13 @@ return True;
 			my Perl6::Element @child = (
 				self._sym( $p.hash.<sym> )
 			);
-			if $p.hash.<sym>.to < $p.hash.<regex_def>.from {
-				@child.append(
-					whitespace-separator(
-						$p,
-						$p.hash.<sym>,
-						$p.hash.<regex_def>
-					)
+			@child.append(
+				whitespace-separator(
+					$p,
+					$p.hash.<sym>,
+					$p.hash.<regex_def>
 				)
-			}
+			);
 			@child.append(
 				self._regex_def( $p.hash.<regex_def> )
 			);
@@ -3485,6 +3500,16 @@ return True;
 								$p.hash.<EXPR>.to - $p.from,
 								$p.to - $p.hash.<EXPR>.to
 							)
+						)
+					)
+				}
+			}
+			elsif $p.hash.<EXPR>.hash.<scope_declarator> {
+				if $p.Str ~~ m{ (\s+) $ } {
+					@child.append(
+						Perl6::WS.new(
+							$p.hash.<EXPR>.to,
+							$0.Str
 						)
 					)
 				}
