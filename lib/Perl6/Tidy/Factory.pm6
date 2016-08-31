@@ -245,6 +245,14 @@ class Perl6::Document does Branching {
 
 class Perl6::Statement does Branching does Bounded {
 	also is Perl6::Element;
+
+	method from-list( Perl6::Element @child ) {
+		self.bless(
+			:from( @child[0].from ),
+			:to( @child[*-1].to ),
+			:child( @child )
+		)
+	}
 }
 
 role Prefixed {
@@ -400,13 +408,6 @@ class Perl6::Block does Branching_Delimited does Bounded {
 #
 class Perl6::Semicolon does Token {
 	also is Perl6::Element;
-	multi method new( Int $from, Int $to, Str $content ) {
-		self.bless(
-			:from( $from ),
-			:to( $to ),
-			:content( $content )
-		)
-	}
 }
 
 class Perl6::Variable {
@@ -662,7 +663,7 @@ class Perl6::Tidy::Factory {
 	# if any.
 	#
 	sub semicolon-terminator( Mu $p ) {
-		if $p.Str ~~ m{ ( \s+ ) ( ';' ) ( \s* ) $ } {
+		if $p.Str ~~ m{ ( \s+ ) ( ';' ) ( \s+ ) $ } {
 			(
 				Perl6::WS.new(
 					:from( $p.to - $2.chars - $1.chars - $0.chars ),
@@ -676,11 +677,34 @@ class Perl6::Tidy::Factory {
 				)
 			)
 		}
-		elsif $p.Str ~~ m{ ( ';' ) ( \s* ) $ } {
+		elsif $p.Str ~~ m{ ( ';' ) ( \s+ ) $ } {
 			(
 				Perl6::Semicolon.new(
-					:from( $p.to - $2.chars - $1.chars ),
-					:to( $p.to - $2.chars ),
+					:from( $p.to - $1.chars - $0.chars ),
+					:to( $p.to - $1.chars ),
+					:content( $0.Str )
+				)
+			)
+		}
+		elsif $p.Str ~~ m{ ( \s+ ) ( ';' ) $ } {
+			(
+				Perl6::WS.new(
+					:from( $p.to - $1.chars - $0.chars ),
+					:to( $p.to - $1.chars ),
+					:content( $0.Str )
+				),
+				Perl6::Semicolon.new(
+					:from( $p.to - $1.chars ),
+					:to( $p.to ),
+					:content( $1.Str )
+				)
+			)
+		}
+		elsif $p.Str ~~ m{ ( ';' ) $ } {
+			(
+				Perl6::Semicolon.new(
+					:from( $p.to - $0.chars ),
+					:to( $p.to  ),
 					:content( $0.Str )
 				)
 			)
@@ -3690,11 +3714,12 @@ return True;
 	method _statementlist( Mu $p ) {
 		my Mu $statement = $p.hash.<statement>;
 		my Perl6::Element @child;
-		my Str $trailing-ws;
+		my Str $trailing-ws = '';
+		my Int $trailing-ws-start = 0;
 		for $statement.list {
 			my Perl6::Element @_child =
 				self._statement( $_ );
-			if $trailing-ws {
+			if $trailing-ws ~~ m{ \s } {
 				@_child.append(
 					Perl6::WS.new(
 						:from( @_child[0].from - $trailing-ws.chars ),
@@ -3702,32 +3727,28 @@ return True;
 						:content( $trailing-ws )
 					)
 				);
-				$trailing-ws = ''
+				$trailing-ws = '';
+				$trailing-ws-start = 0
 			}
-			if $_.Str ~~ m{ ( \s+ ) $ } {
-				$trailing-ws = $0.Str
+			if $_.Str ~~ m{ ';' ( \s+ ) $ } {
+				$trailing-ws = $0.Str;
+				$trailing-ws-start = $_.to - $0.chars
 			}
 			@child.append(
-				Perl6::Statement.new(
-					:from( @_child[0].from ),
-					:to( @_child[*-1].to ),
-					:child( @_child )
-				)
+				Perl6::Statement.from-list( @_child )
 			)
 		}
 		if $trailing-ws ~~ m{ \s } {
+			my Perl6::Element @_child =
+				Perl6::WS.new(
+#					:from( @child[*-1].from ),
+#					:to( @child[*-1].from + $trailing-ws.chars ),
+					:from( $trailing-ws-start ),
+					:to( $trailing-ws-start + $trailing-ws.chars ),
+					:content( $trailing-ws )
+				);
 			@child.append(
-				Perl6::Statement.new(
-					:from( @child[*-1].from ),
-					:to( @child[*-1].from + $trailing-ws.chars ),
-					:child(
-						Perl6::WS.new(
-							:from( @child[*-1].from ),
-							:to( @child[*-1].from + $trailing-ws.chars ),
-							:content( $trailing-ws )
-						)
-					)
-				)
+				Perl6::Statement.from-list( @_child )
 			)
 		}
 		@child

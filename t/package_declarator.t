@@ -39,20 +39,28 @@ grammar <name> { }
 role <name> { }
 knowhow <name> { }
 native <name> { }
-lang <name> ...
+
+)
+
+#`(
+
+These terms either are invalid or need additional support structures.
+I'll add them momentarily...
+
+lang <name>
 trusts <name>
 also <name>
 
 )
 
-plan 1;
+plan 7;
 
 my $pt = Perl6::Tidy.new;
 #my $*TRACE = 1;
 #my $*DEBUG = 1;
 
 subtest {
-	plan 2;
+	plan 3;
 
 	subtest {
 		plan 4;
@@ -173,16 +181,14 @@ unit package Foo  ;
 _END_
 			my $p = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $p );
-say $tree.perl;
 			ok $pt.validate( $p ), Q{valid};
 			is $pt.format( $tree ), $source, Q{formatted};
 		}, Q{ws before semi};
 	}, Q{unit form};
 }, Q{package};
 
-#`(
 subtest {
-	plan 2;
+	plan 3;
 
 	subtest {
 		plan 4;
@@ -292,11 +298,9 @@ _END_
 		is $pt.format( $tree ), $source, Q{formatted};
 	}, Q{unit form};
 }, Q{module};
-)
 
-#`(
 subtest {
-	plan 2;
+	plan 3;
 
 	subtest {
 		plan 4;
@@ -406,11 +410,23 @@ _END_
 		is $pt.format( $tree ), $source, Q{formatted};
 	}, Q{unit form};
 }, Q{class};
-)
 
 #`(
 subtest {
 	plan 2;
+
+	my $source = Q:to[_END_];
+class Foo{also     is   Int}
+_END_
+	my $p = $pt.parse-source( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.format( $tree ), $source, Q{formatted};
+}, Q{class Foo also is};
+)
+
+subtest {
+	plan 3;
 
 	subtest {
 		plan 4;
@@ -520,11 +536,9 @@ _END_
 		is $pt.format( $tree ), $source, Q{formatted};
 	}, Q{unit form};
 }, Q{grammar};
-)
 
-#`(
 subtest {
-	plan 2;
+	plan 3;
 
 	subtest {
 		plan 4;
@@ -634,11 +648,9 @@ _END_
 		is $pt.format( $tree ), $source, Q{formatted};
 	}, Q{unit form};
 }, Q{role};
-)
 
-#`(
 subtest {
-	plan 2;
+	plan 3;
 
 	subtest {
 		plan 4;
@@ -748,11 +760,9 @@ _END_
 		is $pt.format( $tree ), $source, Q{formatted};
 	}, Q{unit form};
 }, Q{knowhow};
-)
 
-#`(
 subtest {
-	plan 2;
+	plan 3;
 
 	subtest {
 		plan 4;
@@ -862,11 +872,13 @@ _END_
 		is $pt.format( $tree ), $source, Q{formatted};
 	}, Q{unit form};
 }, Q{native};
-)
 
 #`(
+
+I guess 'lang Foo { }' and 'unit lang Foo;' aren't valid constructs.
+
 subtest {
-	plan 2;
+	plan 3;
 
 	subtest {
 		plan 4;
@@ -979,6 +991,9 @@ _END_
 )
 
 #`(
+
+I guess 'trusts Foo { }' and 'unit trusts Foo;' aren't valid constructs.
+
 subtest {
 	plan 2;
 
@@ -1090,120 +1105,6 @@ _END_
 		is $pt.format( $tree ), $source, Q{formatted};
 	}, Q{unit form};
 }, Q{trusts};
-)
-
-#`(
-subtest {
-	plan 2;
-
-	subtest {
-		plan 4;
-
-		subtest {
-			plan 2;
-
-			my $source = Q:to[_END_];
-also Foo{}
-_END_
-			my $p = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $p );
-			ok $pt.validate( $p ), Q{valid};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{no ws};
-
-		subtest {
-			plan 2;
-
-			my $source = Q:to[_END_];
-also Foo     {}
-_END_
-			my $p = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $p );
-			ok $pt.validate( $p ), Q{valid};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{leading ws};
-
-		subtest {
-			plan 2;
-
-			my $source = Q{also Foo{}  };
-			my $p = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $p );
-			ok $pt.validate( $p ), Q{valid};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{trailing ws};
-
-		subtest {
-			plan 2;
-
-			my $source = Q{also Foo     {}  };
-			my $p = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $p );
-			ok $pt.validate( $p ), Q{valid};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{leading, trailing ws};
-	}, Q{no intrabrace spacing};
-
-	subtest {
-		plan 4;
-
-		subtest {
-			plan 2;
-
-			my $source = Q:to[_END_];
-also Foo{   }
-_END_
-			my $p = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $p );
-			ok $pt.validate( $p ), Q{valid};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{no ws};
-
-		subtest {
-			plan 2;
-
-			my $source = Q:to[_END_];
-also Foo     {   }
-_END_
-			my $p = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $p );
-			ok $pt.validate( $p ), Q{valid};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{leading ws};
-
-		subtest {
-			plan 2;
-
-			my $source = Q{also Foo{   }  };
-			my $p = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $p );
-			ok $pt.validate( $p ), Q{valid};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{trailing ws};
-
-		subtest {
-			plan 2;
-
-			my $source = Q{also Foo     {   }  };
-			my $p = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $p );
-			ok $pt.validate( $p ), Q{valid};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{leading, trailing ws};
-	}, Q{intrabrace spacing};
-
-	subtest {
-		plan 2;
-
-		my $source = Q:to[_END_];
-unit also Foo;
-_END_
-		my $p = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
-		is $pt.format( $tree ), $source, Q{formatted};
-	}, Q{unit form};
-}, Q{also};
 )
 
 # vim: ft=perl6
