@@ -394,7 +394,7 @@ class Perl6::Block does Branching_Delimited does Bounded {
 	method from-match( Mu $p, Perl6::Element @child ) {
 		$p.Str ~~ m{ ^ (.) }; my Str $front = ~$0;
 		$p.Str ~~ m{ (.) $ }; my Str $back = ~$0;
-		Perl6::Block.new(
+		self.bless(
 			:from( $p.from ),
 			:to( $p.to ),
 			:delimiter( $front, $back ),
@@ -590,7 +590,7 @@ class Perl6::Tidy::Factory {
 	constant FATARROW = Q{=>};
 	constant HYPER = Q{>>};
 
-	method unhandled-case( Mu $p ) {
+	sub unhandled-case( Mu $p ) {
 		say $p.hash.keys.gist;
 		warn "Unhandled case"
 	}
@@ -856,7 +856,7 @@ class Perl6::Tidy::Factory {
 					# XXX Boolean represents blank?
 				}
 				else {
-					self.unhandled-case( $_ )
+					unhandled-case( $_ )
 				}
 			}
 			@child
@@ -873,7 +873,8 @@ class Perl6::Tidy::Factory {
 			die "Not implemented yet";
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -900,7 +901,8 @@ class Perl6::Tidy::Factory {
 		}
 		else {
 			say $p.Int if $p.Int;
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -922,7 +924,8 @@ class Perl6::Tidy::Factory {
 			die "Not implemented yet";
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -934,7 +937,8 @@ class Perl6::Tidy::Factory {
 			Perl6::Bareword.new( $p )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -944,7 +948,8 @@ class Perl6::Tidy::Factory {
 			self._B( $p.hash.<B> )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -959,7 +964,8 @@ class Perl6::Tidy::Factory {
 			die "Not implemented yet";
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -977,7 +983,8 @@ class Perl6::Tidy::Factory {
 			self._blockoid( $p.hash.<blockoid> )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -985,13 +992,14 @@ class Perl6::Tidy::Factory {
 		# $p doesn't contain WS after the block.
 		if self.assert-hash-keys( $p, [< statementlist >] ) {
 			if $p.hash.<statementlist>.Str ~~ /\S/ {
-				my Perl6::Element @child =
+				my Perl6::Element @child;
+				my Perl6::Element @_child =
 					self._statementlist(
 						$p.hash.<statementlist>
 					);
 				@child.append(
 					Perl6::Block.from-match(
-						$p, @child
+						$p, @_child
 					)
 				);
 				@child
@@ -1011,7 +1019,8 @@ class Perl6::Tidy::Factory {
 			}
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -1024,7 +1033,8 @@ class Perl6::Tidy::Factory {
 			self._block( $p.hash.<block> )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -1034,7 +1044,8 @@ class Perl6::Tidy::Factory {
 			self._semilist( $p.hash.<semilist> )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	} 
 
@@ -1053,13 +1064,14 @@ class Perl6::Tidy::Factory {
 					die "Not implemented yet"
 				}
 				else {
-					self.unhandled-case( $_ )
+					unhandled-case( $_ )
 				}
 			}
 			@child
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -1106,7 +1118,8 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			Perl6::Operator::Circumfix.new( $p, @child )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -1116,7 +1129,8 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			self._block( $p.hash.<block> )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -1126,7 +1140,8 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			self._semilist( $p.hash.<semilist> )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -1135,7 +1150,8 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			self._circumfix( $p.hash.<circumfix> )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -1198,7 +1214,7 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			).flat
 		}
 		else {
-			self.unhandled-case( $p )
+			unhandled-case( $p )
 		}
 	}
 
@@ -1209,25 +1225,27 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			return True if $p.<U>;
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
 	method _contextualizer( Mu $p ) {
-		warn "Untested method";
+		warn "untested method";
 		if self.assert-hash-keys( $p, [< coercee circumfix sigil >] ) {
-			die "Not implemented yet";
+			die "not implemented yet";
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
 	method _decint( Mu $p ) {
-		Perl6::Number::Decimal.new(
+		Perl6::number::decimal.new(
 			:from( $p.from ),
 			:to( $p.to ),
-			:content( $p.Str )
+			:content( $p.str )
 		)
 	}
 
@@ -1235,11 +1253,11 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 		if self.assert-hash-keys( $p,
 				[< deftermnow initializer term_init >],
 				[< trait >] ) {
-			die "Not implemented yet";
+			die "not implemented yet";
 		}
 		elsif self.assert-hash-keys( $p,
 				[< initializer signature >], [< trait >] ) {
-			die "Not implemented yet";
+			die "not implemented yet";
 		}
 		elsif self.assert-hash-keys( $p,
 				  [< initializer variable_declarator >],
@@ -1281,10 +1299,11 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 				[< signature >], [< trait >] ) {
 			my Perl6::Element @child =
 				self._signature( $p.hash.<signature> );
-			Perl6::Operator::Circumfix.new( $p, @child )
+			Perl6::Operator::circumfix.new( $p, @child )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -1337,7 +1356,8 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			self._declarator( $p.hash.<declarator> )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -1355,7 +1375,8 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			self.__FloatingPoint( $p )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -1369,13 +1390,14 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 					)
 				}
 				else {
-					self.unhandled-case( $_ )
+					unhandled-case( $_ )
 				}
 			}
 			@child.flat
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -1384,7 +1406,8 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			self._name( $p.hash.<name> )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -1402,7 +1425,8 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			self._identifier( $p.hash.<identifier> )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -1412,7 +1436,8 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			self._defterm( $p.hash.<defterm> )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -1424,7 +1449,8 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			die "Not implemented yet"
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -1454,7 +1480,8 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			)
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -1469,7 +1496,8 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			self._methodop( $p.hash.<methodop> )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -1479,7 +1507,8 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			self._term( $p.hash.<term> )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -1489,7 +1518,8 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			self._scope_declarator( $p.hash.<scope_declarator> )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -1499,7 +1529,8 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			die "Not implemented yet"
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -1510,7 +1541,8 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			die "Not implemented yet"
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -1523,7 +1555,8 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			self._blockoid( $p.hash.<blockoid> )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -1533,7 +1566,8 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			die "Not implemented yet"
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -1568,11 +1602,12 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 				self._quote( $v.hash.<quote> )
 			}
 			else {
-				self.unhandled-case( $p )
+				unhandled-case( $p )
 			}
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -1764,7 +1799,9 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 		#
 		# $p doesn't contain WS after the block.
 		elsif self.assert-hash-keys( $p, [< package_declarator >] ) {
-			self._package_declarator( $p.hash.<package_declarator> )
+			self._package_declarator(
+				$p.hash.<package_declarator>
+			)
 		}
 		elsif self.assert-hash-keys( $p, [< value >] ) {
 			self._value( $p.hash.<value> )
@@ -1779,7 +1816,8 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			self._longname( $p.hash.<longname> )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -1789,7 +1827,8 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			self._O( $p.hash.<O> )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -1798,7 +1837,8 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			self._signature( $p.hash.<signature> )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -1852,7 +1892,8 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			@child
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -1881,7 +1922,7 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 					die "Not implemented yet"
 				}
 				else {
-					self.unhandled-case( $_ )
+					unhandled-case( $_ )
 				}
 			}
 			@child
@@ -1890,7 +1931,8 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			Perl6::Bareword.new( $p )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -1906,7 +1948,8 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			Perl6::Operator::Infix.new( $p.hash.<EXPR> )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -1916,7 +1959,8 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			die "Not implemented yet";
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -1929,7 +1973,8 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			)
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -1953,7 +1998,8 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			@child.flat
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -2023,7 +2069,8 @@ return True;
 			self._termseq( $p.hash.<termseq> )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -2032,7 +2079,8 @@ return True;
 			self._name( $p.hash.<name> )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -2067,7 +2115,8 @@ return True;
 			self._statement( $p.hash.<statement> )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -2098,7 +2147,8 @@ return True;
 			).flat
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -2116,7 +2166,8 @@ return True;
 			self._longname( $p.hash.<longname> )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -2126,7 +2177,8 @@ return True;
 			self._decint( $p.hash.<decint> )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -2136,7 +2188,8 @@ return True;
 			self._EXPR( $p.hash.<EXPR> )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -2146,7 +2199,8 @@ return True;
 			self._longname( $p.hash.<longname> )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -2160,13 +2214,14 @@ return True;
 					die "Not implemented yet"
 				}
 				else {
-					self.unhandled-case( $_ )
+					unhandled-case( $_ )
 				}
 			}
 			@child
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -2184,7 +2239,8 @@ return True;
 			self._declarator( $p.hash.<declarator> )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -2193,7 +2249,8 @@ return True;
 			self._signature( $p.hash.<signature> )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -2202,7 +2259,8 @@ return True;
 			self._param_var( $p.hash.<param_var> )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -2230,7 +2288,8 @@ return True;
 			Perl6::Bareword.new( $p )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -2242,7 +2301,8 @@ return True;
 			die "Not implemented yet"
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -2252,7 +2312,8 @@ return True;
 			self._termseq( $p.hash.<termseq> )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -2290,13 +2351,14 @@ return True;
 					)
 				}
 				else {
-					self.unhandled-case( $_ )
+					unhandled-case( $_ )
 				}
 			}
 			@child
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -2305,7 +2367,8 @@ return True;
 			self._numish( $p.hash.<numish> )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -2323,7 +2386,8 @@ return True;
 			die "Not implemented yet"
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -2402,7 +2466,7 @@ return True;
 			die "Not implemented yet"
 		}
 		else {
-			self.unhandled-case( $p )
+			unhandled-case( $p )
 		}
 	}
 
@@ -2438,7 +2502,8 @@ return True;
 			die "Not implemented yet"
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -2462,8 +2527,27 @@ return True;
 			);
 			@child
 		}
+		elsif self.assert-hash-keys( $p, [< sym trait >] ) {
+			my Perl6::Element @child =
+				self._sym( $p.hash.<sym> );
+			@child.append(
+				whitespace-separator(
+					$p,
+					$p.hash.<sym>,
+					$p.hash.<trait>
+				)
+			);
+			@child.append(
+				self._trait( $p.hash.<trait> )
+			);
+#			@child.append(
+#				semicolon-terminator( $p )
+#			);
+			@child
+		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -2498,7 +2582,8 @@ return True;
 			self._blockoid( $p.hash.<blockoid> )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -2611,7 +2696,7 @@ return True;
 				)
 			}
 			else {
-				self.unhandled-case( $_ )
+				unhandled-case( $_ )
 			}
 		}
 		@child
@@ -2712,7 +2797,8 @@ return True;
 			self._sigil( $p.hash.<sigil> )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -2725,7 +2811,8 @@ return True;
 			self._blockoid( $p.hash.<blockoid> )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -2756,7 +2843,8 @@ return True;
 			)
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -2773,7 +2861,8 @@ return True;
 			Perl6::Operator::Infix.new( $p.hash.<dig> )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -2788,7 +2877,8 @@ return True;
 			die "Not implemented yet"
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -2797,7 +2887,8 @@ return True;
 			Perl6::Operator::Prefix.new( $p.hash.<sym> )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -2811,7 +2902,8 @@ return True;
 			die "Not implemented yet"
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -2824,7 +2916,8 @@ return True;
 			die "Not implemented yet"
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -2834,7 +2927,8 @@ return True;
 			die "Not implemented yet"
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -2874,7 +2968,8 @@ return True;
 			)
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -2888,7 +2983,7 @@ return True;
 					die "Not implemented yet"
 				}
 				else {
-					self.unhandled-case( $_ )
+					unhandled-case( $_ )
 				}
 			}
 			@child
@@ -2902,7 +2997,8 @@ return True;
 			self._identifier( $p.hash.<identifier> )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -2929,7 +3025,8 @@ return True;
 			)
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -2950,7 +3047,8 @@ return True;
 			@child
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -2974,6 +3072,7 @@ return True;
 #					)
 #				)
 			}
+say 2;
 			@child.append(
 				Perl6::Block.new(
 					:from(
@@ -2996,7 +3095,8 @@ return True;
 			@child
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -3019,7 +3119,8 @@ return True;
 			).flat
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -3151,7 +3252,8 @@ return True;
 			self._blockoid( $p.hash.<blockoid> )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -3164,7 +3266,8 @@ return True;
 			die "Not implemented yet"
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -3213,7 +3316,8 @@ return True;
 			).flat
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -3235,7 +3339,8 @@ return True;
 			@child.flat
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -3244,7 +3349,8 @@ return True;
 			self._arglist( $p.hash.<arglist> )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -3263,7 +3369,8 @@ return True;
 			self._EXPR( $p.hash.<statement>.list.[0].<EXPR> )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -3273,7 +3380,8 @@ return True;
 			die "Not implemented yet"
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -3291,7 +3399,8 @@ return True;
 			die "Not implemented yet"
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -3301,7 +3410,8 @@ return True;
 			self._normspace( $p.hash.<normspace> )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -3321,7 +3431,8 @@ return True;
 			die "Not implemented yet"
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -3464,7 +3575,8 @@ return True;
 			)
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 		@child
 	}
@@ -3540,7 +3652,8 @@ return True;
 			()
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -3550,7 +3663,8 @@ return True;
 			self._EXPR( $p.hash.<EXPR> )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -3585,7 +3699,8 @@ return True;
 			die "Not implemented yet"
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -3619,9 +3734,17 @@ return True;
 					die "Not implemented yet"
 				}
 				else {
-					self.unhandled-case( $_ )
+					unhandled-case( $_ )
 				}
 			}
+			@child
+		}
+		elsif self.assert-hash-keys( $p, [< sym trait >] ) {
+			my Perl6::Element @child =
+				self._sym( $p.hash.<sym> );
+			@child.append(
+				self._trait( $p.hash.<trait> )
+			);
 			@child
 		}
 		# $p contains trailing whitespace for <package_declaration>
@@ -3707,7 +3830,8 @@ return True;
 			@child
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -3760,7 +3884,8 @@ return True;
 			die "Not implemented yet"
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -3770,7 +3895,8 @@ return True;
 			die "Not implemented yet"
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -3780,7 +3906,8 @@ return True;
 			die "Not implemented yet"
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -3790,7 +3917,8 @@ return True;
 			self._desigilname( $p.hash.<desigilname> )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -3802,7 +3930,7 @@ return True;
 					die "Not implemented yet"
 				}
 				else {
-					self.unhandled-case( $_ )
+					unhandled-case( $_ )
 				}
 			}
 			@child
@@ -3817,7 +3945,8 @@ return True;
 			die "Not implemented yet"
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -3827,7 +3956,8 @@ return True;
 			self._methodop( $p.hash.<methodop> )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -3843,13 +3973,14 @@ return True;
 					)
 				}
 				else {
-					self.unhandled-case( $_ )
+					unhandled-case( $_ )
 				}
 			}
 			@child
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -3858,7 +3989,8 @@ return True;
 			self._termconjseq( $p.hash.<termconjseq> )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -3875,13 +4007,14 @@ return True;
 					)
 				}
 				else {
-					self.unhandled-case( $_ )
+					unhandled-case( $_ )
 				}
 			}
 			@child
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -3898,7 +4031,7 @@ return True;
 					)
 				}
 				else {
-					self.unhandled-case( $_ )
+					unhandled-case( $_ )
 				}
 			}
 			@child
@@ -3917,7 +4050,8 @@ return True;
 			)
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -3927,7 +4061,8 @@ return True;
 			die "Not implemented yet"
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -3943,7 +4078,7 @@ return True;
 					)
 				}
 				else {
-					self.unhandled-case( $_ )
+					unhandled-case( $_ )
 				}
 			}
 			@child
@@ -3952,7 +4087,7 @@ return True;
 			self._noun( $p.hash.<noun> )
 		}
 		else {
-			self.unhandled-case( $p )
+			unhandled-case( $p )
 		}
 	}
 
@@ -3961,7 +4096,8 @@ return True;
 			self._termaltseq( $p.hash.<termaltseq> )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -3973,7 +4109,7 @@ return True;
 				self._trait_mod( $_.hash.<trait_mod> )
 #			}
 #			else {
-#				self.unhandled-case( $_ )
+#				unhandled-case( $_ )
 #			}
 		}, $p.list;
 		@child
@@ -3982,14 +4118,32 @@ return True;
 	}
 
 	method _trait_mod( Mu $p ) {
-		if self.assert-hash-keys( $p, [< sym typename >] ) {
+		if self.assert-hash-keys( $p,
+				[< sym longname >],
+				[< circumfix >] ) {
+			my @child = 
+				self._sym( $p.hash.<sym> );
+			@child.append(
+				whitespace-separator(
+					$p,
+					$p.hash.<sym>,
+					$p.hash.<longname>
+				)
+			);
+			@child.append(
+				self._longname( $p.hash.<longname> )
+			);
+			@child
+		}
+		elsif self.assert-hash-keys( $p, [< sym typename >] ) {
 			(
 				self._sym( $p.hash.<sym> ),
 				self._typename( $p.hash.<typename> )
 			).flat
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -4012,7 +4166,7 @@ return True;
 					)
 				}
 				else {
-					self.unhandled-case( $_ )
+					unhandled-case( $_ )
 				}
 			}
 		}
@@ -4023,7 +4177,8 @@ return True;
 #			self._typename( $p.hash.<typename> )
 #		}
 #		else {
-#			self.unhandled-case( $p )
+#			say $p.hash.keys.gist;
+#			warn "Unhandled case"
 #		}
 		@child
 	}
@@ -4042,7 +4197,8 @@ return True;
 			die "Not implemented yet"
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -4079,7 +4235,7 @@ return True;
 					self._longname( $_.hash.<longname> )
 			}
 			else {
-				self.unhandled-case( $_ )
+				unhandled-case( $_ )
 			}
 		}
 
@@ -4091,7 +4247,8 @@ return True;
 			self._longname( $p.hash.<longname> )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -4105,7 +4262,8 @@ return True;
 			self._value( $p.hash.<value> )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -4124,7 +4282,8 @@ return True;
 			self._quote( $p.hash.<quote> )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -4149,7 +4308,8 @@ return True;
 			self._variable( $p.hash.<variable> )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -4191,7 +4351,8 @@ return True;
 			).flat
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -4223,7 +4384,8 @@ return True;
 			die "Not implemented yet"
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -4240,13 +4402,14 @@ return True;
 					die "Not implemented yet";
 				}
 				else {
-					self.unhandled-case( $_ )
+					unhandled-case( $_ )
 				}
 			}
 			@child
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -4264,7 +4427,7 @@ return True;
 					die "Not implemented yet";
 				}
 				else {
-					self.unhandled-case( $_ )
+					unhandled-case( $_ )
 				}
 			}
 			@child
@@ -4276,7 +4439,8 @@ return True;
 			self._blockoid( $p.hash.<blockoid> )
 		}
 		else {
-			self.unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 }

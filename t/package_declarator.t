@@ -53,7 +53,7 @@ also <name>
 
 )
 
-plan 7;
+plan 8;
 
 my $pt = Perl6::Tidy.new;
 #my $*TRACE = 1;
@@ -411,7 +411,6 @@ _END_
 	}, Q{unit form};
 }, Q{class};
 
-#`(
 subtest {
 	plan 2;
 
@@ -423,7 +422,6 @@ _END_
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
 }, Q{class Foo also is};
-)
 
 subtest {
 	plan 3;
