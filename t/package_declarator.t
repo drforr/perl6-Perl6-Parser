@@ -168,9 +168,6 @@ _END_
 		subtest {
 			plan 2;
 
-#          1          2
-#0123456789012334567890
-#unit package Foo  ;
 			my $source = Q:to[_END_];
 unit package Foo  ;
 _END_

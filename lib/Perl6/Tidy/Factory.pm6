@@ -659,42 +659,31 @@ class Perl6::Tidy::Factory {
 	}
 
 	# Returns the semicolon and preceding whitespace at the end of a string
-	# if any. Uses substr() just to be consistent.
+	# if any.
 	#
-	sub semicolon-terminator( Mu $p, Mu $lhs ) {
-		my Perl6::Element @child;
-		if $lhs.to < $p.to {
-			$p.Str ~~ m{ (\s+) $ };
-			my $inset = $0.chars;
-			if $p.to - $lhs.to > SEMICOLON.chars {
-				@child.append(
-					Perl6::WS.new(
-						$lhs.to,
-						substr-match(
-							$p,
-							$lhs.to,
-							$p.to - $lhs.to - SEMICOLON.chars - $inset
-						)
-					)
-				)
-			}
-			@child.append(
+	sub semicolon-terminator( Mu $p ) {
+		if $p.Str ~~ m{ ( \s+ ) ( ';' ) ( \s* ) $ } {
+			(
+				Perl6::WS.new(
+					:from( $p.to - $2.chars - $1.chars - $0.chars ),
+					:to( $p.to - $2.chars - $1.chars ),
+					:content( $0.Str )
+				),
 				Perl6::Semicolon.new(
-					:from( $p.to - SEMICOLON.chars ),
-					:to( $p.to ),
-					:content(
-#`(
-						substr-match(
-							$p,
-							$p.to - SEMICOLON.chars,
-							SEMICOLON.chars
-						)
-)
-SEMICOLON
-					)
+					:from( $p.to - $2.chars - $1.chars ),
+					:to( $p.to - $2.chars ),
+					:content( $1.Str )
 				)
-			);
-			@child
+			)
+		}
+		elsif $p.Str ~~ m{ ( ';' ) ( \s* ) $ } {
+			(
+				Perl6::Semicolon.new(
+					:from( $p.to - $2.chars - $1.chars ),
+					:to( $p.to - $2.chars ),
+					:content( $0.Str )
+				)
+			)
 		}
 		else {
 			()
@@ -2445,9 +2434,7 @@ return True;
 				self._package_def( $p.hash.<package_def> )
 			);
 			@child.append(
-				semicolon-terminator(
-					$p, $p.hash.<package_def>
-				)
+				semicolon-terminator( $p )
 			);
 			@child
 		}
@@ -2463,11 +2450,6 @@ return True;
 				self._longname( $p.hash.<longname> );
 			@child.append(
 				self._statementlist( $p.hash.<statementlist> )
-			);
-			@child.append(
-				semicolon-terminator(
-					$p, $p.hash.<longname>
-				)
 			);
 			@child.flat
 		}
@@ -3584,7 +3566,6 @@ return True;
 	}
 
 	method _statement( Mu $p ) {
-key-boundary $p;
 		if $p.list {
 			my Perl6::Element @child;
 			for $p.list {
@@ -3692,22 +3673,14 @@ key-boundary $p;
 				)
 			}
 )
-			Perl6::Statement.new(
-				:from( @child[0].from ),
-				:to( @child[*-1].to ),
-				:child( @child )
-			)
+			@child
 		}
 		elsif self.assert-hash-keys( $p, [< statement_control >] ) {
 			my Perl6::Element @child =
 				self._statement_control(
 					$p.hash.<statement_control>
 				).flat;
-			Perl6::Statement.new(
-				:from( @child[0].from ),
-				:to( @child[*-1].to ),
-				:child( @child )
-			)
+			@child
 		}
 		else {
 			self.unhandled-case( $p )
@@ -3717,9 +3690,44 @@ key-boundary $p;
 	method _statementlist( Mu $p ) {
 		my Mu $statement = $p.hash.<statement>;
 		my Perl6::Element @child;
+		my Str $trailing-ws;
 		for $statement.list {
+			my Perl6::Element @_child =
+				self._statement( $_ );
+			if $trailing-ws {
+				@_child.append(
+					Perl6::WS.new(
+						:from( @_child[0].from - $trailing-ws.chars ),
+						:to( @_child[0].from + $trailing-ws.chars - 1 ),
+						:content( $trailing-ws )
+					)
+				);
+				$trailing-ws = ''
+			}
+			if $_.Str ~~ m{ ( \s+ ) $ } {
+				$trailing-ws = $0.Str
+			}
 			@child.append(
-				self._statement( $_ )
+				Perl6::Statement.new(
+					:from( @_child[0].from ),
+					:to( @_child[*-1].to ),
+					:child( @_child )
+				)
+			)
+		}
+		if $trailing-ws ~~ m{ \s } {
+			@child.append(
+				Perl6::Statement.new(
+					:from( @child[*-1].from ),
+					:to( @child[*-1].from + $trailing-ws.chars ),
+					:child(
+						Perl6::WS.new(
+							:from( @child[*-1].from ),
+							:to( @child[*-1].from + $trailing-ws.chars ),
+							:content( $trailing-ws )
+						)
+					)
+				)
 			)
 		}
 		@child
