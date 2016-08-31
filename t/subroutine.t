@@ -4,6 +4,7 @@ use Test;
 use Perl6::Tidy;
 
 #`(
+#`(
 
 In passing, please note that while it's trivially possible to bum down the
 tests, doing so makes it harder to insert 'say $parsed.dump' to view the
@@ -229,5 +230,6 @@ _END_
 		is $pt.format( $tree ), $source, Q{formatted};
 	}, Q{christmas tree, maximal spacing};
 }, Q{christmas tree};
+)
 
 # vim: ft=perl6

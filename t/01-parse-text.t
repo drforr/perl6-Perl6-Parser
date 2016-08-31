@@ -3,6 +3,7 @@ use v6;
 use Test;
 use Perl6::Tidy;
 
+#`(
 plan 2;
 
 my $pt = Perl6::Tidy.new;
@@ -50,5 +51,6 @@ subtest {
 		Q{quote has correct hash keys};
 	is $f.hash.<nibble>.Str, Q{a}, Q{nibble has correct Str};
 }, Q{Smoketest hash structure};
+)
 
 # vim: ft=perl6

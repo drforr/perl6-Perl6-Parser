@@ -4,6 +4,7 @@ use Test;
 use Perl6::Tidy;
 
 #`(
+#`(
 
 In passing, please note that while it's trivially possible to bum down the
 tests, doing so makes it harder to insert 'say $parsed.dump' to view the
@@ -775,5 +776,6 @@ subtest {
 		is $pt.format( $tree ), Q{:()}, Q{formatted};
 	}, Q{:()};
 }, Q{signature};
+)
 
 # vim: ft=perl6

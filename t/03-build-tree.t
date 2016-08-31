@@ -3,6 +3,7 @@ use v6;
 use Test;
 use Perl6::Tidy;
 
+#`(
 plan 4;
 
 my $pt = Perl6::Tidy.new;
@@ -321,5 +322,6 @@ subtest {
 		Q{tree built};
 	}, Q{With whitespace};
 }, Q{Initialization};
+)
 
 # vim: ft=perl6

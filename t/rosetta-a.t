@@ -3,6 +3,7 @@ use v6;
 use Test;
 use Perl6::Tidy;
 
+#`(
 plan 42;
 
 my $pt = Perl6::Tidy.new;
@@ -1337,5 +1338,6 @@ sub sma(Int \P where * > 0) returns Sub {
 _END_
 	ok $pt.validate( $parsed );
 }, Q{Averages/simple moving average};
+)
 
 # vim: ft=perl6

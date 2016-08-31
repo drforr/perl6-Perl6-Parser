@@ -4,6 +4,7 @@ use Test;
 use Perl6::Tidy;
 
 #`(
+#`(
 
 In passing, please note that while it's trivially possible to bum down the
 tests, doing so makes it harder to insert 'say $parsed.dump' to view the
@@ -1895,6 +1896,7 @@ my @a; die @a
 my @a; map @a, {}
 my @a; substr @a
 
+)
 )
 
 # vim: ft=perl6

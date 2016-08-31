@@ -3,6 +3,7 @@ use v6;
 use Test;
 use Perl6::Tidy;
 
+#`(
 plan 2;
 
 my $pt = Perl6::Tidy.new;
@@ -22,5 +23,6 @@ subtest {
 	my $p = $pt.parse-source( Q{'a'} );
 	ok $pt.validate( $p ), Q{validates};
 }, Q{File with string};
+)
 
 # vim: ft=perl6
