@@ -3248,6 +3248,19 @@ say 1;
 			@child.flat
 		}
 		elsif self.assert-hash-keys( $p,
+				[< deflongname statementlist >],
+				[< trait >] ) {
+			my Perl6::Element @child =
+				self._deflongname( $p.hash.<deflongname> );
+			@child.append(
+				self._statementlist( $p.hash.<statementlist> )
+			);
+			@child.append(
+				semicolon-terminator( $p )
+			);
+			@child.flat
+		}
+		elsif self.assert-hash-keys( $p,
 				[< deflongname trait blockoid >] ) {
 			(
 				self._deflongname( $p.hash.<deflongname> ),

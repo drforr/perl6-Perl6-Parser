@@ -153,7 +153,6 @@ _END_
 		}, Q{leading, trailing ws};
 	}, Q{intrabrace spacing};
 
-#`( XXX Skipping for a few minutes
 	subtest {
 		plan 2;
 
@@ -181,7 +180,6 @@ _END_
 			is $pt.format( $tree ), $source, Q{formatted};
 		}, Q{ws before semi};
 	}, Q{unit form};
-)
 }, Q{sub};
 
 subtest {
