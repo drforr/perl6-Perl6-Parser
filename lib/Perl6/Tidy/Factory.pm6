@@ -2094,6 +2094,7 @@ return True;
 		if self.assert-hash-keys( $p,
 			     [< specials longname blockoid multisig >],
 			     [< trait >] ) {
+say 1;
 			my Perl6::Element @child =
 				 self._multisig( $p.hash.<multisig> );
 			(
@@ -2111,10 +2112,25 @@ return True;
 		elsif self.assert-hash-keys( $p,
 			     [< specials longname blockoid >],
 			     [< trait >] ) {
-			(
-				self._longname( $p.hash.<longname> ),
+			my Perl6::Element @child =
+				self._longname( $p.hash.<longname> );
+			@child.append(
+				whitespace-separator(
+					$p,
+					$p.hash.<longname>,
+					$p.hash.<blockoid>
+				)
+			);
+			@child.append(
 				self._blockoid( $p.hash.<blockoid> )
-			).flat
+			);
+			@child.append(
+				Perl6::WS.whitespace-terminator(
+					$p,
+					$p.hash.<blockoid>
+				)
+			);
+			@child.flat;
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -3138,10 +3154,22 @@ return True;
 			@child.flat
 		}
 		elsif self.assert-hash-keys( $p, [< sym method_def >] ) {
-			(
-				self._sym( $p.hash.<sym> ),
+			my Perl6::Element @child =
+				self._sym( $p.hash.<sym> );
+			# XXX subsume this into the Perl6::WS object later
+			if $p.hash.<method_def>.Str ~~ m{ ^ ( \s+ ) } {
+				@child.append(
+					Perl6::WS.new(
+						:from( $p.hash.<method_def>.from ),
+						:to( $p.hash.<method_def>.from + $0.chars ),
+						:content( $0.Str )
+					)
+				)
+			}
+			@child.append(
 				self._method_def( $p.hash.<method_def> )
-			).flat
+			);
+			@child.flat
 		}
 		else {
 			say $p.hash.keys.gist;

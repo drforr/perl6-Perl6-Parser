@@ -33,13 +33,9 @@ all get tested in the same file, however.
 The terms that get tested here are:
 
 sub <name> ... { },
-method <name> ... { },
-submethod <name> ... { },
-macro <name> ... { }, # XXX ?
-	
 
-#class Foo { also is Int } # 'also' is a package_declaration.
-#class Foo { trusts Int } # 'trusts' is a package_declaration.
+class Foo { method Bar { } } # 'method' is a routine_declaration.
+class Foo { submethod Bar { } } # 'submethod' is a routine_declaration.
 
 )
 
@@ -48,11 +44,11 @@ macro <name> ... { }, # XXX ?
 These terms either are invalid or need additional support structures.
 I'll add them momentarily...
 
-#lang <name>
+#macro <name> ... { }
 
 )
 
-plan 9;
+plan 3;
 
 my $pt = Perl6::Tidy.new;
 #my $*TRACE = 1;
@@ -157,7 +153,7 @@ _END_
 		}, Q{leading, trailing ws};
 	}, Q{intrabrace spacing};
 
-#`( XXX Sipping for a few minutes
+#`( XXX Skipping for a few minutes
 	subtest {
 		plan 2;
 
@@ -194,7 +190,6 @@ subtest {
 	subtest {
 		plan 4;
 
-#`(
 		subtest {
 			plan 2;
 
@@ -211,7 +206,7 @@ _END_
 			plan 2;
 
 			my $source = Q:to[_END_];
-method Foo     {}
+class Foo{method Bar     {}}
 _END_
 			my $p = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $p );
@@ -222,7 +217,7 @@ _END_
 		subtest {
 			plan 2;
 
-			my $source = Q{method Foo{}  };
+			my $source = Q{class Foo{method Foo{}  }};
 			my $p = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
@@ -232,16 +227,14 @@ _END_
 		subtest {
 			plan 2;
 
-			my $source = Q{method Foo     {}  };
+			my $source = Q{class Foo{method Bar     {}  }};
 			my $p = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
 			is $pt.format( $tree ), $source, Q{formatted};
 		}, Q{leading, trailing ws};
-)
 	}, Q{no intrabrace spacing};
 
-#`(
 	subtest {
 		plan 4;
 
@@ -249,7 +242,7 @@ _END_
 			plan 2;
 
 			my $source = Q:to[_END_];
-method Foo{   }
+class Foo{method Bar   {}}
 _END_
 			my $p = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $p );
@@ -261,7 +254,7 @@ _END_
 			plan 2;
 
 			my $source = Q:to[_END_];
-method Foo     {   }
+class Foo{method Bar     {   }}
 _END_
 			my $p = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $p );
@@ -272,7 +265,7 @@ _END_
 		subtest {
 			plan 2;
 
-			my $source = Q{method Foo{   }  };
+			my $source = Q{class Foo{method Foo{   }  }};
 			my $p = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
@@ -282,17 +275,15 @@ _END_
 		subtest {
 			plan 2;
 
-			my $source = Q{method Foo     {   }  };
+			my $source = Q{class Foo{method Bar     {   }  }};
 			my $p = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
 			is $pt.format( $tree ), $source, Q{formatted};
 		}, Q{leading, trailing ws};
-	}, Q{intrabrace spacing};
-)
+	}, Q{with intrabrace spacing};
 }, Q{method};
 
-#`( XXX
 subtest {
 	plan 2;
 
@@ -303,7 +294,7 @@ subtest {
 			plan 2;
 
 			my $source = Q:to[_END_];
-submethod Foo{}
+class Foo{submethod Bar{}}
 _END_
 			my $p = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $p );
@@ -315,7 +306,7 @@ _END_
 			plan 2;
 
 			my $source = Q:to[_END_];
-submethod Foo     {}
+class Foo{submethod Bar     {}}
 _END_
 			my $p = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $p );
@@ -326,7 +317,7 @@ _END_
 		subtest {
 			plan 2;
 
-			my $source = Q{submethod Foo{}  };
+			my $source = Q{class Foo{submethod Foo{}  }};
 			my $p = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
@@ -336,7 +327,7 @@ _END_
 		subtest {
 			plan 2;
 
-			my $source = Q{submethod Foo     {}  };
+			my $source = Q{class Foo{submethod Bar     {}  }};
 			my $p = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
@@ -351,7 +342,7 @@ _END_
 			plan 2;
 
 			my $source = Q:to[_END_];
-submethod Foo{   }
+class Foo{submethod Bar   {}}
 _END_
 			my $p = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $p );
@@ -363,7 +354,7 @@ _END_
 			plan 2;
 
 			my $source = Q:to[_END_];
-submethod Foo     {   }
+class Foo{submethod Bar     {   }}
 _END_
 			my $p = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $p );
@@ -374,7 +365,7 @@ _END_
 		subtest {
 			plan 2;
 
-			my $source = Q{submethod Foo{   }  };
+			my $source = Q{class Foo{submethod Foo{   }  }};
 			my $p = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
@@ -384,15 +375,14 @@ _END_
 		subtest {
 			plan 2;
 
-			my $source = Q{submethod Foo     {   }  };
+			my $source = Q{class Foo{submethod Bar     {   }  }};
 			my $p = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
 			is $pt.format( $tree ), $source, Q{formatted};
 		}, Q{leading, trailing ws};
-	}, Q{intrabrace spacing};
+	}, Q{with intrabrace spacing};
 }, Q{submethod};
-)
 
 #`( XXX Experimental
 subtest {
