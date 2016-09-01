@@ -22,34 +22,6 @@ subtest {
 	plan 2;
 
 	subtest {
-		plan 2;
-
-		my $source = Q:to[_END_];
-sub foo {}
-_END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		is $pt.format( $tree ), $source, Q{formatted};
-	}, Q{no WS in block};
-
-	subtest {
-		plan 2;
-
-		my $source = Q:to[_END_];
-sub foo {  }
-_END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		is $pt.format( $tree ), $source, Q{formatted};
-	}, Q{WS in block};
-}, Q{empty};
-
-subtest {
-	plan 2;
-
-	subtest {
 		plan 6;
 
 		subtest {

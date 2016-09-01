@@ -19,44 +19,7 @@ my $pt = Perl6::Tidy.new;
 #my $*DEBUG = 1;
 
 subtest {
-	plan 3;
-
-	subtest {
-		plan 3;
-
-		subtest {
-			plan 2;
-
-			my $parsed = $pt.parse-source( Q{my $a} );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			is $pt.format( $tree ), Q{my $a}, Q{formatted};
-		}, Q{my $a};
-
-		subtest {
-			plan 2;
-
-			my $parsed = $pt.parse-source( Q{our $a} );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			is $pt.format( $tree ), Q{our $a}, Q{formatted};
-		}, Q{our $a};
-
-		todo Q{'anon $a' not implemented yet, maybe not ever.};
-
-		subtest {
-			plan 2;
-
-			my $parsed = $pt.parse-source( Q{state $a} );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			is $pt.format( $tree ), Q{state $a}, Q{formatted};
-		}, Q{state $a};
-
-		todo Q{'augment $a' not implemented yet, maybe not ever.};
-
-		todo Q{'supersede $a' not implemented yet, maybe not ever.};
-	}, Q{untyped};
+	plan 2;
 
 	subtest {
 		plan 3;
@@ -107,18 +70,6 @@ subtest {
 
 subtest {
 	plan 2;
-
-	subtest {
-		plan 2;
-
-		my $source = Q:to[_END_];
-sub foo {}
-_END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		is $pt.format( $tree ), $source, Q{formatted};
-	}, Q{sub foo {}};
 
 	subtest {
 		plan 2;

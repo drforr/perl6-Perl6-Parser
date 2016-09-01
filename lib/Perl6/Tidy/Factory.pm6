@@ -856,7 +856,8 @@ class Perl6::Tidy::Factory {
 					# XXX Boolean represents blank?
 				}
 				else {
-					unhandled-case( $_ )
+					say $_.hash.keys.gist;
+					warn "Unhandled case"
 				}
 			}
 			@child
@@ -1064,7 +1065,8 @@ class Perl6::Tidy::Factory {
 					die "Not implemented yet"
 				}
 				else {
-					unhandled-case( $_ )
+					say $_.hash.keys.gist;
+					warn "Unhandled case"
 				}
 			}
 			@child
@@ -1214,7 +1216,8 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			).flat
 		}
 		else {
-			unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -1390,7 +1393,8 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 					)
 				}
 				else {
-					unhandled-case( $_ )
+					say $_.hash.keys.gist;
+					warn "Unhandled case"
 				}
 			}
 			@child.flat
@@ -1602,7 +1606,8 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 				self._quote( $v.hash.<quote> )
 			}
 			else {
-				unhandled-case( $p )
+				say $p.hash.keys.gist;
+				warn "Unhandled case"
 			}
 		}
 		else {
@@ -1892,7 +1897,8 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 					die "Not implemented yet"
 				}
 				else {
-					unhandled-case( $_ )
+					say $_.hash.keys.gist;
+					warn "Unhandled case"
 				}
 			}
 			@child
@@ -2200,7 +2206,8 @@ say 1;
 					die "Not implemented yet"
 				}
 				else {
-					unhandled-case( $_ )
+					say $_.hash.keys.gist;
+					warn "Unhandled case"
 				}
 			}
 			@child
@@ -2336,8 +2343,14 @@ say 1;
 						self._atom( $_.hash.<atom> )
 					)
 				}
+				elsif self.assert-hash-keys( $_, [< atom >] ) {
+					@child.push(
+						self._atom( $_.hash.<atom> )
+					)
+				}
 				else {
-					unhandled-case( $_ )
+					say $_.hash.keys.gist;
+					warn "Unhandled case"
 				}
 			}
 			@child
@@ -2452,7 +2465,8 @@ say 1;
 			die "Not implemented yet"
 		}
 		else {
-			unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -2717,7 +2731,8 @@ say 1;
 				)
 			}
 			else {
-				unhandled-case( $_ )
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
 			}
 		}
 		@child
@@ -3004,7 +3019,8 @@ say 1;
 					die "Not implemented yet"
 				}
 				else {
-					unhandled-case( $_ )
+					say $_.hash.keys.gist;
+					warn "Unhandled case"
 				}
 			}
 			@child
@@ -3081,22 +3097,26 @@ say 1;
 		if self.assert-hash-keys( $p,
 				[< deflongname nibble >],
 				[< signature trait >] ) {
-			my Str $x = substr(
-				$p.Str,
-				$p.hash.<deflongname>.Str.chars
-			);
 			my Perl6::Element @_child =
 				self._nibble( $p.hash.<nibble> );
 			my Perl6::Element @child =
 				self._deflongname( $p.hash.<deflongname> );
-			if $x ~~ m{ ^ (\s+) } {
-#				@child.append(
-#					Perl6::WS.new(
-#						$p.hash.<deflongname>.to,
-#						$0.Str
-#					)
-#				)
+			my $remainder = substr( $p.Str, $p.hash.<deflongname>.Str.chars );
+			if $remainder ~~ m{ ^ ( \s+ ) } {
+				@child.append(
+					Perl6::WS.new(
+						:from(
+							$p.hash.<deflongname>.to
+						),
+						:to(
+							$p.hash.<deflongname>.to
+							+ $0.Str.chars
+						),
+						:content( $0.Str )
+					)
+				)
 			}
+			# XXX Collect { } from the actual text
 			@child.append(
 				Perl6::Block.new(
 					:from(
@@ -3108,13 +3128,14 @@ say 1;
 					:child( @_child )
 				)
 			);
-			if $p.Str ~~ m{ (\s+) $ } {
-#				@child.append(
-#					Perl6::WS.new(
-#						$p.to - $0.chars,
-#						$0.Str
-#					)
-#				)
+			if $p.Str ~~ m{ ( \s+ ) $ } {
+				@child.append(
+					Perl6::WS.new(
+						:from( $p.to - $0.chars ),
+						:to( $p.to ),
+						:content( $0.Str )
+					)
+				)
 			}
 			@child
 		}
@@ -3790,7 +3811,8 @@ say 1;
 					die "Not implemented yet"
 				}
 				else {
-					unhandled-case( $_ )
+					say $_.hash.keys.gist;
+					warn "Unhandled case"
 				}
 			}
 			@child
@@ -3989,7 +4011,8 @@ say 1;
 					die "Not implemented yet"
 				}
 				else {
-					unhandled-case( $_ )
+					say $_.hash.keys.gist;
+					warn "Unhandled case"
 				}
 			}
 			@child
@@ -4032,7 +4055,8 @@ say 1;
 					)
 				}
 				else {
-					unhandled-case( $_ )
+					say $_.hash.keys.gist;
+					warn "Unhandled case"
 				}
 			}
 			@child
@@ -4066,7 +4090,8 @@ say 1;
 					)
 				}
 				else {
-					unhandled-case( $_ )
+					say $_.hash.keys.gist;
+					warn "Unhandled case"
 				}
 			}
 			@child
@@ -4090,7 +4115,8 @@ say 1;
 					)
 				}
 				else {
-					unhandled-case( $_ )
+					say $_.hash.keys.gist;
+					warn "Unhandled case"
 				}
 			}
 			@child
@@ -4137,7 +4163,8 @@ say 1;
 					)
 				}
 				else {
-					unhandled-case( $_ )
+					say $_.hash.keys.gist;
+					warn "Unhandled case"
 				}
 			}
 			@child
@@ -4146,7 +4173,8 @@ say 1;
 			self._noun( $p.hash.<noun> )
 		}
 		else {
-			unhandled-case( $p )
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
 		}
 	}
 
@@ -4168,7 +4196,8 @@ say 1;
 				self._trait_mod( $_.hash.<trait_mod> )
 #			}
 #			else {
-#				unhandled-case( $_ )
+#				say $_.hash.keys.gist;
+#				warn "Unhandled case"
 #			}
 		}, $p.list;
 		@child
@@ -4225,7 +4254,8 @@ say 1;
 					)
 				}
 				else {
-					unhandled-case( $_ )
+					say $_.hash.keys.gist;
+					warn "Unhandled case"
 				}
 			}
 		}
@@ -4294,7 +4324,8 @@ say 1;
 					self._longname( $_.hash.<longname> )
 			}
 			else {
-				unhandled-case( $_ )
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
 			}
 		}
 
@@ -4461,7 +4492,8 @@ say 1;
 					die "Not implemented yet";
 				}
 				else {
-					unhandled-case( $_ )
+					say $_.hash.keys.gist;
+					warn "Unhandled case"
 				}
 			}
 			@child
@@ -4486,7 +4518,8 @@ say 1;
 					die "Not implemented yet";
 				}
 				else {
-					unhandled-case( $_ )
+					say $_.hash.keys.gist;
+					warn "Unhandled case"
 				}
 			}
 			@child
