@@ -139,90 +139,6 @@ subtest {
 	subtest {
 		plan 2;
 
-		subtest {
-			plan 2;
-
-			my $source = Q:to[_END_];
-unit module foo;
-_END_
-			my $parsed = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{unit module foo;};
-
-		subtest {
-			plan 2;
-
-			my $source = Q:to[_END_];
-module foo { }
-_END_
-			my $parsed = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{module foo {}};
-	}, q{module};
-
-	subtest {
-		plan 2;
-
-		subtest {
-			plan 2;
-
-			my $source = Q:to[_END_];
-unit class foo;
-_END_
-			my $parsed = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{unit class foo;};
-
-		subtest {
-			plan 2;
-
-			my $source = Q:to[_END_];
-class foo { }
-_END_
-			my $parsed = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{class foo {}};
-	}, Q{class};
-
-	subtest {
-		plan 2;
-
-		subtest {
-			plan 2;
-
-			my $source = Q:to[_END_];
-unit role foo;
-_END_
-			my $parsed = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{unit role foo;};
-
-		subtest {
-			plan 2;
-
-			my $source = Q:to[_END_];
-role foo { }
-_END_
-			my $parsed = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{role foo {}};
-	}, Q{role};
-
-	subtest {
-		plan 2;
-
 		my $source = Q:to[_END_];
 my regex foo { a }
 _END_
@@ -231,34 +147,6 @@ _END_
 		ok $pt.validate( $parsed ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
 	}, Q{my regex foo {a} (null regex not allowed)};
-
-	subtest {
-		plan 2;
-
-		subtest {
-			plan 2;
-
-			my $source = Q:to[_END_];
-unit grammar foo;
-_END_
-			my $parsed = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{unit grammar foo;};
-
-		subtest {
-			plan 2;
-
-			my $source = Q:to[_END_];
-grammar foo { }
-_END_
-			my $parsed = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{grammar foo {}};
-	}, Q{grammar};
 
 	subtest {
 		plan 2;

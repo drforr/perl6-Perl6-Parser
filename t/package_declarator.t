@@ -40,6 +40,9 @@ role <name> { }
 knowhow <name> { }
 native <name> { }
 
+class Foo { also is Int } # 'also' is a package_declaration.
+class Foo { trusts Int } # 'trusts' is a package_declaration.
+
 )
 
 #`(
@@ -48,12 +51,10 @@ These terms either are invalid or need additional support structures.
 I'll add them momentarily...
 
 lang <name>
-trusts <name>
-also <name>
 
 )
 
-plan 8;
+plan 9;
 
 my $pt = Perl6::Tidy.new;
 #my $*TRACE = 1;
@@ -422,6 +423,46 @@ _END_
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
 }, Q{class Foo also is};
+
+#`( XXX
+subtest {
+	plan 2;
+
+	my $source = Q:to[_END_];
+class Foo is Test{}
+_END_
+	my $p = $pt.parse-source( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.format( $tree ), $source, Q{formatted};
+}, Q{class Foo is};
+)
+
+#`( XXX
+subtest {
+	plan 2;
+
+	my $source = Q:to[_END_];
+class Foo is repr('CStruct'){}
+_END_
+	my $p = $pt.parse-source( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.format( $tree ), $source, Q{formatted};
+}, Q{class Foo is repr()};
+)
+
+subtest {
+	plan 2;
+
+	my $source = Q:to[_END_];
+class Foo{trusts     Int}
+_END_
+	my $p = $pt.parse-source( $source );
+ 	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.format( $tree ), $source, Q{formatted};
+}, Q{class Foo trusts Int};
 
 subtest {
 	plan 3;
@@ -986,123 +1027,6 @@ _END_
 		is $pt.format( $tree ), $source, Q{formatted};
 	}, Q{unit form};
 }, Q{lang};
-)
-
-#`(
-
-I guess 'trusts Foo { }' and 'unit trusts Foo;' aren't valid constructs.
-
-subtest {
-	plan 2;
-
-	subtest {
-		plan 4;
-
-		subtest {
-			plan 2;
-
-			my $source = Q:to[_END_];
-trusts Foo{}
-_END_
-			my $p = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $p );
-			ok $pt.validate( $p ), Q{valid};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{no ws};
-
-		subtest {
-			plan 2;
-
-			my $source = Q:to[_END_];
-trusts Foo     {}
-_END_
-			my $p = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $p );
-			ok $pt.validate( $p ), Q{valid};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{leading ws};
-
-		subtest {
-			plan 2;
-
-			my $source = Q{trusts Foo{}  };
-			my $p = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $p );
-			ok $pt.validate( $p ), Q{valid};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{trailing ws};
-
-		subtest {
-			plan 2;
-
-			my $source = Q{trusts Foo     {}  };
-			my $p = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $p );
-			ok $pt.validate( $p ), Q{valid};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{leading, trailing ws};
-	}, Q{no intrabrace spacing};
-
-	subtest {
-		plan 4;
-
-		subtest {
-			plan 2;
-
-			my $source = Q:to[_END_];
-trusts Foo{   }
-_END_
-			my $p = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $p );
-			ok $pt.validate( $p ), Q{valid};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{no ws};
-
-		subtest {
-			plan 2;
-
-			my $source = Q:to[_END_];
-trusts Foo     {   }
-_END_
-			my $p = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $p );
-			ok $pt.validate( $p ), Q{valid};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{leading ws};
-
-		subtest {
-			plan 2;
-
-			my $source = Q{trusts Foo{   }  };
-			my $p = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $p );
-			ok $pt.validate( $p ), Q{valid};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{trailing ws};
-
-		subtest {
-			plan 2;
-
-			my $source = Q{trusts Foo     {   }  };
-			my $p = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $p );
-			ok $pt.validate( $p ), Q{valid};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{leading, trailing ws};
-	}, Q{intrabrace spacing};
-
-	subtest {
-		plan 2;
-
-		my $source = Q:to[_END_];
-unit trusts Foo;
-_END_
-		my $p = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
-		is $pt.format( $tree ), $source, Q{formatted};
-	}, Q{unit form};
-}, Q{trusts};
 )
 
 # vim: ft=perl6

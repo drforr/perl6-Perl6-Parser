@@ -237,6 +237,44 @@ class Perl6::WS does Token {
 			:content( $p.Str )
 		)
 	}
+
+	method whitespace-leader( Mu $p, Mu $rhs ) {
+		if $p.from < $rhs.from {
+			self.bless(
+				:from( $p.from ),
+				:to( $rhs.from ),
+				:content(
+					substr(
+						$p.Str,
+						0,
+						$rhs.from - $p.from
+					)
+				)
+			)
+		}
+		else {
+			()
+		}
+	}
+
+	method whitespace-terminator( Mu $p, Mu $lhs ) {
+		if $lhs.to < $p.to {
+			self.bless(
+				:from( $lhs.to ),
+				:to( $p.to ),
+				:content(
+					substr(
+						$p.Str,
+						$p.Str.chars - ( $p.to - $lhs.to ),
+						$p.to - $lhs.to
+					)
+				)
+			)
+		}
+		else {
+			()
+		}
+	}
 }
 
 class Perl6::Document does Branching {
@@ -605,44 +643,6 @@ class Perl6::Tidy::Factory {
 					$p,
 					$lhs.to,
 					$rhs.from - $lhs.to
-				)
-			)
-		}
-		else {
-			()
-		}
-	}
-
-	# Returns the whitespace at the start of a string, if any.
-	# Use substr() just to be consistent with the other methods.
-	#
-	sub whitespace-leader( Mu $p, Mu $rhs ) {
-		if $p.from < $rhs.from {
-			Perl6::WS.new(
-				$p.from,
-				substr-match(
-					$p,
-					$p.from,
-					$rhs.from - $p.from
-				)
-			)
-		}
-		else {
-			()
-		}
-	}
-
-	# Returns the whitespace at the end of a string, if any.
-	# Use substr() just to be consistent with the other methods.
-	#
-	sub whitespace-terminator( Mu $p, Mu $lhs ) {
-		if $lhs.to < $p.to {
-			Perl6::WS.new(
-				$lhs.to,
-				substr-match(
-					$p,
-					$lhs.to,
-					$p.to - $lhs.to
 				)
 			)
 		}
@@ -1755,48 +1755,18 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			self._fatarrow( $p.hash.<fatarrow> )
 		}
 
-		# rule <name> { },
-		# token <name> { },
-		# regex <name> { },
-		#
 		elsif self.assert-hash-keys( $p, [< regex_declarator >] ) {
 			self._regex_declarator( $p.hash.<regex_declarator> )
 		}
 
-		# sub <name> ... { },
-		# method <name> ... { },
-		# submethod <name> ... { },
-		# macro <name> ... { }, # XXX ?
-		#
 		elsif self.assert-hash-keys( $p, [< routine_declarator >] ) {
 			self._routine_declarator( $p.hash.<routine_declarator> )
 		}
 
-		# my <name>
-		# our <naem>
-		# has <name>
-		# HAS <name>
-		# augment <name>
-		# anon <name>
-		# state <name>
-		# supsersede <name>
-		# unit {package,module,class...} <name>
-		#
 		elsif self.assert-hash-keys( $p, [< scope_declarator >] ) {
 			self._scope_declarator( $p.hash.<scope_declarator> )
 		}
 
-		# package <name> { }
-		# module <name> { }
-		# class <name> { }
-		# grammar <name> { }
-		# role <name> { }
-		# knowhow <name> { }
-		# native <name> { }
-		# lang <name> ...
-		# trusts <name>
-		# also <name>
-		#
 		# $p doesn't contain WS after the block.
 		elsif self.assert-hash-keys( $p, [< package_declarator >] ) {
 			self._package_declarator(
@@ -2507,6 +2477,17 @@ return True;
 		}
 	}
 
+	# package <name> { }
+	# module <name> { }
+	# class <name> { }
+	# grammar <name> { }
+	# role <name> { }
+	# knowhow <name> { }
+	# native <name> { }
+	# lang <name> ...
+	# trusts <name>
+	# also <name>
+	#
 	method _package_declarator( Mu $p ) {
 		# $p doesn't contain WS after the block.
 		if self.assert-hash-keys( $p, [< sym package_def >] ) {
@@ -2525,6 +2506,24 @@ return True;
 			@child.append(
 				semicolon-terminator( $p )
 			);
+			@child
+		}
+		elsif self.assert-hash-keys( $p, [< sym typename >] ) {
+			my Perl6::Element @child =
+				self._sym( $p.hash.<sym> );
+			@child.append(
+				whitespace-separator(
+					$p,
+					$p.hash.<sym>,
+					$p.hash.<typename>
+				)
+			);
+			@child.append(
+				self._package_def( $p.hash.<typename> )
+			);
+#			@child.append(
+#				semicolon-terminator( $p )
+#			);
 			@child
 		}
 		elsif self.assert-hash-keys( $p, [< sym trait >] ) {
@@ -2559,6 +2558,12 @@ return True;
 			@child.append(
 				self._statementlist( $p.hash.<statementlist> )
 			);
+			@child.flat
+		}
+		elsif self.assert-hash-keys( $p,
+				[< longname >], [< colonpair >] ) {
+			my Perl6::Element @child =
+				self._longname( $p.hash.<longname> );
 			@child.flat
 		}
 		# $p doesn't contain WS after the block.
@@ -3030,6 +3035,10 @@ return True;
 		}
 	}
 
+	# rule <name> { },
+	# token <name> { },
+	# regex <name> { },
+	#
 	method _regex_declarator( Mu $p ) {
 		if self.assert-hash-keys( $p, [< sym regex_def >] ) {
 			my Perl6::Element @child =
@@ -3072,7 +3081,6 @@ return True;
 #					)
 #				)
 			}
-say 2;
 			@child.append(
 				Perl6::Block.new(
 					:from(
@@ -3104,13 +3112,30 @@ say 2;
 		$p.hash.<right>.Bool
 	}
 
+	# sub <name> ... { },
+	# method <name> ... { },
+	# submethod <name> ... { },
+	# macro <name> ... { }, # XXX ?
+	#
 	method _routine_declarator( Mu $p ) {
 		if self.assert-hash-keys( $p,
-				[< sym routine_def >] ) {
-			(
-				self._sym( $p.hash.<sym> ),
+			[< sym routine_def >] ) {
+			my Perl6::Element @child =
+				self._sym( $p.hash.<sym> );
+			# XXX subsume this into the Perl6::WS object later
+			if $p.hash.<routine_def>.Str ~~ m{ ^ ( \s+ ) } {
+				@child.append(
+					Perl6::WS.new(
+						:from( $p.hash.<routine_def>.from ),
+						:to( $p.hash.<routine_def>.from + $0.chars ),
+						:content( $0.Str )
+					)
+				)
+			}
+			@child.append(
 				self._routine_def( $p.hash.<routine_def> )
-			).flat
+			);
+			@child.flat
 		}
 		elsif self.assert-hash-keys( $p, [< sym method_def >] ) {
 			(
@@ -3217,32 +3242,16 @@ say 2;
 		elsif self.assert-hash-keys( $p,
 				[< deflongname blockoid >], [< trait >] ) {
 			my Perl6::Element @child;
-			if $p.from < $p.hash.<deflongname>.from {
-				@child.append(
-#					Perl6::WS.new(
-#						$p.from,
-#						substr-match( $p, $p.from,
-#							$p.hash.<deflongname>.from - $p.from
-#						)
-#					)
-				)
-			}
 			@child.append(
 				self._deflongname( $p.hash.<deflongname> )
 			);
-			if @child[*-1].to < $p.hash.<blockoid>.from {
-				my Int $_offset = @child[*-1].to;
-				@child.append(
-#					Perl6::WS.new(
-#						@child[*-1].to,
-#						substr(
-#							$p.Str,
-#							@child[*-1].to - $_offset,
-#							$p.hash.<blockoid>.from - @child[*-1].to
-#						)
-#					)
+			@child.append(
+				whitespace-separator(
+					$p,
+					$p.hash.<deflongname>,
+					$p.hash.<blockoid>,
 				)
-			}
+			);
 			@child.append(
 				self._blockoid( $p.hash.<blockoid> )
 			);
@@ -3289,11 +3298,6 @@ say 2;
 				[< typename >] ) {
 			my Perl6::Element @child;
 			@child.append(
-				whitespace-leader(
-					$p, $p.hash.<package_declarator>
-				)
-			);
-			@child.append(
 				self._package_declarator(
 					$p.hash.<package_declarator>
 				)
@@ -3321,16 +3325,27 @@ say 2;
 		}
 	}
 
+	# my <name>
+	# our <naem>
+	# has <name>
+	# HAS <name>
+	# augment <name>
+	# anon <name>
+	# state <name>
+	# supsersede <name>
+	# unit {package,module,class...} <name>
+	#
 	method _scope_declarator( Mu $p ) {
 		if self.assert-hash-keys( $p, [< sym scoped >] ) {
 			my Perl6::Element @child =
 				self._sym( $p.hash.<sym> );
-			if $p.hash.<scoped>.Str ~~ m{ ^ (\s+) } {
+			if $p.hash.<scoped>.Str ~~ m{ ^ ( \s+ ) } {
 				@child.append(
-#					Perl6::WS.new(
-#						$p.hash.<scoped>.from,
-#						$0.Str
-#					)
+					Perl6::WS.new(
+						:from( $p.hash.<sym>.to ),
+						:to( $p.hash.<sym>.to + $0.chars ),
+						:content( $0.Str )
+					)
 				)
 			}
 			@child.append(
@@ -3753,7 +3768,10 @@ say 2;
 			my Perl6::Element @child =
 				self._EXPR( $p.hash.<EXPR> );
 			@child.append(
-				whitespace-terminator( $p, $p.hash.<EXPR> )
+				Perl6::WS.whitespace-terminator(
+					$p,
+					$p.hash.<EXPR>
+				)
 			);
 #`(
 # XXX XXX XXX
