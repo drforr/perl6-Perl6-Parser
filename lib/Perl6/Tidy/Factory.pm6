@@ -1304,7 +1304,7 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			@child
 		}
 		elsif self.assert-hash-keys( $p,
-				[< sym initializer defterm >],
+				[< sym defterm initializer >],
 				[< trait >] ) {
 			my @child =
 				self._sym(
@@ -1314,21 +1314,21 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 				whitespace-separator(
 					$p,
 					$p.hash.<sym>,
-					$p.hash.<initializer>
-				)
-			);
-			@child.append(
-				self._initializer( $p.hash.<initializer> )
-			);
-			@child.append(
-				whitespace-separator(
-					$p,
-					$p.hash.<initializer>,
 					$p.hash.<defterm>
 				)
 			);
 			@child.append(
 				self._defterm( $p.hash.<defterm> )
+			);
+			@child.append(
+				whitespace-separator(
+					$p,
+					$p.hash.<defterm>,
+					$p.hash.<initializer>
+				)
+			);
+			@child.append(
+				self._initializer( $p.hash.<initializer> )
 			);
 			@child
 		}
@@ -1497,7 +1497,6 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 	}
 
 	method _defterm( Mu $p ) {
-		warn "Untested method";
 		if self.assert-hash-keys( $p, [< identifier colonpair >] ) {
 			(
 				self._identifier( $p.hash.<identifier> ),
@@ -4606,36 +4605,43 @@ say 1;
 	# constant
 	#
 	method _type_declarator( Mu $p ) {
+		my Perl6::Element @child;
 		if self.assert-hash-keys( $p,
-				[< sym initializer defterm >], [< trait >] ) {
-			my @child = 
-				self._sym( $p.hash.<sym> );
+				[< sym defterm initializer >], [< trait >] ) {
+			@child = self._sym( $p.hash.<sym> );
 			@child.append(
 				whitespace-separator(
 					$p,
 					$p.hash.<sym>,
-					$p.hash.<initializer>
-				)
-			);
-			@child.append(
-				self._initializer( $p.hash.<initializer> )
-			);
-			@child.append(
-				whitespace-separator(
-					$p,
-					$p.hash.<initializer>,
 					$p.hash.<defterm>
 				)
 			);
 			@child.append(
 				self._defterm( $p.hash.<defterm> )
 			);
-			@child
+			@child.append(
+				whitespace-separator(
+					$p,
+					$p.hash.<defterm>,
+					$p.hash.<initializer>
+				)
+			);
+			@child.append(
+				self._initializer( $p.hash.<initializer> )
+			);
+			if $p.hash.<initializer>.Str ~~ m{ ( \s+ ) $ } {
+				@child.append(
+					Perl6::WS.new(
+						:from( $p.hash.<initializer>.to - $0.chars ),
+						:to( $p.hash.<initializer>.to ),
+						:content( $0.Str )
+					)
+				)
+			}
 		}
 		elsif self.assert-hash-keys( $p,
 				[< sym longname term >], [< trait >] ) {
-			my @child = 
-				self._sym( $p.hash.<sym> );
+			@child = self._sym( $p.hash.<sym> );
 			@child.append(
 				whitespace-separator(
 					$p,
@@ -4644,7 +4650,7 @@ say 1;
 				)
 			);
 			@child.append(
-				self._term( $p.hash.<longname> )
+				self._longname( $p.hash.<longname> )
 			);
 			@child.append(
 				whitespace-separator(
@@ -4656,12 +4662,10 @@ say 1;
 			@child.append(
 				self._term( $p.hash.<term> )
 			);
-			@child
 		}
 		elsif self.assert-hash-keys( $p,
 				[< sym longname >], [< trait >] ) {
-			my @child = 
-				self._sym( $p.hash.<sym> );
+			@child = self._sym( $p.hash.<sym> );
 			@child.append(
 				whitespace-separator(
 					$p,
@@ -4672,12 +4676,12 @@ say 1;
 			@child.append(
 				self._longname( $p.hash.<longname> )
 			);
-			@child
 		}
 		else {
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
+		@child
 	}
 
 	method _typename( Mu $p ) {
