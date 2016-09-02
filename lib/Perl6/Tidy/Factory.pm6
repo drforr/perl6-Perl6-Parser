@@ -848,7 +848,7 @@ class Perl6::Tidy::Factory {
 		if $p.list {
 			for $p.list {
 				if self.assert-hash-keys( $_, [< EXPR >] ) {
-					@child.push(
+					@child.append(
 						self._EXPR( $_.hash.<EXPR> )
 					)
 				}
@@ -1873,6 +1873,12 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			@child =
 				self._fatarrow( $p.hash.<fatarrow> )
 		}
+		elsif self.assert-hash-keys( $p, [< multi_declarator >] ) {
+			@child =
+				self._multi_declarator(
+					$p.hash.<multi_declarator>
+				)
+		}
 		elsif self.assert-hash-keys( $p, [< regex_declarator >] ) {
 			@child =
 				self._regex_declarator(
@@ -2391,7 +2397,20 @@ say 1;
 	method _multi_declarator( Mu $p ) {
 		my Perl6::Element @child;
 		if self.assert-hash-keys( $p, [< sym routine_def >] ) {
-			die "Not implemented yet"
+			@child =
+				self._sym(
+					$p.hash.<sym>
+				);
+			@child.append(
+				whitespace-separator(
+					$p,
+					$p.hash.<sym>,
+					$p.hash.<routine_def>
+				)
+			);
+			@child.append(
+				self._routine_def( $p.hash.<routine_def> )
+			)
 		}
 		elsif self.assert-hash-keys( $p, [< sym declarator >] ) {
 			@child =
@@ -4498,7 +4517,6 @@ say 1;
 					warn "Unhandled case"
 				}
 			}
-			@child
 		}
 		elsif self.assert-hash-keys( $p, [< termalt >] ) {
 			@child =
