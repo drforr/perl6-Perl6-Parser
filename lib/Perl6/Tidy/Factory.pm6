@@ -907,6 +907,13 @@ class Perl6::Tidy::Factory {
 		}
 	}
 
+	# { }
+	# ?{ }
+	# !{ }
+	# var
+	# name
+	# ~~
+	#
 	method _assertion( Mu $p ) {
 		warn "Untested method";
 		if self.assert-hash-keys( $p, [< var >] ) {
@@ -956,6 +963,20 @@ class Perl6::Tidy::Factory {
 
 	method _backmod( Mu $p ) { $p.hash.<backmod>.Bool }
 
+	# qq
+	# \\
+	# miscq # {} . # ?
+	# misc # \W
+	# a
+	# b
+	# c
+	# e
+	# f
+	# n
+	# o
+	# rn
+	# t
+	#
 	method _backslash( Mu $p ) {
 		warn "Untested method";
 		if self.assert-hash-keys( $p, [< sym >] ) {
@@ -1083,6 +1104,15 @@ class Perl6::Tidy::Factory {
 		return True if $p.list;
 	}
 
+	# ( )
+	# STATEMENT_LIST( )
+	# ang
+	# << >>
+	# « »
+	# { }
+	# [ ]
+	# reduce
+	#
 	method _circumfix( Mu $p ) {
 		if self.assert-hash-keys( $p, [< binint VALUE >] ) {
 			self._binint( $p.hash.<binint> )
@@ -1257,6 +1287,50 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 				[< deftermnow initializer term_init >],
 				[< trait >] ) {
 			die "not implemented yet";
+			my @child =
+				self._variable_declarator(
+					$p.hash.<variable_declarator>
+				);
+			@child.append(
+				whitespace-separator(
+					$p,
+					$p.hash.<variable_declarator>,
+					$p.hash.<initializer>
+				)
+			);
+			@child.append(
+				self._initializer( $p.hash.<initializer> )
+			);
+			@child
+		}
+		elsif self.assert-hash-keys( $p,
+				[< sym initializer defterm >],
+				[< trait >] ) {
+			my @child =
+				self._sym(
+					$p.hash.<sym>
+				);
+			@child.append(
+				whitespace-separator(
+					$p,
+					$p.hash.<sym>,
+					$p.hash.<initializer>
+				)
+			);
+			@child.append(
+				self._initializer( $p.hash.<initializer> )
+			);
+			@child.append(
+				whitespace-separator(
+					$p,
+					$p.hash.<initializer>,
+					$p.hash.<defterm>
+				)
+			);
+			@child.append(
+				self._defterm( $p.hash.<defterm> )
+			);
+			@child
 		}
 		elsif self.assert-hash-keys( $p,
 				[< initializer signature >], [< trait >] ) {
@@ -1278,7 +1352,8 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			);
 			@child.append(
 				self._initializer( $p.hash.<initializer> )
-			)
+			);
+			@child
 		}
 		elsif self.assert-hash-keys( $p,
 				[< routine_declarator >], [< trait >] ) {
@@ -1296,6 +1371,12 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 				[< variable_declarator >], [< trait >] ) {
 			self._variable_declarator(
 				$p.hash.<variable_declarator>
+			)
+		}
+		elsif self.assert-hash-keys( $p,
+				[< type_declarator >], [< trait >] ) {
+			self._type_declarator(
+				$p.hash.<type_declarator>
 			)
 		}
 		elsif self.assert-hash-keys( $p,
@@ -1476,6 +1557,9 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 		$p.hash.<doc>.Bool
 	}
 
+	# .
+	# .*
+	#
 	method _dotty( Mu $p ) {
 		if self.assert-hash-keys( $p, [< sym dottyop O >] ) {
 			(
@@ -1573,6 +1657,29 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
+	}
+
+	# \\
+	# {}
+	# $
+	# @
+	# %
+	# &
+	# ' '
+	# " "
+	# ‘ ’
+	# “ ”
+	# colonpair
+	#
+	method _escape( Mu $p ) {
+		warn "Untested method";
+#		if self.assert-hash-keys( $p, [< sign decint >] ) {
+#			die "Not implemented yet"
+#		}
+#		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+#		}
 	}
 
 	method __Term( Mu $p ) {
@@ -1759,17 +1866,17 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 		elsif self.assert-hash-keys( $p, [< fatarrow >] ) {
 			self._fatarrow( $p.hash.<fatarrow> )
 		}
-
 		elsif self.assert-hash-keys( $p, [< regex_declarator >] ) {
 			self._regex_declarator( $p.hash.<regex_declarator> )
 		}
-
 		elsif self.assert-hash-keys( $p, [< routine_declarator >] ) {
 			self._routine_declarator( $p.hash.<routine_declarator> )
 		}
-
 		elsif self.assert-hash-keys( $p, [< scope_declarator >] ) {
 			self._scope_declarator( $p.hash.<scope_declarator> )
+		}
+		elsif self.assert-hash-keys( $p, [< type_declarator >] ) {
+			self._type_declarator( $p.hash.<type_declarator> )
 		}
 
 		# $p doesn't contain WS after the block.
@@ -1940,6 +2047,24 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 		}
 	}
 
+	# << >>
+	# « »
+	#
+	method _infix_circumfix_meta_operator( Mu $p ) {
+		if self.assert-hash-keys( $p, [< sym infixish O >] ) {
+			# XXX Untested
+			Perl6::Operator::Infix.new(
+				$p.hash.<sym>.from,
+				$p.hash.<sym>.Str ~ $p.hash.<infixish>
+			)
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
+	}
+	# « »
+	#
 	method _infix_prefix_meta_operator( Mu $p ) {
 		if self.assert-hash-keys( $p, [< sym infixish O >] ) {
 			# XXX Untested
@@ -1954,6 +2079,12 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 		}
 	}
 
+	# =
+	# :=
+	# ::=
+	# .=
+	# .
+	#
 	method _initializer( Mu $p ) {
 		if self.assert-hash-keys( $p, [< dottyopish sym >] ) {
 			die "Not implemented yet"
@@ -2064,6 +2195,11 @@ return True;
 		$p.hash.<max>.Str
 	}
 
+	# :my
+	# { }
+	# qw
+	# '
+	#
 	method _metachar( Mu $p ) {
 		warn "Untested method";
 		if self.assert-hash-keys( $p, [< sym >] ) {
@@ -2218,6 +2354,11 @@ say 1;
 		}
 	}
 
+	# multi
+	# proto
+	# only
+	# null
+	#
 	method _multi_declarator( Mu $p ) {
 		if self.assert-hash-keys( $p, [< sym routine_def >] ) {
 			die "Not implemented yet"
@@ -2361,6 +2502,8 @@ say 1;
 		}
 	}
 
+	# numish # ?
+	#
 	method _number( Mu $p ) {
 		if self.assert-hash-keys( $p, [< numish >] ) {
 			self._numish( $p.hash.<numish> )
@@ -2500,6 +2643,36 @@ say 1;
 		}
 		elsif self.assert-hash-keys( $p, [< O >] ) {
 			die "Not implemented yet"
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
+	}
+
+	# ?{ }
+	# ??{ }
+	# var
+	#
+	method _p5metachar( Mu $p ) {
+		# $p doesn't contain WS after the block.
+		if self.assert-hash-keys( $p, [< sym package_def >] ) {
+			my Perl6::Element @child =
+				self._sym( $p.hash.<sym> );
+			@child.append(
+				whitespace-separator(
+					$p,
+					$p.hash.<sym>,
+					$p.hash.<package_def>
+				)
+			);
+			@child.append(
+				self._package_def( $p.hash.<package_def> )
+			);
+			@child.append(
+				semicolon-terminator( $p )
+			);
+			@child
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -2852,6 +3025,56 @@ say 1;
 		}
 	}
 
+	# Needs to be run through a different parser?
+
+	# delimited
+	# delimited_comment
+	# delimited_table
+	# delimited_code
+	# paragraph
+	# paragraph_comment
+	# paragraph_table
+	# paragraph_code
+	# abbreviated
+	# abbreviated_comment
+	# abbreviated_table
+	# abbreviated_code
+	# finish
+	# config
+	# text
+	#
+	method _pod_block( Mu $p ) {
+		# XXX fix later
+		self._EXPR( $p.list.[0].hash.<EXPR> )
+	}
+
+	# block
+	# text
+	#
+	method _pod_content( Mu $p ) {
+		# XXX fix later
+		self._EXPR( $p.list.[0].hash.<EXPR> )
+	}
+
+	# regular
+	# code
+	#
+	method _pod_textcontent( Mu $p ) {
+		# XXX fix later
+		self._EXPR( $p.list.[0].hash.<EXPR> )
+	}
+
+	method _post_constraint( Mu $p ) {
+		# XXX fix later
+		self._EXPR( $p.list.[0].hash.<EXPR> )
+	}
+
+	# [ ]
+	# { }
+	# ang
+	# « »
+	# ( )
+	#
 	method _postcircumfix( Mu $p ) {
 		if self.assert-hash-keys( $p, [< arglist O >] ) {
 			die "Not implemented yet"
@@ -2884,11 +3107,8 @@ say 1;
 		}
 	}
 
-	method _post_constraint( Mu $p ) {
-		# XXX fix later
-		self._EXPR( $p.list.[0].hash.<EXPR> )
-	}
-
+	# ⁿ
+	#
 	method _postfix( Mu $p ) {
 		if self.assert-hash-keys( $p, [< sym O >] ) {
 			Perl6::Operator::Infix.new( $p.hash.<sym> )
@@ -2943,6 +3163,9 @@ say 1;
 		}
 	}
 
+	# **
+	# rakvar
+	#
 	method _quantifier( Mu $p ) {
 		warn "Untested method";
 		if self.assert-hash-keys( $p, [< sym min max backmod >] ) {
@@ -2968,6 +3191,25 @@ say 1;
 		}
 	}
 
+	# apos # ' .. '
+	# sapos # ('smart single quotes')..()
+	# lapos # ('low smart single quotes')..
+	# hapos # ('high smart single quotes')..
+	# dblq # "
+	# sdblq # ('smart double quotes')
+	# ldblq # ('low double smart quotes')
+	# hdblq # ('high double smart quotes')
+	# crnr # ('corner quotes')
+	# qq
+	# q
+	# Q
+	# / /
+	# rx
+	# m
+	# tr
+	# s
+	# quasi
+	#
 	method _quote( Mu $p ) {
 		if self.assert-hash-keys( $p, [< sym quibble rx_adverbs >] ) {
 			die "Not implemented yet"
@@ -3749,6 +3991,24 @@ say 1;
 		$p.hash.<specials>.Bool
 	}
 
+	# if
+	# unless
+	# while
+	# repeat
+	# for
+	# whenever
+	# loop
+	# need
+	# import
+	# use
+	# require
+	# given
+	# when
+	# default
+	# CATCH
+	# CONTROL
+	# QUIT
+	#
 	method _statement_control( Mu $p ) {
 		warn "Untested method";
 		if self.assert-hash-keys( $p, [< block sym e1 e2 e3 >] ) {
@@ -3840,29 +4100,6 @@ say 1;
 # XXX XXX XXX
 # XXX This should be pushed into the blocks where they belong.
 # XXX XXX XXX
-			if $p.hash.<EXPR>.hash.<routine_declarator> {
-				if $p.hash.<EXPR>.to < $p.to {
-					@child.append(
-#						Perl6::WS.new(
-#							$p.hash.<EXPR>.to,
-#							substr-match( $p,
-#								$p.hash.<EXPR>.to,
-#								$p.to - $p.hash.<EXPR>.to
-#							)
-#						)
-					)
-				}
-			}
-			elsif $p.hash.<EXPR>.hash.<scope_declarator> {
-				if $p.Str ~~ m{ (\s+) $ } {
-					@child.append(
-#						Perl6::WS.new(
-#							$p.hash.<EXPR>.to,
-#							$0.Str
-#						)
-					)
-				}
-			}
 			elsif $p.hash.<EXPR>.list.elems == 2 and
 					$p.hash.<EXPR>.hash.<infix> {
 				@child.append(
@@ -3959,6 +4196,16 @@ say 1;
 		@child
 	}
 
+	# if
+	# unless
+	# when
+	# with
+	# without
+	# while
+	# until
+	# for
+	# given
+	#
 	method _statement_mod_cond( Mu $p ) {
 		warn "Untested method";
 		if self.assert-hash-keys( $p, [< sym modifier_expr >] ) {
@@ -3970,6 +4217,11 @@ say 1;
 		}
 	}
 
+	# while
+	# until
+	# for
+	# given
+	#
 	method _statement_mod_loop( Mu $p ) {
 		warn "Untested method";
 		if self.assert-hash-keys( $p, [< sym smexpr >] ) {
@@ -3981,6 +4233,36 @@ say 1;
 		}
 	}
 
+	# BEGIN
+	# CHECK
+	# COMPOSE
+	# INIT
+	# ENTER
+	# FIRST
+	# END
+	# LEAVE
+	# KEEP
+	# UNDO
+	# NEXT
+	# LAST
+	# PRE
+	# POST
+	# CLOSE
+	# DOC
+	# do
+	# gather
+	# supply
+	# react
+	# once
+	# start
+	# lazy
+	# eager
+	# hyper
+	# race
+	# sink
+	# try
+	# quietly
+	#
 	method _statement_prefix( Mu $p ) {
 		warn "Untested method";
 		if self.assert-hash-keys( $p, [< sym blorst >] ) {
@@ -4032,10 +4314,49 @@ say 1;
 		}
 	}
 
+	# fatarrow
+	# colonpair
+	# variable
+	# package_declarator
+	# scope_declarator
+	# routine_declarator
+	# multi_declarator
+	# regex_declarator
+	# type_declarator
+	# circumfix
+	# statement_prefix
+	# sigterm
+	# ∞
+	# lambda
+	# unquote
+	# ?IDENT
+	# self
+	# now
+	# time
+	# empty_set
+	# rand
+	# ...
+	# ???
+	# !!!
+	# dotty
+	# identifier
+	# name
+	# nqp::op
+	# nqp::const
+	# *
+	# **
+	# capterm
+	# onlystar
+	# value
+	#
 	method _term( Mu $p ) {
-		warn "Untested method";
-		if self.assert-hash-keys( $p, [< methodop >] ) {
-			self._methodop( $p.hash.<methodop> )
+		if self.assert-hash-keys( $p, [< circumfix >] ) {
+			self._circumfix( $p.hash.<circumfix> )
+		}
+		elsif self.assert-hash-keys( $p, [< name >], [< colonpair >] ) {
+			my @child = 
+				self._name( $p.hash.<name> );
+			@child
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -4205,6 +4526,14 @@ say 1;
 		self._trait_mod( $p.list.[0].hash.<trait_mod> )
 	}
 
+	# is
+	# hides
+	# does
+	# will
+	# of
+	# returns
+	# handles
+	#
 	method _trait_mod( Mu $p ) {
 		if self.assert-hash-keys( $p,
 				[< sym longname >],
@@ -4272,18 +4601,78 @@ say 1;
 		@child
 	}
 
+	# enum
+	# subset
+	# constant
+	#
 	method _type_declarator( Mu $p ) {
-		warn "Untested method";
 		if self.assert-hash-keys( $p,
-				[< sym initializer variable >], [< trait >] ) {
-			die "Not implemented yet"
+				[< sym initializer defterm >], [< trait >] ) {
+			my @child = 
+				self._sym( $p.hash.<sym> );
+			@child.append(
+				whitespace-separator(
+					$p,
+					$p.hash.<sym>,
+					$p.hash.<initializer>
+				)
+			);
+			@child.append(
+				self._initializer( $p.hash.<initializer> )
+			);
+			@child.append(
+				whitespace-separator(
+					$p,
+					$p.hash.<initializer>,
+					$p.hash.<defterm>
+				)
+			);
+			@child.append(
+				self._defterm( $p.hash.<defterm> )
+			);
+			@child
 		}
 		elsif self.assert-hash-keys( $p,
-				[< sym initializer defterm >], [< trait >] ) {
-			die "Not implemented yet"
+				[< sym longname term >], [< trait >] ) {
+			my @child = 
+				self._sym( $p.hash.<sym> );
+			@child.append(
+				whitespace-separator(
+					$p,
+					$p.hash.<sym>,
+					$p.hash.<longname>
+				)
+			);
+			@child.append(
+				self._term( $p.hash.<longname> )
+			);
+			@child.append(
+				whitespace-separator(
+					$p,
+					$p.hash.<longname>,
+					$p.hash.<term>
+				)
+			);
+			@child.append(
+				self._term( $p.hash.<term> )
+			);
+			@child
 		}
-		elsif self.assert-hash-keys( $p, [< sym initializer >] ) {
-			die "Not implemented yet"
+		elsif self.assert-hash-keys( $p,
+				[< sym longname >], [< trait >] ) {
+			my @child = 
+				self._sym( $p.hash.<sym> );
+			@child.append(
+				whitespace-separator(
+					$p,
+					$p.hash.<sym>,
+					$p.hash.<longname>
+				)
+			);
+			@child.append(
+				self._longname( $p.hash.<longname> )
+			);
+			@child
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -4364,6 +4753,10 @@ say 1;
 		$p.hash.<VALUE>.Str || $p.hash.<VALUE>.Int
 	}
 
+	# quote
+	# number
+	# version
+	#
 	method _value( Mu $p ) {
 		if self.assert-hash-keys( $p, [< number >] ) {
 			self._number( $p.hash.<number> )
