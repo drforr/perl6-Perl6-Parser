@@ -738,14 +738,14 @@ class Perl6::Tidy::Factory {
 	}
 
 	method build( Mu $p ) {
-		my Perl6::Element @child =
+		my Perl6::Element @_child =
 			self._statementlist( $p.hash.<statementlist> );
 		Perl6::Document.new(
-			:child( @child )
+			:child( @_child )
 		)
 	}
 
-	method make-postcircumfix( Mu $p, @child ) {
+	method make-postcircumfix( Mu $p, @_child ) {
 		$p.Str ~~ m{ ^ (.) }; my Str $front = ~$0;
 		$p.Str ~~ m{ (.) $ }; my Str $back = ~$0;
 		Perl6::Operator::PostCircumfix.new(
@@ -753,7 +753,7 @@ class Perl6::Tidy::Factory {
 			:from( $p.from ),
 			:to( $p.to ),
 			:delimiter( $front, $back ),
-			:child( @child )
+			:child( @_child )
 		)
 	}
 
@@ -860,7 +860,6 @@ class Perl6::Tidy::Factory {
 					warn "Unhandled case"
 				}
 			}
-			@child
 		}
 		elsif self.assert-hash-keys( $p,
 				[< deftermnow initializer term_init >],
@@ -877,6 +876,7 @@ class Perl6::Tidy::Factory {
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
+		@child
 	}
 
 	method _args( Mu $p ) {
@@ -1023,11 +1023,10 @@ class Perl6::Tidy::Factory {
 						$p,
 						@_child
 					)
-				);
-				@child
+				)
 			}
 			else {
-				(
+				@child =
 					Perl6::Statement.new(
 						:from( $p.from ),
 						:to( $p.to ),
@@ -1037,13 +1036,13 @@ class Perl6::Tidy::Factory {
 							)
 						)
 					)
-				)
 			}
 		}
 		else {
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
+		@child
 	}
 
 	method _blorst( Mu $p ) {
@@ -1090,12 +1089,12 @@ class Perl6::Tidy::Factory {
 					warn "Unhandled case"
 				}
 			}
-			@child
 		}
 		else {
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
+		@child
 	}
 
 	method _charspec( Mu $p ) {
@@ -1116,19 +1115,24 @@ class Perl6::Tidy::Factory {
 	method _circumfix( Mu $p ) {
 		my Perl6::Element @child;
 		if self.assert-hash-keys( $p, [< binint VALUE >] ) {
-			self._binint( $p.hash.<binint> )
+			@child =
+				self._binint( $p.hash.<binint> )
 		}
 		elsif self.assert-hash-keys( $p, [< octint VALUE >] ) {
-			self._octint( $p.hash.<octint> )
+			@child =
+				self._octint( $p.hash.<octint> )
 		}
 		elsif self.assert-hash-keys( $p, [< decint VALUE >] ) {
-			self._decint( $p.hash.<decint> )
+			@child =
+				self._decint( $p.hash.<decint> )
 		}
 		elsif self.assert-hash-keys( $p, [< hexint VALUE >] ) {
-			self._hexint( $p.hash.<hexint> )
+			@child =
+				self._hexint( $p.hash.<hexint> )
 		}
 		elsif self.assert-hash-keys( $p, [< pblock >] ) {
-			self._pblock( $p.hash.<pblock> )
+			@child =
+				self._pblock( $p.hash.<pblock> )
 		}
 		elsif self.assert-hash-keys( $p, [< semilist >] ) {
 			my Perl6::Element @_child;
@@ -1138,7 +1142,8 @@ class Perl6::Tidy::Factory {
 self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 				)
 			}
-			self.make-postcircumfix( $p, @_child )
+			@child =
+				self.make-postcircumfix( $p, @_child )
 		}
 		elsif self.assert-hash-keys( $p, [< nibble >] ) {
 			# XXX <nibble> can probably be worked with
@@ -1148,12 +1153,14 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 					:to( $p.hash.<nibble>.to ),
 					:content( $p.hash.<nibble>.Str )
 				);
-			Perl6::Operator::Circumfix.new( $p, @_child )
+			@child =
+				Perl6::Operator::Circumfix.new( $p, @_child )
 		}
 		else {
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
+		@child
 	}
 
 	method _codeblock( Mu $p ) {
@@ -1302,8 +1309,7 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			);
 			@child.append(
 				self._initializer( $p.hash.<initializer> )
-			);
-			@child
+			)
 		}
 		elsif self.assert-hash-keys( $p,
 				[< sym defterm initializer >],
@@ -1331,8 +1337,7 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			);
 			@child.append(
 				self._initializer( $p.hash.<initializer> )
-			);
-			@child
+			)
 		}
 		elsif self.assert-hash-keys( $p,
 				[< initializer signature >], [< trait >] ) {
@@ -1354,43 +1359,48 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			);
 			@child.append(
 				self._initializer( $p.hash.<initializer> )
-			);
-			@child
+			)
 		}
 		elsif self.assert-hash-keys( $p,
 				[< routine_declarator >], [< trait >] ) {
-			self._routine_declarator(
-				$p.hash.<routine_declarator>
-			)
+			@child =
+				self._routine_declarator(
+					$p.hash.<routine_declarator>
+				)
 		}
 		elsif self.assert-hash-keys( $p,
 				[< regex_declarator >], [< trait >] ) {
-			self._regex_declarator(
-				$p.hash.<regex_declarator>
-			)
+			@child =
+				self._regex_declarator(
+					$p.hash.<regex_declarator>
+				)
 		}
 		elsif self.assert-hash-keys( $p,
 				[< variable_declarator >], [< trait >] ) {
-			self._variable_declarator(
-				$p.hash.<variable_declarator>
-			)
+			@child =
+				self._variable_declarator(
+					$p.hash.<variable_declarator>
+				)
 		}
 		elsif self.assert-hash-keys( $p,
 				[< type_declarator >], [< trait >] ) {
-			self._type_declarator(
-				$p.hash.<type_declarator>
-			)
+			@child =
+				self._type_declarator(
+					$p.hash.<type_declarator>
+				)
 		}
 		elsif self.assert-hash-keys( $p,
 				[< signature >], [< trait >] ) {
 			my Perl6::Element @_child =
 				self._signature( $p.hash.<signature> );
-			Perl6::Operator::circumfix.new( $p, @_child )
+			@child =
+				Perl6::Operator::circumfix.new( $p, @_child )
 		}
 		else {
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
+		@child
 	}
 
 	method _DECL( Mu $p ) {
@@ -1432,14 +1442,16 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 		elsif self.assert-hash-keys( $p,
 				[< routine_declarator >],
 				[< trait >] ) {
-			self._routine_declarator( $p.hash.<routine_declarator>)
+			self._routine_declarator(
+				$p.hash.<routine_declarator>
+			)
 		}
 		elsif self.assert-hash-keys( $p, [< declarator >] ) {
 			self._declarator( $p.hash.<declarator> )
 		}
 		elsif self.assert-hash-keys( $p,
 				[< signature >], [< trait >] ) {
-			self._declarator( $p.hash.<declarator> )
+			self.signature( $p.hash.<signature> )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -1480,12 +1492,12 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 					warn "Unhandled case"
 				}
 			}
-			@child.flat
 		}
 		else {
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
+		@child.flat
 	}
 
 	method _deflongname( Mu $p ) {
@@ -1731,7 +1743,7 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 				[< postfix_prefix_meta_operator >] ) {
 			# XXX Look into this at some point.
 			if substr-match( $p.orig, $p.from, HYPER.chars ) eq HYPER {
-				(
+				@child =
 					self.__Term( $p.list.[0] ),
 					# XXX note that '>>' is a substring
 					Perl6::Operator::Prefix.new(
@@ -1742,43 +1754,38 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 						)
 					),
 					self._dotty( $p.hash.<dotty> )
-				).flat
 			}
 			else {
-				(
+				@child =
 					self.__Term( $p.list.[0] ),
 					self._dotty( $p.hash.<dotty> )
-				).flat
 			}
 		}
 		elsif self.assert-hash-keys( $p,
 				[< prefix OPER >],
 				[< prefix_postfix_meta_operator >] ) {
-			(
+			@child =
 				self._prefix( $p.hash.<prefix> ),
 				self.__Term( $p.list.[0] )
-			).flat
 		}
 		elsif self.assert-hash-keys( $p,
 				[< postcircumfix OPER >],
 				[< postfix_prefix_meta_operator >] ) {
 			my Perl6::Element @_child =
 				self._postcircumfix( $p.hash.<postcircumfix> );
-			(
+			@child =
 				self.__Term( $p.list.[0] ),
 				self.make-postcircumfix(
 					$p.hash.<postcircumfix>,
 					@_child
 				)
-			).flat
 		}
 		elsif self.assert-hash-keys( $p,
 				[< postfix OPER >],
 				[< postfix_prefix_meta_operator >] ) {
-			(
+			@child =
 				self.__Term( $p.list.[0] ),
 				self._postfix( $p.hash.<postfix> )
-			).flat
 		}
 		elsif self.assert-hash-keys( $p,
 				[< infix_prefix_meta_operator OPER >] ) {
@@ -1791,9 +1798,7 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			);
 			@child.append(
 				self.__Term( $p.list.[1] )
-			);
-
-			@child.flat
+			)
 		}
 		# XXX ternary operators don't follow the string boundary rules
 		# XXX $p.list.[0] is actually the start of the expression.
@@ -1808,8 +1813,7 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 					Perl6::Operator::Infix.new(
 						$p, BANG-BANG
 					),
-					self.__Term( $p.list.[2] );
-				@child.flat
+					self.__Term( $p.list.[2] )
 			}
 			else {
 				@child =
@@ -1837,72 +1841,91 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 				}
 				@child.append(
 					self.__Term( $p.list.[1] )
-				);
-				@child.flat
+				)
 			}
 		}
 		elsif self.assert-hash-keys( $p, [< identifier args >] ) {
-			(
+			@child =
 				self._identifier( $p.hash.<identifier> ),
 				self._args( $p.hash.<args> )
-			)
 		}
 		elsif self.assert-hash-keys( $p, [< sym args >] ) {
-			Perl6::Operator::Infix.new( $p.hash.<sym> )
+			@child = 
+				Perl6::Operator::Infix.new( $p.hash.<sym> )
 		}
 		elsif self.assert-hash-keys( $p, [< longname args >] ) {
 			if $p.hash.<args> and
 			   $p.hash.<args>.hash.<semiarglist> {
-				(
+				@child =
 					self._longname( $p.hash.<longname> ),
 					self._args( $p.hash.<args> )
-				)
 			}
 			else {
-				self._longname( $p.hash.<longname> )
+				@child =
+					self._longname( $p.hash.<longname> )
 			}
 		}
 		elsif self.assert-hash-keys( $p, [< circumfix >] ) {
-			self._circumfix( $p.hash.<circumfix> )
+			@child =
+				self._circumfix( $p.hash.<circumfix> )
 		}
 		elsif self.assert-hash-keys( $p, [< fatarrow >] ) {
-			self._fatarrow( $p.hash.<fatarrow> )
+			@child =
+				self._fatarrow( $p.hash.<fatarrow> )
 		}
 		elsif self.assert-hash-keys( $p, [< regex_declarator >] ) {
-			self._regex_declarator( $p.hash.<regex_declarator> )
+			@child =
+				self._regex_declarator(
+					$p.hash.<regex_declarator>
+				)
 		}
 		elsif self.assert-hash-keys( $p, [< routine_declarator >] ) {
-			self._routine_declarator( $p.hash.<routine_declarator> )
+			@child =
+				self._routine_declarator(
+					$p.hash.<routine_declarator>
+				)
 		}
 		elsif self.assert-hash-keys( $p, [< scope_declarator >] ) {
-			self._scope_declarator( $p.hash.<scope_declarator> )
+			@child =
+				self._scope_declarator(
+					$p.hash.<scope_declarator>
+				)
 		}
 		elsif self.assert-hash-keys( $p, [< type_declarator >] ) {
-			self._type_declarator( $p.hash.<type_declarator> )
+			@child =
+				self._type_declarator(
+					$p.hash.<type_declarator>
+				)
 		}
 
 		# $p doesn't contain WS after the block.
 		elsif self.assert-hash-keys( $p, [< package_declarator >] ) {
-			self._package_declarator(
-				$p.hash.<package_declarator>
-			)
+			@child =
+				self._package_declarator(
+					$p.hash.<package_declarator>
+				)
 		}
 		elsif self.assert-hash-keys( $p, [< value >] ) {
-			self._value( $p.hash.<value> )
+			@child =
+				self._value( $p.hash.<value> )
 		}
 		elsif self.assert-hash-keys( $p, [< variable >] ) {
-			self._variable( $p.hash.<variable> )
+			@child =
+				self._variable( $p.hash.<variable> )
 		}
 		elsif self.assert-hash-keys( $p, [< colonpair >] ) {
-			self._colonpair( $p.hash.<colonpair> )
+			@child =
+				self._colonpair( $p.hash.<colonpair> )
 		}
 		elsif self.assert-hash-keys( $p, [< longname >] ) {
-			self._longname( $p.hash.<longname> )
+			@child =
+				self._longname( $p.hash.<longname> )
 		}
 		else {
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
+		@child.flat
 	}
 
 	method _fake_infix( Mu $p ) {
@@ -1974,12 +1997,12 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 #					)
 #				)
 			}
-			@child
 		}
 		else {
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
+		@child
 	}
 
 	method __FloatingPoint( Mu $p ) {
@@ -2011,15 +2034,16 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 					warn "Unhandled case"
 				}
 			}
-			@child
 		}
 		elsif $p.Str {
-			Perl6::Bareword.new( $p )
+			@child =
+				Perl6::Bareword.new( $p )
 		}
 		else {
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
+		@child
 	}
 
 	method _infix( Mu $p ) {
@@ -2105,13 +2129,13 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			);
 			@child.append(
 				self._EXPR( $p.hash.<EXPR> )
-			);
-			@child.flat
+			)
 		}
 		else {
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
+		@child.flat
 	}
 
 	method _integer( Mu $p ) {
@@ -2276,13 +2300,13 @@ say 1;
 					$p,
 					$p.hash.<blockoid>
 				)
-			);
-			@child.flat;
+			)
 		}
 		else {
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
+		@child.flat
 	}
 
 	method _methodop( Mu $p ) {
@@ -2351,12 +2375,12 @@ say 1;
 					warn "Unhandled case"
 				}
 			}
-			@child
 		}
 		else {
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
+		@child
 	}
 
 	# multi
@@ -2365,22 +2389,35 @@ say 1;
 	# null
 	#
 	method _multi_declarator( Mu $p ) {
+		my Perl6::Element @child;
 		if self.assert-hash-keys( $p, [< sym routine_def >] ) {
 			die "Not implemented yet"
 		}
 		elsif self.assert-hash-keys( $p, [< sym declarator >] ) {
-			(
-				self._sym( $p.hash.<sym> ),
+			@child =
+				self._sym(
+					$p.hash.<sym>
+				);
+			@child.append(
+				whitespace-separator(
+					$p,
+					$p.hash.<sym>,
+					$p.hash.<declarator>
+				)
+			);
+			@child.append(
 				self._declarator( $p.hash.<declarator> )
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< declarator >] ) {
-			self._declarator( $p.hash.<declarator> )
+			@child =
+				self._declarator( $p.hash.<declarator> )
 		}
 		else {
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
+		@child
 	}
 
 	method _multisig( Mu $p ) {
@@ -2499,12 +2536,12 @@ say 1;
 					warn "Unhandled case"
 				}
 			}
-			@child
 		}
 		else {
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
+		@child
 	}
 
 	# numish # ?
@@ -2677,13 +2714,13 @@ say 1;
 			);
 			@child.append(
 				semicolon-terminator( $p )
-			);
-			@child
+			)
 		}
 		else {
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
+		@child
 	}
 
 	# package <name> { }
@@ -2715,8 +2752,7 @@ say 1;
 			);
 			@child.append(
 				semicolon-terminator( $p )
-			);
-			@child
+			)
 		}
 		elsif self.assert-hash-keys( $p, [< sym typename >] ) {
 			@child =
@@ -2733,8 +2769,7 @@ say 1;
 			);
 #			@child.append(
 #				semicolon-terminator( $p )
-#			);
-			@child
+#			)
 		}
 		elsif self.assert-hash-keys( $p, [< sym trait >] ) {
 			@child =
@@ -2751,13 +2786,13 @@ say 1;
 			);
 #			@child.append(
 #				semicolon-terminator( $p )
-#			);
-			@child
+#			)
 		}
 		else {
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
+		@child
 	}
 
 	method _package_def( Mu $p ) {
@@ -2768,14 +2803,12 @@ say 1;
 				self._longname( $p.hash.<longname> );
 			@child.append(
 				self._statementlist( $p.hash.<statementlist> )
-			);
-			@child.flat
+			)
 		}
 		elsif self.assert-hash-keys( $p,
 				[< longname >], [< colonpair >] ) {
 			@child =
-				self._longname( $p.hash.<longname> );
-			@child.flat
+				self._longname( $p.hash.<longname> )
 		}
 		# $p doesn't contain WS after the block.
 		elsif self.assert-hash-keys( $p,
@@ -2791,16 +2824,17 @@ say 1;
 			);
 			@child.append(
 				self._blockoid( $p.hash.<blockoid> )
-			).flat;
-			@child
+			)
 		}
 		elsif self.assert-hash-keys( $p, [< blockoid >], [< trait >] ) {
-			self._blockoid( $p.hash.<blockoid> )
+			@child =
+				self._blockoid( $p.hash.<blockoid> )
 		}
 		else {
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
+		@child.flat
 	}
 
 	method _parameter( Mu $p ) {
@@ -2832,7 +2866,7 @@ say 1;
 					self._post_constraint(
 						$_.hash.<post_constraint>
 					)
-				);
+				)
 			}
 			elsif self.assert-hash-keys( $_,
 				[< type_constraint param_var quant >],
@@ -2853,7 +2887,7 @@ say 1;
 				}
 				@child.append(
 					self._param_var( $_.hash.<param_var> )
-				);
+				)
 			}
 			elsif self.assert-hash-keys( $_,
 				[< param_var quant default_value >],
@@ -2871,7 +2905,7 @@ say 1;
 					self._default_value(
 						$_.hash.<default_value>
 					).flat
-				);
+				)
 			}
 			elsif self.assert-hash-keys( $_,
 				[< param_var quant >],
@@ -2881,7 +2915,7 @@ say 1;
 				@child.append(
 					self._param_var( $_.hash.<param_var> )#,
 #					self._quant( $_.hash.<quant> )
-				);
+				)
 			}
 			elsif self.assert-hash-keys( $_,
 				[< named_param quant >],
@@ -2899,7 +2933,7 @@ say 1;
 					self._named_param(
 						$_.hash.<named_param>
 					)
-				);
+				)
 			}
 			elsif self.assert-hash-keys( $_,
 				[< type_constraint >],
@@ -3273,7 +3307,6 @@ say 1;
 					warn "Unhandled case"
 				}
 			}
-			@child
 		}
 		elsif self.assert-hash-keys( $p,
 				[< circumfix bracket radix >],
@@ -3281,12 +3314,14 @@ say 1;
 			die "Not implemented yet"
 		}
 		elsif self.assert-hash-keys( $p, [< identifier >] ) {
-			self._identifier( $p.hash.<identifier> )
+			@child =
+				self._identifier( $p.hash.<identifier> )
 		}
 		else {
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
+		@child
 	}
 
 	method _radix( Mu $p ) {
@@ -3335,13 +3370,13 @@ say 1;
 			);
 			@child.append(
 				self._regex_def( $p.hash.<regex_def> )
-			);
-			@child
+			)
 		}
 		else {
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
+		@child
 	}
 
 	method _regex_def( Mu $p ) {
@@ -3389,12 +3424,12 @@ say 1;
 					)
 				)
 			}
-			@child
 		}
 		else {
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
+		@child
 	}
 
 	method _right( Mu $p ) {
@@ -3424,8 +3459,7 @@ say 1;
 			}
 			@child.append(
 				self._routine_def( $p.hash.<routine_def> )
-			);
-			@child.flat
+			)
 		}
 		elsif self.assert-hash-keys( $p, [< sym method_def >] ) {
 			@child =
@@ -3442,13 +3476,13 @@ say 1;
 			}
 			@child.append(
 				self._method_def( $p.hash.<method_def> )
-			);
-			@child.flat
+			)
 		}
 		else {
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
+		@child.flat
 	}
 
 	method _routine_def( Mu $p ) {
@@ -3518,8 +3552,7 @@ say 1;
 			}
 			@child.append(
 				self._blockoid( $p.hash.<blockoid> )
-			);
-			@child.flat
+			)
 		}
 		elsif self.assert-hash-keys( $p,
 				[< deflongname statementlist >],
@@ -3531,28 +3564,27 @@ say 1;
 			);
 			@child.append(
 				semicolon-terminator( $p )
-			);
-			@child.flat
+			)
 		}
 		elsif self.assert-hash-keys( $p,
 				[< deflongname trait blockoid >] ) {
-			(
+			@child = (
 				self._deflongname( $p.hash.<deflongname> ),
 				self._trait( $p.hash.<trait> ),
 				self._blockoid( $p.hash.<blockoid> )
-			).flat
+			)
 		}
 		elsif self.assert-hash-keys( $p,
 				[< blockoid multisig >], [< trait >] ) {
 			my Perl6::Element @_child =
 				self._multisig( $p.hash.<multisig> );
-			(
+			@child = (
 				Perl6::Operator::Circumfix.new(
 					:delimiter( '(', ')' ),
 					:child( @_child )
 				),
 				self._blockoid( $p.hash.<blockoid> )
-			).flat
+			)
 		}
 		elsif self.assert-hash-keys( $p,
 				[< deflongname blockoid >], [< trait >] ) {
@@ -3567,16 +3599,17 @@ say 1;
 			);
 			@child.append(
 				self._blockoid( $p.hash.<blockoid> )
-			);
-			@child.flat
+			)
 		}
 		elsif self.assert-hash-keys( $p, [< blockoid >], [< trait >] ) {
-			self._blockoid( $p.hash.<blockoid> )
+			@child =
+				self._blockoid( $p.hash.<blockoid> )
 		}
 		else {
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
+		@child.flat
 	}
 
 	method _rx_adverbs( Mu $p ) {
@@ -3600,8 +3633,16 @@ say 1;
 		#
 		if self.assert-hash-keys( $p,
 					[< multi_declarator DECL typename >] ) {
-			(
-				self._typename( $p.hash.<typename> ),
+			@child =
+				self._typename( $p.hash.<typename> );
+			@child.append(
+				whitespace-separator(
+					$p,
+					$p.hash.<typename>,
+					$p.hash.<multi_declarator>
+				)
+			);
+			@child.append(
 				self._multi_declarator(
 					$p.hash.<multi_declarator>
 				)
@@ -3613,13 +3654,20 @@ say 1;
 			@child =
 				self._package_declarator(
 					$p.hash.<package_declarator>
-				);
-			@child.flat
+				)
 		}
 		elsif self.assert-hash-keys( $p,
-				[< package_declarator sym >] ) {
-			(
-				self._sym( $p.hash.<sym> ),
+				[< sym package_declarator >] ) {
+			@child =
+				self._sym( $p.hash.<sym> );
+			@child.append(
+				whitespace-separator(
+					$p,
+					$p.hash.<sym>,
+					$p.hash.<package_declarator>
+				)
+			);
+			@child.append(
 				self._package_declarator(
 					$p.hash.<package_declarator>
 				)
@@ -3627,14 +3675,14 @@ say 1;
 		}
 		elsif self.assert-hash-keys( $p,
 				[< declarator DECL >], [< typename >] ) {
-			(
+			@child =
 				self._declarator( $p.hash.<declarator> )
-			).flat
 		}
 		else {
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
+		@child.flat
 	}
 
 	# my <name>
@@ -3663,13 +3711,13 @@ say 1;
 			}
 			@child.append(
 				self._scoped( $p.hash.<scoped> ).flat
-			);
-			@child.flat
+			)
 		}
 		else {
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
+		@child.flat
 	}
 
 	method _semiarglist( Mu $p ) {
@@ -3683,7 +3731,6 @@ say 1;
 	}
 
 	method _semilist( Mu $p ) {
-		my Perl6::Element @child;
 		CATCH {
 			when X::Multi::NoMatch { }
 		}
@@ -3815,7 +3862,7 @@ say 1;
 				self._post_constraint(
 					$p.hash.<post_constraint>
 				)
-			);
+			)
 		}
 		elsif self.assert-hash-keys( $p,
 			[< type_constraint param_var quant >],
@@ -3833,7 +3880,7 @@ say 1;
 			}
 			@child.append(
 				self._param_var( $p.hash.<param_var> )
-			);
+			)
 		}
 		elsif self.assert-hash-keys( $p,
 			[< param_var quant default_value >],
@@ -3863,7 +3910,7 @@ say 1;
 				self._default_value(
 					$p.hash.<default_value>
 				).flat
-			);
+			)
 		}
 		elsif self.assert-hash-keys( $p,
 			[< param_var quant >],
@@ -3873,7 +3920,7 @@ say 1;
 			@child.append(
 				self._param_var( $p.hash.<param_var> )#,
 #					self._quant( $p.hash.<quant> )
-			);
+			)
 		}
 		elsif self.assert-hash-keys( $p,
 			[< named_param quant >],
@@ -3891,7 +3938,7 @@ say 1;
 				self._named_param(
 					$p.hash.<named_param>
 				)
-			);
+			)
 		}
 		elsif self.assert-hash-keys( $p,
 			[< type_constraint >],
@@ -3915,7 +3962,7 @@ say 1;
 		if self.assert-hash-keys( $p,
 				[< parameter typename >],
 				[< param_sep >] ) {
-			(
+			@child = (
 				self._typename( $p.hash.<typename> ),
 				self._parameter( $p.hash.<parameter> )
 			)
@@ -3967,23 +4014,24 @@ say 1;
 #					)
 				)
 			}
-			@child.flat
 		}
 		elsif self.assert-hash-keys( $p,
 				[< param_sep >],
 				[< parameter >] ) {
-			(
+			@child = (
 				self._parameter( $p.hash.<parameter> )
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< >],
 				[< param_sep parameter >] ) {
-			()
+			@child = (
+			)
 		}
 		else {
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
+		@child.flat
 	}
 
 	method _smexpr( Mu $p ) {
@@ -4085,15 +4133,13 @@ say 1;
 					warn "Unhandled case"
 				}
 			}
-			@child
 		}
 		elsif self.assert-hash-keys( $p, [< sym trait >] ) {
 			@child =
 				self._sym( $p.hash.<sym> );
 			@child.append(
 				self._trait( $p.hash.<trait> )
-			);
-			@child
+			)
 		}
 		# $p contains trailing whitespace for <package_declaration>
 		#
@@ -4148,19 +4194,18 @@ say 1;
 				)
 			}
 )
-			@child
 		}
 		elsif self.assert-hash-keys( $p, [< statement_control >] ) {
 			@child =
 				self._statement_control(
 					$p.hash.<statement_control>
 				).flat;
-			@child
 		}
 		else {
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
+		@child
 	}
 
 	method _statementlist( Mu $p ) {
@@ -4307,10 +4352,10 @@ say 1;
 					warn "Unhandled case"
 				}
 			}
-			@child
 		}
 		elsif $p.Str {
-			Perl6::Bareword.new( $p )
+			@child =
+				Perl6::Bareword.new( $p )
 		}
 		elsif $p.Bool and $p.Str eq '+' {
 			die "Not implemented yet"
@@ -4322,6 +4367,7 @@ say 1;
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
+		@child
 	}
 
 	# fatarrow
@@ -4362,17 +4408,18 @@ say 1;
 	method _term( Mu $p ) {
 		my Perl6::Element @child;
 		if self.assert-hash-keys( $p, [< circumfix >] ) {
-			self._circumfix( $p.hash.<circumfix> )
+			@child =
+				self._circumfix( $p.hash.<circumfix> )
 		}
 		elsif self.assert-hash-keys( $p, [< name >], [< colonpair >] ) {
 			@child = 
 				self._name( $p.hash.<name> );
-			@child
 		}
 		else {
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
+		@child
 	}
 
 	method _termalt( Mu $p ) {
@@ -4391,12 +4438,12 @@ say 1;
 					warn "Unhandled case"
 				}
 			}
-			@child
 		}
 		else {
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
+		@child
 	}
 
 	method _termaltseq( Mu $p ) {
@@ -4426,12 +4473,12 @@ say 1;
 					warn "Unhandled case"
 				}
 			}
-			@child
 		}
 		else {
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
+		@child
 	}
 
 	method _termconjseq( Mu $p ) {
@@ -4454,22 +4501,25 @@ say 1;
 			@child
 		}
 		elsif self.assert-hash-keys( $p, [< termalt >] ) {
-			self._termalt( $p.hash.<termalt> )
+			@child =
+				self._termalt( $p.hash.<termalt> )
 		}
 		elsif $p.Str {
 			# XXX
 			my Str $str = $p.Str;
 			$str ~~ s{\s+ $} = '';
-			Perl6::Bareword.new(
-				:from( $p.from ),
-				:to( $p.to ),
-				:content( $str )
-			)
+			@child =
+				Perl6::Bareword.new(
+					:from( $p.from ),
+					:to( $p.to ),
+					:content( $str )
+				)
 		}
 		else {
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
+		@child
 	}
 
 	method _term_init( Mu $p ) {
@@ -4499,15 +4549,16 @@ say 1;
 					warn "Unhandled case"
 				}
 			}
-			@child
 		}
 		elsif self.assert-hash-keys( $p, [< noun >] ) {
-			self._noun( $p.hash.<noun> )
+			@child =
+				self._noun( $p.hash.<noun> )
 		}
 		else {
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
+		@child
 	}
 
 	method _termseq( Mu $p ) {
@@ -4521,7 +4572,6 @@ say 1;
 	}
 
 	method _trait( Mu $p ) {
-		my Perl6::Element @child;
 		# XXX Sigh, something else to fix.
 #`(
 		@child = map {
@@ -4562,11 +4612,10 @@ say 1;
 			);
 			@child.append(
 				self._longname( $p.hash.<longname> )
-			);
-			@child
+			)
 		}
 		elsif self.assert-hash-keys( $p, [< sym typename >] ) {
-			(
+			@child = (
 				self._sym( $p.hash.<sym> ),
 				self._typename( $p.hash.<typename> )
 			).flat
@@ -4575,6 +4624,7 @@ say 1;
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
+		@child
 	}
 
 	method _twigi( Mu $p ) {
@@ -4675,7 +4725,7 @@ say 1;
 			);
 			@child.append(
 				self._term( $p.hash.<term> )
-			);
+			)
 		}
 		elsif self.assert-hash-keys( $p,
 				[< sym longname >], [< trait >] ) {
@@ -4689,7 +4739,7 @@ say 1;
 			);
 			@child.append(
 				self._longname( $p.hash.<longname> )
-			);
+			)
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -4841,21 +4891,21 @@ say 1;
 				self._post_constraint(
 					$p.hash.<post_constraint>
 				)
-			);
-			@child.flat
+			)
 		}
 		elsif self.assert-hash-keys( $p,
 				[< variable >],
 				[< semilist postcircumfix signature
 				   trait post_constraint >] ) {
-			(
+			@child = (
 				self._variable( $p.hash.<variable> )
-			).flat
+			)
 		}
 		else {
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
+		@child.flat
 	}
 
 	method _variable( Mu $p ) {
@@ -4908,12 +4958,12 @@ say 1;
 					warn "Unhandled case"
 				}
 			}
-			@child
 		}
 		else {
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
+		@child
 	}
 
 	method _wu( Mu $p ) {
@@ -4934,17 +4984,18 @@ say 1;
 					warn "Unhandled case"
 				}
 			}
-			@child
 		}
 		elsif self.assert-hash-keys( $p, [< pblock EXPR >] ) {
 			die "Not implemented yet";
 		}
 		elsif self.assert-hash-keys( $p, [< blockoid >] ) {
-			self._blockoid( $p.hash.<blockoid> )
+			@child =
+				self._blockoid( $p.hash.<blockoid> )
 		}
 		else {
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
+		@child
 	}
 }
