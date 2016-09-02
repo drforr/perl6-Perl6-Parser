@@ -884,9 +884,9 @@ class Perl6::Tidy::Factory {
 			die "Not implemented yet";
 		}
 		elsif self.assert-hash-keys( $p, [< semiarglist >] ) {
-			my Perl6::Element @child =
+			my Perl6::Element @_child =
 				self._semiarglist( $p.hash.<semiarglist> );
-			self.make-postcircumfix( $p, @child )
+			self.make-postcircumfix( $p, @_child )
 		}
 		elsif self.assert-hash-keys( $p, [< arglist >] ) {
 			self._arglist( $p.hash.<arglist> );
@@ -1020,7 +1020,8 @@ class Perl6::Tidy::Factory {
 					);
 				@child.append(
 					Perl6::Block.from-match(
-						$p, @_child
+						$p,
+						@_child
 					)
 				);
 				@child
@@ -1130,23 +1131,24 @@ class Perl6::Tidy::Factory {
 			self._pblock( $p.hash.<pblock> )
 		}
 		elsif self.assert-hash-keys( $p, [< semilist >] ) {
+			my Perl6::Element @_child;
 			# XXX <semilist> can probably be worked with
 			if $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> {
-				@child.append(
+				@_child.append(
 self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 				)
 			}
-			self.make-postcircumfix( $p, @child )
+			self.make-postcircumfix( $p, @_child )
 		}
 		elsif self.assert-hash-keys( $p, [< nibble >] ) {
 			# XXX <nibble> can probably be worked with
-			@child =
+			my Perl6::Element @_child =
 				Perl6::Operator::Prefix.new(
 					:from( $p.hash.<nibble>.from ),
 					:to( $p.hash.<nibble>.to ),
 					:content( $p.hash.<nibble>.Str )
 				);
-			Perl6::Operator::Circumfix.new( $p, @child )
+			Perl6::Operator::Circumfix.new( $p, @_child )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -1220,7 +1222,7 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 		}
 		elsif self.assert-hash-keys( $p, [< fakesignature >] ) {
 			# XXX May not really be "post" in the P6 sense?
-			my Perl6::Element @child =
+			my Perl6::Element @_child =
 				self._fakesignature(
 					$p.hash.<fakesignature>
 				);
@@ -1228,7 +1230,7 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 				:from( $p.from ),
 				:to( $p.to ),
 				:delimiter( ':(', ')' ),
-				:child( @child )
+				:child( @_child )
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< var >] ) {
@@ -1381,9 +1383,9 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 		}
 		elsif self.assert-hash-keys( $p,
 				[< signature >], [< trait >] ) {
-			my Perl6::Element @child =
+			my Perl6::Element @_child =
 				self._signature( $p.hash.<signature> );
-			Perl6::Operator::circumfix.new( $p, @child )
+			Perl6::Operator::circumfix.new( $p, @_child )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -1760,13 +1762,13 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 		elsif self.assert-hash-keys( $p,
 				[< postcircumfix OPER >],
 				[< postfix_prefix_meta_operator >] ) {
-			my Perl6::Element @child =
+			my Perl6::Element @_child =
 				self._postcircumfix( $p.hash.<postcircumfix> );
 			(
 				self.__Term( $p.list.[0] ),
 				self.make-postcircumfix(
 					$p.hash.<postcircumfix>,
-					@child
+					@_child
 				)
 			).flat
 		}
@@ -2240,7 +2242,7 @@ return True;
 			     [< specials longname blockoid multisig >],
 			     [< trait >] ) {
 say 1;
-			my Perl6::Element @child =
+			my Perl6::Element @_child =
 				 self._multisig( $p.hash.<multisig> );
 			(
 				self._longname( $p.hash.<longname> ),
@@ -2249,7 +2251,7 @@ say 1;
 					:from( $p.from ),
 					:to( $p.to ),
 					:delimiter( '(', ')' ),
-					:child( @child )
+					:child( @_child )
 				),
 				self._blockoid( $p.hash.<blockoid> )
 			).flat
@@ -2999,13 +3001,13 @@ say 1;
 			$leaf
 		}
 		elsif self.assert-hash-keys( $p, [< signature >] ) {
-			my Perl6::Element @child =
+			my Perl6::Element @_child =
 				self._signature( $p.hash.<signature> );
 			Perl6::Operator::Circumfix.new(
 				:from( $p.from ),
 				:to( $p.to ),
 				:delimiter( '(', ')' ),
-				:child( @child )
+				:child( @_child )
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< sigil >] ) {
@@ -3542,12 +3544,12 @@ say 1;
 		}
 		elsif self.assert-hash-keys( $p,
 				[< blockoid multisig >], [< trait >] ) {
-			@child =
+			my Perl6::Element @_child =
 				self._multisig( $p.hash.<multisig> );
 			(
 				Perl6::Operator::Circumfix.new(
 					:delimiter( '(', ')' ),
-					:child( @child )
+					:child( @_child )
 				),
 				self._blockoid( $p.hash.<blockoid> )
 			).flat
@@ -3686,11 +3688,11 @@ say 1;
 			when X::Multi::NoMatch { }
 		}
 		if $p.hash.<statement>.list.[0].hash.<EXPR> {
-			@child =
+			my Perl6::Element @_child =
 				self._EXPR(
 					$p.hash.<statement>.list.[0].hash.<EXPR>
 				);
-			self.make-postcircumfix( $p, @child )
+			self.make-postcircumfix( $p, @_child )
 		}
 		elsif self.assert-hash-keys( $p, [< statement >] ) {
 			self._EXPR( $p.hash.<statement>.list.[0].<EXPR> )
