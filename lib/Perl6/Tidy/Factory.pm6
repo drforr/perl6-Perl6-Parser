@@ -844,8 +844,8 @@ class Perl6::Tidy::Factory {
 	}
 
 	method _arglist( Mu $p ) {
+		my Perl6::Element @child;
 		if $p.list {
-			my Perl6::Element @child;
 			for $p.list {
 				if self.assert-hash-keys( $_, [< EXPR >] ) {
 					@child.push(
@@ -991,7 +991,6 @@ class Perl6::Tidy::Factory {
 		}
 	}
 
-	# XXX Unused
 	method _binint( Mu $p ) {
 		Perl6::Number::Binary.new(
 			:from( $p.from ),
@@ -1011,10 +1010,10 @@ class Perl6::Tidy::Factory {
 	}
 
 	method _blockoid( Mu $p ) {
+		my Perl6::Element @child;
 		# $p doesn't contain WS after the block.
 		if self.assert-hash-keys( $p, [< statementlist >] ) {
 			if $p.hash.<statementlist>.Str ~~ /\S/ {
-				my Perl6::Element @child;
 				my Perl6::Element @_child =
 					self._statementlist(
 						$p.hash.<statementlist>
@@ -1072,9 +1071,9 @@ class Perl6::Tidy::Factory {
 	} 
 
 	method _cclass_elem( Mu $p ) {
+		my Perl6::Element @child;
 		warn "Untested method";
 		if $p.list {
-			my Perl6::Element @child;
 			for $p.list {
 				if self.assert-hash-keys( $_,
 						[< identifier name sign >],
@@ -1114,6 +1113,7 @@ class Perl6::Tidy::Factory {
 	# reduce
 	#
 	method _circumfix( Mu $p ) {
+		my Perl6::Element @child;
 		if self.assert-hash-keys( $p, [< binint VALUE >] ) {
 			self._binint( $p.hash.<binint> )
 		}
@@ -1131,7 +1131,6 @@ class Perl6::Tidy::Factory {
 		}
 		elsif self.assert-hash-keys( $p, [< semilist >] ) {
 			# XXX <semilist> can probably be worked with
-			my Perl6::Element @child;
 			if $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> {
 				@child.append(
 self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
@@ -1141,7 +1140,7 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 		}
 		elsif self.assert-hash-keys( $p, [< nibble >] ) {
 			# XXX <nibble> can probably be worked with
-			my Perl6::Element @child =
+			@child =
 				Perl6::Operator::Prefix.new(
 					:from( $p.hash.<nibble>.from ),
 					:to( $p.hash.<nibble>.to ),
@@ -1283,11 +1282,12 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 	}
 
 	method _declarator( Mu $p ) {
+		my Perl6::Element @child;
 		if self.assert-hash-keys( $p,
 				[< deftermnow initializer term_init >],
 				[< trait >] ) {
 			die "not implemented yet";
-			my @child =
+			@child =
 				self._variable_declarator(
 					$p.hash.<variable_declarator>
 				);
@@ -1306,7 +1306,7 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 		elsif self.assert-hash-keys( $p,
 				[< sym defterm initializer >],
 				[< trait >] ) {
-			my @child =
+			@child =
 				self._sym(
 					$p.hash.<sym>
 				);
@@ -1339,7 +1339,7 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 		elsif self.assert-hash-keys( $p,
 				  [< initializer variable_declarator >],
 				  [< trait >] ) {
-			my @child =
+			@child =
 				self._variable_declarator(
 					$p.hash.<variable_declarator>
 				);
@@ -1465,8 +1465,8 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 	}
 
 	method _default_value( Mu $p ) {
+		my Perl6::Element @child;
 		if $p.list {
-			my Perl6::Element @child;
 			for $p.list {
 				if self.assert-hash-keys( $_, [< EXPR >] ) {
 					@child.push(
@@ -1723,6 +1723,7 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 	}
 
 	method _EXPR( Mu $p ) {
+		my Perl6::Element @child;
 		if self.assert-hash-keys( $p,
 				[< dotty OPER >],
 				[< postfix_prefix_meta_operator >] ) {
@@ -1779,7 +1780,7 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 		}
 		elsif self.assert-hash-keys( $p,
 				[< infix_prefix_meta_operator OPER >] ) {
-			my Perl6::Element @child =
+			@child =
 				self.__Term( $p.list.[0] );
 			@child.append(
 				self._infix_prefix_meta_operator(
@@ -1796,7 +1797,7 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 		# XXX $p.list.[0] is actually the start of the expression.
 		elsif self.assert-hash-keys( $p, [< infix OPER >] ) {
 			if $p.list.elems == 3 {
-				my Perl6::Element @child =
+				@child =
 					self.__Term( $p.list.[0] ),
 					Perl6::Operator::Infix.new(
 						$p, QUES-QUES
@@ -1809,7 +1810,7 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 				@child.flat
 			}
 			else {
-				my Perl6::Element @child =
+				@child =
 					self.__Term( $p.list.[0] );
 				if $p.list.[0].to < $p.hash.<infix>.from {
 					# XXX THIS NEEDS TO CHANGE.
@@ -1924,9 +1925,10 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 	}
 
 	method _fatarrow( Mu $p ) {
+		my Perl6::Element @child;
 		if self.assert-hash-keys( $p, [< key val >] ) {
 			$p.Str ~~ m{ ('=>') };
-			my Perl6::Element @child =
+			@child =
 				self._key( $p.hash.<key> );
 			if $p.hash.<key>.to < $0.from {
 #				@child.append(
@@ -1996,8 +1998,8 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 	}
 
 	method _identifier( Mu $p ) {
+		my Perl6::Element @child;
 		if $p.list {
-			my Perl6::Element @child;
 			for $p.list {
 				if self.assert-Str( $_ ) {
 					die "Not implemented yet"
@@ -2085,11 +2087,12 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 	# .
 	#
 	method _initializer( Mu $p ) {
+		my Perl6::Element @child;
 		if self.assert-hash-keys( $p, [< dottyopish sym >] ) {
 			die "Not implemented yet"
 		}
 		elsif self.assert-hash-keys( $p, [< sym EXPR >] ) {
-			my @child =
+			@child =
 				Perl6::Operator::Infix.new( $p.hash.<sym> );
 			@child.append(
 				whitespace-separator(
@@ -2232,6 +2235,7 @@ return True;
 	}
 
 	method _method_def( Mu $p ) {
+		my Perl6::Element @child;
 		if self.assert-hash-keys( $p,
 			     [< specials longname blockoid multisig >],
 			     [< trait >] ) {
@@ -2253,7 +2257,7 @@ say 1;
 		elsif self.assert-hash-keys( $p,
 			     [< specials longname blockoid >],
 			     [< trait >] ) {
-			my Perl6::Element @child =
+			@child =
 				self._longname( $p.hash.<longname> );
 			@child.append(
 				whitespace-separator(
@@ -2332,9 +2336,9 @@ say 1;
 	}
 
 	method _morename( Mu $p ) {
+		my Perl6::Element @child;
 		warn "Untested method";
 		if $p.list {
-			my Perl6::Element @child;
 			for $p.list {
 				if self.assert-hash-keys( $_,
 					[< identifier >] ) {
@@ -2455,8 +2459,8 @@ say 1;
 	}
 
 	method _noun( Mu $p ) {
+		my Perl6::Element @child;
 		if $p.list {
-			my Perl6::Element @child;
 			for $p.list {
 				if self.assert-hash-keys( $_,
 					[< sigmaybe sigfinal
@@ -2479,12 +2483,12 @@ say 1;
 				}
 				elsif self.assert-hash-keys( $_,
 					[< atom >], [< sigfinal >] ) {
-					@child.push(
+					@child.append(
 						self._atom( $_.hash.<atom> )
 					)
 				}
 				elsif self.assert-hash-keys( $_, [< atom >] ) {
-					@child.push(
+					@child.append(
 						self._atom( $_.hash.<atom> )
 					)
 				}
@@ -2654,9 +2658,10 @@ say 1;
 	# var
 	#
 	method _p5metachar( Mu $p ) {
+		my Perl6::Element @child;
 		# $p doesn't contain WS after the block.
 		if self.assert-hash-keys( $p, [< sym package_def >] ) {
-			my Perl6::Element @child =
+			@child =
 				self._sym( $p.hash.<sym> );
 			@child.append(
 				whitespace-separator(
@@ -2691,9 +2696,10 @@ say 1;
 	# also <name>
 	#
 	method _package_declarator( Mu $p ) {
+		my Perl6::Element @child;
 		# $p doesn't contain WS after the block.
 		if self.assert-hash-keys( $p, [< sym package_def >] ) {
-			my Perl6::Element @child =
+			@child =
 				self._sym( $p.hash.<sym> );
 			@child.append(
 				whitespace-separator(
@@ -2711,7 +2717,7 @@ say 1;
 			@child
 		}
 		elsif self.assert-hash-keys( $p, [< sym typename >] ) {
-			my Perl6::Element @child =
+			@child =
 				self._sym( $p.hash.<sym> );
 			@child.append(
 				whitespace-separator(
@@ -2729,7 +2735,7 @@ say 1;
 			@child
 		}
 		elsif self.assert-hash-keys( $p, [< sym trait >] ) {
-			my Perl6::Element @child =
+			@child =
 				self._sym( $p.hash.<sym> );
 			@child.append(
 				whitespace-separator(
@@ -2753,9 +2759,10 @@ say 1;
 	}
 
 	method _package_def( Mu $p ) {
+		my Perl6::Element @child;
 		if self.assert-hash-keys( $p,
 				[< longname statementlist >], [< trait >] ) {
-			my Perl6::Element @child =
+			@child =
 				self._longname( $p.hash.<longname> );
 			@child.append(
 				self._statementlist( $p.hash.<statementlist> )
@@ -2764,14 +2771,14 @@ say 1;
 		}
 		elsif self.assert-hash-keys( $p,
 				[< longname >], [< colonpair >] ) {
-			my Perl6::Element @child =
+			@child =
 				self._longname( $p.hash.<longname> );
 			@child.flat
 		}
 		# $p doesn't contain WS after the block.
 		elsif self.assert-hash-keys( $p,
 				[< longname blockoid >], [< trait >] ) {
-			my Perl6::Element @child =
+			@child =
 				self._longname( $p.hash.<longname> );
 			@child.append(
 				whitespace-separator(
@@ -3251,9 +3258,9 @@ say 1;
 	}
 
 	method _quotepair( Mu $p ) {
+		my Perl6::Element @child;
 		warn "Untested method";
 		if $p.list {
-			my Perl6::Element @child;
 			for $p.list {
 				if self.assert-hash-keys( $_,
 						[< identifier >] ) {
@@ -3313,8 +3320,9 @@ say 1;
 	# regex <name> { },
 	#
 	method _regex_declarator( Mu $p ) {
+		my Perl6::Element @child;
 		if self.assert-hash-keys( $p, [< sym regex_def >] ) {
-			my Perl6::Element @child =
+			@child =
 				self._sym( $p.hash.<sym> );
 			@child.append(
 				whitespace-separator(
@@ -3335,12 +3343,13 @@ say 1;
 	}
 
 	method _regex_def( Mu $p ) {
+		my Perl6::Element @child;
 		if self.assert-hash-keys( $p,
 				[< deflongname nibble >],
 				[< signature trait >] ) {
 			my Perl6::Element @_child =
 				self._nibble( $p.hash.<nibble> );
-			my Perl6::Element @child =
+			@child =
 				self._deflongname( $p.hash.<deflongname> );
 			my $remainder = substr( $p.Str, $p.hash.<deflongname>.Str.chars );
 			if $remainder ~~ m{ ^ ( \s+ ) } {
@@ -3396,9 +3405,10 @@ say 1;
 	# macro <name> ... { }, # XXX ?
 	#
 	method _routine_declarator( Mu $p ) {
+		my Perl6::Element @child;
 		if self.assert-hash-keys( $p,
 			[< sym routine_def >] ) {
-			my Perl6::Element @child =
+			@child =
 				self._sym( $p.hash.<sym> );
 			# XXX subsume this into the Perl6::WS object later
 			if $p.hash.<routine_def>.Str ~~ m{ ^ ( \s+ ) } {
@@ -3416,7 +3426,7 @@ say 1;
 			@child.flat
 		}
 		elsif self.assert-hash-keys( $p, [< sym method_def >] ) {
-			my Perl6::Element @child =
+			@child =
 				self._sym( $p.hash.<sym> );
 			# XXX subsume this into the Perl6::WS object later
 			if $p.hash.<method_def>.Str ~~ m{ ^ ( \s+ ) } {
@@ -3440,6 +3450,7 @@ say 1;
 	}
 
 	method _routine_def( Mu $p ) {
+		my Perl6::Element @child;
 		if self.assert-hash-keys( $p,
 				[< deflongname multisig blockoid >],
 				[< trait >] ) {
@@ -3452,7 +3463,6 @@ say 1;
 			if $x {
 				$x ~~ m{ ')' (.*) $ }; $offset = $0.chars;
 			}
-			my Perl6::Element @child;
 			if $p.from < $p.hash.<deflongname>.from {
 				@child.append(
 #					Perl6::WS.new(
@@ -3512,7 +3522,7 @@ say 1;
 		elsif self.assert-hash-keys( $p,
 				[< deflongname statementlist >],
 				[< trait >] ) {
-			my Perl6::Element @child =
+			@child =
 				self._deflongname( $p.hash.<deflongname> );
 			@child.append(
 				self._statementlist( $p.hash.<statementlist> )
@@ -3532,7 +3542,7 @@ say 1;
 		}
 		elsif self.assert-hash-keys( $p,
 				[< blockoid multisig >], [< trait >] ) {
-			my Perl6::Element @child =
+			@child =
 				self._multisig( $p.hash.<multisig> );
 			(
 				Perl6::Operator::Circumfix.new(
@@ -3544,10 +3554,8 @@ say 1;
 		}
 		elsif self.assert-hash-keys( $p,
 				[< deflongname blockoid >], [< trait >] ) {
-			my Perl6::Element @child;
-			@child.append(
-				self._deflongname( $p.hash.<deflongname> )
-			);
+			@child =
+				self._deflongname( $p.hash.<deflongname> );
 			@child.append(
 				whitespace-separator(
 					$p,
@@ -3584,6 +3592,7 @@ say 1;
 	}
 
 	method _scoped( Mu $p ) {
+		my Perl6::Element @child;
 		# XXX DECL seems to be a mirror of declarator. This probably
 		# XXX will turn out to be not true later on.
 		#
@@ -3599,12 +3608,10 @@ say 1;
 		elsif self.assert-hash-keys( $p,
 				[< package_declarator DECL >],
 				[< typename >] ) {
-			my Perl6::Element @child;
-			@child.append(
+			@child =
 				self._package_declarator(
 					$p.hash.<package_declarator>
-				)
-			);
+				);
 			@child.flat
 		}
 		elsif self.assert-hash-keys( $p,
@@ -3639,8 +3646,9 @@ say 1;
 	# unit {package,module,class...} <name>
 	#
 	method _scope_declarator( Mu $p ) {
+		my Perl6::Element @child;
 		if self.assert-hash-keys( $p, [< sym scoped >] ) {
-			my Perl6::Element @child =
+			@child =
 				self._sym( $p.hash.<sym> );
 			if $p.hash.<scoped>.Str ~~ m{ ^ ( \s+ ) } {
 				@child.append(
@@ -3673,11 +3681,12 @@ say 1;
 	}
 
 	method _semilist( Mu $p ) {
+		my Perl6::Element @child;
 		CATCH {
 			when X::Multi::NoMatch { }
 		}
 		if $p.hash.<statement>.list.[0].hash.<EXPR> {
-			my Perl6::Element @child =
+			@child =
 				self._EXPR(
 					$p.hash.<statement>.list.[0].hash.<EXPR>
 				);
@@ -3900,6 +3909,7 @@ say 1;
 	}
 
 	method _signature( Mu $p ) {
+		my Perl6::Element @child;
 		if self.assert-hash-keys( $p,
 				[< parameter typename >],
 				[< param_sep >] ) {
@@ -3913,7 +3923,6 @@ say 1;
 				[< param_sep >] ) {
 			my Mu $parameter = $p.hash.<parameter>;
 			my Int $offset = $p.from;
-			my Perl6::Element @child;
 			if $p.Str ~~ m{ ^ ( \s+ ) } {
 				@child.append(
 #					Perl6::WS.new(
@@ -4041,8 +4050,8 @@ say 1;
 	}
 
 	method _statement( Mu $p ) {
+		my Perl6::Element @child;
 		if $p.list {
-			my Perl6::Element @child;
 			for $p.list {
 				if self.assert-hash-keys( $_,
 						[< statement_mod_loop
@@ -4077,7 +4086,7 @@ say 1;
 			@child
 		}
 		elsif self.assert-hash-keys( $p, [< sym trait >] ) {
-			my Perl6::Element @child =
+			@child =
 				self._sym( $p.hash.<sym> );
 			@child.append(
 				self._trait( $p.hash.<trait> )
@@ -4087,7 +4096,7 @@ say 1;
 		# $p contains trailing whitespace for <package_declaration>
 		#
 		elsif self.assert-hash-keys( $p, [< EXPR >] ) {
-			my Perl6::Element @child =
+			@child =
 				self._EXPR( $p.hash.<EXPR> );
 			@child.append(
 				Perl6::WS.whitespace-terminator(
@@ -4140,7 +4149,7 @@ say 1;
 			@child
 		}
 		elsif self.assert-hash-keys( $p, [< statement_control >] ) {
-			my Perl6::Element @child =
+			@child =
 				self._statement_control(
 					$p.hash.<statement_control>
 				).flat;
@@ -4285,8 +4294,8 @@ say 1;
 	}
 
 	method _sym( Mu $p ) {
+		my Perl6::Element @child;
 		if $p.list {
-			my Perl6::Element @child;
 			for $p.list {
 				if $_.Str {
 					die "Not implemented yet"
@@ -4349,11 +4358,12 @@ say 1;
 	# value
 	#
 	method _term( Mu $p ) {
+		my Perl6::Element @child;
 		if self.assert-hash-keys( $p, [< circumfix >] ) {
 			self._circumfix( $p.hash.<circumfix> )
 		}
 		elsif self.assert-hash-keys( $p, [< name >], [< colonpair >] ) {
-			my @child = 
+			@child = 
 				self._name( $p.hash.<name> );
 			@child
 		}
@@ -4364,8 +4374,8 @@ say 1;
 	}
 
 	method _termalt( Mu $p ) {
+		my Perl6::Element @child;
 		if $p.list {
-			my Perl6::Element @child;
 			for $p.list {
 				if self.assert-hash-keys( $_, [< termconj >] ) {
 					@child.append(
@@ -4398,9 +4408,9 @@ say 1;
 	}
 
 	method _termconj( Mu $p ) {
+		my Perl6::Element @child;
 		CATCH { when X::Hash::Store::OddNumber { .resume } } # XXX ?...
 		if $p.list {
-			my Perl6::Element @child;
 			for $p.list {
 				if self.assert-hash-keys( $_, [< termish >] ) {
 					@child.append(
@@ -4423,9 +4433,9 @@ say 1;
 	}
 
 	method _termconjseq( Mu $p ) {
+		my Perl6::Element @child;
 		# XXX Work on this later.
 		if $p.list {
-			my Perl6::Element @child;
 			for $p.list {
 				if self.assert-hash-keys( $_, [< termalt >] ) {
 					@child.append(
@@ -4472,8 +4482,8 @@ say 1;
 	}
 
 	method _termish( Mu $p ) {
+		my Perl6::Element @child;
 		if $p.list {
-			my Perl6::Element @child;
 			for $p.list {
 				if self.assert-hash-keys( $_, [< noun >] ) {
 					@child.append(
@@ -4509,9 +4519,10 @@ say 1;
 	}
 
 	method _trait( Mu $p ) {
+		my Perl6::Element @child;
 		# XXX Sigh, something else to fix.
 #`(
-		my Perl6::Element @child = map {
+		@child = map {
 #			if self.assert-hash-keys( $_, [< trait_mod >] ) {
 				self._trait_mod( $_.hash.<trait_mod> )
 #			}
@@ -4534,10 +4545,11 @@ say 1;
 	# handles
 	#
 	method _trait_mod( Mu $p ) {
+		my Perl6::Element @child;
 		if self.assert-hash-keys( $p,
 				[< sym longname >],
 				[< circumfix >] ) {
-			my @child = 
+			@child = 
 				self._sym( $p.hash.<sym> );
 			@child.append(
 				whitespace-separator(
@@ -4801,6 +4813,7 @@ say 1;
 	}
 
 	method _variable_declarator( Mu $p ) {
+		my Perl6::Element @child;
 		if self.assert-hash-keys( $p,
 			[< semilist variable shape >],
 			[< postcircumfix signature trait
@@ -4813,7 +4826,7 @@ say 1;
 			# Synthesize the 'from' and 'to' markers for 'where'
 			$p.Str ~~ m{ << (where) >> };
 			my Int $from = $0.from;
-			my Perl6::Element @child =
+			@child =
 				self._variable( $p.hash.<variable> );
 			@child.append(
 				Perl6::Bareword.new(
@@ -4881,9 +4894,9 @@ say 1;
 	}
 
 	method _vnum( Mu $p ) {
+		my Perl6::Element @child;
 		warn "Untested method";
 		if $p.list {
-			my Perl6::Element @child;
 			for $p.list {
 				if self.assert-Int( $_ ) {
 					die "Not implemented yet";
@@ -4906,9 +4919,9 @@ say 1;
 	}
 
 	method _xblock( Mu $p ) {
+		my Perl6::Element @child;
 		warn "Untested method";
 		if $p.list {
-			my Perl6::Element @child;
 			for $p.list {
 				if self.assert-hash-keys( $_,
 						[< pblock EXPR >] ) {
