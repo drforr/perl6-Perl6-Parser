@@ -83,46 +83,6 @@ _END_
 		is $pt.format( $tree ), $source, Q{formatted};
 	}, Q{sub foo returns Int {}};
 }, Q{subroutine};
-
-subtest {
-	plan 7;
-
-	subtest {
-		plan 2;
-
-		my $source = Q:to[_END_];
-my regex foo { a }
-_END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		is $pt.format( $tree ), $source, Q{formatted};
-	}, Q{my regex foo {a} (null regex not allowed)};
-
-	subtest {
-		plan 2;
-
-		my $source = Q:to[_END_];
-my token foo { a }
-_END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		is $pt.format( $tree ), $source, Q{formatted};
-	}, Q{my token foo {a} (null regex not allowed, must give it content.)};
-
-	subtest {
-		plan 2;
-
-		my $source = Q:to[_END_];
-my rule foo { a }
-_END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		is $pt.format( $tree ), $source, Q{formatted};
-	}, Q{my rule foo {a}};
-}, Q{braced things};
 )
 
 # vim: ft=perl6

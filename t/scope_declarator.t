@@ -34,11 +34,12 @@ The terms that get tested here are:
 
 my <name>
 our <naem>
+has <name>
 HAS <name>
 augment <name>
 anon <name>
 state <name>
-supsersede <name>
+supersede <name>
 
 class Foo { has <name> } # 'has' is a scope declaration.
 

@@ -32,7 +32,6 @@ subtest {
 			my $parsed = $pt.parse-source( Q{0} );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q{0}, Q{formatted};
 			is $pt.format( $tree ), Q{0}, Q{formatted};
 		}, Q{Zero};
 
@@ -42,7 +41,6 @@ subtest {
 			my $parsed = $pt.parse-source( Q{1} );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q{1}, Q{formatted};
 			is $pt.format( $tree ), Q{1}, Q{formatted};
 		}, Q{positive};
 
@@ -52,7 +50,6 @@ subtest {
 			my $parsed = $pt.parse-source( Q{-1} );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q{-1}, Q{formatted};
 			is $pt.format( $tree ), Q{-1}, Q{formatted};
 		}, Q{negative};
 
@@ -62,7 +59,6 @@ subtest {
 			my $parsed = $pt.parse-source( Q{1_1} );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q{1_1}, Q{formatted};
 			is $pt.format( $tree ), Q{1_1}, Q{formatted};
 		}, Q{underscores};
 	}, Q{decimal};
@@ -76,7 +72,6 @@ subtest {
 			my $parsed = $pt.parse-source( Q{0b0} );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q{0b0}, Q{formatted};
 			is $pt.format( $tree ), Q{0b0}, Q{formatted};
 		}, Q{0b0};
 
@@ -86,7 +81,6 @@ subtest {
 			my $parsed = $pt.parse-source( Q{0b1} );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q{0b1}, Q{formatted};
 			is $pt.format( $tree ), Q{0b1}, Q{formatted};
 		}, Q{0b1};
 
@@ -96,7 +90,6 @@ subtest {
 			my $parsed = $pt.parse-source( Q{-0b1} );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q{-0b1}, Q{formatted};
 			is $pt.format( $tree ), Q{-0b1}, Q{formatted};
 		}, Q{-0b1};
 	}, Q{binary};
@@ -110,7 +103,6 @@ subtest {
 			my $parsed = $pt.parse-source( Q{0o0} );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q{0o0}, Q{formatted};
 			is $pt.format( $tree ), Q{0o0}, Q{formatted};
 		}, Q{0o0};
 
@@ -120,7 +112,6 @@ subtest {
 			my $parsed = $pt.parse-source( Q{0o1} );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q{0o1}, Q{formatted};
 			is $pt.format( $tree ), Q{0o1}, Q{formatted};
 		}, Q{0o1};
 
@@ -130,7 +121,6 @@ subtest {
 			my $parsed = $pt.parse-source( Q{-0o1} );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q{-0o1}, Q{formatted};
 			is $pt.format( $tree ), Q{-0o1}, Q{formatted};
 		}, Q{-0o1};
 	}, Q{octal};
@@ -144,7 +134,6 @@ subtest {
 			my $parsed = $pt.parse-source( Q{0d0} );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q{0d0}, Q{formatted};
 			is $pt.format( $tree ), Q{0d0}, Q{formatted};
 		}, Q{0d0};
 
@@ -154,7 +143,6 @@ subtest {
 			my $parsed = $pt.parse-source( Q{0d1} );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q{0d1}, Q{formatted};
 			is $pt.format( $tree ), Q{0d1}, Q{formatted};
 		}, Q{0d1};
 
@@ -164,7 +152,6 @@ subtest {
 			my $parsed = $pt.parse-source( Q{-0d1} );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q{-0d1}, Q{formatted};
 			is $pt.format( $tree ), Q{-0d1}, Q{formatted};
 		}, Q{-0d1};
 	}, Q{explicit decimal};
@@ -178,7 +165,6 @@ subtest {
 			my $parsed = $pt.parse-source( Q{0} );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q{0}, Q{formatted};
 			is $pt.format( $tree ), Q{0}, Q{formatted};
 		}, Q{0};
 
@@ -188,7 +174,6 @@ subtest {
 			my $parsed = $pt.parse-source( Q{1} );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q{1}, Q{formatted};
 			is $pt.format( $tree ), Q{1}, Q{formatted};
 		}, Q{1};
 
@@ -198,7 +183,6 @@ subtest {
 			my $parsed = $pt.parse-source( Q{-1} );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q{-1}, Q{formatted};
 			is $pt.format( $tree ), Q{-1}, Q{formatted};
 		}, Q{-1};
 	}, Q{implicit decimal};
@@ -212,7 +196,6 @@ subtest {
 			my $parsed = $pt.parse-source( Q{0x0} );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q{0x0}, Q{formatted};
 			is $pt.format( $tree ), Q{0x0}, Q{formatted};
 		}, Q{0x0};
 
@@ -222,7 +205,6 @@ subtest {
 			my $parsed = $pt.parse-source( Q{0x1} );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q{0x1}, Q{formatted};
 			is $pt.format( $tree ), Q{0x1}, Q{formatted};
 		}, Q{0x1};
 
@@ -232,7 +214,6 @@ subtest {
 			my $parsed = $pt.parse-source( Q{-0x1} );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q{-0x1}, Q{formatted};
 			is $pt.format( $tree ), Q{-0x1}, Q{formatted};
 		}, Q{-0x1};
 	}, Q{hexadecimal};
@@ -246,7 +227,6 @@ subtest {
 			my $parsed = $pt.parse-source( Q{:13(0)} );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q{:13(0)}, Q{formatted};
 			is $pt.format( $tree ), Q{:13(0)}, Q{formatted};
 		}, Q{:13(0)};
 
@@ -256,7 +236,6 @@ subtest {
 			my $parsed = $pt.parse-source( Q{:13(1)} );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q{:13(1)}, Q{formatted};
 			is $pt.format( $tree ), Q{:13(1)}, Q{formatted};
 		}, Q{:13(1)};
 
@@ -266,7 +245,6 @@ subtest {
 			my $parsed = $pt.parse-source( Q{:13(-1)} );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q{:13(-1)}, Q{formatted};
 			is $pt.format( $tree ), Q{:13(-1)}, Q{formatted};
 		}, Q{:13(-1)};
 	}, Q{base-13};
@@ -280,7 +258,6 @@ subtest {
 			my $parsed = $pt.parse-source( Q{0.0} );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q{0.0}, Q{formatted};
 			is $pt.format( $tree ), Q{0.0}, Q{formatted};
 		}, Q{0.0};
 
@@ -290,7 +267,6 @@ subtest {
 			my $parsed = $pt.parse-source( Q{0.1} );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q{0.1}, Q{formatted};
 			is $pt.format( $tree ), Q{0.1}, Q{formatted};
 		}, Q{0.1};
 
@@ -300,7 +276,6 @@ subtest {
 			my $parsed = $pt.parse-source( Q{-1} );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q{-1}, Q{formatted};
 			is $pt.format( $tree ), Q{-1}, Q{formatted};
 		}, Q{-1};
 
@@ -310,7 +285,6 @@ subtest {
 			my $parsed = $pt.parse-source( Q{1.0} );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q{1.0}, Q{formatted};
 			is $pt.format( $tree ), Q{1.0}, Q{formatted};
 		}, Q{1.0};
 
@@ -320,7 +294,6 @@ subtest {
 			my $parsed = $pt.parse-source( Q{-1.0} );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q{-1.0}, Q{formatted};
 			is $pt.format( $tree ), Q{-1.0}, Q{formatted};
 		}, Q{-1.0};
 	}, Q{rational};
@@ -334,7 +307,6 @@ subtest {
 			my $parsed = $pt.parse-source( Q{0e0} );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q{0e0}, Q{formatted};
 			is $pt.format( $tree ), Q{0e0}, Q{formatted};
 		}, Q{0e0};
 
@@ -344,7 +316,6 @@ subtest {
 			my $parsed = $pt.parse-source( Q{0.0e0} );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q{0.0e0}, Q{formatted};
 			is $pt.format( $tree ), Q{0.0e0}, Q{formatted};
 		}, Q{0.0e0};
 
@@ -354,7 +325,6 @@ subtest {
 			my $parsed = $pt.parse-source( Q{.1e0} );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q{.1e0}, Q{formatted};
 			is $pt.format( $tree ), Q{.1e0}, Q{formatted};
 		}, Q{.1e0 (no leading zero)};
 
@@ -364,7 +334,6 @@ subtest {
 			my $parsed = $pt.parse-source( Q{0.1e0} );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q{0.1e0}, Q{formatted};
 			is $pt.format( $tree ), Q{0.1e0}, Q{formatted};
 		}, Q{0.1e0 (with leading 0)};
 
@@ -374,7 +343,6 @@ subtest {
 			my $parsed = $pt.parse-source( Q{1e0} );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q{1e0}, Q{formatted};
 			is $pt.format( $tree ), Q{1e0}, Q{formatted};
 		}, Q{1e0};
 
@@ -384,7 +352,6 @@ subtest {
 			my $parsed = $pt.parse-source( Q{-1e0} );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q{-1e0}, Q{formatted};
 			is $pt.format( $tree ), Q{-1e0}, Q{formatted};
 		}, Q{-1e0};
 	}, Q{Num};
@@ -398,7 +365,6 @@ subtest {
 			my $parsed = $pt.parse-source( Q{0i} );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q{0i}, Q{formatted};
 			is $pt.format( $tree ), Q{0i}, Q{formatted};
 		}, Q{0i};
 
@@ -408,7 +374,6 @@ subtest {
 			my $parsed = $pt.parse-source( Q{1i} );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q{1i}, Q{formatted};
 			is $pt.format( $tree ), Q{1i}, Q{formatted};
 		}, Q{1i};
 
@@ -418,7 +383,6 @@ subtest {
 			my $parsed = $pt.parse-source( Q{-1i} );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q{-1i}, Q{formatted};
 			is $pt.format( $tree ), Q{-1i}, Q{formatted};
 		}, Q{-1i};
 	}, Q{imaginary};
@@ -433,8 +397,6 @@ subtest {
 		my $parsed = $pt.parse-source( Q{'Hello, world!'} );
 		my $tree = $pt.build-tree( $parsed );
 		ok $pt.validate( $parsed ), Q{valid};
-#		is $pt.format( $tree ), Q{'Hello, world!'},
-#			Q{formatted};
 		is $pt.format( $tree ), Q{'Hello, world!'},
 			Q{formatted};
 	}, Q{single quote};
@@ -448,8 +410,6 @@ subtest {
 			my $parsed = $pt.parse-source( Q{"Hello, world!"} );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q{"Hello, world!"},
-#				Q{formatted};
 			is $pt.format( $tree ), Q{"Hello, world!"},
 				Q{formatted};
 		}, Q{uninterpolated};
@@ -460,8 +420,6 @@ subtest {
 			my $parsed = $pt.parse-source( Q{"Hello, {'world'}!"} );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q{"Hello, {'world'}!"},
-#				Q{formatted};
 			is $pt.format( $tree ), Q{"Hello, {'world'}!"},
 				Q{formatted};
 		}, Q{interpolated};
@@ -476,8 +434,6 @@ subtest {
 			my $parsed = $pt.parse-source( Q{Q{Hello, world!}} );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q{Q{Hello, world!}},
-#				Q{formatted};
 			is $pt.format( $tree ), Q{Q{Hello, world!}},
 				Q{formatted};
 		}, Q{Q{} (only uninterpolated)};
@@ -491,8 +447,6 @@ subtest {
 				my $parsed = $pt.parse-source( Q{q[Hello, world!]} );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
-#				is $pt.format( $tree ), Q{q[Hello, world!]},
-#					Q{formatted};
 				is $pt.format( $tree ), Q{q[Hello, world!]},
 					Q{formatted};
 			}, Q{unescaped};
@@ -503,8 +457,6 @@ subtest {
 				my $parsed = $pt.parse-source( Q{q[Hello\, world!]} );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
-#				is $pt.format( $tree ), Q{q[Hello\, world!]},
-#					Q{formatted};
 				is $pt.format( $tree ), Q{q[Hello\, world!]},
 					Q{formatted};
 			}, Q{escaped};
@@ -520,8 +472,6 @@ subtest {
 			my $parsed = $pt.parse-source( Q{qq[Hello, world!]} );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q{qq[Hello, world!]},
-#				Q{formatted};
 			is $pt.format( $tree ), Q{qq[Hello, world!]},
 				Q{formatted};
 		}, Q{uninterpolated};
@@ -532,8 +482,6 @@ subtest {
 			my $parsed = $pt.parse-source( Q{qq[Hello\, world!]} );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-#			is $pt.format( $tree ), Q{qq[Hello\, world!]},
-#				Q{formatted};
 			is $pt.format( $tree ), Q{qq[Hello\, world!]},
 				Q{formatted};
 		}, Q{interpolated};
@@ -605,7 +553,6 @@ subtest {
 		my $parsed = $pt.parse-source( Q{@*ARGS} );
 		my $tree = $pt.build-tree( $parsed );
 		ok $pt.validate( $parsed ), Q{valid};
-#		is $pt.format( $tree ), Q{@*ARGS}, Q{formatted};
 		is $pt.format( $tree ), Q{@*ARGS}, Q{formatted};
 	}, Q{@*ARGS (is a global, so available everywhere)};
 
@@ -615,7 +562,6 @@ subtest {
 		my $parsed = $pt.parse-source( Q{$} );
 		my $tree = $pt.build-tree( $parsed );
 		ok $pt.validate( $parsed ), Q{valid};
-#		is $pt.format( $tree ), Q{$}, Q{formatted};
 		is $pt.format( $tree ), Q{$}, Q{formatted};
 	}, Q{$};
 
@@ -625,7 +571,6 @@ subtest {
 		my $parsed = $pt.parse-source( Q{$_} );
 		my $tree = $pt.build-tree( $parsed );
 		ok $pt.validate( $parsed ), Q{valid};
-#		is $pt.format( $tree ), Q{$_}, Q{formatted};
 		is $pt.format( $tree ), Q{$_}, Q{formatted};
 	}, Q{$_};
 
@@ -635,7 +580,6 @@ subtest {
 		my $parsed = $pt.parse-source( Q{$/} );
 		my $tree = $pt.build-tree( $parsed );
 		ok $pt.validate( $parsed ), Q{valid};
-#		is $pt.format( $tree ), Q{$/}, Q{formatted};
 		is $pt.format( $tree ), Q{$/}, Q{formatted};
 	}, Q{$/};
 
@@ -645,7 +589,6 @@ subtest {
 		my $parsed = $pt.parse-source( Q{$!} );
 		my $tree = $pt.build-tree( $parsed );
 		ok $pt.validate( $parsed ), Q{valid};
-#		is $pt.format( $tree ), Q{$!}, Q{formatted};
 		is $pt.format( $tree ), Q{$!}, Q{formatted};
 	}, Q{$!};
 
@@ -655,7 +598,6 @@ subtest {
 		my $parsed = $pt.parse-source( Q{$Foo::Bar} );
 		my $tree = $pt.build-tree( $parsed );
 		ok $pt.validate( $parsed ), Q{valid};
-#		is $pt.format( $tree ), Q{$Foo::Bar}, Q{formatted};
 		is $pt.format( $tree ), Q{$Foo::Bar}, Q{formatted};
 	}, Q{$Foo::Bar};
 
@@ -665,7 +607,6 @@ subtest {
 		my $parsed = $pt.parse-source( Q{&sum} );
 		my $tree = $pt.build-tree( $parsed );
 		ok $pt.validate( $parsed ), Q{valid};
-#		is $pt.format( $tree ), Q{&sum}, Q{formatted};
 		is $pt.format( $tree ), Q{&sum}, Q{formatted};
 	}, Q{&sum};
 
@@ -676,8 +617,6 @@ subtest {
 		my $parsed = $pt.parse-source( Q{$Foo::($*GLOBAL)::Bar} );
 		my $tree = $pt.build-tree( $parsed );
 		ok $pt.validate( $parsed ), Q{valid};
-#		is $pt.format( $tree ), Q{$Foo::($*GLOBAL)::Bar},
-#			Q{formatted};
 		is $pt.format( $tree ), Q{$Foo::($*GLOBAL)::Bar},
 			Q{formatted};
 	}, Q[$Foo::($*GLOBAL)::Bar (Need $*GLOBAL in order to compile)];
@@ -692,7 +631,6 @@ subtest {
 		my $parsed = $pt.parse-source( Q{Int} );
 		my $tree = $pt.build-tree( $parsed );
 		ok $pt.validate( $parsed ), Q{valid};
-#		is $pt.format( $tree ), Q{Int}, Q{formatted};
 		is $pt.format( $tree ), Q{Int}, Q{formatted};
 	}, Q{Int};
 
@@ -702,7 +640,6 @@ subtest {
 		my $parsed = $pt.parse-source( Q{IO::Handle} );
 		my $tree = $pt.build-tree( $parsed );
 		ok $pt.validate( $parsed ), Q{valid};
-#		is $pt.format( $tree ), Q{IO::Handle}, Q{formatted};
 		is $pt.format( $tree ), Q{IO::Handle}, Q{formatted};
 	}, Q{IO::Handle (Two package names)};
 }, Q{type};
@@ -716,7 +653,6 @@ subtest {
 		my $parsed = $pt.parse-source( Q{pi} );
 		my $tree = $pt.build-tree( $parsed );
 		ok $pt.validate( $parsed ), Q{valid};
-#		is $pt.format( $tree ), Q{pi}, Q{formatted};
 		is $pt.format( $tree ), Q{pi}, Q{formatted};
 	}, Q{pi};
 }, Q{constant};
@@ -730,7 +666,6 @@ subtest {
 		my $parsed = $pt.parse-source( Q{sum} );
 		my $tree = $pt.build-tree( $parsed );
 		ok $pt.validate( $parsed ), Q{valid};
-#		is $pt.format( $tree ), Q{sum}, Q{formatted};
 		is $pt.format( $tree ), Q{sum}, Q{formatted};
 	}, Q{sum};
 }, Q{function call};
@@ -744,7 +679,6 @@ subtest {
 		my $parsed = $pt.parse-source( Q{()} );
 		my $tree = $pt.build-tree( $parsed );
 		ok $pt.validate( $parsed ), Q{valid};
-#		is $pt.format( $tree ), Q{()}, Q{formatted};
 		is $pt.format( $tree ), Q{()}, Q{formatted};
 	}, Q{circumfix};
 }, Q{operator};
@@ -758,7 +692,6 @@ subtest {
 		my $parsed = $pt.parse-source( Q{:foo} );
 		my $tree = $pt.build-tree( $parsed );
 		ok $pt.validate( $parsed ), Q{valid};
-#		is $pt.format( $tree ), Q{:foo}, Q{formatted};
 		is $pt.format( $tree ), Q{:foo}, Q{formatted};
 	}, Q{:foo};
 }, Q{adverbial-pair};
@@ -772,7 +705,6 @@ subtest {
 		my $parsed = $pt.parse-source( Q{:()} );
 		my $tree = $pt.build-tree( $parsed );
 		ok $pt.validate( $parsed ), Q{valid};
-#		is $pt.format( $tree ), Q{:()}, Q{formatted};
 		is $pt.format( $tree ), Q{:()}, Q{formatted};
 	}, Q{:()};
 }, Q{signature};

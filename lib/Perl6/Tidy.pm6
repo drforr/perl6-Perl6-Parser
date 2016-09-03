@@ -193,25 +193,24 @@ class Perl6::Tidy {
 		$str
 	}
 
-	method _tidy( Str $source, $formatting = { } ) {
-		my $parsed    = self.parse-source( $source );
-#say $parsed.hash.<statementlist>.hash.<statement>.list.[0].dump;
-		my $valid     = self.validate( $parsed );
-		my $tree      = self.build-tree( $parsed );
-		my $formatted = self.format( $tree, $formatting );
-
-		$formatted
+	method dump-term( Perl6::Element $term ) {
+		my $str = $term.WHAT.perl;
+		if $term ~~ Perl6::Bareword or
+		   $term ~~ Perl6::WS {
+			$str ~= " ('" ~ $term.content ~ "')"
+		}
+		$str
 	}
 
-# Remove when the refactoring is done.
-#
-method get-tree( Str $source ) {
-	my $parsed    = self.parse-source( $source );
-	my $valid     = self.validate( $parsed );
-	my $tree      = self.build-tree( $parsed );
-
-	$tree
-}
+	method dump-tree( Perl6::Element $root, Int $depth = 0 ) {
+		my $str = ( "\t" xx $depth ) ~ self.dump-term( $root ) ~ "\n";
+		if $root.^can('child') {
+			for $root.child {
+				$str ~= self.dump-tree( $_, $depth + 1 )
+			}
+		}
+		$str
+	}
 
 	method tidy( Str $source, $formatting = { } ) {
 		my $parsed    = self.parse-source( $source );

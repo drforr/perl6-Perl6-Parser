@@ -32,7 +32,9 @@ all get tested in the same file, however.
 
 The terms that get tested here are:
 
-sub <name> ... { },
+sub <name> ... { }
+method <name> ... { }
+submethod <name> ... { }
 
 class Foo { method Bar { } } # 'method' is a routine_declaration.
 class Foo { submethod Bar { } } # 'submethod' is a routine_declaration.

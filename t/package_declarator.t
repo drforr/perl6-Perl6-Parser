@@ -39,6 +39,8 @@ grammar <name> { }
 role <name> { }
 knowhow <name> { }
 native <name> { }
+also is <name>
+trusts <name>
 
 class Foo { also is Int } # 'also' is a package_declaration.
 class Foo { trusts Int } # 'trusts' is a package_declaration.
