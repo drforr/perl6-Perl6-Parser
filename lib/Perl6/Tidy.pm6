@@ -195,18 +195,34 @@ class Perl6::Tidy {
 
 	method dump-term( Perl6::Element $term ) {
 		my $str = $term.WHAT.perl;
-		if $term ~~ Perl6::Bareword or
-		   $term ~~ Perl6::WS {
-			$str ~= " ('" ~ $term.content ~ "')"
+		if $term ~~ Perl6::Block or
+		   $term ~~ Perl6::Operator::Circumfix or
+		   $term ~~ Perl6::Operator::PostCircumfix {
+			$str ~= " ('{$term.delimiter.[0]}'..'{$term.delimiter.[1]}')"
+		}
+		elsif $term ~~ Perl6::Bareword or
+		      $term ~~ Perl6::Variable or
+		      $term ~~ Perl6::Operator or
+		      $term ~~ Perl6::WS {
+			$str ~= " ('{$term.content}')"
+		}
+		elsif $term ~~ Perl6::Number {
+			$str ~= " ({$term.content})"
+		}
+		elsif $term ~~ Perl6::String {
+			$str ~= " ({$term.content}) ('{$term.bare}')"
 		}
 		$str
 	}
 
-	method dump-tree( Perl6::Element $root, Int $depth = 0 ) {
+	method dump-tree( Perl6::Element $root,
+			  Bool $display-ws = True,
+			  Int $depth = 0 ) {
+		return '' if $root ~~ Perl6::WS and !$display-ws;
 		my $str = ( "\t" xx $depth ) ~ self.dump-term( $root ) ~ "\n";
 		if $root.^can('child') {
 			for $root.child {
-				$str ~= self.dump-tree( $_, $depth + 1 )
+				$str ~= self.dump-tree( $_, $display-ws, $depth + 1 )
 			}
 		}
 		$str

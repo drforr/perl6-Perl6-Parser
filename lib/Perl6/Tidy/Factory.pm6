@@ -409,7 +409,8 @@ class Perl6::Operator {
 }
 class Perl6::Operator::Prefix does Token {
 	also is Perl6::Operator;
-	multi method new( Mu $p ) {
+
+	multi method from-match( Mu $p ) {
 		self.bless(
 			:from( $p.from ),
 			:to( $p.to ),
@@ -801,10 +802,6 @@ class Perl6::Tidy::Factory {
 		say "{$p.from} {$p.to} [{substr($p.orig,$p.from,$p.to-$p.from)}]";
 	}
 
-	sub dump( Mu $parsed ) {
-		say $parsed.hash.keys.gist;
-	}
-
 	method assert-Bool( Mu $parsed ) {
 		return False if $parsed.hash;
 		return False if $parsed.list;
@@ -1062,16 +1059,20 @@ class Perl6::Tidy::Factory {
 				)
 			}
 			else {
+				my @_child;
+				if $p.hash.<statementlist>.chars {
+					@_child.append(
+						Perl6::WS.from-match(
+							$p.hash.<statementlist>
+						)
+					)
+				}
 				@child =
 					Perl6::Block.new(
 						:from( $p.from ),
 						:to( $p.to ),
 						:delimiter( '{', '}' ),
-						:child(
-							Perl6::WS.from-match(
-								$p.hash.<statementlist>
-							)
-						)
+						:child( @_child )
 					)
 			}
 		}
@@ -1142,7 +1143,7 @@ class Perl6::Tidy::Factory {
 
 	# ( )
 	# STATEMENT_LIST( )
-	# ang
+	# ang # < > # ?
 	# << >>
 	# « »
 	# { }
@@ -2772,7 +2773,6 @@ return True;
 		my Perl6::Element @child;
 		# $p doesn't contain WS after the block.
 		if self.assert-hash-keys( $p, [< sym package_def >] ) {
-say 11;
 			@child =
 				self._sym( $p.hash.<sym> );
 			@child.append(
@@ -2839,7 +2839,6 @@ say 11;
 		# $p doesn't contain WS after the block.
 		elsif self.assert-hash-keys( $p,
 				[< longname blockoid >], [< trait >] ) {
-say 14;
 			@child =
 				self._longname( $p.hash.<longname> );
 			@child.append(
@@ -4200,6 +4199,20 @@ say 14;
 			@_child.append(
 				Perl6::WS.whitespace-trailer( $_ )
 			);
+			my $temp = substr(
+				$p.Str,
+				@_child[*-1].to - $p.from,
+				SEMICOLON.chars
+			);
+			if $temp ~~ m{ (';') } {
+				@_child.append(
+					Perl6::Semicolon.new(
+						:from( @_child[*-1].to ),
+						:to( @_child[*-1].to + SEMICOLON.chars ),
+						:content( $0.Str )
+					)
+				)
+			}
 			@child.append(
 				Perl6::Statement.from-list( @_child )
 			)
