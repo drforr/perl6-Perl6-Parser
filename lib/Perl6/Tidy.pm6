@@ -212,6 +212,9 @@ class Perl6::Tidy {
 		elsif $term ~~ Perl6::String {
 			$str ~= " ({$term.content}) ('{$term.bare}')"
 		}
+		if $term.^can('from') {
+			$str ~= " ({$term.from}-{$term.to})";
+		}
 		$str
 	}
 

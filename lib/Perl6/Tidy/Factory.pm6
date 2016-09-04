@@ -2772,94 +2772,96 @@ return True;
 	method _package_declarator( Mu $p ) {
 		my Perl6::Element @child;
 		# $p doesn't contain WS after the block.
-		if self.assert-hash-keys( $p, [< sym package_def >] ) {
-			@child =
-				self._sym( $p.hash.<sym> );
-			@child.append(
-				Perl6::WS.between-matches(
-					$p,
-					$p.hash.<sym>,
-					$p.hash.<package_def>
+		given $p {
+			when self.assert-hash-keys( $_,
+				[< sym package_def >] ) {
+				@child = self._sym( $_.hash.<sym> );
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						$_.hash.<sym>,
+						$_.hash.<package_def>
+					)
+				);
+				@child.append(
+					self._package_def(
+						$_.hash.<package_def>
+					)
 				)
-			);
-			@child.append(
-				self._package_def( $p.hash.<package_def> )
-			);
-		}
-		elsif self.assert-hash-keys( $p, [< sym typename >] ) {
-			@child =
-				self._sym( $p.hash.<sym> );
-			@child.append(
-				Perl6::WS.between-matches(
-					$p,
-					$p.hash.<sym>,
-					$p.hash.<typename>
+			}
+			when self.assert-hash-keys( $_, [< sym typename >] ) {
+				@child = self._sym( $_.hash.<sym> );
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						$_.hash.<sym>,
+						$_.hash.<typename>
+					)
+				);
+				@child.append(
+					self._package_def( $_.hash.<typename> )
 				)
-			);
-			@child.append(
-				self._package_def( $p.hash.<typename> )
-			);
-		}
-		elsif self.assert-hash-keys( $p, [< sym trait >] ) {
-			@child =
-				self._sym( $p.hash.<sym> );
-			@child.append(
-				Perl6::WS.between-matches(
-					$p,
-					$p.hash.<sym>,
-					$p.hash.<trait>
+			}
+			when self.assert-hash-keys( $_, [< sym trait >] ) {
+				@child = self._sym( $_.hash.<sym> );
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						$_.hash.<sym>,
+						$_.hash.<trait>
+					)
+				);
+				@child.append(
+					self._trait( $_.hash.<trait> )
 				)
-			);
-			@child.append(
-				self._trait( $p.hash.<trait> )
-			);
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 		@child
 	}
 
 	method _package_def( Mu $p ) {
 		my Perl6::Element @child;
-		if self.assert-hash-keys( $p,
+		given $p {
+			when self.assert-hash-keys( $_,
 				[< longname statementlist >], [< trait >] ) {
-			@child =
-				self._longname( $p.hash.<longname> );
-			@child.append(
-				self._statementlist( $p.hash.<statementlist> )
-			)
-		}
-		elsif self.assert-hash-keys( $p,
-				[< longname >], [< colonpair >] ) {
-			@child =
-				self._longname( $p.hash.<longname> )
-		}
-		# $p doesn't contain WS after the block.
-		elsif self.assert-hash-keys( $p,
-				[< longname blockoid >], [< trait >] ) {
-			@child =
-				self._longname( $p.hash.<longname> );
-			@child.append(
-				Perl6::WS.between-matches(
-					$p,
-					$p.hash.<longname>,
-					$p.hash.<blockoid>
+				@child = self._longname( $_.hash.<longname> );
+				@child.append(
+					self._statementlist(
+						$_.hash.<statementlist>
+					)
 				)
-			);
-			@child.append(
-				self._blockoid( $p.hash.<blockoid> )
-			)
-		}
-		elsif self.assert-hash-keys( $p,
-				[< blockoid >], [< trait >] ) {
-			@child =
-				self._blockoid( $p.hash.<blockoid> )
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+			}
+			when self.assert-hash-keys( $_,
+					[< longname >], [< colonpair >] ) {
+				@child = self._longname( $_.hash.<longname> )
+			}
+			# $p doesn't contain WS after the block.
+			when self.assert-hash-keys( $_,
+					[< longname blockoid >], [< trait >] ) {
+				@child = self._longname( $_.hash.<longname> );
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						$_.hash.<longname>,
+						$_.hash.<blockoid>
+					)
+				);
+				@child.append(
+					self._blockoid( $_.hash.<blockoid> )
+				)
+			}
+			when self.assert-hash-keys( $_,
+					[< blockoid >], [< trait >] ) {
+				@child = self._blockoid( $_.hash.<blockoid> )
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 		@child.flat
 	}
@@ -2871,7 +2873,8 @@ return True;
 				[< param_var type_constraint
 				   quant post_constraint >],
 				[< default_value modifier trait >] ) {
-				# Synthesize the 'from' and 'to' markers for 'where'
+				# Synthesize the 'from' and 'to' markers for
+				# 'where'
 				$p.Str ~~ m{ << (where) >> };
 				my Int $from = $0.from;
 				@child.append(
@@ -2885,7 +2888,10 @@ return True;
 				@child.append(
 					Perl6::Bareword.new(
 						:from( $p.from + $from ),
-						:to( $p.from + $from + WHERE.chars ),
+						:to(
+							$p.from + $from +
+							WHERE.chars
+						),
 						:content( WHERE )
 					)
 				);
@@ -3081,16 +3087,18 @@ return True;
 	}
 
 	method _pblock( Mu $p ) {
-		if self.assert-hash-keys( $p,
-				[< lambda blockoid signature >] ) {
-			die "Not implemented yet"
-		}
-		elsif self.assert-hash-keys( $p, [< blockoid >] ) {
-			self._blockoid( $p.hash.<blockoid> )
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_,
+					[< lambda blockoid signature >] ) {
+				die "Not implemented yet"
+			}
+			when self.assert-hash-keys( $_, [< blockoid >] ) {
+				self._blockoid( $p.hash.<blockoid> )
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
@@ -3179,15 +3187,17 @@ return True;
 	# ⁿ
 	#
 	method _postfix( Mu $p ) {
-		if self.assert-hash-keys( $p, [< sym O >] ) {
-			Perl6::Operator::Infix.new( $p.hash.<sym> )
-		}
-		elsif self.assert-hash-keys( $p, [< dig O >] ) {
-			Perl6::Operator::Infix.new( $p.hash.<dig> )
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $p, [< sym O >] ) {
+				Perl6::Operator::Infix.new( $p.hash.<sym> )
+			}
+			when self.assert-hash-keys( $p, [< dig O >] ) {
+				Perl6::Operator::Infix.new( $p.hash.<dig> )
+			}
+			default {
+				say $p.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
@@ -3208,12 +3218,14 @@ return True;
 	}
 
 	method _prefix( Mu $p ) {
-		if self.assert-hash-keys( $p, [< sym O >] ) {
-			Perl6::Operator::Prefix.new( $p.hash.<sym> )
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $p, [< sym O >] ) {
+				Perl6::Operator::Prefix.new( $p.hash.<sym> )
+			}
+			default {
+				say $p.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
@@ -4189,9 +4201,24 @@ return True;
 	method _statementlist( Mu $p ) {
 		my Mu $statement = $p.hash.<statement>;
 		my Perl6::Element @child;
+		my $leftover-ws = '';
+		my $leftover-ws-from = 0;
 		for $statement.list {
-			my Perl6::Element @_child =
-				self._statement( $_ );
+			my Perl6::Element @_child;
+			if $leftover-ws ne '' {
+				@_child.append(
+					Perl6::WS.new(
+						:from( $leftover-ws-from ),
+						:to( $leftover-ws-from + $leftover-ws.chars ),
+						:content( $leftover-ws )
+					)
+				);
+				$leftover-ws = '';
+				$leftover-ws-from = 0
+			}
+			@_child.append(
+				self._statement( $_ )
+			);
 			# Do *NOT* remove this, use it to replace whatever
 			# WS trailing terms the grammar below might add
 			# redundantly.
@@ -4201,10 +4228,21 @@ return True;
 			);
 			my $temp = substr(
 				$p.Str,
-				@_child[*-1].to - $p.from,
-				SEMICOLON.chars
+				@_child[*-1].to - $p.from
 			);
-			if $temp ~~ m{ (';') } {
+			if $temp ~~ m{ ^ (';') (\s+) } {
+				@_child.append(
+					Perl6::Semicolon.new(
+						:from( @_child[*-1].to ),
+						:to( @_child[*-1].to + SEMICOLON.chars ),
+						:content( $0.Str )
+					)
+				);
+				$leftover-ws = $1.Str;
+				$leftover-ws-from = 
+					@_child[*-1].to + SEMICOLON.chars
+			}
+			elsif $temp ~~ m{ ^ (';') } {
 				@_child.append(
 					Perl6::Semicolon.new(
 						:from( @_child[*-1].to ),
