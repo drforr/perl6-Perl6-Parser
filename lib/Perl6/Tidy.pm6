@@ -235,7 +235,7 @@ class Perl6::Tidy {
 	}
 
 	method ruler( Str $source ) {
-		my Str $munged = substr( $source, 0, min( $source.chars, 72 );
+		my Str $munged = substr( $source, 0, min( $source.chars, 72 ) );
 		$munged ~= '...' if $source.chars > 72;
 		my Int $blocks = $munged.chars div 10 + 1;
 		$munged ~~ s:g{ \n } = Q{␤};
