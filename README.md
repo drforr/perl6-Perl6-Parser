@@ -31,6 +31,52 @@ PLEASE DO NOT ASSUME THIS IS STABLE OR IN ANY WAY REPRESENTATIVE OF THE FINAL
 PRODUCT. Doing so will void your warranty, and may cause demons to fly from
 your nose. YOU HAVE BEEN WARNED.
 
+=begin DEBUGGING UTILITIES
+
+There are two methods in L<Perl6::Tidy>, and one core method that you'll find
+useful as you delve into the murky waters of the code.
+
+The first one is useful after C<$pt.parse-source( $source )> - You can use
+C<.dump> on the resultant object, and (usually) get a dump of the NQPMatch
+object that the Perl 6 parser has generated for your source. I say "usually"
+because there are some conditions under which C<.dump> will hang, most of the
+time because you've passed it a list element. This is an issue with the
+NQP core, and deprioritized as such.
+
+The next one is useful after C<$pt.build-tree( $p )>, and that is
+C<$pt.dump-tree( $tree )>. This gives a nicely-annotated view of the
+L<Perl6::Tidy> tree, complete with text that it's matched in gist form, and
+the start and end markers of each leaf on the tree.
+(Start and end markers for constructs like L<Perl6::Document> and
+L<Perl6::Statement> are elided because they're computed from the underlying
+C<:child> elements. My rationale for ignoring those is that when I'm
+debugging line boundaries, I'm most concerned with what I can immediately
+affect in the code; since statement and document boundaries are generated for
+me, they're not something I can/should be tweaking.
+
+Finally, there's a little C<$pt.ruler( $source )> helper. All it does is put
+up a bit of text like so:
+
+#          1         2
+#01234567890123456789
+#unit subset Foo;␤
+
+First it puts up a tiny ASCII-art ruler that helps you count characters, with
+every 10 characters called out w/an extra tick above. This way you don't go
+blind counting characters. It renders just the first 72 characters so that
+things don't go wrapping around the terminal, and adds an ellipsis ('...') if
+the source text is more than 72 characters.
+
+It munges UNIX newlines (eventually CRLF when I get around to it) into the
+equivalent Unicode control pictures, so they don't wrap around to the next
+line of the screen.
+
+And then, so you can copy the text into another buffer without worrying about
+whether it'll be accidentally run as code, adds '#' to the start so that it's
+automatically a valid comment.
+
+=end DEBUGGING UTILITIES
+
 =begin DEVELOPER NOTES
 
 Internal classes are labeled with a leading C<_> so they will never be confused with native Perl6 classes. This is very likely with this sort of grammar, see L<_Signature> vs. the existing L<Signature> class.

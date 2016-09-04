@@ -204,7 +204,7 @@ class Perl6::Tidy {
 		      $term ~~ Perl6::Variable or
 		      $term ~~ Perl6::Operator or
 		      $term ~~ Perl6::WS {
-			$str ~= " ('{$term.content}')"
+			$str ~= " ({$term.content.perl})"
 		}
 		elsif $term ~~ Perl6::Number {
 			$str ~= " ({$term.content})"
@@ -212,7 +212,10 @@ class Perl6::Tidy {
 		elsif $term ~~ Perl6::String {
 			$str ~= " ({$term.content}) ('{$term.bare}')"
 		}
-		if $term.^can('from') {
+
+		if $term.^can('from') and not (
+				$term ~~ Perl6::Document | Perl6::Statement
+			) {
 			$str ~= " ({$term.from}-{$term.to})";
 		}
 		$str
@@ -229,6 +232,22 @@ class Perl6::Tidy {
 			}
 		}
 		$str
+	}
+
+	method ruler( Str $source ) {
+		my Str $munged = substr( $source, 0, min( $source.chars, 72 );
+		$munged ~= '...' if $source.chars > 72;
+		my Int $blocks = $munged.chars div 10 + 1;
+		$munged ~~ s:g{ \n } = Q{␤};
+		my Str $nums = '';
+		for ^$blocks {
+			$nums ~= "         {$_+1}";
+		}
+
+		my $ruler = '';
+		$ruler ~= '#' ~ ' ' ~ $nums ~ "\n";
+		$ruler ~= '#' ~ ('0123456789' x $blocks) ~ "\n";
+		$ruler ~= '#' ~ $munged ~ "\n";
 	}
 
 	method tidy( Str $source, $formatting = { } ) {

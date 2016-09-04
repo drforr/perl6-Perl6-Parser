@@ -180,7 +180,10 @@ _END_
 unit subset Foo;
 _END_
 		my $p = $pt.parse-source( $source );
+say $p.dump;
 		my $tree = $pt.build-tree( $p );
+say $pt.ruler($source);
+say $pt.dump-tree($tree);
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
 	}, Q{unit form};

@@ -234,16 +234,18 @@ class Perl6::WS does Token {
 		)
 	}
 
-	method between-matches( Mu $p, Mu $lhs, Mu $rhs ) {
-		if $lhs.to < $rhs.from {
+	method between-matches( Mu $p, Str $lhs, Str $rhs ) {
+		my $_lhs = $p.hash.{$lhs};
+		my $_rhs = $p.hash.{$rhs};
+		if $_lhs.to < $_rhs.from {
 			self.bless(
-				:from( $lhs.to ),
-				:to( $rhs.from ),
+				:from( $_lhs.to ),
+				:to( $_rhs.from ),
 				:content(
 					substr(
 						$p.Str,
-						$lhs.to - $p.from,
-						$rhs.from - $lhs.to
+						$_lhs.to - $p.from,
+						$_rhs.from - $_lhs.to
 					)
 				)
 			)
@@ -305,7 +307,7 @@ class Perl6::WS does Token {
 	}
 }
 
-class Perl6::Document does Branching {
+class Perl6::Document does Branching does Bounded {
 	also is Perl6::Element;
 }
 
@@ -782,6 +784,8 @@ class Perl6::Tidy::Factory {
 		my Perl6::Element @_child =
 			self._statementlist( $p.hash.<statementlist> );
 		Perl6::Document.new(
+			:from( @_child[0].from ),
+			:to( @_child[*-1].to ),
 			:child( @_child )
 		)
 	}
@@ -1339,8 +1343,8 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			@child.append(
 				Perl6::WS.between-matches(
 					$p,
-					$p.hash.<variable_declarator>,
-					$p.hash.<initializer>
+					'variable_declarator',
+					'initializer'
 				)
 			);
 			@child.append(
@@ -1351,14 +1355,12 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 				[< sym defterm initializer >],
 				[< trait >] ) {
 			@child =
-				self._sym(
-					$p.hash.<sym>
-				);
+				self._sym( $p.hash.<sym> );
 			@child.append(
 				Perl6::WS.between-matches(
 					$p,
-					$p.hash.<sym>,
-					$p.hash.<defterm>
+					'sym',
+					'defterm'
 				)
 			);
 			@child.append(
@@ -1367,8 +1369,8 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			@child.append(
 				Perl6::WS.between-matches(
 					$p,
-					$p.hash.<defterm>,
-					$p.hash.<initializer>
+					'defterm',
+					'initializer'
 				)
 			);
 			@child.append(
@@ -1384,8 +1386,8 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			@child.append(
 				Perl6::WS.between-matches(
 					$p,
-					$p.hash.<signature>,
-					$p.hash.<initializer>
+					'signature',
+					'initializer'
 				)
 			);
 			@child.append(
@@ -1402,8 +1404,8 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			@child.append(
 				Perl6::WS.between-matches(
 					$p,
-					$p.hash.<variable_declarator>,
-					$p.hash.<initializer>
+					'variable_declarator',
+					'initializer'
 				)
 			);
 			@child.append(
@@ -1700,17 +1702,30 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 	}
 
 	method _else( Mu $p ) {
+		my Perl6::Element @child;
 		warn "Untested method";
 		if self.assert-hash-keys( $p, [< sym blorst >] ) {
-			die "Not implemented yet"
+			@child = self._sym( $p.hash.<sym> );
+			@child.append(
+				Perl6::WS.between-matches(
+					$p,
+					'sym',
+					'blorst'
+				)
+			);
+			@child.append(
+				self._blorst( $p.hash.<blorst> )
+			)
 		}
 		elsif self.assert-hash-keys( $p, [< blockoid >] ) {
-			self._blockoid( $p.hash.<blockoid> )
+			@child =
+				self._blockoid( $p.hash.<blockoid> )
 		}
 		else {
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
+		@child
 	}
 
 	method _escale( Mu $p ) {
@@ -2181,8 +2196,8 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			@child.append(
 				Perl6::WS.between-matches(
 					$p,
-					$p.hash.<sym>,
-					$p.hash.<EXPR>
+					'sym',
+					'EXPR'
 				)
 			);
 			@child.append(
@@ -2321,8 +2336,8 @@ return True;
 			@child.append(
 				Perl6::WS.between-matches(
 					$p,
-					$p.hash.<longname>,
-					$p.hash.<blockoid>
+					'longname',
+					'blockoid'
 				)
 			);
 			@child.append(
@@ -2428,8 +2443,8 @@ return True;
 			@child.append(
 				Perl6::WS.between-matches(
 					$p,
-					$p.hash.<sym>,
-					$p.hash.<routine_def>
+					'sym',
+					'routine_def'
 				)
 			);
 			@child.append(
@@ -2444,8 +2459,8 @@ return True;
 			@child.append(
 				Perl6::WS.between-matches(
 					$p,
-					$p.hash.<sym>,
-					$p.hash.<declarator>
+					'sym',
+					'declarator'
 				)
 			);
 			@child.append(
@@ -2740,16 +2755,13 @@ return True;
 			@child.append(
 				Perl6::WS.between-matches(
 					$p,
-					$p.hash.<sym>,
-					$p.hash.<package_def>
+					'sym',
+					'package_def'
 				)
 			);
 			@child.append(
 				self._package_def( $p.hash.<package_def> )
 			);
-			@child.append(
-				semicolon-terminator( $p )
-			)
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -2779,8 +2791,8 @@ return True;
 				@child.append(
 					Perl6::WS.between-matches(
 						$_,
-						$_.hash.<sym>,
-						$_.hash.<package_def>
+						'sym',
+						'package_def'
 					)
 				);
 				@child.append(
@@ -2794,8 +2806,8 @@ return True;
 				@child.append(
 					Perl6::WS.between-matches(
 						$_,
-						$_.hash.<sym>,
-						$_.hash.<typename>
+						'sym',
+						'typename'
 					)
 				);
 				@child.append(
@@ -2807,8 +2819,8 @@ return True;
 				@child.append(
 					Perl6::WS.between-matches(
 						$_,
-						$_.hash.<sym>,
-						$_.hash.<trait>
+						'sym',
+						'trait'
 					)
 				);
 				@child.append(
@@ -2846,8 +2858,8 @@ return True;
 				@child.append(
 					Perl6::WS.between-matches(
 						$_,
-						$_.hash.<longname>,
-						$_.hash.<blockoid>
+						'longname',
+						'blockoid'
 					)
 				);
 				@child.append(
@@ -3403,8 +3415,8 @@ return True;
 			@child.append(
 				Perl6::WS.between-matches(
 					$p,
-					$p.hash.<sym>,
-					$p.hash.<regex_def>
+					'sym',
+					'regex_def'
 				)
 			);
 			@child.append(
@@ -3616,8 +3628,8 @@ return True;
 			@child.append(
 				Perl6::WS.between-matches(
 					$p,
-					$p.hash.<multisig>,
-					$p.hash.<blockoid>,
+					'multisig',
+					'blockoid',
 				)
 			);
 			@child.append(
@@ -3631,8 +3643,8 @@ return True;
 			@child.append(
 				Perl6::WS.between-matches(
 					$p,
-					$p.hash.<deflongname>,
-					$p.hash.<blockoid>,
+					'deflongname',
+					'blockoid',
 				)
 			);
 			@child.append(
@@ -3677,8 +3689,8 @@ return True;
 			@child.append(
 				Perl6::WS.between-matches(
 					$p,
-					$p.hash.<typename>,
-					$p.hash.<multi_declarator>
+					'typename',
+					'multi_declarator'
 				)
 			);
 			@child.append(
@@ -3702,8 +3714,8 @@ return True;
 			@child.append(
 				Perl6::WS.between-matches(
 					$p,
-					$p.hash.<sym>,
-					$p.hash.<package_declarator>
+					'sym',
+					'package_declarator'
 				)
 			);
 			@child.append(
@@ -4230,19 +4242,12 @@ return True;
 				$p.Str,
 				@_child[*-1].to - $p.from
 			);
-			if $temp ~~ m{ ^ (';') (\s+) } {
-				@_child.append(
-					Perl6::Semicolon.new(
-						:from( @_child[*-1].to ),
-						:to( @_child[*-1].to + SEMICOLON.chars ),
-						:content( $0.Str )
-					)
-				);
-				$leftover-ws = $1.Str;
-				$leftover-ws-from = 
-					@_child[*-1].to + SEMICOLON.chars
-			}
-			elsif $temp ~~ m{ ^ (';') } {
+			if $temp ~~ m{ ^ (';') (\s+)? } {
+				if $1 {
+					$leftover-ws = $1.Str;
+					$leftover-ws-from = 
+						@_child[*-1].to + SEMICOLON.chars
+				}
 				@_child.append(
 					Perl6::Semicolon.new(
 						:from( @_child[*-1].to ),
@@ -4251,6 +4256,17 @@ return True;
 					)
 				)
 			}
+			@child.append(
+				Perl6::Statement.from-list( @_child )
+			)
+		}
+		if $leftover-ws and $leftover-ws ne '' {
+			my Perl6::Element @_child =
+				Perl6::WS.new(
+					:from( $leftover-ws-from ),
+					:to( $leftover-ws-from + $leftover-ws.chars ),
+					:content( $leftover-ws )
+				);
 			@child.append(
 				Perl6::Statement.from-list( @_child )
 			)
@@ -4611,8 +4627,8 @@ return True;
 			@child.append(
 				Perl6::WS.between-matches(
 					$p,
-					$p.hash.<sym>,
-					$p.hash.<longname>
+					'sym',
+					'longname'
 				)
 			);
 			@child.append(
@@ -4625,8 +4641,8 @@ return True;
 			@child.append(
 				Perl6::WS.between-matches(
 					$p,
-					$p.hash.<sym>,
-					$p.hash.<typename>
+					'sym',
+					'typename'
 				)
 			);
 			@child.append(
@@ -4695,8 +4711,8 @@ return True;
 			@child.append(
 				Perl6::WS.between-matches(
 					$p,
-					$p.hash.<sym>,
-					$p.hash.<defterm>
+					'sym',
+					'defterm'
 				)
 			);
 			@child.append(
@@ -4705,8 +4721,8 @@ return True;
 			@child.append(
 				Perl6::WS.between-matches(
 					$p,
-					$p.hash.<defterm>,
-					$p.hash.<initializer>
+					'defterm',
+					'initializer'
 				)
 			);
 			@child.append(
@@ -4719,8 +4735,8 @@ return True;
 			@child.append(
 				Perl6::WS.between-matches(
 					$p,
-					$p.hash.<sym>,
-					$p.hash.<longname>
+					'sym',
+					'longname'
 				)
 			);
 			@child.append(
@@ -4729,8 +4745,8 @@ return True;
 			@child.append(
 				Perl6::WS.between-matches(
 					$p,
-					$p.hash.<longname>,
-					$p.hash.<term>
+					'longname',
+					'term'
 				)
 			);
 			@child.append(
@@ -4743,8 +4759,8 @@ return True;
 			@child.append(
 				Perl6::WS.between-matches(
 					$p,
-					$p.hash.<sym>,
-					$p.hash.<longname>
+					'sym',
+					'longname'
 				)
 			);
 			@child.append(
@@ -4753,8 +4769,8 @@ return True;
 			@child.append(
 				Perl6::WS.between-matches(
 					$p,
-					$p.hash.<longname>,
-					$p.hash.<trait>
+					'longname',
+					'trait'
 				)
 			);
 			@child.append(
@@ -4767,8 +4783,8 @@ return True;
 			@child.append(
 				Perl6::WS.between-matches(
 					$p,
-					$p.hash.<sym>,
-					$p.hash.<longname>
+					'sym',
+					'longname'
 				)
 			);
 			@child.append(
