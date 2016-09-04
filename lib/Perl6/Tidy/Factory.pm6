@@ -2840,12 +2840,34 @@ return True;
 		given $p {
 			when self.assert-hash-keys( $_,
 				[< longname statementlist >], [< trait >] ) {
+key-boundary $_.hash.<longname>;
+key-boundary $_.hash.<statementlist>;
+key-boundary $_;
 				@child = self._longname( $_.hash.<longname> );
-				@child.append(
-					self._statementlist(
-						$_.hash.<statementlist>
-					)
-				)
+				my $temp = substr(
+					$_.Str,
+					$_.hash.<longname>.to - $_.from
+				);
+				if $temp ~~ m{ ^ (\s+) (';')? } {
+					@child.append(
+						Perl6::WS.new(
+							:from( $_.hash.<longname>.to ),
+							:to( $_.hash.<longname>.to + $0.chars ),
+							:content( $0.Str )
+							
+						)
+					);
+					if $1.chars {
+						@child.append(
+							Perl6::Semicolon.new(
+								:from( $_.hash.<longname>.to + $0.chars ),
+								:to( $_.hash.<longname>.to + $0.chars + $1.chars ),
+								:content( $1.Str )
+							)
+
+						)
+					}
+				}
 			}
 			when self.assert-hash-keys( $_,
 					[< longname >], [< colonpair >] ) {
