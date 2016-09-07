@@ -144,13 +144,13 @@ _END_
 	}, Q{leading ws};
 }, Q{has};
 
-#`(
 subtest {
 	plan 2;
 
 	subtest {
 		plan 2;
 
+#`(
 		my $source = Q:to[_END_];
 class Foo{HAS$x}
 _END_
@@ -158,11 +158,13 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
+)
 	}, Q{no ws};
 
 	subtest {
 		plan 2;
 
+#`(
 		my $source = Q:to[_END_];
 class Foo{HAS     $x}
 _END_
@@ -170,9 +172,9 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
+)
 	}, Q{leading ws};
 }, Q{HAS};
-)
 
 #`( Not implemented yet
 subtest {
@@ -240,6 +242,7 @@ subtest {
 	subtest {
 		plan 2;
 
+#`(
 		my $source = Q:to[_END_];
 state$x
 _END_
@@ -247,11 +250,13 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
+)
 	}, Q{no ws};
 
 	subtest {
 		plan 2;
 
+#`(
 		my $source = Q:to[_END_];
 state     $x
 _END_
@@ -259,6 +264,7 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
+)
 	}, Q{leading ws};
 }, Q{state};
 

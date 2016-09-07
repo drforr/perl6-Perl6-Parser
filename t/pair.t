@@ -4,7 +4,6 @@ use Test;
 use Perl6::Tidy;
 
 #`(
-#`(
 
 In passing, please note that while it's trivially possible to bum down the
 tests, doing so makes it harder to insert 'say $parsed.dump' to view the
@@ -21,6 +20,7 @@ my $pt = Perl6::Tidy.new;
 subtest {
 	plan 2;
 
+#`(
 	my $source = Q:to[_END_];
 a => 1
 _END_
@@ -28,11 +28,13 @@ _END_
 	my $tree = $pt.build-tree( $parsed );
 	ok $pt.validate( $parsed ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
+)
 }, Q{a => 1};
 
 subtest {
 	plan 2;
 
+#`(
 	my $source = Q:to[_END_];
 'a' => 'b'
 _END_
@@ -40,11 +42,13 @@ _END_
 	my $tree = $pt.build-tree( $parsed );
 	ok $pt.validate( $parsed ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
+)
 }, Q{a => 1};
 
 subtest {
 	plan 2;
 
+#`(
 	my $source = Q:to[_END_];
 :a
 _END_
@@ -52,11 +56,13 @@ _END_
 	my $tree = $pt.build-tree( $parsed );
 	ok $pt.validate( $parsed ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
+)
 }, Q{:a};
 
 subtest {
 	plan 2;
 
+#`(
 	my $source = Q:to[_END_];
 :!a
 _END_
@@ -64,11 +70,13 @@ _END_
 	my $tree = $pt.build-tree( $parsed );
 	ok $pt.validate( $parsed ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
+)
 }, Q{:!a};
 
 subtest {
 	plan 2;
 
+#`(
 	my $source = Q:to[_END_];
 :a<b>
 _END_
@@ -76,11 +84,13 @@ _END_
 	my $tree = $pt.build-tree( $parsed );
 	ok $pt.validate( $parsed ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
+)
 }, Q{:a<b>};
 
 subtest {
 	plan 2;
 
+#`(
 	my $source = Q:to[_END_];
 :a<b c>
 _END_
@@ -88,6 +98,7 @@ _END_
 	my $tree = $pt.build-tree( $parsed );
 	ok $pt.validate( $parsed ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
+)
 }, Q{:a<b c>};
 
 subtest {
@@ -96,6 +107,7 @@ subtest {
 	subtest {
 		plan 2;
 
+#`(
 		my $source = Q:to[_END_];
 my $a;:a{$a}
 _END_
@@ -103,11 +115,13 @@ _END_
 		my $tree = $pt.build-tree( $parsed );
 		ok $pt.validate( $parsed ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
+)
 	}, Q{:a{$a}};
 
 	subtest {
 		plan 2;
 
+#`(
 		my $source = Q:to[_END_];
 my $a; :a{$a}
 _END_
@@ -115,12 +129,14 @@ _END_
 		my $tree = $pt.build-tree( $parsed );
 		ok $pt.validate( $parsed ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
+)
 	}, Q{with WS};
 }, Q{:a{$a}};
 
 subtest {
 	plan 2;
 
+#`(
 	my $source = Q:to[_END_];
 :a{'a', 'b'}
 _END_
@@ -128,11 +144,13 @@ _END_
 	my $tree = $pt.build-tree( $parsed );
 	ok $pt.validate( $parsed ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
+)
 }, Q{:a{'a', 'b'}};
 
 subtest {
 	plan 2;
 
+#`(
 	my $source = Q:to[_END_];
 :a{'a' => 'b'}
 _END_
@@ -140,11 +158,13 @@ _END_
 	my $tree = $pt.build-tree( $parsed );
 	ok $pt.validate( $parsed ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
+)
 }, Q{:a{'a' => 'b'}};
 
 subtest {
 	plan 2;
 
+#`(
 	my $source = Q:to[_END_];
 my $a; :$a
 _END_
@@ -152,11 +172,13 @@ _END_
 	my $tree = $pt.build-tree( $parsed );
 	ok $pt.validate( $parsed ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
+)
 }, Q{:$a};
 
 subtest {
 	plan 2;
 
+#`(
 	my $source = Q:to[_END_];
 my @a; :@a
 _END_
@@ -164,11 +186,13 @@ _END_
 	my $tree = $pt.build-tree( $parsed );
 	ok $pt.validate( $parsed ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
+)
 }, Q{:@a};
 
 subtest {
 	plan 2;
 
+#`(
 	my $source = Q:to[_END_];
 my %a; :%a
 _END_
@@ -176,11 +200,13 @@ _END_
 	my $tree = $pt.build-tree( $parsed );
 	ok $pt.validate( $parsed ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
+)
 }, Q{:%a};
 
 subtest {
 	plan 2;
 
+#`(
 	my $source = Q:to[_END_];
 my sub a { }; :&a
 _END_
@@ -188,7 +214,7 @@ _END_
 	my $tree = $pt.build-tree( $parsed );
 	ok $pt.validate( $parsed ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
-}, Q{:&a};
 )
+}, Q{:&a};
 
 # vim: ft=perl6

@@ -426,10 +426,10 @@ _END_
 	is $pt.format( $tree ), $source, Q{formatted};
 }, Q{class Foo also is};
 
-#`( XXX
 subtest {
 	plan 2;
 
+#`(
 	my $source = Q:to[_END_];
 class Foo is Test{}
 _END_
@@ -437,13 +437,13 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
-}, Q{class Foo is};
 )
+}, Q{class Foo is};
 
-#`( XXX
 subtest {
 	plan 2;
 
+#`(
 	my $source = Q:to[_END_];
 class Foo is repr('CStruct'){}
 _END_
@@ -451,8 +451,8 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
-}, Q{class Foo is repr()};
 )
+}, Q{class Foo is repr()};
 
 subtest {
 	plan 2;

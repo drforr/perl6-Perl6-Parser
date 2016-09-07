@@ -3,7 +3,6 @@ use v6;
 use Test;
 use Perl6::Tidy;
 
-#`(
 plan 4;
 
 my $pt = Perl6::Tidy.new;
@@ -11,11 +10,13 @@ my $pt = Perl6::Tidy.new;
 subtest {
 	plan 1;
 	
+#`(
 	my $p = $pt.parse-source( Q{} );
 	my $t = $pt.build-tree( $p );
 	is-deeply $t,
 		Perl6::Document.new( :child() ),
 	Q{tree built};
+)
 }, Q{Empty file};
 
 subtest {
@@ -23,6 +24,7 @@ subtest {
 
 	my ($p, $t);
 
+#`(
 	#                        0123
 	$p = $pt.parse-source( Q{my$a} );
 	$t = $pt.build-tree( $p );
@@ -44,7 +46,9 @@ subtest {
 			) )
 		) ),
 	Q{without semi, without ws};
+)
 
+#`(
 	#                        01234
 	$p = $pt.parse-source( Q{ my$a} );
 	$t = $pt.build-tree( $p );
@@ -71,7 +75,9 @@ subtest {
 			) )
 		) ),
 	Q{leading whitespace};
+)
 
+#`(
 	#                        01234
 	$p = $pt.parse-source( Q{my $a} );
 	$t = $pt.build-tree( $p );
@@ -98,7 +104,9 @@ subtest {
 			) )
 		) ),
 	Q{without semi, with ws};
+)
 
+#`(
 	#                        01234
 	$p = $pt.parse-source( Q{my$a;} );
 	$t = $pt.build-tree( $p );
@@ -120,7 +128,9 @@ subtest {
 			) )
 		) ),
 	Q{with semi, without ws};
+)
 
+#`(
 	#                        012345
 	$p = $pt.parse-source( Q{my $a;} );
 	$t = $pt.build-tree( $p );
@@ -147,11 +157,13 @@ subtest {
 			) )
 		) ),
 	Q{with semi, ws};
+)
 }, Q{Declaration, ws/semi permutations};
 
 subtest {
 	plan 1;
 
+#`(
 	#                           012345678
 	my $p = $pt.parse-source( Q{my $a = 1} );
 #say $p.hash.<statementlist>.hash.<statement>.list.[0].dump;
@@ -199,6 +211,7 @@ subtest {
 			) )
 		) ),
 	Q{tree built};
+)
 }, Q{Initialization};
 
 subtest {
@@ -207,6 +220,7 @@ subtest {
 	subtest {
 		plan 1;
 
+#`(
 		#                           01234567
 		my $p = $pt.parse-source( Q{my$a=1+2} );
 		my $t = $pt.build-tree( $p );
@@ -248,11 +262,13 @@ subtest {
 				) )
 			) ),
 		Q{tree built};
+)
 	}, Q{No whitespace};
 
 	subtest {
 		plan 1;
 
+#`(
 		#                                     1  
 		#                           0123456789012
 		my $p = $pt.parse-source( Q{my $a = 1 + 2} );
@@ -320,8 +336,8 @@ subtest {
 				) )
 			) ),
 		Q{tree built};
+)
 	}, Q{With whitespace};
 }, Q{Initialization};
-)
 
 # vim: ft=perl6

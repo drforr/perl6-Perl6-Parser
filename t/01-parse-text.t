@@ -3,7 +3,6 @@ use v6;
 use Test;
 use Perl6::Tidy;
 
-#`(
 plan 2;
 
 my $pt = Perl6::Tidy.new;
@@ -13,13 +12,16 @@ my $pt = Perl6::Tidy.new;
 subtest {
 	plan 1;
 	
+#`(
 	my $parsed = $pt.parse-source( Q{} );
 	ok $parsed.hash.<statementlist>, Q{statementlist};
+)
 }, Q{Empty file};
 
 subtest {
 	plan 11;
 
+#`(
 	my $p = $pt.parse-source( Q{'a'} );
 	is-deeply [ $p.hash.keys ], [< statementlist >],
 		Q{document has correct hash keys};
@@ -50,7 +52,7 @@ subtest {
 	is-deeply [ $f.hash.keys ], [< nibble >],
 		Q{quote has correct hash keys};
 	is $f.hash.<nibble>.Str, Q{a}, Q{nibble has correct Str};
-}, Q{Smoketest hash structure};
 )
+}, Q{Smoketest hash structure};
 
 # vim: ft=perl6
