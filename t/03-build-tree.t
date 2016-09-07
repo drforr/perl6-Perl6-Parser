@@ -10,26 +10,43 @@ my $pt = Perl6::Tidy.new;
 subtest {
 	plan 1;
 	
-#`(
 	my $p = $pt.parse-source( Q{} );
 	my $t = $pt.build-tree( $p );
 	is-deeply $t,
-		Perl6::Document.new( :child() ),
+		Perl6::Document.new( :from( 0 ), :to( 0 ), :child() ),
+	Q{tree built};
+}, Q{Empty file};
+
+subtest {
+	plan 1;
+	
+#`(
+	my $p = $pt.parse-source( Q{ } );
+	my $t = $pt.build-tree( $p );
+	is-deeply $t,
+		Perl6::Document.new( :from( 0 ), :to( 1 ), :child(
+			Perl6::Statement.new( :from( 0 ), :to( 1 ), :child(
+				Perl6::WS.new(
+					:from( 0 ),
+					:to( 1 ),
+					:content( Q{ } )
+				)
+			) )
+		) ),
 	Q{tree built};
 )
-}, Q{Empty file};
+}, Q{whitespace only};
 
 subtest {
 	plan 5;
 
 	my ($p, $t);
 
-#`(
 	#                        0123
 	$p = $pt.parse-source( Q{my$a} );
 	$t = $pt.build-tree( $p );
 	is-deeply $t,
-		Perl6::Document.new( :child(
+		Perl6::Document.new( :from( 0 ), :to( 4 ), :child(
 			Perl6::Statement.new( :from( 0 ), :to( 4 ), :child(
 				Perl6::Bareword.new(
 					:from( 0 ),
@@ -46,7 +63,6 @@ subtest {
 			) )
 		) ),
 	Q{without semi, without ws};
-)
 
 #`(
 	#                        01234
@@ -225,7 +241,7 @@ subtest {
 		my $p = $pt.parse-source( Q{my$a=1+2} );
 		my $t = $pt.build-tree( $p );
 		is-deeply $t,
-			Perl6::Document.new( :child(
+			Perl6::Document.new( :from( 0 ), :to( 8 ), :child(
 				Perl6::Statement.new( :from( 0 ), :to( 8 ), :child(
 					Perl6::Bareword.new(
 						:from( 0 ),
@@ -274,7 +290,7 @@ subtest {
 		my $p = $pt.parse-source( Q{my $a = 1 + 2} );
 		my $t = $pt.build-tree( $p );
 		is-deeply $t,
-			Perl6::Document.new( :child(
+			Perl6::Document.new( :from( 0 ), :to( 13 ), :child(
 				Perl6::Statement.new( :from( 0 ), :to( 13 ), :child(
 					Perl6::Bareword.new(
 						:from( 0 ),

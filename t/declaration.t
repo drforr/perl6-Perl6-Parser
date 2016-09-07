@@ -26,36 +26,30 @@ subtest {
 		subtest {
 			plan 2;
 
-#`(
 			my $parsed = $pt.parse-source( Q{my Int $a} );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.format( $tree ), Q{my Int $a}, Q{formatted};
-)
 		}, Q{regular};
 
 		subtest {
 			plan 2;
 
-#`(
 			my $parsed = $pt.parse-source( Q{my Int:D $a = 0} );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.format( $tree ),
 				Q{my Int:D $a = 0},
 				Q{formatted};
-)
 		}, Q{defined};
 
 		subtest {
 			plan 2;
 
-#`(
 			my $parsed = $pt.parse-source( Q{my Int:U $a} );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.format( $tree ), Q{my Int:U $a}, Q{formatted};
-)
 		}, Q{undefined};
 	}, Q{typed};
 

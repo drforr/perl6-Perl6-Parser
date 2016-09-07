@@ -3,14 +3,18 @@ use v6;
 use Test;
 use Perl6::Tidy;
 
-plan 2;
+plan 3;
 
 my $pt = Perl6::Tidy.new;
 
-#`(
 is $pt.tidy( Q{} ),
 	Q{},
 	Q{Empty string};
+
+#`(
+is $pt.tidy( Q{ } ),
+	Q{ },
+	Q{whitespace only};
 )
 
 subtest {
@@ -19,7 +23,6 @@ subtest {
 	subtest {
 		plan 4;
 
-#`(
 		is $pt.tidy( Q{my$a} ),
 			Q{my$a},
 			Q{no WS};
@@ -29,21 +32,17 @@ subtest {
 			Q{single WS};
 
 		is $pt.tidy( Q{my$a;} ),
-#			Q{my$a;},
-			Q{my$a},
+			Q{my$a;},
 			Q{semi, no WS};
 
 		is $pt.tidy( Q{my $a;} ),
-#			Q{my $a;},
-			Q{my $a},
+			Q{my $a;},
 			Q{semi, single WS};
-)
 	}, Q{simple declaration};
 
 	subtest {
 		plan 4;
 
-#`(
 		is $pt.tidy( Q{my$a=1} ),
 			Q{my$a=1},
 			Q{no WS};
@@ -53,15 +52,12 @@ subtest {
 			Q{single WS};
 
 		is $pt.tidy( Q{my$a=1;} ),
-#			Q{my$a=1;},
-			Q{my$a=1},
+			Q{my$a=1;},
 			Q{semi, no WS};
 
 		is $pt.tidy( Q{my $a=1;} ),
-#			Q{my $a=1;},
-			Q{my $a=1},
+			Q{my $a=1;},
 			Q{semi, single WS};
-)
 	}, Q{initializer};
 }, Q{passthrough};
 

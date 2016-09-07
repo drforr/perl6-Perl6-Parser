@@ -796,8 +796,8 @@ class Perl6::Tidy::Factory {
 		my Perl6::Element @_child =
 			self._statementlist( $p.hash.<statementlist> );
 		Perl6::Document.new(
-			:from( @_child[0].from ),
-			:to( @_child[*-1].to ),
+			:from( @_child ?? @_child[0].from !! 0 ),
+			:to( @_child ?? @_child[*-1].to !! 0 ),
 			:child( @_child )
 		)
 	}
