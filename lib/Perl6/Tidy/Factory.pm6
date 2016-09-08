@@ -802,7 +802,7 @@ class Perl6::Tidy::Factory {
 		)
 	}
 
-	sub key-boundary( Mu $p ) {
+	sub key-bounds( Mu $p ) {
 		say "{$p.from} {$p.to} [{substr($p.orig,$p.from,$p.to-$p.from)}]";
 	}
 
@@ -4270,6 +4270,13 @@ return True;
 					),
 					:content( $leftover-ws )
 				);
+			@child.append(
+				Perl6::Statement.from-list( @_child )
+			)
+		}
+		elsif !$p.hash.<statement> and $p.Str ~~ m{ . } {
+			my Perl6::Element @_child =
+				Perl6::WS.from-match( $p );
 			@child.append(
 				Perl6::Statement.from-list( @_child )
 			)

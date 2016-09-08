@@ -11,53 +11,89 @@ is $pt.tidy( Q{} ),
 	Q{},
 	Q{Empty string};
 
-#`(
 is $pt.tidy( Q{ } ),
 	Q{ },
 	Q{whitespace only};
-)
 
 subtest {
 	plan 2;
 
 	subtest {
-		plan 4;
+		plan 5;
 
-		is $pt.tidy( Q{my$a} ),
-			Q{my$a},
-			Q{no WS};
+		subtest {
+			plan 1;
 
-		is $pt.tidy( Q{my $a} ),
-			Q{my $a},
-			Q{single WS};
+			my $source = Q{my$a};
+			is $pt.tidy( $source ), $source, Q{roundtrip};
+		}, Q{my$a};
 
-		is $pt.tidy( Q{my$a;} ),
-			Q{my$a;},
-			Q{semi, no WS};
+		subtest {
+			plan 1;
 
-		is $pt.tidy( Q{my $a;} ),
-			Q{my $a;},
-			Q{semi, single WS};
+			my $source = Q{my$a;};
+			is $pt.tidy( $source ), $source, Q{roundtrip};
+		}, Q{my$a;};
+
+		subtest {
+			plan 1;
+
+			my $source = Q{my $a};
+			is $pt.tidy( $source ), $source, Q{roundtrip};
+		}, Q{my $a};
+
+		subtest {
+			plan 1;
+
+			my $source = Q{my $a;};
+			is $pt.tidy( $source ), $source, Q{roundtrip};
+		}, Q{my $a;};
+
+		subtest {
+			plan 1;
+
+			my $source = Q{my $a ;};
+			is $pt.tidy( $source ), $source, Q{roundtrip};
+		}, Q{my $a ;};
 	}, Q{simple declaration};
 
 	subtest {
-		plan 4;
+		plan 5;
 
-		is $pt.tidy( Q{my$a=1} ),
-			Q{my$a=1},
-			Q{no WS};
+		subtest {
+			plan 1;
 
-		is $pt.tidy( Q{my $a=1} ),
-			Q{my $a=1},
-			Q{single WS};
+			my $source = Q{my$a=1};
+			is $pt.tidy( $source ), $source, Q{roundtrip};
+		}, Q{my$a=1};
 
-		is $pt.tidy( Q{my$a=1;} ),
-			Q{my$a=1;},
-			Q{semi, no WS};
+		subtest {
+			plan 1;
 
-		is $pt.tidy( Q{my $a=1;} ),
-			Q{my $a=1;},
-			Q{semi, single WS};
+			my $source = Q{my$a=1;};
+			is $pt.tidy( $source ), $source, Q{roundtrip};
+		}, Q{my$a=1;};
+
+		subtest {
+			plan 1;
+
+			my $source = Q{my $a=1};
+			is $pt.tidy( $source ), $source, Q{roundtrip};
+		}, Q{my $a=1};
+
+		subtest {
+			plan 1;
+
+			my $source = Q{my $a=1;};
+			is $pt.tidy( $source ), $source, Q{roundtrip};
+		}, Q{my $a=1;};
+
+		subtest {
+			plan 1;
+
+			my $source = Q{my $a=1 ;};
+			is $pt.tidy( $source ), $source, Q{roundtrip};
+		}, Q{my $a=1 ;};
 	}, Q{initializer};
 }, Q{passthrough};
 

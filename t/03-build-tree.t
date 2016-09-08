@@ -15,12 +15,11 @@ subtest {
 	is-deeply $t,
 		Perl6::Document.new( :from( 0 ), :to( 0 ), :child() ),
 	Q{tree built};
-}, Q{Empty file};
+}, Q{no ws};
 
 subtest {
 	plan 1;
 	
-#`(
 	my $p = $pt.parse-source( Q{ } );
 	my $t = $pt.build-tree( $p );
 	is-deeply $t,
@@ -34,8 +33,7 @@ subtest {
 			) )
 		) ),
 	Q{tree built};
-)
-}, Q{whitespace only};
+}, Q{ws};
 
 subtest {
 	plan 5;
@@ -90,7 +88,7 @@ subtest {
 				)
 			) )
 		) ),
-	Q{leading whitespace};
+	Q{leading ws};
 )
 
 #`(
@@ -179,13 +177,11 @@ subtest {
 subtest {
 	plan 1;
 
-#`(
 	#                           012345678
 	my $p = $pt.parse-source( Q{my $a = 1} );
-#say $p.hash.<statementlist>.hash.<statement>.list.[0].dump;
 	my $t = $pt.build-tree( $p );
 	is-deeply $t,
-		Perl6::Document.new( :child(
+		Perl6::Document.new( :from( 0 ), :to( 9 ), :child(
 			Perl6::Statement.new( :from( 0 ), :to( 9 ), :child(
 				Perl6::Bareword.new(
 					:from( 0 ),
@@ -227,7 +223,6 @@ subtest {
 			) )
 		) ),
 	Q{tree built};
-)
 }, Q{Initialization};
 
 subtest {
@@ -279,7 +274,7 @@ subtest {
 			) ),
 		Q{tree built};
 )
-	}, Q{No whitespace};
+	}, Q{no ws};
 
 	subtest {
 		plan 1;
@@ -353,7 +348,7 @@ subtest {
 			) ),
 		Q{tree built};
 )
-	}, Q{With whitespace};
+	}, Q{ws};
 }, Q{Initialization};
 
 # vim: ft=perl6
