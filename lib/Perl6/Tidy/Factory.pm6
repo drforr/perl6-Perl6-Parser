@@ -242,7 +242,7 @@ class Perl6::WS does Token {
 		)
 	}
 
-	method between-matches( Mu $p, Str $lhs, Str $rhs ) {
+	multi method between-matches( Mu $p, Str $lhs, Str $rhs ) {
 		my $_lhs = $p.hash.{$lhs};
 		my $_rhs = $p.hash.{$rhs};
 		if $_lhs.to < $_rhs.from {
@@ -254,6 +254,25 @@ class Perl6::WS does Token {
 						$p.Str,
 						$_lhs.to - $p.from,
 						$_rhs.from - $_lhs.to
+					)
+				)
+			)
+		}
+		else {
+			()
+		}
+	}
+
+	multi method between-matches( Mu $p, Mu $lhs, Mu $rhs ) {
+		if $lhs.to < $rhs.from {
+			self.bless(
+				:from( $lhs.to ),
+				:to( $rhs.from ),
+				:content(
+					substr(
+						$p.Str,
+						$lhs.to - $p.from,
+						$rhs.from - $lhs.to
 					)
 				)
 			)
@@ -1776,17 +1795,7 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			@child = self._variable( $p.hash.<variable> )
 		}
 		elsif self.assert-hash-keys( $p, [< value >] ) {
-			my Mu $v = $p.hash.<value>;
-			if self.assert-hash-keys( $v, [< number >] ) {
-				@child = self._number( $v.hash.<number> )
-			}
-			elsif self.assert-hash-keys( $v, [< quote >] ) {
-				@child = self._quote( $v.hash.<quote> )
-			}
-			else {
-				say $p.hash.keys.gist;
-				warn "Unhandled case"
-			}
+			@child = self._value( $p.hash.<value> )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -1875,27 +1884,9 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			}
 			else {
 				@child = self.__Term( $p.list.[0] );
-				if $p.list.[0].to < $p.hash.<infix>.from {
-					# XXX THIS NEEDS TO CHANGE.
-#					@child.append(
-#						Perl6::WS.new(
-#							$p.list.[0].to,
-#							' ' x $p.hash.<infix>.from - $p.list.[0].to
-#						)
-#					)
-				}
 				@child.append(
 					self._infix( $p.hash.<infix> )
 				);
-				if $p.hash.<infix>.from < $p.list.[1].from {
-					# XXX THIS NEEDS TO CHANGE.
-#					@child.append(
-#						Perl6::WS.new(
-#							$p.hash.<infix>.to,
-#							' ' x $p.list.[1].from - $p.hash.<infix>.to
-#						)
-#					)
-				}
 				@child.append(
 					self.__Term( $p.list.[1] )
 				)
@@ -2170,13 +2161,24 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 				Perl6::Operator::Infix.from-match(
 					$p.hash.<sym>
 				);
-			@child.append(
-				Perl6::WS.between-matches(
-					$p,
-					'sym',
-					'EXPR'
+			if $p.hash.<EXPR>.list.[0] {
+				@child.append(
+					Perl6::WS.between-matches(
+						$p,
+						$p.hash.<sym>,
+						$p.hash.<EXPR>.list.[0]
+					)
 				)
-			);
+			}
+			else {
+				@child.append(
+					Perl6::WS.between-matches(
+						$p,
+						'sym',
+						'EXPR'
+					)
+				)
+			}
 			@child.append(
 				self._EXPR( $p.hash.<EXPR> )
 			)

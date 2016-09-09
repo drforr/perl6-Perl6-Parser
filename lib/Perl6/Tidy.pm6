@@ -156,6 +156,12 @@ class Perl6::Tidy {
 					next if $index == 0;
 					next unless $root.child.[$index-1].^can('to');
 					next unless $root.child.[$index].^can('from');
+					if $root.child.[$index-1] ~~ Perl6::WS and
+					   $root.child.[$index] ~~ Perl6::WS {
+#						say $root.child.[$index-1].perl;
+#						say $root.child.[$index].perl;
+						say "Two WS entries in a row"
+					}
 					if $root.child.[$index-1].to !=
 						$root.child.[$index].from {
 #						say $root.child.[$index-1].perl;
