@@ -410,6 +410,10 @@ class Perl6::WS does Token {
 	}
 }
 
+class Perl6::Comment does Token {
+	also is Perl6::Element;
+}
+
 class Perl6::Document does Branching does Bounded {
 	also is Perl6::Element;
 }
@@ -4193,8 +4197,12 @@ return True;
 		my $leftover-ws;
 		my $leftover-ws-from = 0;
 		my $beginning-ws;
+		my $beginning-comment;
 		if $p.Str ~~ m{ ^ ( \s+ ) } {
 			$beginning-ws = $0.Str
+		}
+		elsif $p.Str ~~ m{ ^ ( [ \s* '#' .+ $$ ]+ ) } {
+			$beginning-comment = $0.Str
 		}
 		for $p.hash.<statement>.list {
 			my Perl6::Element @_child;
@@ -4204,6 +4212,16 @@ return True;
 						:from( 0 ),
 						:to( $beginning-ws.chars ),
 						:content( $beginning-ws )
+					)
+				);
+				$beginning-ws = Nil;
+			}
+			if $beginning-comment {
+				@_child.append(
+					Perl6::Comment.new(
+						:from( 0 ),
+						:to( $beginning-comment.chars ),
+						:content( $beginning-comment )
 					)
 				);
 				$beginning-ws = Nil;
