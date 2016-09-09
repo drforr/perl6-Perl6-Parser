@@ -62,18 +62,17 @@ subtest {
 		) ),
 	Q{without semi, without ws};
 
-#`(
 	#                        01234
 	$p = $pt.parse-source( Q{ my$a} );
 	$t = $pt.build-tree( $p );
 	is-deeply $t,
-		Perl6::Document.new( :child(
-			Perl6::Statement.new( :from( 1 ), :to( 5 ), :child(
-#				Perl6::WS.new(
-#					:from( 0 ),
-#					:to( 1 ),
-#					:content( Q{ } )
-#				),
+		Perl6::Document.new( :from( 0 ), :to( 5 ) :child(
+			Perl6::Statement.new( :from( 0 ), :to( 5 ), :child(
+				Perl6::WS.new(
+					:from( 0 ),
+					:to( 1 ),
+					:content( Q{ } )
+				),
 				Perl6::Bareword.new(
 					:from( 1 ),
 					:to( 3 ),
@@ -89,14 +88,12 @@ subtest {
 			) )
 		) ),
 	Q{leading ws};
-)
 
-#`(
 	#                        01234
 	$p = $pt.parse-source( Q{my $a} );
 	$t = $pt.build-tree( $p );
 	is-deeply $t,
-		Perl6::Document.new( :child(
+		Perl6::Document.new( :from( 0 ), :to( 5 ), :child(
 			Perl6::Statement.new( :from( 0 ), :to( 5 ), :child(
 				Perl6::Bareword.new(
 					:from( 0 ),
@@ -118,15 +115,13 @@ subtest {
 			) )
 		) ),
 	Q{without semi, with ws};
-)
 
-#`(
 	#                        01234
 	$p = $pt.parse-source( Q{my$a;} );
 	$t = $pt.build-tree( $p );
 	is-deeply $t,
-		Perl6::Document.new( :child(
-			Perl6::Statement.new( :from( 0 ), :to( 4 ), :child(
+		Perl6::Document.new( :from( 0 ), :to( 5 ), :child(
+			Perl6::Statement.new( :from( 0 ), :to( 5 ), :child(
 				Perl6::Bareword.new(
 					:from( 0 ),
 					:to( 2 ),
@@ -138,19 +133,22 @@ subtest {
 					:sigil( Q{$} ),
 					:content( Q{$a} ),
 					:headless( Q{a} )
+				),
+				Perl6::Semicolon.new(
+					:from( 4 ),
+					:to( 5 ),
+					:content( Q{;} )
 				)
 			) )
 		) ),
 	Q{with semi, without ws};
-)
 
-#`(
 	#                        012345
 	$p = $pt.parse-source( Q{my $a;} );
 	$t = $pt.build-tree( $p );
 	is-deeply $t,
-		Perl6::Document.new( :child(
-			Perl6::Statement.new( :from( 0 ), :to( 5 ), :child(
+		Perl6::Document.new( :from( 0 ), :to( 6 ), :child(
+			Perl6::Statement.new( :from( 0 ), :to( 6 ), :child(
 				Perl6::Bareword.new(
 					:from( 0 ),
 					:to( 2 ),
@@ -167,11 +165,15 @@ subtest {
 					:sigil( Q{$} ),
 					:content( Q{$a} ),
 					:headless( Q{a} )
+				),
+				Perl6::Semicolon.new(
+					:from( 5 ),
+					:to( 6 ),
+					:content( Q{;} )
 				)
 			) )
 		) ),
 	Q{with semi, ws};
-)
 }, Q{Declaration, ws/semi permutations};
 
 subtest {

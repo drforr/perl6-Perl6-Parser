@@ -4190,8 +4190,22 @@ return True;
 		my Perl6::Element @child;
 		my $leftover-ws;
 		my $leftover-ws-from = 0;
+		my $beginning-ws;
+		if $p.Str ~~ m{ ^ ( \s+ ) } {
+			$beginning-ws = $0.Str
+		}
 		for $p.hash.<statement>.list {
 			my Perl6::Element @_child;
+			if $beginning-ws {
+				@_child.append(
+					Perl6::WS.new(
+						:from( 0 ),
+						:to( $beginning-ws.chars ),
+						:content( $beginning-ws )
+					)
+				);
+				$beginning-ws = Nil;
+			}
 			if $leftover-ws {
 				@_child.append(
 					Perl6::WS.new(
