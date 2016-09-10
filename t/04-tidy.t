@@ -21,79 +21,43 @@ subtest {
 	subtest {
 		plan 5;
 
-		subtest {
-			plan 1;
+		my $source;
 
-			my $source = Q{my$a};
-			is $pt.tidy( $source ), $source, Q{roundtrip};
-		}, Q{my$a};
+		$source = Q{my$a};
+		is $pt.tidy( $source ), $source, Q{my$a};
 
-		subtest {
-			plan 1;
+		$source = Q{my$a;};
+		is $pt.tidy( $source ), $source, Q{my$a;};
 
-			my $source = Q{my$a;};
-			is $pt.tidy( $source ), $source, Q{roundtrip};
-		}, Q{my$a;};
+		$source = Q{my $a};
+		is $pt.tidy( $source ), $source, Q{my $a};
 
-		subtest {
-			plan 1;
+		$source = Q{my $a;};
+		is $pt.tidy( $source ), $source, Q{my $a;};
 
-			my $source = Q{my $a};
-			is $pt.tidy( $source ), $source, Q{roundtrip};
-		}, Q{my $a};
-
-		subtest {
-			plan 1;
-
-			my $source = Q{my $a;};
-			is $pt.tidy( $source ), $source, Q{roundtrip};
-		}, Q{my $a;};
-
-		subtest {
-			plan 1;
-
-			my $source = Q{my $a ;};
-			is $pt.tidy( $source ), $source, Q{roundtrip};
-		}, Q{my $a ;};
+		$source = Q{my $a ;};
+		is $pt.tidy( $source ), $source, Q{my $a ;};
 	}, Q{simple declaration};
 
 	subtest {
 		plan 5;
 
-		subtest {
-			plan 1;
+		my $source;
 
-			my $source = Q{my$a=1};
-			is $pt.tidy( $source ), $source, Q{roundtrip};
-		}, Q{my$a=1};
+		$source = Q{my$a=1};
+		is $pt.tidy( $source ), $source, Q{my$a=1};
 
-		subtest {
-			plan 1;
+		$source = Q{my$a=1;};
+		is $pt.tidy( $source ), $source, Q{my$a=1;};
 
-			my $source = Q{my$a=1;};
-			is $pt.tidy( $source ), $source, Q{roundtrip};
-		}, Q{my$a=1;};
+		$source = Q{my $a=1};
+		is $pt.tidy( $source ), $source, Q{my $a=1};
 
-		subtest {
-			plan 1;
+		$source = Q{my $a=1;};
+		is $pt.tidy( $source ), $source, Q{my $a=1;};
 
-			my $source = Q{my $a=1};
-			is $pt.tidy( $source ), $source, Q{roundtrip};
-		}, Q{my $a=1};
-
-		subtest {
-			plan 1;
-
-			my $source = Q{my $a=1;};
-			is $pt.tidy( $source ), $source, Q{roundtrip};
-		}, Q{my $a=1;};
-
-		subtest {
-			plan 1;
-
-			my $source = Q{my $a=1 ;};
-			is $pt.tidy( $source ), $source, Q{roundtrip};
-		}, Q{my $a=1 ;};
+		$source = Q{my $a=1 ;};
+		is $pt.tidy( $source ), $source, Q{my $a=1 ;};
 	}, Q{initializer};
 }, Q{passthrough};
 
