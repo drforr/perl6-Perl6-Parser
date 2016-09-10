@@ -240,23 +240,18 @@ subtest {
 	plan 2;
 
 	subtest {
-		plan 0;
+		plan 2;
 
-#`(
-		my $source = Q:to[_END_];
-state$x
-_END_
+		my $source = Q{state$x};
 		my $p = $pt.parse-source( $source );
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
-)
 	}, Q{no ws};
 
 	subtest {
-		plan 0;
+		plan 2;
 
-#`(
 		my $source = Q:to[_END_];
 state     $x
 _END_
@@ -264,7 +259,6 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
-)
 	}, Q{leading ws};
 }, Q{state};
 
