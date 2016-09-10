@@ -1887,6 +1887,7 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 					self.__Term( $p.list.[2] )
 			}
 			else {
+die "Woops, need to catch this at a higher level.";
 				@child = self.__Term( $p.list.[0] );
 				@child.append(
 					self._infix( $p.hash.<infix> )
@@ -3228,11 +3229,11 @@ return True;
 
 	method _prefix( Mu $p ) {
 		given $p {
-			when self.assert-hash-keys( $p, [< sym O >] ) {
-				Perl6::Operator::Prefix.new( $p.hash.<sym> )
+			when self.assert-hash-keys( $_, [< sym O >] ) {
+				Perl6::Operator::Prefix.new( $_.hash.<sym> )
 			}
 			default {
-				say $p.hash.keys.gist;
+				say $_.hash.keys.gist;
 				warn "Unhandled case"
 			}
 		}
@@ -4192,7 +4193,35 @@ key-bounds $p;
 		# This *should* be handled in _statementlist
 		#
 		elsif self.assert-hash-keys( $p, [< EXPR >] ) {
-			@child = self._EXPR( $p.hash.<EXPR> );
+			# XXX Sigh, need to handle *this* where we have the
+			# XXX proper matching string available.
+			if $p.hash.<EXPR>.hash.<infix> {
+				my $q = $p.hash.<EXPR>;
+				@child = self.__Term( $q.list.[0] );
+				@child.append(
+					Perl6::WS.between-matches(
+						$p,
+						$q.list.[0],
+						$q.hash.<infix>
+					)
+				);
+				@child.append(
+					self._infix( $q.hash.<infix> )
+				);
+				@child.append(
+					Perl6::WS.between-matches(
+						$p,
+						$q.hash.<infix>,
+						$q.list.[1]
+					)
+				);
+				@child.append(
+					self.__Term( $q.list.[1] )
+				)
+			}
+			else {
+				@child = self._EXPR( $p.hash.<EXPR> );
+			}
 		}
 		elsif self.assert-hash-keys( $p, [< statement_control >] ) {
 			@child =
