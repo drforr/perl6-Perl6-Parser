@@ -1261,8 +1261,6 @@ subtest {
 	subtest {
 		plan 2;
 
-		my $parsed = $pt.parse-source( Q{$Foo::($*GLOBAL)::Bar} );
-
 		subtest {
 			plan 3;
 
@@ -1296,27 +1294,29 @@ subtest {
 		plan 2;
 
 		subtest {
-			plan 0;
+			plan 2;
 
-#`(
 			my $source = Q{Int};
 			my $parsed = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
+# XXX Probably shouldn't be a bareword...
+#			ok (grep { $_ ~~ Perl6::Number }, $tree.child.[0].child),
+#				Q{found number};
 			is $pt.format( $tree ), $source, Q{formatted};
-)
 		}, Q{no ws};
 
 		subtest {
-			plan 0;
+			plan 2;
 
-#`(
 			my $source = Q{ Int  };
 			my $parsed = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
+# XXX Probably shouldn't be a bareword...
+#			ok (grep { $_ ~~ Perl6::Number }, $tree.child.[0].child),
+#				Q{found number};
 			is $pt.format( $tree ), $source, Q{formatted};
-)
 		}, Q{ws};
 	}, Q{Int};
 
@@ -1324,27 +1324,29 @@ subtest {
 		plan 2;
 
 		subtest {
-			plan 0;
+			plan 2;
 
-#`(
 			my $source = Q{IO::Handle};
 			my $parsed = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
+# XXX Probably shouldn't be a bareword...
+#			ok (grep { $_ ~~ Perl6::Number }, $tree.child.[0].child),
+#				Q{found number};
 			is $pt.format( $tree ), $source, Q{formatted};
-)
 		}, Q{no ws};
 
 		subtest {
-			plan 0;
+			plan 2;
 
-#`(
 			my $source = Q{ IO::Handle  };
 			my $parsed = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
+# XXX Probably shouldn't be a bareword...
+#			ok (grep { $_ ~~ Perl6::Number }, $tree.child.[0].child),
+#				Q{found number};
 			is $pt.format( $tree ), $source, Q{formatted};
-)
 		}, Q{ws};
 	}, Q{IO::Handle (Two package names)};
 }, Q{type};
@@ -1356,27 +1358,29 @@ subtest {
 		plan 2;
 
 		subtest {
-			plan 0;
+			plan 2;
 
-#`(
 			my $source = Q{pi};
 			my $parsed = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
+# XXX Probably shouldn't be a bareword...
+#			ok (grep { $_ ~~ Perl6::Number }, $tree.child.[0].child),
+#				Q{found number};
 			is $pt.format( $tree ), $source, Q{formatted};
-)
 		}, Q{no ws};
 
 		subtest {
-			plan 0;
+			plan 2;
 
-#`(
 			my $source = Q{ pi  };
 			my $parsed = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
+# XXX Probably shouldn't be a bareword...
+#			ok (grep { $_ ~~ Perl6::Number }, $tree.child.[0].child),
+#				Q{found number};
 			is $pt.format( $tree ), $source, Q{formatted};
-)
 		}, Q{ws};
 	}, Q{pi};
 }, Q{constant};
@@ -1388,27 +1392,27 @@ subtest {
 		plan 2;
 
 		subtest {
-			plan 0;
+			plan 2;
 
-#`(
 			my $source = Q{sum};
 			my $parsed = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
+#			ok (grep { $_ ~~ Perl6::Number }, $tree.child.[0].child),
+#				Q{found number};
 			is $pt.format( $tree ), $source, Q{formatted};
-)
 		}, Q{no ws};
 
 		subtest {
-			plan 0;
+			plan 2;
 
-#`(
 			my $source = Q{ sum  };
 			my $parsed = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
+#			ok (grep { $_ ~~ Perl6::Number }, $tree.child.[0].child),
+#				Q{found number};
 			is $pt.format( $tree ), $source, Q{formatted};
-)
 		}, Q{ws};
 	}, Q{sum};
 }, Q{function call};
@@ -1420,27 +1424,27 @@ subtest {
 		plan 2;
 
 		subtest {
-			plan 0;
+			plan 2;
 
-#`(
 			my $source = Q{()};
 			my $parsed = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
+#			ok (grep { $_ ~~ Perl6::Number }, $tree.child.[0].child),
+#				Q{found number};
 			is $pt.format( $tree ), $source, Q{formatted};
-)
 		}, Q{no ws};
 
 		subtest {
-			plan 0;
+			plan 2;
 
-#`(
 			my $source = Q{ ()  };
 			my $parsed = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
+#			ok (grep { $_ ~~ Perl6::Number }, $tree.child.[0].child),
+#				Q{found number};
 			is $pt.format( $tree ), $source, Q{formatted};
-)
 		}, Q{ws};
 	}, Q{circumfix};
 }, Q{operator};
@@ -1454,27 +1458,27 @@ subtest {
 		plan 2;
 
 		subtest {
-			plan 0;
+			plan 2;
 
-#`(
 			my $source = Q{:()};
 			my $parsed = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
+#			ok (grep { $_ ~~ Perl6::Number }, $tree.child.[0].child),
+#				Q{found number};
 			is $pt.format( $tree ), $source, Q{formatted};
-)
 		}, Q{no ws};
 
 		subtest {
-			plan 0;
+			plan 2;
 
-#`(
 			my $source = Q{ :()  };
 			my $parsed = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
+#			ok (grep { $_ ~~ Perl6::Number }, $tree.child.[0].child),
+#				Q{found number};
 			is $pt.format( $tree ), $source, Q{formatted};
-)
 		}, Q{ws};
 	}, Q{:()};
 }, Q{signature};
