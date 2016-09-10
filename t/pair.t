@@ -3,14 +3,6 @@ use v6;
 use Test;
 use Perl6::Tidy;
 
-#`(
-
-In passing, please note that while it's trivially possible to bum down the
-tests, doing so makes it harder to insert 'say $parsed.dump' to view the
-AST, and 'say $tree.perl' to view the generated Perl 6 structure.
-
-)
-
 plan 13;
 
 my $pt = Perl6::Tidy.new;

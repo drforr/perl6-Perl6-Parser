@@ -5,31 +5,6 @@ use Perl6::Tidy;
 
 #`(
 
-In passing, please note that while it's trivially possible to bum down the
-tests, doing so makes it harder to insert 'say $p.dump' to view the
-AST, and 'say $tree.perl' to view the generated Perl 6 structure.
-
-)
-
-#`(
-
-As much as I dislike explicitly handling whitespace, here's the rationale:
-
-Leading WS, intrabrace WS and trailing WS are all different lengths. This is
-by design, so that in case I've matched the wrong whitespace section (they all
-look alike) during testing, the different lengths will break the test.
-
-Leading is 5 characters, intra is 3, trailing is 2.
-It's a happy coincidence that these are the 3rd-5th terms in the Fibonacci
-sequence.
-
-It's not a coincidence, however, that leading, trailing and intrabrace spacing
-all get tested in the same file, however.
-
-)
-
-#`(
-
 The terms that get tested here are:
 
 package <name> { }
