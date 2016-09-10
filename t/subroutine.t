@@ -27,14 +27,13 @@ subtest {
 			plan 2;
 
 			subtest {
-				plan 0;
-#`(
+				plan 2;
+
 				my $source = Q{sub foo(){}};
 				my $parsed = $pt.parse-source( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				is $pt.format( $tree ), $source, Q{formatted};
-)
 			}, Q{no ws};
 
 			subtest {
@@ -55,14 +54,13 @@ _END_
 			plan 2;
 
 			subtest {
-				plan 0;
-#`(
+				plan 2;
+
 				my $source = Q{sub foo(0){}};
 				my $parsed = $pt.parse-source( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				is $pt.format( $tree ), $source, Q{formatted};
-)
 			}, Q{no ws};
 
 			subtest {
@@ -83,14 +81,13 @@ _END_
 			plan 2;
 
 			subtest {
-				plan 0;
-#`(
+				plan 2;
+
 				my $source = Q{sub foo($a){}};
 				my $parsed = $pt.parse-source( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				is $pt.format( $tree ), $source, Q{formatted};
-)
 			}, Q{no ws};
 
 			subtest {
@@ -114,14 +111,13 @@ _END_
 				plan 2;
 
 				subtest {
-					plan 0;
-#`(
+					plan 2;
+
 					my $source = Q{sub foo(Int$a){}};
 					my $parsed = $pt.parse-source( $source );
 					my $tree = $pt.build-tree( $parsed );
 					ok $pt.validate( $parsed ), Q{valid};
 					is $pt.format( $tree ), $source, Q{formatted};
-)
 				}, Q{no ws};
 
 				subtest {
@@ -170,14 +166,13 @@ _END_
 				plan 2;
 
 				subtest {
-					plan 0;
-#`(
+					plan 2;
+
 					my $source = Q{sub foo(Int){}};
 					my $parsed = $pt.parse-source( $source );
 					my $tree = $pt.build-tree( $parsed );
 					ok $pt.validate( $parsed ), Q{valid};
 					is $pt.format( $tree ), $source, Q{formatted};
-)
 				}, Q{no ws};
 
 				subtest {
@@ -199,8 +194,9 @@ _END_
 
 				subtest {
 					plan 0;
+
 #`(
-					my $source = Q{sub foo(Int$a where1){}};
+					my $source = Q{sub foo(Int$a where 1){}};
 					my $parsed = $pt.parse-source( $source );
 					my $tree = $pt.build-tree( $parsed );
 					ok $pt.validate( $parsed ), Q{valid};
@@ -227,14 +223,13 @@ _END_
 			plan 2;
 
 			subtest {
-				plan 0;
-#`(
+				plan 2;
+
 				my $source = Q{sub foo($a=0){}};
 				my $parsed = $pt.parse-source( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				is $pt.format( $tree ), $source, Q{formatted};
-)
 			}, Q{no ws};
 
 			subtest {
@@ -310,7 +305,19 @@ _END_
 }, Q{scalar arguments};
 
 subtest {
-	plan 3;
+	plan 4;
+
+	subtest {
+		plan 0;
+
+#`(
+		my $source = Q{sub foo($a,Str$b,Str$c where"foo",Int$d=32){}};
+		my $parsed = $pt.parse-source( $source );
+		my $tree = $pt.build-tree( $parsed );
+		ok $pt.validate( $parsed ), Q{valid};
+		is $pt.format( $tree ), $source, Q{formatted};
+)
+	}, Q{christmas tree, minimal spacing};
 
 	subtest {
 		plan 0;

@@ -1556,7 +1556,7 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 		if $p.list {
 			for $p.list {
 				if self.assert-hash-keys( $_, [< EXPR >] ) {
-					@child.push(
+					@child.append(
 						self._EXPR( $_.hash.<EXPR> )
 					)
 				}
