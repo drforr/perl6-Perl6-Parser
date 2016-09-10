@@ -2009,47 +2009,35 @@ die "Woops, need to catch this at a higher level.";
 			$p.Str ~~ m{ ('=>') };
 			@child = self._key( $p.hash.<key> );
 			if $p.hash.<key>.to < $0.from {
-#				@child.append(
-#					Perl6::WS.new(
-#						$p.hash.<key>.to,
-#						substr-match(
-#							$p,
-#							$p.hash.<key>.to,
-#							$0.from - $p.hash.<key>.to
-#						)
-#					)
-#				)
+				@child.append(
+					Perl6::WS.new(
+						$p.hash.<key>.to,
+						substr-match(
+							$p,
+							$p.hash.<key>.to,
+							$0.from - $p.hash.<key>.to
+						)
+					)
+				)
 			}
 			@child.append(
 				Perl6::Operator::Infix.new( $p, FATARROW ),
 			);
 			if $0.to < $p.hash.<val>.from {
-#				@child.append(
-#					Perl6::WS.new(
-#						$0.to,
-#						substr-match(
-#							$p,
-#							$0.to,
-#							$p.hash.<val>.from - $0.to
-#						)
-#					)
-#				)
+				@child.append(
+					Perl6::WS.new(
+						$0.to,
+						substr-match(
+							$p,
+							$0.to,
+							$p.hash.<val>.from - $0.to
+						)
+					)
+				)
 			}
 			@child.append(
 				self._val( $p.hash.<val> )
 			);
-			if $p.hash.<val>.to < $p.to {
-#				@child.append(
-#					Perl6::WS.new(
-#						$p.hash.<val>.to,
-#						substr-match(
-#							$p,
-#							$p.hash.<val>.to,
-#							$p.to - $p.hash.<val>.to
-#						)
-#					)
-#				)
-			}
 		}
 		else {
 			say $p.hash.keys.gist;

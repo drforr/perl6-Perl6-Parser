@@ -610,20 +610,34 @@ subtest {
 	plan 1;
 
 	subtest {
-		plan 3;
+		plan 2;
 
-#`(
-		my $source = Q:to[_END_];
+		subtest {
+			plan 3;
+
+			my $source = Q{1**2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 ** 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
-	}, Q{?};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
+	}, Q{**};
 }, Q{Exponentiation Precedence};
 
 subtest {
@@ -778,179 +792,341 @@ subtest {
 	plan 11;
 
 	subtest {
-		plan 3;
+		plan 2;
 
-#`(
-		my $source = Q:to[_END_];
+		subtest {
+			plan 3;
+
+			my $source = Q{1*2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 * 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{*};
 
 	subtest {
-		plan 3;
+		plan 2;
 
-#`(
-		my $source = Q:to[_END_];
+		subtest {
+			plan 3;
+
+			my $source = Q{1/2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 / 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{/};
 
 	subtest {
-		plan 3;
+		plan 1;
 
-#`(
-		my $source = Q:to[_END_];
+#`( XXX Illegal
+		subtest {
+			plan 3;
+
+			my $source = Q{1div2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+)
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 div 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{div};
 
 	subtest {
-		plan 3;
+		plan 2;
 
-#`(
-		my $source = Q:to[_END_];
+		subtest {
+			plan 3;
+
+			my $source = Q{1%2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 % 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{%};
 
 	subtest {
-		plan 3;
+		plan 2;
 
-#`(
-		my $source = Q:to[_END_];
+		subtest {
+			plan 3;
+
+			my $source = Q{1%%2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 %% 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{%%};
 
 	subtest {
-		plan 3;
+		plan 1;
 
-#`(
-		my $source = Q:to[_END_];
+#`( XXX Illegal
+		subtest {
+			plan 3;
+
+			my $source = Q{1mod2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+)
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 mod 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{mod};
 
 	subtest {
-		plan 3;
+		plan 2;
 
-#`(
-		my $source = Q:to[_END_];
+		subtest {
+			plan 3;
+
+			my $source = Q{1+&2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 +& 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{+&};
 
 	subtest {
-		plan 3;
+		plan 2;
 
-#`(
-		my $source = Q:to[_END_];
+		subtest {
+			plan 3;
+
+			my $source = Q{1+<2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 +< 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{+<};
 
 	subtest {
-		plan 3;
+		plan 2;
 
-#`(
-		my $source = Q:to[_END_];
+		subtest {
+			plan 3;
+
+			my $source = Q{1+>2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 +> 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{+>};
 
 	subtest {
-		plan 3;
+		plan 1;
 
-#`(
-		my $source = Q:to[_END_];
+#`( XXX Illegal
+		subtest {
+			plan 3;
+
+			my $source = Q{1gcd2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+)
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 gcd 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{gcd};
 
 	subtest {
-		plan 3;
+		plan 1;
 
-#`(
-		my $source = Q:to[_END_];
+#`( XXX Illegal
+		subtest {
+			plan 3;
+
+			my $source = Q{1lcm2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+)
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 lcm 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{lcm};
 }, Q{Multipicative Precedence};
 
@@ -958,83 +1134,153 @@ subtest {
 	plan 5;
 
 	subtest {
-		plan 3;
+		plan 2;
 
-#`(
-		my $source = Q:to[_END_];
+		subtest {
+			plan 3;
+
+			my $source = Q{1+2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 + 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{+};
 
 	subtest {
-		plan 3;
+		plan 2;
 
-#`(
-		my $source = Q:to[_END_];
+		subtest {
+			plan 3;
+
+			my $source = Q{1=2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 - 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{-};
 
 	subtest {
-		plan 3;
+		plan 2;
 
-#`(
-		my $source = Q:to[_END_];
+		subtest {
+			plan 3;
+
+			my $source = Q{1+|2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 +| 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{+|};
 
 	subtest {
-		plan 3;
+		plan 2;
 
-#`(
-		my $source = Q:to[_END_];
+		subtest {
+			plan 3;
+
+			my $source = Q{1+^2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 +^ 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{+^};
 
 	subtest {
-		plan 3;
+		plan 2;
 
-#`(
-		my $source = Q:to[_END_];
+		subtest {
+			plan 3;
+
+			my $source = Q{1?|2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 ?| 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{?|};
 }, Q{Additive Precedence};
 
@@ -1042,35 +1288,67 @@ subtest {
 	plan 2;
 
 	subtest {
-		plan 3;
+		plan 1;
 
-#`(
-		my $source = Q:to[_END_];
+#`( XXX Illegal
+		subtest {
+			plan 3;
+
+			my $source = Q{1x2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+)
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 x 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{x};
 
 	subtest {
-		plan 3;
+		plan 1;
 
-#`(
-		my $source = Q:to[_END_];
+#`( XXX Illegal
+		subtest {
+			plan 3;
+
+			my $source = Q{1xx2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+)
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 xx 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{xx};
 }, Q{Replication Precedence};
 
@@ -1078,19 +1356,33 @@ subtest {
 	plan 1;
 
 	subtest {
-		plan 3;
+		plan 2;
 
-#`(
-		my $source = Q:to[_END_];
+		subtest {
+			plan 3;
+
+			my $source = Q{1~2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 ~ 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{~};
 }, Q{Concatenation Precedence};
 
@@ -1098,19 +1390,33 @@ subtest {
 	plan 1;
 
 	subtest {
-		plan 3;
+		plan 2;
 
-#`(
-		my $source = Q:to[_END_];
+		subtest {
+			plan 3;
+
+			my $source = Q{1&2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 & 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{&};
 }, Q{Junctive AND Precedence};
 
@@ -1118,35 +1424,63 @@ subtest {
 	plan 2;
 
 	subtest {
-		plan 3;
+		plan 2;
 
-#`(
-		my $source = Q:to[_END_];
+		subtest {
+			plan 3;
+
+			my $source = Q{1|2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 | 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{|};
 
 	subtest {
-		plan 3;
+		plan 2;
 
-#`(
-		my $source = Q:to[_END_];
+		subtest {
+			plan 3;
+
+			my $source = Q{1^2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 ^ 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{^};
 }, Q{Junctive OR Precedence};
 
@@ -1190,147 +1524,283 @@ subtest {
 	plan 9;
 
 	subtest {
-		plan 3;
+		plan 1;
 
-#`(
-		my $source = Q:to[_END_];
+#`( XXX Illegal
+		subtest {
+			plan 3;
+
+			my $source = Q{1does2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+)
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 does 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{does};
 
 	subtest {
-		plan 3;
+		plan 1;
 
-#`(
-		my $source = Q:to[_END_];
+#`( XXX Illegal
+		subtest {
+			plan 3;
+
+			my $source = Q{1but2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+)
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 but 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{but};
 
 	subtest {
-		plan 3;
+		plan 1;
 
-#`(
-		my $source = Q:to[_END_];
+#`( XXX Illegal
+		subtest {
+			plan 3;
+
+			my $source = Q{1cmp2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+)
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 cmp 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{cmp};
 
 	subtest {
-		plan 3;
+		plan 1;
 
-#`(
-		my $source = Q:to[_END_];
+#`( XXX Illegal
+		subtest {
+			plan 3;
+
+			my $source = Q{1leg2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+)
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 leg 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{leg};
 
 	subtest {
-		plan 3;
+		plan 1;
 
-#`(
-		my $source = Q:to[_END_];
+#`( XXX Illegal
+		subtest {
+			plan 3;
+
+			my $source = Q{1<=>2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+)
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 <=> 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{<=>};
 
 	subtest {
-		plan 3;
+		plan 2;
 
-#`(
-		my $source = Q:to[_END_];
+		subtest {
+			plan 3;
+
+			my $source = Q{1..2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 .. 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{..};
 
 	subtest {
-		plan 3;
+		plan 2;
 
-#`(
-		my $source = Q:to[_END_];
+		subtest {
+			plan 3;
+
+			my $source = Q{1^..2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 ^.. 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{^..};
 
 	subtest {
-		plan 3;
+		plan 2;
 
-#`(
-		my $source = Q:to[_END_];
+		subtest {
+			plan 3;
+
+			my $source = Q{1..^2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 ..^ 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{..^};
 
 	subtest {
-		plan 3;
+		plan 2;
 
-#`(
-		my $source = Q:to[_END_];
+		subtest {
+			plan 3;
+
+			my $source = Q{1^..^2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 ^..^ 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{^..^};
 }, Q{Nonchaining Binary Precedence};
 
@@ -1338,339 +1808,625 @@ subtest {
 	plan 21;
 
 	subtest {
-		plan 3;
+		plan 2;
 
-#`(
-		my $source = Q:to[_END_];
+		subtest {
+			plan 3;
+
+			my $source = Q{1==2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 == 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{==};
 
 	subtest {
-		plan 3;
+		plan 2;
 
-#`(
-		my $source = Q:to[_END_];
+		subtest {
+			plan 3;
+
+			my $source = Q{1!=2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 != 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{!=};
 
 	subtest {
-		plan 3;
+		plan 1;
 
-#`(
-		my $source = Q:to[_END_];
+#`( XXX Illegal
+		subtest {
+			plan 3;
+
+			my $source = Q{1<2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+)
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 < 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{<};
 
 	subtest {
-		plan 3;
+		plan 2;
 
-#`(
-		my $source = Q:to[_END_];
-1 <= 2
-_END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
-	}, Q{<=};
+		subtest {
+			plan 3;
 
-	subtest {
-		plan 3;
+			my $source = Q{1>2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
 
-#`(
-		my $source = Q:to[_END_];
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 > 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{>};
 
 	subtest {
-		plan 3;
+		plan 1;
 
-#`(
-		my $source = Q:to[_END_];
+#`( XXX Illegal
+		subtest {
+			plan 3;
+
+			my $source = Q{1<=2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+)
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 <= 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{<=};
 
 	subtest {
-		plan 3;
+		plan 2;
 
-#`(
-		my $source = Q:to[_END_];
+		subtest {
+			plan 3;
+
+			my $source = Q{1>2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 > 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{>};
 
 	subtest {
-		plan 3;
+		plan 2;
 
-#`(
-		my $source = Q:to[_END_];
+		subtest {
+			plan 3;
+
+			my $source = Q{1>=2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 >= 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{>=};
 
 	subtest {
-		plan 3;
+		plan 1;
 
-#`(
-		my $source = Q:to[_END_];
+#`( XXX Illegal
+		subtest {
+			plan 3;
+
+			my $source = Q{1eq2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+)
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 eq 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{eq};
 
 	subtest {
-		plan 3;
+		plan 1;
 
-#`(
-		my $source = Q:to[_END_];
+#`( XXX Illegal
+		subtest {
+			plan 3;
+
+			my $source = Q{1ne2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+)
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 ne 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{ne};
 
 	subtest {
-		plan 3;
+		plan 1;
 
-#`(
-		my $source = Q:to[_END_];
+#`( XXX Illegal
+		subtest {
+			plan 3;
+
+			my $source = Q{1gt2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+)
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 gt 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{gt};
 
 	subtest {
-		plan 3;
+		plan 1;
 
-#`(
-		my $source = Q:to[_END_];
+#`( XXX Illegal
+		subtest {
+			plan 3;
+
+			my $source = Q{1ge2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+)
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 ge 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{ge};
 
 	subtest {
-		plan 3;
+		plan 1;
 
-#`(
-		my $source = Q:to[_END_];
-( 1 )
-_END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
+#`( XXX Illegal
+		subtest {
+			plan 3;
+
+			my $source = Q{1lt2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
 )
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
+1 lt 2
+_END_
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{lt};
 
 	subtest {
-		plan 3;
+		plan 1;
 
-#`(
-		my $source = Q:to[_END_];
+#`( XXX Illegal
+		subtest {
+			plan 3;
+
+			my $source = Q{1le2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+)
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 le 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{le};
 
 	subtest {
-		plan 3;
+		plan 1;
 
-#`(
-		my $source = Q:to[_END_];
+#`( XXX Illegal
+		subtest {
+			plan 3;
+
+			my $source = Q{1before2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+)
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 before 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{before};
 
 	subtest {
-		plan 3;
+		plan 1;
 
-#`(
-		my $source = Q:to[_END_];
+#`( XXX Illegal
+		subtest {
+			plan 3;
+
+			my $source = Q{1after2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+)
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 after 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{after};
 
 	subtest {
-		plan 3;
+		plan 1;
 
-#`(
-		my $source = Q:to[_END_];
+#`( XXX Illegal
+		subtest {
+			plan 3;
+
+			my $source = Q{1eqv2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+)
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 eqv 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{eqv};
 
 	subtest {
-		plan 3;
+		plan 2;
 
-#`(
-		my $source = Q:to[_END_];
-1 === 2
+		subtest {
+			plan 3;
+
+			my $source = Q{1===2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
+1===2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{===};
 
 	subtest {
-		plan 3;
+		plan 2;
 
-#`(
-		my $source = Q:to[_END_];
+		subtest {
+			plan 3;
+
+			my $source = Q{1=:=2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 =:= 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{=:=};
 
 	subtest {
-		plan 3;
+		plan 2;
 
-#`(
-		my $source = Q:to[_END_];
+		subtest {
+			plan 3;
+
+			my $source = Q{1~~2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 ~~ 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{~~};
 
 	subtest {
-		plan 3;
+		plan 2;
 
-#`(
-		my $source = Q:to[_END_];
+		subtest {
+			plan 3;
+
+			my $source = Q{1=~=2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 =~= 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{=~=};
 }, Q{Chaining Binary Precedence};
 
@@ -1678,19 +2434,33 @@ subtest {
 	plan 1;
 
 	subtest {
-		plan 3;
+		plan 2;
 
-#`(
-		my $source = Q:to[_END_];
+		subtest {
+			plan 3;
+
+			my $source = Q{1&&2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 && 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{&&};
 }, Q{Tight AND Precedence};
 
@@ -1698,83 +2468,157 @@ subtest {
 	plan 5;
 
 	subtest {
-		plan 3;
+		plan 2;
 
-#`(
-		my $source = Q:to[_END_];
+		subtest {
+			plan 3;
+
+			my $source = Q{1||2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 || 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{||};
 
 	subtest {
-		plan 3;
+		plan 2;
 
-#`(
-		my $source = Q:to[_END_];
+		subtest {
+			plan 3;
+
+			my $source = Q{1^^2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 ^^ 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{^^};
 
 	subtest {
-		plan 3;
+		plan 2;
 
-#`(
-		my $source = Q:to[_END_];
+		subtest {
+			plan 3;
+
+			my $source = Q{1//2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 // 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{//};
 
 	subtest {
-		plan 3;
+		plan 1;
 
-#`(
-		my $source = Q:to[_END_];
+#`( XXX Illegal
+		subtest {
+			plan 3;
+
+			my $source = Q{1min2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+)
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 min 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{min};
 
 	subtest {
-		plan 3;
+		plan 1;
 
-#`(
-		my $source = Q:to[_END_];
+#`( XXX Illegal
+		subtest {
+			plan 3;
+
+			my $source = Q{1max2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+)
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 max 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{max};
 }, Q{Tight OR Precedence};
 
@@ -1782,147 +2626,289 @@ subtest {
 	plan 9;
 
 	subtest {
-		plan 3;
+		plan 2;
+
+		subtest {
+			plan 3;
 
 #`(
-		my $source = Q:to[_END_];
+			my $source = Q{1??2!!3};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+)
+		}, Q{no ws};
+
+		subtest {
+			plan 3;
+
+#`(
+			my $source = Q:to[_END_];
 1 ?? 2 !! 3
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
 )
+		}, Q{ws};
 	}, Q{?? !!};
 
 	subtest {
-		plan 3;
+		plan 1;
 
-#`(
-		my $source = Q:to[_END_];
+#`( XXX Illegal
+		subtest {
+			plan 3;
+
+			my $source = Q{1ff2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+)
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 ff 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{ff};
 
 	subtest {
-		plan 3;
+		plan 1;
 
-#`(
-		my $source = Q:to[_END_];
+#`( XXX Illegal
+		subtest {
+			plan 3;
+
+			my $source = Q{1...2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+)
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 ^ff 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{^ff};
 
 	subtest {
-		plan 3;
+		plan 1;
 
-#`(
-		my $source = Q:to[_END_];
+#`( XXX Illegal
+		subtest {
+			plan 3;
+
+			my $source = Q{1ff^2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+)
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 ff^ 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{ff^};
 
 	subtest {
-		plan 3;
+		plan 2;
 
-#`(
-		my $source = Q:to[_END_];
+		subtest {
+			plan 3;
+
+			my $source = Q{1^ff^2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 ^ff^ 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{^ff^};
 
 	subtest {
-		plan 3;
+		plan 1;
 
-#`(
-		my $source = Q:to[_END_];
+#`( XXX Illegal
+		subtest {
+			plan 3;
+
+			my $source = Q{1fff2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+)
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 fff 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{fff};
 
 	subtest {
-		plan 3;
+		plan 1;
 
-#`(
-		my $source = Q:to[_END_];
+#`( XXX Illegal
+		subtest {
+			plan 3;
+
+			my $source = Q{1^fff2}
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+)
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 ^fff 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{^fff};
 
 	subtest {
-		plan 3;
+		plan 1;
 
-#`(
-		my $source = Q:to[_END_];
+#`( XXX 1fff^2 illegal
+		subtest {
+			plan 3;
+
+			my $source = Q{1fff^2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+)
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 fff^ 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{fff^};
 
 	subtest {
-		plan 3;
+		plan 2;
 
-#`(
-		my $source = Q:to[_END_];
+		subtest {
+			plan 3;
+
+			my $source = Q{1^fff^2};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 1 ^fff^ 2
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{^fff^};
 }, Q{Conditional Operator Precedence};
 
@@ -1930,35 +2916,63 @@ subtest {
 	plan 2;
 
 	subtest {
-		plan 3;
+		plan 2;
 
-#`(
-		my $source = Q:to[_END_];
+		subtest {
+			plan 3;
+
+			my $source = Q{my$a=1};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 my $a = 1
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{=};
 
 	subtest {
-		plan 3;
+		plan 2;
 
-#`(
-		my $source = Q:to[_END_];
+		subtest {
+			plan 3;
+
+			my $source = Q{a=>1};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+
+		subtest {
+			plan 3;
+
+			my $source = Q:to[_END_];
 a => 1
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{=>};
 }, Q{Item Assignment Precedence};
 
