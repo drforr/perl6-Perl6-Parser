@@ -1294,7 +1294,7 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 				# XXX Note that ':' is part of the expression.
 				Perl6::Operator::Prefix.new(
 					:from( $p.from ),
-					:to( $p.from + 1 ),
+					:to( $p.from + COLON.chars ),
 					:content( COLON )
 				),
 				self._coloncircumfix(
@@ -1330,7 +1330,7 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 				# XXX I think it is.
 				Perl6::Operator::Prefix.new(
 					:from( $p.from ),
-					:to( $p.from + 1 ),
+					:to( $p.from + COLON.chars ),
 					:content( COLON )
 				),
 				self._var( $p.hash.<var> )
