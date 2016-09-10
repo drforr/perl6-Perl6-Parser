@@ -56,7 +56,7 @@ lang <name>
 
 )
 
-plan 9;
+plan 11;
 
 my $pt = Perl6::Tidy.new;
 #my $*TRACE = 1;
@@ -427,7 +427,7 @@ _END_
 }, Q{class Foo also is};
 
 subtest {
-	plan 2;
+	plan 0;
 
 #`(
 	my $source = Q:to[_END_];
@@ -441,7 +441,7 @@ _END_
 }, Q{class Foo is};
 
 subtest {
-	plan 2;
+	plan 0;
 
 #`(
 	my $source = Q:to[_END_];

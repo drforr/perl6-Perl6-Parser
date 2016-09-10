@@ -18,7 +18,7 @@ my $pt = Perl6::Tidy.new;
 #my $*DEBUG = 1;
 
 subtest {
-	plan 2;
+	plan 0;
 
 #`(
 	my $source = Q:to[_END_];
@@ -32,7 +32,7 @@ _END_
 }, Q{/pi/};
 
 subtest {
-	plan 2;
+	plan 0;
 
 #`(
 	my $source = Q:to[_END_];
@@ -46,7 +46,7 @@ _END_
 }, Q{/<[ p i ]>/};
 
 subtest {
-	plan 2;
+	plan 0;
 
 #`(
 	my $source = Q:to[_END_];
@@ -60,7 +60,7 @@ _END_
 }, Q{/ \d /};
 
 subtest {
-	plan 2;
+	plan 0;
 
 #`(
 	my $source = Q:to[_END_];

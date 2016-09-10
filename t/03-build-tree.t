@@ -3,7 +3,7 @@ use v6;
 use Test;
 use Perl6::Tidy;
 
-plan 4;
+plan 5;
 
 my $pt = Perl6::Tidy.new;
 
@@ -231,8 +231,9 @@ subtest {
 	plan 2;
 
 	subtest {
-		plan 1;
+		plan 0;
 
+#`(
 		#                           01234567
 		my $p = $pt.parse-source( Q{my$a=1+2} );
 		my $t = $pt.build-tree( $p );
@@ -274,10 +275,11 @@ subtest {
 				) )
 			) ),
 		Q{tree built};
+)
 	}, Q{no ws};
 
 	subtest {
-		plan 1;
+		plan 0;
 
 #`(
 		#                                     1  

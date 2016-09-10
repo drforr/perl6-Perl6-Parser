@@ -3623,11 +3623,6 @@ return True;
 		}
 		elsif self.assert-hash-keys( $p,
 				[< deflongname trait blockoid >] ) {
-say $p.dump;
-key-bounds $p.hash.<deflongname>;
-key-bounds $p.hash.<trait>.list.[0];
-key-bounds $p.hash.<blockoid>;
-key-bounds $p;
 			@child = self._deflongname( $p.hash.<deflongname> );
 			@child.append(
 				Perl6::WS.between-matches(

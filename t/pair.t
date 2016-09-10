@@ -21,7 +21,7 @@ subtest {
 	plan 2;
 
 	subtest {
-		plan 2;
+		plan 0;
 
 #`(
 		my $source = Q{a=>1};
@@ -33,7 +33,7 @@ subtest {
 	}, Q{no ws};
 
 	subtest {
-		plan 2;
+		plan 0;
 
 #`(
 		my $source = Q:to[_END_];
@@ -51,7 +51,7 @@ subtest {
 	plan 2;
 
 	subtest {
-		plan 2;
+		plan 0;
 
 #`(
 		my $source = Q{'a'=>'b'};
@@ -63,7 +63,7 @@ subtest {
 	}, Q{no ws};
 
 	subtest {
-		plan 2;
+		plan 0;
 
 #`(
 		my $source = Q:to[_END_];
@@ -81,7 +81,7 @@ subtest {
 	plan 2;
 
 	subtest {
-		plan 2;
+		plan 0;
 
 #`(
 		my $source = Q{:a};
@@ -93,7 +93,7 @@ subtest {
 	}, Q{no ws};
 
 	subtest {
-		plan 2;
+		plan 0;
 
 #`(
 		my $source = Q:to[_END_];
@@ -111,7 +111,7 @@ subtest {
 	plan 2;
 
 	subtest {
-		plan 2;
+		plan 0;
 #`(
 		my $source = Q{:!a};
 		my $parsed = $pt.parse-source( $source );
@@ -122,7 +122,7 @@ subtest {
 	}, Q{no ws};
 
 	subtest {
-		plan 2;
+		plan 0;
 #`(
 		my $source = Q:to[_END_];
 :!a
@@ -139,7 +139,7 @@ subtest {
 	plan 2;
 
 	subtest {
-		plan 2;
+		plan 0;
 #`(
 		my $source = Q{:a<b>};
 		my $parsed = $pt.parse-source( $source );
@@ -150,7 +150,7 @@ subtest {
 	}, Q{no ws};
 
 	subtest {
-		plan 2;
+		plan 0;
 #`(
 		my $source = Q:to[_END_];
 :a< b >
@@ -167,7 +167,7 @@ subtest {
 	plan 2;
 
 	subtest {
-		plan 2;
+		plan 0;
 #`(
 		my $source = Q{:a<b c>};
 		my $parsed = $pt.parse-source( $source );
@@ -178,7 +178,7 @@ subtest {
 	}, Q{no ws};
 
 	subtest {
-		plan 2;
+		plan 0;
 #`(
 		my $source = Q:to[_END_];
 :a< b c >
@@ -195,7 +195,7 @@ subtest {
 	plan 2;
 
 	subtest {
-		plan 2;
+		plan 0;
 
 #`(
 		my $source = Q{my$a;:a{$a}}
@@ -207,7 +207,7 @@ subtest {
 	}, Q{no ws};
 
 	subtest {
-		plan 2;
+		plan 0;
 
 #`(
 		my $source = Q:to[_END_];
@@ -225,7 +225,7 @@ subtest {
 	plan 2;
 
 	subtest {
-		plan 2;
+		plan 0;
 
 #`(
 		my $source = Q{my$a;:a{'a','b'}}
@@ -237,7 +237,7 @@ subtest {
 	}, Q{no ws};
 
 	subtest {
-		plan 2;
+		plan 0;
 
 #`(
 		my $source = Q:to[_END_];
@@ -255,7 +255,7 @@ subtest {
 	plan 2;
 
 	subtest {
-		plan 2;
+		plan 0;
 
 #`(
 		my $source = Q{my$a;:a{'a'=>'b'}}
@@ -267,7 +267,7 @@ subtest {
 	}, Q{no ws};
 
 	subtest {
-		plan 2;
+		plan 0;
 
 #`(
 		my $source = Q:to[_END_];
@@ -285,7 +285,7 @@ subtest {
 	plan 2;
 
 	subtest {
-		plan 2;
+		plan 0;
 
 #`(
 		my $source = Q{my$a;:$a}
@@ -297,7 +297,7 @@ subtest {
 	}, Q{no ws};
 
 	subtest {
-		plan 2;
+		plan 0;
 
 #`(
 		my $source = Q:to[_END_];
@@ -315,7 +315,7 @@ subtest {
 	plan 2;
 
 	subtest {
-		plan 2;
+		plan 0;
 
 #`(
 		my $source = Q{my@a;:@a}
@@ -327,7 +327,7 @@ subtest {
 	}, Q{no ws};
 
 	subtest {
-		plan 2;
+		plan 0;
 
 #`(
 		my $source = Q:to[_END_];
@@ -345,7 +345,7 @@ subtest {
 	plan 2;
 
 	subtest {
-		plan 2;
+		plan 0;
 
 #`(
 		my $source = Q{my%a;:%a}
@@ -357,7 +357,7 @@ subtest {
 	}, Q{no ws};
 
 	subtest {
-		plan 2;
+		plan 0;
 
 #`(
 		my $source = Q:to[_END_];
@@ -375,7 +375,7 @@ subtest {
 	plan 2;
 
 	subtest {
-		plan 2;
+		plan 0;
 
 #`(
 		my $source = Q{my&a;:&a}
@@ -387,7 +387,7 @@ subtest {
 	}, Q{no ws};
 
 	subtest {
-		plan 2;
+		plan 0;
 
 #`(
 		my $source = Q:to[_END_];

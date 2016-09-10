@@ -11,7 +11,7 @@ AST, and 'say $tree.perl' to view the generated Perl 6 structure.
 
 )
 
-plan 3;
+plan 2;
 
 my $pt = Perl6::Tidy.new;
 #my $*TRACE = 1;
@@ -27,7 +27,7 @@ subtest {
 			plan 2;
 
 			subtest {
-				plan 2;
+				plan 0;
 #`(
 				my $source = Q{sub foo(){}};
 				my $parsed = $pt.parse-source( $source );
@@ -38,7 +38,7 @@ subtest {
 			}, Q{no ws};
 
 			subtest {
-				plan 2;
+				plan 0;
 #`(
 				my $source = Q:to[_END_];
 sub foo( ) { }
@@ -55,7 +55,7 @@ _END_
 			plan 2;
 
 			subtest {
-				plan 2;
+				plan 0;
 #`(
 				my $source = Q{sub foo(0){}};
 				my $parsed = $pt.parse-source( $source );
@@ -66,7 +66,7 @@ _END_
 			}, Q{no ws};
 
 			subtest {
-				plan 2;
+				plan 0;
 #`(
 				my $source = Q:to[_END_];
 sub foo( 0 ) { }
@@ -83,7 +83,7 @@ _END_
 			plan 2;
 
 			subtest {
-				plan 2;
+				plan 0;
 #`(
 				my $source = Q{sub foo($a){}};
 				my $parsed = $pt.parse-source( $source );
@@ -94,7 +94,7 @@ _END_
 			}, Q{no ws};
 
 			subtest {
-				plan 2;
+				plan 0;
 #`(
 				my $source = Q:to[_END_];
 sub foo( $a ) { }
@@ -114,7 +114,7 @@ _END_
 				plan 2;
 
 				subtest {
-					plan 2;
+					plan 0;
 #`(
 					my $source = Q{sub foo(Int$a){}};
 					my $parsed = $pt.parse-source( $source );
@@ -125,9 +125,9 @@ _END_
 				}, Q{no ws};
 
 				subtest {
-					plan 2;
+					plan 0;
 #`(
-				my $source = Q:to[_END_];
+					my $source = Q:to[_END_];
 sub foo( Int $a ) { }
 _END_
 					my $parsed = $pt.parse-source( $source );
@@ -142,7 +142,7 @@ _END_
 				plan 2;
 
 				subtest {
-					plan 2;
+					plan 0;
 #`(
 					my $source = Q{sub foo(::T$a){}};
 					my $parsed = $pt.parse-source( $source );
@@ -153,9 +153,9 @@ _END_
 				}, Q{no ws};
 
 				subtest {
-					plan 2;
+					plan 0;
 #`(
-				my $source = Q:to[_END_];
+					my $source = Q:to[_END_];
 sub foo( ::T $a ) { }
 _END_
 					my $parsed = $pt.parse-source( $source );
@@ -170,7 +170,7 @@ _END_
 				plan 2;
 
 				subtest {
-					plan 2;
+					plan 0;
 #`(
 					my $source = Q{sub foo(Int){}};
 					my $parsed = $pt.parse-source( $source );
@@ -181,9 +181,9 @@ _END_
 				}, Q{no ws};
 
 				subtest {
-					plan 2;
+					plan 0;
 #`(
-				my $source = Q:to[_END_];
+					my $source = Q:to[_END_];
 sub foo( Int ) { }
 _END_
 					my $parsed = $pt.parse-source( $source );
@@ -198,7 +198,7 @@ _END_
 				plan 2;
 
 				subtest {
-					plan 2;
+					plan 0;
 #`(
 					my $source = Q{sub foo(Int$a where1){}};
 					my $parsed = $pt.parse-source( $source );
@@ -209,9 +209,9 @@ _END_
 				}, Q{no ws};
 
 				subtest {
-					plan 2;
+					plan 0;
 #`(
-				my $source = Q:to[_END_];
+					my $source = Q:to[_END_];
 sub foo( Int $a where 1 ) { }
 _END_
 					my $parsed = $pt.parse-source( $source );
@@ -227,7 +227,7 @@ _END_
 			plan 2;
 
 			subtest {
-				plan 2;
+				plan 0;
 #`(
 				my $source = Q{sub foo($a=0){}};
 				my $parsed = $pt.parse-source( $source );
@@ -238,7 +238,7 @@ _END_
 			}, Q{no ws};
 
 			subtest {
-				plan 2;
+				plan 0;
 #`(
 				my $source = Q:to[_END_];
 sub foo( $a = 0 ) { }
@@ -255,7 +255,7 @@ _END_
 			plan 2;
 
 			subtest {
-				plan 2;
+				plan 0;
 #`(
 				my $source = Q{sub foo(:a){}};
 				my $parsed = $pt.parse-source( $source );
@@ -266,7 +266,7 @@ _END_
 			}, Q{no ws};
 
 			subtest {
-				plan 2;
+				plan 0;
 #`(
 				my $source = Q:to[_END_];
 sub foo( :a ) { }
@@ -284,7 +284,7 @@ _END_
 		plan 2;
 
 		subtest {
-			plan 2;
+			plan 0;
 #`(
 			my $source = Q{sub foo($a,$b){}};
 			my $parsed = $pt.parse-source( $source );
@@ -295,7 +295,7 @@ _END_
 		}, Q{no ws};
 
 		subtest {
-			plan 2;
+			plan 0;
 #`(
 			my $source = Q:to[_END_];
 sub foo( $a, $b ) { }
@@ -313,7 +313,7 @@ subtest {
 	plan 3;
 
 	subtest {
-		plan 2;
+		plan 0;
 
 #`(
 		my $source = Q:to[_END_];
@@ -331,7 +331,7 @@ _END_
 	# actually being copied from the wrong RE.
 	#
 	subtest {
-		plan 2;
+		plan 0;
 
 #`(
 		my $source = Q:to[_END_];
@@ -354,7 +354,7 @@ _END_
 	}, Q{christmas tree, alternating spacing};
 
 	subtest {
-		plan 2;
+		plan 0;
 
 #`(
 		my $source = Q:to[_END_];

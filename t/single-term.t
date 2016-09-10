@@ -11,14 +11,14 @@ AST, and 'say $tree.perl' to view the generated Perl 6 structure.
 
 )
 
-plan 9;
+plan 8;
 
 my $pt = Perl6::Tidy.new;
 #my $*TRACE = 1;
 #my $*DEBUG = 1;
 
 subtest {
-	plan 10;
+	plan 9;
 
 	subtest {
 		plan 5;
@@ -39,7 +39,7 @@ subtest {
 			}, Q{no ws};
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{ 0  };
@@ -65,7 +65,7 @@ subtest {
 			}, Q{no ws};
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{ 1  };
@@ -81,7 +81,7 @@ subtest {
 			plan 2;
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{-1};
@@ -93,7 +93,7 @@ subtest {
 			}, Q{no ws};
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{ -1  };
@@ -119,7 +119,7 @@ subtest {
 			}, Q{no ws};
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{ 1_1  };
@@ -139,7 +139,7 @@ subtest {
 			plan 2;
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{0b0};
@@ -151,7 +151,7 @@ subtest {
 			}, Q{no ws};
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{ 0b0  };
@@ -167,7 +167,7 @@ subtest {
 			plan 2;
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{0b1};
@@ -179,7 +179,7 @@ subtest {
 			}, Q{no ws};
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{ 0b1  };
@@ -195,7 +195,7 @@ subtest {
 			plan 2;
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{-0b1};
@@ -207,7 +207,7 @@ subtest {
 			}, Q{no ws};
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{ -0b1  };
@@ -227,7 +227,7 @@ subtest {
 			plan 2;
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{0o0};
@@ -239,7 +239,7 @@ subtest {
 			}, Q{no ws};
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{ 0o0  };
@@ -255,7 +255,7 @@ subtest {
 			plan 2;
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{0o1};
@@ -267,7 +267,7 @@ subtest {
 			}, Q{no ws};
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{ 0o1  };
@@ -283,7 +283,7 @@ subtest {
 			plan 2;
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{-0o1};
@@ -295,7 +295,7 @@ subtest {
 			}, Q{no ws};
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{ -0o1  };
@@ -315,7 +315,7 @@ subtest {
 			plan 2;
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{0d0};
@@ -327,7 +327,7 @@ subtest {
 			}, Q{no ws};
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{ 0d0  };
@@ -343,7 +343,7 @@ subtest {
 			plan 2;
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{0d1};
@@ -355,7 +355,7 @@ subtest {
 			}, Q{no ws};
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{ 0d1  };
@@ -371,7 +371,7 @@ subtest {
 			plan 2;
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{-0d1};
@@ -383,7 +383,7 @@ subtest {
 			}, Q{no ws};
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{ -0d1  };
@@ -403,7 +403,7 @@ subtest {
 			plan 2;
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{0};
@@ -415,7 +415,7 @@ subtest {
 			}, Q{no ws};
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{ 0  };
@@ -431,7 +431,7 @@ subtest {
 			plan 2;
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{1};
@@ -443,7 +443,7 @@ subtest {
 			}, Q{no ws};
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{ 1  };
@@ -459,7 +459,7 @@ subtest {
 			plan 2;
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{-1};
@@ -471,7 +471,7 @@ subtest {
 			}, Q{no ws};
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{ -1  };
@@ -491,7 +491,7 @@ subtest {
 			plan 2;
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{0x0};
@@ -503,7 +503,7 @@ subtest {
 			}, Q{no ws};
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{ 0x0  };
@@ -519,7 +519,7 @@ subtest {
 			plan 2;
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{0x1};
@@ -531,7 +531,7 @@ subtest {
 			}, Q{no ws};
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{ 0x1  };
@@ -547,7 +547,7 @@ subtest {
 			plan 2;
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{-0x1};
@@ -559,7 +559,7 @@ subtest {
 			}, Q{no ws};
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{ -0x1  };
@@ -579,7 +579,7 @@ subtest {
 			plan 2;
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{:13(0)};
@@ -591,7 +591,7 @@ subtest {
 			}, Q{no ws};
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{ :13(0)  };
@@ -607,7 +607,7 @@ subtest {
 			plan 2;
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{:13(1)};
@@ -619,7 +619,7 @@ subtest {
 			}, Q{no ws};
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{ :13(1)  };
@@ -635,7 +635,7 @@ subtest {
 			plan 2;
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{:13(-1)};
@@ -647,7 +647,7 @@ subtest {
 			}, Q{no ws};
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{ :13(-1)  };
@@ -661,13 +661,13 @@ subtest {
 	}, Q{radix};
 
 	subtest {
-		plan 3;
+		plan 4;
 
 		subtest {
 			plan 2;
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{0e0};
@@ -679,7 +679,7 @@ subtest {
 			}, Q{no ws};
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{ 0e0  };
@@ -695,7 +695,7 @@ subtest {
 			plan 2;
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{0e1};
@@ -707,7 +707,7 @@ subtest {
 			}, Q{no ws};
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{ 0e1  };
@@ -723,7 +723,7 @@ subtest {
 			plan 2;
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{-0e1};
@@ -735,7 +735,7 @@ subtest {
 			}, Q{no ws};
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{ -0e1  };
@@ -751,7 +751,7 @@ subtest {
 			plan 2;
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{0e-1};
@@ -763,7 +763,7 @@ subtest {
 			}, Q{no ws};
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{ 0e-1  };
@@ -783,7 +783,7 @@ subtest {
 			plan 2;
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{0i};
@@ -795,7 +795,7 @@ subtest {
 			}, Q{no ws};
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{ 0i  };
@@ -811,7 +811,7 @@ subtest {
 			plan 2;
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{1i};
@@ -823,7 +823,7 @@ subtest {
 			}, Q{no ws};
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{ 1i  };
@@ -839,7 +839,7 @@ subtest {
 			plan 2;
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{-1i};
@@ -851,7 +851,7 @@ subtest {
 			}, Q{no ws};
 
 			subtest {
-				plan 2;
+				plan 0;
 
 #`(
 				my $source = Q{ -1i  };
@@ -866,13 +866,13 @@ subtest {
 }, Q{number};
 
 subtest {
-	plan 5;
+	plan 6;
 
 	subtest {
 		plan 2;
 
 		subtest {
-			plan 2;
+			plan 0;
 
 #`(
 			my $source = Q{'Hello, world!'};
@@ -884,7 +884,7 @@ subtest {
 		}, Q{no ws};
 
 		subtest {
-			plan 2;
+			plan 0;
 
 #`(
 			my $source = Q{ 'Hello, world!'  };
@@ -900,7 +900,7 @@ subtest {
 		plan 2;
 
 		subtest {
-			plan 2;
+			plan 0;
 
 #`(
 			my $source = Q{"Hello, world!"};
@@ -912,7 +912,7 @@ subtest {
 		}, Q{no ws};
 
 		subtest {
-			plan 2;
+			plan 0;
 
 #`(
 			my $source = Q{ "Hello, world!"  };
@@ -928,7 +928,7 @@ subtest {
 		plan 2;
 
 		subtest {
-			plan 2;
+			plan 0;
 
 #`(
 			my $source = Q{Q{Hello, world!}};
@@ -940,7 +940,7 @@ subtest {
 		}, Q{no ws};
 
 		subtest {
-			plan 2;
+			plan 0;
 
 #`(
 			my $source = Q{ Q{Hello, world!}  };
@@ -956,7 +956,7 @@ subtest {
 		plan 2;
 
 		subtest {
-			plan 2;
+			plan 0;
 
 #`(
 			my $source = Q{q[Hello, world!]};
@@ -968,7 +968,7 @@ subtest {
 		}, Q{no ws};
 
 		subtest {
-			plan 2;
+			plan 0;
 
 #`(
 			my $source = Q{ q[Hello, world!]  };
@@ -984,7 +984,7 @@ subtest {
 		plan 2;
 
 		subtest {
-			plan 2;
+			plan 0;
 
 #`(
 			my $source = Q{qq[Hello, world!]};
@@ -996,7 +996,7 @@ subtest {
 		}, Q{no ws};
 
 		subtest {
-			plan 2;
+			plan 0;
 
 #`(
 			my $source = Q{ qq[Hello, world!]  };
@@ -1012,7 +1012,7 @@ subtest {
 		plan 2;
 
 		subtest {
-			plan 2;
+			plan 0;
 
 #`(
 			my $source = Q{q:to[_END_]
@@ -1026,7 +1026,7 @@ _END_};
 		}, Q{no ws};
 
 		subtest {
-			plan 2;
+			plan 0;
 
 #`(
 			my $source = Q{ q:to[_END_]
@@ -1048,7 +1048,7 @@ subtest {
 		plan 2;
 
 		subtest {
-			plan 2;
+			plan 0;
 
 #`(
 			my $source = Q{@*ARGS};
@@ -1060,7 +1060,7 @@ subtest {
 		}, Q{no ws};
 
 		subtest {
-			plan 2;
+			plan 0;
 
 #`(
 			my $source = Q{ @*ARGS  };
@@ -1076,7 +1076,7 @@ subtest {
 		plan 2;
 
 		subtest {
-			plan 2;
+			plan 0;
 
 #`(
 			my $source = Q{$};
@@ -1088,7 +1088,7 @@ subtest {
 		}, Q{no ws};
 
 		subtest {
-			plan 2;
+			plan 0;
 
 #`(
 			my $source = Q{ $  };
@@ -1104,7 +1104,7 @@ subtest {
 		plan 2;
 
 		subtest {
-			plan 2;
+			plan 0;
 
 #`(
 			my $source = Q{$_};
@@ -1116,7 +1116,7 @@ subtest {
 		}, Q{no ws};
 
 		subtest {
-			plan 2;
+			plan 0;
 
 #`(
 			my $source = Q{ $_  };
@@ -1132,7 +1132,7 @@ subtest {
 		plan 2;
 
 		subtest {
-			plan 2;
+			plan 0;
 
 #`(
 			my $source = Q{$/};
@@ -1144,7 +1144,7 @@ subtest {
 		}, Q{no ws};
 
 		subtest {
-			plan 2;
+			plan 0;
 
 #`(
 			my $source = Q{ $/  };
@@ -1160,7 +1160,7 @@ subtest {
 		plan 2;
 
 		subtest {
-			plan 2;
+			plan 0;
 
 #`(
 			my $source = Q{$!};
@@ -1172,7 +1172,7 @@ subtest {
 		}, Q{no ws};
 
 		subtest {
-			plan 2;
+			plan 0;
 
 #`(
 			my $source = Q{ $!  };
@@ -1188,7 +1188,7 @@ subtest {
 		plan 2;
 
 		subtest {
-			plan 2;
+			plan 0;
 
 #`(
 			my $source = Q{$Foo::Bar};
@@ -1200,7 +1200,7 @@ subtest {
 		}, Q{no ws};
 
 		subtest {
-			plan 2;
+			plan 0;
 
 #`(
 			my $source = Q{ $Foo::Bar  };
@@ -1217,7 +1217,7 @@ subtest {
 		plan 2;
 
 		subtest {
-			plan 2;
+			plan 0;
 
 #`(
 			my $source = Q{&sum};
@@ -1229,7 +1229,7 @@ subtest {
 		}, Q{no ws};
 
 		subtest {
-			plan 2;
+			plan 0;
 
 #`(
 			my $source = Q{ &sum  };
@@ -1248,7 +1248,7 @@ subtest {
 		my $parsed = $pt.parse-source( Q{$Foo::($*GLOBAL)::Bar} );
 
 		subtest {
-			plan 2;
+			plan 0;
 
 #`(
 			my $source = Q{$Foo::($*GLOBAL)::Bar};
@@ -1260,7 +1260,7 @@ subtest {
 		}, Q{no ws};
 
 		subtest {
-			plan 2;
+			plan 0;
 
 #`(
 			my $source = Q{ $Foo::($*GLOBAL)::Bar  };
@@ -1280,7 +1280,7 @@ subtest {
 		plan 2;
 
 		subtest {
-			plan 2;
+			plan 0;
 
 #`(
 			my $source = Q{Int};
@@ -1292,7 +1292,7 @@ subtest {
 		}, Q{no ws};
 
 		subtest {
-			plan 2;
+			plan 0;
 
 #`(
 			my $source = Q{ Int  };
@@ -1308,7 +1308,7 @@ subtest {
 		plan 2;
 
 		subtest {
-			plan 2;
+			plan 0;
 
 #`(
 			my $source = Q{IO::Handle};
@@ -1320,7 +1320,7 @@ subtest {
 		}, Q{no ws};
 
 		subtest {
-			plan 2;
+			plan 0;
 
 #`(
 			my $source = Q{ IO::Handle  };
@@ -1340,7 +1340,7 @@ subtest {
 		plan 2;
 
 		subtest {
-			plan 2;
+			plan 0;
 
 #`(
 			my $source = Q{pi};
@@ -1352,7 +1352,7 @@ subtest {
 		}, Q{no ws};
 
 		subtest {
-			plan 2;
+			plan 0;
 
 #`(
 			my $source = Q{ pi  };
@@ -1372,7 +1372,7 @@ subtest {
 		plan 2;
 
 		subtest {
-			plan 2;
+			plan 0;
 
 #`(
 			my $source = Q{sum};
@@ -1384,7 +1384,7 @@ subtest {
 		}, Q{no ws};
 
 		subtest {
-			plan 2;
+			plan 0;
 
 #`(
 			my $source = Q{ sum  };
@@ -1404,7 +1404,7 @@ subtest {
 		plan 2;
 
 		subtest {
-			plan 2;
+			plan 0;
 
 #`(
 			my $source = Q{()};
@@ -1416,7 +1416,7 @@ subtest {
 		}, Q{no ws};
 
 		subtest {
-			plan 2;
+			plan 0;
 
 #`(
 			my $source = Q{ ()  };
@@ -1438,7 +1438,7 @@ subtest {
 		plan 2;
 
 		subtest {
-			plan 2;
+			plan 0;
 
 #`(
 			my $source = Q{:()};
@@ -1450,7 +1450,7 @@ subtest {
 		}, Q{no ws};
 
 		subtest {
-			plan 2;
+			plan 0;
 
 #`(
 			my $source = Q{ :()  };

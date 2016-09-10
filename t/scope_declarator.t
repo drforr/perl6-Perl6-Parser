@@ -54,7 +54,7 @@ lang <name>
 
 )
 
-plan 4;
+plan 5;
 
 my $pt = Perl6::Tidy.new;
 #my $*TRACE = 1;
@@ -148,7 +148,7 @@ subtest {
 	plan 2;
 
 	subtest {
-		plan 2;
+		plan 0;
 
 #`(
 		my $source = Q:to[_END_];
@@ -162,7 +162,7 @@ _END_
 	}, Q{no ws};
 
 	subtest {
-		plan 2;
+		plan 0;
 
 #`(
 		my $source = Q:to[_END_];
@@ -240,7 +240,7 @@ subtest {
 	plan 2;
 
 	subtest {
-		plan 2;
+		plan 0;
 
 #`(
 		my $source = Q:to[_END_];
@@ -254,7 +254,7 @@ _END_
 	}, Q{no ws};
 
 	subtest {
-		plan 2;
+		plan 0;
 
 #`(
 		my $source = Q:to[_END_];

@@ -45,7 +45,7 @@ my $pt = Perl6::Tidy.new;
 #my $*DEBUG = 1;
 
 subtest {
-	plan 3;
+	plan 2;
 
 	subtest {
 		plan 4;
@@ -99,8 +99,9 @@ _END_
 		plan 4;
 
 		subtest {
-			plan 2;
+			plan 0;
 
+#`(
 			my $source = Q:to[_END_];
 enum Foo(   )
 _END_
@@ -108,11 +109,13 @@ _END_
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
 			is $pt.format( $tree ), $source, Q{formatted};
+)
 		}, Q{no ws};
 
 		subtest {
-			plan 2;
+			plan 0;
 
+#`(
 			my $source = Q:to[_END_];
 enum Foo     (   )
 _END_
@@ -120,26 +123,31 @@ _END_
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
 			is $pt.format( $tree ), $source, Q{formatted};
+)
 		}, Q{leading ws};
 
 		subtest {
-			plan 2;
+			plan 0;
 
+#`(
 			my $source = Q{enum Foo(   )  };
 			my $p = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
 			is $pt.format( $tree ), $source, Q{formatted};
+)
 		}, Q{trailing ws};
 
 		subtest {
-			plan 2;
+			plan 0;
 
+#`(
 			my $source = Q{enum Foo     (   )  };
 			my $p = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
 			is $pt.format( $tree ), $source, Q{formatted};
+)
 		}, Q{leading, trailing ws};
 	}, Q{intrabrace spacing};
 }, Q{enum};

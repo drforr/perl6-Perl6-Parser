@@ -18,7 +18,7 @@ my $pt = Perl6::Tidy.new;
 #my $*DEBUG = 1;
 
 subtest {
-	plan 2;
+	plan 0;
 
 #`(
 	my $source = Q:to[_END_];

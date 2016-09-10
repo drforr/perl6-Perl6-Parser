@@ -135,23 +135,27 @@ _END_
 		}, Q{leading ws};
 
 		subtest {
-			plan 2;
+			plan 0;
 
+#`(
 			my $source = Q{sub Foo{   }  };
 			my $p = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
 			is $pt.format( $tree ), $source, Q{formatted};
+)
 		}, Q{trailing ws};
 
 		subtest {
-			plan 2;
+			plan 0;
 
+#`(
 			my $source = Q{sub Foo     {   }  };
 			my $p = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
 			is $pt.format( $tree ), $source, Q{formatted};
+)
 		}, Q{leading, trailing ws};
 	}, Q{intrabrace spacing};
 
@@ -159,8 +163,9 @@ _END_
 		plan 2;
 
 		subtest {
-			plan 2;
+			plan 0;
 
+#`(
 			my $source = Q:to[_END_];
 unit sub MAIN;
 _END_
@@ -168,11 +173,13 @@ _END_
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
 			is $pt.format( $tree ), $source, Q{formatted};
+)
 		}, Q{no ws};
 
 		subtest {
-			plan 2;
+			plan 0;
 
+#`(
 			my $source = Q:to[_END_];
 unit sub MAIN  ;
 _END_
@@ -180,6 +187,7 @@ _END_
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
 			is $pt.format( $tree ), $source, Q{formatted};
+)
 		}, Q{ws before semi};
 	}, Q{unit form};
 }, Q{sub};

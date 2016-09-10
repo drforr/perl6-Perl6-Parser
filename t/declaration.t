@@ -11,7 +11,7 @@ AST, and 'say $tree.perl' to view the generated Perl 6 structure.
 
 )
 
-plan 3;
+plan 2;
 
 my $pt = Perl6::Tidy.new;
 #my $*TRACE = 1;
@@ -68,11 +68,12 @@ subtest {
 }, Q{variable};
 
 subtest {
-	plan 2;
+	plan 1;
 
 	subtest {
-		plan 2;
+		plan 0;
 
+#`(
 		my $source = Q:to[_END_];
 sub foo returns Int {}
 _END_
@@ -80,6 +81,7 @@ _END_
 		my $tree = $pt.build-tree( $parsed );
 		ok $pt.validate( $parsed ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
+)
 	}, Q{sub foo returns Int {}};
 }, Q{subroutine};
 
