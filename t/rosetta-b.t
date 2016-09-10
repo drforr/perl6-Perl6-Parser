@@ -3,7 +3,6 @@ use v6;
 use Test;
 use Perl6::Tidy;
 
-#`(
 plan 27;
 
 my $pt = Perl6::Tidy.new;
@@ -1112,6 +1111,5 @@ say @candidates
 _END_
 	ok $pt.validate( $parsed );
 }, Q{Bulls and cows / player};
-)
 
 # vim: ft=perl6
