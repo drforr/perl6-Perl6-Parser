@@ -431,7 +431,10 @@ class Perl6::Statement does Branching does Bounded {
 }
 
 role Prefixed {
-	has Str $.headless is required;
+	method headless() {
+		$.content ~~ m/ 0 <[bdox]> (.+) /;
+		$0
+	}
 }
 
 # And now for the most basic tokens...
@@ -452,6 +455,14 @@ class Perl6::Number::Binary does Prefixed {
 }
 class Perl6::Number::Octal does Prefixed {
 	also is Perl6::Number;
+
+	method from-match( Mu $p ) {
+		self.bless(
+			:from( $p.from ),
+			:to( $p.to ),
+			:content( $p.Str )
+		)
+	}
 }
 class Perl6::Number::Decimal {
 	also is Perl6::Number;
