@@ -53,9 +53,7 @@ subtest {
 		subtest {
 			plan 2;
 
-			my $source = Q:to[_END_];
-my token Foo{a}
-_END_
+			my $source = Q{my token Foo{a}};
 			my $p = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
@@ -161,9 +159,7 @@ subtest {
 		subtest {
 			plan 2;
 
-			my $source = Q:to[_END_];
-my rule Foo{a}
-_END_
+			my $source = Q{my rule Foo{a}};
 			my $p = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
@@ -210,9 +206,7 @@ _END_
 			plan 0;
 
 #`(
-			my $source = Q:to[_END_];
-my rule Foo{ a  }
-_END_
+			my $source = Q{my rule Foo{ a  }};
 			my $p = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
@@ -224,9 +218,7 @@ _END_
 			plan 0;
 
 #`(
-			my $source = Q:to[_END_];
-my rule Foo     { a  }
-_END_
+			my $source = Q{my rule Foo     { a  }};
 			my $p = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
@@ -269,9 +261,7 @@ subtest {
 		subtest {
 			plan 2;
 
-			my $source = Q:to[_END_];
-my regex Foo{a}
-_END_
+			my $source = Q{my regex Foo{a}};
 			my $p = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
@@ -281,9 +271,7 @@ _END_
 		subtest {
 			plan 2;
 
-			my $source = Q:to[_END_];
-my regex Foo     {a}
-_END_
+			my $source = Q{my regex Foo     {a}};
 			my $p = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
@@ -318,9 +306,7 @@ _END_
 			plan 0;
 
 #`(
-			my $source = Q:to[_END_];
-my regex Foo{ a  }
-_END_
+			my $source = Q{my regex Foo{ a  }};
 			my $p = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
@@ -332,8 +318,7 @@ _END_
 			plan 0;
 
 #`(
-			my $source = Q:to[_END_];
-my regex Foo     { a  }
+			my $source = Q{my regex Foo     { a  }}
 _END_
 			my $p = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $p );
