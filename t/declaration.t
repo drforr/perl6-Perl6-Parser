@@ -59,12 +59,10 @@ subtest {
 		subtest {
 			plan 2;
 
-#`(
 			my $parsed = $pt.parse-source( Q{my $a where 1} );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.format( $tree ), Q{my $a where 1}, Q{formatted};
-)
 		}, Q{my $a where 1};
 	}, Q{constrained};
 }, Q{variable};

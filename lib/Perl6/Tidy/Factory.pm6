@@ -4210,7 +4210,6 @@ return True;
 		if $p.Str ~~ m{ ^ ( \s+ ) } {
 			$beginning-ws = $0.Str
 		}
-#		elsif $p.Str ~~ m{ ^ ( <comment-eol>+ ) } {
 		elsif $p.Str ~~ m{ ^ ( <comment>+ ) } {
 			$beginning-comment = $0.Str
 		}
@@ -4977,16 +4976,34 @@ return True;
 				[< semilist postcircumfix
 				   signature trait >] ) {
 			# Synthesize the 'from' and 'to' markers for 'where'
-			$p.Str ~~ m{ << (where) >> };
+			$p.Str ~~ m{ (\s*) (where) (\s*) };
 			my Int $from = $0.from;
 			@child = self._variable( $p.hash.<variable> );
+			if $0.Str {
+				@child.append(
+					Perl6::WS.new(
+						:from( $p.from + $0.from ),
+						:to( $p.from + $0.to ),
+						:content( $0.Str )
+					)
+				)
+			}
 			@child.append(
 				Perl6::Bareword.new(
-					:from( $p.from + $from ),
-					:to( $p.from + $from + 5 ),
+					:from( $p.from + $1.from ),
+					:to( $p.from + $1.from + 5 ),
 					:content( WHERE )
 				)
 			);
+			if $2.Str {
+				@child.append(
+					Perl6::WS.new(
+						:from( $p.from + $2.from ),
+						:to( $p.from + $2.to ),
+						:content( $2.Str )
+					)
+				)
+			}
 			@child.append(
 				self._post_constraint(
 					$p.hash.<post_constraint>
