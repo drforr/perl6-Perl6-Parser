@@ -3602,10 +3602,25 @@ return True;
 		}
 		elsif self.assert-hash-keys( $p,
 				[< deflongname trait blockoid >] ) {
-			@child =
-				self._deflongname( $p.hash.<deflongname> ),
-				self._trait( $p.hash.<trait> ),
+say $p.dump;
+key-bounds $p.hash.<deflongname>;
+key-bounds $p.hash.<trait>.list.[0];
+key-bounds $p.hash.<blockoid>;
+key-bounds $p;
+			@child = self._deflongname( $p.hash.<deflongname> );
+			@child.append(
+				Perl6::WS.between-matches(
+					$p,
+					$p.hash.<deflongname>,
+					$p.hash.<trait>.list.[0],
+				)
+			);
+			@child.append(
+				self._trait( $p.hash.<trait> )
+			);
+			@child.append(
 				self._blockoid( $p.hash.<blockoid> )
+			)
 		}
 		elsif self.assert-hash-keys( $p,
 				[< blockoid multisig >], [< trait >] ) {

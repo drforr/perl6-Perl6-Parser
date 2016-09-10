@@ -73,7 +73,6 @@ subtest {
 	subtest {
 		plan 2;
 
-#`(
 		my $source = Q:to[_END_];
 sub foo returns Int {}
 _END_
@@ -81,7 +80,6 @@ _END_
 		my $tree = $pt.build-tree( $parsed );
 		ok $pt.validate( $parsed ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
-)
 	}, Q{sub foo returns Int {}};
 }, Q{subroutine};
 
