@@ -510,7 +510,7 @@ _END_
 			my $parsed = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[1].child),
 				Q{found operator};
 			is $pt.format( $tree ), $source, Q{formatted};
 )
@@ -526,27 +526,45 @@ _END_
 			my $parsed = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[1].child),
 				Q{found operator};
 			is $pt.format( $tree ), $source, Q{formatted};
 )
 		}, Q{ws};
 	}, Q{.:};
 
-	subtest { # XXX Left off here with the whitespace additions.
-		plan 0;
+	subtest {
+		plan 2;
+
+		subtest {
+			plan 0;
 
 #`(
-		my $source = Q:to[_END_];
+			my $source = Q{my $a; $a.Foo::Bar};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[1].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
+)
+		}, Q{no ws};
+
+		subtest {
+			plan 0;
+
+#`(
+			my $source = Q:to[_END_];
 my $a; $a.Foo::Bar
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
-			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[1].child),
+				Q{found operator};
+			is $pt.format( $tree ), $source, Q{formatted};
 )
+		}, Q{ws};
 	}, Q{.::};
 }, Q{Method Postfix Precedence};
 
@@ -772,9 +790,8 @@ _END_
 	}, Q{!};
 
 	subtest {
-		plan 0;
+		plan 3;
 
-#`(
 		my $source = Q:to[_END_];
 + 2
 _END_
@@ -784,13 +801,11 @@ _END_
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
 		is $pt.format( $tree ), $source, Q{formatted};
-)
 	}, Q{+};
 
 	subtest {
-		plan 0;
+		plan 3;
 
-#`(
 		my $source = Q:to[_END_];
 - 2
 _END_
@@ -800,13 +815,11 @@ _END_
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
 		is $pt.format( $tree ), $source, Q{formatted};
-)
 	}, Q{-};
 
 	subtest {
-		plan 0;
+		plan 3;
 
-#`(
 		my $source = Q:to[_END_];
 ~ 2
 _END_
@@ -816,13 +829,11 @@ _END_
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
 		is $pt.format( $tree ), $source, Q{formatted};
-)
 	}, Q{~};
 
 	subtest {
-		plan 0;
+		plan 3;
 
-#`(
 		my $source = Q:to[_END_];
 | 2
 _END_
@@ -832,13 +843,11 @@ _END_
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
 		is $pt.format( $tree ), $source, Q{formatted};
-)
 	}, Q{|};
 
 	subtest {
-		plan 0;
+		plan 3;
 
-#`(
 		my $source = Q:to[_END_];
 +^ 2
 _END_
@@ -848,13 +857,11 @@ _END_
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
 		is $pt.format( $tree ), $source, Q{formatted};
-)
 	}, Q{+^};
 
 	subtest {
-		plan 0;
+		plan 3;
 
-#`(
 		my $source = Q:to[_END_];
 ?^ 2
 _END_
@@ -864,13 +871,11 @@ _END_
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
 		is $pt.format( $tree ), $source, Q{formatted};
-)
 	}, Q{?^};
 
 	subtest {
-		plan 0;
+		plan 3;
 
-#`(
 		my $source = Q:to[_END_];
 ^ 2
 _END_
@@ -880,7 +885,6 @@ _END_
 		ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
 			Q{found operator};
 		is $pt.format( $tree ), $source, Q{formatted};
-)
 	}, Q{^};
 }, Q{Symbolic Unary Precedence};
 
@@ -1594,7 +1598,7 @@ subtest {
 			my $parsed = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[0].child),
+			ok (grep { $_ ~~ Perl6::Operator }, $tree.child.[1].child),
 				Q{found operator};
 			is $pt.format( $tree ), $source, Q{formatted};
 		}, Q{no ws};
@@ -2978,7 +2982,7 @@ _END_
 	subtest {
 		plan 1;
 
-#`( XXX 1fff^2 illegal
+#`( XXX illegal
 		subtest {
 			plan 3;
 

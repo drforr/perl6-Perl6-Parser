@@ -1662,8 +1662,10 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 		my Perl6::Element @child;
 		if self.assert-hash-keys( $p, [< sym dottyop O >] ) {
 			@child =
-				Perl6::Operator::Prefix.new( $p.hash.<sym> ),
-				self._dottyop( $p.hash.<dottyop> )
+				Perl6::Operator::Prefix.from-match(
+					$p.hash.<sym>
+				),
+				self._dottyop( $p.hash.<dottyop> ).flat
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -1832,7 +1834,7 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 				[< dotty OPER >],
 				[< postfix_prefix_meta_operator >] ) {
 			# XXX Look into this at some point.
-			if substr-match( $p.orig, $p.from, HYPER.chars ) eq HYPER {
+			if substr-match( $p, $p.from, HYPER.chars ) eq HYPER {
 				@child =
 					self.__Term( $p.list.[0] ),
 					# XXX note that '>>' is a substring
