@@ -64,7 +64,6 @@ subtest {
 	subtest {
 		plan 2;
 
-#`(
 		my $source = Q:to[_END_];
 #`( comment on single line )
 _END_
@@ -72,13 +71,11 @@ _END_
 		my $tree = $pt.build-tree( $parsed );
 		ok $pt.validate( $parsed ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
-)
 	}, Q{single EOL comment};
 
 	subtest {
 		plan 2;
 
-#`(
 		my $source = Q:to[_END_];
 #`( comment
 spanning
@@ -89,7 +86,6 @@ _END_
 		my $tree = $pt.build-tree( $parsed );
 		ok $pt.validate( $parsed ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
-)
 	}, Q{Two EOL comments in a row};
 }, Q{spanning comment};
 

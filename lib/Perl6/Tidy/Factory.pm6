@@ -4198,10 +4198,20 @@ return True;
 		my $leftover-ws-from = 0;
 		my $beginning-ws;
 		my $beginning-comment;
+
+		# XXX Must fix this at some point.
+		my regex comment-eol { \s* '#' .+ $$ };
+		my regex comment-balanced { \s* '#`(' .+ ')' };
+		my regex comment {
+			<comment-eol> |
+			<comment-balanced>
+		}
+
 		if $p.Str ~~ m{ ^ ( \s+ ) } {
 			$beginning-ws = $0.Str
 		}
-		elsif $p.Str ~~ m{ ^ ( [ \s* '#' .+ $$ ]+ ) } {
+#		elsif $p.Str ~~ m{ ^ ( <comment-eol>+ ) } {
+		elsif $p.Str ~~ m{ ^ ( <comment>+ ) } {
 			$beginning-comment = $0.Str
 		}
 		for $p.hash.<statement>.list {
