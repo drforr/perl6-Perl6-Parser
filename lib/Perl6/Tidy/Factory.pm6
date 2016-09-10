@@ -1202,6 +1202,13 @@ class Perl6::Tidy::Factory {
 self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 				)
 			}
+			elsif $p.hash.<semilist>.Str ~~ m{ ^ ( \s+ ) $ } {
+				@_child.append(
+					Perl6::WS.from-match(
+						$p.hash.<semilist>
+					)
+				)
+			}
 			@child =
 				Perl6::Operator::PostCircumfix.make-postcircumfix( $p, @_child )
 		}
