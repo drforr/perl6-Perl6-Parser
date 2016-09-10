@@ -1905,19 +1905,25 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 		# XXX $p.list.[0] is actually the start of the expression.
 		elsif self.assert-hash-keys( $p, [< infix OPER >] ) {
 			if $p.list.elems == 3 {
-				@child =
-					self.__Term( $p.list.[0] ),
+				@child = self.__Term( $p.list.[0] );
+				@child.append(
 					Perl6::Operator::Infix.new(
 						$p, QUES-QUES
-					),
-					self.__Term( $p.list.[1] ),
+					)
+				);
+				@child.append(
+					self.__Term( $p.list.[1] )
+				);
+				@child.append(
 					Perl6::Operator::Infix.new(
 						$p, BANG-BANG
-					),
+					)
+				);
+				@child.append(
 					self.__Term( $p.list.[2] )
+				)
 			}
 			else {
-die "Woops, need to catch this at a higher level.";
 				@child = self.__Term( $p.list.[0] );
 				@child.append(
 					self._infix( $p.hash.<infix> )
