@@ -1836,9 +1836,17 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 		elsif self.assert-hash-keys( $p,
 				[< prefix OPER >],
 				[< prefix_postfix_meta_operator >] ) {
-			@child =
-				self._prefix( $p.hash.<prefix> ),
+			@child = self._prefix( $p.hash.<prefix> );
+			@child.append(
+				Perl6::WS.between-matches(
+					$p,
+					$p.hash.<prefix>,
+					$p.list.[0]
+				)
+			);
+			@child.append(
 				self.__Term( $p.list.[0] )
+			)
 		}
 		elsif self.assert-hash-keys( $p,
 				[< postcircumfix OPER >],
@@ -1856,8 +1864,10 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 				[< postfix OPER >],
 				[< postfix_prefix_meta_operator >] ) {
 			@child =
-				self.__Term( $p.list.[0] ),
+				self.__Term( $p.list.[0] );
+			@child.append(
 				self._postfix( $p.hash.<postfix> )
+			)
 		}
 		elsif self.assert-hash-keys( $p,
 				[< infix_prefix_meta_operator OPER >] ) {
@@ -3181,22 +3191,32 @@ return True;
 	# ⁿ
 	#
 	method _postfix( Mu $p ) {
+		my Perl6::Element @child;
 		given $p {
-			when self.assert-hash-keys( $p, [< sym O >] ) {
-				Perl6::Operator::Infix.from-match(
-					$p.hash.<sym>
+			when self.assert-hash-keys( $_, [< sym O >] ) {
+				@child =
+					Perl6::Operator::Postfix.from-match(
+						$_.hash.<sym>
+					);
+				@child.append(
+					Perl6::WS.whitespace-terminator(
+						$_,
+						$_.hash.<sym>
+					)
 				)
 			}
-			when self.assert-hash-keys( $p, [< dig O >] ) {
-				Perl6::Operator::Infix.from-match(
-					$p.hash.<dig>
-				)
+			when self.assert-hash-keys( $_, [< dig O >] ) {
+				@child =
+					Perl6::Operator::Postfix.from-match(
+						$_.hash.<dig>
+					)
 			}
 			default {
-				say $p.hash.keys.gist;
+				say $_.hash.keys.gist;
 				warn "Unhandled case"
 			}
 		}
+		@child
 	}
 
 	method _postop( Mu $p ) {
@@ -3216,15 +3236,27 @@ return True;
 	}
 
 	method _prefix( Mu $p ) {
+		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash-keys( $_, [< sym O >] ) {
-				Perl6::Operator::Prefix.new( $_.hash.<sym> )
+				@child =
+					Perl6::Operator::Prefix.from-match(
+						$_.hash.<sym>
+					);
+				if $_.Str ~~ m{ ( \s+ ) $ } {
+					@child.append(
+						Perl6::WS.whitespace-trailer(
+							$_
+						)
+					)
+				}
 			}
 			default {
 				say $_.hash.keys.gist;
 				warn "Unhandled case"
 			}
 		}
+		@child.flat
 	}
 
 	method _quant( Mu $p ) {
