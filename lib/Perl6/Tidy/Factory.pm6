@@ -3588,6 +3588,25 @@ return True;
 			@child.append(
 				self._deflongname( $p.hash.<deflongname> )
 			);
+			# XXX Why...
+			if @_child.elems == 0 {
+				my Str $strip-sides =
+					substr-match(
+						$p,
+						$p.hash.<deflongname>.to,
+						$p.hash.<blockoid>.from -
+						$p.hash.<deflongname>.to
+					);
+				if $strip-sides ~~ m{ '(' ( \s+ ) ')' } {
+					@_child.append(
+						Perl6::WS.new(
+							:from( $p.hash.<deflongname>.to + $0.from ),
+							:to( $p.hash.<deflongname>.to + $0.from + $0.chars ),
+							:content( $0.Str )
+						)
+					)
+				}
+			}
 			@child.append(
 				Perl6::Operator::Circumfix.new(
 					:from( $p.hash.<deflongname>.to ),

@@ -16,7 +16,7 @@ subtest {
 		plan 6;
 
 		subtest {
-			plan 2;
+			plan 3;
 
 			subtest {
 				plan 2;
@@ -29,17 +29,23 @@ subtest {
 			}, Q{no ws};
 
 			subtest {
-				plan 0;
+				plan 2;
 
-#`(
-				my $source = Q:to[_END_];
-sub foo( ) { }
-_END_
+				my $source = Q{sub foo() {}};
 				my $parsed = $pt.parse-source( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				is $pt.format( $tree ), $source, Q{formatted};
-)
+			}, Q{ws};
+
+			subtest {
+				plan 2;
+
+				my $source = Q{sub foo( ) { }};
+				my $parsed = $pt.parse-source( $source );
+				my $tree = $pt.build-tree( $parsed );
+				ok $pt.validate( $parsed ), Q{valid};
+				is $pt.format( $tree ), $source, Q{formatted};
 			}, Q{ws};
 		}, Q{empty};
 
