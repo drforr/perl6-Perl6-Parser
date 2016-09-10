@@ -3572,6 +3572,10 @@ return True;
 		if self.assert-hash-keys( $p,
 				[< deflongname multisig blockoid >],
 				[< trait >] ) {
+			my Perl6::Element @_child;
+			@_child.append(
+				self._multisig( $p.hash.<multisig> )
+			);
 			my Str $x = substr-match(
 				$p,
 				$p.from,
@@ -3581,55 +3585,30 @@ return True;
 			if $x {
 				$x ~~ m{ ')' (.*) $ }; $offset = $0.chars;
 			}
-			if $p.from < $p.hash.<deflongname>.from {
-				@child.append(
-#					Perl6::WS.new(
-#						$p.from,
-#						substr-match( $p, $p.from,
-#							$p.hash.<deflongname>.from - $p.from
-#						)
-#					)
-				)
-			}
 			@child.append(
 				self._deflongname( $p.hash.<deflongname> )
-			);
-			my Perl6::Element @multisig;
-			if $p.hash.<deflongname>.to + 1 < $p.hash.<multisig>.from {
-				@multisig.append(
-#					Perl6::WS.new(
-#						$p.hash.<deflongname>.to + 1,
-#						substr-match( $p,
-#							$p.hash.<deflongname>.to + 1,
-#							$p.hash.<multisig>.from - $p.hash.<deflongname>.to - 1
-#						)
-#					)
-				)
-			}
-			@multisig.append(
-				self._multisig( $p.hash.<multisig> )
 			);
 			@child.append(
 				Perl6::Operator::Circumfix.new(
 					:from( $p.hash.<deflongname>.to ),
 					:to(
-						$p.hash.<blockoid>.from - $offset
+						$p.hash.<blockoid>.from -
+						$offset
 					),
 					:delimiter( '(', ')' ),
-					:child( @multisig )
+					:child( @_child )
 				),
 			);
-			if $p.hash.<blockoid>.from - $p.hash.<multisig>.to - 1 > 0 {
-				my Int $_offset = @child[*-1].to;
+			my Str $collect-ws = substr(
+				$p.Str, 0, $p.hash.<blockoid>.from - $p.from
+			);
+			if $collect-ws ~~ m{ ( \s+ ) $ } {
 				@child.append(
-#					Perl6::WS.new(
-#						@child[*-1].to,
-#						substr-match(
-#							$p,
-#							$p.hash.<multisig>.to + 1,
-#							$p.hash.<blockoid>.from - $p.hash.<multisig>.to - 1
-#)
-#					)
+					Perl6::WS.new(
+						:from( @child[*-1].to ),
+						:to( @child[*-1].to + $0.chars ),
+						:content( $0.Str )
+					)
 				)
 			}
 			@child.append(
@@ -3639,9 +3618,14 @@ return True;
 		elsif self.assert-hash-keys( $p,
 				[< deflongname statementlist >],
 				[< trait >] ) {
-			@child = self._deflongname( $p.hash.<deflongname> );
+			@child =
+				self._deflongname(
+					$p.hash.<deflongname>
+				);
 			@child.append(
-				self._statementlist( $p.hash.<statementlist> )
+				self._statementlist(
+					$p.hash.<statementlist>
+				)
 			);
 			@child.append(
 				Perl6::WS.semicolon-terminator( $p )
@@ -3649,7 +3633,10 @@ return True;
 		}
 		elsif self.assert-hash-keys( $p,
 				[< deflongname trait blockoid >] ) {
-			@child = self._deflongname( $p.hash.<deflongname> );
+			@child =
+				self._deflongname(
+					$p.hash.<deflongname>
+				);
 			@child.append(
 				Perl6::WS.between-matches(
 					$p,
@@ -3685,8 +3672,12 @@ return True;
 			)
 		}
 		elsif self.assert-hash-keys( $p,
-				[< deflongname blockoid >], [< trait >] ) {
-			@child = self._deflongname( $p.hash.<deflongname> );
+				[< deflongname blockoid >],
+				[< trait >] ) {
+			@child =
+				self._deflongname(
+					$p.hash.<deflongname>
+				);
 			@child.append(
 				Perl6::WS.between-matches(
 					$p,
