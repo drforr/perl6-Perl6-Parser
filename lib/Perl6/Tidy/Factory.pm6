@@ -2477,13 +2477,20 @@ return True;
 	}
 
 	method _multisig( Mu $p ) {
+		my Perl6::Element @child;
 		if self.assert-hash-keys( $p, [< signature >] ) {
-			self._signature( $p.hash.<signature> )
+			@child = self._signature( $p.hash.<signature> );
+			@child.append(
+				Perl6::WS.whitespace-trailer(
+					$p.hash.<signature>
+				)
+			)
 		}
 		else {
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
+		@child
 	}
 
 	method _named_param( Mu $p ) {
@@ -3589,23 +3596,39 @@ return True;
 				self._deflongname( $p.hash.<deflongname> )
 			);
 			# XXX Why...
-			if @_child.elems == 0 {
-				my Str $strip-sides =
-					substr-match(
-						$p,
-						$p.hash.<deflongname>.to,
-						$p.hash.<blockoid>.from -
-						$p.hash.<deflongname>.to
-					);
-				if $strip-sides ~~ m{ '(' ( \s+ ) ')' } {
-					@_child.append(
-						Perl6::WS.new(
-							:from( $p.hash.<deflongname>.to + $0.from ),
-							:to( $p.hash.<deflongname>.to + $0.from + $0.chars ),
-							:content( $0.Str )
-						)
+			my Str $strip-sides =
+				substr-match(
+					$p,
+					$p.hash.<deflongname>.to,
+					$p.hash.<blockoid>.from -
+					$p.hash.<deflongname>.to
+				);
+			if $strip-sides ~~ m{ '(' ( \s+ ) ')' } {
+				@_child.append(
+					Perl6::WS.new(
+						:from( $p.hash.<deflongname>.to + $0.from ),
+						:to( $p.hash.<deflongname>.to + $0.from + $0.chars ),
+						:content( $0.Str )
 					)
-				}
+				)
+			}
+			elsif $strip-sides ~~ m{ '(' ( \s+ ) } {
+				@_child.splice( 0, 0,
+					Perl6::WS.new(
+						:from( $p.hash.<deflongname>.to + $0.from ),
+						:to( $p.hash.<deflongname>.to + $0.from + $0.chars ),
+						:content( $0.Str )
+					)
+				)
+			}
+			elsif $strip-sides ~~ m{ ( \s+ ) ')' } {
+				@_child.append(
+					Perl6::WS.new(
+						:from( $p.hash.<deflongname>.to + $0.from ),
+						:to( $p.hash.<deflongname>.to + $0.from + $0.chars ),
+						:content( $0.Str )
+					)
+				)
 			}
 			@child.append(
 				Perl6::Operator::Circumfix.new(

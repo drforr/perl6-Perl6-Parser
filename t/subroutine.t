@@ -63,8 +63,8 @@ subtest {
 			}, Q{no ws};
 
 			subtest {
-				plan 0;
-#`(
+				plan 2;
+
 				my $source = Q:to[_END_];
 sub foo( 0 ) { }
 _END_
@@ -72,7 +72,6 @@ _END_
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				is $pt.format( $tree ), $source, Q{formatted};
-)
 			}, Q{ws};
 		}, Q{constant};
 
@@ -90,8 +89,7 @@ _END_
 			}, Q{no ws};
 
 			subtest {
-				plan 0;
-#`(
+				plan 2;
 				my $source = Q:to[_END_];
 sub foo( $a ) { }
 _END_
@@ -99,7 +97,6 @@ _END_
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				is $pt.format( $tree ), $source, Q{formatted};
-)
 			}, Q{ws};
 		}, Q{untyped};
 
