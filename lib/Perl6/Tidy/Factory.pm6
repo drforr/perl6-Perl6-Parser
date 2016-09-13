@@ -221,6 +221,85 @@ class Perl6::Semicolon does Token {
 	also is Perl6::Element;
 }
 
+class Perl6::Operator {
+	also is Perl6::Element;
+}
+class Perl6::Operator::Prefix does Token {
+	also is Perl6::Operator;
+
+	multi method from-match( Mu $p ) {
+		self.bless(
+			:from( $p.from ),
+			:to( $p.to ),
+			:content( $p.Str )
+		)
+	}
+}
+class Perl6::Operator::Infix does Token {
+	also is Perl6::Operator;
+	method from-match( Mu $p ) {
+		self.bless(
+			:from( $p.from ),
+			:to( $p.to ),
+			:content( $p.Str )
+		)
+	}
+	multi method new( Int $from, Str $str ) {
+		self.bless(
+			:from( $from ),
+			:to( $from + $str.chars ),
+			:content( $str )
+		)
+	}
+	multi method new( Mu $p, Str $token ) {
+		$p.Str ~~ m{ ($token) };
+		my Int $offset = $0.from;
+		self.bless(
+			:from( $p.from + $offset ),
+			:to( $p.from + $offset + $token.chars ),
+			:content( $token )
+		)
+	}
+}
+class Perl6::Operator::Postfix does Token {
+	also is Perl6::Operator;
+	method from-match( Mu $p ) {
+		self.bless(
+			:from( $p.from ),
+			:to( $p.to ),
+			:content( $p.Str )
+		)
+	}
+}
+class Perl6::Operator::Circumfix does Branching_Delimited does Bounded {
+	also is Perl6::Operator;
+	method from-match( Mu $p, @child ) {
+		$p.Str ~~ m{ ^ (.) }; my Str $front = ~$0;
+		$p.Str ~~ m{ (.) $ }; my Str $back = ~$0;
+		self.bless(
+			:from( $p.from ),
+			:to( $p.to ),
+			:delimiter( $front, $back ),
+			:child( @child )
+		)
+	}
+}
+class Perl6::Operator::PostCircumfix does Branching_Delimited does Bounded {
+	also is Perl6::Operator;
+
+	method make-postcircumfix( Mu $p, @_child ) {
+		$p.Str ~~ m{ ^ (.) }; my Str $front = ~$0;
+		$p.Str ~~ m{ (.) $ }; my Str $back = ~$0;
+		self.bless(
+			# XXX What is it "post"? Hmm.
+			:from( $p.from ),
+			:to( $p.to ),
+			:delimiter( $front, $back ),
+			:child( @_child )
+		)
+	}
+}
+
 class Perl6::WS does Token {
 	also is Perl6::Element;
 
@@ -338,20 +417,20 @@ class Perl6::WS does Token {
 		my ( $lhs, $rhs ) = split( COMMA, $split-me );
 		my Perl6::Element @child;
 		if $lhs and $lhs ne '' {
-#			@child.append(
-#				Perl6::WS.new( $start, $lhs )
-#			);
-#			$start += $lhs.chars;
+			@child.append(
+				Perl6::WS.new( $start, $lhs )
+			);
+			$start += $lhs.chars;
 		}
 		@child.append(
 			Perl6::Operator::Infix.new( $start, COMMA )
 		);
 		$start += COMMA.chars;
 		if $rhs and $rhs ne '' {
-#			@child.append(
-#				Perl6::WS.new( $start, $rhs )
-#			);
-#			$start += $rhs.chars;
+			@child.append(
+				Perl6::WS.new( $start, $rhs )
+			);
+			$start += $rhs.chars;
 		}
 		@child.flat
 	}
@@ -521,84 +600,6 @@ class Perl6::Bareword does Token {
 			:from( $p.from ),
 			:to( $p.to ),
 			:content( $p.Str )
-		)
-	}
-}
-class Perl6::Operator {
-	also is Perl6::Element;
-}
-class Perl6::Operator::Prefix does Token {
-	also is Perl6::Operator;
-
-	multi method from-match( Mu $p ) {
-		self.bless(
-			:from( $p.from ),
-			:to( $p.to ),
-			:content( $p.Str )
-		)
-	}
-}
-class Perl6::Operator::Infix does Token {
-	also is Perl6::Operator;
-	method from-match( Mu $p ) {
-		self.bless(
-			:from( $p.from ),
-			:to( $p.to ),
-			:content( $p.Str )
-		)
-	}
-	multi method new( Int $from, Str $str ) {
-		self.bless(
-			:from( $from ),
-			:to( $from + $str.chars ),
-			:content( $str )
-		)
-	}
-	multi method new( Mu $p, Str $token ) {
-		$p.Str ~~ m{ ($token) };
-		my Int $offset = $0.from;
-		self.bless(
-			:from( $p.from + $offset ),
-			:to( $p.from + $offset + $token.chars ),
-			:content( $token )
-		)
-	}
-}
-class Perl6::Operator::Postfix does Token {
-	also is Perl6::Operator;
-	method from-match( Mu $p ) {
-		self.bless(
-			:from( $p.from ),
-			:to( $p.to ),
-			:content( $p.Str )
-		)
-	}
-}
-class Perl6::Operator::Circumfix does Branching_Delimited does Bounded {
-	also is Perl6::Operator;
-	method from-match( Mu $p, @child ) {
-		$p.Str ~~ m{ ^ (.) }; my Str $front = ~$0;
-		$p.Str ~~ m{ (.) $ }; my Str $back = ~$0;
-		self.bless(
-			:from( $p.from ),
-			:to( $p.to ),
-			:delimiter( $front, $back ),
-			:child( @child )
-		)
-	}
-}
-class Perl6::Operator::PostCircumfix does Branching_Delimited does Bounded {
-	also is Perl6::Operator;
-
-	method make-postcircumfix( Mu $p, @_child ) {
-		$p.Str ~~ m{ ^ (.) }; my Str $front = ~$0;
-		$p.Str ~~ m{ (.) $ }; my Str $back = ~$0;
-		self.bless(
-			# XXX What is it "post"? Hmm.
-			:from( $p.from ),
-			:to( $p.to ),
-			:delimiter( $front, $back ),
-			:child( @_child )
 		)
 	}
 }
@@ -3954,23 +3955,25 @@ return True;
 				)
 			);
 			
+			# XXX revisit later
 			if $p.hash.<type_constraint>.list.[*-1].Str ~~ m{ (\s+) $ } {
 				@child.append(
-#					Perl6::WS.new(
-#						$p.hash.<type_constraint>.list.[*-1].to - $0.chars,
-#						$0.Str
-#					)
+					Perl6::WS.new(
+						$p.hash.<type_constraint>.list.[*-1].to - $0.chars,
+						$0.Str
+					)
 				)
 			}
 			@child.append(
 				self._param_var( $p.hash.<param_var> )
 			);
+			# XXX revisit this later
 			if $p.Str ~~ m{ (\s+) ('where') } {
 				@child.append(
-#					Perl6::WS.new(
-#						$p.hash.<param_var>.to,
-#						~$0
-#					)
+					Perl6::WS.new(
+						$p.hash.<param_var>.to,
+						~$0
+					)
 				)
 			}
 			@child.append(
@@ -3981,9 +3984,9 @@ return True;
 				)
 			);
 			if $p.Str ~~ m{ ('where') (\s+) } {
-#				@child.append(
-#					Perl6::WS.new( $p.from + $0.to, ~$1 )
-#				)
+				@child.append(
+					Perl6::WS.new( $p.from + $0.to, ~$1 )
+				)
 			}
 			@child.append(
 				self._post_constraint(
@@ -4019,19 +4022,19 @@ return True;
 			);
 			if $p.Str ~~ m{ (\s+) ('=') } {
 				@child.append(
-#					Perl6::WS.new(
-#						$p.hash.<param_var>.to,
-#						~$0
-#					)
+					Perl6::WS.new(
+						$p.hash.<param_var>.to,
+						~$0
+					)
 				)
 			}
 			@child.append(
 				Perl6::Operator::Infix.new( $p, EQUAL )
 			);
 			if $p.Str ~~ m{ ('=') (\s+) } {
-#				@child.append(
-#					Perl6::WS.new( $p.from + $0.to, ~$1 )
-#				)
+				@child.append(
+					Perl6::WS.new( $p.from + $0.to, ~$1 )
+				)
 			}
 			@child.append(
 				self._default_value(
