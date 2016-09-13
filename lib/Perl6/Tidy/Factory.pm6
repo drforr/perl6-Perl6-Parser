@@ -609,6 +609,7 @@ class Perl6::PackageName does Token {
 		self.bless(
 			:from( $p.from ),
 			:to( $p.to ),
+			:content( $p.Str )
 		)
 	}
 
@@ -2413,16 +2414,15 @@ return True;
 
 	method _morename( Mu $p ) {
 		my Perl6::Element @child;
-		warn "Untested method";
+		# XXX This probably needs further work.
 		if $p.list {
 			for $p.list {
-				if self.assert-hash-keys( $_,
-					[< identifier >] ) {
-					die "Not implemented yet"
-				}
-				else {
-					say $_.hash.keys.gist;
-					warn "Unhandled case"
+				if self.assert-hash-keys( $p, [< identifier >] ) {
+					@child.append(
+						Perl6::PackageName.from-match(
+							$_.hash.<identifier>
+						)
+					)
 				}
 			}
 		}
@@ -2518,6 +2518,7 @@ return True;
 		}
 		elsif self.assert-hash-keys( $p, [< morename >] ) {
 			Perl6::PackageName.from-match( $p )
+			#self._morename( $p.hash.<morename> )
 		}
 		elsif self.assert-Str( $p ) {
 			Perl6::Bareword.from-match( $p )
@@ -4000,9 +4001,9 @@ return True;
 				)
 			);
 			if $p.Str ~~ m{ (\s+) } {
-#				@child.append(
-#					Perl6::WS.new( $p.from + $0.from, ~$0 )
-#				)
+				@child.append(
+					Perl6::WS.new( $p.from + $0.from, ~$0 )
+				)
 			}
 			@child.append(
 				self._param_var( $p.hash.<param_var> )
@@ -4126,18 +4127,6 @@ return True;
 				@child.append(
 					self.__Parameter( $_ )
 				);
-			}
-			if @child[*-1].to < $p.to {
-				@child.push(
-#					Perl6::WS.new(
-#						@child[*-1].to,
-#						substr(
-#							$p.Str,
-#							@child[*-1].to - $offset,
-#							$p.to - @child[*-1].to + 1
-#						)
-#					)
-				)
 			}
 		}
 		elsif self.assert-hash-keys( $p,
