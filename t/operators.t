@@ -148,8 +148,8 @@ _END_
 		}, Q{no ws};
 
 		subtest {
-			plan 0;
-#`(
+			plan 3;
+
 			my $source = Q:to[_END_];
 [ 1 ]
 _END_
@@ -160,7 +160,6 @@ _END_
 					$tree.child.[0].child),
 				Q{found operator};
 			is $pt.format( $tree ), $source, Q{formatted};
-)
 		}, Q{ws};
 	}, Q{[]}
 }, Q{Term Precedence};
@@ -205,8 +204,8 @@ _END_
 		plan 2;
 
 		subtest {
-			plan 0;
-#`(
+			plan 3;
+
 			# Whitespace sensitive between 'a' and '{' '}'
 			my $source = Q{my%a;%a{"foo"}};
 			my $parsed = $pt.parse-source( $source );
@@ -216,12 +215,10 @@ _END_
 					$tree.child.[1].child),
 				Q{found operator};
 			is $pt.format( $tree ), $source, Q{formatted};
-)
 		}, Q{no ws};
 
 		subtest {
 			plan 0;
-
 #`(
 			# Whitespace sensitive between 'a' and '{' '}'
 			my $source = Q:to[_END_];
@@ -242,9 +239,8 @@ _END_
 		plan 2;
 
 		subtest {
-			plan 0;
+			plan 3;
 
-#`(
 			# Whitespace sensitive between 'a' and '<' '>'
 			my $source = Q{my%a;%a<foo>};
 			my $parsed = $pt.parse-source( $source );
@@ -254,7 +250,6 @@ _END_
 					$tree.child.[1].child),
 				Q{found operator};
 			is $pt.format( $tree ), $source, Q{formatted};
-)
 		}, Q{no ws};
 
 		subtest {

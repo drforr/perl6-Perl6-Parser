@@ -3284,14 +3284,15 @@ return True;
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< nibble O >] ) {
-			my Str $x = $p.hash.<nibble>.Str;
-			$x ~~ s{ ^ (\s*) } = ''; my Int $leading = $0.chars;
-			$x ~~ s{ (\s+) $ } = ''; my Int $trailing = $0.chars;
+			$p.hash.<nibble>.Str ~~
+				m{ ^ ( \s* ) ( .+ ) ( \s* ) $ };
+			my Int $leading = $0 ?? $0.Str.chars !! 0;
+			my Int $trailing = $2 ?? $2.Str.chars !! 0;
 			# XXX whitespace around text could be done differently?
 			Perl6::Bareword.new(
 				:from( $p.hash.<nibble>.from + $leading ),
 				:to( $p.hash.<nibble>.to - $trailing ),
-				:content( $x )
+				:content( $1.Str )
 			)
 		}
 		else {
