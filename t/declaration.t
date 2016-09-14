@@ -25,25 +25,23 @@ subtest {
 		}, Q{regular};
 
 		subtest {
-			plan 0;
-#`(
+			plan 2;
+
 			my $p = $pt.parse-source( Q{my Int:U $a} );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
 			is $pt.format( $tree ), Q{my Int:U $a}, Q{formatted};
-)
 		}, Q{undefined};
 
 		subtest {
-			plan 0;
-#`(
+			plan 2;
+
 			my $p = $pt.parse-source( Q{my Int:D $a = 0} );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
 			is $pt.format( $tree ),
 				Q{my Int:D $a = 0},
 				Q{formatted};
-)
 		}, Q{defined};
 	}, Q{typed};
 

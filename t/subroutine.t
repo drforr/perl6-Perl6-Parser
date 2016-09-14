@@ -16,7 +16,7 @@ subtest {
 		plan 6;
 
 		subtest {
-			plan 3;
+			plan 2;
 
 			subtest {
 				plan 2;
@@ -31,22 +31,12 @@ subtest {
 			subtest {
 				plan 2;
 
-				my $source = Q{sub foo() {}};
-				my $p = $pt.parse-source( $source );
-				my $tree = $pt.build-tree( $p );
-				ok $pt.validate( $p ), Q{valid};
-				is $pt.format( $tree ), $source, Q{formatted};
-			}, Q{ws};
-
-			subtest {
-				plan 2;
-
 				my $source = Q{sub foo( ) { }};
 				my $p = $pt.parse-source( $source );
 				my $tree = $pt.build-tree( $p );
 				ok $pt.validate( $p ), Q{valid};
 				is $pt.format( $tree ), $source, Q{formatted};
-			}, Q{ws};
+			}, Q{intra-term ws};
 		}, Q{empty};
 
 		subtest {
@@ -101,7 +91,7 @@ _END_
 		}, Q{untyped};
 
 		subtest {
-			plan 4;
+			plan 5;
 
 			subtest {
 				plan 2;
@@ -117,8 +107,8 @@ _END_
 				}, Q{no ws};
 
 				subtest {
-					plan 2;
-
+					plan 0;
+#`(
 					my $source = Q:to[_END_];
 sub foo( Int $a ) { }
 _END_
@@ -126,8 +116,38 @@ _END_
 					my $tree = $pt.build-tree( $p );
 					ok $pt.validate( $p ), Q{valid};
 					is $pt.format( $tree ), $source, Q{formatted};
+)
 				}, Q{ws};
 			}, Q{typed};
+
+			subtest {
+				plan 2;
+
+				subtest {
+					plan 0;
+#`(
+					my $source = Q{sub foo(Int$a=32){}};
+					my $p = $pt.parse-source( $source );
+say $p.dump;
+					my $tree = $pt.build-tree( $p );
+					ok $pt.validate( $p ), Q{valid};
+					is $pt.format( $tree ), $source, Q{formatted};
+)
+				}, Q{no ws};
+
+				subtest {
+					plan 0;
+#`(
+					my $source = Q:to[_END_];
+sub foo( Int $a = 32 ) { }
+_END_
+					my $p = $pt.parse-source( $source );
+					my $tree = $pt.build-tree( $p );
+					ok $pt.validate( $p ), Q{valid};
+					is $pt.format( $tree ), $source, Q{formatted};
+)
+				}, Q{ws};
+			}, Q{typed and declared};
 
 			subtest {
 				plan 2;

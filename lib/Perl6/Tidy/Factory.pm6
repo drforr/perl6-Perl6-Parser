@@ -2162,7 +2162,6 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 			Perl6::Operator::Infix.from-match( $p.hash.<sym> )
 		}
 		elsif self.assert-hash-keys( $p, [< EXPR O >] ) {
-			# XXX Untested
 			Perl6::Operator::Infix.from-match( $p.hash.<EXPR> )
 		}
 		else {
@@ -2187,7 +2186,6 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 	#
 	method _infix_circumfix_meta_operator( Mu $p ) {
 		if self.assert-hash-keys( $p, [< sym infixish O >] ) {
-			# XXX Untested
 			Perl6::Operator::Infix.new(
 				$p.hash.<sym>.from,
 				$p.hash.<sym>.Str ~ $p.hash.<infixish>
@@ -2202,7 +2200,6 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 	#
 	method _infix_prefix_meta_operator( Mu $p ) {
 		if self.assert-hash-keys( $p, [< sym infixish O >] ) {
-			# XXX Untested
 			Perl6::Operator::Infix.new(
 				$p.hash.<sym>.from,
 				$p.hash.<sym>.Str ~ $p.hash.<infixish>
@@ -2248,9 +2245,39 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 					)
 				)
 			}
-			@child.append(
-				self._EXPR( $p.hash.<EXPR> )
-			)
+			if $p.hash.<sym>.Str eq '=' and
+				$p.hash.<EXPR>.list.elems == 2 {
+				@child.append(
+					self.__Term( $p.hash.<EXPR>.list.[0] )
+				);
+				@child.append(
+					Perl6::WS.between-matches(
+						$p,
+						$p.hash.<EXPR>.list.[0],
+						$p.hash.<EXPR>.hash.<infix>
+					)
+				);
+				@child.append(
+					self._infix(
+						$p.hash.<EXPR>.hash.<infix>
+					)
+				);
+				@child.append(
+					Perl6::WS.between-matches(
+						$p,
+						$p.hash.<EXPR>.hash.<infix>,
+						$p.hash.<EXPR>.list.[1]
+					)
+				);
+				@child.append(
+					self.__Term( $p.hash.<EXPR>.list.[1] )
+				)
+			}
+			else {
+				@child.append(
+					self._EXPR( $p.hash.<EXPR> )
+				)
+			}
 		}
 		else {
 			say $p.hash.keys.gist;

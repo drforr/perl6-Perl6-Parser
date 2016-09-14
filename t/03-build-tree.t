@@ -277,9 +277,8 @@ subtest {
 	}, Q{no ws};
 
 	subtest {
-		plan 0;
+		plan 1;
 
-#`(
 		#                                     1  
 		#                           0123456789012
 		my $p = $pt.parse-source( Q{my $a = 1 + 2} );
@@ -347,7 +346,6 @@ subtest {
 				) )
 			) ),
 		Q{tree built};
-)
 	}, Q{ws};
 }, Q{Initialization};
 
