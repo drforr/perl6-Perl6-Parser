@@ -1340,16 +1340,17 @@ class Perl6::Tidy::Factory {
 				)
 		}
 		elsif self.assert-hash-keys( $p, [< coloncircumfix >] ) {
-			@child =
 				# XXX Note that ':' is part of the expression.
-				Perl6::Operator::Prefix.new(
-					:from( $p.from ),
-					:to( $p.from + COLON.chars ),
-					:content( COLON )
-				),
+			@child = Perl6::Operator::Prefix.new(
+				:from( $p.from ),
+				:to( $p.from + COLON.chars ),
+				:content( COLON )
+			);
+			@child.append(
 				self._coloncircumfix(
 					$p.hash.<coloncircumfix>
 				)
+			)
 		}
 		elsif self.assert-hash-keys( $p, [< identifier >] ) {
 			@child =
@@ -1711,11 +1712,12 @@ class Perl6::Tidy::Factory {
 	method _dotty( Mu $p ) {
 		my Perl6::Element @child;
 		if self.assert-hash-keys( $p, [< sym dottyop O >] ) {
-			@child =
-				Perl6::Operator::Prefix.from-match(
+			@child = Perl6::Operator::Prefix.from-match(
 					$p.hash.<sym>
-				),
+				);
+			@child.append(
 				self._dottyop( $p.hash.<dottyop> ).flat
+			)
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -1885,8 +1887,8 @@ class Perl6::Tidy::Factory {
 				[< postfix_prefix_meta_operator >] ) {
 			# XXX Look into this at some point.
 			if substr-match( $p, $p.from, HYPER.chars ) eq HYPER {
-				@child =
-					self.__Term( $p.list.[0] ),
+				@child = self.__Term( $p.list.[0] );
+				@child.append(
 					# XXX note that '>>' is a substring
 					Perl6::Operator::Prefix.new(
 						:from( $p.from ),
@@ -1894,13 +1896,17 @@ class Perl6::Tidy::Factory {
 						:content( 
 							substr( $p.orig, $p.from, HYPER.chars )
 						)
-					),
+					)
+				);
+				@child.append(
 					self._dotty( $p.hash.<dotty> )
+				)
 			}
 			else {
-				@child =
-					self.__Term( $p.list.[0] ),
+				@child = self.__Term( $p.list.[0] );
+				@child.append(
 					self._dotty( $p.hash.<dotty> )
+				)
 			}
 		}
 		elsif self.assert-hash-keys( $p,
@@ -1985,9 +1991,10 @@ class Perl6::Tidy::Factory {
 			}
 		}
 		elsif self.assert-hash-keys( $p, [< identifier args >] ) {
-			@child =
-				self._identifier( $p.hash.<identifier> ),
+			@child = self._identifier( $p.hash.<identifier> );
+			@child.append(
 				self._args( $p.hash.<args> )
+			)
 		}
 		elsif self.assert-hash-keys( $p, [< sym args >] ) {
 			@child = 

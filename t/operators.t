@@ -254,7 +254,6 @@ _END_
 
 		subtest {
 			plan 0;
-
 #`(
 			# Whitespace sensitive between 'a' and '<' '>'
 			my $source = Q:to[_END_];
@@ -275,9 +274,8 @@ _END_
 		plan 2;
 
 		subtest {
-			plan 0;
+			plan 3;
 
-#`(
 			# Whitespace sensitive between 'a' and '«' '»'
 			my $source = Q{my%a;%a«foo»};
 			my $parsed = $pt.parse-source( $source );
@@ -287,12 +285,10 @@ _END_
 					$tree.child.[1].child),
 				Q{found operator};
 			is $pt.format( $tree ), $source, Q{formatted};
-)
 		}, Q{no ws};
 
 		subtest {
 			plan 0;
-
 #`(
 			# Whitespace sensitive between 'a' and '«' '»'
 			my $source = Q:to[_END_];
@@ -313,9 +309,8 @@ _END_
 		plan 3;
 
 		subtest {
-			plan 0;
+			plan 3;
 
-#`(
 			# Whitespace sensitive between 'chomp' and '(' ')'
 			my $source = Q{chomp()};
 			my $parsed = $pt.parse-source( $source );
@@ -325,12 +320,10 @@ _END_
 					$tree.child.[0].child),
 				Q{found operator};
 			is $pt.format( $tree ), $source, Q{formatted};
-)
 		}, Q{no arguments, no ws};
 
 		subtest {
 			plan 0;
-
 #`(
 			# Whitespace sensitive between 'chomp' and '(' ')'
 			my $source = Q:to[_END_];
@@ -348,7 +341,6 @@ _END_
 
 		subtest {
 			plan 0;
-
 #`(
 			# Whitespace sensitive between 'chomp' and '(' ')'
 			my $source = Q:to[_END_];
@@ -366,9 +358,8 @@ _END_
 	}, Q{func()};
 
 	subtest {
-		plan 0;
+		plan 3;
 
-#`(
 		my $source = Q:to[_END_];
 42.round
 _END_
@@ -379,13 +370,11 @@ _END_
 				$tree.child.[0].child),
 			Q{found operator};
 		is $pt.format( $tree ), $source, Q{formatted};
-)
 	}, Q{.};
 
 	subtest {
-		plan 0;
+		plan 3;
 
-#`(
 		my $source = Q:to[_END_];
 42.&round
 _END_
@@ -396,13 +385,11 @@ _END_
 				$tree.child.[0].child),
 			Q{found operator};
 		is $pt.format( $tree ), $source, Q{formatted};
-)
 	}, Q{.&};
 
 	subtest {
-		plan 0;
+		plan 3;
 
-#`(
 		my $source = Q:to[_END_];
 Int.=round
 _END_
@@ -413,13 +400,11 @@ _END_
 				$tree.child.[0].child),
 			Q{found operator};
 		is $pt.format( $tree ), $source, Q{formatted};
-)
 	}, Q{.=};
 
 	subtest {
-		plan 0;
+		plan 3;
 
-#`(
 		my $source = Q:to[_END_];
 42.^name
 _END_
@@ -430,13 +415,11 @@ _END_
 				$tree.child.[0].child),
 			Q{found operator};
 		is $pt.format( $tree ), $source, Q{formatted};
-)
 	}, Q{.^};
 
 	subtest {
-		plan 0;
+		plan 3;
 
-#`(
 		my $source = Q:to[_END_];
 42.?name
 _END_
@@ -447,13 +430,11 @@ _END_
 				$tree.child.[0].child),
 			Q{found operator};
 		is $pt.format( $tree ), $source, Q{formatted};
-)
 	}, Q{.?};
 
 	subtest {
-		plan 0;
+		plan 3;
 
-#`(
 		my $source = Q:to[_END_];
 42.+name
 _END_
@@ -464,13 +445,11 @@ _END_
 				$tree.child.[0].child),
 			Q{found operator};
 		is $pt.format( $tree ), $source, Q{formatted};
-)
 	}, Q{.+};
 
 	subtest {
-		plan 0;
+		plan 3;
 
-#`(
 		my $source = Q:to[_END_];
 42.*name
 _END_
@@ -481,13 +460,11 @@ _END_
 				$tree.child.[0].child),
 			Q{found operator};
 		is $pt.format( $tree ), $source, Q{formatted};
-)
 	}, Q{.*};
 
 	subtest {
-		plan 0;
+		plan 3;
 
-#`(
 		my $source = Q:to[_END_];
 42>>.say
 _END_
@@ -498,16 +475,14 @@ _END_
 				$tree.child.[0].child),
 			Q{found operator};
 		is $pt.format( $tree ), $source, Q{formatted};
-)
 	}, Q{>>.};
 
 	subtest {
 		plan 2;
 
 		subtest {
-			plan 0;
+			plan 3;
 
-#`(
 			my $source = Q{my$a;$a.:<++>};
 			my $parsed = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $parsed );
@@ -516,13 +491,11 @@ _END_
 					$tree.child.[1].child),
 				Q{found operator};
 			is $pt.format( $tree ), $source, Q{formatted};
-)
 		}, Q{no ws};
 
 		subtest {
-			plan 0;
+			plan 3;
 
-#`(
 			my $source = Q:to[_END_];
 my $a; $a.:< ++ >
 _END_
@@ -533,7 +506,6 @@ _END_
 					$tree.child.[1].child),
 				Q{found operator};
 			is $pt.format( $tree ), $source, Q{formatted};
-)
 		}, Q{ws};
 	}, Q{.:};
 
@@ -541,9 +513,8 @@ _END_
 		plan 2;
 
 		subtest {
-			plan 0;
+			plan 3;
 
-#`(
 			my $source = Q{my $a; $a.Foo::Bar};
 			my $parsed = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $parsed );
@@ -552,13 +523,11 @@ _END_
 					$tree.child.[1].child),
 				Q{found operator};
 			is $pt.format( $tree ), $source, Q{formatted};
-)
 		}, Q{no ws};
 
 		subtest {
-			plan 0;
+			plan 3;
 
-#`(
 			my $source = Q:to[_END_];
 my $a; $a.Foo::Bar
 _END_
@@ -569,7 +538,6 @@ _END_
 					$tree.child.[1].child),
 				Q{found operator};
 			is $pt.format( $tree ), $source, Q{formatted};
-)
 		}, Q{ws};
 	}, Q{.::};
 }, Q{Method Postfix Precedence};
@@ -2907,7 +2875,6 @@ subtest {
 
 		subtest {
 			plan 0;
-
 #`(
 			my $source = Q{1??2!!3};
 			my $parsed = $pt.parse-source( $source );
