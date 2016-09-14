@@ -1234,7 +1234,17 @@ class Perl6::Tidy::Factory {
 			# XXX <semilist> can probably be worked with
 			if $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> {
 				@_child.append(
-self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
+					Perl6::WS.whitespace-header(
+						$p.hash.<semilist>
+					)
+				);
+				@_child.append(
+					self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
+				);
+				@_child.append(
+					Perl6::WS.whitespace-trailer(
+						$p.hash.<semilist>
+					)
 				)
 			}
 			elsif $p.hash.<semilist>.Str ~~ m{ ^ ( \s+ ) $ } {
@@ -1245,7 +1255,7 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 				)
 			}
 			@child =
-				Perl6::Operator::PostCircumfix.make-postcircumfix( $p, @_child )
+				Perl6::Operator::Circumfix.from-match( $p, @_child )
 		}
 		elsif self.assert-hash-keys( $p, [< nibble >] ) {
 			# XXX <nibble> can probably be worked with
@@ -1913,12 +1923,13 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 				[< postfix_prefix_meta_operator >] ) {
 			my Perl6::Element @_child =
 				self._postcircumfix( $p.hash.<postcircumfix> );
-			@child =
-				self.__Term( $p.list.[0] ),
+			@child = self.__Term( $p.list.[0] );
+			@child.append(
 				Perl6::Operator::PostCircumfix.make-postcircumfix(
 					$p.hash.<postcircumfix>,
 					@_child
 				)
+			)
 		}
 		elsif self.assert-hash-keys( $p,
 				[< postfix OPER >],
@@ -3261,14 +3272,15 @@ return True;
 			die "Not implemented yet"
 		}
 		elsif self.assert-hash-keys( $p, [< semilist O >] ) {
-			my Str $x = $p.hash.<semilist>.Str;
-			$x ~~ s{ ^ (\s*) } = ''; my Int $leading = $0.chars;
-			$x ~~ s{ (\s+) $ } = ''; my Int $trailing = $0.chars;
+			$p.hash.<semilist>.Str ~~
+				m{ ^ ( \s* ) ( .+ ) ( \s* ) $ };
+			my Int $leading = $0 ?? $0.Str.chars !! 0;
+			my Int $trailing = $2 ?? $2.Str.chars !! 0;
 			# XXX whitespace around text could be done differently?
 			Perl6::Bareword.new(
 				:from( $p.hash.<semilist>.from + $leading ),
 				:to( $p.hash.<semilist>.to - $trailing ),
-				:content( $x )
+				:content( $1.Str )
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< nibble O >] ) {

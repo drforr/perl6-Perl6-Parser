@@ -81,8 +81,8 @@ _END_
 		}, Q{no ws};
 
 		subtest {
-			plan 0;
-#`(
+			plan 3;
+
 			my $source = Q:to[_END_];
 ( 1 )
 _END_
@@ -93,7 +93,6 @@ _END_
 					$tree.child.[0].child),
 				Q{found operator};
 			is $pt.format( $tree ), $source, Q{formatted};
-)
 		}, Q{ws};
 	}, Q{()};
 
@@ -117,7 +116,6 @@ _END_
 
 		subtest {
 			plan 0;
-
 #`(
 			my $source = Q:to[_END_];
 { 1 }
@@ -151,7 +149,6 @@ _END_
 
 		subtest {
 			plan 0;
-
 #`(
 			my $source = Q:to[_END_];
 [ 1 ]
@@ -175,8 +172,8 @@ subtest {
 		plan 2;
 
 		subtest {
-			plan 0;
-#`(
+			plan 3;
+
 			my $source = Q{my@a;@a[2]};
 			my $parsed = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $parsed );
@@ -185,7 +182,6 @@ subtest {
 					$tree.child.[1].child),
 				Q{found operator};
 			is $pt.format( $tree ), $source, Q{formatted};
-)
 		}, Q{no ws};
 
 		subtest {
