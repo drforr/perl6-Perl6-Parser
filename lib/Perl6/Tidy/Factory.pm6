@@ -234,6 +234,15 @@ class Perl6::Operator::Prefix does Token {
 			:content( $p.Str )
 		)
 	}
+
+	multi method from-match-trimmed( Mu $p ) {
+		$p.Str ~~ m{ ^ ( \s* ) ( .+? ) ( \s* ) $ };
+		self.bless(
+			:from( $p.from + ( $0.Str ?? $0.Str.chars !! 0 ) ),
+			:to( $p.to - ( $2.Str ?? $2.Str.chars !! 0 ) ),
+			:content( $1.Str )
+		)
+	}
 }
 class Perl6::Operator::Infix does Token {
 	also is Perl6::Operator;
@@ -392,6 +401,19 @@ class Perl6::WS does Token {
 						$p.to - $lhs.to
 					)
 				)
+			)
+		}
+		else {
+			()
+		}
+	}
+
+	method whitespace-header( Mu $p ) {
+		if $p.Str ~~ m{ ( \s+ ) $ } {
+			self.bless(
+				:from( $p.from ),
+				:to( $p.from + $0.Str.chars ),
+				:content( $0.Str )
 			)
 		}
 		else {
@@ -1227,10 +1249,26 @@ self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
 		}
 		elsif self.assert-hash-keys( $p, [< nibble >] ) {
 			# XXX <nibble> can probably be worked with
-			my Perl6::Element @_child =
-				Perl6::Operator::Prefix.from-match(
+			my Perl6::Element @_child;
+			if $p.hash.<nibble>.Str ~~ m{ ^ \s+ } {
+				@_child.append(
+					Perl6::WS.whitespace-header(
+						$p.hash.<nibble>
+					)
+				)
+			}
+			@_child.append(
+				Perl6::Operator::Prefix.from-match-trimmed(
 					$p.hash.<nibble>
-				);
+				)
+			);
+			if $p.hash.<nibble>.Str ~~ m{ \s+ $ } {
+				@_child.append(
+					Perl6::WS.whitespace-trailer(
+						$p.hash.<nibble>
+					)
+				)
+			}
 			@child =
 				Perl6::Operator::Circumfix.from-match(
 					$p, @_child
@@ -4806,6 +4844,12 @@ return True;
 			);
 			@child.append(
 				self._typename( $p.hash.<typename> )
+			);
+			@child.append(
+				Perl6::WS.whitespace-terminator(
+					$p,
+					$p.hash.<typename>
+				)
 			)
 		}
 		else {

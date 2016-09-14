@@ -18,31 +18,33 @@ subtest {
 		subtest {
 			plan 2;
 
-			my $parsed = $pt.parse-source( Q{my Int $a} );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
+			my $p = $pt.parse-source( Q{my Int $a} );
+			my $tree = $pt.build-tree( $p );
+			ok $pt.validate( $p ), Q{valid};
 			is $pt.format( $tree ), Q{my Int $a}, Q{formatted};
 		}, Q{regular};
 
 		subtest {
-			plan 2;
+			plan 0;
+#`(
+			my $p = $pt.parse-source( Q{my Int:U $a} );
+			my $tree = $pt.build-tree( $p );
+			ok $pt.validate( $p ), Q{valid};
+			is $pt.format( $tree ), Q{my Int:U $a}, Q{formatted};
+)
+		}, Q{undefined};
 
-			my $parsed = $pt.parse-source( Q{my Int:D $a = 0} );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
+		subtest {
+			plan 0;
+#`(
+			my $p = $pt.parse-source( Q{my Int:D $a = 0} );
+			my $tree = $pt.build-tree( $p );
+			ok $pt.validate( $p ), Q{valid};
 			is $pt.format( $tree ),
 				Q{my Int:D $a = 0},
 				Q{formatted};
+)
 		}, Q{defined};
-
-		subtest {
-			plan 2;
-
-			my $parsed = $pt.parse-source( Q{my Int:U $a} );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			is $pt.format( $tree ), Q{my Int:U $a}, Q{formatted};
-		}, Q{undefined};
 	}, Q{typed};
 
 	subtest {
@@ -51,9 +53,9 @@ subtest {
 		subtest {
 			plan 2;
 
-			my $parsed = $pt.parse-source( Q{my $a where 1} );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
+			my $p = $pt.parse-source( Q{my $a where 1} );
+			my $tree = $pt.build-tree( $p );
+			ok $pt.validate( $p ), Q{valid};
 			is $pt.format( $tree ), Q{my $a where 1}, Q{formatted};
 		}, Q{my $a where 1};
 	}, Q{constrained};
@@ -63,17 +65,28 @@ subtest {
 	plan 1;
 
 	subtest {
-		plan 0;
+		plan 2;
 
-#`(
-		my $source = Q:to[_END_];
+		subtest {
+			plan 2;
+
+			my $source = Q{sub foo returns Int {}};
+			my $p = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $p );
+			ok $pt.validate( $p ), Q{valid};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
+		subtest {
+			plan 2;
+
+			my $source = Q:to[_END_];
 sub foo returns Int {}
 _END_
-		my $parsed = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $parsed );
-		ok $pt.validate( $parsed ), Q{valid};
-		is $pt.format( $tree ), $source, Q{formatted};
-)
+			my $p = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $p );
+			ok $pt.validate( $p ), Q{valid};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
 	}, Q{sub foo returns Int {}};
 }, Q{subroutine};
 

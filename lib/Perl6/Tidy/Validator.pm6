@@ -353,6 +353,13 @@ class Perl6::Tidy::Validator {
 	}
 
 	method _ColonPairs( Mu $parsed ) {
+#say $parsed.orig.Str;#.dump; # 'my Int:U $a'
+#say $parsed.from;
+#say $parsed.to;
+#say $parsed.made; # '{U => 1}'
+#say $parsed.dump_str; # '{U => 1}'
+#say $parsed.keys;
+#return;
 		self.trace( '_ColonPairs' );
 #return True;
 		if $parsed ~~ Hash {
