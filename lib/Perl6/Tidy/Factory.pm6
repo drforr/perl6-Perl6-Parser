@@ -1353,16 +1353,19 @@ class Perl6::Tidy::Factory {
 		if self.assert-hash-keys( $p,
 				     [< identifier coloncircumfix >] ) {
 			# Synthesize the 'from' marker for ':'
-			@child =
-				Perl6::Operator::Prefix.new(
-					:from( $p.from ),
-					:to( $p.from + COLON.chars ),
-					:content( COLON )
-				),
-				self._identifier( $p.hash.<identifier> ),
+			@child = Perl6::Operator::Prefix.new(
+				:from( $p.from ),
+				:to( $p.from + COLON.chars ),
+				:content( COLON )
+			);
+			@child.append(
+				self._identifier( $p.hash.<identifier> )
+			);
+			@child.append(
 				self._coloncircumfix(
 					$p.hash.<coloncircumfix>
 				)
+			)
 		}
 		elsif self.assert-hash-keys( $p, [< coloncircumfix >] ) {
 				# XXX Note that ':' is part of the expression.

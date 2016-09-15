@@ -1021,9 +1021,7 @@ _END_
 	}, Q{unit form};
 }, Q{native};
 
-#`(
-
-I guess 'lang Foo { }' and 'unit lang Foo;' aren't valid constructs.
+#`( XXX Illegal (?)
 
 subtest {
 	plan 3;
