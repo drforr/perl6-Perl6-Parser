@@ -296,7 +296,7 @@ class Perl6::Operator::Circumfix does Branching_Delimited does Bounded {
 class Perl6::Operator::PostCircumfix does Branching_Delimited does Bounded {
 	also is Perl6::Operator;
 
-	method make-postcircumfix( Mu $p, @_child ) {
+	method from-match( Mu $p, @_child ) {
 		$p.Str ~~ m{ ^ (.) }; my Str $front = ~$0;
 		$p.Str ~~ m{ (.) $ }; my Str $back = ~$0;
 		self.bless(
@@ -622,6 +622,15 @@ class Perl6::Bareword does Token {
 			:from( $p.from ),
 			:to( $p.to ),
 			:content( $p.Str )
+		)
+	}
+
+	multi method from-match-trimmed( Mu $p ) {
+		$p.Str ~~ m{ ^ ( \s* ) ( .+? ) ( \s* ) $ };
+		self.bless(
+			:from( $p.from + ( $0.Str ?? $0.Str.chars !! 0 ) ),
+			:to( $p.to - ( $2.Str ?? $2.Str.chars !! 0 ) ),
+			:content( $1.Str )
 		)
 	}
 }
@@ -1943,15 +1952,31 @@ class Perl6::Tidy::Factory {
 		elsif self.assert-hash-keys( $p,
 				[< postcircumfix OPER >],
 				[< postfix_prefix_meta_operator >] ) {
-			my Perl6::Element @_child =
-				self._postcircumfix( $p.hash.<postcircumfix> );
+			my Perl6::Element @_child;
+			if $p.hash.<postcircumfix>.Str ~~ m{ ^ ( \s+ ) } {
+				@_child.append(
+					Perl6::WS.whitespace-header(
+						$p.hash.<postcircumfix>
+					)
+				)
+			}
+			@_child.append(
+				self._postcircumfix( $p.hash.<postcircumfix> )
+			);
+			if $p.hash.<postcircumfix>.Str ~~ m{ \S ( \s+ ) $ } {
+				@_child.append(
+					Perl6::WS.whitespace-trailer(
+						$p.hash.<postcircumfix>
+					)
+				)
+			}
 			@child = self.__Term( $p.list.[0] );
 			@child.append(
-				Perl6::Operator::PostCircumfix.make-postcircumfix(
+				Perl6::Operator::PostCircumfix.from-match(
 					$p.hash.<postcircumfix>,
 					@_child
 				)
-			)
+			);
 		}
 		elsif self.assert-hash-keys( $p,
 				[< postfix OPER >],
@@ -3291,20 +3316,32 @@ return True;
 	# ( )
 	#
 	method _postcircumfix( Mu $p ) {
+		my Perl6::Element @child;
 		if self.assert-hash-keys( $p, [< arglist O >] ) {
 			die "Not implemented yet"
 		}
 		elsif self.assert-hash-keys( $p, [< semilist O >] ) {
-			$p.hash.<semilist>.Str ~~
-				m{ ^ ( \s* ) ( .+ ) ( \s* ) $ };
-			my Int $leading = $0 ?? $0.Str.chars !! 0;
-			my Int $trailing = $2 ?? $2.Str.chars !! 0;
-			# XXX whitespace around text could be done differently?
-			Perl6::Bareword.new(
-				:from( $p.hash.<semilist>.from + $leading ),
-				:to( $p.hash.<semilist>.to - $trailing ),
-				:content( $1.Str )
-			)
+			if $p.Str ~~ m{ ^ (.) ( \s+ ) } {
+				@child.append(
+					Perl6::WS.new(
+						:from( $p.from + $0.Str.chars ),
+						:to( $p.from + $0.Str.chars + $1.Str.chars ),
+						:content( $1.Str )
+					)
+				)
+			}
+			@child.append(
+				Perl6::Bareword.from-match-trimmed(
+					$p.hash.<semilist>
+				)
+			);
+			if $p.hash.<semilist>.Str ~~ m{ \S ( \s+ ) $ } {
+				@child.append(
+					Perl6::WS.whitespace-trailer(
+						$p.hash.<semilist>
+					)
+				)
+			}
 		}
 		elsif self.assert-hash-keys( $p, [< nibble O >] ) {
 			$p.hash.<nibble>.Str ~~
@@ -3312,16 +3349,19 @@ return True;
 			my Int $leading = $0 ?? $0.Str.chars !! 0;
 			my Int $trailing = $2 ?? $2.Str.chars !! 0;
 			# XXX whitespace around text could be done differently?
-			Perl6::Bareword.new(
-				:from( $p.hash.<nibble>.from + $leading ),
-				:to( $p.hash.<nibble>.to - $trailing ),
-				:content( $1.Str )
+			@child.append(
+				Perl6::Bareword.new(
+					:from( $p.hash.<nibble>.from + $leading ),
+					:to( $p.hash.<nibble>.to - $trailing ),
+					:content( $1.Str )
+				)
 			)
 		}
 		else {
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
+		@child
 	}
 
 	# ⁿ
@@ -3968,7 +4008,9 @@ return True;
 				self._EXPR(
 					$p.hash.<statement>.list.[0].hash.<EXPR>
 				);
-			Perl6::Operator::PostCircumfix.make-postcircumfix( $p, @_child )
+			Perl6::Operator::PostCircumfix.from-match(
+				$p, @_child
+			)
 		}
 		elsif self.assert-hash-keys( $p, [< statement >] ) {
 			self._EXPR( $p.hash.<statement>.list.[0].<EXPR> )

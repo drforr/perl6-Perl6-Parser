@@ -116,7 +116,7 @@ _END_
 
 		subtest {
 			plan 0;
-#`(
+#`( XXX This isn't an operator yet, just a {} block.
 			my $source = Q:to[_END_];
 { 1 }
 _END_
@@ -184,8 +184,8 @@ subtest {
 		}, Q{no ws};
 
 		subtest {
-			plan 0;
-#`(
+			plan 3;
+
 			my $source = Q:to[_END_];
 my @a; @a[ 2 ]
 _END_
@@ -196,7 +196,6 @@ _END_
 					$tree.child.[1].child),
 				Q{found operator};
 			is $pt.format( $tree ), $source, Q{formatted};
-)
 		}, Q{ws};
 	}, Q{[]};
 
@@ -218,8 +217,8 @@ _END_
 		}, Q{no ws};
 
 		subtest {
-			plan 0;
-#`(
+			plan 3;
+
 			# Whitespace sensitive between 'a' and '{' '}'
 			my $source = Q:to[_END_];
 my %a; %a{ "foo" }
@@ -231,7 +230,6 @@ _END_
 					$tree.child.[1].child),
 				Q{found operator};
 			is $pt.format( $tree ), $source, Q{formatted};
-)
 		}, Q{ws};
 	}, Q{%a{}};
 
@@ -3626,7 +3624,7 @@ subtest {
 	subtest {
 		plan 1;
 
-#`( # XXX Illegal
+#`( XXX Illegal
 		subtest {
 			plan 3;
 
@@ -3660,7 +3658,7 @@ _END_
 	subtest {
 		plan 1;
 
-#`( # XXX Illegal
+#`( XXX Illegal
 		subtest {
 			plan 3;
 
@@ -3732,7 +3730,7 @@ _END_
 	subtest {
 		plan 1;
 
-#`( # XXX Illegal
+#`( XXX Illegal
 		subtest {
 			plan 3;
 
