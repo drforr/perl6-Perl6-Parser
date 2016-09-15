@@ -251,8 +251,8 @@ _END_
 		}, Q{no ws};
 
 		subtest {
-			plan 0;
-#`(
+			plan 3;
+
 			# Whitespace sensitive between 'a' and '<' '>'
 			my $source = Q:to[_END_];
 my %a; %a< foo >
@@ -264,7 +264,6 @@ _END_
 					$tree.child.[1].child),
 				Q{found operator};
 			is $pt.format( $tree ), $source, Q{formatted};
-)
 		}, Q{ws};
 	}, Q{%a{}};
 

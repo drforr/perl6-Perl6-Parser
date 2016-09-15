@@ -3344,18 +3344,52 @@ return True;
 			}
 		}
 		elsif self.assert-hash-keys( $p, [< nibble O >] ) {
-			$p.hash.<nibble>.Str ~~
-				m{ ^ ( \s* ) ( .+ ) ( \s* ) $ };
-			my Int $leading = $0 ?? $0.Str.chars !! 0;
-			my Int $trailing = $2 ?? $2.Str.chars !! 0;
-			# XXX whitespace around text could be done differently?
-			@child.append(
-				Perl6::Bareword.new(
-					:from( $p.hash.<nibble>.from + $leading ),
-					:to( $p.hash.<nibble>.to - $trailing ),
-					:content( $1.Str )
+			if $p.Str ~~ m{ ^ (.) ( \s+ ) ( .+ ) ( \s+ ) (.) $ } {
+				@child.append(
+					Perl6::WS.new(
+						:from( $p.from + $0.Str.chars ),
+						:to( $p.from + $0.Str.chars + $1.Str.chars ),
+						:content( $1.Str )
+					)
+				);
+				@child.append(
+					Perl6::Bareword.new(
+						:from( $p.from + $0.Str.chars + $1.Str.chars ),
+						:to( $p.to - $4.Str.chars - $3.Str.chars ),
+						:content( $2.Str )
+					)
+				);
+				@child.append(
+					Perl6::WS.new(
+						:from( $p.to - $4.Str.chars - $3.Str.chars ),
+						:to( $p.to - $4.Str.chars ),
+						:content( $1.Str )
+					)
 				)
-			)
+			}
+			else {
+				if $p.hash.<nibble>.Str ~~ m{ ^ ( \S ) ( \s+ ) } {
+					@child.append(
+						Perl6::WS.new(
+							:from( $p.hash.<nibble>.from + $0.Str.chars ),
+							:to( $p.hash.<nibble>.from + $0.Str.chars + $1.Str.chars ),
+							:content( $1.Str )
+						)
+					)
+				}
+				@child.append(
+					Perl6::Bareword.from-match-trimmed(
+						$p.hash.<nibble>
+					)
+				);
+				if $p.hash.<nibble>.Str ~~ m{ \S ( \s+ ) ( \S ) $ } {
+					@child.append(
+						Perl6::WS.whitespace-trailer(
+							$p.hash.<nibble>
+						)
+					)
+				}
+			}
 		}
 		else {
 			say $p.hash.keys.gist;
