@@ -323,8 +323,8 @@ _END_
 		}, Q{no arguments, no ws};
 
 		subtest {
-			plan 0;
-#`(
+			plan 3;
+
 			# Whitespace sensitive between 'chomp' and '(' ')'
 			my $source = Q:to[_END_];
 chomp( )
@@ -336,12 +336,11 @@ _END_
 					$tree.child.[0].child),
 				Q{found operator};
 			is $pt.format( $tree ), $source, Q{formatted};
-)
 		}, Q{no arguments, ws};
 
 		subtest {
-			plan 0;
-#`(
+			plan 3;
+
 			# Whitespace sensitive between 'chomp' and '(' ')'
 			my $source = Q:to[_END_];
 chomp( 1 )
@@ -353,7 +352,6 @@ _END_
 					$tree.child.[0].child),
 				Q{found operator};
 			is $pt.format( $tree ), $source, Q{formatted};
-)
 		}, Q{with arguments};
 	}, Q{func()};
 

@@ -983,9 +983,25 @@ class Perl6::Tidy::Factory {
 			die "Not implemented yet";
 		}
 		elsif self.assert-hash-keys( $p, [< semiarglist >] ) {
-			my Perl6::Element @_child =
-				self._semiarglist( $p.hash.<semiarglist> );
-			Perl6::Operator::PostCircumfix.make-postcircumfix( $p, @_child )
+			my Perl6::Element @_child;
+			if $p.hash.<semiarglist>.Str ~~ m{ ^ ( \s+ ) } {
+				@_child.append(
+					Perl6::WS.whitespace-header(
+						$p.hash.<semiarglist>
+					)
+				)
+			}
+			@_child.append(
+				self._semiarglist( $p.hash.<semiarglist> )
+			);
+			if $p.hash.<semiarglist>.Str ~~ m{ \S ( \s+ ) $ } {
+				@_child.append(
+					Perl6::WS.whitespace-trailer(
+						$p.hash.<semiarglist>
+					)
+				)
+			}
+			Perl6::Operator::Circumfix.from-match( $p, @_child )
 		}
 		elsif self.assert-hash-keys( $p, [< arglist >] ) {
 			self._arglist( $p.hash.<arglist> );

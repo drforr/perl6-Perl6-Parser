@@ -360,6 +360,9 @@ class Perl6::Tidy::Validator {
 #say $parsed.dump_str; # '{U => 1}'
 #say $parsed.keys;
 #return;
+		CATCH {
+			when X::Multi::NoMatch { }
+		}
 		self.trace( '_ColonPairs' );
 #return True;
 		if $parsed ~~ Hash {
