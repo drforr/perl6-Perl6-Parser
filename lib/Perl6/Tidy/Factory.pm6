@@ -509,6 +509,23 @@ class Perl6::WS does Token {
 		}
 		@child.flat
 	}
+
+	method with-header( Mu $p, *@element ) {
+		my Perl6::Element @_child;
+		@_child.append( Perl6::WS.whitespace-header( $p ) );
+		@_child.append( @element );
+		@_child
+	}
+
+	method with-header-trailer( Mu $p, *@element ) {
+		my Perl6::Element @_child;
+		@_child.append( Perl6::WS.whitespace-header( $p ) );
+		@_child.append( @element );
+		if $p.Str ~~ m{ \S \s+ $ } {
+			@_child.append( Perl6::WS.whitespace-trailer( $p ) );
+		}
+		@_child
+	}
 }
 
 class Perl6::Comment does Token {
@@ -651,6 +668,14 @@ class Perl6::PackageName does Token {
 }
 class Perl6::ColonBareword does Token {
 	also is Perl6::Bareword;
+
+	method from-match( Mu $p ) {
+		self.bless(
+			:from( $p.from ),
+			:to( $p.to ),
+			:content( $p.Str )
+		)
+	}
 }
 class Perl6::Block does Branching_Delimited does Bounded {
 	also is Perl6::Element;
@@ -846,11 +871,6 @@ class Perl6::Tidy::Factory {
 	constant FATARROW = Q{=>};
 	constant HYPER = Q{>>};
 
-	sub unhandled-case( Mu $p ) {
-		say $p.hash.keys.gist;
-		warn "Unhandled case"
-	}
-
 	sub substr-match( Mu $p, Int $offset where * >= 0, Int $chars ) {
 		substr(
 			$p.Str,
@@ -993,23 +1013,14 @@ class Perl6::Tidy::Factory {
 		}
 		elsif self.assert-hash-keys( $p, [< semiarglist >] ) {
 			my Perl6::Element @_child;
-			if $p.hash.<semiarglist>.Str ~~ m{ ^ ( \s+ ) } {
-				@_child.append(
-					Perl6::WS.whitespace-header(
-						$p.hash.<semiarglist>
-					)
-				)
-			}
 			@_child.append(
-				self._semiarglist( $p.hash.<semiarglist> )
-			);
-			if $p.hash.<semiarglist>.Str ~~ m{ \S ( \s+ ) $ } {
-				@_child.append(
-					Perl6::WS.whitespace-trailer(
+				Perl6::WS.with-header-trailer(
+					$p.hash.<semiarglist>,
+					self._semiarglist(
 						$p.hash.<semiarglist>
 					)
 				)
-			}
+			);
 			Perl6::Operator::Circumfix.from-match( $p, @_child )
 		}
 		elsif self.assert-hash-keys( $p, [< arglist >] ) {
@@ -1146,7 +1157,7 @@ class Perl6::Tidy::Factory {
 				)
 			}
 			else {
-				my @_child;
+				my Perl6::Element @_child;
 				if $p.hash.<statementlist>.chars {
 					@_child.append(
 						Perl6::WS.from-match(
@@ -1154,6 +1165,7 @@ class Perl6::Tidy::Factory {
 						)
 					)
 				}
+				# XXX Capture '{', '}' correctly
 				@child =
 					Perl6::Block.new(
 						:from( $p.from ),
@@ -1259,18 +1271,13 @@ class Perl6::Tidy::Factory {
 			# XXX <semilist> can probably be worked with
 			if $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> {
 				@_child.append(
-					Perl6::WS.whitespace-header(
-						$p.hash.<semilist>
+					Perl6::WS.with-header-trailer(
+						$p.hash.<semilist>,
+						self._EXPR(
+							$p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR>
+						)
 					)
 				);
-				@_child.append(
-					self._EXPR( $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> )
-				);
-				@_child.append(
-					Perl6::WS.whitespace-trailer(
-						$p.hash.<semilist>
-					)
-				)
 			}
 			elsif $p.hash.<semilist>.Str ~~ m{ ^ ( \s+ ) $ } {
 				@_child.append(
@@ -1280,30 +1287,21 @@ class Perl6::Tidy::Factory {
 				)
 			}
 			@child =
-				Perl6::Operator::Circumfix.from-match( $p, @_child )
+				Perl6::Operator::Circumfix.from-match(
+					$p, @_child
+				)
 		}
 		elsif self.assert-hash-keys( $p, [< nibble >] ) {
 			# XXX <nibble> can probably be worked with
 			my Perl6::Element @_child;
-			if $p.hash.<nibble>.Str ~~ m{ ^ \s+ } {
-				@_child.append(
-					Perl6::WS.whitespace-header(
+			@_child.append(
+				Perl6::WS.with-header-trailer(
+					$p.hash.<nibble>,
+					Perl6::Operator::Prefix.from-match-trimmed(
 						$p.hash.<nibble>
 					)
-				)
-			}
-			@_child.append(
-				Perl6::Operator::Prefix.from-match-trimmed(
-					$p.hash.<nibble>
 				)
 			);
-			if $p.hash.<nibble>.Str ~~ m{ \s+ $ } {
-				@_child.append(
-					Perl6::WS.whitespace-trailer(
-						$p.hash.<nibble>
-					)
-				)
-			}
 			@child =
 				Perl6::Operator::Circumfix.from-match(
 					$p, @_child
@@ -1353,11 +1351,12 @@ class Perl6::Tidy::Factory {
 		if self.assert-hash-keys( $p,
 				     [< identifier coloncircumfix >] ) {
 			# Synthesize the 'from' marker for ':'
-			@child = Perl6::Operator::Prefix.new(
-				:from( $p.from ),
-				:to( $p.from + COLON.chars ),
-				:content( COLON )
-			);
+			@child =
+				Perl6::Operator::Prefix.new(
+					:from( $p.from ),
+					:to( $p.from + COLON.chars ),
+					:content( COLON )
+				);
 			@child.append(
 				self._identifier( $p.hash.<identifier> )
 			);
@@ -1369,11 +1368,12 @@ class Perl6::Tidy::Factory {
 		}
 		elsif self.assert-hash-keys( $p, [< coloncircumfix >] ) {
 				# XXX Note that ':' is part of the expression.
-			@child = Perl6::Operator::Prefix.new(
-				:from( $p.from ),
-				:to( $p.from + COLON.chars ),
-				:content( COLON )
-			);
+			@child =
+				Perl6::Operator::Prefix.new(
+					:from( $p.from ),
+					:to( $p.from + COLON.chars ),
+					:content( COLON )
+				);
 			@child.append(
 				self._coloncircumfix(
 					$p.hash.<coloncircumfix>
@@ -1381,12 +1381,7 @@ class Perl6::Tidy::Factory {
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< identifier >] ) {
-			@child =
-				Perl6::ColonBareword.new(
-					:from( $p.from ),
-					:to( $p.to ),
-					:content( $p.Str )
-				)
+			@child = Perl6::ColonBareword.from-match( $p )
 		}
 		elsif self.assert-hash-keys( $p, [< fakesignature >] ) {
 			# XXX May not really be "post" in the P6 sense?
@@ -1740,7 +1735,8 @@ class Perl6::Tidy::Factory {
 	method _dotty( Mu $p ) {
 		my Perl6::Element @child;
 		if self.assert-hash-keys( $p, [< sym dottyop O >] ) {
-			@child = Perl6::Operator::Prefix.from-match(
+			@child =
+				Perl6::Operator::Prefix.from-match(
 					$p.hash.<sym>
 				);
 			@child.append(
@@ -1956,23 +1952,14 @@ class Perl6::Tidy::Factory {
 				[< postcircumfix OPER >],
 				[< postfix_prefix_meta_operator >] ) {
 			my Perl6::Element @_child;
-			if $p.hash.<postcircumfix>.Str ~~ m{ ^ ( \s+ ) } {
-				@_child.append(
-					Perl6::WS.whitespace-header(
-						$p.hash.<postcircumfix>
-					)
-				)
-			}
 			@_child.append(
-				self._postcircumfix( $p.hash.<postcircumfix> )
-			);
-			if $p.hash.<postcircumfix>.Str ~~ m{ \S ( \s+ ) $ } {
-				@_child.append(
-					Perl6::WS.whitespace-trailer(
+				Perl6::WS.with-header-trailer(
+					$p.hash.<postcircumfix>,
+					self._postcircumfix(
 						$p.hash.<postcircumfix>
 					)
 				)
-			}
+			);
 			@child = self.__Term( $p.list.[0] );
 			@child.append(
 				Perl6::Operator::PostCircumfix.from-match(
@@ -2049,9 +2036,10 @@ class Perl6::Tidy::Factory {
 		elsif self.assert-hash-keys( $p, [< longname args >] ) {
 			if $p.hash.<args> and
 			   $p.hash.<args>.hash.<semiarglist> {
-				@child =
-					self._longname( $p.hash.<longname> ),
+				@child = self._longname( $p.hash.<longname> );
+				@child.append(
 					self._args( $p.hash.<args> )
+				)
 			}
 			else {
 				@child = self._longname( $p.hash.<longname> )
@@ -4445,7 +4433,9 @@ return True;
 				if $p.hash.<EXPR>.list.elems == 3 and
 					$p.hash.<EXPR>.hash.<infix> and
 					$p.hash.<EXPR>.hash.<OPER> {
-					@child = self.__Term( $p.hash.<EXPR>.list.[0] );
+					@child = self.__Term(
+						$p.hash.<EXPR>.list.[0]
+					);
 					@child.append(
 						Perl6::WS.between-matches(
 							$p,
@@ -4816,8 +4806,7 @@ return True;
 			@child = self._circumfix( $p.hash.<circumfix> )
 		}
 		elsif self.assert-hash-keys( $p, [< name >], [< colonpair >] ) {
-			@child = 
-				self._name( $p.hash.<name> );
+			@child = self._name( $p.hash.<name> );
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -5001,8 +4990,7 @@ return True;
 		if self.assert-hash-keys( $p,
 				[< sym longname >],
 				[< circumfix >] ) {
-			@child = 
-				self._sym( $p.hash.<sym> );
+			@child = self._sym( $p.hash.<sym> );
 			@child.append(
 				Perl6::WS.between-matches(
 					$p,
@@ -5015,8 +5003,7 @@ return True;
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< sym typename >] ) {
-			@child = 
-				self._sym( $p.hash.<sym> );
+			@child = self._sym( $p.hash.<sym> );
 			@child.append(
 				Perl6::WS.between-matches(
 					$p,
