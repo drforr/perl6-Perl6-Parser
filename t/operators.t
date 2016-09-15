@@ -2868,8 +2868,8 @@ subtest {
 		plan 2;
 
 		subtest {
-			plan 0;
-#`(
+			plan 3;
+
 			my $source = Q{1??2!!3};
 			my $parsed = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $parsed );
@@ -2878,12 +2878,10 @@ subtest {
 					$tree.child.[0].child),
 				Q{found operator};
 			is $pt.format( $tree ), $source, Q{formatted};
-)
 		}, Q{no ws};
 
 		subtest {
 			plan 0;
-
 #`(
 			my $source = Q:to[_END_];
 1 ?? 2 !! 3

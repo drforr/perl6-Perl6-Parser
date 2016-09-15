@@ -4442,28 +4442,68 @@ return True;
 			# XXX Sigh, need to handle *this* where we have the
 			# XXX proper matching string available.
 			if $p.hash.<EXPR>.hash.<infix> {
-				my $q = $p.hash.<EXPR>;
-				@child = self.__Term( $q.list.[0] );
-				@child.append(
-					Perl6::WS.between-matches(
-						$p,
-						$q.list.[0],
-						$q.hash.<infix>
+				if $p.hash.<EXPR>.list.elems == 3 and
+					$p.hash.<EXPR>.hash.<infix> and
+					$p.hash.<EXPR>.hash.<OPER> {
+					@child = self.__Term( $p.hash.<EXPR>.list.[0] );
+					@child.append(
+						Perl6::WS.between-matches(
+							$p,
+							$p.hash.<EXPR>.list.[0],
+							$p.hash.<EXPR>.hash.<infix>
+						)
+					);
+					@child.append(
+						Perl6::Operator::Infix.new(
+#							$p.hash.<EXPR>, QUES-QUES
+							:from( $p.hash.<EXPR>.hash.<infix>.from ),
+							:to( $p.hash.<EXPR>.hash.<infix>.from + QUES-QUES.chars ),
+							:content( QUES-QUES )
+						)
+					);
+					@child.append(
+						self.__Term( $p.hash.<EXPR>.list.[1] )
+					);
+					@child.append(
+						Perl6::Operator::Infix.new(
+							$p.hash.<EXPR>, BANG-BANG
+						)
+					);
+					@child.append(
+						Perl6::WS.between-matches(
+							$p,
+							$p.hash.<EXPR>.hash.<OPER>,
+							$p.hash.<EXPR>.list.[2]
+						)
+					);
+					@child.append(
+						self.__Term( $p.hash.<EXPR>.list.[2] )
 					)
-				);
-				@child.append(
-					self._infix( $q.hash.<infix> )
-				);
-				@child.append(
-					Perl6::WS.between-matches(
-						$p,
-						$q.hash.<infix>,
-						$q.list.[1]
+				}
+				else {
+					my $q = $p.hash.<EXPR>;
+					@child = self.__Term( $q.list.[0] );
+					@child.append(
+						Perl6::WS.between-matches(
+							$p,
+							$q.list.[0],
+							$q.hash.<infix>
+						)
+					);
+					@child.append(
+						self._infix( $q.hash.<infix> )
+					);
+					@child.append(
+						Perl6::WS.between-matches(
+							$p,
+							$q.hash.<infix>,
+							$q.list.[1]
+						)
+					);
+					@child.append(
+						self.__Term( $q.list.[1] )
 					)
-				);
-				@child.append(
-					self.__Term( $q.list.[1] )
-				)
+				}
 			}
 			else {
 				@child = self._EXPR( $p.hash.<EXPR> );

@@ -13,11 +13,17 @@ Perl6::Tidy - Extract a Perl 6 AST from the NQP Perl 6 Parser
     say $parsed.perl6($format-settings); 
     my $other = $pt.tidy-file( 't/clean-me.t' );
 
+    # This *will* execute phasers such as BEGIN in your existing code.
+    # This may constitute a security hole, at least until the author figures
+    # out how to truly make the Perl 6 grammar standalone.
+
 =end SYNOPSIS
 
 =begin DESCRIPTION
 
 Uses the built-in Perl 6 parser exposed by the nqp module in order to parse Perl 6 from within Perl 6. If this scares you, well, it probably should. Once this is finished, you should be able to call C<.perl6> on the tidied output, along with a so-far-unspecified formatting object, and get back nicely-formatted Perl 6 code.
+
+Please B<please> note that this, out of necessity, does compile your Perl 6 code, which B<does> mean executing phasers such as C<BEGIN>. There may be a way to oerride this behavior, and if you have suggestions that don't involve rewriting the Perl 6 grammar as a standalone library (which would not be such a bad idea in general) then please let the author know.
 
 As it stands, the C<.tidy> method returns a deeply-nested object representation of the Perl 6 code it's given. It handles the regex language, but not the other braided languages such as embedded blocks in strings. It will do so eventually, but for the moment I'm busy getting the grammar rules covered.
 

@@ -1022,7 +1022,6 @@ _END_
 }, Q{native};
 
 #`( XXX Illegal (?)
-
 subtest {
 	plan 3;
 
