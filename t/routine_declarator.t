@@ -3,33 +3,22 @@ use v6;
 use Test;
 use Perl6::Tidy;
 
-#`(
+# The terms that get tested here are:
+#
+# sub <name> ... { }
+# method <name> ... { }
+# submethod <name> ... { }
+#
+# class Foo { method Bar { } } # 'method' is a routine_declaration.
+# class Foo { submethod Bar { } } # 'submethod' is a routine_declaration.
 
-The terms that get tested here are:
-
-sub <name> ... { }
-method <name> ... { }
-submethod <name> ... { }
-
-class Foo { method Bar { } } # 'method' is a routine_declaration.
-class Foo { submethod Bar { } } # 'submethod' is a routine_declaration.
-
-)
-
-#`(
-
-These terms either are invalid or need additional support structures.
-I'll add them momentarily...
-
-#macro <name> ... { }
-
-)
+# These terms either are invalid or need additional support structures.
+#
+# macro <name> ... { } # NYI
 
 plan 3;
 
 my $pt = Perl6::Tidy.new;
-#my $*TRACE = 1;
-#my $*DEBUG = 1;
 
 subtest {
 	plan 3;
@@ -144,16 +133,16 @@ _END_
 		}, Q{no ws};
 
 		subtest {
-			plan 0;
-#`(
+			plan 2;
+
 			my $source = Q:to[_END_];
 unit sub MAIN  ;
 _END_
 			my $p = $pt.parse-source( $source );
+say $p.dump;
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
 			is $pt.format( $tree ), $source, Q{formatted};
-)
 		}, Q{ws before semi};
 	}, Q{unit form};
 }, Q{sub};

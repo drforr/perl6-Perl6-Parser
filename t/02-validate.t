@@ -6,8 +6,6 @@ use Perl6::Tidy;
 plan 3;
 
 my $pt = Perl6::Tidy.new;
-#my $*TRACE = 1;
-#my $*DEBUG = 1;
 
 my $p = $pt.parse-source( Q{} );
 ok $pt.validate( $p ), Q{Empty file};

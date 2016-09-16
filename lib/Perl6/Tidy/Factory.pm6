@@ -3903,11 +3903,6 @@ return True;
 					$p.hash.<deflongname>
 				);
 			@child.append(
-				self._statementlist(
-					$p.hash.<statementlist>
-				)
-			);
-			@child.append(
 				Perl6::WS.semicolon-terminator( $p )
 			)
 		}

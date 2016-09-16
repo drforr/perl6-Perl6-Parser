@@ -6,8 +6,6 @@ use Perl6::Tidy;
 plan 8;
 
 my $pt = Perl6::Tidy.new;
-#my $*TRACE = 1;
-#my $*DEBUG = 1;
 
 subtest {
 	plan 9;
@@ -1150,9 +1148,8 @@ subtest {
 		}, Q{no ws};
 
 		subtest {
-			plan 0;
+			plan 3;
 
-#`(
 			my $source = Q{ $/  };
 			my $parsed = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $parsed );
@@ -1160,7 +1157,6 @@ subtest {
 			ok (grep { $_ ~~ Perl6::Variable }, $tree.child.[0].child),
 				Q{found variable};
 			is $pt.format( $tree ), $source, Q{formatted};
-)
 		}, Q{ws};
 	}, Q{$/};
 
@@ -1225,27 +1221,23 @@ subtest {
 		plan 2;
 
 		subtest {
-			plan 0;
+			plan 2;
 
-#`(
 			my $source = Q{&sum};
 			my $parsed = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.format( $tree ), $source, Q{formatted};
-)
 		}, Q{no ws};
 
 		subtest {
-			plan 0;
+			plan 2;
 
-#`(
 			my $source = Q{ &sum  };
 			my $parsed = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.format( $tree ), $source, Q{formatted};
-)
 		}, Q{ws};
 	}, Q{&sum};
 

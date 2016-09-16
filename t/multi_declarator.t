@@ -3,22 +3,16 @@ use v6;
 use Test;
 use Perl6::Tidy;
 
-#`(
-
-The terms that get tested here are:
-
-multi 
-proto 
-only
-null
-	
-)
+# The terms that get tested here are:
+#
+# multi 
+# proto 
+# only
+# null
 
 plan 3;
 
 my $pt = Perl6::Tidy.new;
-#my $*TRACE = 1;
-#my $*DEBUG = 1;
 
 subtest {
 	plan 2;

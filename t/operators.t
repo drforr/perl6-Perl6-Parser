@@ -5,29 +5,25 @@ use Perl6::Tidy;
 
 plan 25;
 
-#`(
-Please note for the record that these tests aren't meant to cover the
-admittedly bewildering array (hee) of inputs these operators can take, they're
-just meant to cover the fact that the basic operators format correctly.
-
-The code being tested will never be executed, so I'm not concerned about whether
-a sample produces warnings or not. It'd be nice if it didn't, but not at the
-cost of extraneous terms.
-
-There are probably ways to bum down some of these tests as well, but as long
-as the operators remain operators I don't mind.
-
-For those operators that can generate or exist in list context, we're also not
-concerned about the context they generate in these tests. The text is meant to
-be very simple.
-
-There are also +=, R= and /= variants, those will be in separate files.
-As will the [+] hyperoperator, as it'll probably get a test suite of its own.
-)
+# Please note for the record that these tests aren't meant to cover the
+# admittedly bewildering array (hee) of inputs these operators can take, they're
+# just meant to cover the fact that the basic operators format correctly.
+#
+# The code being tested will never be executed, so I'm not concerned about
+# whether a sample produces warnings or not. It'd be nice if it didn't, but
+# not at the cost of extraneous terms.
+#
+# There are probably ways to bum down some of these tests as well, but as long
+# as the operators remain operators I don't mind.
+#
+# For those operators that can generate or exist in list context, we're also not
+# concerned about the context they generate in these tests. The text is meant to
+# be very simple.
+#
+# There are also +=, R= and /= variants, those will be in separate files.
+# As will the [+] hyperoperator, as it'll probably get a test suite of its own.
 
 my $pt = Perl6::Tidy.new;
-#my $*TRACE = 1;
-#my $*DEBUG = 1;
 
 subtest {
 	plan 4;

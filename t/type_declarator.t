@@ -3,21 +3,15 @@ use v6;
 use Test;
 use Perl6::Tidy;
 
-#`(
-
-The terms that get tested here are:
-
-enum <name> "foo"
-subset <name> of Type
-constant <name> = 1
-	
-)
+# The terms that get tested here are:
+#
+# enum <name> "foo"
+# subset <name> of Type
+# constant <name> = 1
 
 plan 3;
 
 my $pt = Perl6::Tidy.new;
-#my $*TRACE = 1;
-#my $*DEBUG = 1;
 
 subtest {
 	plan 2;
@@ -138,14 +132,13 @@ _END_
 		}, Q{no ws};
 
 		subtest {
-			plan 0;
-#`(
+			plan 2;
+
 			my $source = Q{subset Foo of Int  };
 			my $p = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
 			is $pt.format( $tree ), $source, Q{formatted};
-)
 		}, Q{trailing ws};
 	}, Q{Normal version};
 

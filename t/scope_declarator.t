@@ -3,37 +3,26 @@ use v6;
 use Test;
 use Perl6::Tidy;
 
-#`(
+# The terms that get tested here are:
+#
+# my <name>
+# our <naem>
+# has <name>
+# HAS <name>
+# augment <name>
+# anon <name>
+# state <name>
+# supersede <name>
+#
+# class Foo { has <name> } # 'has' is a scope declaration.
 
-The terms that get tested here are:
-
-my <name>
-our <naem>
-has <name>
-HAS <name>
-augment <name>
-anon <name>
-state <name>
-supersede <name>
-
-class Foo { has <name> } # 'has' is a scope declaration.
-
-)
-
-#`(
-
-These terms either are invalid or need additional support structures.
-I'll add them momentarily...
-
-lang <name>
-
-)
+# These terms are invalid:
+#
+# lang <name>
 
 plan 5;
 
 my $pt = Perl6::Tidy.new;
-#my $*TRACE = 1;
-#my $*DEBUG = 1;
 
 subtest {
 	plan 2;

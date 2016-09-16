@@ -3,39 +3,29 @@ use v6;
 use Test;
 use Perl6::Tidy;
 
-#`(
+# The terms that get tested here are:
 
-The terms that get tested here are:
+# package <name> { }
+# module <name> { }
+# class <name> { }
+# grammar <name> { }
+# role <name> { }
+# knowhow <name> { }
+# native <name> { }
+# also is <name>
+# trusts <name>
+#
+# class Foo { also is Int } # 'also' is a package_declaration.
+# class Foo { trusts Int } # 'trusts' is a package_declaration.
 
-package <name> { }
-module <name> { }
-class <name> { }
-grammar <name> { }
-role <name> { }
-knowhow <name> { }
-native <name> { }
-also is <name>
-trusts <name>
-
-class Foo { also is Int } # 'also' is a package_declaration.
-class Foo { trusts Int } # 'trusts' is a package_declaration.
-
-)
-
-#`(
-
-These terms either are invalid or need additional support structures.
-I'll add them momentarily...
-
-lang <name>
-
-)
+# These terms either are invalid or need additional support structures.
+# I'll add them momentarily...
+#
+# lang <name>
 
 plan 11;
 
 my $pt = Perl6::Tidy.new;
-#my $*TRACE = 1;
-#my $*DEBUG = 1;
 
 subtest {
 	plan 3;
