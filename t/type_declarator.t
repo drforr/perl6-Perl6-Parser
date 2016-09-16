@@ -126,8 +126,8 @@ subtest {
 		plan 2;
 
 		subtest {
-			plan 0;
-#`(
+			plan 2;
+
 			my $source = Q:to[_END_];
 subset Foo of Int
 _END_
@@ -135,7 +135,6 @@ _END_
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
 			is $pt.format( $tree ), $source, Q{formatted};
-)
 		}, Q{no ws};
 
 		subtest {

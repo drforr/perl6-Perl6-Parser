@@ -1,5 +1,11 @@
 =begin README
 
+I'm commenting out not-working-yet tests using the #`(..) style (1) because I
+can, and (2) because the ` is rarer in Perl 6, therefore faster to search for.
+In fact, I recently deleted a bunch of tests that were using the #`(..) marker
+but marked as 'Illegal' because they do illegal things with whitespace, rather
+than skip past them using '`'.
+
 In passing, please note that while it's trivially possible to bum down the
 tests, doing so makes it harder to insert 'say $p.dump' to view the
 AST, and 'say $tree.perl' to view the generated Perl 6 structure.

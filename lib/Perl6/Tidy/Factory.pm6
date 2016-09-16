@@ -228,11 +228,16 @@ class Perl6::Operator::Prefix does Token {
 	also is Perl6::Operator;
 
 	multi method from-match( Mu $p ) {
-		self.bless(
-			:from( $p.from ),
-			:to( $p.to ),
-			:content( $p.Str )
-		)
+		if $p.from < $p.to {
+			self.bless(
+				:from( $p.from ),
+				:to( $p.to ),
+				:content( $p.Str )
+			)
+		}
+		else {
+			( )
+		}
 	}
 
 	multi method from-match-trimmed( Mu $p ) {
@@ -247,11 +252,16 @@ class Perl6::Operator::Prefix does Token {
 class Perl6::Operator::Infix does Token {
 	also is Perl6::Operator;
 	method from-match( Mu $p ) {
-		self.bless(
-			:from( $p.from ),
-			:to( $p.to ),
-			:content( $p.Str )
-		)
+		if $p.from < $p.to {
+			self.bless(
+				:from( $p.from ),
+				:to( $p.to ),
+				:content( $p.Str )
+			)
+		}
+		else {
+			( )
+		}
 	}
 	multi method new( Int $from, Str $str ) {
 		self.bless(
@@ -272,12 +282,18 @@ class Perl6::Operator::Infix does Token {
 }
 class Perl6::Operator::Postfix does Token {
 	also is Perl6::Operator;
+
 	method from-match( Mu $p ) {
-		self.bless(
-			:from( $p.from ),
-			:to( $p.to ),
-			:content( $p.Str )
-		)
+		if $p.from < $p.to {
+			self.bless(
+				:from( $p.from ),
+				:to( $p.to ),
+				:content( $p.Str )
+			)
+		}
+		else {
+			( )
+		}
 	}
 }
 class Perl6::Operator::Circumfix does Branching_Delimited does Bounded {
@@ -297,15 +313,20 @@ class Perl6::Operator::PostCircumfix does Branching_Delimited does Bounded {
 	also is Perl6::Operator;
 
 	method from-match( Mu $p, @_child ) {
-		$p.Str ~~ m{ ^ (.) }; my Str $front = ~$0;
-		$p.Str ~~ m{ (.) $ }; my Str $back = ~$0;
-		self.bless(
-			# XXX What is it "post"? Hmm.
-			:from( $p.from ),
-			:to( $p.to ),
-			:delimiter( $front, $back ),
-			:child( @_child )
-		)
+		if $p.from < $p.to {
+			$p.Str ~~ m{ ^ (.) }; my Str $front = ~$0;
+			$p.Str ~~ m{ (.) $ }; my Str $back = ~$0;
+			self.bless(
+				# XXX What is it "post"? Hmm.
+				:from( $p.from ),
+				:to( $p.to ),
+				:delimiter( $front, $back ),
+				:child( @_child )
+			)
+		}
+		else {
+			( )
+		}
 	}
 }
 
@@ -323,11 +344,16 @@ class Perl6::WS does Token {
 	}
 
 	method from-match( Mu $p ) {
-		self.bless(
-			:from( $p.from ),
-			:to( $p.to ),
-			:content( $p.Str )
-		)
+		if $p.from < $p.to {
+			self.bless(
+				:from( $p.from ),
+				:to( $p.to ),
+				:content( $p.Str )
+			)
+		}
+		else {
+			( )
+		}
 	}
 
 	multi method between-matches( Mu $p, Str $lhs, Str $rhs ) {
@@ -564,33 +590,48 @@ class Perl6::Number::Binary does Prefixed {
 	also is Perl6::Number;
 
 	method from-match( Mu $p ) {
-		self.bless(
-			:from( $p.from ),
-			:to( $p.to ),
-			:content( $p.Str )
-		)
+		if $p.from < $p.to {
+			self.bless(
+				:from( $p.from ),
+				:to( $p.to ),
+				:content( $p.Str )
+			)
+		}
+		else {
+			( )
+		}
 	}
 }
 class Perl6::Number::Octal does Prefixed {
 	also is Perl6::Number;
 
 	method from-match( Mu $p ) {
-		self.bless(
-			:from( $p.from ),
-			:to( $p.to ),
-			:content( $p.Str )
-		)
+		if $p.from < $p.to {
+			self.bless(
+				:from( $p.from ),
+				:to( $p.to ),
+				:content( $p.Str )
+			)
+		}
+		else {
+			( )
+		}
 	}
 }
 class Perl6::Number::Decimal {
 	also is Perl6::Number;
 
 	method from-match( Mu $p ) {
-		self.bless(
-			:from( $p.from ),
-			:to( $p.to ),
-			:content( $p.Str )
-		)
+		if $p.from < $p.to {
+			self.bless(
+				:from( $p.from ),
+				:to( $p.to ),
+				:content( $p.Str )
+			)
+		}
+		else {
+			( )
+		}
 	}
 }
 class Perl6::Number::Decimal::Explicit does Prefixed {
@@ -600,11 +641,16 @@ class Perl6::Number::Hexadecimal does Prefixed {
 	also is Perl6::Number;
 
 	method from-match( Mu $p ) {
-		self.bless(
-			:from( $p.from ),
-			:to( $p.to ),
-			:content( $p.Str )
-		)
+		if $p.from < $p.to {
+			self.bless(
+				:from( $p.from ),
+				:to( $p.to ),
+				:content( $p.Str )
+			)
+		}
+		else {
+			( )
+		}
 	}
 }
 class Perl6::Number::Radix {
@@ -614,11 +660,16 @@ class Perl6::Number::Floating {
 	also is Perl6::Number;
 
 	method from-match( Mu $p ) {
-		self.bless(
-			:from( $p.from ),
-			:to( $p.to ),
-			:content( $p.Str )
-		)
+		if $p.from < $p.to {
+			self.bless(
+				:from( $p.from ),
+				:to( $p.to ),
+				:content( $p.Str )
+			)
+		}
+		else {
+			( )
+		}
 	}
 }
 
@@ -635,31 +686,46 @@ class Perl6::Regex does Token {
 class Perl6::Bareword does Token {
 	also is Perl6::Element;
 	multi method from-match( Mu $p ) {
-		self.bless(
-			:from( $p.from ),
-			:to( $p.to ),
-			:content( $p.Str )
-		)
+		if $p.from < $p.to {
+			self.bless(
+				:from( $p.from ),
+				:to( $p.to ),
+				:content( $p.Str )
+			)
+		}
+		else {
+			( )
+		}
 	}
 
 	multi method from-match-trimmed( Mu $p ) {
-		$p.Str ~~ m{ ^ ( \s* ) ( .+? ) ( \s* ) $ };
-		self.bless(
-			:from( $p.from + ( $0.Str ?? $0.Str.chars !! 0 ) ),
-			:to( $p.to - ( $2.Str ?? $2.Str.chars !! 0 ) ),
-			:content( $1.Str )
-		)
+		if $p.from < $p.to {
+			$p.Str ~~ m{ ^ ( \s* ) ( .+? ) ( \s* ) $ };
+			self.bless(
+				:from( $p.from + ( $0.Str ?? $0.Str.chars !! 0 ) ),
+				:to( $p.to - ( $2.Str ?? $2.Str.chars !! 0 ) ),
+				:content( $1.Str )
+			)
+		}
+		else {
+			( )
+		}
 	}
 }
 class Perl6::PackageName does Token {
 	also is Perl6::Element;
 
 	method from-match( Mu $p ) {
-		self.bless(
-			:from( $p.from ),
-			:to( $p.to ),
-			:content( $p.Str )
-		)
+		if $p.from < $p.to {
+			self.bless(
+				:from( $p.from ),
+				:to( $p.to ),
+				:content( $p.Str )
+			)
+		}
+		else {
+			( )
+		}
 	}
 
 	method namespaces() {
@@ -670,25 +736,35 @@ class Perl6::ColonBareword does Token {
 	also is Perl6::Bareword;
 
 	method from-match( Mu $p ) {
-		self.bless(
-			:from( $p.from ),
-			:to( $p.to ),
-			:content( $p.Str )
-		)
+		if $p.from < $p.to {
+			self.bless(
+				:from( $p.from ),
+				:to( $p.to ),
+				:content( $p.Str )
+			)
+		}
+		else {
+			( )
+		}
 	}
 }
 class Perl6::Block does Branching_Delimited does Bounded {
 	also is Perl6::Element;
 
 	method from-match( Mu $p, Perl6::Element @child ) {
-		$p.Str ~~ m{ ^ (.) }; my Str $front = ~$0;
-		$p.Str ~~ m{ (.) $ }; my Str $back = ~$0;
-		self.bless(
-			:from( $p.from ),
-			:to( $p.to ),
-			:delimiter( $front, $back ),
-			:child( @child )
-		)
+		if $p.from < $p.to {
+			$p.Str ~~ m{ ^ (.) }; my Str $front = ~$0;
+			$p.Str ~~ m{ (.) $ }; my Str $back = ~$0;
+			self.bless(
+				:from( $p.from ),
+				:to( $p.to ),
+				:delimiter( $front, $back ),
+				:child( @child )
+			)
+		}
+		else {
+			( )
+		}
 	}
 }
 
@@ -1144,36 +1220,14 @@ class Perl6::Tidy::Factory {
 		my Perl6::Element @child;
 		# $p doesn't contain WS after the block.
 		if self.assert-hash-keys( $p, [< statementlist >] ) {
-			if $p.hash.<statementlist>.Str ~~ /\S/ {
-				my Perl6::Element @_child =
-					self._statementlist(
-						$p.hash.<statementlist>
-					);
-				@child.append(
-					Perl6::Block.from-match(
-						$p,
-						@_child
-					)
+			my Perl6::Element @_child;
+			@_child.append(
+				self._statementlist(
+					$p.hash.<statementlist>
 				)
-			}
-			else {
-				my Perl6::Element @_child;
-				if $p.hash.<statementlist>.chars {
-					@_child.append(
-						Perl6::WS.from-match(
-							$p.hash.<statementlist>
-						)
-					)
-				}
-				# XXX Capture '{', '}' correctly
-				@child =
-					Perl6::Block.new(
-						:from( $p.from ),
-						:to( $p.to ),
-						:delimiter( '{', '}' ),
-						:child( @_child )
-					)
-			}
+			);
+			@child =
+				Perl6::Block.from-match( $p, @_child )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -1389,6 +1443,7 @@ class Perl6::Tidy::Factory {
 				self._fakesignature(
 					$p.hash.<fakesignature>
 				);
+			# XXX properly match delimiter
 			@child =
 				Perl6::Operator::PostCircumfix.new(
 					:from( $p.from ),
@@ -1399,15 +1454,17 @@ class Perl6::Tidy::Factory {
 		}
 		elsif self.assert-hash-keys( $p, [< var >] ) {
 			# Synthesize the 'from' marker for ':'
+			# XXX is this actually a single token?
+			# XXX I think it is.
 			@child =
-				# XXX is this actually a single token?
-				# XXX I think it is.
 				Perl6::Operator::Prefix.new(
 					:from( $p.from ),
 					:to( $p.from + COLON.chars ),
 					:content( COLON )
-				),
+				);
+			@child.append(
 				self._var( $p.hash.<var> )
+			)
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -3399,12 +3456,6 @@ return True;
 					Perl6::Operator::Postfix.from-match(
 						$_.hash.<sym>
 					);
-				@child.append(
-					Perl6::WS.whitespace-terminator(
-						$_,
-						$_.hash.<sym>
-					)
-				)
 			}
 			when self.assert-hash-keys( $_, [< dig O >] ) {
 				@child =
@@ -3875,6 +3926,11 @@ return True;
 			);
 			@child.append(
 				self._trait( $p.hash.<trait> )
+			);
+			@child.append(
+				Perl6::WS.whitespace-trailer(
+					$p.hash.<trait>.list.[0]
+				)
 			);
 			@child.append(
 				self._blockoid( $p.hash.<blockoid> )
@@ -5059,12 +5115,6 @@ return True;
 			);
 			@child.append(
 				self._typename( $p.hash.<typename> )
-			);
-			@child.append(
-				Perl6::WS.whitespace-terminator(
-					$p,
-					$p.hash.<typename>
-				)
 			)
 		}
 		else {

@@ -841,6 +841,7 @@ subtest {
 #`(
 				my $source = Q{-1i};
 				my $parsed = $pt.parse-source( $source );
+say $parsed.dump;
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number }, $tree.child.[0].child),
