@@ -2295,7 +2295,7 @@ class Perl6::Tidy::Factory {
 					)
 				)
 			}
-			if $p.hash.<sym>.Str eq '=' and
+			if $p.hash.<sym>.Str eq EQUAL and
 				$p.hash.<EXPR>.list.elems == 2 {
 				@child.append(
 					self.__Term( $p.hash.<EXPR>.list.[0] )
@@ -4178,7 +4178,44 @@ return True;
 			}
 			@child.append(
 				self._param_var( $p.hash.<param_var> )
-			)
+			);
+			if $p.hash.<default_value> {
+#key-bounds $p.hash.<type_constraint>;
+#key-bounds $p.hash.<param_var>;
+#key-bounds $p.hash.<quant>;
+key-bounds $p;
+#say $p.dump;
+				if $p.Str ~~ m{ ( \s* ) ('=') ( \s* ) } {
+					if $0 and $0.Str.chars {
+						@child.append(
+							Perl6::WS.new(
+								:from( $p.from ),
+								:to( $p.from + $0.Str.chars ),
+								:content( $0.Str )
+							)
+						);
+					}
+					@child.append(
+						Perl6::Operator::Infix.new(
+							:from( $p.from + $1.from ),
+							:to( $p.from + $1.to ),
+							:content( $1.Str )
+						)
+					);
+					if $2 and $2.Str.chars {
+						@child.append(
+							Perl6::WS.new(
+								:from( $p.from + $2.from ),
+								:to( $p.from + $2.to ),
+								:content( $2.Str )
+							)
+						);
+					}
+					@child.append(
+						self._EXPR( $p.hash.<default_value>.list.[0].hash.<EXPR> )
+					);
+				}
+			}
 		}
 		elsif self.assert-hash-keys( $p,
 			[< param_var quant default_value >],
@@ -4260,23 +4297,18 @@ return True;
 		if self.assert-hash-keys( $p,
 				[< parameter typename >],
 				[< param_sep >] ) {
-			@child =
-				self._typename( $p.hash.<typename> ),
+			@child.append(
+				self._typename( $p.hash.<typename> )
+			);
+			@child.append(
 				self._parameter( $p.hash.<parameter> )
+			)
 		}
 		elsif self.assert-hash-keys( $p,
 				[< parameter >],
 				[< param_sep >] ) {
 			my Mu $parameter = $p.hash.<parameter>;
 			my Int $offset = $p.from;
-			if $p.Str ~~ m{ ^ ( \s+ ) } {
-				@child.append(
-#					Perl6::WS.new(
-#						$p.from,
-#						$0.Str
-#					)
-				)
-			}
 			for $parameter.list.kv -> $index, $_ {
 				if $index > 0 {
 					my Int $inset = 0;
@@ -4297,7 +4329,7 @@ return True;
 				}
 				@child.append(
 					self.__Parameter( $_ )
-				);
+				)
 			}
 		}
 		elsif self.assert-hash-keys( $p,

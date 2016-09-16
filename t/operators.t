@@ -947,21 +947,7 @@ _END_
 	subtest {
 		plan 1;
 
-#`( XXX Illegal
-		subtest {
-			plan 3;
-
-			my $source = Q{1div2};
-			my $parsed = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[0].child),
-				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{no ws};
-)
-
+		# XXX '1div2' is illegal
 		subtest {
 			plan 3;
 
@@ -1045,21 +1031,7 @@ _END_
 	subtest {
 		plan 1;
 
-#`( XXX Illegal
-		subtest {
-			plan 3;
-
-			my $source = Q{1mod2};
-			my $parsed = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[0].child),
-				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{no ws};
-)
-
+		# XXX '1mod2' is illegal
 		subtest {
 			plan 3;
 
@@ -1175,21 +1147,7 @@ _END_
 	subtest {
 		plan 1;
 
-#`( XXX Illegal
-		subtest {
-			plan 3;
-
-			my $source = Q{1gcd2};
-			my $parsed = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[0].child),
-				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{no ws};
-)
-
+		# XXX '1gcd2' is illegal
 		subtest {
 			plan 3;
 
@@ -1209,21 +1167,7 @@ _END_
 	subtest {
 		plan 1;
 
-#`( XXX Illegal
-		subtest {
-			plan 3;
-
-			my $source = Q{1lcm2};
-			my $parsed = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[0].child),
-				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{no ws};
-)
-
+		# XXX '1lcm2' is illegal
 		subtest {
 			plan 3;
 
@@ -1411,21 +1355,7 @@ subtest {
 	subtest {
 		plan 1;
 
-#`( XXX Illegal
-		subtest {
-			plan 3;
-
-			my $source = Q{1x2};
-			my $parsed = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[0].child),
-				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{no ws};
-)
-
+		# XXX '1x2' is illegal
 		subtest {
 			plan 3;
 
@@ -1445,21 +1375,7 @@ _END_
 	subtest {
 		plan 1;
 
-#`( XXX Illegal
-		subtest {
-			plan 3;
-
-			my $source = Q{1xx2};
-			my $parsed = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[0].child),
-				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{no ws};
-)
-
+		# XXX '1xx2' is illegal
 		subtest {
 			plan 3;
 
@@ -1623,21 +1539,7 @@ subtest {
 	subtest {
 		plan 1;
 
-#`( XXX Illegal
-		subtest {
-			plan 3;
-
-			my $source = Q{my$a;temp$a};
-			my $parsed = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[1].child),
-				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{no ws};
-)
-
+		# XXX 'temp$a' is illegal (weird.)
 		subtest {
 			plan 3;
 
@@ -1657,21 +1559,7 @@ _END_
 	subtest {
 		plan 1;
 
-#`( XXX Illegal
-		subtest {
-			plan 3;
-
-			my $source = Q{my$a;let$a};
-			my $parsed = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[1].child),
-				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{no ws};
-)
-
+		# XXX 'let$a' is illegal (weird.)
 		subtest {
 			plan 3;
 
@@ -1695,21 +1583,7 @@ subtest {
 	subtest {
 		plan 1;
 
-#`( XXX Illegal
-		subtest {
-			plan 3;
-
-			my $source = Q{1does2};
-			my $parsed = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[0].child),
-				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{no ws};
-)
-
+		# XXX '1does2' illegal
 		subtest {
 			plan 3;
 
@@ -1729,21 +1603,7 @@ _END_
 	subtest {
 		plan 1;
 
-#`( XXX Illegal
-		subtest {
-			plan 3;
-
-			my $source = Q{1but2};
-			my $parsed = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[0].child),
-				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{no ws};
-)
-
+		# XXX '1but2' illegal
 		subtest {
 			plan 3;
 
@@ -1763,21 +1623,7 @@ _END_
 	subtest {
 		plan 1;
 
-#`( XXX Illegal
-		subtest {
-			plan 3;
-
-			my $source = Q{1cmp2};
-			my $parsed = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[0].child),
-				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{no ws};
-)
-
+		# XXX '1cmp2' illegal
 		subtest {
 			plan 3;
 
@@ -1797,21 +1643,7 @@ _END_
 	subtest {
 		plan 1;
 
-#`( XXX Illegal
-		subtest {
-			plan 3;
-
-			my $source = Q{1leg2};
-			my $parsed = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[0].child),
-				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{no ws};
-)
-
+		# XXX '1leg2' illegal
 		subtest {
 			plan 3;
 
@@ -1831,21 +1663,7 @@ _END_
 	subtest {
 		plan 1;
 
-#`( XXX Illegal
-		subtest {
-			plan 3;
-
-			my $source = Q{1<=>2};
-			my $parsed = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[0].child),
-				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{no ws};
-)
-
+		# XXX '1<=>2' illegal
 		subtest {
 			plan 3;
 
@@ -2061,21 +1879,7 @@ _END_
 	subtest {
 		plan 1;
 
-#`( XXX Illegal
-		subtest {
-			plan 3;
-
-			my $source = Q{1<2};
-			my $parsed = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[0].child),
-				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{no ws};
-)
-
+		# XXX '1<2' illegal
 		subtest {
 			plan 3;
 
@@ -2127,21 +1931,7 @@ _END_
 	subtest {
 		plan 1;
 
-#`( XXX Illegal
-		subtest {
-			plan 3;
-
-			my $source = Q{1<=2};
-			my $parsed = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[0].child),
-				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{no ws};
-)
-
+		# XXX '1<=2' illegal
 		subtest {
 			plan 3;
 
@@ -2225,21 +2015,7 @@ _END_
 	subtest {
 		plan 1;
 
-#`( XXX Illegal
-		subtest {
-			plan 3;
-
-			my $source = Q{1eq2};
-			my $parsed = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[0].child),
-				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{no ws};
-)
-
+		# XXX '1eq2' illegal
 		subtest {
 			plan 3;
 
@@ -2259,21 +2035,7 @@ _END_
 	subtest {
 		plan 1;
 
-#`( XXX Illegal
-		subtest {
-			plan 3;
-
-			my $source = Q{1ne2};
-			my $parsed = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[0].child),
-				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{no ws};
-)
-
+		# XXX '1ne2' illegal
 		subtest {
 			plan 3;
 
@@ -2293,21 +2055,7 @@ _END_
 	subtest {
 		plan 1;
 
-#`( XXX Illegal
-		subtest {
-			plan 3;
-
-			my $source = Q{1gt2};
-			my $parsed = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[0].child),
-				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{no ws};
-)
-
+		# XXX '1gt2' illegal
 		subtest {
 			plan 3;
 
@@ -2327,21 +2075,7 @@ _END_
 	subtest {
 		plan 1;
 
-#`( XXX Illegal
-		subtest {
-			plan 3;
-
-			my $source = Q{1ge2};
-			my $parsed = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[0].child),
-				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{no ws};
-)
-
+		# XXX '1ge2' illegal
 		subtest {
 			plan 3;
 
@@ -2361,21 +2095,7 @@ _END_
 	subtest {
 		plan 1;
 
-#`( XXX Illegal
-		subtest {
-			plan 3;
-
-			my $source = Q{1lt2};
-			my $parsed = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[0].child),
-				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{no ws};
-)
-
+		# XXX '1lt2' illegal
 		subtest {
 			plan 3;
 
@@ -2395,21 +2115,7 @@ _END_
 	subtest {
 		plan 1;
 
-#`( XXX Illegal
-		subtest {
-			plan 3;
-
-			my $source = Q{1le2};
-			my $parsed = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[0].child),
-				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{no ws};
-)
-
+		# XXX '1le2' illegal
 		subtest {
 			plan 3;
 
@@ -2429,21 +2135,7 @@ _END_
 	subtest {
 		plan 1;
 
-#`( XXX Illegal
-		subtest {
-			plan 3;
-
-			my $source = Q{1before2};
-			my $parsed = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[0].child),
-				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{no ws};
-)
-
+		# XXX '1before2' illegal
 		subtest {
 			plan 3;
 
@@ -2463,21 +2155,7 @@ _END_
 	subtest {
 		plan 1;
 
-#`( XXX Illegal
-		subtest {
-			plan 3;
-
-			my $source = Q{1after2};
-			my $parsed = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[0].child),
-				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{no ws};
-)
-
+		# XXX '1after2' illegal
 		subtest {
 			plan 3;
 
@@ -2497,21 +2175,7 @@ _END_
 	subtest {
 		plan 1;
 
-#`( XXX Illegal
-		subtest {
-			plan 3;
-
-			my $source = Q{1eqv2};
-			my $parsed = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[0].child),
-				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{no ws};
-)
-
+		# XXX '1eqv2' illegal
 		subtest {
 			plan 3;
 
@@ -2795,21 +2459,7 @@ _END_
 	subtest {
 		plan 1;
 
-#`( XXX Illegal
-		subtest {
-			plan 3;
-
-			my $source = Q{1min2};
-			my $parsed = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[0].child),
-				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{no ws};
-)
-
+		# XXX '1min2' illegal
 		subtest {
 			plan 3;
 
@@ -2829,21 +2479,7 @@ _END_
 	subtest {
 		plan 1;
 
-#`( XXX Illegal
-		subtest {
-			plan 3;
-
-			my $source = Q{1max2};
-			my $parsed = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[0].child),
-				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{no ws};
-)
-
+		# XXX '1max2' is illegal.
 		subtest {
 			plan 3;
 
@@ -2900,21 +2536,7 @@ _END_
 	subtest {
 		plan 1;
 
-#`( XXX Illegal
-		subtest {
-			plan 3;
-
-			my $source = Q{1ff2};
-			my $parsed = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[0].child),
-				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{no ws};
-)
-
+		# XXX '1ff2' illegal
 		subtest {
 			plan 3;
 
@@ -2966,21 +2588,7 @@ _END_
 	subtest {
 		plan 1;
 
-#`( XXX Illegal
-		subtest {
-			plan 3;
-
-			my $source = Q{1ff^2};
-			my $parsed = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[0].child),
-				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{no ws};
-)
-
+		# XXX '1ff^2' illegal
 		subtest {
 			plan 3;
 
@@ -3032,21 +2640,7 @@ _END_
 	subtest {
 		plan 1;
 
-#`( XXX Illegal
-		subtest {
-			plan 3;
-
-			my $source = Q{1fff2};
-			my $parsed = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[0].child),
-				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{no ws};
-)
-
+		# XXX '1fff2' illegal
 		subtest {
 			plan 3;
 
@@ -3066,21 +2660,7 @@ _END_
 	subtest {
 		plan 1;
 
-#`( XXX Illegal
-		subtest {
-			plan 3;
-
-			my $source = Q{1^fff2}
-			my $parsed = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[0].child),
-				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{no ws};
-)
-
+		# XXX '1^fff2' illegal
 		subtest {
 			plan 3;
 
@@ -3100,21 +2680,7 @@ _END_
 	subtest {
 		plan 1;
 
-#`( XXX illegal
-		subtest {
-			plan 3;
-
-			my $source = Q{1fff^2};
-			my $parsed = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[0].child),
-				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{no ws};
-)
-
+		# XXX '1fff^2' illegal
 		subtest {
 			plan 3;
 
@@ -3238,21 +2804,7 @@ subtest {
 	subtest {
 		plan 1;
 
-#`( XXX Illegal
-		subtest {
-			plan 3;
-
-			my $source = Q{not1};
-			my $parsed = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[0].child),
-				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{no ws};
-)
-
+		# XXX 'not2' illegal
 		subtest {
 			plan 3;
 
@@ -3272,21 +2824,7 @@ _END_
 	subtest {
 		plan 1;
 
-#`( XXX Illegal
-		subtest {
-			plan 3;
-
-			my $source = Q{so1};
-			my $parsed = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[0].child),
-				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{no ws};
-)
-
+		# XXX 'so1' illegal
 		subtest {
 			plan 3;
 
@@ -3348,21 +2886,7 @@ subtest {
 	subtest {
 		plan 1;
 
-#`( XXX Illegal
-		subtest {
-			plan 3;
-
-			my $source = Q{3Z2};
-			my $parsed = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[0].child),
-				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{no ws};
-)
-
+		# XXX '3Z2' illegal
 		subtest {
 			plan 3;
 
@@ -3382,21 +2906,7 @@ _END_
 	subtest {
 		plan 1;
 
-#`( XXX Illegal
-		subtest {
-			plan 3;
-
-			my $source = Q{3X2};
-			my $parsed = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[0].child),
-				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{no ws};
-)
-
+		# XXX '3X2' illegal
 		subtest {
 			plan 3;
 
@@ -3620,21 +3130,7 @@ subtest {
 	subtest {
 		plan 1;
 
-#`( XXX Illegal
-		subtest {
-			plan 3;
-
-			my $source = Q{3and2};
-			my $parsed = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[0].child),
-				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{no ws};
-)
-
+		# XXX '3and2' illegal
 		subtest {
 			plan 3;
 
@@ -3654,21 +3150,7 @@ _END_
 	subtest {
 		plan 1;
 
-#`( XXX Illegal
-		subtest {
-			plan 3;
-
-			my $source = Q{3andthen2};
-			my $parsed = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[0].child),
-				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{no ws};
-)
-
+		# XXX '3andthen2' illegal
 		subtest {
 			plan 3;
 
@@ -3692,21 +3174,7 @@ subtest {
 	subtest {
 		plan 1;
 
-#`( XXX Illegal
-		subtest {
-			plan 3;
-
-			my $source = Q{3or2};
-			my $parsed = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[0].child),
-				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{ws};
-)
-
+		# XXX '3or2' illegal
 		subtest {
 			plan 3;
 
@@ -3726,21 +3194,7 @@ _END_
 	subtest {
 		plan 1;
 
-#`( XXX Illegal
-		subtest {
-			plan 3;
-
-			my $source = Q{3orelse2};
-			my $parsed = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[0].child),
-				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{no ws};
-)
-
+		# XXX '3orelse2' illegal
 		subtest {
 			plan 3;
 
@@ -3764,21 +3218,7 @@ subtest {
 	subtest {
 		plan 1;
 
-#`( XXX Illegal
-		subtest {
-			plan 3;
-
-			my $source = Q[my@a;@a<=='a'];
-			my $parsed = $pt.parse-source( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[1].child),
-				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
-		}, Q{no ws};
-)
-
+		# XXX "@a<=='a'" illegal
 		subtest {
 			plan 3;
 

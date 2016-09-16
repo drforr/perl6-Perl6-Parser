@@ -13,7 +13,7 @@ subtest {
 	plan 2;
 
 	subtest {
-		plan 6;
+		plan 5;
 
 		subtest {
 			plan 2;
@@ -107,8 +107,8 @@ _END_
 				}, Q{no ws};
 
 				subtest {
-					plan 0;
-#`(
+					plan 2;
+
 					my $source = Q:to[_END_];
 sub foo( Int $a ) { }
 _END_
@@ -116,7 +116,6 @@ _END_
 					my $tree = $pt.build-tree( $p );
 					ok $pt.validate( $p ), Q{valid};
 					is $pt.format( $tree ), $source, Q{formatted};
-)
 				}, Q{ws};
 			}, Q{typed};
 
@@ -124,20 +123,18 @@ _END_
 				plan 2;
 
 				subtest {
-					plan 0;
-#`(
+					plan 2;
+
 					my $source = Q{sub foo(Int$a=32){}};
 					my $p = $pt.parse-source( $source );
-say $p.dump;
 					my $tree = $pt.build-tree( $p );
 					ok $pt.validate( $p ), Q{valid};
 					is $pt.format( $tree ), $source, Q{formatted};
-)
 				}, Q{no ws};
 
 				subtest {
-					plan 0;
-#`(
+					plan 2;
+
 					my $source = Q:to[_END_];
 sub foo( Int $a = 32 ) { }
 _END_
@@ -145,7 +142,6 @@ _END_
 					my $tree = $pt.build-tree( $p );
 					ok $pt.validate( $p ), Q{valid};
 					is $pt.format( $tree ), $source, Q{formatted};
-)
 				}, Q{ws};
 			}, Q{typed and declared};
 
@@ -254,34 +250,7 @@ _END_
 			}, Q{ws};
 		}, Q{default};
 
-		subtest {
-			plan 2;
-
-			subtest {
-				plan 0;
-
-#`( XXX Illegal
-				my $source = Q{sub foo( :a ){}};
-				my $p = $pt.parse-source( $source );
-				my $tree = $pt.build-tree( $p );
-				ok $pt.validate( $p ), Q{valid};
-				is $pt.format( $tree ), $source, Q{formatted};
-)
-			}, Q{no ws};
-
-			subtest {
-				plan 0;
-#`( XXX Illegal
-				my $source = Q:to[_END_];
-sub foo( :a ) { }
-_END_
-				my $p = $pt.parse-source( $source );
-				my $tree = $pt.build-tree( $p );
-				ok $pt.validate( $p ), Q{valid};
-				is $pt.format( $tree ), $source, Q{formatted};
-)
-			}, Q{ws};
-		}, Q{optional};
+		# XXX 'sub foo(:a) { }' illegal
 	}, Q{single};
 
 	subtest {
@@ -316,7 +285,6 @@ subtest {
 
 	subtest {
 		plan 0;
-
 #`(
 		my $source = Q{sub foo($a,Str$b,Str$c where"foo",Int$d=32){}};
 		my $p = $pt.parse-source( $source );

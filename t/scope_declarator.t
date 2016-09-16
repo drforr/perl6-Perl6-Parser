@@ -151,65 +151,9 @@ _END_
 	}, Q{leading ws};
 }, Q{HAS};
 
-#`( Not implemented yet
-subtest {
-	plan 2;
+# XXX 'augment $x' is NIY
 
-	subtest {
-		plan 2;
-
-		my $source = Q:to[_END_];
-augment$x
-_END_
-		my $p = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
-		is $pt.format( $tree ), $source, Q{formatted};
-	}, Q{no ws};
-
-	subtest {
-		plan 2;
-
-		my $source = Q:to[_END_];
-augment     $x
-_END_
-		my $p = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
-		is $pt.format( $tree ), $source, Q{formatted};
-	}, Q{leading ws};
-}, Q{augment};
-)
-
-#`( Not implemented yet
-subtest {
-	plan 2;
-
-	subtest {
-		plan 2;
-
-		my $source = Q:to[_END_];
-anon$x
-_END_
-		my $p = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
-		is $pt.format( $tree ), $source, Q{formatted};
-	}, Q{no ws};
-
-	subtest {
-		plan 2;
-
-		my $source = Q:to[_END_];
-anon     $x
-_END_
-		my $p = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
-		is $pt.format( $tree ), $source, Q{formatted};
-	}, Q{leading ws};
-}, Q{anon};
-)
+# XXX 'anon $x' is NIY
 
 subtest {
 	plan 2;
@@ -237,34 +181,6 @@ _END_
 	}, Q{leading ws};
 }, Q{state};
 
-#`( Not implemented yet
-subtest {
-	plan 2;
-
-	subtest {
-		plan 2;
-
-		my $source = Q:to[_END_];
-supersede$x
-_END_
-		my $p = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
-		is $pt.format( $tree ), $source, Q{formatted};
-	}, Q{no ws};
-
-	subtest {
-		plan 2;
-
-		my $source = Q:to[_END_];
-supersede     $x
-_END_
-		my $p = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
-		is $pt.format( $tree ), $source, Q{formatted};
-	}, Q{leading ws};
-}, Q{supersede};
-)
+# XXX 'supersede $x' NIY
 
 # vim: ft=perl6
