@@ -124,7 +124,6 @@ subtest {
 
 	subtest {
 		plan 0;
-
 #`(
 		my $source = Q:to[_END_];
 class Foo{HAS$x}
@@ -138,7 +137,6 @@ _END_
 
 	subtest {
 		plan 0;
-
 #`(
 		my $source = Q:to[_END_];
 class Foo{HAS     $x}

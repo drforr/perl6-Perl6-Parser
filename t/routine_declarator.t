@@ -145,7 +145,6 @@ _END_
 
 		subtest {
 			plan 0;
-
 #`(
 			my $source = Q:to[_END_];
 unit sub MAIN  ;

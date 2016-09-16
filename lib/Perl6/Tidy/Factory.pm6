@@ -1876,9 +1876,10 @@ class Perl6::Tidy::Factory {
 		if self.assert-hash-keys( $p,
 				[< postfix OPER >],
 				[< postfix_prefix_meta_operator >] ) {
-			@child =
-				self.__Term( $p.list.[0] ),
+			@child = self.__Term( $p.list.[0] );
+			@child.append(
 				self._postfix( $p.hash.<postfix> )
+			)
 		}
 		elsif self.assert-hash-keys( $p,
 				[< identifier >], [< args >] ) {
@@ -1971,8 +1972,7 @@ class Perl6::Tidy::Factory {
 		elsif self.assert-hash-keys( $p,
 				[< postfix OPER >],
 				[< postfix_prefix_meta_operator >] ) {
-			@child =
-				self.__Term( $p.list.[0] );
+			@child = self.__Term( $p.list.[0] );
 			@child.append(
 				self._postfix( $p.hash.<postfix> )
 			)
@@ -3652,8 +3652,27 @@ return True;
 		if self.assert-hash-keys( $p,
 				[< deflongname nibble >],
 				[< signature trait >] ) {
-			my Perl6::Element @_child =
-				self._nibble( $p.hash.<nibble> );
+			my Perl6::Element @_child;
+			my $x = $p.Str.substr(
+				0, $p.hash.<nibble>.from - $p.from
+			);
+			if $x ~~ m{ ( \s+ ) $ } {
+				@_child.append(
+					Perl6::WS.new(
+						:from( $p.hash.<nibble>.from - $0.Str.chars ),
+						:to( $p.hash.<nibble>.from ),
+						:content( $0.Str )
+					)
+				)
+			}
+			@_child.append(
+				self._nibble( $p.hash.<nibble> )
+			);
+			@_child.append(
+				Perl6::WS.whitespace-trailer(
+					$p.hash.<nibble>
+				)
+			);
 			@child = self._deflongname( $p.hash.<deflongname> );
 			my $remainder = substr( $p.Str, $p.hash.<deflongname>.Str.chars );
 			my $inset = 0;
@@ -4180,11 +4199,6 @@ return True;
 				self._param_var( $p.hash.<param_var> )
 			);
 			if $p.hash.<default_value> {
-#key-bounds $p.hash.<type_constraint>;
-#key-bounds $p.hash.<param_var>;
-#key-bounds $p.hash.<quant>;
-key-bounds $p;
-#say $p.dump;
 				if $p.Str ~~ m{ ( \s* ) ('=') ( \s* ) } {
 					if $0 and $0.Str.chars {
 						@child.append(

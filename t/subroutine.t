@@ -284,20 +284,18 @@ subtest {
 	plan 4;
 
 	subtest {
-		plan 0;
-#`(
+		plan 2;
+
 		my $source = Q{sub foo($a,Str$b,Str$c where"foo",Int$d=32){}};
 		my $p = $pt.parse-source( $source );
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
-)
 	}, Q{christmas tree, minimal spacing};
 
 	subtest {
-		plan 0;
+		plan 2;
 
-#`(
 		my $source = Q:to[_END_];
 sub foo($a,Str$b,Str$c where"foo",Int$d=32){}
 _END_
@@ -305,7 +303,6 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
-)
 	}, Q{christmas tree, minimal spacing};
 
 	# Having differing whitespace on each side of an operator assures
@@ -313,9 +310,8 @@ _END_
 	# actually being copied from the wrong RE.
 	#
 	subtest {
-		plan 0;
+		plan 2;
 
-#`(
 		my $source = Q:to[_END_];
 sub foo(
 $a  ,
@@ -332,13 +328,11 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
-)
 	}, Q{christmas tree, alternating spacing};
 
 	subtest {
-		plan 0;
+		plan 2;
 
-#`(
 		my $source = Q:to[_END_];
 sub foo(  $a  ,  Str  $b  ,  Str  $c  where  "foo"  ,  Int  $d  =  32  )  {  }
 _END_
@@ -346,7 +340,6 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
-)
 	}, Q{christmas tree, maximal spacing};
 }, Q{christmas tree};
 
