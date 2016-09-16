@@ -1999,7 +1999,7 @@ class Perl6::Tidy::Factory {
 				Perl6::WS.between-matches(
 					$p,
 					$p.hash.<prefix>,
-					$p.list.[0]
+					$p.list.[0].list.[0] // $p.list.[0]
 				)
 			);
 			@child.append(
@@ -3495,13 +3495,11 @@ return True;
 					Perl6::Operator::Prefix.from-match(
 						$_.hash.<sym>
 					);
-				if $_.Str ~~ m{ ( \s+ ) $ } {
-					@child.append(
-						Perl6::WS.whitespace-trailer(
-							$_
-						)
+				@child.append(
+					Perl6::WS.whitespace-trailer(
+						$_
 					)
-				}
+				)
 			}
 			default {
 				say $_.hash.keys.gist;
@@ -4548,9 +4546,29 @@ return True;
 							:content( QUES-QUES )
 						)
 					);
+					if $p.hash.<EXPR>.hash.<infix>.Str ~~ m{ '??' ( \s+ ) } {
+						@child.append(
+							Perl6::WS.new(
+								:from( $p.hash.<EXPR>.hash.<infix>.from + QUES-QUES.chars ),
+								:to( $p.hash.<EXPR>.hash.<infix>.from + QUES-QUES.chars + $0.Str.chars ),
+								:content( $0.Str )
+								
+							)
+						)
+					}
 					@child.append(
 						self.__Term( $p.hash.<EXPR>.list.[1] )
 					);
+					if $p.hash.<EXPR>.hash.<infix>.Str ~~ m{ ( \s+ ) '!!' } {
+						@child.append(
+							Perl6::WS.new(
+								:from( $p.hash.<EXPR>.hash.<infix>.to - BANG-BANG.chars - $0.Str.chars ),
+								:to( $p.hash.<EXPR>.hash.<infix>.to - BANG-BANG.chars ),
+								:content( $0.Str )
+								
+							)
+						)
+					}
 					@child.append(
 						Perl6::Operator::Infix.new(
 							$p.hash.<EXPR>, BANG-BANG

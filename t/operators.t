@@ -2513,8 +2513,8 @@ subtest {
 		}, Q{no ws};
 
 		subtest {
-			plan 0;
-#`(
+			plan 3;
+
 			my $source = Q:to[_END_];
 1 ?? 2 !! 3
 _END_
@@ -2525,7 +2525,6 @@ _END_
 					$tree.child.[0].child),
 				Q{found operator};
 			is $pt.format( $tree ), $source, Q{formatted};
-)
 		}, Q{ws};
 	}, Q{?? !!};
 
@@ -3263,40 +3262,5 @@ _END_
 		}, Q{ws};
 	}, Q{==>};
 }, Q{Sequencer Precedence};
-
-#`(
-
-my $x; $x.say
-my $x; $x.()
-my $x; $x.[]
-my $x; $x.{}
-my $x; $x.<>
-my $x; $x.«»
-my $x; ||$x
-
-3 ~& 2
-3 ~< 2
-3 ~> 2
-3 ?& 2
-3 ~| 2
-3 ~^ 2
-3 ?^ 2
-
-3 !eqv 2
-
-substr('a': 2)
-
-my @a; my @b; @a minmax @b
-my @a; my @b; @a X~ @b
-my @a; my @b; @a X* @b
-my @a; my @b; @a Xeqv @b
-my @a; print @a
-my @a; push @a, 1
-my @a; say @a
-my @a; die @a
-my @a; map @a, {}
-my @a; substr @a
-
-)
 
 # vim: ft=perl6

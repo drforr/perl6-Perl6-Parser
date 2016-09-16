@@ -835,23 +835,20 @@ subtest {
 			plan 2;
 
 			subtest {
-				plan 0;
-#`(
+				plan 3;
+
 				my $source = Q{-1i};
 				my $parsed = $pt.parse-source( $source );
-say $parsed.dump;
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number }, $tree.child.[0].child),
 					Q{found number};
 				is $pt.format( $tree ), $source, Q{formatted};
-)
 			}, Q{no ws};
 
 			subtest {
-				plan 0;
+				plan 3;
 
-#`(
 				my $source = Q{ -1i  };
 				my $parsed = $pt.parse-source( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -859,7 +856,6 @@ say $parsed.dump;
 				ok (grep { $_ ~~ Perl6::Number }, $tree.child.[0].child),
 					Q{found number};
 				is $pt.format( $tree ), $source, Q{formatted};
-)
 			}, Q{ws};
 		}, Q{-1i};
 	}, Q{imaginary};
@@ -1013,7 +1009,6 @@ subtest {
 
 		subtest {
 			plan 0;
-
 #`(
 			my $source = Q{q:to[_END_]
 Hello, world!
@@ -1029,7 +1024,6 @@ _END_};
 
 		subtest {
 			plan 0;
-
 #`(
 			my $source = Q{ q:to[_END_]
 Hello, world!
