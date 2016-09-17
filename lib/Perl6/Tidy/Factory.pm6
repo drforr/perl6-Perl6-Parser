@@ -103,6 +103,42 @@ Children: L<Perl6::Variable::Contextualizer::Scalar> and so forth.
 
 =cut
 
+=item L<Perl6::Sir-Not-Appearing-In-This-Statement>
+
+By way of caveat: If you stick to the APIs mentioned in the documentation, you should never deal with objects in this class. Ever. If you see this, you're probably debugging internals of this module, and if you're not, please send the author a snippet of code B<and> the associated Perl 6 code that replicates it.
+
+While you should stick to the published APIs, there are of course times when you need to get your proverbial hands dirty. Read on if you want the scoop.
+
+Your humble author has gone to a great deal of trouble to assure that every character of user code is parsed and represented in some fashion, and the internals keep track of the text down to the by..chara...glyph level. More to the point, each Perl6::Tidy element has its own start and end point.
+
+The internal method C<check-tree> does a B<rigorous> check of the entire parse tree, at least while self-tests are runnin. Relevant to the discussion at hand are two things: Checking that each element has exactly the number of glyphs that its start and end claim that it has, and checking that each element exactly overlaps its neighbos, with no gaps.
+
+Look at a sample contrived here-doc:
+
+    # It starts
+    #   V-- here. V--- But does it end here?
+    say Q:to[_END_]; say 2 +
+        First line
+        _END_
+    #   ^--- Wait, it ends here, in the *middle* of the next statement.
+    5;
+
+While a contrived example, it'll do to make my points. The first rule the internals assert is that tokens start at glyph X and end at glyph Y. Here-docs break that rule right off the bat. They start at the C<Q:to[_END_]>, skip a bunch of glyphs ahead, then stop at the terninal C<_END_> several lines later.
+
+So, B<internally>, here-docs start at the C<Q> of C<Q:to[_END_]> and end at the closing C<]> of C<Q:to[_END_]>. Any other text that it might have is stored somewhere that the self-test algorithm won't find it. So if you're probing the L<Here-Doc> class for its text directly (which the author disrecommends), you won't find it all there.
+
+There also can't be any gaps between two tokens, and again, here-docs break that rule. If we take it at face value, C<Q:to[_END_]> and C<First line.._END_> are two separate tokens, simply because there's an intervening 'say 2', which (to make matters worse) is in a different L<Perl6::Statement>.
+
+Now L<Perl6::Sir-Not-Appearing-In-This-Statement> comes into play. Since tokens can only be a single block of text, we can't have both the C<Q:to[_END_]> and C<First line> be in the same token; and if we did break them up (which we do), they can't be the same class, because we'd end up with multiple heredocs later on when parsing.
+
+So our single here-doc internally becomes two elements. First comes the official L<Perl6::String> element, which you can query to get the delimiter (C<_END_>), full text (C<Q:to[_END_]>\nFirst line\n_END_> and the body text, C<First line>.
+
+Later on, we run across the actual body of the here-doc, and rather than fiddling with the validation algorithms, we drop in L<Sir-Not-Appearing-In-This-Statement>, a "token" that doesn't exist. It has the bounds of the C<First line\n_END_> text, so that it appears for our validation algorithm. But it's special-cased to not appear in the C<dump-tree> method, or anything that deals with L<Perl6::Statement>s because while B<syntactically> it's in a statement's boundary, it's not B<semantically> part of the statement it "appears" in.
+
+Whew. If you're doing manipulation of statements, B<now> hopefully you'll see why the author recommends sticking to the methods in the API. Eventually this little kink may get ironed out and here-docs may be relegated to a special case somewhere, but not today.
+
+=cut
+
 =end CLASSES
 
 =begin ROLES
@@ -562,6 +598,19 @@ class Perl6::Document does Branching does Bounded {
 	also is Perl6::Element;
 }
 
+# If you have any curiosity about this, please search for /Sir-Not in the
+# docs. This workaround may be gone by the time you read about this class,
+# and if so, I'm glad.
+#
+class Perl6::Sir-Not-Appearing-In-This-Statement does Bounded {
+	also is Perl6::Element;
+	has $.content; # XXX because it's not quite a token.
+
+	method perl6( $f ) {
+		~$.content
+	}
+}
+
 class Perl6::Statement does Branching does Bounded {
 	also is Perl6::Element;
 
@@ -675,11 +724,47 @@ class Perl6::Number::Floating {
 
 class Perl6::String does Token {
 	also is Perl6::Element;
-	has Str $.bare; # Easier to grab it from the parser.
+#	has Str $.bare; # Easier to grab it from the parser.
 
-	has $.q;
+#	has $.q;
 	has @.delimiter;
-	has @.adverb;
+#	has @.adverb;
+}
+class Perl6::String::Quote::Single does Token {
+	also is Perl6::String;
+
+	has Str @.delimiter = ( Q{'}, Q{'} );
+
+	multi method from-match( Mu $p ) {
+		if $p.from < $p.to {
+			self.bless(
+				:from( $p.from ),
+				:to( $p.to ),
+				:content( $p.Str )
+			)
+		}
+		else {
+			( )
+		}
+	}
+}
+class Perl6::String::Quote::Double does Token {
+	also is Perl6::String;
+
+	has Str @.delimiter = ( Q{"}, Q{"} );
+
+	multi method from-match( Mu $p ) {
+		if $p.from < $p.to {
+			self.bless(
+				:from( $p.from ),
+				:to( $p.to ),
+				:content( $p.Str )
+			)
+		}
+		else {
+			( )
+		}
+	}
 }
 
 # XXX Needs work
@@ -951,6 +1036,8 @@ class Perl6::Tidy::Factory {
 	constant FATARROW = Q{=>};
 	constant HYPER = Q{>>};
 
+	has %.here-doc; # Text for here-docs, indexed by their $p.from.
+
 	sub substr-match( Mu $p, Int $offset where * >= 0, Int $chars ) {
 		substr(
 			$p.Str,
@@ -959,7 +1046,18 @@ class Perl6::Tidy::Factory {
 		)
 	}
 
+	method __Build-Heredoc-List( Mu $p ) {
+		%.here-doc = ();
+		while $p.Str ~~ m:c{ 'q:to[' \s* ( <-[ \] ]>+ ) } {
+			my $start = $/.from;
+			my $marker = $0.Str;
+			$p.Str ~~ m{ \s* ']' (.+?) $marker };
+			%.here-doc{ $start } = $0.Str, $marker;
+		}
+	}
+
 	method build( Mu $p ) {
+		self.__Build-Heredoc-List( $p );
 		my Perl6::Element @_child =
 			self._statementlist( $p.hash.<statementlist> );
 		Perl6::Document.new(
@@ -3577,12 +3675,23 @@ return True;
 	#
 	method _quote( Mu $p ) {
 		if self.assert-hash-keys( $p, [< sym quibble rx_adverbs >] ) {
+#key-bounds $p.hash.<sym>;
+#key-bounds $p.hash.<rx_adverbs>;
+#key-bounds $p.hash.<quibble>;
+#key-bounds $p;
 			die "Not implemented yet"
 		}
 		elsif self.assert-hash-keys( $p, [< sym rx_adverbs sibble >] ) {
+##key-bounds $p.hash.<sym>;
+#key-bounds $p.hash.<rx_adverbs>;
+#key-bounds $p.hash.<sibble>;
+#key-bounds $p;
 			die "Not implemented yet"
 		}
 		elsif self.assert-hash-keys( $p, [< quibble >] ) {
+#key-bounds $p.hash.<quibble>.hash.<nibble>;
+#key-bounds $p.hash.<quibble>;
+#key-bounds $p;
 			my $leader = $p.Str.substr(
 				0,
 				$p.hash.<quibble>.hash.<nibble>.from - $p.from
@@ -3590,6 +3699,12 @@ return True;
 			my $trailer = $p.Str.substr(
 				$p.hash.<quibble>.hash.<nibble>.to - $p.from
 			);
+			my $content = $p.Str;
+			if $leader ~~ m{ ':to' } {
+				my ( $content, $marker ) =
+					%.here-doc{ $p.from };
+				$content = $content;
+			}
 			$leader ~~ m{ ^
 				( <[ q Q ]>+ ) \s*
 					[ ( ':' q ) \s* ]? # XXX yes, yes...
@@ -3599,22 +3714,32 @@ return True;
 			Perl6::String.new(
 				:from( $p.from ),
 				:to( $p.to ),
-				:q( $0.Str ),
+#				:q( $0.Str ),
 				:delimiter( $3.Str, $trailer ),
-				:adverb( ( $1 ?? $1.Str !! (),
-					   $2 ?? $2.Str !! () ).flat
-				),
-				:content( $p.Str )
+#				:adverb( ( $1 ?? $1.Str !! (),
+#					   $2 ?? $2.Str !! () ).flat
+#				),
+				:content( $content )
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< nibble >] ) {
 			$p.Str ~~ m{ ^ (.) .* (.) $ };
-			Perl6::String.new(
-				:from( $p.from ),
-				:to( $p.to ),
-				:delimiter( $0.Str, $1.Str ),
-				:content( $p.Str )
-			)
+			given $0.Str {
+				when Q{'} {
+					Perl6::String::Quote::Single.from-match(
+						$p
+					)
+				}
+				when Q{"} {
+					Perl6::String::Quote::Double.from-match(
+						$p
+					)
+				}
+				default {
+					# XXX
+					die "Unknown delimiter"
+				}
+			}
 		}
 		else {
 			say $p.hash.keys.gist;
