@@ -676,6 +676,10 @@ class Perl6::Number::Floating {
 class Perl6::String does Token {
 	also is Perl6::Element;
 	has Str $.bare; # Easier to grab it from the parser.
+
+	has $.q;
+	has @.delimiter;
+	has @.adverb;
 }
 
 # XXX Needs work
@@ -3579,31 +3583,37 @@ return True;
 			die "Not implemented yet"
 		}
 		elsif self.assert-hash-keys( $p, [< quibble >] ) {
-			# XXX This should properly call quibble, but that's
-			# XXX for later.
-			if $p.Str ~~ m:i/^Q/ {
-				Perl6::String.new(
-					:from( $p.from ),
-					:to( $p.to ),
-					:content( $p.Str ),
-					:bare( $p.hash.<quibble>.hash.<nibble>.Str )
-				)
-			}
-			else {
-				Perl6::String.new(
-					:from( $p.hash.<quibble>.from ),
-					:to( $p.hash.<quibble>.to ),
-					:content( $p.Str ),
-					:bare( $p.hash.<quibble>.hash.<nibble>.Str )
-				)
-			}
-		}
-		elsif self.assert-hash-keys( $p, [< nibble >] ) {
+			my $leader = $p.Str.substr(
+				0,
+				$p.hash.<quibble>.hash.<nibble>.from - $p.from
+			);
+			my $trailer = $p.Str.substr(
+				$p.hash.<quibble>.hash.<nibble>.to - $p.from
+			);
+			$leader ~~ m{ ^
+				( <[ q Q ]>+ ) \s*
+					[ ( ':' q ) \s* ]? # XXX yes, yes...
+					[ ( ':' to ) \s* ]?
+				( . ) $
+			};
 			Perl6::String.new(
 				:from( $p.from ),
 				:to( $p.to ),
-				:content( $p.Str ),
-				:bare( $p.hash.<nibble>.Str )
+				:q( $0.Str ),
+				:delimiter( $3.Str, $trailer ),
+				:adverb( ( $1 ?? $1.Str !! (),
+					   $2 ?? $2.Str !! () ).flat
+				),
+				:content( $p.Str )
+			)
+		}
+		elsif self.assert-hash-keys( $p, [< nibble >] ) {
+			$p.Str ~~ m{ ^ (.) .* (.) $ };
+			Perl6::String.new(
+				:from( $p.from ),
+				:to( $p.to ),
+				:delimiter( $0.Str, $1.Str ),
+				:content( $p.Str )
 			)
 		}
 		else {

@@ -862,7 +862,7 @@ subtest {
 }, Q{number};
 
 subtest {
-	plan 6;
+	plan 8;
 
 	subtest {
 		plan 2;
@@ -919,6 +919,62 @@ subtest {
 			is $pt.format( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{"Hello, world!"};
+
+	subtest {
+		plan 2;
+
+		subtest {
+			plan 3;
+
+			my $source = Q{Q :q ^Hello, world!^};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::String }, $tree.child.[0].child),
+				Q{found string};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+
+		subtest {
+			plan 3;
+
+			my $source = Q{ Q :q ^Hello, world!^  };
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::String }, $tree.child.[0].child),
+				Q{found string};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
+	}, Q{Q :q ^Hello, world!^};
+
+	subtest {
+		plan 2;
+
+		subtest {
+			plan 3;
+
+			my $source = Q{Q ^Hello, world!^};
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::String }, $tree.child.[0].child),
+				Q{found string};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{no ws};
+
+		subtest {
+			plan 3;
+
+			my $source = Q{ Q ^Hello, world!^  };
+			my $parsed = $pt.parse-source( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			ok (grep { $_ ~~ Perl6::String }, $tree.child.[0].child),
+				Q{found string};
+			is $pt.format( $tree ), $source, Q{formatted};
+		}, Q{ws};
+	}, Q{Q ^Hello, world!^};
 
 	subtest {
 		plan 2;
@@ -1014,9 +1070,11 @@ subtest {
 Hello, world!
 _END_};
 			my $parsed = $pt.parse-source( $source );
+say $parsed.dump;
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::String }, $tree.child.[0].child),
+			ok (grep { $_ ~~ Perl6::String },
+				$tree.child.[0].child),
 				Q{found string};
 			is $pt.format( $tree ), $source, Q{formatted};
 )
