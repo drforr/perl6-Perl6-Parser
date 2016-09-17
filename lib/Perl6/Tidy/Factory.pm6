@@ -722,6 +722,28 @@ class Perl6::Number::Floating {
 	}
 }
 
+class Perl6::Regex does Token {
+	also is Perl6::Element;
+#	has Str $.bare; # Easier to grab it from the parser.
+
+#	has $.q;
+#	has @.delimiter;
+#	has @.adverb;
+
+	multi method from-match( Mu $p ) {
+		if $p.from < $p.to {
+			self.bless(
+				:from( $p.from ),
+				:to( $p.to ),
+				:content( $p.Str )
+			)
+		}
+		else {
+			( )
+		}
+	}
+}
+
 class Perl6::String does Token {
 	also is Perl6::Element;
 #	has Str $.bare; # Easier to grab it from the parser.
@@ -765,11 +787,6 @@ class Perl6::String::Quote::Double does Token {
 			( )
 		}
 	}
-}
-
-# XXX Needs work
-class Perl6::Regex does Token {
-	also is Perl6::Element;
 }
 
 class Perl6::Bareword does Token {
@@ -3723,7 +3740,7 @@ return True;
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< nibble >] ) {
-			$p.Str ~~ m{ ^ (.) .* (.) $ };
+			$p.Str ~~ m{ ^ (.) .*? (.) $ };
 			given $0.Str {
 				when Q{'} {
 					Perl6::String::Quote::Single.from-match(
@@ -3735,9 +3752,13 @@ return True;
 						$p
 					)
 				}
+				when Q{/} {
+					# XXX Need to pass delimiters in
+					Perl6::Regex.from-match( $p )
+				}
 				default {
 					# XXX
-					die "Unknown delimiter"
+					die "Unknown delimiter '{$0.Str}'"
 				}
 			}
 		}
