@@ -112,29 +112,25 @@ subtest {
 	plan 2;
 
 	subtest {
-		plan 0;
-#`(
-		my $source = Q:to[_END_];
-class Foo{HAS$x}
-_END_
+		plan 2;
+
+		my $source = Q{class Foo is repr('CStruct'){HAS int $x}};
 		my $p = $pt.parse-source( $source );
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
-)
 	}, Q{no ws};
 
 	subtest {
-		plan 0;
-#`(
+		plan 2;
+
 		my $source = Q:to[_END_];
-class Foo{HAS     $x}
+class Foo is repr( 'CStruct' ) { HAS int $x }
 _END_
 		my $p = $pt.parse-source( $source );
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
-)
 	}, Q{leading ws};
 }, Q{HAS};
 
