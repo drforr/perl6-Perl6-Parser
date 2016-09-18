@@ -187,6 +187,7 @@ class Perl6::Tidy {
 				die "Content '{$root.content}' too long for element ({$root.from} - {$root.to})"
 			}
 			if $root !~~ Perl6::WS and
+					$root !~~ Perl6::Sir-Not-Appearing-In-This-Statement and
 					$root.content ~~ m{ ^ (\s+) } {
 				say $root.perl;
 				die "Content '{$root.content}' has leading whitespace"
@@ -206,6 +207,8 @@ class Perl6::Tidy {
 	}
 
 	method dump-term( Perl6::Element $term ) {
+		return if $term ~~ Perl6::Sir-Not-Appearing-In-This-Statement;
+
 		my $str = $term.WHAT.perl;
 		if $term ~~ Perl6::Block or
 		   $term ~~ Perl6::Operator::Circumfix or

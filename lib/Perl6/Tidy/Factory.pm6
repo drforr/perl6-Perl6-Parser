@@ -1063,13 +1063,27 @@ class Perl6::Tidy::Factory {
 		)
 	}
 
+	my class Here-Doc {
+		has Int $.delimiter-start; # 'q:to[_FOO_]'
+		has Int $.body-from; # 'Hello, world!\n_FOO_'
+		has Int $.body-to; #  'Hello, world!\n_FOO_'
+		has Str $.marker;
+	}
+
 	method __Build-Heredoc-List( Mu $p ) {
 		%.here-doc = ();
-		while $p.Str ~~ m:c{ 'q:to[' \s* ( <-[ \] ]>+ ) } {
-			my $start = $/.from;
-			my $marker = $0.Str;
-			$p.Str ~~ m{ \s* ']' (.+?) $marker };
-			%.here-doc{ $start } = $0.Str, $marker;
+		while $p.Str ~~ m:c{ ( 'q:to[' ) \s* ( <-[ \] ]>+ ) } {
+			my $start = $0.from;
+			my $marker = $1.Str;
+			#$p.Str ~~ m{ \s* ']' (.+?) ( $marker ) };
+			$p.Str ~~ m{ \s* ']' ( .*? $$ ) (.+?) ( $marker ) };
+			%.here-doc{ $start } =
+				Here-Doc.new(
+					:delimiter-start( $start ),
+					:body-from( $1.from ),
+					:body-to( $1.to ),
+					:marker( $marker )
+				);
 		}
 	}
 
@@ -2504,6 +2518,21 @@ class Perl6::Tidy::Factory {
 					self._EXPR( $p.hash.<EXPR> )
 				)
 			}
+			if $p.hash.<EXPR>.to < $p.to and
+			   %.here-doc.keys.elems > 0 {
+				@child.append(
+					Perl6::Sir-Not-Appearing-In-This-Statement.new(
+						:from( $p.hash.<EXPR>.to ),
+						:to( $p.to ),
+						:content(
+							$p.Str.substr(
+								$p.hash.<EXPR>.to - $p.from
+							);
+						)
+					)
+
+				)
+			}
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -3692,50 +3721,40 @@ return True;
 	#
 	method _quote( Mu $p ) {
 		if self.assert-hash-keys( $p, [< sym quibble rx_adverbs >] ) {
-#key-bounds $p.hash.<sym>;
-#key-bounds $p.hash.<rx_adverbs>;
-#key-bounds $p.hash.<quibble>;
-#key-bounds $p;
 			die "Not implemented yet"
 		}
 		elsif self.assert-hash-keys( $p, [< sym rx_adverbs sibble >] ) {
-##key-bounds $p.hash.<sym>;
-#key-bounds $p.hash.<rx_adverbs>;
-#key-bounds $p.hash.<sibble>;
-#key-bounds $p;
 			die "Not implemented yet"
 		}
 		elsif self.assert-hash-keys( $p, [< quibble >] ) {
-#key-bounds $p.hash.<quibble>.hash.<nibble>;
-#key-bounds $p.hash.<quibble>;
-#key-bounds $p;
 			my $leader = $p.Str.substr(
 				0,
 				$p.hash.<quibble>.hash.<nibble>.from - $p.from
 			);
+
+			my Bool ( $has-q, $has-to ) = False, False;
+			$has-q = True if $leader ~~ m{ ':q' };
+			$has-to = True if $leader ~~ m{ ':to' };
+
 			my $trailer = $p.Str.substr(
 				$p.hash.<quibble>.hash.<nibble>.to - $p.from
 			);
 			my $content = $p.Str;
-			if $leader ~~ m{ ':to' } {
+			if $has-to {
 				my ( $content, $marker ) =
 					%.here-doc{ $p.from };
 				$content = $content;
 			}
-			$leader ~~ m{ ^
-				( <[ q Q ]>+ ) \s*
-					[ ( ':' q ) \s* ]? # XXX yes, yes...
-					[ ( ':' to ) \s* ]?
-				( . ) $
-			};
+			$leader ~~ m{ ( . ) $ };
+			my @adverb;
+			@adverb.append( ':q' ) if $has-q;
+			@adverb.append( ':to' ) if $has-to;
+
 			Perl6::String.new(
 				:from( $p.from ),
 				:to( $p.to ),
-#				:q( $0.Str ),
-				:delimiter( $3.Str, $trailer ),
-#				:adverb( ( $1 ?? $1.Str !! (),
-#					   $2 ?? $2.Str !! () ).flat
-#				),
+				:delimiter( $0.Str, $trailer ),
+				:adverb( @adverb ),
 				:content( $content )
 			)
 		}
