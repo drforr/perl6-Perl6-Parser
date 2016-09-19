@@ -4738,9 +4738,23 @@ return True;
 		if $p.list {
 			for $p.list {
 				if self.assert-hash-keys( $_,
-						[< statement_mod_loop
-						   EXPR >] ) {
-					die "Not implemented yet"
+						[< EXPR
+						   statement_mod_loop >] ) {
+					@child.append(
+						self._EXPR( $_.hash.<EXPR> )
+					);
+					@child.append(
+						Perl6::WS.between-matches(
+							$_,
+							'EXPR',
+							'statement_mod_loop'
+						)
+					);
+					@child.append(
+						self._statement_mod_loop(
+							$_.hash.<statement_mod_loop>
+						)
+					)
 				}
 				elsif self.assert-hash-keys( $_,
 						[< statement_mod_cond

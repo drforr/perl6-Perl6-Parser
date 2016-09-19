@@ -11,8 +11,8 @@ subtest {
 	plan 5;
 
 	subtest {
-		plan 0;
-#`(
+		plan 2;
+
 		my $source = Q:to[_END_];
 my @doors = False xx 101;
  
@@ -23,7 +23,6 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
-)
 	}, Q{regression};
 
 	subtest {
