@@ -1485,7 +1485,6 @@ class Perl6::Tidy::Factory {
 				)
 		}
 		elsif self.assert-hash-keys( $p, [< nibble >] ) {
-			# XXX <nibble> can probably be worked with
 			my Perl6::Element @_child;
 			@_child.append(
 				Perl6::WS.with-header-trailer(
@@ -4322,7 +4321,17 @@ return True;
 		my Perl6::Element @child;
 		if self.assert-hash-keys( $p, [< statement >] ) {
 			@child.append(
+				Perl6::WS.whitespace-header(
+					$p
+				)
+			);
+			@child.append(
 				self._statement( $p.hash.<statement> )
+			);
+			@child.append(
+				Perl6::WS.whitespace-trailer(
+					$p
+				)
 			)
 		}
 		elsif self.assert-hash-keys( $p, [ ], [< statement >] ) {
