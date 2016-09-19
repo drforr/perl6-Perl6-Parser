@@ -77,8 +77,8 @@ _END_
 		}, Q{no ws};
 
 		subtest {
-			plan 3;
-
+			plan 0;
+#`(
 			my $source = Q:to[_END_];
 ( 1 )
 _END_
@@ -89,6 +89,7 @@ _END_
 					$tree.child.[0].child),
 				Q{found operator};
 			is $pt.format( $tree ), $source, Q{formatted};
+)
 		}, Q{ws};
 	}, Q{()};
 
@@ -141,8 +142,8 @@ _END_
 		}, Q{no ws};
 
 		subtest {
-			plan 3;
-
+			plan 0;
+#`(
 			my $source = Q:to[_END_];
 [ 1 ]
 _END_
@@ -153,6 +154,7 @@ _END_
 					$tree.child.[0].child),
 				Q{found operator};
 			is $pt.format( $tree ), $source, Q{formatted};
+)
 		}, Q{ws};
 	}, Q{[]}
 }, Q{Term Precedence};

@@ -497,9 +497,9 @@ class Perl6::WS does Token {
 	}
 
 	method comma-separator( Int $offset, Str $split-me ) {
+		my Perl6::Element @child;
 		my Int $start = $offset;
 		my ( $lhs, $rhs ) = split( COMMA, $split-me );
-		my Perl6::Element @child;
 		if $lhs and $lhs ne '' {
 			@child.append(
 				Perl6::WS.new( $start, $lhs )
@@ -1318,7 +1318,15 @@ class Perl6::Tidy::Factory {
 		}
 	}
 
-	method _backmod( Mu $p ) { $p.hash.<backmod>.Bool }
+	method _backmod( Mu $p ) {
+		if self.assert-hash-keys( $p, [< backmod >] ) {
+			$p.hash.<backmod>.Bool
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
+	}
 
 	# qq
 	# \\
@@ -1468,24 +1476,9 @@ class Perl6::Tidy::Factory {
 		}
 		elsif self.assert-hash-keys( $p, [< semilist >] ) {
 			my Perl6::Element @_child;
-			# XXX <semilist> can probably be worked with
-			if $p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR> {
-				@_child.append(
-					Perl6::WS.with-header-trailer(
-						$p.hash.<semilist>,
-						self._EXPR(
-							$p.hash.<semilist>.hash.<statement>.list.[0].hash.<EXPR>
-						)
-					)
-				);
-			}
-			elsif $p.hash.<semilist>.Str ~~ m{ ^ ( \s+ ) $ } {
-				@_child.append(
-					Perl6::WS.from-match(
-						$p.hash.<semilist>
-					)
-				)
-			}
+			@_child.append(
+				self._semilist( $p.hash.<semilist> )
+			);
 			@child =
 				Perl6::Operator::Circumfix.from-match(
 					$p, @_child
@@ -1929,7 +1922,13 @@ class Perl6::Tidy::Factory {
 	}
 
 	method _doc( Mu $p ) {
-		$p.hash.<doc>.Bool
+		if self.assert-hash-keys( $p, [< doc >] ) {
+			$p.hash.<doc>.Bool
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
 	# .
@@ -2250,6 +2249,9 @@ class Perl6::Tidy::Factory {
 		}
 		elsif self.assert-hash-keys( $p, [< circumfix >] ) {
 			@child = self._circumfix( $p.hash.<circumfix> )
+		}
+		elsif self.assert-hash-keys( $p, [< dotty >] ) {
+			@child = self._dotty( $p.hash.<dotty> )
 		}
 		elsif self.assert-hash-keys( $p, [< fatarrow >] ) {
 			@child = self._fatarrow( $p.hash.<fatarrow> )
@@ -2588,7 +2590,13 @@ return True;
 	}
 
 	method _lambda( Mu $p ) {
-		$p.hash.<lambda>.Str
+		if self.assert-hash-keys( $p, [< lambda >] ) {
+			$p.hash.<lambda>.Str
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
 	method _left( Mu $p ) {
@@ -2613,7 +2621,13 @@ return True;
 	}
 
 	method _max( Mu $p ) {
-		$p.hash.<max>.Str
+		if self.assert-hash-keys( $p, [< max >] ) {
+			$p.hash.<max>.Str
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
 	# :my
@@ -2888,7 +2902,13 @@ return True;
 	}
 
 	method _normspace( Mu $p ) {
-		$p.hash.<normspace>.Str
+		if self.assert-hash-keys( $p, [< normspace >] ) {
+			$p.hash.<normspace>.Str
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
 	method _noun( Mu $p ) {
@@ -3671,7 +3691,13 @@ return True;
 	}
 
 	method _quant( Mu $p ) {
-		$p.hash.<quant>.Bool
+		if self.assert-hash-keys( $p, [< quant >] ) {
+			$p.hash.<quant>.Bool
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
 	method _quantified_atom( Mu $p ) {
@@ -3831,7 +3857,13 @@ return True;
 	}
 
 	method _radix( Mu $p ) {
-		$p.hash.<radix>.Int
+		if self.assert-hash-keys( $p, [< radix >] ) {
+			$p.hash.<radix>.Int
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
 	method _rad_number( Mu $p ) {
@@ -3949,7 +3981,13 @@ return True;
 	}
 
 	method _right( Mu $p ) {
-		$p.hash.<right>.Bool
+		if self.assert-hash-keys( $p, [< right >] ) {
+			$p.hash.<right>.Bool
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
 	# sub <name> ... { },
@@ -4281,25 +4319,24 @@ return True;
 	}
 
 	method _semilist( Mu $p ) {
-		CATCH {
-			when X::Multi::NoMatch { }
-		}
-		if $p.hash.<statement>.list.[0].hash.<EXPR> {
-			my Perl6::Element @_child =
-				self._EXPR(
-					$p.hash.<statement>.list.[0].hash.<EXPR>
-				);
-			Perl6::Operator::PostCircumfix.from-match(
-				$p, @_child
+		my Perl6::Element @child;
+		if self.assert-hash-keys( $p, [< statement >] ) {
+			@child.append(
+				self._statement( $p.hash.<statement> )
 			)
 		}
-		elsif self.assert-hash-keys( $p, [< statement >] ) {
-			self._EXPR( $p.hash.<statement>.list.[0].<EXPR> )
+		elsif self.assert-hash-keys( $p, [ ], [< statement >] ) {
+			@child.append(
+				Perl6::WS.from-match(
+					$p
+				)
+			)
 		}
 		else {
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
+		@child
 	}
 
 	method _separator( Mu $p ) {
@@ -4314,11 +4351,23 @@ return True;
 	}
 
 	method _septype( Mu $p ) {
-		$p.hash.<septype>.Str
+		if self.assert-hash-keys( $p, [< septype >] ) {
+			$p.hash.<septype>.Str
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
 	method _shape( Mu $p ) {
-		$p.hash.<shape>.Str
+		if self.assert-hash-keys( $p, [< shape >] ) {
+			$p.hash.<shape>.Str
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
 	method _sibble( Mu $p ) {
@@ -4344,7 +4393,13 @@ return True;
 	}
 
 	method _sigil( Mu $p ) {
-		$p.hash.<sym>.Str
+		if self.assert-hash-keys( $p, [< sym >] ) {
+			$p.hash.<sym>.Str
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
 	method _sigmaybe( Mu $p ) {
@@ -4600,7 +4655,6 @@ return True;
 	}
 
 	method _smexpr( Mu $p ) {
-		warn "Untested method";
 		if self.assert-hash-keys( $p, [< EXPR >] ) {
 			self._EXPR( $p.hash.<EXPR> )
 		}
@@ -4611,7 +4665,13 @@ return True;
 	}
 
 	method _specials( Mu $p ) {
-		$p.hash.<specials>.Bool
+		if self.assert-hash-keys( $p, [< specials >] ) {
+			$p.hash.<specials>.Bool
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
 	# if
@@ -4699,6 +4759,22 @@ return True;
 					warn "Unhandled case"
 				}
 			}
+		}
+		elsif self.assert-hash-keys( $p,
+				[< EXPR statement_mod_loop >] ) {
+			@child = self._EXPR( $p.hash.<EXPR> );
+			@child.append(
+				Perl6::WS.between-matches(
+					$p,
+					'EXPR',
+					'statement_mod_loop'
+				)
+			);
+			@child.append(
+				self._statement_mod_loop(
+					$p.hash.<statement_mod_loop>
+				)
+			)
 		}
 		elsif self.assert-hash-keys( $p, [< sym trait >] ) {
 			@child = self._sym( $p.hash.<sym> );
@@ -4807,6 +4883,9 @@ return True;
 				self._statement_control(
 					$p.hash.<statement_control>
 				).flat;
+		}
+		elsif !$p.hash.keys {
+			note "Fix null case"
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -4977,14 +5056,25 @@ return True;
 	# given
 	#
 	method _statement_mod_loop( Mu $p ) {
-		warn "Untested method";
+		my Perl6::Element @child;
 		if self.assert-hash-keys( $p, [< sym smexpr >] ) {
-			die "Not implemented yet"
+			@child = self._sym( $p.hash.<sym> );
+			@child.append(
+				Perl6::WS.between-matches(
+					$p,
+					'sym',
+					'smexpr'
+				)
+			);
+			@child.append(
+				self._smexpr( $p.hash.<smexpr> )
+			)
 		}
 		else {
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
+		@child
 	}
 
 	# BEGIN
@@ -5326,7 +5416,13 @@ return True;
 	}
 
 	method _twigi( Mu $p ) {
-		$p.hash.<sym>.Str
+		if self.assert-hash-keys( $p, [< sym >] ) {
+			$p.hash.<sym>.Str
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
 	method _type_constraint( Mu $p ) {
@@ -5677,7 +5773,13 @@ return True;
 	}
 
 	method _vstr( Mu $p ) {
-		$p.hash.<vstr>.Int
+		if self.assert-hash-keys( $p, [< vstr >] ) {
+			$p.hash.<vstr>.Int
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
 	method _vnum( Mu $p ) {
@@ -5702,7 +5804,13 @@ return True;
 	}
 
 	method _wu( Mu $p ) {
-		$p.hash.<wu>.Str
+		if self.assert-hash-keys( $p, [< wu >] ) {
+			$p.hash.<wu>.Str
+		}
+		else {
+			say $p.hash.keys.gist;
+			warn "Unhandled case"
+		}
 	}
 
 	method _xblock( Mu $p ) {
