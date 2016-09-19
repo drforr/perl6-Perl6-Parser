@@ -180,11 +180,11 @@ class Perl6::Tidy {
 		if $root.^can('content') {
 			if $root.content.chars < $root.to - $root.from {
 				say $root.perl;
-				die "Content '{$root.content}' too short for element ({$root.from} - {$root.to})"
+				die "Content '{$root.content}' too short for element ({$root.from} - {$root.to}) ({$root.to - $root.from} chars)"
 			}
 			if $root.content.chars > $root.to - $root.from {
 				say $root.perl;
-				die "Content '{$root.content}' too long for element ({$root.from} - {$root.to})"
+				die "Content '{$root.content}' too long for element ({$root.from} - {$root.to}) ({$root.to - $root.from} glyphs}"
 			}
 			if $root !~~ Perl6::WS and
 					$root !~~ Perl6::Sir-Not-Appearing-In-This-Statement and
@@ -207,8 +207,6 @@ class Perl6::Tidy {
 	}
 
 	method dump-term( Perl6::Element $term ) {
-		return if $term ~~ Perl6::Sir-Not-Appearing-In-This-Statement;
-
 		my $str = $term.WHAT.perl;
 		if $term ~~ Perl6::Block or
 		   $term ~~ Perl6::Operator::Circumfix or
@@ -225,7 +223,8 @@ class Perl6::Tidy {
 			$str ~= " ({$term.content})"
 		}
 		elsif $term ~~ Perl6::String {
-			$str ~= " ({$term.content}) ('{$term.bare}')"
+#			$str ~= " ({$term.content}) ('{$term.bare}')"
+			$str ~= " ({$term.content})"
 		}
 
 		if $term.^can('from') and not (

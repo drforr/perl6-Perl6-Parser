@@ -1088,9 +1088,32 @@ class Perl6::Tidy::Factory {
 	}
 
 	method build( Mu $p ) {
+say "1 " ~ $p.dump;
+#key-bounds $p.hash.<statementlist>.hash.<statement>.list.[0];
+#key-bounds $p.hash.<statementlist>;
+#key-bounds $p;
+if $p.hash.<statementlist>.hash.<statement>.list.elems == 0 and
+   $p.hash.<statementlist>.hash.<statement>.list.[0].to < $p.to {
+	
+}
 		self.__Build-Heredoc-List( $p );
+say %.here-doc.perl;
 		my Perl6::Element @_child =
 			self._statementlist( $p.hash.<statementlist> );
+if $p.hash.<statementlist>.hash.<statement>.list.elems == 1 and
+   $p.hash.<statementlist>.hash.<statement>.list.[0].to < $p.to {
+	@_child[0].child.append(
+		Perl6::Sir-Not-Appearing-In-This-Statement.new(
+			:from( $p.hash.<statementlist>.hash.<statement>.list.[0].to + 1 ),
+			:to( $p.to ),
+			:content(
+				$p.Str.substr(
+					$p.hash.<statementlist>.hash.<statement>.list.[0].to - $p.from + 1
+				);
+			)
+		)
+	)
+}
 		Perl6::Document.new(
 			:from( @_child ?? @_child[0].from !! 0 ),
 			:to( @_child ?? @_child[*-1].to !! 0 ),
