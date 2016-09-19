@@ -15,12 +15,13 @@ use Perl6::Tidy;
 # supersede <name>
 #
 # class Foo { has <name> } # 'has' is a scope declaration.
+# class Foo { HAS <name> } # 'HAS' requires a separate class to work
 
 # These terms are invalid:
 #
 # lang <name>
 
-plan 5;
+plan 4;
 
 my $pt = Perl6::Tidy.new;
 
@@ -108,31 +109,33 @@ _END_
 	}, Q{leading ws};
 }, Q{has};
 
-subtest {
-	plan 2;
-
-	subtest {
-		plan 2;
-
-		my $source = Q{class Foo is repr('CStruct'){HAS int $x}};
-		my $p = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
-		is $pt.format( $tree ), $source, Q{formatted};
-	}, Q{no ws};
-
-	subtest {
-		plan 2;
-
-		my $source = Q:to[_END_];
-class Foo is repr( 'CStruct' ) { HAS int $x }
-_END_
-		my $p = $pt.parse-source( $source );
-		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
-		is $pt.format( $tree ), $source, Q{formatted};
-	}, Q{leading ws};
-}, Q{HAS};
+# HAS requires another class definition.
+#
+#subtest {
+#	plan 2;
+#
+#	subtest {
+#		plan 2;
+#
+#		my $source = Q{class Foo is repr('CStruct'){HAS int $x}};
+#		my $p = $pt.parse-source( $source );
+#		my $tree = $pt.build-tree( $p );
+#		ok $pt.validate( $p ), Q{valid};
+#		is $pt.format( $tree ), $source, Q{formatted};
+#	}, Q{no ws};
+#
+#	subtest {
+#		plan 2;
+#
+#		my $source = Q:to[_END_];
+#class Foo is repr( 'CStruct' ) { HAS int $x }
+#_END_
+#		my $p = $pt.parse-source( $source );
+#		my $tree = $pt.build-tree( $p );
+#		ok $pt.validate( $p ), Q{valid};
+#		is $pt.format( $tree ), $source, Q{formatted};
+#	}, Q{leading ws};
+#}, Q{HAS};
 
 # XXX 'augment $x' is NIY
 

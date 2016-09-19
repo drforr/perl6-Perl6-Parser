@@ -96,34 +96,31 @@ _END_
 		plan 2;
 
 		subtest {
-			plan 0;
+			plan 3;
 
-#`( XXX This isn't an operator yet, just a {} block.
 			my $source = Q[{1}];
 			my $parsed = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::Operator },
+			ok (grep { $_ ~~ Perl6::Block },
 					$tree.child.[0].child),
-				Q{found operator};
+				Q{found block};
 			is $pt.format( $tree ), $source, Q{formatted};
-)
 		}, Q{no ws};
 
 		subtest {
-			plan 0;
-#`( XXX This isn't an operator yet, just a {} block.
+			plan 3;
+
 			my $source = Q:to[_END_];
 { 1 }
 _END_
 			my $parsed = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::Operator },
+			ok (grep { $_ ~~ Perl6::Block },
 					$tree.child.[0].child),
 				Q{found operator};
 			is $pt.format( $tree ), $source, Q{formatted};
-)
 		}, Q{ws};
 	}, Q[{}];
 
