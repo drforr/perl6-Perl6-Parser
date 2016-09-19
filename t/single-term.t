@@ -1064,8 +1064,8 @@ subtest {
 		plan 2;
 
 		subtest {
-			plan 0;
-#`(
+			plan 3;
+
 			my $source = Q{q:to[_END_]
 Hello, world!
 _END_};
@@ -1076,12 +1076,11 @@ _END_};
 				$tree.child.[0].child),
 				Q{found string};
 			is $pt.format( $tree ), $source, Q{formatted};
-)
 		}, Q{no ws};
 
 		subtest {
-			plan 0;
-#`(
+			plan 3;
+
 			my $source = Q{ q:to[_END_]
 Hello, world!
 _END_};
@@ -1091,7 +1090,6 @@ _END_};
 			ok (grep { $_ ~~ Perl6::String }, $tree.child.[0].child),
 				Q{found string};
 			is $pt.format( $tree ), $source, Q{formatted};
-)
 		}, Q{ws};
 	}, Q{q:to[_END_]};
 }, Q{string};

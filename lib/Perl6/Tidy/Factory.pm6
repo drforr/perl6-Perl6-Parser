@@ -1092,7 +1092,7 @@ class Perl6::Tidy::Factory {
 			self._statementlist( $p.hash.<statementlist> );
 		if $p.hash.<statementlist>.hash.<statement>.list.elems == 1 and
 		   @_child[*-1].child[*-1].to < $p.to {
-			@_child[1].child.append(
+			@_child[*-1].child.append(
 				Perl6::Sir-Not-Appearing-In-This-Statement.new(
 					:from( @_child[*-1].child[*-1].to ),
 					:to( $p.to ),
