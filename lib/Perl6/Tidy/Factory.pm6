@@ -347,17 +347,61 @@ class Perl6::Operator::Postfix does Token {
 		}
 	}
 }
-class Perl6::Operator::Circumfix does Branching_Delimited does Bounded {
+class Perl6::Operator::Circumfix does Branching does Bounded {
 	also is Perl6::Operator;
 	method from-match( Mu $p, @child ) {
+		my Perl6::Element @_child;
 		$p.Str ~~ m{ ^ (.) }; my Str $front = ~$0;
 		$p.Str ~~ m{ (.) $ }; my Str $back = ~$0;
+		@_child.append(
+			Perl6::Balanced::Enter.new(
+				:from( $p.from ),
+				:to( $p.from + $front.chars ),
+				:content( $front )
+			)
+		);
+		@_child.append( @child );
+		@_child.append(
+			Perl6::Balanced::Exit.new(
+				:from( $p.to - $back.chars ),
+				:to( $p.to ),
+				:content( $back )
+			)
+		);
 		self.bless(
 			:from( $p.from ),
 			:to( $p.to ),
-			:delimiter( $front, $back ),
-			:child( @child )
+			:child( @_child )
 		)
+	}
+
+	method from-from-to-XXX( Int $from, Int $to, Str $front, Str $back, @child ) {
+		if $from < $to {
+			my Perl6::Element @_child;
+			@_child.append(
+				Perl6::Balanced::Enter.new(
+					:from( $from ),
+					:to( $from + $front.chars ),
+					:content( $front )
+				)
+			);
+			@_child.append( @child );
+			@_child.append(
+				Perl6::Balanced::Exit.new(
+					:from( $to - $back.chars ),
+					:to( $to ),
+					:content( $back )
+				)
+			);
+			self.bless(
+				:from( $from ),
+				:to( $to ),
+				:child( @_child )
+			)
+		}
+		else {
+			( )
+		}
 	}
 }
 class Perl6::Operator::PostCircumfix does Branching does Bounded {
@@ -2730,12 +2774,8 @@ return True;
 				 self._multisig( $p.hash.<multisig> );
 			@child =
 				self._longname( $p.hash.<longname> ),
-				Perl6::Operator::Circumfix.new(
-					# XXX Verify from/to
-					:from( $p.from ),
-					:to( $p.to ),
-					:delimiter( '(', ')' ),
-					:child( @_child )
+				Perl6::Operator::Circumfix.from-match(
+					$p, @_child
 				),
 				self._blockoid( $p.hash.<blockoid> )
 		}
@@ -3516,11 +3556,8 @@ return True;
 		elsif self.assert-hash-keys( $p, [< signature >] ) {
 			my Perl6::Element @_child =
 				self._signature( $p.hash.<signature> );
-			Perl6::Operator::Circumfix.new(
-				:from( $p.from ),
-				:to( $p.to ),
-				:delimiter( '(', ')' ),
-				:child( @_child )
+			Perl6::Operator::Circumfix.from-match(
+				$p, @_child
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< sigil >] ) {
@@ -4147,15 +4184,13 @@ return True;
 				)
 			}
 			@child.append(
-				Perl6::Operator::Circumfix.new(
-					:from( $p.hash.<deflongname>.to ),
-					:to(
-						$p.hash.<blockoid>.from -
-						$offset
-					),
-					:delimiter( '(', ')' ),
-					:child( @_child )
-				),
+				Perl6::Operator::Circumfix.from-from-to-XXX(
+					$p.hash.<deflongname>.to,
+					$p.hash.<blockoid>.from - $offset,
+					'(',
+					')',
+					@_child
+				)
 			);
 			my Str $collect-ws = substr(
 				$p.Str, 0, $p.hash.<blockoid>.from - $p.from
