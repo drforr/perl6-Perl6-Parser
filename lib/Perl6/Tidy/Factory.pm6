@@ -250,11 +250,26 @@ role Token does Bounded {
 	}
 }
 
+class Perl6::Structural {
+	also is Perl6::Element;
+}
+
 # Semicolons should only occur at statement boundaries.
 # So they're only generated in the _statement handler.
 #
 class Perl6::Semicolon does Token {
-	also is Perl6::Element;
+	also is Perl6::Structural;
+}
+
+# Generic balanced character
+class Perl6::Balanced {
+	also is Perl6::Structural;
+}
+class Perl6::Balanced::Enter does Token {
+	also is Perl6::Balanced;
+}
+class Perl6::Balanced::Exit does Token {
+	also is Perl6::Balanced;
 }
 
 class Perl6::Operator {
@@ -345,18 +360,61 @@ class Perl6::Operator::Circumfix does Branching_Delimited does Bounded {
 		)
 	}
 }
-class Perl6::Operator::PostCircumfix does Branching_Delimited does Bounded {
+class Perl6::Operator::PostCircumfix does Branching does Bounded {
 	also is Perl6::Operator;
 
-	method from-match( Mu $p, @_child ) {
+	method from-match( Mu $p, @child ) {
 		if $p.from < $p.to {
+			my Perl6::Element @_child;
 			$p.Str ~~ m{ ^ (.) }; my Str $front = ~$0;
 			$p.Str ~~ m{ (.) $ }; my Str $back = ~$0;
+			@_child.append(
+				Perl6::Balanced::Enter.new(
+					:from( $p.from ),
+					:to( $p.from + $front.chars ),
+					:content( $front )
+				)
+			);
+			@_child.append( @child );
+			@_child.append(
+				Perl6::Balanced::Exit.new(
+					:from( $p.to - $back.chars ),
+					:to( $p.to ),
+					:content( $back )
+				)
+			);
 			self.bless(
-				# XXX What is it "post"? Hmm.
 				:from( $p.from ),
 				:to( $p.to ),
-				:delimiter( $front, $back ),
+				:child( @_child )
+			)
+		}
+		else {
+			( )
+		}
+	}
+
+	method from-delims( Mu $p, Str $front, Str $back, @child ) {
+		if $p.from < $p.to {
+			my Perl6::Element @_child;
+			@_child.append(
+				Perl6::Balanced::Enter.new(
+					:from( $p.from ),
+					:to( $p.from + $front.chars ),
+					:content( $front )
+				)
+			);
+			@_child.append( @child );
+			@_child.append(
+				Perl6::Balanced::Exit.new(
+					:from( $p.to - $back.chars ),
+					:to( $p.to ),
+					:content( $back )
+				)
+			);
+			self.bless(
+				:from( $p.from ),
+				:to( $p.to ),
 				:child( @_child )
 			)
 		}
@@ -1583,11 +1641,8 @@ class Perl6::Tidy::Factory {
 				);
 			# XXX properly match delimiter
 			@child =
-				Perl6::Operator::PostCircumfix.new(
-					:from( $p.from ),
-					:to( $p.to ),
-					:delimiter( ':(', ')' ),
-					:child( @_child )
+				Perl6::Operator::PostCircumfix.from-delims(
+					$p, ':(', ')', @_child
 				)
 		}
 		elsif self.assert-hash-keys( $p, [< var >] ) {

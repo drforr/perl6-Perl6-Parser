@@ -209,13 +209,15 @@ class Perl6::Tidy {
 	method dump-term( Perl6::Element $term ) {
 		my $str = $term.WHAT.perl;
 		if $term ~~ Perl6::Block or
-		   $term ~~ Perl6::Operator::Circumfix or
-		   $term ~~ Perl6::Operator::PostCircumfix {
+		   $term ~~ Perl6::Operator::Circumfix {
 			$str ~= " ('{$term.delimiter.[0]}'..'{$term.delimiter.[1]}')"
+		}
+		elsif $term ~~ Perl6::Operator::PostCircumfix {
 		}
 		elsif $term ~~ Perl6::Bareword or
 		      $term ~~ Perl6::Variable or
 		      $term ~~ Perl6::Operator or
+		      $term ~~ Perl6::Balanced or
 		      $term ~~ Perl6::WS {
 			$str ~= " ({$term.content.perl})"
 		}
