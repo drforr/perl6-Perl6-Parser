@@ -2934,23 +2934,27 @@ return True;
 
 	method _modifier_expr( Mu $p ) {
 		warn "Untested method";
-		if self.assert-hash-keys( $p, [< EXPR >] ) {
-			self._EXPR( $p.hash.<EXPR> )
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< EXPR >] ) {
+				self._EXPR( $_.hash.<EXPR> )
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
 	method _module_name( Mu $p ) {
 		warn "Untested method";
-		if self.assert-hash-keys( $p, [< longname >] ) {
-			self._longname( $p.hash.<longname> )
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< longname >] ) {
+				self._longname( $_.hash.<longname> )
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
@@ -2982,126 +2986,147 @@ return True;
 	#
 	method _multi_declarator( Mu $p ) {
 		my Perl6::Element @child;
-		if self.assert-hash-keys( $p, [< sym routine_def >] ) {
-			@child = self._sym( $p.hash.<sym> );
-			@child.append(
-				Perl6::WS.between-matches(
-					$p,
-					'sym',
-					'routine_def'
+		given $p {
+			when self.assert-hash-keys( $_,
+					[< sym routine_def >] ) {
+				@child = self._sym( $_.hash.<sym> );
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						'sym',
+						'routine_def'
+					)
+				);
+				@child.append(
+					self._routine_def(
+						$_.hash.<routine_def>
+					)
 				)
-			);
-			@child.append(
-				self._routine_def( $p.hash.<routine_def> )
-			)
-		}
-		elsif self.assert-hash-keys( $p, [< sym declarator >] ) {
-			@child = self._sym( $p.hash.<sym> );
-			@child.append(
-				Perl6::WS.between-matches(
-					$p,
-					'sym',
-					'declarator'
+			}
+			when self.assert-hash-keys( $_,
+					[< sym declarator >] ) {
+				@child = self._sym( $_.hash.<sym> );
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						'sym',
+						'declarator'
+					)
+				);
+				@child.append(
+					self._declarator( $_.hash.<declarator> )
 				)
-			);
-			@child.append(
-				self._declarator( $p.hash.<declarator> )
-			)
-		}
-		elsif self.assert-hash-keys( $p, [< declarator >] ) {
-			@child = self._declarator( $p.hash.<declarator> )
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+			}
+			when self.assert-hash-keys( $_, [< declarator >] ) {
+				@child = self._declarator(
+					$_.hash.<declarator>
+				)
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 		@child
 	}
 
 	method _multisig( Mu $p ) {
 		my Perl6::Element @child;
-		if self.assert-hash-keys( $p, [< signature >] ) {
-			@child = self._signature( $p.hash.<signature> );
-			@child.append(
-				Perl6::WS.whitespace-trailer(
-					$p.hash.<signature>
+		given $p {
+			when self.assert-hash-keys( $_, [< signature >] ) {
+				@child = self._signature( $_.hash.<signature> );
+				@child.append(
+					Perl6::WS.whitespace-trailer(
+						$_.hash.<signature>
+					)
 				)
-			)
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 		@child
 	}
 
 	method _named_param( Mu $p ) {
-		if self.assert-hash-keys( $p, [< param_var >] ) {
-			self._param_var( $p.hash.<param_var> )
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< param_var >] ) {
+				self._param_var( $_.hash.<param_var> )
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
 	method _name( Mu $p ) {
-		if self.assert-hash-keys( $p,
-			[< param_var type_constraint quant >],
-			[< default_value modifier trait post_constraint >] ) {
-			die "Not implemented yet"
-		}
-		elsif self.assert-hash-keys( $p,
-			[< identifier >], [< morename >] ) {
-			Perl6::Bareword.from-match( $p )
-		}
-		elsif self.assert-hash-keys( $p, [< subshortname >] ) {
-			die "Not implemented yet"
-		}
-		elsif self.assert-hash-keys( $p, [< morename >] ) {
-			Perl6::PackageName.from-match( $p )
-			#self._morename( $p.hash.<morename> )
-		}
-		elsif self.assert-Str( $p ) {
-			Perl6::Bareword.from-match( $p )
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_,
+				[< param_var type_constraint quant >],
+				[< default_value modifier trait
+				   post_constraint >] ) {
+				die "Not implemented yet"
+			}
+			when self.assert-hash-keys( $_,
+				[< identifier >], [< morename >] ) {
+				Perl6::Bareword.from-match( $_ )
+			}
+			when self.assert-hash-keys( $_, [< subshortname >] ) {
+				die "Not implemented yet"
+			}
+			when self.assert-hash-keys( $_, [< morename >] ) {
+				Perl6::PackageName.from-match( $_ )
+				#self._morename( $_.hash.<morename> )
+			}
+			when self.assert-Str( $_ ) {
+				Perl6::Bareword.from-match( $_ )
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
 	method _nibble( Mu $p ) {
-		if self.assert-hash-keys( $p, [< termseq >] ) {
-			self._termseq( $p.hash.<termseq> )
-		}
-		elsif $p.Bool {
-			die "Not implemented yet"
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< termseq >] ) {
+				self._termseq( $_.hash.<termseq> )
+			}
+			when $_.Bool {
+				die "Not implemented yet"
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
 	method _nibbler( Mu $p ) {
 		warn "Untested method";
-		if self.assert-hash-keys( $p, [< termseq >] ) {
-			self._termseq( $p.hash.<termseq> )
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< termseq >] ) {
+				self._termseq( $_.hash.<termseq> )
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
 	method _normspace( Mu $p ) {
-		if self.assert-hash-keys( $p, [< normspace >] ) {
-			$p.hash.<normspace>.Str
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< normspace >] ) {
+				$_.hash.<normspace>.Str
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
@@ -3155,31 +3180,35 @@ return True;
 	# numish # ?
 	#
 	method _number( Mu $p ) {
-		if self.assert-hash-keys( $p, [< numish >] ) {
-			self._numish( $p.hash.<numish> )
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< numish >] ) {
+				self._numish( $_.hash.<numish> )
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
 	method _numish( Mu $p ) {
-		if self.assert-hash-keys( $p, [< dec_number >] ) {
-			self._dec_number( $p.hash.<dec_number> )
-		}
-		elsif self.assert-hash-keys( $p, [< rad_number >] ) {
-			self._rad_number( $p.hash.<rad_number> )
-		}
-		elsif self.assert-hash-keys( $p, [< integer >] ) {
-			self._integer( $p.hash.<integer> )
-		}
-		elsif $p.Bool {
-			die "Not implemented yet"
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< dec_number >] ) {
+				self._dec_number( $_.hash.<dec_number> )
+			}
+			when self.assert-hash-keys( $_, [< rad_number >] ) {
+				self._rad_number( $_.hash.<rad_number> )
+			}
+			when self.assert-hash-keys( $_, [< integer >] ) {
+				self._integer( $_.hash.<integer> )
+			}
+			when $_.Bool {
+				die "Not implemented yet"
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
@@ -3246,55 +3275,59 @@ return True;
 
 	method _op( Mu $p ) {
 		warn "Untested method";
-		if self.assert-hash-keys( $p,
-			     [< infix_prefix_meta_operator OPER >] ) {
-			die "Not implemented yet"
-		}
-		elsif self.assert-hash-keys( $p, [< infix OPER >] ) {
-			die "Not implemented yet"
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_,
+				     [< infix_prefix_meta_operator OPER >] ) {
+				die "Not implemented yet"
+			}
+			when self.assert-hash-keys( $_, [< infix OPER >] ) {
+				die "Not implemented yet"
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
 	method _OPER( Mu $p ) {
-		if self.assert-hash-keys( $p, [< sym infixish O >] ) {
-			die "Not implemented yet"
-		}
-		elsif self.assert-hash-keys( $p, [< sym dottyop O >] ) {
-			(
-				Perl6::Operator::Infix.from-match(
-					$p.hash.<sym>
-				),
-				self._dottyop( $p.hash.<dottyop> )
-			)
-		}
-		elsif self.assert-hash-keys( $p, [< sym O >] ) {
-			die "Not implemented yet"
-		}
-		elsif self.assert-hash-keys( $p, [< EXPR O >] ) {
-			die "Not implemented yet"
-		}
-		elsif self.assert-hash-keys( $p, [< semilist O >] ) {
-			die "Not implemented yet"
-		}
-		elsif self.assert-hash-keys( $p, [< nibble O >] ) {
-			die "Not implemented yet"
-		}
-		elsif self.assert-hash-keys( $p, [< arglist O >] ) {
-			die "Not implemented yet"
-		}
-		elsif self.assert-hash-keys( $p, [< dig O >] ) {
-			die "Not implemented yet"
-		}
-		elsif self.assert-hash-keys( $p, [< O >] ) {
-			die "Not implemented yet"
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< sym infixish O >] ) {
+				die "Not implemented yet"
+			}
+			when self.assert-hash-keys( $_, [< sym dottyop O >] ) {
+				(
+					Perl6::Operator::Infix.from-match(
+						$_.hash.<sym>
+					),
+					self._dottyop( $_.hash.<dottyop> )
+				)
+			}
+			when self.assert-hash-keys( $_, [< sym O >] ) {
+				die "Not implemented yet"
+			}
+			when self.assert-hash-keys( $_, [< EXPR O >] ) {
+				die "Not implemented yet"
+			}
+			when self.assert-hash-keys( $_, [< semilist O >] ) {
+				die "Not implemented yet"
+			}
+			when self.assert-hash-keys( $_, [< nibble O >] ) {
+				die "Not implemented yet"
+			}
+			when self.assert-hash-keys( $_, [< arglist O >] ) {
+				die "Not implemented yet"
+			}
+			when self.assert-hash-keys( $_, [< dig O >] ) {
+				die "Not implemented yet"
+			}
+			when self.assert-hash-keys( $_, [< O >] ) {
+				die "Not implemented yet"
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
@@ -3304,23 +3337,28 @@ return True;
 	#
 	method _p5metachar( Mu $p ) {
 		my Perl6::Element @child;
-		# $p doesn't contain WS after the block.
-		if self.assert-hash-keys( $p, [< sym package_def >] ) {
-			@child = self._sym( $p.hash.<sym> );
-			@child.append(
-				Perl6::WS.between-matches(
-					$p,
-					'sym',
-					'package_def'
-				)
-			);
-			@child.append(
-				self._package_def( $p.hash.<package_def> )
-			);
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			# $_ doesn't contain WS after the block.
+			when self.assert-hash-keys( $_,
+					[< sym package_def >] ) {
+				@child = self._sym( $_.hash.<sym> );
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						'sym',
+						'package_def'
+					)
+				);
+				@child.append(
+					self._package_def(
+						$_.hash.<package_def>
+					)
+				);
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 		@child
 	}
@@ -3615,57 +3653,62 @@ return True;
 		'&~' => Perl6::Variable::Callable::SubLanguage;
 
 	method _param_var( Mu $p ) {
-		if self.assert-hash-keys( $p, [< name twigil sigil >] ) {
-			# XXX refactor back to a method
-			my Str $sigil       = $p.hash.<sigil>.Str;
-			my Str $twigil      = $p.hash.<twigil> ??
-					      $p.hash.<twigil>.Str !! '';
-			my Str $desigilname = $p.hash.<name> ??
-					      $p.hash.<name>.Str !! '';
-			my Str $content     = $p.hash.<sigil> ~
-					      $twigil ~
-					      $desigilname;
+		given $p {
+			when self.assert-hash-keys( $_,
+					[< name twigil sigil >] ) {
+				# XXX refactor back to a method
+				my Str $sigil       = $_.hash.<sigil>.Str;
+				my Str $twigil      = $_.hash.<twigil> ??
+						      $_.hash.<twigil>.Str !! '';
+				my Str $desigilname = $_.hash.<name> ??
+						      $_.hash.<name>.Str !! '';
+				my Str $content     = $_.hash.<sigil> ~
+						      $twigil ~
+						      $desigilname;
 
-			my Perl6::Element $leaf =
-				%sigil-map{$sigil ~ $twigil}.new(
-					:from( $p.from ),
-					:to( $p.to ),
-					:content( $p.Str )
-				);
-			$leaf
-		}
-		elsif self.assert-hash-keys( $p, [< name sigil >] ) {
-			# XXX refactor back to a method
-			my Str $sigil       = $p.hash.<sigil>.Str;
-			my Str $twigil      = $p.hash.<twigil> ??
-					      $p.hash.<twigil>.Str !! '';
-			my Str $desigilname = $p.hash.<name> ??
-					      $p.hash.<name>.Str !! '';
-			my Str $content     = $p.hash.<sigil> ~
-					      $twigil ~
-					      $desigilname;
+				my Perl6::Element $leaf =
+					%sigil-map{$sigil ~ $twigil}.new(
+						:from( $_.from ),
+						:to( $_.to ),
+						:content( $_.Str )
+					);
+				$leaf
+			}
+			when self.assert-hash-keys( $_,
+					[< name sigil >] ) {
+				# XXX refactor back to a method
+				my Str $sigil       = $_.hash.<sigil>.Str;
+				my Str $twigil      = $_.hash.<twigil> ??
+						      $_.hash.<twigil>.Str !!
+						      '';
+				my Str $desigilname = $_.hash.<name> ??
+						      $_.hash.<name>.Str !! '';
+				my Str $content     = $_.hash.<sigil> ~
+						      $twigil ~
+						      $desigilname;
 
-			my Perl6::Element $leaf =
-				%sigil-map{$sigil ~ $twigil}.new(
-					:from( $p.from ),
-					:to( $p.to ),
-					:content( $content )
-				);
-			$leaf
-		}
-		elsif self.assert-hash-keys( $p, [< signature >] ) {
-			my Perl6::Element @_child =
-				self._signature( $p.hash.<signature> );
-			Perl6::Operator::Circumfix.from-match(
-				$p, @_child
-			)
-		}
-		elsif self.assert-hash-keys( $p, [< sigil >] ) {
-			self._sigil( $p.hash.<sigil> )
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+				my Perl6::Element $leaf =
+					%sigil-map{$sigil ~ $twigil}.new(
+						:from( $_.from ),
+						:to( $_.to ),
+						:content( $content )
+					);
+				$leaf
+			}
+			when self.assert-hash-keys( $_, [< signature >] ) {
+				my Perl6::Element @_child =
+					self._signature( $_.hash.<signature> );
+				Perl6::Operator::Circumfix.from-match(
+					$_, @_child
+				)
+			}
+			when self.assert-hash-keys( $_, [< sigil >] ) {
+				self._sigil( $_.hash.<sigil> )
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
@@ -3845,17 +3888,19 @@ return True;
 
 	method _postop( Mu $p ) {
 		warn "Untested method";
-		if self.assert-hash-keys( $p,
-				[< sym postcircumfix O >] ) {
-			die "Not implemented yet"
-		}
-		elsif self.assert-hash-keys( $p,
-				[< sym postcircumfix >], [< O >] ) {
-			die "Not implemented yet"
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_,
+					[< sym postcircumfix O >] ) {
+				die "Not implemented yet"
+			}
+			when self.assert-hash-keys( $_,
+					[< sym postcircumfix >], [< O >] ) {
+				die "Not implemented yet"
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
@@ -3882,23 +3927,27 @@ return True;
 	}
 
 	method _quant( Mu $p ) {
-		if self.assert-hash-keys( $p, [< quant >] ) {
-			$p.hash.<quant>.Bool
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< quant >] ) {
+				$_.hash.<quant>.Bool
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
 	method _quantified_atom( Mu $p ) {
 		warn "Untested method";
-		if self.assert-hash-keys( $p, [< sigfinal atom >] ) {
-			die "Not implemented yet"
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< sigfinal atom >] ) {
+				die "Not implemented yet"
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
@@ -3907,26 +3956,31 @@ return True;
 	#
 	method _quantifier( Mu $p ) {
 		warn "Untested method";
-		if self.assert-hash-keys( $p, [< sym min max backmod >] ) {
-			die "Not implemented yet"
-		}
-		elsif self.assert-hash-keys( $p, [< sym backmod >] ) {
-			die "Not implemented yet"
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_,
+					[< sym min max backmod >] ) {
+				die "Not implemented yet"
+			}
+			when self.assert-hash-keys( $_, [< sym backmod >] ) {
+				die "Not implemented yet"
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
 	method _quibble( Mu $p ) {
 		warn "Untested method";
-		if self.assert-hash-keys( $p, [< babble nibble >] ) {
-			die "Not implemented yet"
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< babble nibble >] ) {
+				die "Not implemented yet"
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
@@ -4048,36 +4102,40 @@ return True;
 	}
 
 	method _radix( Mu $p ) {
-		if self.assert-hash-keys( $p, [< radix >] ) {
-			$p.hash.<radix>.Int
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< radix >] ) {
+				$_.hash.<radix>.Int
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
 	method _rad_number( Mu $p ) {
-		if self.assert-hash-keys( $p,
-				[< circumfix bracket radix >],
-				[< exp base >] ) {
-			Perl6::Number::Radix.new(
-				:from( $p.from ),
-				:to( $p.to ),
-				:content( $p.Str )
-			)
-		}
-		elsif self.assert-hash-keys( $p,
-				[< circumfix radix >], [< exp base >] ) {
-			Perl6::Number::Radix.new(
-				:from( $p.from ),
-				:to( $p.to ),
-				:content( $p.Str )
-			)
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_,
+					[< circumfix bracket radix >],
+					[< exp base >] ) {
+				Perl6::Number::Radix.new(
+					:from( $_.from ),
+					:to( $_.to ),
+					:content( $_.Str )
+				)
+			}
+			when self.assert-hash-keys( $_,
+					[< circumfix radix >], [< exp base >] ) {
+				Perl6::Number::Radix.new(
+					:from( $_.from ),
+					:to( $_.to ),
+					:content( $_.Str )
+				)
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
@@ -4087,22 +4145,24 @@ return True;
 	#
 	method _regex_declarator( Mu $p ) {
 		my Perl6::Element @child;
-		if self.assert-hash-keys( $p, [< sym regex_def >] ) {
-			@child = self._sym( $p.hash.<sym> );
-			@child.append(
-				Perl6::WS.between-matches(
-					$p,
-					'sym',
-					'regex_def'
+		given $p {
+			when self.assert-hash-keys( $_, [< sym regex_def >] ) {
+				@child = self._sym( $_.hash.<sym> );
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						'sym',
+						'regex_def'
+					)
+				);
+				@child.append(
+					self._regex_def( $_.hash.<regex_def> )
 				)
-			);
-			@child.append(
-				self._regex_def( $p.hash.<regex_def> )
-			)
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 		@child
 	}
@@ -4172,12 +4232,14 @@ return True;
 	}
 
 	method _right( Mu $p ) {
-		if self.assert-hash-keys( $p, [< right >] ) {
-			$p.hash.<right>.Bool
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< right >] ) {
+				$_.hash.<right>.Bool
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
@@ -4395,70 +4457,78 @@ return True;
 
 	method _rx_adverbs( Mu $p ) {
 		warn "Untested method";
-		if self.assert-hash-keys( $p, [< quotepair >] ) {
-			self._quotepair( $p.hash.<quotepair> )
-		}
-		elsif self.assert-hash-keys( $p, [< >], [< quotepair >] ) {
-			die "Not implemented yet"
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< quotepair >] ) {
+				self._quotepair( $_.hash.<quotepair> )
+			}
+			when self.assert-hash-keys( $_,
+					[< >], [< quotepair >] ) {
+				die "Not implemented yet"
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
 	method _scoped( Mu $p ) {
 		my Perl6::Element @child;
-		# XXX DECL seems to be a mirror of declarator. This probably
-		# XXX will turn out to be not true later on.
-		#
-		if self.assert-hash-keys( $p,
-				[< multi_declarator DECL typename >] ) {
-			@child = self._typename( $p.hash.<typename> );
-			@child.append(
-				Perl6::WS.between-matches(
-					$p,
-					'typename',
-					'multi_declarator'
+		given $p {
+			# XXX DECL seems to be a mirror of declarator.
+			# XXX This probably will turn out to be not true.
+			#
+			if self.assert-hash-keys( $_,
+					[< multi_declarator DECL typename >] ) {
+				@child = self._typename( $_.hash.<typename> );
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						'typename',
+						'multi_declarator'
+					)
+				);
+				@child.append(
+					self._multi_declarator(
+						$_.hash.<multi_declarator>
+					)
 				)
-			);
-			@child.append(
-				self._multi_declarator(
-					$p.hash.<multi_declarator>
+			}
+			elsif self.assert-hash-keys( $_,
+					[< package_declarator DECL >],
+					[< typename >] ) {
+				@child =
+					self._package_declarator(
+						$_.hash.<package_declarator>
+					)
+			}
+			elsif self.assert-hash-keys( $_,
+					[< sym package_declarator >] ) {
+				@child = self._sym( $_.hash.<sym> );
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						'sym',
+						'package_declarator'
+					)
+				);
+				@child.append(
+					self._package_declarator(
+						$_.hash.<package_declarator>
+					)
 				)
-			)
-		}
-		elsif self.assert-hash-keys( $p,
-				[< package_declarator DECL >],
-				[< typename >] ) {
-			@child =
-				self._package_declarator(
-					$p.hash.<package_declarator>
+			}
+			elsif self.assert-hash-keys( $_,
+					[< declarator DECL >],
+					[< typename >] ) {
+				@child = self._declarator(
+					$_.hash.<declarator>
 				)
-		}
-		elsif self.assert-hash-keys( $p,
-				[< sym package_declarator >] ) {
-			@child = self._sym( $p.hash.<sym> );
-			@child.append(
-				Perl6::WS.between-matches(
-					$p,
-					'sym',
-					'package_declarator'
-				)
-			);
-			@child.append(
-				self._package_declarator(
-					$p.hash.<package_declarator>
-				)
-			)
-		}
-		elsif self.assert-hash-keys( $p,
-				[< declarator DECL >], [< typename >] ) {
-			@child = self._declarator( $p.hash.<declarator> )
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+			}
+			else {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 		@child.flat
 	}
@@ -4498,123 +4568,144 @@ return True;
 	}
 
 	method _semiarglist( Mu $p ) {
-		if self.assert-hash-keys( $p, [< arglist >] ) {
-			self._arglist( $p.hash.<arglist> )
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< arglist >] ) {
+				self._arglist( $_.hash.<arglist> )
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
 	method _semilist( Mu $p ) {
 		my Perl6::Element @child;
-		if self.assert-hash-keys( $p, [< statement >] ) {
-			@child.append(
-				Perl6::WS.whitespace-header(
-					$p
+		given $p {
+			when self.assert-hash-keys( $_, [< statement >] ) {
+				@child.append(
+					Perl6::WS.whitespace-header(
+						$_
+					)
+				);
+				@child.append(
+					self._statement( $_.hash.<statement> )
+				);
+				@child.append(
+					Perl6::WS.whitespace-trailer(
+						$_
+					)
 				)
-			);
-			@child.append(
-				self._statement( $p.hash.<statement> )
-			);
-			@child.append(
-				Perl6::WS.whitespace-trailer(
-					$p
+			}
+			when self.assert-hash-keys( $_,
+					[< >], [< statement >] ) {
+				@child.append(
+					Perl6::WS.from-match(
+						$_
+					)
 				)
-			)
-		}
-		elsif self.assert-hash-keys( $p, [ ], [< statement >] ) {
-			@child.append(
-				Perl6::WS.from-match(
-					$p
-				)
-			)
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 		@child
 	}
 
 	method _separator( Mu $p ) {
 		warn "Untested method";
-		if self.assert-hash-keys( $p, [< septype quantified_atom >] ) {
-			die "Not implemented yet"
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_,
+					[< septype quantified_atom >] ) {
+				die "Not implemented yet"
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
 	method _septype( Mu $p ) {
-		if self.assert-hash-keys( $p, [< septype >] ) {
-			$p.hash.<septype>.Str
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< septype >] ) {
+				$_.hash.<septype>.Str
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
 	method _shape( Mu $p ) {
-		if self.assert-hash-keys( $p, [< shape >] ) {
-			$p.hash.<shape>.Str
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< shape >] ) {
+				$_.hash.<shape>.Str
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
 	method _sibble( Mu $p ) {
 		warn "Untested method";
-		if self.assert-hash-keys( $p, [< right babble left >] ) {
-			die "Not implemented yet"
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			if self.assert-hash-keys( $_,
+					[< right babble left >] ) {
+				die "Not implemented yet"
+			}
+			else {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
 	method _sigfinal( Mu $p ) {
 		warn "Untested method";
-		if self.assert-hash-keys( $p, [< normspace >] ) {
-			self._normspace( $p.hash.<normspace> )
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< normspace >] ) {
+				self._normspace( $_.hash.<normspace> )
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
 	method _sigil( Mu $p ) {
-		if self.assert-hash-keys( $p, [< sym >] ) {
-			$p.hash.<sym>.Str
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< sym >] ) {
+				$_.hash.<sym>.Str
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
 	method _sigmaybe( Mu $p ) {
 		warn "Untested method";
-		if self.assert-hash-keys( $p,
-				[< parameter typename >],
-				[< param_sep >] ) {
-			die "Not implemented yet"
-		}
-		elsif self.assert-hash-keys( $p, [],
-				[< param_sep parameter >] ) {
-			die "Not implemented yet"
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_,
+					[< parameter typename >],
+					[< param_sep >] ) {
+				die "Not implemented yet"
+			}
+			when self.assert-hash-keys( $_, [],
+					[< param_sep parameter >] ) {
+				die "Not implemented yet"
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
@@ -4854,22 +4945,26 @@ return True;
 	}
 
 	method _smexpr( Mu $p ) {
-		if self.assert-hash-keys( $p, [< EXPR >] ) {
-			self._EXPR( $p.hash.<EXPR> )
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< EXPR >] ) {
+				self._EXPR( $_.hash.<EXPR> )
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
 	method _specials( Mu $p ) {
-		if self.assert-hash-keys( $p, [< specials >] ) {
-			$p.hash.<specials>.Bool
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< specials >] ) {
+				$_.hash.<specials>.Bool
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
@@ -4893,33 +4988,40 @@ return True;
 	#
 	method _statement_control( Mu $p ) {
 		warn "Untested method";
-		if self.assert-hash-keys( $p, [< block sym e1 e2 e3 >] ) {
-			die "Not implemented yet"
-		}
-		elsif self.assert-hash-keys( $p, [< pblock sym EXPR wu >] ) {
-			die "Not implemented yet"
-		}
-		elsif self.assert-hash-keys( $p, [< doc sym module_name >] ) {
-			die "Not implemented yet"
-		}
-		elsif self.assert-hash-keys( $p, [< doc sym version >] ) {
-			die "Not implemented yet"
-		}
-		elsif self.assert-hash-keys( $p, [< sym else xblock >] ) {
-			die "Not implemented yet"
-		}
-		elsif self.assert-hash-keys( $p, [< xblock sym wu >] ) {
-			die "Not implemented yet"
-		}
-		elsif self.assert-hash-keys( $p, [< sym xblock >] ) {
-			die "Not implemented yet"
-		}
-		elsif self.assert-hash-keys( $p, [< block sym >] ) {
-			die "Not implemented yet"
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			if self.assert-hash-keys( $_,
+					[< block sym e1 e2 e3 >] ) {
+				die "Not implemented yet"
+			}
+			elsif self.assert-hash-keys( $_,
+					[< pblock sym EXPR wu >] ) {
+				die "Not implemented yet"
+			}
+			elsif self.assert-hash-keys( $_,
+					[< doc sym module_name >] ) {
+				die "Not implemented yet"
+			}
+			elsif self.assert-hash-keys( $_,
+					[< doc sym version >] ) {
+				die "Not implemented yet"
+			}
+			elsif self.assert-hash-keys( $_,
+					[< sym else xblock >] ) {
+				die "Not implemented yet"
+			}
+			elsif self.assert-hash-keys( $_, [< xblock sym wu >] ) {
+				die "Not implemented yet"
+			}
+			elsif self.assert-hash-keys( $_, [< sym xblock >] ) {
+				die "Not implemented yet"
+			}
+			elsif self.assert-hash-keys( $_, [< block sym >] ) {
+				die "Not implemented yet"
+			}
+			else {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
@@ -5254,12 +5356,15 @@ return True;
 	#
 	method _statement_mod_cond( Mu $p ) {
 		warn "Untested method";
-		if self.assert-hash-keys( $p, [< sym modifier_expr >] ) {
-			die "Not implemented yet"
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_,
+					[< sym modifier_expr >] ) {
+				die "Not implemented yet"
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
@@ -5270,22 +5375,24 @@ return True;
 	#
 	method _statement_mod_loop( Mu $p ) {
 		my Perl6::Element @child;
-		if self.assert-hash-keys( $p, [< sym smexpr >] ) {
-			@child = self._sym( $p.hash.<sym> );
-			@child.append(
-				Perl6::WS.between-matches(
-					$p,
-					'sym',
-					'smexpr'
+		given $p {
+			when self.assert-hash-keys( $_, [< sym smexpr >] ) {
+				@child = self._sym( $_.hash.<sym> );
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						'sym',
+						'smexpr'
+					)
+				);
+				@child.append(
+					self._smexpr( $_.hash.<smexpr> )
 				)
-			);
-			@child.append(
-				self._smexpr( $p.hash.<smexpr> )
-			)
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 		@child
 	}
@@ -5322,23 +5429,27 @@ return True;
 	#
 	method _statement_prefix( Mu $p ) {
 		warn "Untested method";
-		if self.assert-hash-keys( $p, [< sym blorst >] ) {
-			die "Not implemented yet"
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< sym blorst >] ) {
+				die "Not implemented yet"
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
 	method _subshortname( Mu $p ) {
 		warn "Untested method";
-		if self.assert-hash-keys( $p, [< desigilname >] ) {
-			self._desigilname( $p.hash.<desigilname> )
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< desigilname >] ) {
+				self._desigilname( $_.hash.<desigilname> )
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
@@ -5408,15 +5519,18 @@ return True;
 	#
 	method _term( Mu $p ) {
 		my Perl6::Element @child;
-		if self.assert-hash-keys( $p, [< circumfix >] ) {
-			@child = self._circumfix( $p.hash.<circumfix> )
-		}
-		elsif self.assert-hash-keys( $p, [< name >], [< colonpair >] ) {
-			@child = self._name( $p.hash.<name> );
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< circumfix >] ) {
+				@child = self._circumfix( $_.hash.<circumfix> )
+			}
+			when self.assert-hash-keys( $_,
+					[< name >], [< colonpair >] ) {
+				@child = self._name( $_.hash.<name> );
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 		@child
 	}
@@ -5446,12 +5560,14 @@ return True;
 	}
 
 	method _termaltseq( Mu $p ) {
-		if self.assert-hash-keys( $p, [< termconjseq >] ) {
-			self._termconjseq( $p.hash.<termconjseq> )
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< termconjseq >] ) {
+				self._termconjseq( $_.hash.<termconjseq> )
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
@@ -5521,12 +5637,14 @@ return True;
 
 	method _term_init( Mu $p ) {
 		warn "Untested method";
-		if self.assert-hash-keys( $p, [< sym EXPR >] ) {
-			die "Not implemented yet"
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< sym EXPR >] ) {
+				die "Not implemented yet"
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
@@ -5558,12 +5676,14 @@ return True;
 	}
 
 	method _termseq( Mu $p ) {
-		if self.assert-hash-keys( $p, [< termaltseq >] ) {
-			self._termaltseq( $p.hash.<termaltseq> )
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< termaltseq >] ) {
+				self._termaltseq( $_.hash.<termaltseq> )
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
@@ -5593,48 +5713,52 @@ return True;
 	#
 	method _trait_mod( Mu $p ) {
 		my Perl6::Element @child;
-		if self.assert-hash-keys( $p,
-				[< sym longname >],
-				[< circumfix >] ) {
-			@child = self._sym( $p.hash.<sym> );
-			@child.append(
-				Perl6::WS.between-matches(
-					$p,
-					'sym',
-					'longname'
+		given $p {
+			when self.assert-hash-keys( $_,
+					[< sym longname >],
+					[< circumfix >] ) {
+				@child = self._sym( $_.hash.<sym> );
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						'sym',
+						'longname'
+					)
+				);
+				@child.append(
+					self._longname( $_.hash.<longname> )
 				)
-			);
-			@child.append(
-				self._longname( $p.hash.<longname> )
-			)
-		}
-		elsif self.assert-hash-keys( $p, [< sym typename >] ) {
-			@child = self._sym( $p.hash.<sym> );
-			@child.append(
-				Perl6::WS.between-matches(
-					$p,
-					'sym',
-					'typename'
+			}
+			when self.assert-hash-keys( $_, [< sym typename >] ) {
+				@child = self._sym( $_.hash.<sym> );
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						'sym',
+						'typename'
+					)
+				);
+				@child.append(
+					self._typename( $_.hash.<typename> )
 				)
-			);
-			@child.append(
-				self._typename( $p.hash.<typename> )
-			)
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 		@child
 	}
 
-	method _twigi( Mu $p ) {
-		if self.assert-hash-keys( $p, [< sym >] ) {
-			$p.hash.<sym>.Str
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+	method _twigil( Mu $p ) {
+		given $p {
+			when self.assert-hash-keys( $_, [< sym >] ) {
+				$_.hash.<sym>.Str
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
@@ -5828,17 +5952,19 @@ return True;
 	}
 
 	method _val( Mu $p ) {
-		if self.assert-hash-keys( $p,
-				[< prefix OPER >],
-				[< prefix_postfix_meta_operator >] ) {
-			die "Not implemented yet"
-		}
-		elsif self.assert-hash-keys( $p, [< value >] ) {
-			self._value( $p.hash.<value> )
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_,
+					[< prefix OPER >],
+					[< prefix_postfix_meta_operator >] ) {
+				die "Not implemented yet"
+			}
+			when self.assert-hash-keys( $_, [< value >] ) {
+				self._value( $_.hash.<value> )
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
@@ -5854,41 +5980,48 @@ return True;
 	# version
 	#
 	method _value( Mu $p ) {
-		if self.assert-hash-keys( $p, [< number >] ) {
-			self._number( $p.hash.<number> )
-		}
-		elsif self.assert-hash-keys( $p, [< quote >] ) {
-			self._quote( $p.hash.<quote> )
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< number >] ) {
+				self._number( $_.hash.<number> )
+			}
+			when self.assert-hash-keys( $_, [< quote >] ) {
+				self._quote( $_.hash.<quote> )
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
 	method _var( Mu $p ) {
-		if self.assert-hash-keys( $p,
-				[< sigil desigilname >] ) {
-			# XXX For heavens' sake refactor.
-			my Str $sigil	= $p.hash.<sigil>.Str;
-			my Str $twigil	= $p.hash.<twigil> ??
-					  $p.hash.<twigil>.Str !! '';
-			my Str $desigilname = $p.hash.<desigilname> ??
-					      $p.hash.<desigilname>.Str !! '';
-			my Str $content =
-				$p.hash.<sigil> ~ $twigil ~ $desigilname;
-			%sigil-map{$sigil ~ $twigil}.new(
-				:from( $p.from ),
-				:to( $p.to ),
-				:content( $content )
-			)
-		}
-		elsif self.assert-hash-keys( $p, [< variable >] ) {
-			self._variable( $p.hash.<variable> )
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_,
+					[< sigil desigilname >] ) {
+				# XXX For heavens' sake refactor.
+				my Str $sigil	= $_.hash.<sigil>.Str;
+				my Str $twigil	= $_.hash.<twigil> ??
+						  $_.hash.<twigil>.Str !! '';
+				my Str $desigilname =
+					$_.hash.<desigilname> ??
+					$_.hash.<desigilname>.Str !! '';
+				my Str $content =
+					$_.hash.<sigil> ~
+					$twigil ~
+					$desigilname;
+				%sigil-map{$sigil ~ $twigil}.new(
+					:from( $_.from ),
+					:to( $_.to ),
+					:content( $content )
+				)
+			}
+			when self.assert-hash-keys( $_, [< variable >] ) {
+				self._variable( $_.hash.<variable> )
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
@@ -5976,22 +6109,26 @@ return True;
 
 	method _version( Mu $p ) {
 		warn "Untested method";
-		if self.assert-hash-keys( $p, [< vnum vstr >] ) {
-			die "Not implemented yet"
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< vnum vstr >] ) {
+				die "Not implemented yet"
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
 	method _vstr( Mu $p ) {
-		if self.assert-hash-keys( $p, [< vstr >] ) {
-			$p.hash.<vstr>.Int
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< vstr >] ) {
+				$_.hash.<vstr>.Int
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
@@ -6017,12 +6154,14 @@ return True;
 	}
 
 	method _wu( Mu $p ) {
-		if self.assert-hash-keys( $p, [< wu >] ) {
-			$p.hash.<wu>.Str
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< wu >] ) {
+				$_.hash.<wu>.Str
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
