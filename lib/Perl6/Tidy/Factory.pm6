@@ -4247,14 +4247,18 @@ return True;
 					)
 				)
 			}
+			my $right-inset = 0;
+			$p.Str ~~ m{ ( . ) ( \s* ) $ }; my $back = $0.Str;
+			if $1.Str {
+				$right-inset = $1.Str.chars;
+			}
 			# XXX Collect { } from the actual text
 			@child.append(
 				Perl6::Block.from-from-to-XXX(
-					$p.hash.<deflongname>.to +
-					$inset,
-					$p.to,
+					$p.hash.<deflongname>.to + $inset,
+					$p.to - $right-inset,
 					'{',
-					'}',
+					$back,
 					@_child
 					
 				)

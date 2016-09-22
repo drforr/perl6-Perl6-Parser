@@ -139,7 +139,6 @@ _END_
 unit sub MAIN  ;
 _END_
 			my $p = $pt.parse-source( $source );
-say $p.dump;
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
 			is $pt.format( $tree ), $source, Q{formatted};

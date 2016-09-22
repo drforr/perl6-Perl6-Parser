@@ -278,7 +278,7 @@ subtest {
 		subtest {
 			plan 2;
 
-			my $source = Q{my regex Foo{ a  }  };
+			my $source = Q{my regex Foo{ a  }   };
 			my $p = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
@@ -288,7 +288,7 @@ subtest {
 		subtest {
 			plan 2;
 
-			my $source = Q{my regex Foo     { a  }  };
+			my $source = Q{my regex Foo     { a  }   };
 			my $p = $pt.parse-source( $source );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
