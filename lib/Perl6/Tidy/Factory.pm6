@@ -956,18 +956,62 @@ class Perl6::ColonBareword does Token {
 		}
 	}
 }
-class Perl6::Block does Branching_Delimited does Bounded {
+class Perl6::Block does Branching does Bounded {
 	also is Perl6::Element;
 
 	method from-match( Mu $p, Perl6::Element @child ) {
 		if $p.from < $p.to {
+			my Perl6::Element @_child;
 			$p.Str ~~ m{ ^ (.) }; my Str $front = ~$0;
 			$p.Str ~~ m{ (.) $ }; my Str $back = ~$0;
+			@_child.append(
+				Perl6::Balanced::Enter.new(
+					:from( $p.from ),
+					:to( $p.from + $front.chars ),
+					:content( $front )
+				)
+			);
+			@_child.append( @child );
+			@_child.append(
+				Perl6::Balanced::Exit.new(
+					:from( $p.to - $back.chars ),
+					:to( $p.to ),
+					:content( $back )
+				)
+			);
 			self.bless(
 				:from( $p.from ),
 				:to( $p.to ),
-				:delimiter( $front, $back ),
-				:child( @child )
+				:child( @_child )
+			)
+		}
+		else {
+			( )
+		}
+	}
+
+	method from-from-to-XXX( Int $from, Int $to, Str $front, Str $back, @child ) {
+		if $from < $to {
+			my Perl6::Element @_child;
+			@_child.append(
+				Perl6::Balanced::Enter.new(
+					:from( $from ),
+					:to( $from + $front.chars ),
+					:content( $front )
+				)
+			);
+			@_child.append( @child );
+			@_child.append(
+				Perl6::Balanced::Exit.new(
+					:from( $to - $back.chars ),
+					:to( $to ),
+					:content( $back )
+				)
+			);
+			self.bless(
+				:from( $from ),
+				:to( $to ),
+				:child( @_child )
 			)
 		}
 		else {
@@ -4205,16 +4249,16 @@ return True;
 			}
 			# XXX Collect { } from the actual text
 			@child.append(
-				Perl6::Block.new(
-					:from(
-						$p.hash.<deflongname>.to +
-						$inset
-					),
-					:to( $p.to ),
-					:delimiter( '{', '}' ),
-					:child( @_child )
-				)
-			);
+				Perl6::Block.from-from-to-XXX(
+					$p.hash.<deflongname>.to +
+					$inset,
+					$p.to,
+					'{',
+					'}',
+					@_child
+					
+				);
+			)
 		}
 		else {
 			say $p.hash.keys.gist;

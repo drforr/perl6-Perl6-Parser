@@ -139,14 +139,14 @@ class Perl6::Tidy {
 	}
 
 	method check-tree( Perl6::Element $root ) {
-		if $root.^can('delimiter') {
-			unless $root.delimiter.[0] {
+		if $root ~~ Perl6::Block {
+			unless $root.child.[0] ~~ Perl6::Structural {
 				say $root.perl;
-				die "Opening delimiter missing" 
+				die "First element of block not structural"
 			}
-			unless $root.delimiter.[1] {
+			unless $root.child.[*-1] ~~ Perl6::Structural {
 				say $root.perl;
-				die "Closing delimiter missing" 
+				die "Last element of block not structural"
 			}
 		}
 		if $root.^can('child') {
@@ -208,10 +208,7 @@ class Perl6::Tidy {
 
 	method dump-term( Perl6::Element $term ) {
 		my $str = $term.WHAT.perl;
-		if $term ~~ Perl6::Block {
-			$str ~= " ('{$term.delimiter.[0]}'..'{$term.delimiter.[1]}')"
-		}
-		elsif $term ~~ Perl6::Operator::PostCircumfix or
+		if $term ~~ Perl6::Operator::PostCircumfix or
 		      $term ~~ Perl6::Operator::Circumfix {
 		}
 		elsif $term ~~ Perl6::Bareword or
