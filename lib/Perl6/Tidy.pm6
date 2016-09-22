@@ -240,8 +240,18 @@ class Perl6::Tidy {
 		return '' if $root ~~ Perl6::WS and !$display-ws;
 		my $str = ( "\t" xx $depth ) ~ self.dump-term( $root ) ~ "\n";
 		if $root.^can('child') {
-			for $root.child {
-				$str ~= self.dump-tree( $_, $display-ws, $depth + 1 )
+			for ^$root.child {
+				# Mark the tokens that don't overlap.
+				#
+				if $root.child.[$_+1].defined and
+					$root.child.[$_].to !=
+					$root.child.[$_+1].from {
+					$str ~= '*'
+				}
+				$str ~= self.dump-tree(
+					$root.child.[$_],
+					$display-ws, $depth + 1
+				)
 			}
 		}
 		$str
