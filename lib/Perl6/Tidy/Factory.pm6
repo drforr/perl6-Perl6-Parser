@@ -1332,37 +1332,42 @@ class Perl6::Tidy::Factory {
 	}
 
 	method _args( Mu $p ) {
-		if self.assert-hash-keys( $p, [< invocant semiarglist >] ) {
-			die "Not implemented yet";
-		}
-		elsif self.assert-hash-keys( $p, [< semiarglist >] ) {
-			my Perl6::Element @_child;
-			@_child.append(
-				Perl6::WS.with-header-trailer(
-					$p.hash.<semiarglist>,
-					self._semiarglist(
-						$p.hash.<semiarglist>
+		given $p {
+			when self.assert-hash-keys( $_,
+					[< invocant semiarglist >] ) {
+				die "Not implemented yet";
+			}
+			when self.assert-hash-keys( $_, [< semiarglist >] ) {
+				my Perl6::Element @_child;
+				@_child.append(
+					Perl6::WS.with-header-trailer(
+						$_.hash.<semiarglist>,
+						self._semiarglist(
+							$_.hash.<semiarglist>
+						)
 					)
+				);
+				Perl6::Operator::Circumfix.from-match(
+					$_, @_child
 				)
-			);
-			Perl6::Operator::Circumfix.from-match( $p, @_child )
-		}
-		elsif self.assert-hash-keys( $p, [< arglist >] ) {
-			self._arglist( $p.hash.<arglist> );
-		}
-		elsif self.assert-hash-keys( $p, [< EXPR >] ) {
-			self._EXPR( $p.hash.<EXPR> );
-		}
-		elsif $p.Str {
-			die "Not implemented yet"
-		}
-		elsif $p.Bool {
-			die "Not implemented yet"
-		}
-		else {
-			say $p.Int if $p.Int;
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+			}
+			when self.assert-hash-keys( $_, [< arglist >] ) {
+				self._arglist( $_.hash.<arglist> );
+			}
+			when self.assert-hash-keys( $_, [< EXPR >] ) {
+				self._EXPR( $_.hash.<EXPR> );
+			}
+			when $_.Str {
+				die "Not implemented yet"
+			}
+			when $_.Bool {
+				die "Not implemented yet"
+			}
+			default {
+				say $_.Int if $p.Int;
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
@@ -1375,28 +1380,31 @@ class Perl6::Tidy::Factory {
 	#
 	method _assertion( Mu $p ) {
 		warn "Untested method";
-		if self.assert-hash-keys( $p, [< var >] ) {
-			self._var( $p.hash.<var> )
-		}
-		elsif self.assert-hash-keys( $p, [< longname >] ) {
-			self._longname( $p.hash.<longname> )
-		}
-		elsif self.assert-hash-keys( $p, [< cclass_elem >] ) {
-			self._cclass_elem( $p.hash.<cclass_elem> )
-		}
-		elsif self.assert-hash-keys( $p, [< codeblock >] ) {
-			self._codeblock( $p.hash.<codeblock> )
-		}
-		elsif $p.Str {
-			die "Not implemented yet";
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< var >] ) {
+				self._var( $_.hash.<var> )
+			}
+			when self.assert-hash-keys( $_, [< longname >] ) {
+				self._longname( $_.hash.<longname> )
+			}
+			when self.assert-hash-keys( $_, [< cclass_elem >] ) {
+				self._cclass_elem( $_.hash.<cclass_elem> )
+			}
+			when self.assert-hash-keys( $_, [< codeblock >] ) {
+				self._codeblock( $_.hash.<codeblock> )
+			}
+			when $_.Str {
+				die "Not implemented yet";
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
 	method _atom( Mu $p ) {
+		# XXX Interesting, this can't be converted to given-when?
 		if self.assert-hash-keys( $p, [< metachar >] ) {
 			self._metachar( $p.hash.<metachar> )
 		}
@@ -1411,22 +1419,27 @@ class Perl6::Tidy::Factory {
 
 	method _babble( Mu $p ) {
 		warn "Untested method";
-		if self.assert-hash-keys( $p, [< B >], [< quotepair >] ) {
-			self._B( $p.hash.<B> )
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_,
+					[< B >], [< quotepair >] ) {
+				self._B( $_.hash.<B> )
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
 	method _backmod( Mu $p ) {
-		if self.assert-hash-keys( $p, [< backmod >] ) {
-			$p.hash.<backmod>.Bool
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< backmod >] ) {
+				$_.hash.<backmod>.Bool
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
@@ -1446,15 +1459,17 @@ class Perl6::Tidy::Factory {
 	#
 	method _backslash( Mu $p ) {
 		warn "Untested method";
-		if self.assert-hash-keys( $p, [< sym >] ) {
-			self._sym( $p.hash.<sym> )
-		}
-		elsif $p.Str {
-			die "Not implemented yet";
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< sym >] ) {
+				self._sym( $_.hash.<sym> )
+			}
+			when $_.Str {
+				die "Not implemented yet";
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
@@ -1463,57 +1478,65 @@ class Perl6::Tidy::Factory {
 	}
 
 	method _block( Mu $p ) {
-		if self.assert-hash-keys( $p, [< blockoid >] ) {
-			self._blockoid( $p.hash.<blockoid> )
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< blockoid >] ) {
+				self._blockoid( $_.hash.<blockoid> )
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
 	method _blockoid( Mu $p ) {
 		my Perl6::Element @child;
-		# $p doesn't contain WS after the block.
-		if self.assert-hash-keys( $p, [< statementlist >] ) {
-			my Perl6::Element @_child;
-			@_child.append(
-				self._statementlist(
-					$p.hash.<statementlist>
-				)
-			);
-			@child =
-				Perl6::Block.from-match( $p, @_child )
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			# $_ doesn't contain WS after the block.
+			when self.assert-hash-keys( $_, [< statementlist >] ) {
+				my Perl6::Element @_child;
+				@_child.append(
+					self._statementlist(
+						$_.hash.<statementlist>
+					)
+				);
+				@child =
+					Perl6::Block.from-match( $_, @_child )
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 		@child
 	}
 
 	method _blorst( Mu $p ) {
 		warn "Untested method";
-		if self.assert-hash-keys( $p, [< statement >] ) {
-			self._statement( $p.hash.<statement> )
-		}
-		elsif self.assert-hash-keys( $p, [< block >] ) {
-			self._block( $p.hash.<block> )
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< statement >] ) {
+				self._statement( $_.hash.<statement> )
+			}
+			when self.assert-hash-keys( $_, [< block >] ) {
+				self._block( $_.hash.<block> )
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
 	method _bracket( Mu $p ) {
 		warn "Untested method";
-		if self.assert-hash-keys( $p, [< semilist >] ) {
-			self._semilist( $p.hash.<semilist> )
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< semilist >] ) {
+				self._semilist( $_.hash.<semilist> )
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	} 
 
@@ -1610,33 +1633,39 @@ class Perl6::Tidy::Factory {
 
 	method _codeblock( Mu $p ) {
 		warn "Untested method";
-		if self.assert-hash-keys( $p, [< block >] ) {
-			self._block( $p.hash.<block> )
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< block >] ) {
+				self._block( $_.hash.<block> )
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
 	method _coercee( Mu $p ) {
 		warn "Untested method";
-		if self.assert-hash-keys( $p, [< semilist >] ) {
-			self._semilist( $p.hash.<semilist> )
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< semilist >] ) {
+				self._semilist( $_.hash.<semilist> )
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
 	method _coloncircumfix( Mu $p ) {
-		if self.assert-hash-keys( $p, [< circumfix >] ) {
-			self._circumfix( $p.hash.<circumfix> )
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< circumfix >] ) {
+				self._circumfix( $_.hash.<circumfix> )
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
@@ -1724,12 +1753,15 @@ class Perl6::Tidy::Factory {
 
 	method _contextualizer( Mu $p ) {
 		warn "untested method";
-		if self.assert-hash-keys( $p, [< coercee circumfix sigil >] ) {
-			die "not implemented yet";
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_,
+					[< coercee circumfix sigil >] ) {
+				die "not implemented yet";
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
@@ -1953,12 +1985,15 @@ class Perl6::Tidy::Factory {
 	}
 
 	method _deflongname( Mu $p ) {
-		if self.assert-hash-keys( $p, [< name >], [< colonpair >] ) {
-			self._name( $p.hash.<name> )
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_,
+					[< name >], [< colonpair >] ) {
+				self._name( $_.hash.<name> )
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
@@ -1983,25 +2018,29 @@ class Perl6::Tidy::Factory {
 
 	method _deftermnow( Mu $p ) {
 		warn "Untested method";
-		if self.assert-hash-keys( $p, [< defterm >] ) {
-			self._defterm( $p.hash.<defterm> )
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< defterm >] ) {
+				self._defterm( $_.hash.<defterm> )
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
 	method _desigilname( Mu $p ) {
-		if self.assert-hash-keys( $p, [< longname >] ) {
-			self._longname( $p.hash.<longname> )
-		}
-		elsif $p.Str {
-			die "Not implemented yet"
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< longname >] ) {
+				self._longname( $_.hash.<longname> )
+			}
+			when $_.Str {
+				die "Not implemented yet"
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
@@ -2020,12 +2059,14 @@ class Perl6::Tidy::Factory {
 	}
 
 	method _doc( Mu $p ) {
-		if self.assert-hash-keys( $p, [< doc >] ) {
-			$p.hash.<doc>.Bool
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< XXX >] ) {
+				$_.hash.<XXX>.Bool
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
@@ -2034,117 +2075,137 @@ class Perl6::Tidy::Factory {
 	#
 	method _dotty( Mu $p ) {
 		my Perl6::Element @child;
-		if self.assert-hash-keys( $p, [< sym dottyop O >] ) {
-			@child =
-				Perl6::Operator::Prefix.from-match(
-					$p.hash.<sym>
-				);
-			@child.append(
-				self._dottyop( $p.hash.<dottyop> ).flat
-			)
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< sym dottyop O >] ) {
+				@child =
+					Perl6::Operator::Prefix.from-match(
+						$_.hash.<sym>
+					);
+				@child.append(
+					self._dottyop( $_.hash.<dottyop> ).flat
+				)
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 		@child
 	}
 
 	method _dottyop( Mu $p ) {
-		if self.assert-hash-keys( $p, [< sym postop >], [< O >] ) {
-			die "Not implemented yet"
-		}
-		elsif self.assert-hash-keys( $p, [< colonpair >] ) {
-			self._colonpair( $p.hash.<colonpair> )
-		}
-		elsif self.assert-hash-keys( $p, [< methodop >] ) {
-			self._methodop( $p.hash.<methodop> )
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_,
+					[< sym postop >], [< O >] ) {
+				die "Not implemented yet"
+			}
+			when self.assert-hash-keys( $_, [< colonpair >] ) {
+				self._colonpair( $_.hash.<colonpair> )
+			}
+			when self.assert-hash-keys( $_, [< methodop >] ) {
+				self._methodop( $_.hash.<methodop> )
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
 	method _dottyopish( Mu $p ) {
 		warn "Untested method";
-		if self.assert-hash-keys( $p, [< term >] ) {
-			self._term( $p.hash.<term> )
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< term >] ) {
+				self._term( $_.hash.<term> )
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
 	method _e1( Mu $p ) {
 		warn "Untested method";
-		if self.assert-hash-keys( $p, [< scope_declarator >] ) {
-			self._scope_declarator( $p.hash.<scope_declarator> )
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_,
+					[< scope_declarator >] ) {
+				self._scope_declarator(
+					$_.hash.<scope_declarator>
+				)
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
 	method _e2( Mu $p ) {
 		warn "Untested method";
-		if self.assert-hash-keys( $p, [< infix OPER >] ) {
-			die "Not implemented yet"
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< infix OPER >] ) {
+				die "Not implemented yet"
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
 	method _e3( Mu $p ) {
 		warn "Untested method";
-		if self.assert-hash-keys( $p, [< postfix OPER >],
-				[< postfix_prefix_meta_operator >] ) {
-			die "Not implemented yet"
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< postfix OPER >],
+					[< postfix_prefix_meta_operator >] ) {
+				die "Not implemented yet"
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
 	method _else( Mu $p ) {
 		my Perl6::Element @child;
 		warn "Untested method";
-		if self.assert-hash-keys( $p, [< sym blorst >] ) {
-			@child = self._sym( $p.hash.<sym> );
-			@child.append(
-				Perl6::WS.between-matches(
-					$p,
-					'sym',
-					'blorst'
+		given $p {
+			when self.assert-hash-keys( $_, [< sym blorst >] ) {
+				@child = self._sym( $_.hash.<sym> );
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						'sym',
+						'blorst'
+					)
+				);
+				@child.append(
+					self._blorst( $_.hash.<blorst> )
 				)
-			);
-			@child.append(
-				self._blorst( $p.hash.<blorst> )
-			)
-		}
-		elsif self.assert-hash-keys( $p, [< blockoid >] ) {
-			@child = self._blockoid( $p.hash.<blockoid> )
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+			}
+			when self.assert-hash-keys( $_, [< blockoid >] ) {
+				@child = self._blockoid( $_.hash.<blockoid> )
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 		@child
 	}
 
 	method _escale( Mu $p ) {
 		warn "Untested method";
-		if self.assert-hash-keys( $p, [< sign decint >] ) {
-			die "Not implemented yet"
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< sign decint >] ) {
+				die "Not implemented yet"
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
@@ -2173,34 +2234,38 @@ class Perl6::Tidy::Factory {
 
 	method __Term( Mu $p ) {
 		my Perl6::Element @child;
-		if self.assert-hash-keys( $p,
-				[< postfix OPER >],
-				[< postfix_prefix_meta_operator >] ) {
-			@child = self.__Term( $p.list.[0] );
-			@child.append(
-				self._postfix( $p.hash.<postfix> )
-			)
-		}
-		elsif self.assert-hash-keys( $p,
-				[< identifier >], [< args >] ) {
-			@child = self._identifier( $p.hash.<identifier> )
-		}
-		elsif self.assert-hash-keys( $p,
-				[< longname >], [< args >] ) {
-			@child = self._longname( $p.hash.<longname> )
-		}
-		elsif self.assert-hash-keys( $p, [< longname >] ) {
-			@child = self._longname( $p.hash.<longname> )
-		}
-		elsif self.assert-hash-keys( $p, [< variable >] ) {
-			@child = self._variable( $p.hash.<variable> )
-		}
-		elsif self.assert-hash-keys( $p, [< value >] ) {
-			@child = self._value( $p.hash.<value> )
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_,
+					[< postfix OPER >],
+					[< postfix_prefix_meta_operator >] ) {
+				@child = self.__Term( $_.list.[0] );
+				@child.append(
+					self._postfix( $_.hash.<postfix> )
+				)
+			}
+			when self.assert-hash-keys( $_,
+					[< identifier >], [< args >] ) {
+				@child = self._identifier(
+					$_.hash.<identifier>
+				)
+			}
+			when self.assert-hash-keys( $_,
+					[< longname >], [< args >] ) {
+				@child = self._longname( $_.hash.<longname> )
+			}
+			when self.assert-hash-keys( $_, [< longname >] ) {
+				@child = self._longname( $_.hash.<longname> )
+			}
+			when self.assert-hash-keys( $_, [< variable >] ) {
+				@child = self._variable( $_.hash.<variable> )
+			}
+			when self.assert-hash-keys( $_, [< value >] ) {
+				@child = self._value( $_.hash.<value> )
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 		@child
 	}
@@ -2413,22 +2478,26 @@ class Perl6::Tidy::Factory {
 
 	method _fake_infix( Mu $p ) {
 		warn "Untested method";
-		if self.assert-hash-keys( $p, [< O >] ) {
-			self._O( $p.hash.<O> )
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< O >] ) {
+				self._O( $_.hash.<O> )
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
 	method _fakesignature( Mu $p ) {
-		if self.assert-hash-keys( $p, [< signature >] ) {
-			self._signature( $p.hash.<signature> )
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			if self.assert-hash-keys( $_, [< signature >] ) {
+				self._signature( $_.hash.<signature> )
+			}
+			else {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
@@ -2508,29 +2577,37 @@ class Perl6::Tidy::Factory {
 	}
 
 	method _infix( Mu $p ) {
-		if self.assert-hash-keys( $p, [< infix OPER >] ) {
-			die "Not implemented yet";
-		}
-		elsif self.assert-hash-keys( $p, [< sym O >] ) {
-			Perl6::Operator::Infix.from-match( $p.hash.<sym> )
-		}
-		elsif self.assert-hash-keys( $p, [< EXPR O >] ) {
-			Perl6::Operator::Infix.from-match( $p.hash.<EXPR> )
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< infix OPER >] ) {
+				die "Not implemented yet";
+			}
+			when self.assert-hash-keys( $_, [< sym O >] ) {
+				Perl6::Operator::Infix.from-match(
+					$_.hash.<sym>
+				)
+			}
+			when self.assert-hash-keys( $_, [< EXPR O >] ) {
+				Perl6::Operator::Infix.from-match(
+					$_.hash.<EXPR>
+				)
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
 	method _infixish( Mu $p ) {
 		warn "Untested method";
-		if self.assert-hash-keys( $p, [< infix OPER >] ) {
-			die "Not implemented yet";
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< infix OPER >] ) {
+				die "Not implemented yet";
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
@@ -2538,29 +2615,33 @@ class Perl6::Tidy::Factory {
 	# « »
 	#
 	method _infix_circumfix_meta_operator( Mu $p ) {
-		if self.assert-hash-keys( $p, [< sym infixish O >] ) {
-			Perl6::Operator::Infix.new(
-				$p.hash.<sym>.from,
-				$p.hash.<sym>.Str ~ $p.hash.<infixish>
-			)
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< sym infixish O >] ) {
+				Perl6::Operator::Infix.new(
+					$_.hash.<sym>.from,
+					$_.hash.<sym>.Str ~ $_.hash.<infixish>
+				)
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 	# « »
 	#
 	method _infix_prefix_meta_operator( Mu $p ) {
-		if self.assert-hash-keys( $p, [< sym infixish O >] ) {
-			Perl6::Operator::Infix.new(
-				$p.hash.<sym>.from,
-				$p.hash.<sym>.Str ~ $p.hash.<infixish>
-			)
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< sym infixish O >] ) {
+				Perl6::Operator::Infix.new(
+					$_.hash.<sym>.from,
+					$_.hash.<sym>.Str ~ $_.hash.<infixish>
+				)
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
@@ -2655,21 +2736,23 @@ class Perl6::Tidy::Factory {
 	}
 
 	method _integer( Mu $p ) {
-		if self.assert-hash-keys( $p, [< binint VALUE >] ) {
-			Perl6::Number::Binary.from-match( $p )
-		}
-		elsif self.assert-hash-keys( $p, [< octint VALUE >] ) {
-			Perl6::Number::Octal.from-match( $p )
-		}
-		elsif self.assert-hash-keys( $p, [< decint VALUE >] ) {
-			Perl6::Number::Decimal.from-match( $p )
-		}
-		elsif self.assert-hash-keys( $p, [< hexint VALUE >] ) {
-			Perl6::Number::Hexadecimal.from-match( $p )
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< binint VALUE >] ) {
+				Perl6::Number::Binary.from-match( $_ )
+			}
+			when self.assert-hash-keys( $_, [< octint VALUE >] ) {
+				Perl6::Number::Octal.from-match( $_ )
+			}
+			when self.assert-hash-keys( $_, [< decint VALUE >] ) {
+				Perl6::Number::Decimal.from-match( $_ )
+			}
+			when self.assert-hash-keys( $_, [< hexint VALUE >] ) {
+				Perl6::Number::Hexadecimal.from-match( $_ )
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
@@ -2688,43 +2771,52 @@ return True;
 	}
 
 	method _lambda( Mu $p ) {
-		if self.assert-hash-keys( $p, [< lambda >] ) {
-			$p.hash.<lambda>.Str
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< lambda >] ) {
+				$_.hash.<lambda>.Str
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
 	method _left( Mu $p ) {
 		warn "Untested method";
-		if self.assert-hash-keys( $p, [< termseq >] ) {
-			self._termseq( $p.hash.<termseq> )
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< termseq >] ) {
+				self._termseq( $_.hash.<termseq> )
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
 	method _longname( Mu $p ) {
-		if self.assert-hash-keys( $p, [< name >], [< colonpair >] ) {
-			self._name( $p.hash.<name> )
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_,
+					[< name >], [< colonpair >] ) {
+				self._name( $_.hash.<name> )
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
 	method _max( Mu $p ) {
-		if self.assert-hash-keys( $p, [< max >] ) {
-			$p.hash.<max>.Str
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< max >] ) {
+				$_.hash.<max>.Str
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
@@ -2735,100 +2827,108 @@ return True;
 	#
 	method _metachar( Mu $p ) {
 		warn "Untested method";
-		if self.assert-hash-keys( $p, [< sym >] ) {
-			self._sym( $p.hash.<sym> )
-		}
-		elsif self.assert-hash-keys( $p, [< codeblock >] ) {
-			self._codeblock( $p.hash.<codeblock> )
-		}
-		elsif self.assert-hash-keys( $p, [< backslash >] ) {
-			self._backslash( $p.hash.<backslash> )
-		}
-		elsif self.assert-hash-keys( $p, [< assertion >] ) {
-			self._assertion( $p.hash.<assertion> )
-		}
-		elsif self.assert-hash-keys( $p, [< nibble >] ) {
-			self._nibble( $p.hash.<nibble> )
-		}
-		elsif self.assert-hash-keys( $p, [< quote >] ) {
-			self._quote( $p.hash.<quote> )
-		}
-		elsif self.assert-hash-keys( $p, [< nibbler >] ) {
-			self._nibbler( $p.hash.<nibbler> )
-		}
-		elsif self.assert-hash-keys( $p, [< statement >] ) {
-			self._statement( $p.hash.<statement> )
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< sym >] ) {
+				self._sym( $_.hash.<sym> )
+			}
+			when self.assert-hash-keys( $_, [< codeblock >] ) {
+				self._codeblock( $_.hash.<codeblock> )
+			}
+			when self.assert-hash-keys( $_, [< backslash >] ) {
+				self._backslash( $_.hash.<backslash> )
+			}
+			when self.assert-hash-keys( $_, [< assertion >] ) {
+				self._assertion( $_.hash.<assertion> )
+			}
+			when self.assert-hash-keys( $_, [< nibble >] ) {
+				self._nibble( $_.hash.<nibble> )
+			}
+			when self.assert-hash-keys( $_, [< quote >] ) {
+				self._quote( $_.hash.<quote> )
+			}
+			when self.assert-hash-keys( $_, [< nibbler >] ) {
+				self._nibbler( $_.hash.<nibbler> )
+			}
+			when self.assert-hash-keys( $_, [< statement >] ) {
+				self._statement( $_.hash.<statement> )
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
 	method _method_def( Mu $p ) {
 		my Perl6::Element @child;
-		if self.assert-hash-keys( $p,
-			     [< specials longname blockoid multisig >],
-			     [< trait >] ) {
-			my Perl6::Element @_child =
-				 self._multisig( $p.hash.<multisig> );
-			@child =
-				self._longname( $p.hash.<longname> ),
-				Perl6::Operator::Circumfix.from-match(
-					$p, @_child
-				),
-				self._blockoid( $p.hash.<blockoid> )
-		}
-		elsif self.assert-hash-keys( $p,
-			     [< specials longname blockoid >],
-			     [< trait >] ) {
-			@child = self._longname( $p.hash.<longname> );
-			@child.append(
-				Perl6::WS.between-matches(
-					$p,
-					'longname',
-					'blockoid'
-				)
-			);
-			@child.append(
-				self._blockoid( $p.hash.<blockoid> )
-			);
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_,
+				     [< specials longname blockoid multisig >],
+				     [< trait >] ) {
+				my Perl6::Element @_child =
+					 self._multisig( $_.hash.<multisig> );
+				@child =
+					self._longname( $_.hash.<longname> ),
+					Perl6::Operator::Circumfix.from-match(
+						$_, @_child
+					),
+					self._blockoid( $_.hash.<blockoid> )
+			}
+			when self.assert-hash-keys( $_,
+				     [< specials longname blockoid >],
+				     [< trait >] ) {
+				@child = self._longname( $_.hash.<longname> );
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						'longname',
+						'blockoid'
+					)
+				);
+				@child.append(
+					self._blockoid( $_.hash.<blockoid> )
+				);
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 		@child.flat
 	}
 
 	method _methodop( Mu $p ) {
 		my Perl6::Element @child;
-		if self.assert-hash-keys( $p, [< longname args >] ) {
-			@child =
-				self._longname( $p.hash.<longname> ),
-				self._args( $p.hash.<args> )
-		}
-		elsif self.assert-hash-keys( $p, [< variable >] ) {
-			@child = self._variable( $p.hash.<variable> )
-		}
-		elsif self.assert-hash-keys( $p, [< longname >] ) {
-			@child = self._longname( $p.hash.<longname> )
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< longname args >] ) {
+				@child =
+					self._longname( $_.hash.<longname> ),
+					self._args( $_.hash.<args> )
+			}
+			when self.assert-hash-keys( $_, [< variable >] ) {
+				@child = self._variable( $_.hash.<variable> )
+			}
+			when self.assert-hash-keys( $_, [< longname >] ) {
+				@child = self._longname( $_.hash.<longname> )
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 		@child
 	}
 
 	method _min( Mu $p ) {
 		warn "Untested method";
-		if self.assert-hash-keys( $p, [< decint VALUE >] ) {
-			self._decint( $p.hash.<decint> )
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when self.assert-hash-keys( $_, [< decint VALUE >] ) {
+				self._decint( $_.hash.<decint> )
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
