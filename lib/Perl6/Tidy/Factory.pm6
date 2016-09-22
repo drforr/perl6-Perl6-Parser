@@ -4257,7 +4257,7 @@ return True;
 					'}',
 					@_child
 					
-				);
+				)
 			)
 		}
 		else {
@@ -5271,8 +5271,8 @@ return True;
 			if $beginning-ws {
 				@_child.append(
 					Perl6::WS.new(
-						:from( 0 ),
-						:to( $beginning-ws.chars ),
+						:from( $p.from ),
+						:to( $p.from + $beginning-ws.chars ),
 						:content( $beginning-ws )
 					)
 				);
@@ -5311,9 +5311,8 @@ return True;
 			#
 			if $_.Str ~~ m{ (';') (\s+) $ } {
 				$leftover-ws = $1.Str;
-				$leftover-ws-from = 
-					@_child[*-1].to +
-					SEMICOLON.chars;
+				$leftover-ws-from =
+					$_.to - $1.Str.chars
 			}
 			else {
 				@_child.append(
