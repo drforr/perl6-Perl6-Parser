@@ -3534,14 +3534,6 @@ return True;
 						$_.hash.<type_constraint>
 					)
 				);
-				if $_.Str ~~ m{ (\s+) } {
-#					@child.append(
-#						Perl6::WS.new(
-#							$_.from + $0.from,
-#							$0.Str
-#						)
-#					)
-				}
 				@child.append(
 					self._param_var( $_.hash.<param_var> )
 				)
