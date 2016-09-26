@@ -573,7 +573,7 @@ class Perl6::WS does Token {
 	}
 
 	method whitespace-header( Mu $p ) {
-		if $p.Str ~~ m{ ( \s+ ) $ } {
+		if $p.Str ~~ m{ ^ ( \s+ ) } {
 			self.bless(
 				:from( $p.from ),
 				:to( $p.from + $0.Str.chars ),
@@ -697,6 +697,25 @@ class Perl6::WS does Token {
 		}
 		@_child
 	}
+
+	multi method with-inter-ws( Mu $p,
+				Str $start, $start-list,
+				Str $end, $end-list ) {
+		my Perl6::Element @_child;
+		@_child.append( @( $start-list ) );
+		@_child.append( Perl6::WS.between-matches( $p, $start, $end ) );
+		@_child.append( @( $end-list ) );
+		@_child
+	}
+	multi method with-inter-ws( Mu $p,
+				Mu $start, $start-list,
+				Mu $end, $end-list ) {
+		my Perl6::Element @_child;
+		@_child.append( @( $start-list ) );
+		@_child.append( Perl6::WS.between-matches( $p, $start, $end ) );
+		@_child.append( @( $end-list ) );
+		@_child
+	}
 }
 
 class Perl6::Comment does Token {
@@ -743,92 +762,40 @@ role Prefixed {
 #
 class Perl6::Number does Token {
 	also is Perl6::Element;
+
+	method from-match( Mu $p ) {
+		if $p.from < $p.to {
+			self.bless(
+				:from( $p.from ),
+				:to( $p.to ),
+				:content( $p.Str )
+			)
+		}
+		else {
+			( )
+		}
+	}
 }
 class Perl6::Number::Binary does Prefixed {
 	also is Perl6::Number;
-
-	method from-match( Mu $p ) {
-		if $p.from < $p.to {
-			self.bless(
-				:from( $p.from ),
-				:to( $p.to ),
-				:content( $p.Str )
-			)
-		}
-		else {
-			( )
-		}
-	}
 }
 class Perl6::Number::Octal does Prefixed {
 	also is Perl6::Number;
-
-	method from-match( Mu $p ) {
-		if $p.from < $p.to {
-			self.bless(
-				:from( $p.from ),
-				:to( $p.to ),
-				:content( $p.Str )
-			)
-		}
-		else {
-			( )
-		}
-	}
 }
 class Perl6::Number::Decimal {
 	also is Perl6::Number;
-
-	method from-match( Mu $p ) {
-		if $p.from < $p.to {
-			self.bless(
-				:from( $p.from ),
-				:to( $p.to ),
-				:content( $p.Str )
-			)
-		}
-		else {
-			( )
-		}
-	}
 }
 class Perl6::Number::Decimal::Explicit does Prefixed {
 	also is Perl6::Number::Decimal;
 }
 class Perl6::Number::Hexadecimal does Prefixed {
 	also is Perl6::Number;
-
-	method from-match( Mu $p ) {
-		if $p.from < $p.to {
-			self.bless(
-				:from( $p.from ),
-				:to( $p.to ),
-				:content( $p.Str )
-			)
-		}
-		else {
-			( )
-		}
-	}
 }
 class Perl6::Number::Radix {
 	also is Perl6::Number;
 }
 class Perl6::Number::Floating {
 	also is Perl6::Number;
-
-	method from-match( Mu $p ) {
-		if $p.from < $p.to {
-			self.bless(
-				:from( $p.from ),
-				:to( $p.to ),
-				:content( $p.Str )
-			)
-		}
-		else {
-			( )
-		}
-	}
 }
 
 class Perl6::Regex does Token {
@@ -1825,19 +1792,22 @@ class Perl6::Tidy::Factory {
 		if self.assert-hash-keys( $p,
 				[< deftermnow initializer term_init >],
 				[< trait >] ) {
-			@child =
-				self._variable_declarator(
-					$p.hash.<variable_declarator>
-				);
 			@child.append(
-				Perl6::WS.between-matches(
+				Perl6::WS.with-inter-ws(
 					$p,
-					'variable_declarator',
-					'initializer'
+					$p.hash.<variable_declarator>,
+					[
+						self._variable_declarator(
+							$p.hash.<variable_declarator>
+						)
+					],
+					$p.hash.<initializer>,
+					[
+						self._initializer(
+							$p.hash.<initializer>
+						)
+					]
 				)
-			);
-			@child.append(
-				self._initializer( $p.hash.<initializer> )
 			)
 		}
 		elsif self.assert-hash-keys( $p,
@@ -1867,34 +1837,43 @@ class Perl6::Tidy::Factory {
 		}
 		elsif self.assert-hash-keys( $p,
 				[< initializer signature >], [< trait >] ) {
-			@child = self._signature( $p.hash.<signature> );
 			@child.append(
-				Perl6::WS.between-matches(
+				Perl6::WS.with-inter-ws(
 					$p,
-					'signature',
-					'initializer'
+					$p.hash.<signature>,
+					[
+						self._signature(
+							$p.hash.<signature>
+						)
+					],
+					$p.hash.<initializer>,
+					[
+						self._initializer(
+							$p.hash.<initializer>
+						)
+					]
 				)
-			);
-			@child.append(
-				self._initializer( $p.hash.<initializer> )
 			)
 		}
 		elsif self.assert-hash-keys( $p,
 				  [< initializer variable_declarator >],
 				  [< trait >] ) {
-			@child =
-				self._variable_declarator(
-					$p.hash.<variable_declarator>
-				);
 			@child.append(
-				Perl6::WS.between-matches(
+				Perl6::WS.with-inter-ws(
 					$p,
-					'variable_declarator',
-					'initializer'
+					$p.hash.<variable_declarator>,
+					[
+						self._variable_declarator(
+							$p.hash.<variable_declarator>
+						)
+					],
+					$p.hash.<initializer>,
+					[
+						self._initializer(
+							$p.hash.<initializer>
+						)
+					]
 				)
-			);
-			@child.append(
-				self._initializer( $p.hash.<initializer> )
 			)
 		}
 		elsif self.assert-hash-keys( $p,
@@ -2224,16 +2203,22 @@ class Perl6::Tidy::Factory {
 		warn "Untested method";
 		given $p {
 			when self.assert-hash-keys( $_, [< sym blorst >] ) {
-				@child = self._sym( $_.hash.<sym> );
 				@child.append(
-					Perl6::WS.between-matches(
+					Perl6::WS.with-inter-ws(
 						$_,
-						'sym',
-						'blorst'
+						$_.hash.<sym>,
+						[
+							self._sym(
+								$_.hash.<sym>
+							)
+						],
+						$_.hash.<blorst>,
+						[
+							self._blorst(
+								$_.hash.<blorst>
+							)
+						]
 					)
-				);
-				@child.append(
-					self._blorst( $_.hash.<blorst> )
 				)
 			}
 			when self.assert-hash-keys( $_, [< blockoid >] ) {
@@ -2353,16 +2338,18 @@ class Perl6::Tidy::Factory {
 		elsif self.assert-hash-keys( $p,
 				[< prefix OPER >],
 				[< prefix_postfix_meta_operator >] ) {
-			@child = self._prefix( $p.hash.<prefix> );
 			@child.append(
-				Perl6::WS.between-matches(
+				Perl6::WS.with-inter-ws(
 					$p,
 					$p.hash.<prefix>,
-					$p.list.[0].list.[0] // $p.list.[0]
+					[
+						self._prefix( $p.hash.<prefix> )
+					],
+					$p.list.[0].list.[0] // $p.list.[0],
+					[
+						self.__Term( $p.list.[0] )
+					]
 				)
-			);
-			@child.append(
-				self.__Term( $p.list.[0] )
 			)
 		}
 		elsif self.assert-hash-keys( $p,
@@ -2928,17 +2915,23 @@ return True;
 			when self.assert-hash-keys( $_,
 				     [< specials longname blockoid >],
 				     [< trait >] ) {
-				@child = self._longname( $_.hash.<longname> );
 				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'longname',
-						'blockoid'
+					Perl6::WS.with-inter-ws(
+						$p,
+						$p.hash.<longname>,
+						[
+							self._longname(
+								$p.hash.<longname>
+							)
+						],
+						$p.hash.<blockoid>,
+						[
+							self._blockoid(
+								$p.hash.<blockoid>
+							)
+						]
 					)
-				);
-				@child.append(
-					self._blockoid( $_.hash.<blockoid> )
-				);
+				)
 			}
 			default {
 				say $_.hash.keys.gist;
@@ -3040,32 +3033,42 @@ return True;
 		given $p {
 			when self.assert-hash-keys( $_,
 					[< sym routine_def >] ) {
-				@child = self._sym( $_.hash.<sym> );
 				@child.append(
-					Perl6::WS.between-matches(
+					Perl6::WS.with-inter-ws(
 						$_,
-						'sym',
-						'routine_def'
-					)
-				);
-				@child.append(
-					self._routine_def(
-						$_.hash.<routine_def>
+						$_.hash.<sym>,
+						[
+							self._sym(
+								$_.hash.<sym>
+							)
+						],
+						$_.hash.<routine_def>,
+						[
+							self._routine_def(
+								$_.hash.<routine_def>
+							)
+						]
 					)
 				)
 			}
 			when self.assert-hash-keys( $_,
 					[< sym declarator >] ) {
-				@child = self._sym( $_.hash.<sym> );
 				@child.append(
-					Perl6::WS.between-matches(
+					Perl6::WS.with-inter-ws(
 						$_,
-						'sym',
-						'declarator'
+						$_.hash.<sym>,
+						[
+							self._sym(
+								$_.hash.<sym>
+							)
+						],
+						$_.hash.<declarator>,
+						[
+							self._declarator(
+								$_.hash.<declarator>
+							)
+						]
 					)
-				);
-				@child.append(
-					self._declarator( $_.hash.<declarator> )
 				)
 			}
 			when self.assert-hash-keys( $_, [< declarator >] ) {
@@ -3394,19 +3397,23 @@ return True;
 			# $_ doesn't contain WS after the block.
 			when self.assert-hash-keys( $_,
 					[< sym package_def >] ) {
-				@child = self._sym( $_.hash.<sym> );
 				@child.append(
-					Perl6::WS.between-matches(
+					Perl6::WS.with-inter-ws(
 						$_,
-						'sym',
-						'package_def'
+						$_.hash.<sym>,
+						[
+							self._sym(
+								$_.hash.<sym>
+							)
+						],
+						$_.hash.<package_def>,
+						[
+							self._package_def(
+								$_.hash.<package_def>
+							)
+						]
 					)
-				);
-				@child.append(
-					self._package_def(
-						$_.hash.<package_def>
-					)
-				);
+				)
 			}
 			default {
 				say $_.hash.keys.gist;
@@ -3433,44 +3440,60 @@ return True;
 		given $p {
 			when self.assert-hash-keys( $_,
 				[< sym package_def >] ) {
-				@child = self._sym( $_.hash.<sym> );
 				@child.append(
-					Perl6::WS.between-matches(
+					Perl6::WS.with-inter-ws(
 						$_,
-						'sym',
-						'package_def'
-					)
-				);
-				@child.append(
-					self._package_def(
-						$_.hash.<package_def>
+						$_.hash.<sym>,
+						[
+							self._sym(
+								$_.hash.<sym>
+							)
+						],
+						$_.hash.<package_def>,
+						[
+							self._package_def(
+								$_.hash.<package_def>
+							)
+						]
 					)
 				)
 			}
 			when self.assert-hash-keys( $_, [< sym typename >] ) {
-				@child = self._sym( $_.hash.<sym> );
 				@child.append(
-					Perl6::WS.between-matches(
+					Perl6::WS.with-inter-ws(
 						$_,
-						'sym',
-						'typename'
+						$_.hash.<sym>,
+						[
+							self._sym(
+								$_.hash.<sym>
+							)
+						],
+						$_.hash.<typename>,
+						[
+							self._typename(
+								$_.hash.<typename>
+							)
+						]
 					)
-				);
-				@child.append(
-					self._package_def( $_.hash.<typename> )
 				)
 			}
 			when self.assert-hash-keys( $_, [< sym trait >] ) {
-				@child = self._sym( $_.hash.<sym> );
 				@child.append(
-					Perl6::WS.between-matches(
+					Perl6::WS.with-inter-ws(
 						$_,
-						'sym',
-						'trait'
+						$_.hash.<sym>,
+						[
+							self._sym(
+								$_.hash.<sym>
+							)
+						],
+						$_.hash.<trait>,
+						[
+							self._trait(
+								$_.hash.<trait>
+							)
+						]
 					)
-				);
-				@child.append(
-					self._trait( $_.hash.<trait> )
 				)
 			}
 			default {
@@ -3519,16 +3542,22 @@ return True;
 			# $p doesn't contain WS after the block.
 			when self.assert-hash-keys( $_,
 					[< longname blockoid >], [< trait >] ) {
-				@child = self._longname( $_.hash.<longname> );
 				@child.append(
-					Perl6::WS.between-matches(
+					Perl6::WS.with-inter-ws(
 						$_,
-						'longname',
-						'blockoid'
+						$_.hash.<longname>,
+						[
+							self._longname(
+								$p.hash.<longname>
+							)
+						],
+						$_.hash.<blockoid>,
+						[
+							self._blockoid(
+								$_.hash.<blockoid>
+							)
+						]
 					)
-				);
-				@child.append(
-					self._blockoid( $_.hash.<blockoid> )
 				)
 			}
 			when self.assert-hash-keys( $_,
@@ -4079,7 +4108,7 @@ return True;
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< nibble >] ) {
-			$p.Str ~~ m{ ^ (.) .*? (.) $ };
+			$p.Str ~~ m{ ^ ( . ) .*? ( . ) $ };
 			given $0.Str {
 				when Q{'} {
 					Perl6::String::Quote::Single.from-match(
@@ -4154,19 +4183,12 @@ return True;
 			when self.assert-hash-keys( $_,
 					[< circumfix bracket radix >],
 					[< exp base >] ) {
-				Perl6::Number::Radix.new(
-					:from( $_.from ),
-					:to( $_.to ),
-					:content( $_.Str )
-				)
+				Perl6::Number::Radix.from-match( $_ )
 			}
 			when self.assert-hash-keys( $_,
-					[< circumfix radix >], [< exp base >] ) {
-				Perl6::Number::Radix.new(
-					:from( $_.from ),
-					:to( $_.to ),
-					:content( $_.Str )
-				)
+					[< circumfix radix >],
+					[< exp base >] ) {
+				Perl6::Number::Radix.from-match( $_ )
 			}
 			default {
 				say $_.hash.keys.gist;
@@ -4183,16 +4205,22 @@ return True;
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash-keys( $_, [< sym regex_def >] ) {
-				@child = self._sym( $_.hash.<sym> );
 				@child.append(
-					Perl6::WS.between-matches(
+					Perl6::WS.with-inter-ws(
 						$_,
-						'sym',
-						'regex_def'
+						$_.hash.<sym>,
+						[
+							self._sym(
+								$_.hash.<sym>
+							)
+						],
+						$_.hash.<regex_def>,
+						[
+							self._regex_def(
+								$_.hash.<regex_def>
+							)
+						]
 					)
-				);
-				@child.append(
-					self._regex_def( $_.hash.<regex_def> )
 				)
 			}
 			default {
@@ -4215,7 +4243,8 @@ return True;
 			if $x ~~ m{ ( \s+ ) $ } {
 				@_child.append(
 					Perl6::WS.new(
-						:from( $p.hash.<nibble>.from - $0.Str.chars ),
+						:from(	$p.hash.<nibble>.from -
+							$0.Str.chars ),
 						:to( $p.hash.<nibble>.from ),
 						:content( $0.Str )
 					)
@@ -4228,7 +4257,9 @@ return True;
 				)
 			);
 			@child = self._deflongname( $p.hash.<deflongname> );
-			my $remainder = substr( $p.Str, $p.hash.<deflongname>.Str.chars );
+			my $remainder = substr(
+				$p.Str, $p.hash.<deflongname>.Str.chars
+			);
 			my $inset = 0;
 			if $remainder ~~ m{ ^ ( \s+ ) } {
 				$inset = $0.chars;
@@ -4291,33 +4322,23 @@ return True;
 		if self.assert-hash-keys( $p,
 			[< sym routine_def >] ) {
 			@child = self._sym( $p.hash.<sym> );
-			if $p.hash.<routine_def>.Str ~~ m{ ^ ( \s+ ) } {
-				@child.append(
-					Perl6::WS.new(
-						:from( $p.hash.<routine_def>.from ),
-						:to( $p.hash.<routine_def>.from + $0.chars ),
-						:content( $0.Str )
+			@child.append(
+				Perl6::WS.with-header(
+					$p.hash.<routine_def>,
+					self._routine_def(
+						$p.hash.<routine_def>
 					)
 				)
-			}
-			@child.append(
-				self._routine_def( $p.hash.<routine_def> )
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< sym method_def >] ) {
 			@child = self._sym( $p.hash.<sym> );
 			# XXX subsume this into the Perl6::WS object later
-			if $p.hash.<method_def>.Str ~~ m{ ^ ( \s+ ) } {
-				@child.append(
-					Perl6::WS.new(
-						:from( $p.hash.<method_def>.from ),
-						:to( $p.hash.<method_def>.from + $0.chars ),
-						:content( $0.Str )
-					)
-				)
-			}
 			@child.append(
-				self._method_def( $p.hash.<method_def> )
+				Perl6::WS.with-header(
+					$p.hash.<method_def>,
+					self._method_def( $p.hash.<method_def> )
+				)
 			)
 		}
 		else {
@@ -4465,19 +4486,22 @@ return True;
 		elsif self.assert-hash-keys( $p,
 				[< deflongname blockoid >],
 				[< trait >] ) {
-			@child =
-				self._deflongname(
-					$p.hash.<deflongname>
-				);
 			@child.append(
-				Perl6::WS.between-matches(
+				Perl6::WS.with-inter-ws(
 					$p,
-					'deflongname',
-					'blockoid',
+					$p.hash.<deflongname>,
+					[
+						self._deflongname(
+							$p.hash.<deflongname>
+						)
+					],
+					$p.hash.<blockoid>,
+					[
+						self._blockoid(
+							$p.hash.<blockoid>
+						)
+					]
 				)
-			);
-			@child.append(
-				self._blockoid( $p.hash.<blockoid> )
 			)
 		}
 		elsif self.assert-hash-keys( $p,
@@ -4516,17 +4540,21 @@ return True;
 			#
 			if self.assert-hash-keys( $_,
 					[< multi_declarator DECL typename >] ) {
-				@child = self._typename( $_.hash.<typename> );
 				@child.append(
-					Perl6::WS.between-matches(
+					Perl6::WS.with-inter-ws(
 						$_,
-						'typename',
-						'multi_declarator'
-					)
-				);
-				@child.append(
-					self._multi_declarator(
-						$_.hash.<multi_declarator>
+						$_.hash.<typename>,
+						[
+							self._typename(
+								$_.hash.<typename>
+							)
+						],
+						$_.hash.<multi_declarator>,
+						[
+							self._multi_declarator(
+								$_.hash.<multi_declarator>
+							)
+						]
 					)
 				)
 			}
@@ -4540,17 +4568,21 @@ return True;
 			}
 			elsif self.assert-hash-keys( $_,
 					[< sym package_declarator >] ) {
-				@child = self._sym( $_.hash.<sym> );
 				@child.append(
-					Perl6::WS.between-matches(
+					Perl6::WS.with-inter-ws(
 						$_,
-						'sym',
-						'package_declarator'
-					)
-				);
-				@child.append(
-					self._package_declarator(
-						$_.hash.<package_declarator>
+						$_.hash.<sym>,
+						[
+							self._sym(
+								$_.hash.<sym>
+							)
+						],
+						$_.hash.<package_declarator>,
+						[
+							self._package_declarator(
+								$_.hash.<package_declarator>
+							)
+						]
 					)
 				)
 			}
@@ -4587,7 +4619,8 @@ return True;
 				@child.append(
 					Perl6::WS.new(
 						:from( $p.hash.<sym>.to ),
-						:to( $p.hash.<sym>.to + $0.chars ),
+						:to( $p.hash.<sym>.to +
+							$0.chars ),
 						:content( $0.Str )
 					)
 				)
@@ -4754,16 +4787,11 @@ return True;
 					$p.hash.<type_constraint>
 				)
 			);
-			
-			# XXX revisit later
-			if $p.hash.<type_constraint>.list.[*-1].Str ~~ m{ (\s+) $ } {
-				@child.append(
-					Perl6::WS.new(
-						$p.hash.<type_constraint>.list.[*-1].to - $0.chars,
-						$0.Str
-					)
+			@child.append(
+				Perl6::WS.whitespace-trailer(
+					$p.hash.<type_constraint>.list.[*-1]
 				)
-			}
+			);
 			@child.append(
 				self._param_var( $p.hash.<param_var> )
 			);
@@ -4890,12 +4918,12 @@ return True;
 			   trait post_constraint >] ) {
 			# Synthesize the 'from' and 'to' markers for ':'
 			$p.Str ~~ m{ (':') };
-			my Int $from = $0.from;
 			@child.append(
 				Perl6::Operator::Prefix.new(
-					:from( $p.from + $from ),
-					:to( $p.from + $from + COLON.chars ),
-					:content( COLON )
+					:from( $p.from + $0.Str.from ),
+					:to( $p.from + $0.Str.from +
+						$0.Str.chars ),
+					:content( $0.Str )
 				),
 				self._named_param(
 					$p.hash.<named_param>
@@ -5064,18 +5092,20 @@ return True;
 						[< EXPR
 						   statement_mod_loop >] ) {
 					@child.append(
-						self._EXPR( $_.hash.<EXPR> )
-					);
-					@child.append(
-						Perl6::WS.between-matches(
+						Perl6::WS.with-inter-ws(
 							$_,
-							'EXPR',
-							'statement_mod_loop'
-						)
-					);
-					@child.append(
-						self._statement_mod_loop(
-							$_.hash.<statement_mod_loop>
+							$_.hash.<EXPR>,
+							[
+								self._EXPR(
+									$_.hash.<EXPR>
+								)
+							],
+							$_.hash.<statement_mod_loop>,
+							[
+								self._statement_mod_loop(
+									$_.hash.<statement_mod_loop>
+								)
+							]
 						)
 					)
 				}
@@ -5108,17 +5138,21 @@ return True;
 		}
 		elsif self.assert-hash-keys( $p,
 				[< EXPR statement_mod_loop >] ) {
-			@child = self._EXPR( $p.hash.<EXPR> );
 			@child.append(
-				Perl6::WS.between-matches(
+				Perl6::WS.with-inter-ws(
 					$p,
-					'EXPR',
-					'statement_mod_loop'
-				)
-			);
-			@child.append(
-				self._statement_mod_loop(
-					$p.hash.<statement_mod_loop>
+					$p.hash.<EXPR>,
+					[
+						self._EXPR(
+							$p.hash.<EXPR>
+						)
+					],
+					$p.hash.<statement_mod_loop>,
+					[
+						self._statement_mod_loop(
+							$p.hash.<statement_mod_loop>
+						)
+					]
 				)
 			)
 		}
@@ -5304,7 +5338,7 @@ return True;
 			# WS trailing terms the grammar below might add
 			# redundantly.
 			#
-			if $_.Str ~~ m{ (';') (\s+) $ } {
+			if $_.Str ~~ m{ ( ';' ) ( \s+ ) $ } {
 				$leftover-ws = $1.Str;
 				$leftover-ws-from =
 					$_.to - $1.Str.chars
@@ -5318,29 +5352,29 @@ return True;
 				$p.Str,
 				@_child[*-1].to - $p.from
 			);
-			if $temp ~~ m{ ^ (';') (\s+) } {
+			if $temp ~~ m{ ^ ( ';' ) ( \s+ ) } {
 				$leftover-ws = $1.Str;
 				$leftover-ws-from = 
 					@_child[*-1].to +
-					SEMICOLON.chars;
+					$0.Str.chars;
 				@_child.append(
 					Perl6::Semicolon.new(
 						:from( @_child[*-1].to ),
 						:to(
 							@_child[*-1].to +
-							SEMICOLON.chars
+							$0.Str.chars
 						),
 						:content( $0.Str )
 					)
 				)
 			}
-			elsif $temp ~~ m{ ^ (';') } {
+			elsif $temp ~~ m{ ^ ( ';' ) } {
 				@_child.append(
 					Perl6::Semicolon.new(
 						:from( @_child[*-1].to ),
 						:to(
 							@_child[*-1].to +
-							SEMICOLON.chars
+							$0.Str.chars
 						),
 						:content( $0.Str )
 					)
@@ -5407,16 +5441,22 @@ return True;
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash-keys( $_, [< sym smexpr >] ) {
-				@child = self._sym( $_.hash.<sym> );
 				@child.append(
-					Perl6::WS.between-matches(
+					Perl6::WS.with-inter-ws(
 						$_,
-						'sym',
-						'smexpr'
+						$_.hash.<sym>,
+						[
+							self._sym(
+								$_.hash.<sym>
+							)
+						],
+						$_.hash.<smexpr>,
+						[
+							self._smexpr(
+								$_.hash.<smexpr>
+							)
+						]
 					)
-				);
-				@child.append(
-					self._smexpr( $_.hash.<smexpr> )
 				)
 			}
 			default {
@@ -5650,7 +5690,7 @@ return True;
 		elsif $p.Str {
 			# XXX
 			my Str $str = $p.Str;
-			$str ~~ s{\s+ $} = '';
+			$str ~~ s{ \s+ $ } = '';
 			@child =
 				Perl6::Bareword.new(
 					:from( $p.from ),
@@ -5747,29 +5787,41 @@ return True;
 			when self.assert-hash-keys( $_,
 					[< sym longname >],
 					[< circumfix >] ) {
-				@child = self._sym( $_.hash.<sym> );
 				@child.append(
-					Perl6::WS.between-matches(
+					Perl6::WS.with-inter-ws(
 						$_,
-						'sym',
-						'longname'
+						$_.hash.<sym>,
+						[
+							self._sym(
+								$_.hash.<sym>
+							)
+						],
+						$_.hash.<longname>,
+						[
+							self._longname(
+								$_.hash.<longname>
+							)
+						]
 					)
-				);
-				@child.append(
-					self._longname( $_.hash.<longname> )
 				)
 			}
 			when self.assert-hash-keys( $_, [< sym typename >] ) {
-				@child = self._sym( $_.hash.<sym> );
 				@child.append(
-					Perl6::WS.between-matches(
+					Perl6::WS.with-inter-ws(
 						$_,
-						'sym',
-						'typename'
+						$_.hash.<sym>,
+						[
+							self._sym(
+								$_.hash.<sym>
+							)
+						],
+						$_.hash.<typename>,
+						[
+							self._typename(
+								$_.hash.<typename>
+							)
+						]
 					)
-				);
-				@child.append(
-					self._typename( $_.hash.<typename> )
 				)
 			}
 			default {
@@ -5911,16 +5963,22 @@ return True;
 		}
 		elsif self.assert-hash-keys( $p,
 				[< sym longname >], [< trait >] ) {
-			@child = self._sym( $p.hash.<sym> );
 			@child.append(
-				Perl6::WS.between-matches(
+				Perl6::WS.with-inter-ws(
 					$p,
-					'sym',
-					'longname'
+					$p.hash.<sym>,
+					[
+						self._sym(
+							$p.hash.<sym>
+						)
+					],
+					$p.hash.<longname>,
+					[
+						self._longname(
+							$p.hash.<longname>
+						)
+					]
 				)
-			);
-			@child.append(
-				self._longname( $p.hash.<longname> )
 			)
 		}
 		else {
