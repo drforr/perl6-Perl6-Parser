@@ -681,6 +681,13 @@ class Perl6::WS does Token {
 		@_child
 	}
 
+	method with-trailer( Mu $p, *@element ) {
+		my Perl6::Element @_child;
+		@_child.append( @element );
+		@_child.append( Perl6::WS.whitespace-trailer( $p ) );
+		@_child
+	}
+
 	method with-header-trailer( Mu $p, *@element ) {
 		my Perl6::Element @_child;
 		@_child.append( Perl6::WS.whitespace-header( $p ) );
@@ -3078,10 +3085,12 @@ return True;
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash-keys( $_, [< signature >] ) {
-				@child = self._signature( $_.hash.<signature> );
 				@child.append(
-					Perl6::WS.whitespace-trailer(
-						$_.hash.<signature>
+					Perl6::WS.with-trailer(
+						$_.hash.<signature>,
+						self._signature(
+							$_.hash.<signature>
+						)
 					)
 				)
 			}
@@ -3482,7 +3491,7 @@ return True;
 					$_.Str,
 					$_.hash.<longname>.to - $_.from
 				);
-				if $temp ~~ m{ ^ (\s+) (';')? } {
+				if $temp ~~ m{ ^ ( \s+ ) ( ';' )? } {
 					@child.append(
 						Perl6::WS.new(
 							:from( $_.hash.<longname>.to ),
@@ -3820,7 +3829,7 @@ return True;
 			die "Not implemented yet"
 		}
 		elsif self.assert-hash-keys( $p, [< semilist O >] ) {
-			if $p.Str ~~ m{ ^ (.) ( \s+ ) } {
+			if $p.Str ~~ m{ ^ ( . ) ( \s+ ) } {
 				@child.append(
 					Perl6::WS.new(
 						:from( $p.from + $0.Str.chars ),
@@ -3830,17 +3839,13 @@ return True;
 				)
 			}
 			@child.append(
-				Perl6::Bareword.from-match-trimmed(
-					$p.hash.<semilist>
-				)
-			);
-			if $p.hash.<semilist>.Str ~~ m{ \S ( \s+ ) $ } {
-				@child.append(
-					Perl6::WS.whitespace-trailer(
+				Perl6::WS.with-trailer(
+					$p.hash.<semilist>,
+					Perl6::Bareword.from-match-trimmed(
 						$p.hash.<semilist>
 					)
 				)
-			}
+			)
 		}
 		elsif self.assert-hash-keys( $p, [< nibble O >] ) {
 			if $p.Str ~~ m{ ^ (.) ( \s+ ) ( .+ ) ( \s+ ) (.) $ } {
@@ -3877,17 +3882,13 @@ return True;
 					)
 				}
 				@child.append(
-					Perl6::Bareword.from-match-trimmed(
-						$p.hash.<nibble>
-					)
-				);
-				if $p.hash.<nibble>.Str ~~ m{ \S ( \s+ ) ( \S ) $ } {
-					@child.append(
-						Perl6::WS.whitespace-trailer(
+					Perl6::WS.with-trailer(
+						$p.hash.<nibble>,
+						Perl6::Bareword.from-match-trimmed(
 							$p.hash.<nibble>
 						)
 					)
-				}
+				)
 			}
 		}
 		else {
@@ -3944,13 +3945,12 @@ return True;
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash-keys( $_, [< sym O >] ) {
-				@child =
-					Perl6::Operator::Prefix.from-match(
-						$_.hash.<sym>
-					);
 				@child.append(
-					Perl6::WS.whitespace-trailer(
-						$_
+					Perl6::WS.with-trailer(
+						$_,
+						Perl6::Operator::Prefix.from-match(
+							$_.hash.<sym>
+						)
 					)
 				)
 			}
@@ -4222,11 +4222,9 @@ return True;
 				)
 			}
 			@_child.append(
-				self._nibble( $p.hash.<nibble> )
-			);
-			@_child.append(
-				Perl6::WS.whitespace-trailer(
-					$p.hash.<nibble>
+				Perl6::WS.with-trailer(
+					$p.hash.<nibble>,
+					self._nibble( $p.hash.<nibble> )
 				)
 			);
 			@child = self._deflongname( $p.hash.<deflongname> );
@@ -4435,11 +4433,9 @@ return True;
 				)
 			);
 			@child.append(
-				self._trait( $p.hash.<trait> )
-			);
-			@child.append(
-				Perl6::WS.whitespace-trailer(
-					$p.hash.<trait>.list.[0]
+				Perl6::WS.with-trailer(
+					$p.hash.<trait>.list.[0],
+					self._trait( $p.hash.<trait> )
 				)
 			);
 			@child.append(
@@ -4624,16 +4620,11 @@ return True;
 		given $p {
 			when self.assert-hash-keys( $_, [< statement >] ) {
 				@child.append(
-					Perl6::WS.whitespace-header(
-						$_
-					)
-				);
-				@child.append(
-					self._statement( $_.hash.<statement> )
-				);
-				@child.append(
-					Perl6::WS.whitespace-trailer(
-						$_
+					Perl6::WS.with-header-trailer(
+						$_,
+						self._statement(
+							$_.hash.<statement>
+						)
 					)
 				)
 			}
