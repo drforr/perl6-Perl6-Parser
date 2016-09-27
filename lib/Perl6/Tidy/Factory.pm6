@@ -534,7 +534,7 @@ class Perl6::WS does Token {
 		}
 	}
 
-	method whitespace-leader( Mu $p, Mu $rhs ) {
+	method leader( Mu $p, Mu $rhs ) {
 		if $p.from < $rhs.from {
 			self.bless(
 				:from( $p.from ),
@@ -553,7 +553,7 @@ class Perl6::WS does Token {
 		}
 	}
 
-	method whitespace-terminator( Mu $p, Mu $lhs ) {
+	method terminator( Mu $p, Mu $lhs ) {
 		if $lhs.to < $p.to {
 			self.bless(
 				:from( $lhs.to ),
@@ -572,7 +572,7 @@ class Perl6::WS does Token {
 		}
 	}
 
-	method whitespace-header( Mu $p ) {
+	method header( Mu $p ) {
 		if $p.Str ~~ m{ ^ ( \s+ ) } {
 			self.bless(
 				:from( $p.from ),
@@ -585,7 +585,7 @@ class Perl6::WS does Token {
 		}
 	}
 
-	method whitespace-trailer( Mu $p ) {
+	method trailer( Mu $p ) {
 		if $p.Str ~~ m{ ( \s+ ) $ } {
 			self.bless(
 				:from( $p.to - $0.Str.chars ),
@@ -676,7 +676,7 @@ class Perl6::WS does Token {
 
 	method with-header( Mu $p, *@element ) {
 		my Perl6::Element @_child;
-		@_child.append( Perl6::WS.whitespace-header( $p ) );
+		@_child.append( Perl6::WS.header( $p ) );
 		@_child.append( @element );
 		@_child
 	}
@@ -684,16 +684,16 @@ class Perl6::WS does Token {
 	method with-trailer( Mu $p, *@element ) {
 		my Perl6::Element @_child;
 		@_child.append( @element );
-		@_child.append( Perl6::WS.whitespace-trailer( $p ) );
+		@_child.append( Perl6::WS.trailer( $p ) );
 		@_child
 	}
 
 	method with-header-trailer( Mu $p, *@element ) {
 		my Perl6::Element @_child;
-		@_child.append( Perl6::WS.whitespace-header( $p ) );
+		@_child.append( Perl6::WS.header( $p ) );
 		@_child.append( @element );
 		if $p.Str ~~ m{ \S \s+ $ } {
-			@_child.append( Perl6::WS.whitespace-trailer( $p ) );
+			@_child.append( Perl6::WS.trailer( $p ) );
 		}
 		@_child
 	}
@@ -715,6 +715,20 @@ class Perl6::WS does Token {
 		@_child.append( Perl6::WS.between-matches( $p, $start, $end ) );
 		@_child.append( @( $end-list ) );
 		@_child
+	}
+
+	method after( Mu $p, Mu $lhs ) {
+		my $x = $p.Str.substr( $lhs.to - $p.from );
+		if $x ~~ m{ ^ ( \s+ ) } {
+			self.bless(
+				:from( $lhs.to ),
+				:to( $lhs.to + $0.Str.chars ),
+				:content( $0.Str )
+			)
+		}
+		else {
+			()
+		}
 	}
 }
 
@@ -4821,7 +4835,7 @@ return True;
 				)
 			);
 			@child.append(
-				Perl6::WS.whitespace-trailer(
+				Perl6::WS.trailer(
 					$p.hash.<type_constraint>.list.[*-1]
 				)
 			);
@@ -5293,10 +5307,9 @@ return True;
 						self._infix( $q.hash.<infix> )
 					);
 					@child.append(
-						Perl6::WS.between-matches(
+						Perl6::WS.after(
 							$p,
-							$q.hash.<infix>,
-							$q.list.[1]
+							$q.hash.<infix>
 						)
 					);
 					@child.append(
@@ -5395,7 +5408,7 @@ return True;
 			}
 			else {
 				@_child.append(
-					Perl6::WS.whitespace-trailer( $_ )
+					Perl6::WS.trailer( $_ )
 				);
 			}
 			my $temp = substr(
