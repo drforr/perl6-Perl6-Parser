@@ -16,10 +16,9 @@ subtest {
 		my $source = Q:to[_END_];
 my @doors = False xx 101;
  
-(.=not for @doors[0, $_ ... 100]) for 1..100;
+say "Door $_ is ", <closed open>[ @doors[$_] ] for 1..100;
 _END_
 		my $p = $pt.parse-source( $source );
-#say $p.dump;
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};

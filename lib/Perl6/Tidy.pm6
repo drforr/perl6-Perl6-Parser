@@ -47,55 +47,6 @@ Given a so-far undefined hash of format settings, return formatted Perl 6 code t
 
 =end pod
 
-# These debugging routines are rather hit-and-miss because the objects they're
-# supposed to silly-walk aren't actually Perl, but a lower-level object.
-#
-# I do need to firm them up before releasing.
-#
-sub dump-parsed( Mu $parsed ) {
-	my @lines;
-	my @types;
-	@types.push( 'Bool' ) if $parsed.Bool;
-	@types.push( 'Int'  ) if $parsed.Int;
-	@types.push( 'Num'  ) if $parsed.Num;
-
-	@lines.push( Q[ ~:   '] ~ ~$parsed.Str ~ "' - Types: " ~ @types.gist );
-	@lines.push( Q[{}:    ] ~ $parsed.hash.keys.gist );
-	# XXX
-	CATCH { default { .resume } } # workaround for X::Hash exception
-	@lines.push( Q{[]:    } ~ $parsed.list.elems );
-
-	if $parsed.hash {
-		my @keys;
-		for $parsed.hash.keys {
-			@keys.push( $_ ) if
-				$parsed.hash:defined{$_} and not
-				$parsed.hash.{$_}
-		}
-		@lines.push( Q[{}:U: ] ~ @keys.gist );
-
-		for $parsed.hash.keys {
-			next unless $parsed.hash.{$_};
-			@lines.push( qq{  {$_}:  } );
-			@lines.append( dump-parsed( $parsed.hash.{$_} ) )
-		}
-	}
-	if $parsed.list {
-		my $i = 0;
-		for $parsed.list {
-			@lines.push( qq{  [$i]:  } );
-			@lines.append( dump-parsed( $_ ) )
-		}
-	}
-
-	my $indent-str = '  ';
-	map { $indent-str ~ $_ }, @lines
-}
-
-sub dump( Mu $parsed ) {
-	dump-parsed( $parsed ).join( "\n" )
-}
-
 use Perl6::Tidy::Validator;
 use Perl6::Tidy::Factory;
 
@@ -180,22 +131,22 @@ class Perl6::Tidy {
 		if $root.^can('content') {
 			if $root.content.chars < $root.to - $root.from {
 				say $root.perl;
-				die "Content '{$root.content}' too short for element ({$root.from} - {$root.to}) ({$root.to - $root.from} chars)"
+				warn "Content '{$root.content}' too short for element ({$root.from} - {$root.to}) ({$root.to - $root.from} chars)"
 			}
 			if $root.content.chars > $root.to - $root.from {
 				say $root.perl;
-				die "Content '{$root.content}' too long for element ({$root.from} - {$root.to}) ({$root.to - $root.from} glyphs}"
+				warn "Content '{$root.content}' too long for element ({$root.from} - {$root.to}) ({$root.to - $root.from} glyphs}"
 			}
 			if $root !~~ Perl6::WS and
 					$root !~~ Perl6::Sir-Not-Appearing-In-This-Statement and
 					$root.content ~~ m{ ^ (\s+) } {
 				say $root.perl;
-				die "Content '{$root.content}' has leading whitespace"
+				warn "Content '{$root.content}' has leading whitespace"
 			}
 			if $root !~~ Perl6::WS and
 					$root.content ~~ m{ (\s+) $ } {
 				say $root.perl;
-				die "Content '{$root.content}' has trailing whitespace"
+				warn "Content '{$root.content}' has trailing whitespace"
 			}
 		}
 	}
@@ -241,13 +192,25 @@ class Perl6::Tidy {
 		my $str = ( "\t" xx $depth ) ~ self.dump-term( $root ) ~ "\n";
 		if $root.^can('child') {
 			for ^$root.child {
+				my @problem;
 				# Mark the tokens that don't overlap.
 				#
 				if $root.child.[$_+1].defined and
 					$root.child.[$_].to !=
 					$root.child.[$_+1].from {
-					$str ~= '*'
+					@problem.push( 'G' )
 				}
+				if $root.child.[$_].^can( 'content' ) {
+					if $root.child.[$_] ~~ Perl6::WS and
+					   $root.child.[$_].content ~~ / \S / {
+						@problem.push( 'WS' )
+					}
+					if $root.child.[$_] !~~ Perl6::WS and
+					   $root.child.[$_].content ~~ / \s / {
+						@problem.push( 'WS' )
+					}
+				}
+				$str ~= @problem.join( ' ' ) if @problem;
 				$str ~= self.dump-tree(
 					$root.child.[$_],
 					$display-ws, $depth + 1

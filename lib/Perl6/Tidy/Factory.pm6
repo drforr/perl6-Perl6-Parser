@@ -717,6 +717,20 @@ class Perl6::WS does Token {
 		@_child
 	}
 
+	method before( Mu $p, Mu $lhs ) {
+		my $x = $p.Str.substr( 0, $lhs.from - $p.from );
+		if $x ~~ m{ ( \s+ ) $ } {
+			self.bless(
+				:from( $lhs.from - $0.Str.chars ),
+				:to( $lhs.from ),
+				:content( $0.Str )
+			)
+		}
+		else {
+			()
+		}
+	}
+
 	method after( Mu $p, Mu $lhs ) {
 		my $x = $p.Str.substr( $lhs.to - $p.from );
 		if $x ~~ m{ ^ ( \s+ ) } {
@@ -1353,6 +1367,13 @@ class Perl6::Tidy::Factory {
 		elsif self.assert-hash-keys( $p, [< EXPR >] ) {
 			@child.append(
 				self._EXPR( $p.hash.<EXPR> )
+			);
+			# XXX WATCH THIS
+			@child.splice( min( 2, @child.elems ), 0, 
+				Perl6::WS.after(
+					$p,
+					$p.hash.<EXPR>
+				)
 			)
 		}
 		elsif self.assert-Int( $p ) {
@@ -2278,13 +2299,13 @@ class Perl6::Tidy::Factory {
 	#
 	method _escape( Mu $p ) {
 		warn "Untested method";
-#		if self.assert-hash-keys( $p, [< sign decint >] ) {
-#			die "Not implemented yet"
-#		}
-#		else {
+		if self.assert-hash-keys( $p, [< sign decint >] ) {
+			die "Not implemented yet"
+		}
+		else {
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
-#		}
+		}
 	}
 
 	method __Term( Mu $p ) {
@@ -2298,6 +2319,11 @@ class Perl6::Tidy::Factory {
 					self._postcircumfix(
 						$_.hash.<postcircumfix>
 					)
+				)
+			}
+			when self.assert-hash-keys( $_, [< infix OPER >] ) {
+				@child.append(
+					self._infix( $_.hash.<infix> )
 				)
 			}
 			when self.assert-hash-keys( $_,
@@ -2387,22 +2413,12 @@ class Perl6::Tidy::Factory {
 		elsif self.assert-hash-keys( $p,
 				[< postcircumfix OPER >],
 				[< postfix_prefix_meta_operator >] ) {
-			my Perl6::Element @_child;
-			@_child.append(
-				Perl6::WS.with-header-trailer(
-					$p.hash.<postcircumfix>,
-					self._postcircumfix(
-						$p.hash.<postcircumfix>
-					)
-				)
-			);
 			@child = self.__Term( $p.list.[0] );
 			@child.append(
-				Perl6::Operator::PostCircumfix.from-match(
-					$p.hash.<postcircumfix>,
-					@_child
+				self._postcircumfix(
+					$p.hash.<postcircumfix>
 				)
-			);
+			)
 		}
 		elsif self.assert-hash-keys( $p,
 				[< postfix OPER >],
@@ -3901,75 +3917,89 @@ return True;
 	#
 	method _postcircumfix( Mu $p ) {
 		my Perl6::Element @child;
-		if self.assert-hash-keys( $p, [< arglist O >] ) {
-			die "Not implemented yet"
-		}
-		elsif self.assert-hash-keys( $p, [< semilist O >] ) {
-			if $p.Str ~~ m{ ^ ( . ) ( \s+ ) } {
-				@child.append(
-					Perl6::WS.new(
-						:from( $p.from + $0.Str.chars ),
-						:to( $p.from + $0.Str.chars + $1.Str.chars ),
-						:content( $1.Str )
-					)
-				)
+		given $p {
+			when self.assert-hash-keys( $_, [< arglist O >] ) {
+				die "Not implemented yet"
 			}
-			@child.append(
-				Perl6::WS.with-trailer(
-					$p.hash.<semilist>,
-					Perl6::Bareword.from-match-trimmed(
-						$p.hash.<semilist>
+			when self.assert-hash-keys( $_, [< semilist O >] ) {
+				my Perl6::Element @_child;
+				@_child.append(
+					Perl6::WS.before(
+						$_,
+						$_.hash.<semilist>
 					)
-				)
-			)
-		}
-		elsif self.assert-hash-keys( $p, [< nibble O >] ) {
-			if $p.Str ~~ m{ ^ (.) ( \s+ ) ( .+ ) ( \s+ ) (.) $ } {
-				@child.append(
-					Perl6::WS.new(
-						:from( $p.from + $0.Str.chars ),
-						:to( $p.from + $0.Str.chars + $1.Str.chars ),
-						:content( $1.Str )
+				);
+				@_child.append(
+					self._semilist(
+						$_.hash.<semilist>
 					)
 				);
 				@child.append(
-					Perl6::Bareword.new(
-						:from( $p.from + $0.Str.chars + $1.Str.chars ),
-						:to( $p.to - $4.Str.chars - $3.Str.chars ),
-						:content( $2.Str )
-					)
-				);
-				@child.append(
-					Perl6::WS.new(
-						:from( $p.to - $4.Str.chars - $3.Str.chars ),
-						:to( $p.to - $4.Str.chars ),
-						:content( $1.Str )
+					Perl6::Operator::PostCircumfix.from-match(
+						$_,
+						@_child
 					)
 				)
 			}
-			else {
-				if $p.hash.<nibble>.Str ~~ m{ ^ ( \S ) ( \s+ ) } {
+			# XXX can probably be rewritten to use utils
+			when self.assert-hash-keys( $_, [< nibble O >] ) {
+				if $_.Str ~~ m{ ^ (.) ( \s+ )? ( .+? ) ( \s+ )? (.) $ } {
+					my Perl6::Element @_child;
+					if $1 and $1.Str.chars {
+						@_child.append(
+							Perl6::WS.new(
+								:from( $_.from + $0.Str.chars ),
+								:to( $_.from + $0.Str.chars + $1.Str.chars ),
+								:content( $1.Str )
+							)
+						)
+					}
+					@_child.append(
+						Perl6::Bareword.new(
+							:from( $_.from + $0.Str.chars + ( $1 ?? $1.Str.chars !! 0 ) ),
+							:to( $_.to - $4.Str.chars - ( $3 ?? $3.Str.chars !! 0 ) ),
+							:content( $2.Str )
+						)
+					);
+					if $3 and $3.Str.chars {
+						@_child.append(
+							Perl6::WS.new(
+								:from( $_.to - $4.Str.chars - $3.Str.chars ),
+								:to( $_.to - $4.Str.chars ),
+								:content( $3.Str )
+							)
+						)
+					}
 					@child.append(
-						Perl6::WS.new(
-							:from( $p.hash.<nibble>.from + $0.Str.chars ),
-							:to( $p.hash.<nibble>.from + $0.Str.chars + $1.Str.chars ),
-							:content( $1.Str )
+						Perl6::Operator::PostCircumfix.from-match(
+							$_, @_child
 						)
 					)
 				}
-				@child.append(
-					Perl6::WS.with-trailer(
-						$p.hash.<nibble>,
-						Perl6::Bareword.from-match-trimmed(
-							$p.hash.<nibble>
+				else {
+					if $_.hash.<nibble>.Str ~~ m{ ^ ( \S ) ( \s+ ) } {
+						@child.append(
+							Perl6::WS.new(
+								:from( $_.hash.<nibble>.from + $0.Str.chars ),
+								:to( $_.hash.<nibble>.from + $0.Str.chars + $1.Str.chars ),
+								:content( $1.Str )
+							)
+						)
+					}
+					@child.append(
+						Perl6::WS.with-trailer(
+							$_.hash.<nibble>,
+							Perl6::Bareword.from-match-trimmed(
+								$_.hash.<nibble>
+							)
 						)
 					)
-				)
+				}
 			}
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 		@child
 	}
