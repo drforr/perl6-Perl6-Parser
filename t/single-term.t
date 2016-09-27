@@ -1508,6 +1508,7 @@ subtest {
 
 			my $source = Q{sum};
 			my $parsed = $pt.parse-source( $source );
+say $parsed.dump;
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 #			ok (grep { $_ ~~ Perl6::Number },

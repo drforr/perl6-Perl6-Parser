@@ -1336,8 +1336,13 @@ class Perl6::Tidy::Factory {
 				[< trait >] ) {
 			die "Not implemented yet";
 		}
+		elsif self.assert-hash-keys( $p, [< EXPR >] ) {
+			@child.append(
+				self._EXPR( $p.hash.<EXPR> )
+			)
+		}
 		elsif self.assert-Int( $p ) {
-			die "Not implemented yet";
+			$p.Int
 		}
 		elsif self.assert-Bool( $p ) {
 			die "Not implemented yet";
@@ -1382,7 +1387,7 @@ class Perl6::Tidy::Factory {
 				die "Not implemented yet"
 			}
 			default {
-				say $_.Int if $p.Int;
+				say $_.Int if $_.Int;
 				say $_.hash.keys.gist;
 				warn "Unhandled case"
 			}
@@ -2272,6 +2277,16 @@ class Perl6::Tidy::Factory {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash-keys( $_,
+					[< postcircumfix OPER >],
+					[< postfix_prefix_meta_operator >] ) {
+				@child = self.__Term( $_.list.[0] );
+				@child.append(
+					self._postcircumfix(
+						$_.hash.<postcircumfix>
+					)
+				)
+			}
+			when self.assert-hash-keys( $_,
 					[< postfix OPER >],
 					[< postfix_prefix_meta_operator >] ) {
 				@child = self.__Term( $_.list.[0] );
@@ -2297,6 +2312,9 @@ class Perl6::Tidy::Factory {
 			}
 			when self.assert-hash-keys( $_, [< value >] ) {
 				@child = self._value( $_.hash.<value> )
+			}
+			when self.assert-hash-keys( $_, [< circumfix >] ) {
+				@child = self._circumfix( $_.hash.<circumfix> )
 			}
 			default {
 				say $_.hash.keys.gist;
@@ -2445,7 +2463,22 @@ class Perl6::Tidy::Factory {
 				)
 			}
 			else {
-				@child = self._longname( $p.hash.<longname> )
+				@child.append(
+					self._longname(
+						$p.hash.<longname>
+					)
+				);
+				if $p.hash.<args>.hash.keys and
+				   $p.hash.<args>.Str ~~ m{ \S } {
+					@child.append(
+						Perl6::WS.with-header(
+							$p.hash.<args>,
+							self._args(
+								$p.hash.<args>
+							)
+						)
+					)
+				}
 			}
 		}
 		elsif self.assert-hash-keys( $p, [< circumfix >] ) {
@@ -2917,17 +2950,17 @@ return True;
 				     [< trait >] ) {
 				@child.append(
 					Perl6::WS.with-inter-ws(
-						$p,
-						$p.hash.<longname>,
+						$_,
+						$_.hash.<longname>,
 						[
 							self._longname(
-								$p.hash.<longname>
+								$_.hash.<longname>
 							)
 						],
-						$p.hash.<blockoid>,
+						$_.hash.<blockoid>,
 						[
 							self._blockoid(
-								$p.hash.<blockoid>
+								$_.hash.<blockoid>
 							)
 						]
 					)
@@ -4844,8 +4877,8 @@ return True;
 					if $0 and $0.Str.chars {
 						@child.append(
 							Perl6::WS.new(
-								:from( $p.from ),
-								:to( $p.from + $0.Str.chars ),
+								:from( $p.from + $0.from ),
+								:to( $p.from + $0.from + $0.Str.chars ),
 								:content( $0.Str )
 							)
 						);
@@ -5138,23 +5171,40 @@ return True;
 		}
 		elsif self.assert-hash-keys( $p,
 				[< EXPR statement_mod_loop >] ) {
-			@child.append(
-				Perl6::WS.with-inter-ws(
-					$p,
-					$p.hash.<EXPR>,
-					[
+			if $p.hash.<EXPR>.Str ~~ m{ ( \s+ ) $ } {
+				@child.append(
+					Perl6::WS.with-trailer(
+						$p.hash.<EXPR>,
 						self._EXPR(
-							$p.hash.<EXPR>
+							$p.hash.<EXPR>,
 						)
-					],
-					$p.hash.<statement_mod_loop>,
-					[
-						self._statement_mod_loop(
-							$p.hash.<statement_mod_loop>
-						)
-					]
+					)
+				);
+				@child.append(
+					self._statement_mod_loop(
+						$p.hash.<statement_mod_loop>
+					)
 				)
-			)
+			}
+			else {
+				@child.append(
+					Perl6::WS.with-inter-ws(
+						$p,
+						$p.hash.<EXPR>,
+						[
+							self._EXPR(
+								$p.hash.<EXPR>
+							)
+						],
+						$p.hash.<statement_mod_loop>,
+						[
+							self._statement_mod_loop(
+								$p.hash.<statement_mod_loop>
+							)
+						]
+					)
+				)
+			}
 		}
 		elsif self.assert-hash-keys( $p, [< sym trait >] ) {
 			@child = self._sym( $p.hash.<sym> );
