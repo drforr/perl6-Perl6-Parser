@@ -182,6 +182,9 @@ class Perl6::Tidy {
 			) {
 			$str ~= " ({$term.from}-{$term.to})";
 		}
+
+		$str ~= " (line {$term.factory-line-number})" if
+			$term.factory-line-number;
 		$str
 	}
 

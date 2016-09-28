@@ -213,6 +213,7 @@ class Perl6::Variable::Contextualizer::Callable {
 )
 
 class Perl6::Element {
+	has $.factory-line-number; # Purely a debugging aid.
 }
 
 role Child {
@@ -281,6 +282,7 @@ class Perl6::Operator::Prefix does Token {
 	multi method from-match( Mu $p ) {
 		if $p.from < $p.to {
 			self.bless(
+				:factory-line-number( callframe(1).line ),
 				:from( $p.from ),
 				:to( $p.to ),
 				:content( $p.Str )
@@ -294,6 +296,7 @@ class Perl6::Operator::Prefix does Token {
 	multi method from-match-trimmed( Mu $p ) {
 		$p.Str ~~ m{ ^ ( \s* ) ( .+? ) ( \s* ) $ };
 		self.bless(
+			:factory-line-number( callframe(1).line ),
 			:from( $p.from + ( $0.Str ?? $0.Str.chars !! 0 ) ),
 			:to( $p.to - ( $2.Str ?? $2.Str.chars !! 0 ) ),
 			:content( $1.Str )
@@ -302,9 +305,11 @@ class Perl6::Operator::Prefix does Token {
 }
 class Perl6::Operator::Infix does Token {
 	also is Perl6::Operator;
+
 	method from-match( Mu $p ) {
 		if $p.from < $p.to {
 			self.bless(
+				:factory-line-number( callframe(1).line ),
 				:from( $p.from ),
 				:to( $p.to ),
 				:content( $p.Str )
@@ -316,6 +321,7 @@ class Perl6::Operator::Infix does Token {
 	}
 	multi method new( Int $from, Str $str ) {
 		self.bless(
+			:factory-line-number( callframe(1).line ),
 			:from( $from ),
 			:to( $from + $str.chars ),
 			:content( $str )
@@ -325,6 +331,7 @@ class Perl6::Operator::Infix does Token {
 		$p.Str ~~ m{ ($token) };
 		my Int $offset = $0.from;
 		self.bless(
+			:factory-line-number( callframe(1).line ),
 			:from( $p.from + $offset ),
 			:to( $p.from + $offset + $token.chars ),
 			:content( $token )
@@ -337,6 +344,7 @@ class Perl6::Operator::Postfix does Token {
 	method from-match( Mu $p ) {
 		if $p.from < $p.to {
 			self.bless(
+				:factory-line-number( callframe(1).line ),
 				:from( $p.from ),
 				:to( $p.to ),
 				:content( $p.Str )
@@ -355,6 +363,7 @@ class Perl6::Operator::Circumfix does Branching does Bounded {
 		$p.Str ~~ m{ (.) $ }; my Str $back = ~$0;
 		@_child.append(
 			Perl6::Balanced::Enter.new(
+				:factory-line-number( callframe(1).line ),
 				:from( $p.from ),
 				:to( $p.from + $front.chars ),
 				:content( $front )
@@ -363,12 +372,14 @@ class Perl6::Operator::Circumfix does Branching does Bounded {
 		@_child.append( @child );
 		@_child.append(
 			Perl6::Balanced::Exit.new(
+				:factory-line-number( callframe(1).line ),
 				:from( $p.to - $back.chars ),
 				:to( $p.to ),
 				:content( $back )
 			)
 		);
 		self.bless(
+			:factory-line-number( callframe(1).line ),
 			:from( $p.from ),
 			:to( $p.to ),
 			:child( @_child )
@@ -380,6 +391,7 @@ class Perl6::Operator::Circumfix does Branching does Bounded {
 			my Perl6::Element @_child;
 			@_child.append(
 				Perl6::Balanced::Enter.new(
+					:factory-line-number( callframe(1).line ),
 					:from( $from ),
 					:to( $from + $front.chars ),
 					:content( $front )
@@ -388,12 +400,14 @@ class Perl6::Operator::Circumfix does Branching does Bounded {
 			@_child.append( @child );
 			@_child.append(
 				Perl6::Balanced::Exit.new(
+					:factory-line-number( callframe(1).line ),
 					:from( $to - $back.chars ),
 					:to( $to ),
 					:content( $back )
 				)
 			);
 			self.bless(
+				:factory-line-number( callframe(1).line ),
 				:from( $from ),
 				:to( $to ),
 				:child( @_child )
@@ -414,6 +428,7 @@ class Perl6::Operator::PostCircumfix does Branching does Bounded {
 			$p.Str ~~ m{ (.) $ }; my Str $back = ~$0;
 			@_child.append(
 				Perl6::Balanced::Enter.new(
+					:factory-line-number( callframe(1).line ),
 					:from( $p.from ),
 					:to( $p.from + $front.chars ),
 					:content( $front )
@@ -422,12 +437,14 @@ class Perl6::Operator::PostCircumfix does Branching does Bounded {
 			@_child.append( @child );
 			@_child.append(
 				Perl6::Balanced::Exit.new(
+					:factory-line-number( callframe(1).line ),
 					:from( $p.to - $back.chars ),
 					:to( $p.to ),
 					:content( $back )
 				)
 			);
 			self.bless(
+				:factory-line-number( callframe(1).line ),
 				:from( $p.from ),
 				:to( $p.to ),
 				:child( @_child )
@@ -443,6 +460,7 @@ class Perl6::Operator::PostCircumfix does Branching does Bounded {
 			my Perl6::Element @_child;
 			@_child.append(
 				Perl6::Balanced::Enter.new(
+					:factory-line-number( callframe(1).line ),
 					:from( $p.from ),
 					:to( $p.from + $front.chars ),
 					:content( $front )
@@ -451,12 +469,14 @@ class Perl6::Operator::PostCircumfix does Branching does Bounded {
 			@_child.append( @child );
 			@_child.append(
 				Perl6::Balanced::Exit.new(
+					:factory-line-number( callframe(1).line ),
 					:from( $p.to - $back.chars ),
 					:to( $p.to ),
 					:content( $back )
 				)
 			);
 			self.bless(
+				:factory-line-number( callframe(1).line ),
 				:from( $p.from ),
 				:to( $p.to ),
 				:child( @_child )
@@ -475,6 +495,7 @@ class Perl6::WS does Token {
 
 	multi method new( Int $start, $content ) {
 		self.bless(
+			:factory-line-number( callframe(1).line ),
 			:from( $start ),
 			:to( $start + $content.chars ),
 			:content( $content )
@@ -484,6 +505,7 @@ class Perl6::WS does Token {
 	method from-match( Mu $p ) {
 		if $p.from < $p.to {
 			self.bless(
+				:factory-line-number( callframe(1).line ),
 				:from( $p.from ),
 				:to( $p.to ),
 				:content( $p.Str )
@@ -499,6 +521,7 @@ class Perl6::WS does Token {
 		my $_rhs = $p.hash.{$rhs};
 		if $_lhs.to < $_rhs.from {
 			self.bless(
+				:factory-line-number( callframe(1).line ),
 				:from( $_lhs.to ),
 				:to( $_rhs.from ),
 				:content(
@@ -518,6 +541,7 @@ class Perl6::WS does Token {
 	multi method between-matches( Mu $p, Mu $lhs, Mu $rhs ) {
 		if $lhs.to < $rhs.from {
 			self.bless(
+				:factory-line-number( callframe(1).line ),
 				:from( $lhs.to ),
 				:to( $rhs.from ),
 				:content(
@@ -537,6 +561,7 @@ class Perl6::WS does Token {
 	method leader( Mu $p, Mu $rhs ) {
 		if $p.from < $rhs.from {
 			self.bless(
+				:factory-line-number( callframe(1).line ),
 				:from( $p.from ),
 				:to( $rhs.from ),
 				:content(
@@ -556,6 +581,7 @@ class Perl6::WS does Token {
 	method terminator( Mu $p, Mu $lhs ) {
 		if $lhs.to < $p.to {
 			self.bless(
+				:factory-line-number( callframe(1).line ),
 				:from( $lhs.to ),
 				:to( $p.to ),
 				:content(
@@ -575,6 +601,7 @@ class Perl6::WS does Token {
 	method header( Mu $p ) {
 		if $p.Str ~~ m{ ^ ( \s+ ) } {
 			self.bless(
+				:factory-line-number( callframe(1).line ),
 				:from( $p.from ),
 				:to( $p.from + $0.Str.chars ),
 				:content( $0.Str )
@@ -588,6 +615,7 @@ class Perl6::WS does Token {
 	method trailer( Mu $p ) {
 		if $p.Str ~~ m{ ( \s+ ) $ } {
 			self.bless(
+				:factory-line-number( callframe(1).line ),
 				:from( $p.to - $0.Str.chars ),
 				:to( $p.to ),
 				:content( $0.Str )
@@ -629,11 +657,13 @@ class Perl6::WS does Token {
 		if $p.Str ~~ m{ ( \s+ ) ( ';' ) ( \s+ ) $ } {
 			@child =
 				self.bless(
+					:factory-line-number( callframe(1).line ),
 					:from( $p.to - $2.chars - $1.chars - $0.chars ),
 					:to( $p.to - $2.chars - $1.chars ),
 					:content( $0.Str )
 				),
 				Perl6::Semicolon.new(
+					:factory-line-number( callframe(1).line ),
 					:from( $p.to - $2.chars - $1.chars ),
 					:to( $p.to - $2.chars ),
 					:content( $1.Str )
@@ -642,6 +672,7 @@ class Perl6::WS does Token {
 		elsif $p.Str ~~ m{ ( ';' ) ( \s+ ) $ } {
 			@child =
 				Perl6::Semicolon.new(
+					:factory-line-number( callframe(1).line ),
 					:from( $p.to - $1.chars - $0.chars ),
 					:to( $p.to - $1.chars ),
 					:content( $0.Str )
@@ -650,11 +681,13 @@ class Perl6::WS does Token {
 		elsif $p.Str ~~ m{ ( \s+ ) ( ';' ) $ } {
 			@child =
 				self.bless(
+					:factory-line-number( callframe(1).line ),
 					:from( $p.to - $1.chars - $0.chars ),
 					:to( $p.to - $1.chars ),
 					:content( $0.Str )
 				),
 				Perl6::Semicolon.new(
+					:factory-line-number( callframe(1).line ),
 					:from( $p.to - $1.chars ),
 					:to( $p.to ),
 					:content( $1.Str )
@@ -663,6 +696,7 @@ class Perl6::WS does Token {
 		elsif $p.Str ~~ m{ ( ';' ) $ } {
 			@child =
 				Perl6::Semicolon.new(
+					:factory-line-number( callframe(1).line ),
 					:from( $p.to - $0.chars ),
 					:to( $p.to  ),
 					:content( $0.Str )
@@ -721,6 +755,7 @@ class Perl6::WS does Token {
 		my $x = $p.Str.substr( 0, $lhs.from - $p.from );
 		if $x ~~ m{ ( \s+ ) $ } {
 			self.bless(
+				:factory-line-number( callframe(1).line ),
 				:from( $lhs.from - $0.Str.chars ),
 				:to( $lhs.from ),
 				:content( $0.Str )
@@ -735,6 +770,7 @@ class Perl6::WS does Token {
 		my $x = $p.Str.substr( $lhs.to - $p.from );
 		if $x ~~ m{ ^ ( \s+ ) } {
 			self.bless(
+				:factory-line-number( callframe(1).line ),
 				:from( $lhs.to ),
 				:to( $lhs.to + $0.Str.chars ),
 				:content( $0.Str )
@@ -772,6 +808,7 @@ class Perl6::Statement does Branching does Bounded {
 
 	method from-list( Perl6::Element @child ) {
 		self.bless(
+			:factory-line-number( callframe(1).line ),
 			:from( @child[0].from ),
 			:to( @child[*-1].to ),
 			:child( @child )
@@ -794,6 +831,7 @@ class Perl6::Number does Token {
 	method from-match( Mu $p ) {
 		if $p.from < $p.to {
 			self.bless(
+				:factory-line-number( callframe(1).line ),
 				:from( $p.from ),
 				:to( $p.to ),
 				:content( $p.Str )
@@ -837,6 +875,7 @@ class Perl6::Regex does Token {
 	multi method from-match( Mu $p ) {
 		if $p.from < $p.to {
 			self.bless(
+				:factory-line-number( callframe(1).line ),
 				:from( $p.from ),
 				:to( $p.to ),
 				:content( $p.Str )
@@ -864,6 +903,7 @@ class Perl6::String::Quote::Single does Token {
 	multi method from-match( Mu $p ) {
 		if $p.from < $p.to {
 			self.bless(
+				:factory-line-number( callframe(1).line ),
 				:from( $p.from ),
 				:to( $p.to ),
 				:content( $p.Str )
@@ -882,6 +922,7 @@ class Perl6::String::Quote::Double does Token {
 	multi method from-match( Mu $p ) {
 		if $p.from < $p.to {
 			self.bless(
+				:factory-line-number( callframe(1).line ),
 				:from( $p.from ),
 				:to( $p.to ),
 				:content( $p.Str )
@@ -898,6 +939,7 @@ class Perl6::Bareword does Token {
 	multi method from-match( Mu $p ) {
 		if $p.from < $p.to {
 			self.bless(
+				:factory-line-number( callframe(1).line ),
 				:from( $p.from ),
 				:to( $p.to ),
 				:content( $p.Str )
@@ -912,6 +954,7 @@ class Perl6::Bareword does Token {
 		if $p.from < $p.to {
 			$p.Str ~~ m{ ^ ( \s* ) ( .+? ) ( \s* ) $ };
 			self.bless(
+				:factory-line-number( callframe(1).line ),
 				:from( $p.from + ( $0.Str ?? $0.Str.chars !! 0 ) ),
 				:to( $p.to - ( $2.Str ?? $2.Str.chars !! 0 ) ),
 				:content( $1.Str )
@@ -928,6 +971,7 @@ class Perl6::PackageName does Token {
 	method from-match( Mu $p ) {
 		if $p.from < $p.to {
 			self.bless(
+				:factory-line-number( callframe(1).line ),
 				:from( $p.from ),
 				:to( $p.to ),
 				:content( $p.Str )
@@ -948,6 +992,7 @@ class Perl6::ColonBareword does Token {
 	method from-match( Mu $p ) {
 		if $p.from < $p.to {
 			self.bless(
+				:factory-line-number( callframe(1).line ),
 				:from( $p.from ),
 				:to( $p.to ),
 				:content( $p.Str )
@@ -968,6 +1013,7 @@ class Perl6::Block does Branching does Bounded {
 			$p.Str ~~ m{ (.) $ }; my Str $back = ~$0;
 			@_child.append(
 				Perl6::Balanced::Enter.new(
+					:factory-line-number( callframe(1).line ),
 					:from( $p.from ),
 					:to( $p.from + $front.chars ),
 					:content( $front )
@@ -976,12 +1022,14 @@ class Perl6::Block does Branching does Bounded {
 			@_child.append( @child );
 			@_child.append(
 				Perl6::Balanced::Exit.new(
+					:factory-line-number( callframe(1).line ),
 					:from( $p.to - $back.chars ),
 					:to( $p.to ),
 					:content( $back )
 				)
 			);
 			self.bless(
+				:factory-line-number( callframe(1).line ),
 				:from( $p.from ),
 				:to( $p.to ),
 				:child( @_child )
@@ -997,6 +1045,7 @@ class Perl6::Block does Branching does Bounded {
 			my Perl6::Element @_child;
 			@_child.append(
 				Perl6::Balanced::Enter.new(
+					:factory-line-number( callframe(1).line ),
 					:from( $from ),
 					:to( $from + $front.chars ),
 					:content( $front )
@@ -1005,12 +1054,14 @@ class Perl6::Block does Branching does Bounded {
 			@_child.append( @child );
 			@_child.append(
 				Perl6::Balanced::Exit.new(
+					:factory-line-number( callframe(1).line ),
 					:from( $to - $back.chars ),
 					:to( $to ),
 					:content( $back )
 				)
 			);
 			self.bless(
+				:factory-line-number( callframe(1).line ),
 				:from( $from ),
 				:to( $to ),
 				:child( @_child )
@@ -1226,6 +1277,7 @@ class Perl6::Tidy::Factory {
 			$p.Str ~~ m{ \s* ']' ( .*? $$ ) (.+?) ( $marker ) };
 			%.here-doc{ $start } =
 				Here-Doc.new(
+					:factory-line-number( callframe(1).line ),
 					:delimiter-start( $start ),
 					:body-from( $1.from ),
 					:body-to( $1.to ),
@@ -1242,6 +1294,7 @@ class Perl6::Tidy::Factory {
 		   @_child[*-1].child[*-1].to < $p.to {
 			@_child[*-1].child.append(
 				Perl6::Sir-Not-Appearing-In-This-Statement.new(
+					:factory-line-number( callframe(1).line ),
 					:from( @_child[*-1].child[*-1].to ),
 					:to( $p.to ),
 					:content(
@@ -1253,6 +1306,7 @@ class Perl6::Tidy::Factory {
 			)
 		}
 		Perl6::Document.new(
+			# No line number needed.
 			:from( @_child ?? @_child[0].from !! 0 ),
 			:to( @_child ?? @_child[*-1].to !! 0 ),
 			:child( @_child )
@@ -1734,6 +1788,7 @@ class Perl6::Tidy::Factory {
 			# Synthesize the 'from' marker for ':'
 			@child =
 				Perl6::Operator::Prefix.new(
+					:factory-line-number( callframe(1).line ),
 					:from( $p.from ),
 					:to( $p.from + COLON.chars ),
 					:content( COLON )
@@ -1751,6 +1806,7 @@ class Perl6::Tidy::Factory {
 				# XXX Note that ':' is part of the expression.
 			@child =
 				Perl6::Operator::Prefix.new(
+					:factory-line-number( callframe(1).line ),
 					:from( $p.from ),
 					:to( $p.from + COLON.chars ),
 					:content( COLON )
@@ -1782,6 +1838,7 @@ class Perl6::Tidy::Factory {
 			# XXX I think it is.
 			@child =
 				Perl6::Operator::Prefix.new(
+					:factory-line-number( callframe(1).line ),
 					:from( $p.from ),
 					:to( $p.from + COLON.chars ),
 					:content( COLON )
@@ -2375,6 +2432,7 @@ class Perl6::Tidy::Factory {
 				@child.append(
 					# XXX note that '>>' is a substring
 					Perl6::Operator::Prefix.new(
+						:factory-line-number( callframe(1).line ),
 						:from( $p.from ),
 						:to( $p.from + HYPER.chars ),
 						:content( 
@@ -2817,6 +2875,7 @@ class Perl6::Tidy::Factory {
 			   %.here-doc.keys.elems > 0 {
 				@child.append(
 					Perl6::Sir-Not-Appearing-In-This-Statement.new(
+						:factory-line-number( callframe(1).line ),
 						:from( $p.hash.<EXPR>.to ),
 						:to( $p.to ),
 						:content(
@@ -3580,6 +3639,7 @@ return True;
 				if $temp ~~ m{ ^ ( \s+ ) ( ';' )? } {
 					@child.append(
 						Perl6::WS.new(
+							:factory-line-number( callframe(1).line ),
 							:from( $_.hash.<longname>.to ),
 							:to( $_.hash.<longname>.to + $0.chars ),
 							:content( $0.Str )
@@ -3589,6 +3649,7 @@ return True;
 					if $1.chars {
 						@child.append(
 							Perl6::Semicolon.new(
+								:factory-line-number( callframe(1).line ),
 								:from( $_.hash.<longname>.to + $0.chars ),
 								:to( $_.hash.<longname>.to + $0.chars + $1.chars ),
 								:content( $1.Str )
@@ -3656,6 +3717,7 @@ return True;
 				);
 				@child.append(
 					Perl6::Bareword.new(
+						:factory-line-number( callframe(1).line ),
 						:from( $p.from + $from ),
 						:to(
 							$p.from + $from +
@@ -3720,6 +3782,7 @@ return True;
 				my Int $from = $0.from;
 				@child.append(
 					Perl6::Operator::Prefix.new(
+						:factory-line-number( callframe(1).line ),
 						:from( $from ),
 						:to( $from + COLON.chars ),
 						:content( COLON )
@@ -3805,6 +3868,7 @@ return True;
 
 				my Perl6::Element $leaf =
 					%sigil-map{$sigil ~ $twigil}.new(
+						:factory-line-number( callframe(1).line ),
 						:from( $_.from ),
 						:to( $_.to ),
 						:content( $_.Str )
@@ -3826,6 +3890,7 @@ return True;
 
 				my Perl6::Element $leaf =
 					%sigil-map{$sigil ~ $twigil}.new(
+						:factory-line-number( callframe(1).line ),
 						:from( $_.from ),
 						:to( $_.to ),
 						:content( $content )
@@ -3948,6 +4013,7 @@ return True;
 					if $1 and $1.Str.chars {
 						@_child.append(
 							Perl6::WS.new(
+								:factory-line-number( callframe(1).line ),
 								:from( $_.from + $0.Str.chars ),
 								:to( $_.from + $0.Str.chars + $1.Str.chars ),
 								:content( $1.Str )
@@ -3956,6 +4022,7 @@ return True;
 					}
 					@_child.append(
 						Perl6::Bareword.new(
+							:factory-line-number( callframe(1).line ),
 							:from( $_.from + $0.Str.chars + ( $1 ?? $1.Str.chars !! 0 ) ),
 							:to( $_.to - $4.Str.chars - ( $3 ?? $3.Str.chars !! 0 ) ),
 							:content( $2.Str )
@@ -3964,6 +4031,7 @@ return True;
 					if $3 and $3.Str.chars {
 						@_child.append(
 							Perl6::WS.new(
+								:factory-line-number( callframe(1).line ),
 								:from( $_.to - $4.Str.chars - $3.Str.chars ),
 								:to( $_.to - $4.Str.chars ),
 								:content( $3.Str )
@@ -3980,6 +4048,7 @@ return True;
 					if $_.hash.<nibble>.Str ~~ m{ ^ ( \S ) ( \s+ ) } {
 						@child.append(
 							Perl6::WS.new(
+								:factory-line-number( callframe(1).line ),
 								:from( $_.hash.<nibble>.from + $0.Str.chars ),
 								:to( $_.hash.<nibble>.from + $0.Str.chars + $1.Str.chars ),
 								:content( $1.Str )
@@ -4177,6 +4246,7 @@ return True;
 			@adverb.append( ':to' ) if $has-to;
 
 			Perl6::String.new(
+				:factory-line-number( callframe(1).line ),
 				:from( $p.from ),
 				:to( $p.to ),
 				:delimiter( $0.Str, $trailer ),
@@ -4320,6 +4390,7 @@ return True;
 			if $x ~~ m{ ( \s+ ) $ } {
 				@_child.append(
 					Perl6::WS.new(
+						:factory-line-number( callframe(1).line ),
 						:from(	$p.hash.<nibble>.from -
 							$0.Str.chars ),
 						:to( $p.hash.<nibble>.from ),
@@ -4342,6 +4413,7 @@ return True;
 				$inset = $0.chars;
 				@child.append(
 					Perl6::WS.new(
+						:factory-line-number( callframe(1).line ),
 						:from(
 							$p.hash.<deflongname>.to
 						),
@@ -4457,6 +4529,7 @@ return True;
 			if $strip-sides ~~ m{ '(' ( \s+ ) ')' } {
 				@_child.append(
 					Perl6::WS.new(
+						:factory-line-number( callframe(1).line ),
 						:from( $p.hash.<deflongname>.to + $0.from ),
 						:to( $p.hash.<deflongname>.to + $0.from + $0.chars ),
 						:content( $0.Str )
@@ -4466,6 +4539,7 @@ return True;
 			elsif $strip-sides ~~ m{ '(' ( \s+ ) } {
 				@_child.splice( 0, 0,
 					Perl6::WS.new(
+						:factory-line-number( callframe(1).line ),
 						:from( $p.hash.<deflongname>.to + $0.from ),
 						:to( $p.hash.<deflongname>.to + $0.from + $0.chars ),
 						:content( $0.Str )
@@ -4475,6 +4549,7 @@ return True;
 			elsif $strip-sides ~~ m{ ( \s+ ) ')' } {
 				@_child.append(
 					Perl6::WS.new(
+						:factory-line-number( callframe(1).line ),
 						:from( $p.hash.<deflongname>.to + $0.from ),
 						:to( $p.hash.<deflongname>.to + $0.from + $0.chars ),
 						:content( $0.Str )
@@ -4496,6 +4571,7 @@ return True;
 			if $collect-ws ~~ m{ ( \s+ ) $ } {
 				@child.append(
 					Perl6::WS.new(
+						:factory-line-number( callframe(1).line ),
 						:from( @child[*-1].to ),
 						:to( @child[*-1].to + $0.chars ),
 						:content( $0.Str )
@@ -4546,6 +4622,7 @@ return True;
 				self._multisig( $p.hash.<multisig> );
 			@child =
 				Perl6::Operator::Circumfix.new(
+					:factory-line-number( callframe(1).line ),
 					:delimiter( '(', ')' ),
 					:child( @_child )
 				);
@@ -4695,6 +4772,7 @@ return True;
 			if $p.hash.<scoped>.Str ~~ m{ ^ ( \s+ ) } {
 				@child.append(
 					Perl6::WS.new(
+						:factory-line-number( callframe(1).line ),
 						:from( $p.hash.<sym>.to ),
 						:to( $p.hash.<sym>.to +
 							$0.chars ),
@@ -4883,6 +4961,7 @@ return True;
 			}
 			@child.append(
 				Perl6::Bareword.new(
+					:factory-line-number( callframe(1).line ),
 					:from( $p.from + $from ),
 					:to( $p.from + $from + WHERE.chars ),
 					:content( WHERE )
@@ -4921,6 +5000,7 @@ return True;
 					if $0 and $0.Str.chars {
 						@child.append(
 							Perl6::WS.new(
+								:factory-line-number( callframe(1).line ),
 								:from( $p.from + $0.from ),
 								:to( $p.from + $0.from + $0.Str.chars ),
 								:content( $0.Str )
@@ -4929,6 +5009,7 @@ return True;
 					}
 					@child.append(
 						Perl6::Operator::Infix.new(
+							:factory-line-number( callframe(1).line ),
 							:from( $p.from + $1.from ),
 							:to( $p.from + $1.to ),
 							:content( $1.Str )
@@ -4937,6 +5018,7 @@ return True;
 					if $2 and $2.Str.chars {
 						@child.append(
 							Perl6::WS.new(
+								:factory-line-number( callframe(1).line ),
 								:from( $p.from + $2.from ),
 								:to( $p.from + $2.to ),
 								:content( $2.Str )
@@ -4997,6 +5079,7 @@ return True;
 			$p.Str ~~ m{ (':') };
 			@child.append(
 				Perl6::Operator::Prefix.new(
+					:factory-line-number( callframe(1).line ),
 					:from( $p.from + $0.Str.from ),
 					:to( $p.from + $0.Str.from +
 						$0.Str.chars ),
@@ -5278,7 +5361,7 @@ return True;
 					);
 					@child.append(
 						Perl6::Operator::Infix.new(
-#							$p.hash.<EXPR>, QUES-QUES
+							:factory-line-number( callframe(1).line ),
 							:from( $p.hash.<EXPR>.hash.<infix>.from ),
 							:to( $p.hash.<EXPR>.hash.<infix>.from + QUES-QUES.chars ),
 							:content( QUES-QUES )
@@ -5287,6 +5370,7 @@ return True;
 					if $p.hash.<EXPR>.hash.<infix>.Str ~~ m{ '??' ( \s+ ) } {
 						@child.append(
 							Perl6::WS.new(
+								:factory-line-number( callframe(1).line ),
 								:from( $p.hash.<EXPR>.hash.<infix>.from + QUES-QUES.chars ),
 								:to( $p.hash.<EXPR>.hash.<infix>.from + QUES-QUES.chars + $0.Str.chars ),
 								:content( $0.Str )
@@ -5300,6 +5384,7 @@ return True;
 					if $p.hash.<EXPR>.hash.<infix>.Str ~~ m{ ( \s+ ) '!!' } {
 						@child.append(
 							Perl6::WS.new(
+								:factory-line-number( callframe(1).line ),
 								:from( $p.hash.<EXPR>.hash.<infix>.to - BANG-BANG.chars - $0.Str.chars ),
 								:to( $p.hash.<EXPR>.hash.<infix>.to - BANG-BANG.chars ),
 								:content( $0.Str )
@@ -5393,6 +5478,7 @@ return True;
 			if $beginning-ws {
 				@_child.append(
 					Perl6::WS.new(
+						:factory-line-number( callframe(1).line ),
 						:from( $p.from ),
 						:to( $p.from + $beginning-ws.chars ),
 						:content( $beginning-ws )
@@ -5403,6 +5489,7 @@ return True;
 			if $beginning-comment {
 				@_child.append(
 					Perl6::Comment.new(
+						:factory-line-number( callframe(1).line ),
 						:from( 0 ),
 						:to( $beginning-comment.chars ),
 						:content( $beginning-comment )
@@ -5413,6 +5500,7 @@ return True;
 			if $leftover-ws {
 				@_child.append(
 					Perl6::WS.new(
+						:factory-line-number( callframe(1).line ),
 						:from( $leftover-ws-from ),
 						:to(
 							$leftover-ws-from +
@@ -5452,6 +5540,7 @@ return True;
 					$0.Str.chars;
 				@_child.append(
 					Perl6::Semicolon.new(
+						:factory-line-number( callframe(1).line ),
 						:from( @_child[*-1].to ),
 						:to(
 							@_child[*-1].to +
@@ -5464,6 +5553,7 @@ return True;
 			elsif $temp ~~ m{ ^ ( ';' ) } {
 				@_child.append(
 					Perl6::Semicolon.new(
+						:factory-line-number( callframe(1).line ),
 						:from( @_child[*-1].to ),
 						:to(
 							@_child[*-1].to +
@@ -5480,6 +5570,7 @@ return True;
 		if $leftover-ws {
 			my Perl6::Element @_child =
 				Perl6::WS.new(
+					:factory-line-number( callframe(1).line ),
 					:from( $leftover-ws-from ),
 					:to(
 						$leftover-ws-from +
@@ -5786,6 +5877,7 @@ return True;
 			$str ~~ s{ \s+ $ } = '';
 			@child =
 				Perl6::Bareword.new(
+					:factory-line-number( callframe(1).line ),
 					:from( $p.from ),
 					:to( $p.to ),
 					:content( $str )
@@ -6097,6 +6189,7 @@ return True;
 				# XXX Fix this later.
 				return
 					Perl6::Bareword.new(
+						:factory-line-number( callframe(1).line ),
 						:from( -42 ),
 						:top( -42 ),
 						:content( $_.Str )
@@ -6191,6 +6284,7 @@ return True;
 					$twigil ~
 					$desigilname;
 				%sigil-map{$sigil ~ $twigil}.new(
+					:factory-line-number( callframe(1).line ),
 					:from( $_.from ),
 					:to( $_.to ),
 					:content( $content )
@@ -6225,6 +6319,7 @@ return True;
 			if $0.Str {
 				@child.append(
 					Perl6::WS.new(
+						:factory-line-number( callframe(1).line ),
 						:from( $p.from + $0.from ),
 						:to( $p.from + $0.to ),
 						:content( $0.Str )
@@ -6233,6 +6328,7 @@ return True;
 			}
 			@child.append(
 				Perl6::Bareword.new(
+					:factory-line-number( callframe(1).line ),
 					:from( $p.from + $1.from ),
 					:to( $p.from + $1.from + 5 ),
 					:content( WHERE )
@@ -6241,6 +6337,7 @@ return True;
 			if $2.Str {
 				@child.append(
 					Perl6::WS.new(
+						:factory-line-number( callframe(1).line ),
 						:from( $p.from + $2.from ),
 						:to( $p.from + $2.to ),
 						:content( $2.Str )
@@ -6281,6 +6378,7 @@ return True;
 			$p.hash.<sigil> ~ $twigil ~ $desigilname;
 
 		my Perl6::Element $leaf = %sigil-map{$sigil ~ $twigil}.new(
+			:factory-line-number( callframe(1).line ),
 			:from( $p.from ),
 			:to( $p.to ),
 			:content( $content )
