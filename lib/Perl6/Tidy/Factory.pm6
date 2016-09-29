@@ -587,7 +587,7 @@ class Perl6::WS does Token {
 			()
 		}
 	}
-	multi method between-matches-orig( Mu $m, Mu $lhs, Mu $rhs ) {
+	multi method between-matches-orig( Mu $lhs, Mu $rhs ) {
 		if $lhs.to < $rhs.from {
 			self.bless(
 				:factory-line-number( callframe(1).line ),
@@ -595,7 +595,7 @@ class Perl6::WS does Token {
 				:to( $rhs.from ),
 				:content(
 					substr(
-						$m.orig,
+						$lhs.orig,
 						$lhs.to,
 						$rhs.from - $lhs.to
 					)
@@ -895,6 +895,20 @@ class Perl6::WS does Token {
 			()
 		}
 	}
+	method before-orig( Mu $lhs ) {
+		my $x = $lhs.orig.substr( 0, $lhs.from );
+		if $x ~~ m{ ( \s+ ) $ } {
+			self.bless(
+				:factory-line-number( callframe(1).line ),
+				:from( $lhs.from - $0.Str.chars ),
+				:to( $lhs.from ),
+				:content( $0.Str )
+			)
+		}
+		else {
+			()
+		}
+	}
 
 	# Returns a WS token consisting of the whitespace after the end of
 	# match object $lhs.
@@ -904,6 +918,20 @@ class Perl6::WS does Token {
 	#
 	method after( Mu $p, Mu $lhs ) {
 		my $x = $p.Str.substr( $lhs.to - $p.from );
+		if $x ~~ m{ ^ ( \s+ ) } {
+			self.bless(
+				:factory-line-number( callframe(1).line ),
+				:from( $lhs.to ),
+				:to( $lhs.to + $0.Str.chars ),
+				:content( $0.Str )
+			)
+		}
+		else {
+			()
+		}
+	}
+	method after-orig( Mu $lhs ) {
+		my $x = $lhs.orig.substr( $lhs.to );
 		if $x ~~ m{ ^ ( \s+ ) } {
 			self.bless(
 				:factory-line-number( callframe(1).line ),
@@ -1567,13 +1595,6 @@ class Perl6::Tidy::Factory {
 			@child.append(
 				self._EXPR( $p.hash.<EXPR> )
 			);
-			# XXX WATCH THIS
-			@child.splice( min( 2, @child.elems ), 0, 
-				Perl6::WS.after(
-					$p,
-					$p.hash.<EXPR>
-				)
-			)
 		}
 		elsif self.assert-Int( $p ) {
 			$p.Int
@@ -2591,7 +2612,17 @@ class Perl6::Tidy::Factory {
 				[< infix_prefix_meta_operator OPER >] ) {
 			@child = self._EXPR( $p.list.[0] );
 			@child.append(
+				Perl6::WS.before-orig(
+					$p.hash.<infix_prefix_meta_operator>
+				),
+			);
+			@child.append(
 				self._infix_prefix_meta_operator(
+					$p.hash.<infix_prefix_meta_operator>
+				),
+			);
+			@child.append(
+				Perl6::WS.after-orig(
 					$p.hash.<infix_prefix_meta_operator>
 				),
 			);
@@ -2635,16 +2666,11 @@ class Perl6::Tidy::Factory {
 				@child.append(
 					self._infix( $p.hash.<infix> )
 				);
-key-bounds $p.hash.<infix>;
-key-bounds $p.list.[1];
-#				@child.append(
-#					Perl6::WS.between-matches-orig(
-#					#Perl6::WS.between-matches(
-#						$p,
-#						$p.hash.<infix>,
-#						$p.list.[1]
-#					)
-#				);
+				@child.append(
+					Perl6::WS.after-orig(
+						$p.hash.<infix>
+					)
+				);
 				@child.append(
 					self._EXPR( $p.list.[1] )
 				)
@@ -5419,8 +5445,7 @@ if $q.list.[0] and
 		)
 	);
 	@child.append(
-		Perl6::WS.between-matches(
-			$p,
+		Perl6::WS.between-matches-orig(
 			$q.hash.<infix>,
 			$q.list.[1].hash.<value>
 		)

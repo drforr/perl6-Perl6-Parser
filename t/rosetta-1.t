@@ -8,12 +8,11 @@ plan 7;
 my $pt = Perl6::Tidy.new;
 
 subtest {
-	plan 5;
+	plan 4;
 
 	subtest {
-		plan 0;
+		plan 2;
 
-#`(
 		my $source = Q:to[_END_];
 my @doors = False xx 101;
  
@@ -25,48 +24,42 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
-)
-	}, Q{regression};
-
-	subtest {
-		plan 1;
-
-		my $parsed = $pt.parse-source( Q:to[END] );
-my @doors = False xx 101;
- 
-(.=not for @doors[0, $_ ... 100]) for 1..100;
- 
-say "Door $_ is ", <closed open>[ @doors[$_] ] for 1..100;
-END
-		ok $pt.validate( $parsed );
 	}, Q{version 1};
 
 	subtest {
-		plan 1;
+		plan 2;
 
-		my $parsed = $pt.parse-source( Q:to[END] );
+		my $source = Q:to[_END_];
 say "Door $_ is open" for map {$^n ** 2}, 1..10;
-END
-		ok $pt.validate( $parsed );
+_END_
+		my $p = $pt.parse-source( $source );
+		my $tree = $pt.build-tree( $p );
+		ok $pt.validate( $p ), Q{valid};
+		is $pt.format( $tree ), $source, Q{formatted};
 	}, Q{version 2};
-	
 
 	subtest {
-		plan 1;
+		plan 2;
 
-		my $parsed = $pt.parse-source( Q:to[END] );
+		my $source = Q:to[_END_];
 say "Door $_ is open" for 1..10 X** 2;
-END
-		ok $pt.validate( $parsed );
+_END_
+		my $p = $pt.parse-source( $source );
+		my $tree = $pt.build-tree( $p );
+		ok $pt.validate( $p ), Q{valid};
+		is $pt.format( $tree ), $source, Q{formatted};
 	}, Q{version 3};
 
 	subtest {
-		plan 1;
+		plan 2;
 
-		my $parsed = $pt.parse-source( Q:to[END] );
+		my $source = Q:to[_END_];
 say "Door $_ is ", <closed open>[.sqrt == .sqrt.floor] for 1..100;
-END
-		ok $pt.validate( $parsed );
+_END_
+		my $p = $pt.parse-source( $source );
+		my $tree = $pt.build-tree( $p );
+		ok $pt.validate( $p ), Q{valid};
+		is $pt.format( $tree ), $source, Q{formatted};
 	}, Q{version 4};
 }, Q{100 doors};
 
