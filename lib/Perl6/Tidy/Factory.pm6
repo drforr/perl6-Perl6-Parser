@@ -1408,6 +1408,7 @@ class Perl6::Variable::Callable::SubLanguage {
 class Perl6::Tidy::Factory {
 
 	constant COLON = Q{:};
+	constant COMMA = Q{,};
 	constant SEMICOLON = Q{;};
 	constant EQUAL = Q{=};
 	constant WHERE = Q{where};
@@ -2634,23 +2635,70 @@ class Perl6::Tidy::Factory {
 		# XXX $p.list.[0] is actually the start of the expression.
 		elsif self.assert-hash-keys( $p, [< infix OPER >] ) {
 			if $p.list.elems == 3 {
-				@child = self._EXPR( $p.list.[0] );
-				@child.append(
-					Perl6::Operator::Infix.new(
-						$p, QUES-QUES
+				if $p.hash.<infix>.Str eq COMMA {
+					@child.append(
+						Perl6::WS.before-orig(
+							$p.list.[0]
+						)
+					);
+					@child = self._EXPR( $p.list.[0] );
+					@child.append(
+						Perl6::WS.after-orig(
+							$p.list.[0]
+						)
+					);
+					@child.append(
+						Perl6::Operator::Infix.new(
+							$p, COMMA
+						)
+					);
+					@child.append(
+						Perl6::WS.before-orig(
+							$p.list.[1]
+						)
+					);
+					@child.append(
+						self._EXPR( $p.list.[1] )
+					);
+					@child.append(
+						Perl6::WS.after-orig(
+							$p.list.[1]
+						)
+					);
+					@child.append(
+						Perl6::Operator::Infix.new(
+							$p, COMMA
+						)
+					);
+					@child.append(
+						Perl6::WS.before-orig(
+							$p.list.[2]
+						)
+					);
+					@child.append(
+						self._EXPR( $p.list.[2] )
 					)
-				);
-				@child.append(
-					self._EXPR( $p.list.[1] )
-				);
-				@child.append(
-					Perl6::Operator::Infix.new(
-						$p, BANG-BANG
+				}
+				else {
+					# XXX Sigh, unify this later.
+					@child = self._EXPR( $p.list.[0] );
+					@child.append(
+						Perl6::Operator::Infix.new(
+							$p, QUES-QUES
+						)
+					);
+					@child.append(
+						self._EXPR( $p.list.[1] )
+					);
+					@child.append(
+						Perl6::Operator::Infix.new(
+							$p, BANG-BANG
+						)
+					);
+					@child.append(
+						self._EXPR( $p.list.[2] )
 					)
-				);
-				@child.append(
-					self._EXPR( $p.list.[2] )
-				)
+				}
 			}
 			else {
 				@child.append(
@@ -3076,16 +3124,9 @@ return True;
 		Perl6::Bareword.from-match( $p )
 	}
 
+	# Special value...
 	method _lambda( Mu $p ) {
-		given $p {
-			when self.assert-hash-keys( $_, [< lambda >] ) {
-				$_.hash.<lambda>.Str
-			}
-			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
-			}
-		}
+		Perl6::Operator::Infix.from-match( $p )
 	}
 
 	method _left( Mu $p ) {
@@ -4061,10 +4102,24 @@ return True;
 	}
 
 	method _pblock( Mu $p ) {
+		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash-keys( $_,
-					[< lambda blockoid signature >] ) {
-				die "Not implemented yet"
+					[< lambda signature blockoid >] ) {
+				@child = self._lambda( $_.hash.<lambda> );
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						'lambda',
+						'signature'
+					)
+				);
+				@child.append(
+					self._signature( $_.hash.<signature> )
+				);
+				@child.append(
+					self._blockoid( $_.hash.<blockoid> )
+				)
 			}
 			when self.assert-hash-keys( $_, [< blockoid >] ) {
 				self._blockoid( $p.hash.<blockoid> )
@@ -4074,6 +4129,7 @@ return True;
 				warn "Unhandled case"
 			}
 		}
+		@child
 	}
 
 	# Needs to be run through a different parser?
@@ -5352,7 +5408,7 @@ return True;
 	# QUIT
 	#
 	method _statement_control( Mu $p ) {
-		warn "Untested method";
+		my Perl6::Element @child;
 		given $p {
 			if self.assert-hash-keys( $_,
 					[< block sym e1 e2 e3 >] ) {
@@ -5378,7 +5434,17 @@ return True;
 				die "Not implemented yet"
 			}
 			elsif self.assert-hash-keys( $_, [< sym xblock >] ) {
-				die "Not implemented yet"
+				@child = self._sym( $_.hash.<sym> );
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						'sym',
+						'xblock'
+					)
+				);
+				@child.append(
+					self._xblock( $_.hash.<xblock> )
+				);
 			}
 			elsif self.assert-hash-keys( $_, [< block sym >] ) {
 				die "Not implemented yet"
@@ -6630,7 +6696,6 @@ else {
 
 	method _xblock( Mu $p ) {
 		my Perl6::Element @child;
-		warn "Untested method";
 		if $p.list {
 			for $p.list {
 				if self.assert-hash-keys( $_,
@@ -6643,8 +6708,18 @@ else {
 				}
 			}
 		}
-		elsif self.assert-hash-keys( $p, [< pblock EXPR >] ) {
-			die "Not implemented yet";
+		elsif self.assert-hash-keys( $p, [< EXPR pblock >] ) {
+			@child = self._EXPR( $p.hash.<EXPR> );
+			@child.append(
+				Perl6::WS.between-matches(
+					$p,
+					'EXPR',
+					'pblock'
+				)
+			);
+			@child.append(
+				self._pblock( $p.hash.<pblock> )
+			);
 		}
 		elsif self.assert-hash-keys( $p, [< blockoid >] ) {
 			@child = self._blockoid( $p.hash.<blockoid> )
