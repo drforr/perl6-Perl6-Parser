@@ -213,14 +213,10 @@ class Perl6::Tidy {
 					next unless $root.child.[$index].^can('from');
 					if $root.child.[$index-1] ~~ Perl6::WS and
 					   $root.child.[$index] ~~ Perl6::WS {
-#						say $root.child.[$index-1].perl;
-#						say $root.child.[$index].perl;
 						say "Two WS entries in a row"
 					}
 					if $root.child.[$index-1].to !=
 						$root.child.[$index].from {
-#						say $root.child.[$index-1].perl;
-#						say $root.child.[$index].perl;
 						say "Gap between two items"
 					}
 				}
@@ -302,11 +298,20 @@ class Perl6::Tidy {
 					@problem.push( 'G' )
 				}
 				if $root.child.[$_].^can( 'content' ) {
+					if $root.child.[$_].from ==
+					   $root.child.[$_].to {
+						@problem.push( Q{''} )
+					}
+					if $root.child.[$_].to -
+					   $root.child.[$_].from != $root.child.[$_].content.chars {
+						@problem.push( Q{''} )
+					}
 					if $root.child.[$_] ~~ Perl6::WS and
 					   $root.child.[$_].content ~~ / \S / {
 						@problem.push( 'WS' )
 					}
 					if $root.child.[$_] !~~ Perl6::WS and
+					   $root.child.[$_] !~~ Perl6::String and
 					   $root.child.[$_].content ~~ / \s / {
 						@problem.push( 'WS' )
 					}

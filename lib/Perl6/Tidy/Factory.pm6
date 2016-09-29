@@ -550,8 +550,8 @@ class Perl6::WS does Token {
 				:to( $_rhs.from ),
 				:content(
 					substr(
-						$m.Str,
-						$_lhs.to - $m.from,
+						$m.orig,
+						$_lhs.to,
 						$_rhs.from - $_lhs.to
 					)
 				)
@@ -568,7 +568,7 @@ class Perl6::WS does Token {
 	# If there is no whitespace, returns () which is treated as a
 	# nonexistent array element by append().
 	#
-	multi method between-matches( Mu $p, Mu $lhs, Mu $rhs ) {
+	multi method between-matches( Mu $m, Mu $lhs, Mu $rhs ) {
 		if $lhs.to < $rhs.from {
 			self.bless(
 				:factory-line-number( callframe(1).line ),
@@ -576,8 +576,27 @@ class Perl6::WS does Token {
 				:to( $rhs.from ),
 				:content(
 					substr(
-						$p.Str,
-						$lhs.to - $p.from,
+						$m.orig,
+						$lhs.to,
+						$rhs.from - $lhs.to
+					)
+				)
+			)
+		}
+		else {
+			()
+		}
+	}
+	multi method between-matches-orig( Mu $m, Mu $lhs, Mu $rhs ) {
+		if $lhs.to < $rhs.from {
+			self.bless(
+				:factory-line-number( callframe(1).line ),
+				:from( $lhs.to ),
+				:to( $rhs.from ),
+				:content(
+					substr(
+						$m.orig,
+						$lhs.to,
 						$rhs.from - $lhs.to
 					)
 				)
@@ -1432,7 +1451,8 @@ class Perl6::Tidy::Factory {
 
 	sub key-bounds( Mu $p ) {
 		if $p.list {
-			say "-1 -1 *list*"
+			#say "-1 -1 *list*"
+			say "{$p.from} {$p.to} [{substr($p.orig,$p.from,$p.to-$p.from)}]"
 		}
 		elsif $p.orig {
 			say "{$p.from} {$p.to} [{substr($p.orig,$p.from,$p.to-$p.from)}]"
@@ -1821,49 +1841,51 @@ class Perl6::Tidy::Factory {
 	#
 	method _circumfix( Mu $p ) {
 		my Perl6::Element @child;
-		if self.assert-hash-keys( $p, [< binint VALUE >] ) {
-			@child = self._binint( $p.hash.<binint> )
-		}
-		elsif self.assert-hash-keys( $p, [< octint VALUE >] ) {
-			@child = self._octint( $p.hash.<octint> )
-		}
-		elsif self.assert-hash-keys( $p, [< decint VALUE >] ) {
-			@child = self._decint( $p.hash.<decint> )
-		}
-		elsif self.assert-hash-keys( $p, [< hexint VALUE >] ) {
-			@child = self._hexint( $p.hash.<hexint> )
-		}
-		elsif self.assert-hash-keys( $p, [< pblock >] ) {
-			@child = self._pblock( $p.hash.<pblock> )
-		}
-		elsif self.assert-hash-keys( $p, [< semilist >] ) {
-			my Perl6::Element @_child;
-			@_child.append(
-				self._semilist( $p.hash.<semilist> )
-			);
-			@child =
-				Perl6::Operator::Circumfix.from-match(
-					$p, @_child
-				)
-		}
-		elsif self.assert-hash-keys( $p, [< nibble >] ) {
-			my Perl6::Element @_child;
-			@_child.append(
-				Perl6::WS.with-header-trailer(
-					$p.hash.<nibble>,
-					Perl6::Operator::Prefix.from-match-trimmed(
-						$p.hash.<nibble>
+		given $p {
+			when self.assert-hash-keys( $_, [< binint VALUE >] ) {
+				@child = self._binint( $_.hash.<binint> )
+			}
+			when self.assert-hash-keys( $_, [< octint VALUE >] ) {
+				@child = self._octint( $_.hash.<octint> )
+			}
+			when self.assert-hash-keys( $_, [< decint VALUE >] ) {
+				@child = self._decint( $_.hash.<decint> )
+			}
+			when self.assert-hash-keys( $_, [< hexint VALUE >] ) {
+				@child = self._hexint( $_.hash.<hexint> )
+			}
+			when self.assert-hash-keys( $_, [< pblock >] ) {
+				@child = self._pblock( $_.hash.<pblock> )
+			}
+			when self.assert-hash-keys( $_, [< semilist >] ) {
+				my Perl6::Element @_child;
+				@_child.append(
+					self._semilist( $_.hash.<semilist> )
+				);
+				@child =
+					Perl6::Operator::Circumfix.from-match(
+						$_, @_child
 					)
-				)
-			);
-			@child =
-				Perl6::Operator::Circumfix.from-match(
-					$p, @_child
-				)
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+			}
+			when self.assert-hash-keys( $_, [< nibble >] ) {
+				my Perl6::Element @_child;
+				@_child.append(
+					Perl6::WS.with-header-trailer(
+						$_.hash.<nibble>,
+						Perl6::Operator::Prefix.from-match-trimmed(
+							$_.hash.<nibble>
+						)
+					)
+				);
+				@child =
+					Perl6::Operator::Circumfix.from-match(
+						$_, @_child
+					)
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 		@child
 	}
@@ -1908,86 +1930,96 @@ class Perl6::Tidy::Factory {
 
 	method _colonpair( Mu $p ) {
 		my Perl6::Element @child;
-		if self.assert-hash-keys( $p,
-				     [< identifier coloncircumfix >] ) {
-			# Synthesize the 'from' marker for ':'
-			@child =
-				Perl6::Operator::Prefix.new(
-					:factory-line-number( callframe(1).line ),
-					:from( $p.from ),
-					:to( $p.from + COLON.chars ),
-					:content( COLON )
+		given $p {
+			when self.assert-hash-keys( $_,
+					     [< identifier coloncircumfix >] ) {
+				# Synthesize the 'from' marker for ':'
+				@child =
+					Perl6::Operator::Prefix.new(
+						:factory-line-number(
+							callframe(1).line
+						),
+						:from( $_.from ),
+						:to( $_.from + COLON.chars ),
+						:content( COLON )
+					);
+				@child.append(
+					self._identifier( $_.hash.<identifier> )
 				);
-			@child.append(
-				self._identifier( $p.hash.<identifier> )
-			);
-			@child.append(
-				self._coloncircumfix(
-					$p.hash.<coloncircumfix>
+				@child.append(
+					self._coloncircumfix(
+						$_.hash.<coloncircumfix>
+					)
 				)
-			)
-		}
-		elsif self.assert-hash-keys( $p, [< coloncircumfix >] ) {
+			}
+			when self.assert-hash-keys( $_, [< coloncircumfix >] ) {
 				# XXX Note that ':' is part of the expression.
-			@child =
-				Perl6::Operator::Prefix.new(
-					:factory-line-number( callframe(1).line ),
-					:from( $p.from ),
-					:to( $p.from + COLON.chars ),
-					:content( COLON )
-				);
-			@child.append(
-				self._coloncircumfix(
-					$p.hash.<coloncircumfix>
+				@child =
+					Perl6::Operator::Prefix.new(
+						:factory-line-number(
+							callframe(1).line
+						),
+						:from( $_.from ),
+						:to( $_.from + COLON.chars ),
+						:content( COLON )
+					);
+				@child.append(
+					self._coloncircumfix(
+						$_.hash.<coloncircumfix>
+					)
 				)
-			)
-		}
-		elsif self.assert-hash-keys( $p, [< identifier >] ) {
-			@child = Perl6::ColonBareword.from-match( $p )
-		}
-		elsif self.assert-hash-keys( $p, [< fakesignature >] ) {
-			# XXX May not really be "post" in the P6 sense?
-			my Perl6::Element @_child =
-				self._fakesignature(
-					$p.hash.<fakesignature>
-				);
-			# XXX properly match delimiter
-			@child =
-				Perl6::Operator::PostCircumfix.from-delims(
-					$p, ':(', ')', @_child
+			}
+			when self.assert-hash-keys( $_, [< identifier >] ) {
+				@child = Perl6::ColonBareword.from-match( $_ )
+			}
+			when self.assert-hash-keys( $_, [< fakesignature >] ) {
+				# XXX May not really be "post" in the P6 sense?
+				my Perl6::Element @_child =
+					self._fakesignature(
+						$_.hash.<fakesignature>
+					);
+				# XXX properly match delimiter
+				@child =
+					Perl6::Operator::PostCircumfix.from-delims(
+						$_, ':(', ')', @_child
+					)
+			}
+			when self.assert-hash-keys( $_, [< var >] ) {
+				# Synthesize the 'from' marker for ':'
+				# XXX is this actually a single token?
+				# XXX I think it is.
+				@child =
+					Perl6::Operator::Prefix.new(
+						:factory-line-number(
+							callframe(1).line
+						),
+						:from( $_.from ),
+						:to( $_.from + COLON.chars ),
+						:content( COLON )
+					);
+				@child.append(
+					self._var( $_.hash.<var> )
 				)
-		}
-		elsif self.assert-hash-keys( $p, [< var >] ) {
-			# Synthesize the 'from' marker for ':'
-			# XXX is this actually a single token?
-			# XXX I think it is.
-			@child =
-				Perl6::Operator::Prefix.new(
-					:factory-line-number( callframe(1).line ),
-					:from( $p.from ),
-					:to( $p.from + COLON.chars ),
-					:content( COLON )
-				);
-			@child.append(
-				self._var( $p.hash.<var> )
-			)
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 		@child.flat
 	}
 
 	method _colonpairs( Mu $p ) {
 		warn "Untested method";
-		if $p ~~ Hash {
-			return True if $p.<D>;
-			return True if $p.<U>;
-		}
-		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+		given $p {
+			when $_ ~~ Hash {
+				return True if $_.<D>;
+				return True if $_.<U>;
+			}
+			default {
+				say $_.hash.keys.gist;
+				warn "Unhandled case"
+			}
 		}
 	}
 
@@ -2490,62 +2522,6 @@ class Perl6::Tidy::Factory {
 		}
 	}
 
-	method __Term( Mu $p ) {
-		my Perl6::Element @child;
-		given $p {
-			when self.assert-hash-keys( $_,
-					[< postcircumfix OPER >],
-					[< postfix_prefix_meta_operator >] ) {
-				@child = self.__Term( $_.list.[0] );
-				@child.append(
-					self._postcircumfix(
-						$_.hash.<postcircumfix>
-					)
-				)
-			}
-			when self.assert-hash-keys( $_, [< infix OPER >] ) {
-				@child.append(
-					self._infix( $_.hash.<infix> )
-				)
-			}
-			when self.assert-hash-keys( $_,
-					[< postfix OPER >],
-					[< postfix_prefix_meta_operator >] ) {
-				@child = self.__Term( $_.list.[0] );
-				@child.append(
-					self._postfix( $_.hash.<postfix> )
-				)
-			}
-			when self.assert-hash-keys( $_,
-					[< identifier >], [< args >] ) {
-				@child = self._identifier(
-					$_.hash.<identifier>
-				)
-			}
-			when self.assert-hash-keys( $_,
-					[< longname >], [< args >] ) {
-				@child = self._longname( $_.hash.<longname> )
-			}
-			when self.assert-hash-keys( $_, [< longname >] ) {
-				@child = self._longname( $_.hash.<longname> )
-			}
-			when self.assert-hash-keys( $_, [< variable >] ) {
-				@child = self._variable( $_.hash.<variable> )
-			}
-			when self.assert-hash-keys( $_, [< value >] ) {
-				@child = self._value( $_.hash.<value> )
-			}
-			when self.assert-hash-keys( $_, [< circumfix >] ) {
-				@child = self._circumfix( $_.hash.<circumfix> )
-			}
-			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
-			}
-		}
-		@child
-	}
-
 	method _EXPR( Mu $p ) {
 		my Perl6::Element @child;
 		if self.assert-hash-keys( $p,
@@ -2553,7 +2529,7 @@ class Perl6::Tidy::Factory {
 				[< postfix_prefix_meta_operator >] ) {
 			# XXX Look into this at some point.
 			if substr-match( $p, $p.from, HYPER.chars ) eq HYPER {
-				@child = self.__Term( $p.list.[0] );
+				@child = self._EXPR( $p.list.[0] );
 				@child.append(
 					# XXX note that '>>' is a substring
 					Perl6::Operator::Prefix.new(
@@ -2570,7 +2546,7 @@ class Perl6::Tidy::Factory {
 				)
 			}
 			else {
-				@child = self.__Term( $p.list.[0] );
+				@child = self._EXPR( $p.list.[0] );
 				@child.append(
 					self._dotty( $p.hash.<dotty> )
 				)
@@ -2588,7 +2564,7 @@ class Perl6::Tidy::Factory {
 					],
 					$p.list.[0].list.[0] // $p.list.[0],
 					[
-						self.__Term( $p.list.[0] )
+						self._EXPR( $p.list.[0] )
 					]
 				)
 			)
@@ -2596,7 +2572,7 @@ class Perl6::Tidy::Factory {
 		elsif self.assert-hash-keys( $p,
 				[< postcircumfix OPER >],
 				[< postfix_prefix_meta_operator >] ) {
-			@child = self.__Term( $p.list.[0] );
+			@child = self._EXPR( $p.list.[0] );
 			@child.append(
 				self._postcircumfix(
 					$p.hash.<postcircumfix>
@@ -2606,35 +2582,35 @@ class Perl6::Tidy::Factory {
 		elsif self.assert-hash-keys( $p,
 				[< postfix OPER >],
 				[< postfix_prefix_meta_operator >] ) {
-			@child = self.__Term( $p.list.[0] );
+			@child = self._EXPR( $p.list.[0] );
 			@child.append(
 				self._postfix( $p.hash.<postfix> )
 			)
 		}
 		elsif self.assert-hash-keys( $p,
 				[< infix_prefix_meta_operator OPER >] ) {
-			@child = self.__Term( $p.list.[0] );
+			@child = self._EXPR( $p.list.[0] );
 			@child.append(
 				self._infix_prefix_meta_operator(
 					$p.hash.<infix_prefix_meta_operator>
 				),
 			);
 			@child.append(
-				self.__Term( $p.list.[1] )
+				self._EXPR( $p.list.[1] )
 			)
 		}
 		# XXX ternary operators don't follow the string boundary rules
 		# XXX $p.list.[0] is actually the start of the expression.
 		elsif self.assert-hash-keys( $p, [< infix OPER >] ) {
 			if $p.list.elems == 3 {
-				@child = self.__Term( $p.list.[0] );
+				@child = self._EXPR( $p.list.[0] );
 				@child.append(
 					Perl6::Operator::Infix.new(
 						$p, QUES-QUES
 					)
 				);
 				@child.append(
-					self.__Term( $p.list.[1] )
+					self._EXPR( $p.list.[1] )
 				);
 				@child.append(
 					Perl6::Operator::Infix.new(
@@ -2642,11 +2618,13 @@ class Perl6::Tidy::Factory {
 					)
 				);
 				@child.append(
-					self.__Term( $p.list.[2] )
+					self._EXPR( $p.list.[2] )
 				)
 			}
 			else {
-				@child = self.__Term( $p.list.[0] );
+				@child.append(
+					self._EXPR( $p.list.[0] )
+				);
 				@child.append(
 					Perl6::WS.between-matches(
 						$p,
@@ -2657,15 +2635,18 @@ class Perl6::Tidy::Factory {
 				@child.append(
 					self._infix( $p.hash.<infix> )
 				);
+key-bounds $p.hash.<infix>;
+key-bounds $p.list.[1];
+#				@child.append(
+#					Perl6::WS.between-matches-orig(
+#					#Perl6::WS.between-matches(
+#						$p,
+#						$p.hash.<infix>,
+#						$p.list.[1]
+#					)
+#				);
 				@child.append(
-					Perl6::WS.between-matches(
-						$p,
-						$p.hash.<infix>,
-						$p.list.[1]
-					)
-				);
-				@child.append(
-					self.__Term( $p.list.[1] )
+					self._EXPR( $p.list.[1] )
 				)
 			}
 		}
@@ -2980,7 +2961,7 @@ class Perl6::Tidy::Factory {
 			if $p.hash.<sym>.Str eq EQUAL and
 				$p.hash.<EXPR>.list.elems == 2 {
 				@child.append(
-					self.__Term( $p.hash.<EXPR>.list.[0] )
+					self._EXPR( $p.hash.<EXPR>.list.[0] )
 				);
 				@child.append(
 					Perl6::WS.between-matches(
@@ -3002,7 +2983,7 @@ class Perl6::Tidy::Factory {
 					)
 				);
 				@child.append(
-					self.__Term( $p.hash.<EXPR>.list.[1] )
+					self._EXPR( $p.hash.<EXPR>.list.[1] )
 				)
 			}
 			else {
@@ -4946,8 +4927,6 @@ return True;
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash-keys( $_, [< statement >] ) {
-key-bounds $_;
-say $_.dump;
 				@child.append(
 					Perl6::WS.with-header-trailer(
 						$_,
@@ -5417,36 +5396,46 @@ say $_.dump;
 				}
 				elsif self.assert-hash-keys( $_,
 						[< EXPR >] ) {
-# XXX Aiyee.
+# XXX Aiyee. Ugly but it does work.
 my $q = $_.hash.<EXPR>;
 if $q.list.[0] and
    $q.hash.<infix> and
-   $q.list.[1] {
-	@child = self.__Term( $q.list.[0] );
+   $q.list.[1] and
+   $q.list.[1].hash.<value> {
 	@child.append(
-		Perl6::WS.between-matches(
-			$p, # This is why.
-			$q.list.[0],
+		self._EXPR(
+			$q.list.[0]
+		)
+	);
+	@child.append(
+		Perl6::WS.before(
+			$p,
 			$q.hash.<infix>
 		)
 	);
 	@child.append(
-		self._infix( $q.hash.<infix> )
-	);
-	@child.append(
-		Perl6::WS.between-matches(
-			$p, # This is why.
-			$q.hash.<infix>,
-			$q.list.[1]
+		self._infix(
+			$q.hash.<infix>
 		)
 	);
 	@child.append(
-		self.__Term( $q.list.[1] )
-	)
+		Perl6::WS.between-matches(
+			$p,
+			$q.hash.<infix>,
+			$q.list.[1].hash.<value>
+		)
+	);
+	@child.append(
+		self._EXPR(
+			$q.list.[1]
+		)
+	);
 }
 else {
 					@child.append(
-						self._EXPR( $_.hash.<EXPR> )
+						self._EXPR(
+							$_.hash.<EXPR>
+						)
 					)
 }
 				}
@@ -5519,7 +5508,7 @@ else {
 				if $p.hash.<EXPR>.list.elems == 3 and
 					$p.hash.<EXPR>.hash.<infix> and
 					$p.hash.<EXPR>.hash.<OPER> {
-					@child = self.__Term(
+					@child = self._EXPR(
 						$p.hash.<EXPR>.list.[0]
 					);
 					@child.append(
@@ -5549,7 +5538,7 @@ else {
 						)
 					}
 					@child.append(
-						self.__Term( $p.hash.<EXPR>.list.[1] )
+						self._EXPR( $p.hash.<EXPR>.list.[1] )
 					);
 					if $p.hash.<EXPR>.hash.<infix>.Str ~~ m{ ( \s+ ) '!!' } {
 						@child.append(
@@ -5575,12 +5564,12 @@ else {
 						)
 					);
 					@child.append(
-						self.__Term( $p.hash.<EXPR>.list.[2] )
+						self._EXPR( $p.hash.<EXPR>.list.[2] )
 					)
 				}
 				else {
 					my $q = $p.hash.<EXPR>;
-					@child = self.__Term( $q.list.[0] );
+					@child = self._EXPR( $q.list.[0] );
 					@child.append(
 						Perl6::WS.between-matches(
 							$p,
@@ -5598,7 +5587,7 @@ else {
 						)
 					);
 					@child.append(
-						self.__Term( $q.list.[1] )
+						self._EXPR( $q.list.[1] )
 					)
 				}
 			}
