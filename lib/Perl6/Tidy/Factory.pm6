@@ -493,22 +493,39 @@ class Perl6::WS does Token {
 
 	constant COMMA = Q{,};
 
+	# Returns a WS token starting at character $start, consisting of
+	# $content.chars characters.
+	#
+	# If there is no whitespace, returns () which is treated as a
+	# nonexistent array element by append().
+	#
 	multi method new( Int $start, $content ) {
-		self.bless(
-			:factory-line-number( callframe(1).line ),
-			:from( $start ),
-			:to( $start + $content.chars ),
-			:content( $content )
-		)
-	}
-
-	method from-match( Mu $p ) {
-		if $p.from < $p.to {
+		if $content {
 			self.bless(
 				:factory-line-number( callframe(1).line ),
-				:from( $p.from ),
-				:to( $p.to ),
-				:content( $p.Str )
+				:from( $start ),
+				:to( $start + $content.chars ),
+				:content( $content )
+			)
+		}
+		else {
+			warn "Attempting to create empty whitespace token";
+			( )
+		}
+	}
+
+	# Returns a WS token consisting entirely of a given match $m
+	#
+	# If there is no whitespace, returns () which is treated as a
+	# nonexistent array element by append().
+	#
+	method from-match( Mu $m ) {
+		if $m.from < $m.to {
+			self.bless(
+				:factory-line-number( callframe(1).line ),
+				:from( $m.from ),
+				:to( $m.to ),
+				:content( $m.Str )
 			)
 		}
 		else {
@@ -516,9 +533,16 @@ class Perl6::WS does Token {
 		}
 	}
 
-	multi method between-matches( Mu $p, Str $lhs, Str $rhs ) {
-		my $_lhs = $p.hash.{$lhs};
-		my $_rhs = $p.hash.{$rhs};
+	# Returns a WS token starting at the end of match $m.hash.{$lhs},
+	# extending to the start of match $m.hash.{$rhs}.
+	# (uses the whitespace in match $m)
+	#
+	# If there is no whitespace, returns () which is treated as a
+	# nonexistent array element by append().
+	#
+	multi method between-matches( Mu $m, Str $lhs, Str $rhs ) {
+		my $_lhs = $m.hash.{$lhs};
+		my $_rhs = $m.hash.{$rhs};
 		if $_lhs.to < $_rhs.from {
 			self.bless(
 				:factory-line-number( callframe(1).line ),
@@ -526,8 +550,8 @@ class Perl6::WS does Token {
 				:to( $_rhs.from ),
 				:content(
 					substr(
-						$p.Str,
-						$_lhs.to - $p.from,
+						$m.Str,
+						$_lhs.to - $m.from,
 						$_rhs.from - $_lhs.to
 					)
 				)
@@ -538,6 +562,12 @@ class Perl6::WS does Token {
 		}
 	}
 
+	# The same as above, but instead of $m.hash.{$lhs}, $lhs and $rhs are
+	# the actual matches.
+	#
+	# If there is no whitespace, returns () which is treated as a
+	# nonexistent array element by append().
+	#
 	multi method between-matches( Mu $p, Mu $lhs, Mu $rhs ) {
 		if $lhs.to < $rhs.from {
 			self.bless(
@@ -558,17 +588,23 @@ class Perl6::WS does Token {
 		}
 	}
 
-	method leader( Mu $p, Mu $rhs ) {
-		if $p.from < $rhs.from {
+	# Returns a WS token starting at the beginning of match $m, extending
+	# to the start of match $rhs.
+	#
+	# If there is no whitespace, returns () which is treated as a
+	# nonexistent array element by append().
+	#
+	method leader( Mu $m, Mu $rhs ) {
+		if $m.from < $rhs.from {
 			self.bless(
 				:factory-line-number( callframe(1).line ),
-				:from( $p.from ),
+				:from( $m.from ),
 				:to( $rhs.from ),
 				:content(
 					substr(
-						$p.Str,
+						$m.Str,
 						0,
-						$rhs.from - $p.from
+						$rhs.from - $m.from
 					)
 				)
 			)
@@ -578,6 +614,12 @@ class Perl6::WS does Token {
 		}
 	}
 
+	# Returns a WS token starting at the end of match $lhs, extending to
+	# the end of match $m.
+	#
+	# If there is no whitespace, returns () which is treated as a
+	# nonexistent array element by append().
+	#
 	method terminator( Mu $p, Mu $lhs ) {
 		if $lhs.to < $p.to {
 			self.bless(
@@ -598,12 +640,18 @@ class Perl6::WS does Token {
 		}
 	}
 
-	method header( Mu $p ) {
-		if $p.Str ~~ m{ ^ ( \s+ ) } {
+	# Returns a WS token starting at the beginning of match $m, extending
+	# to the first non-whitespace character (or the end of the match.)
+	#
+	# If there is no whitespace, returns () which is treated as a
+	# nonexistent array element by append().
+	#
+	method header( Mu $m ) {
+		if $m.Str ~~ m{ ^ ( \s+ ) } {
 			self.bless(
 				:factory-line-number( callframe(1).line ),
-				:from( $p.from ),
-				:to( $p.from + $0.Str.chars ),
+				:from( $m.from ),
+				:to( $m.from + $0.Str.chars ),
 				:content( $0.Str )
 			)
 		}
@@ -612,6 +660,12 @@ class Perl6::WS does Token {
 		}
 	}
 
+	# Returns a WS token starting at the start of the last WS in the match
+	# $m, extending to the end of the string.
+	#
+	# If there is no whitespace, returns () which is treated as a
+	# nonexistent array element by append().
+	#
 	method trailer( Mu $p ) {
 		if $p.Str ~~ m{ ( \s+ ) $ } {
 			self.bless(
@@ -626,6 +680,15 @@ class Perl6::WS does Token {
 		}
 	}
 
+	# Returns a sequence of (maybe WS), (,), (maybe WS) given the string
+	# $split-me. $offset is the offset from the start of the entire
+	# match, since we don't pass in the match object.
+	#
+	# XXX Really should be rethought.
+	#
+	# If there is no whitespace, returns () which is treated as a
+	# nonexistent array element by append().
+	#
 	method comma-separator( Int $offset, Str $split-me ) {
 		my Perl6::Element @child;
 		my Int $start = $offset;
@@ -649,56 +712,59 @@ class Perl6::WS does Token {
 		@child.flat
 	}
 
-	# Returns the semicolon and preceding whitespace at the end of a
-	# string if any.
+	# Returns (maybe WS), (;), (maybe WS) at thee end of match.
+	# XXX This can definitely be trimmed down.
 	#
-	method semicolon-terminator( Mu $p ) {
+	# If there is no whitespace, returns () which is treated as a
+	# nonexistent array element by append().
+	#
+	method semicolon-terminator( Mu $m ) {
 		my Perl6::Element @child;
-		if $p.Str ~~ m{ ( \s+ ) ( ';' ) ( \s+ ) $ } {
+		if $m.Str ~~ m{ ( \s+ ) ( ';' ) ( \s+ ) $ } {
 			@child =
 				self.bless(
 					:factory-line-number( callframe(1).line ),
-					:from( $p.to - $2.chars - $1.chars - $0.chars ),
-					:to( $p.to - $2.chars - $1.chars ),
+					:from( $m.to - $2.chars - $1.chars - $0.chars ),
+					:to( $m.to - $2.chars - $1.chars ),
 					:content( $0.Str )
 				),
 				Perl6::Semicolon.new(
 					:factory-line-number( callframe(1).line ),
-					:from( $p.to - $2.chars - $1.chars ),
-					:to( $p.to - $2.chars ),
+					:from( $m.to - $2.chars - $1.chars ),
+					:to( $m.to - $2.chars ),
 					:content( $1.Str )
 				)
 		}
-		elsif $p.Str ~~ m{ ( ';' ) ( \s+ ) $ } {
+		elsif $m.Str ~~ m{ ( ';' ) ( \s+ ) $ } {
 			@child =
 				Perl6::Semicolon.new(
 					:factory-line-number( callframe(1).line ),
-					:from( $p.to - $1.chars - $0.chars ),
-					:to( $p.to - $1.chars ),
+					:from( $m.to - $1.chars - $0.chars ),
+					:to( $m.to - $1.chars ),
 					:content( $0.Str )
 				)
 		}
-		elsif $p.Str ~~ m{ ( \s+ ) ( ';' ) $ } {
+		elsif $m.Str ~~ m{ ( \s+ ) ( ';' ) $ } {
 			@child =
 				self.bless(
 					:factory-line-number( callframe(1).line ),
-					:from( $p.to - $1.chars - $0.chars ),
-					:to( $p.to - $1.chars ),
+					:from( $m.to - $1.chars - $0.chars ),
+					:to( $m.to - $1.chars ),
 					:content( $0.Str )
 				),
 				Perl6::Semicolon.new(
 					:factory-line-number( callframe(1).line ),
-					:from( $p.to - $1.chars ),
-					:to( $p.to ),
+					:from( $m.to - $1.chars ),
+					:to( $m.to ),
 					:content( $1.Str )
 				)
 		}
-		elsif $p.Str ~~ m{ ( ';' ) $ } {
+		elsif $m.Str ~~ m{ ( ';' ) $ } {
 			@child =
 				Perl6::Semicolon.new(
 					:factory-line-number( callframe(1).line ),
-					:from( $p.to - $0.chars ),
-					:to( $p.to  ),
+					:from( $m.to - $0.chars ),
+					:to( $m.to  ),
 					:content( $0.Str )
 				)
 		}
@@ -708,6 +774,15 @@ class Perl6::WS does Token {
 		@child.flat
 	}
 
+	# Returns the header WS at the start of match $m, followed by
+	# whatever tokens are passed in.
+	#
+	# This really is a splice() operation, and may be rethought.
+	# Of course the real issue is wanting to keep immutability.
+	#
+	# If there is no whitespace, returns () which is treated as a
+	# nonexistent array element by append().
+	#
 	method with-header( Mu $p, *@element ) {
 		my Perl6::Element @_child;
 		@_child.append( Perl6::WS.header( $p ) );
@@ -715,6 +790,14 @@ class Perl6::WS does Token {
 		@_child
 	}
 
+	# Returns whatever tokens are passed in, followed by the trailer WS.
+	#
+	# This really is a splice() operation, and may be rethought.
+	# Of course the real issue is wanting to keep immutability.
+	#
+	# If there is no whitespace, returns () which is treated as a
+	# nonexistent array element by append().
+	#
 	method with-trailer( Mu $p, *@element ) {
 		my Perl6::Element @_child;
 		@_child.append( @element );
@@ -722,6 +805,14 @@ class Perl6::WS does Token {
 		@_child
 	}
 
+	# Returns the header WS at the start of $m, whatever tokens there
+	# happen to be in the string, then the trailer WS.
+	#
+	# Like its predecessor, it is just a splice() and will be rethought.
+	#
+	# If there is no whitespace, returns () which is treated as a
+	# nonexistent array element by append().
+	#
 	method with-header-trailer( Mu $p, *@element ) {
 		my Perl6::Element @_child;
 		@_child.append( Perl6::WS.header( $p ) );
@@ -732,6 +823,12 @@ class Perl6::WS does Token {
 		@_child
 	}
 
+	# Return tokes before a WS, the WS itself, and the tokens after a WS.
+	# Here $start and $end are the names of the hash keys inside $p.
+	#
+	# If there is no whitespace, returns () which is treated as a
+	# nonexistent array element by append().
+	#
 	multi method with-inter-ws( Mu $p,
 				Str $start, $start-list,
 				Str $end, $end-list ) {
@@ -741,6 +838,14 @@ class Perl6::WS does Token {
 		@_child.append( @( $end-list ) );
 		@_child
 	}
+
+	# Return tokes before a WS, the WS itself, and the tokens after a WS.
+	# Here $start and $end are the match objects at the start and end of
+	# the main match $p.
+	#
+	# If there is no whitespace, returns () which is treated as a
+	# nonexistent array element by append().
+	#
 	multi method with-inter-ws( Mu $p,
 				Mu $start, $start-list,
 				Mu $end, $end-list ) {
@@ -751,6 +856,12 @@ class Perl6::WS does Token {
 		@_child
 	}
 
+	# Returns a WS token consisting of the whitespace before the start of
+	# match object $lhs.
+	#
+	# If there is no whitespace, returns () which is treated as a
+	# nonexistent array element by append().
+	#
 	method before( Mu $p, Mu $lhs ) {
 		my $x = $p.Str.substr( 0, $lhs.from - $p.from );
 		if $x ~~ m{ ( \s+ ) $ } {
@@ -766,6 +877,12 @@ class Perl6::WS does Token {
 		}
 	}
 
+	# Returns a WS token consisting of the whitespace after the end of
+	# match object $lhs.
+	#
+	# If there is no whitespace, returns () which is treated as a
+	# nonexistent array element by append().
+	#
 	method after( Mu $p, Mu $lhs ) {
 		my $x = $p.Str.substr( $lhs.to - $p.from );
 		if $x ~~ m{ ^ ( \s+ ) } {
@@ -1314,7 +1431,15 @@ class Perl6::Tidy::Factory {
 	}
 
 	sub key-bounds( Mu $p ) {
-		say "{$p.from} {$p.to} [{substr($p.orig,$p.from,$p.to-$p.from)}]";
+		if $p.list {
+			say "-1 -1 *list*"
+		}
+		elsif $p.orig {
+			say "{$p.from} {$p.to} [{substr($p.orig,$p.from,$p.to-$p.from)}]"
+		}
+		else {
+			say "-1 -1 NIL"
+		}
 	}
 
 	method assert-Bool( Mu $parsed ) {
@@ -2523,7 +2648,21 @@ class Perl6::Tidy::Factory {
 			else {
 				@child = self.__Term( $p.list.[0] );
 				@child.append(
+					Perl6::WS.between-matches(
+						$p,
+						$p.list.[0],
+						$p.hash.<infix>
+					)
+				);
+				@child.append(
 					self._infix( $p.hash.<infix> )
+				);
+				@child.append(
+					Perl6::WS.between-matches(
+						$p,
+						$p.hash.<infix>,
+						$p.list.[1]
+					)
 				);
 				@child.append(
 					self.__Term( $p.list.[1] )
@@ -4807,6 +4946,8 @@ return True;
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash-keys( $_, [< statement >] ) {
+key-bounds $_;
+say $_.dump;
 				@child.append(
 					Perl6::WS.with-header-trailer(
 						$_,
@@ -5276,9 +5417,38 @@ return True;
 				}
 				elsif self.assert-hash-keys( $_,
 						[< EXPR >] ) {
+# XXX Aiyee.
+my $q = $_.hash.<EXPR>;
+if $q.list.[0] and
+   $q.hash.<infix> and
+   $q.list.[1] {
+	@child = self.__Term( $q.list.[0] );
+	@child.append(
+		Perl6::WS.between-matches(
+			$p, # This is why.
+			$q.list.[0],
+			$q.hash.<infix>
+		)
+	);
+	@child.append(
+		self._infix( $q.hash.<infix> )
+	);
+	@child.append(
+		Perl6::WS.between-matches(
+			$p, # This is why.
+			$q.hash.<infix>,
+			$q.list.[1]
+		)
+	);
+	@child.append(
+		self.__Term( $q.list.[1] )
+	)
+}
+else {
 					@child.append(
 						self._EXPR( $_.hash.<EXPR> )
 					)
+}
 				}
 				elsif self.assert-hash-keys( $_,
 						[< statement_control >] ) {

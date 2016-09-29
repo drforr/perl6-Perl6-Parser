@@ -33,6 +33,104 @@ Classes representing Perl 6 object code are currently in the same file as the ma
 
 =end DESCRIPTION
 
+=begin DEBUGGING
+
+Some notes on how I go about debugging various issues follow.
+
+Let's take the case of the following glitch: The terms C<$_> and C<0> don't show up in the fragment C<[$_, 0 .. 100]>, for various reasons, mostly because there's a branch that's either not being traversed, or simply a term has gone missing.
+
+The first thing is to break the offending bit of code out so it's easier to debug. The test file I make to do this (usually an existing test file I've got lying around) looks partially like this, with boilerplate stripped out:
+
+    my $source = Q:to[_END_];
+        my @a; @a[$_, 0 .. 100];
+    _END_
+    my $p = $pt.parse-source( $source );
+    say $p.dump;
+    my $tree = $pt.build-tree( $p );
+    say $pt.dump-tree($tree);
+    ok $pt.validate( $p ), Q{valid};
+    is $pt.format( $tree ), $source, Q{formatted};
+
+Already a few things might stand out. First, the code inside the here-doc doesn't actually do anything, it'll never print anything to the screen or do anything interesting. That's not the point at this stage in the game. At this point all I need is a syntactically valid bit of Perl 6 that has the constructs that reproduce the bug. I don't care what the code actually does in the real world.
+
+Second, I'm not doing anything that you as a user of the class would do. As a user of a the class, all you have to do is run the format() method, and it does what you want. I'm breaking things down into their component steps.
+
+(side note - This will probably have changed in detail since I wrote this text - Consult your nearest test file for examples of current usage.)
+
+Internally, the library takes sevaral steps to get to the nicely objectified tree that you see on your output. The two important steps in our case are the C<.parse-source( 'text goes here' )> method call, and C<.build-tree( $parse-tree )>.
+
+The C<.parse-source()> call returns a very raw L<NQPMatch> object, which is the Perl 6 internal we're trying to reparse into a more useful form. Most of the time you can call C<.dump()> on this object and get back a semi-useful object tree. On occasion this B<will> lock up, most often because you're trying to C<.dump()> a L<list> accessor, and that hasn't been implemented for NQPMatch. The actual C<list> accessor works, but the C<.dump()> call will not. A simple workaround is to call C<$p.list.[0].dump> on one of the list elements inside, and hope there is one.
+
+Again, these are NQP internals, and aren't quite as stable as the Perl 6 main support layer.
+
+Once you've got a dump of the offending area, it'll look something like this:
+
+        - postcircumfix: [0, $_ ... 100]
+          - semilist: 0, $_ ... 100
+            - statement: 1 matches
+              - EXPR: ...
+                - 0: ,
+                  - 0: 0
+                    - value: 0
+                    # ...
+                  - 1: $_
+                    - variable: $_
+                      - sigil: $
+                      # ...
+                  - infix: ,
+                    - sym: ,
+                    - O: <object>
+                  - OPER: ,
+
+The full thing will probably go on for a few hundred lines. Hope you've got scrollback, or just use tmux as I do.
+
+With this you can almost immediately jump to what appears to be the offending expression, albeit with a bit of interpretation. You'll see C<- 0: 0> and C<- 1: $_>, and these are exactly the two bits of syntax that have gone missing in our example. Down below you'll see C<- infix: ,> which is where the comma separator goes.
+
+We can combine these facts and reason that we have to search for the bit of code where we find an C<infix> operator and two list elements. The C<- 0> and C<- 1> bits tell us that we're dealing with two list elements, and the C<- infix> and C<- OPER> bits tell us that we've also got two hash keys to find.
+
+Look down in this file for a C<assert-hash-keys()> call attempting to assert the existence of exactly a C<infix> and C<OPER> tag. There may actually be other hash keys in this data structure, as C<.dump()> doesn't report unused hash keys; this caused me a deal of confusion.
+
+Eventually you'll find in the C<_EXPR()> method this bit of code: (due to change, obviously)
+
+    when self.assert-hash-keys( $_, [< infix OPER >] ) {
+    	@child.append(
+    		self._infix( $_.hash.<infix> )
+    	)
+    }
+
+You're most welcome to use the Perl 6 debugger, but what I just do is add a C<say 1;> statement just above the C<@child.append()> method call (and anywhere else I find a C<infix> and C<OPER> hash key hiding, because there are multiple places in the code that match an C<infix> and C<OPER> hash key) and rerun the test.
+
+Now that we've confirmed where the element C<should> be getting generated, but somehow isn't, we need to look at the actual text to verify that this is actually where the C<$_> and C<0> bits are being matched, and we can use another internal debugging tool to help out with that. Add these lines:
+
+    key-bounds $_.list.[0];
+    key-bounds $_.hash.<infix>;
+    key-bounds $_.list.[1];
+    key-bounds $_.hash.<OPER>;
+    key-bounds $_;
+
+And rerun your code. Or make the appropriate calls in the debugger, it's your funeral :) What this function does is return something that looks like this:
+
+    45 60 [[0, $_ ... 100]]
+
+The two numbers are the glyphs where the matched text starts and stops, respectively. The bit in between [..] (in this case seemingly doubled, but that's because the text is itself bracketed) is the actual text that's been matched. 
+
+So, by now you know what the text you're matching actually looks like, where it is in the string, and maybe eve have a rough idea of why what you're seeing isn't being displayedk
+
+With any luck you'll see that the code simply isn't adding the variables to the list that is being glommed onto the C<@child> array, and can add it.
+
+By convention, when you're dumping a C<- semilist:> match, you can always call C<self._semilist( $p.hash.<semilist> )> in order to get back the list of tokens generated by matching on the C<$p.hash.semilist> object. You might be wondering why I don't just subclass NQPMatch and add this as a generic multimethod or dispatch it in some other way.
+
+Well, the reason it's called C<NQP> is because it's Not Quite Perl 6, and like poor Rudolph, Perl 6 won't let NQP objects join in any subclasing or dispatching games, because it's Not Quite Perl. And yes, this leads to quite a bit of frustruation.
+
+Let's assume that you've found the C<$_.list.[0]> and C<< $_.hash.<infix> >> handlers, and now need to add whitespace between the C<$_> and C<0> elements in your generated code.
+
+Now we turn to the rather bewildering array of methods on the C<Perl6::WS> class. This profusion of methods is because of two things:
+
+    * Whitespace can be inside a token, before or after a token, or even simply not be there because it's actually inside the L<NQPMatch> object one or more levels up, so you're never B<quite> sure where your whitespace will be hiding.
+    * If each of the ~50 classes handled whitespace on its own, I'd have to track down each of the ~50 whitespace-generating methods in order to see which of the whitespace calls is being made. This way I can just look for L<Perl6::WS> and know that those are the only B<possible> places where a whitespace token could be being generated.
+
+=end DEBUGGING
+
 =begin METHODS
 
 =item tidy( Str $perl-code ) returns Perl6::Tidy::Root
