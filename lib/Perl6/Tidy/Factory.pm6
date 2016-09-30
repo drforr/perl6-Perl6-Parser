@@ -1595,10 +1595,12 @@ class Perl6::Tidy::Factory {
 		elsif self.assert-hash-keys( $p, [< EXPR >] ) {
 			@child.append(
 				self._EXPR( $p.hash.<EXPR> )
-			);
+			)
 		}
 		elsif self.assert-Int( $p ) {
-			$p.Int
+			@child.append(
+				$p.Int
+			)
 		}
 		elsif self.assert-Bool( $p ) {
 			die "Not implemented yet";
@@ -2643,13 +2645,13 @@ class Perl6::Tidy::Factory {
 					);
 					@child = self._EXPR( $p.list.[0] );
 					@child.append(
-						Perl6::WS.after-orig(
-							$p.list.[0]
-						)
-					);
-					@child.append(
 						Perl6::Operator::Infix.new(
-							$p, COMMA
+							:factory-line-number(
+								callframe(0).line
+							),
+							:from( @child[*-1].to ),
+							:to( @child[*-1].to + COMMA.chars ),
+							:content( COMMA )
 						)
 					);
 					@child.append(
@@ -2670,11 +2672,19 @@ class Perl6::Tidy::Factory {
 							$p, COMMA
 						)
 					);
-					@child.append(
-						Perl6::WS.before-orig(
-							$p.list.[2]
-						)
+					my $x = $p.orig.substr(
+						$p.hash.<infix>.to# + COMMA.chars
 					);
+					if $x ~~ m{ ^ ( \s+ ) } {
+						@child.append(
+							Perl6::WS.new(
+								:factory-line-number( callframe(1).line ),
+								:from( $p.hash.<infix>.to ),
+								:to( $p.hash.<infix>.to + $0.Str.chars ),
+								:content( $0.Str )
+							)
+						)
+					}
 					@child.append(
 						self._EXPR( $p.list.[2] )
 					)
@@ -4122,7 +4132,9 @@ return True;
 				)
 			}
 			when self.assert-hash-keys( $_, [< blockoid >] ) {
-				self._blockoid( $p.hash.<blockoid> )
+				@child.append(
+					self._blockoid( $p.hash.<blockoid> )
+				)
 			}
 			default {
 				say $_.hash.keys.gist;
