@@ -2740,6 +2740,12 @@ class Perl6::Tidy::Factory {
 				)
 			}
 		}
+		elsif self.assert-hash-keys( $p, [< args op >] ) {
+#			@child = self._op( $p.hash.<op> );
+			@child.append(
+				self._args( $p.hash.<args> )
+			)
+		}
 		elsif self.assert-hash-keys( $p, [< identifier args >] ) {
 			@child = self._identifier( $p.hash.<identifier> );
 			@child.append(
@@ -4840,6 +4846,7 @@ return True;
 				[< blockoid multisig >], [< trait >] ) {
 			my Perl6::Element @_child =
 				self._multisig( $p.hash.<multisig> );
+			# XXX broken
 			@child =
 				Perl6::Operator::Circumfix.new(
 					:factory-line-number( callframe(1).line ),

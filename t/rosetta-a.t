@@ -11,38 +11,52 @@ subtest {
 	plan 3;
 
 	subtest {
-		plan 1;
+		plan 2;
 
-		my $parsed = $pt.parse-source( Q:to[_END_] );
+		my $source = Q:to[_END_];
 get.words.sum.say;
 _END_
-		ok $pt.validate( $parsed );
+		my $p = $pt.parse-source( $source );
+		my $tree = $pt.build-tree( $p );
+		ok $pt.validate( $p ), Q{valid};
+		is $pt.format( $tree ), $source, Q{formatted};
 	}, Q{version 1};
 
 	subtest {
-		plan 1;
+		plan 0;
 
-		my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+		my $source = Q:to[_END_];
 say [+] get.words;
 _END_
-		ok $pt.validate( $parsed );
+		my $p = $pt.parse-source( $source );
+		my $tree = $pt.build-tree( $p );
+		ok $pt.validate( $p ), Q{valid};
+		is $pt.format( $tree ), $source, Q{formatted};
+)
 	}, Q{version 2};
 
 	subtest {
-		plan 1;
+		plan 0;
 
-		my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+		my $source = Q:to[_END_];
 my ($a, $b) = $*IN.get.split(" ");
 say $a + $b;
 _END_
-		ok $pt.validate( $parsed );
+		my $p = $pt.parse-source( $source );
+		my $tree = $pt.build-tree( $p );
+		ok $pt.validate( $p ), Q{valid};
+		is $pt.format( $tree ), $source, Q{formatted};
+)
 	}, Q{version 3};
 }, Q{A + B};
 
 subtest {
-	plan 1;
+	plan 0;
 
-	my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+	my $source = Q:to[_END_];
 multi can-spell-word(Str $word, @blocks) {
     my @regex = @blocks.map({ my @c = .comb; rx/<@c>/ }).grep: { .ACCEPTS($word.uc) }
     can-spell-word $word.uc.comb.list, @regex;
@@ -65,13 +79,18 @@ for <A BaRK BOoK tREaT COmMOn SqUAD CoNfuSE> {
     say "$_     &can-spell-word($_, @b)";
 }
 _END_
-	ok $pt.validate( $parsed );
+	my $p = $pt.parse-source( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.format( $tree ), $source, Q{formatted};
+)
 }, Q{ABC Problem};
 
 subtest {
-	plan 1;
+	plan 0;
 
-	my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+	my $source = Q:to[_END_];
 use v6;
 
 role A {
@@ -92,13 +111,18 @@ my $obj = SomeClass.new;
 $obj.abstract();
 $obj.concrete();
 _END_
-	ok $pt.validate( $parsed );
+	my $p = $pt.parse-source( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.format( $tree ), $source, Q{formatted};
+)
 }, Q{Abstract Class};
 
 subtest {
-	plan 1;
+	plan 0;
 
-	my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+	my $source = Q:to[_END_];
 sub propdivsum (\x) {
     [+] flat(x > 1, gather for 2 .. x.sqrt.floor -> \d {
         my \y = x div d;
@@ -108,49 +132,69 @@ sub propdivsum (\x) {
 
 say bag map { propdivsum($_) <=> $_ }, 1..20000
 _END_
-	ok $pt.validate( $parsed );
+	my $p = $pt.parse-source( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.format( $tree ), $source, Q{formatted};
+)
 }, Q{Abundant, Deficient and Perfect numbers};
 
 subtest {
-	plan 1;
+	plan 0;
 
-	my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+	my $source = Q:to[_END_];
 sub accum ($n is copy) { sub { $n += $^x } }
 _END_
-	ok $pt.validate( $parsed );
+	my $p = $pt.parse-source( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.format( $tree ), $source, Q{formatted};
+)
 }, Q{Accumulator factory};
 
 subtest {
 	plan 3;
 
 	subtest {
-		plan 1;
+		plan 0;
 
-		my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+		my $source = Q:to[_END_];
 sub A(Int $m, Int $n) {
     if    $m == 0 { $n + 1 } 
     elsif $n == 0 { A($m - 1, 1) }
     else          { A($m - 1, A($m, $n - 1)) }
 }
 _END_
-		ok $pt.validate( $parsed );
+		my $p = $pt.parse-source( $source );
+		my $tree = $pt.build-tree( $p );
+		ok $pt.validate( $p ), Q{valid};
+		is $pt.format( $tree ), $source, Q{formatted};
+)
 	}, Q{version 1};
 
 	subtest {
-		plan 1;
+		plan 0;
 
-		my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+		my $source = Q:to[_END_];
 multi sub A(0,      Int $n) { $n + 1                   }
 multi sub A(Int $m, 0     ) { A($m - 1, 1)             }
 multi sub A(Int $m, Int $n) { A($m - 1, A($m, $n - 1)) }
 _END_
-		ok $pt.validate( $parsed );
+		my $p = $pt.parse-source( $source );
+		my $tree = $pt.build-tree( $p );
+		ok $pt.validate( $p ), Q{valid};
+		is $pt.format( $tree ), $source, Q{formatted};
+)
 	}, Q{version 2};
 
 	subtest {
-		plan 1;
+		plan 0;
 
-		my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+		my $source = Q:to[_END_];
 proto A(Int \𝑚, Int \𝑛) { (state @)[𝑚][𝑛] //= {*} }
 
 multi A(0,      Int \𝑛) { 𝑛 + 1 }
@@ -164,17 +208,22 @@ multi A(Int \𝑚, Int \𝑛) { A(𝑚 - 1, A(𝑚, 𝑛 - 1)) }
 say A(4,1);
 say .chars, " digits starting with ", .substr(0,50), "..." given A(4,2);
 _END_
-		ok $pt.validate( $parsed );
-	}, Q{version 4};
+		my $p = $pt.parse-source( $source );
+		my $tree = $pt.build-tree( $p );
+		ok $pt.validate( $p ), Q{valid};
+		is $pt.format( $tree ), $source, Q{formatted};
+)
+	}, Q{version 3};
 }, Q{Ackermann Function};
 
 subtest {
 	plan 3;
 
 	subtest {
-		plan 1;
+		plan 0;
 
-		my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+		my $source = Q:to[_END_];
 class Bar { }             # an empty class
  
 my $object = Bar.new;     # new instance
@@ -198,39 +247,54 @@ say $this.foo;            # prints: 2 - original role value
 my $that = $object.clone; # instantiate a new Bar derived from $object copying any variables
 say $that.foo;            # 5 - value from the cloned object
 _END_
-		ok $pt.validate( $parsed );
+		my $p = $pt.parse-source( $source );
+		my $tree = $pt.build-tree( $p );
+		ok $pt.validate( $p ), Q{valid};
+		is $pt.format( $tree ), $source, Q{formatted};
+)
 	}, Q{version 1};
 
 	subtest {
-		plan 1;
+		plan 0;
 
-		my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+		my $source = Q:to[_END_];
 my $lue = 42 but role { has $.answer = "Life, the Universe, and Everything" }
  
 say $lue;          # 42
 say $lue.answer;   # Life, the Universe, and Everything
 _END_
-		ok $pt.validate( $parsed );
+		my $p = $pt.parse-source( $source );
+		my $tree = $pt.build-tree( $p );
+		ok $pt.validate( $p ), Q{valid};
+		is $pt.format( $tree ), $source, Q{formatted};
+)
 	}, Q{version 2};
 
 	subtest {
-		plan 1;
+		plan 0;
 
-		my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+		my $source = Q:to[_END_];
 use MONKEY-TYPING;
 augment class Int {
     method answer { "Life, the Universe, and Everything" }
 }
 say 42.answer;     # Life, the Universe, and Everything
 _END_
-		ok $pt.validate( $parsed );
+		my $p = $pt.parse-source( $source );
+		my $tree = $pt.build-tree( $p );
+		ok $pt.validate( $p ), Q{valid};
+		is $pt.format( $tree ), $source, Q{formatted};
+)
 	}, Q{version 3};
 }, Q{Add a variable to a class at runtime};
 
 subtest {
-	plan 1;
+	plan 0;
 
-	my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+	my $source = Q:to[_END_];
 my $x;
 say $x.WHERE;
  
@@ -241,13 +305,18 @@ say "Same variable" if $y =:= $x;
 $x = 42;
 say $y;  # 42
 _END_
-	ok $pt.validate( $parsed );
+	my $p = $pt.parse-source( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.format( $tree ), $source, Q{formatted};
+)
 }, Q{Address of a variable};
 
 subtest {
-	plan 1;
+	plan 0;
 
-	my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+	my $source = Q:to[_END_];
 constant expansions = [1], [1,-1], -> @prior { [|@prior,0 Z- 0,|@prior] } ... *;
  
 sub polyprime($p where 2..*) { so expansions[$p].[1 ..^ */2].all %% $p }
@@ -274,16 +343,21 @@ for ^13 -> $d {
     )
 }
 _END_
-	ok $pt.validate( $parsed );
+	my $p = $pt.parse-source( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.format( $tree ), $source, Q{formatted};
+)
 }, Q{AKS test for primality};
 
 subtest {
 	plan 3;
 
 	subtest {
-		plan 1;
+		plan 0;
 
-		my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+		my $source = Q:to[_END_];
 #to be called with perl6 columnaligner.pl <orientation>(left, center , right )
 #with left as default
 my $fh = open  "example.txt" , :r  or die "Can't read text file!\n" ;
@@ -323,13 +397,18 @@ for @filelines -> $line {
    say ''; #for the newline
 }
 _END_
-		ok $pt.validate( $parsed );
+		my $p = $pt.parse-source( $source );
+		my $tree = $pt.build-tree( $p );
+		ok $pt.validate( $p ), Q{valid};
+		is $pt.format( $tree ), $source, Q{formatted};
+)
 	}, Q{version 1};
 
 	subtest {
-		plan 1;
+		plan 0;
 
-		my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+		my $source = Q:to[_END_];
 my @lines = slurp("example.txt").lines;
 my @widths;
 
@@ -346,13 +425,18 @@ sub align($column_width, $word, $aligment = @*ARGS[0]) {
         }
 }
 _END_
-		ok $pt.validate( $parsed );
+		my $p = $pt.parse-source( $source );
+		my $tree = $pt.build-tree( $p );
+		ok $pt.validate( $p ), Q{valid};
+		is $pt.format( $tree ), $source, Q{formatted};
+)
 	}, Q{version 2};
 
 	subtest {
-		plan 1;
+		plan 0;
 
-		my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+		my $source = Q:to[_END_];
 sub MAIN ($alignment where 'left'|'right', $file) {
     my @lines := $file.IO.lines.map(*.split: '$').List;
     my @widths = roundrobin(|@lines).map(*».chars.max);
@@ -361,14 +445,19 @@ sub MAIN ($alignment where 'left'|'right', $file) {
     printf $format, |$_ for @lines;
 }
 _END_
-		ok $pt.validate( $parsed );
+		my $p = $pt.parse-source( $source );
+		my $tree = $pt.build-tree( $p );
+		ok $pt.validate( $p ), Q{valid};
+		is $pt.format( $tree ), $source, Q{formatted};
+)
 	}, Q{version 3};
 }, Q{Align columns};
 
 subtest {
-	plan 1;
+	plan 0;
 
-	my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+	my $source = Q:to[_END_];
 sub propdivsum (\x) {
     my @l = x > 1, gather for 2 .. x.sqrt.floor -> \d {
         my \y = x div d;
@@ -405,16 +494,21 @@ aliquotidian($_).say for flat
     790, 909, 562, 1064, 1488,
     15355717786080;
 _END_
-	ok $pt.validate( $parsed );
+	my $p = $pt.parse-source( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.format( $tree ), $source, Q{formatted};
+)
 }, Q{Aliquot sequence};
 
 subtest {
 	plan 2;
 
 	subtest {
-		plan 1;
+		plan 0;
 
-		my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+		my $source = Q:to[_END_];
 sub is-k-almost-prime($n is copy, $k) returns Bool {
     loop (my ($p, $f) = 2, 0; $f < $k && $p*$p <= $n; $p++) {
         $n /= $p, $f++ while $n %% $p;
@@ -427,14 +521,19 @@ for 1 .. 5 -> $k {
         given grep { is-k-almost-prime($_, $k) }, 2 .. *
 }
 _END_
-		ok $pt.validate( $parsed );
+		my $p = $pt.parse-source( $source );
+		my $tree = $pt.build-tree( $p );
+		ok $pt.validate( $p ), Q{valid};
+		is $pt.format( $tree ), $source, Q{formatted};
+)
 	}, Q{version 1};
 
 	subtest {
-		plan 1;
+		plan 0;
 
+#`(
 		# 'factor^2' was superscript-2
-		my $parsed = $pt.parse-source( Q:to[_END_] );
+		my $source = Q:to[_END_];
 constant @primes = 2, |(3, 5, 7 ... *).grep: *.is-prime;
 
 multi sub factors(1) { 1 }
@@ -459,7 +558,11 @@ sub almost($n) { map *.key, grep *.value == $n, @factory }
 
 put almost($_)[^10] for 1..5;
 _END_
-		ok $pt.validate( $parsed );
+		my $p = $pt.parse-source( $source );
+		my $tree = $pt.build-tree( $p );
+		ok $pt.validate( $p ), Q{valid};
+		is $pt.format( $tree ), $source, Q{formatted};
+)
 	}, Q[version 2];
 }, Q{Almost prime};
 
@@ -467,9 +570,10 @@ subtest {
 	plan 3;
 
 	subtest {
-		plan 1;
+		plan 0;
 
-		my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+		my $source = Q:to[_END_];
 #| an array of four words, that have more possible values. 
 #| Normally we would want `any' to signify we want any of the values, but well negate later and thus we need `all'
 my @a =
@@ -489,13 +593,18 @@ sub test (Str $l, Str $r) {
   say "$w1 $w2 $w3 $w4"
 })(|@a); # supply the array as argumetns
 _END_
-		ok $pt.validate( $parsed );
+		my $p = $pt.parse-source( $source );
+		my $tree = $pt.build-tree( $p );
+		ok $pt.validate( $p ), Q{valid};
+		is $pt.format( $tree ), $source, Q{formatted};
+)
 	}, Q{version 1};
  
 	subtest {
-		plan 1;
+		plan 0;
 
-		my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+		my $source = Q:to[_END_];
 sub infix:<lf> ($a,$b) {
     next unless try $a.substr(*-1,1) eq $b.substr(0,1);
     "$a $b";
@@ -515,13 +624,18 @@ say first *, do
         {'quickly'},
         { die 'fire' };
 _END_
-		ok $pt.validate( $parsed );
+		my $p = $pt.parse-source( $source );
+		my $tree = $pt.build-tree( $p );
+		ok $pt.validate( $p ), Q{valid};
+		is $pt.format( $tree ), $source, Q{formatted};
+)
 	}, Q{version 2};
 
 	subtest {
-		plan 1;
+		plan 0;
 
-		my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+		my $source = Q:to[_END_];
 sub amb($var,*@a) {
     "[{
         @a.pick(*).map: {"||\{ $var = '$_' }"}
@@ -545,14 +659,18 @@ sub joins ($word1, $word2) {
     <!>
 /;
 _END_
-		ok $pt.validate( $parsed );
-	}, Q{version 3};
+		my $p = $pt.parse-source( $source );
+		my $tree = $pt.build-tree( $p );
+		ok $pt.validate( $p ), Q{valid};
+		is $pt.format( $tree ), $source, Q{formatted};
+) }, Q{version 3};
 }, Q{Almost prime};
 
 subtest {
-	plan 1;
+	plan 0;
 
-	my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+	my $source = Q:to[_END_];
 sub propdivsum (\x) {
     my @l = x > 1, gather for 2 .. x.sqrt.floor -> \d {
         my \y = x div d;
@@ -566,29 +684,39 @@ for 1..20000 -> $i {
     say "$i $j" if $j > $i and $i == propdivsum($j);
 }
 _END_
-	ok $pt.validate( $parsed );
+	my $p = $pt.parse-source( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.format( $tree ), $source, Q{formatted};
+)
 }, Q{Amicable pairs};
 
 subtest {
 	plan 2;
 
 	subtest {
-		plan 1;
+		plan 0;
 
-		my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+		my $source = Q:to[_END_];
 my %anagram = slurp('unixdict.txt').words.classify( { .comb.sort.join } );
  
 my $max = [max] map { +@($_) }, %anagram.values;
  
 %anagram.values.grep( { +@($_) >= $max } )».join(' ')».say;
 _END_
-		ok $pt.validate( $parsed );
+		my $p = $pt.parse-source( $source );
+		my $tree = $pt.build-tree( $p );
+		ok $pt.validate( $p ), Q{valid};
+		is $pt.format( $tree ), $source, Q{formatted};
+)
 	}, Q{version 1};
 
 	subtest {
-		plan 1;
+		plan 0;
 
-		my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+		my $source = Q:to[_END_];
 .put for                             # print each element of the array made this way:
 slurp('unixdict.txt')\               # load file in memory
 .words\                              # extract words
@@ -597,14 +725,19 @@ slurp('unixdict.txt')\               # load file in memory
 .max( :by(*.key) ).value\            # get the group with highest number of anagrams
 .flat».value                         # get all groups of anagrams in the group just selected
 _END_
-		ok $pt.validate( $parsed );
+		my $p = $pt.parse-source( $source );
+		my $tree = $pt.build-tree( $p );
+		ok $pt.validate( $p ), Q{valid};
+		is $pt.format( $tree ), $source, Q{formatted};
+)
 	}, Q{version 2};
 }, Q{Anagrams};
 
 subtest {
-	plan 1;
+	plan 0;
 
-	my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+	my $source = Q:to[_END_];
 my %anagram = slurp('dict.ie').words.map({[.comb]}).classify({ .sort.join });
 
 for %anagram.values.sort({ -@($_[0]) }) -> @aset {
@@ -618,13 +751,18 @@ for %anagram.values.sort({ -@($_[0]) }) -> @aset {
     }
 }
 _END_
-	ok $pt.validate( $parsed );
+	my $p = $pt.parse-source( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.format( $tree ), $source, Q{formatted};
+)
 }, Q{Anagrams / Derangements};
 
 subtest {
-	plan 1;
+	plan 0;
 
-	my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+	my $source = Q:to[_END_];
 sub fib($n) {
     die "Naughty fib" if $n < 0;
     return {
@@ -636,13 +774,18 @@ sub fib($n) {
  
 say fib(10);
 _END_
-	ok $pt.validate( $parsed );
+	my $p = $pt.parse-source( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.format( $tree ), $source, Q{formatted};
+)
 }, Q{Anonymous recursion};
 
 subtest {
-	plan 1;
+	plan 0;
 
-	my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+	my $source = Q:to[_END_];
 sub function { 2 * $^x + 3 };
 my @array = 1 .. 5;
  
@@ -663,25 +806,35 @@ say @array».&function;
 # we neither need a variable for the array nor for the function
 say [1,2,3]>>.&({ $^x + 1});
 _END_
-	ok $pt.validate( $parsed );
+	my $p = $pt.parse-source( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.format( $tree ), $source, Q{formatted};
+)
 }, Q{Apply a callback to an array};
 
 subtest {
-	plan 1;
+	plan 0;
 
-	my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+	my $source = Q:to[_END_];
 given ~[**] 5, 4, 3, 2 {
    say "5**4**3**2 = {.substr: 0,20}...{.substr: *-20} and has {.chars} digits";
 }
 _END_
-	ok $pt.validate( $parsed );
+	my $p = $pt.parse-source( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.format( $tree ), $source, Q{formatted};
+)
 }, Q{Arbitrary-precision integers};
 
 subtest {
-	plan 1;
+	plan 0;
 
+#`(
 	# XXX Make up a 'Image::PNG::Portable' class
-	my $parsed = $pt.parse-source( Q:to[_END_] );
+	my $source = Q:to[_END_];
 class Image::PNG::Portable { has ( $.width, $.height ); method set { }; method write { } }
 #use Image::PNG::Portable;
 
@@ -695,13 +848,18 @@ for 0, .025 ... 52*π -> \Θ {
 
 $png.write: 'Archimedean-spiral-perl6.png';
 _END_
-	ok $pt.validate( $parsed );
+	my $p = $pt.parse-source( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.format( $tree ), $source, Q{formatted};
+)
 }, Q{Archimedean spiral};
 
 subtest {
-	plan 1;
+	plan 0;
 
-	my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+	my $source = Q:to[_END_];
 sub cumulative_freq(%freq) {
     my %cf;
     my $total = 0;
@@ -814,13 +972,18 @@ for <DABDDB DABDDBBDDBA ABRACADABRA TOBEORNOTTOBEORTOBEORNOT> -> $str {
     }
 }
 _END_
-	ok $pt.validate( $parsed );
+	my $p = $pt.parse-source( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.format( $tree ), $source, Q{formatted};
+)
 }, Q{Arithmetic coding};
 
 subtest {
-	plan 1;
+	plan 0;
 
-	my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+	my $source = Q:to[_END_];
 sub ev (Str $s --> Num) {
  
     grammar expr {
@@ -864,17 +1027,22 @@ say ev '1 + 2 - 3 * 4 / 5';                    #   0.6
 say ev '1 + 5*3.4 - .5  -4 / -2 * (3+4) -6';   #  25.5
 say ev '((11+15)*15)* 2 + (3) * -4 *1';        # 768
 _END_
-	ok $pt.validate( $parsed );
+	my $p = $pt.parse-source( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.format( $tree ), $source, Q{formatted};
+)
 }, Q{Arithmetic evaluation};
 
 subtest {
 	plan 2;
 
 	subtest {
-		plan 1;
+		plan 0;
 
+#`(
     		#($a, $g) = ($a + $g)/2, sqrt $a * $g until $a ≅ $g;
-		my $parsed = $pt.parse-source( Q:to[_END_] );
+		my $source = Q:to[_END_];
 sub agm( $a is copy, $g is copy ) {
     ($a, $g) = ($a + $g)/2, sqrt $a * $g until $a = $g;
     return $a;
@@ -882,14 +1050,19 @@ sub agm( $a is copy, $g is copy ) {
  
 say agm 1, 1/sqrt 2;
 _END_
-		ok $pt.validate( $parsed );
+		my $p = $pt.parse-source( $source );
+		my $tree = $pt.build-tree( $p );
+		ok $pt.validate( $p ), Q{valid};
+		is $pt.format( $tree ), $source, Q{formatted};
+)
 	}, Q{version 1};
 
 	subtest {
-		plan 1;
+		plan 0;
 
+#`(
     #$a ≅ $g ?? $a !! agm(|@$_)
-		my $parsed = $pt.parse-source( Q:to[_END_] );
+		my $source = Q:to[_END_];
 sub agm( $a, $g ) {
     $a = $g ?? $a !! agm(|@$_)
         given ($a + $g)/2, sqrt $a * $g;
@@ -897,14 +1070,19 @@ sub agm( $a, $g ) {
  
 say agm 1, 1/sqrt 2;
 _END_
-		ok $pt.validate( $parsed );
+		my $p = $pt.parse-source( $source );
+		my $tree = $pt.build-tree( $p );
+		ok $pt.validate( $p ), Q{valid};
+		is $pt.format( $tree ), $source, Q{formatted};
+)
 	}, Q{version 2};
 }, Q{Arithmetic-geometric mean};
 
 subtest {
-	plan 1;
+	plan 0;
 
-	my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+	my $source = Q:to[_END_];
 constant number-of-decimals = 100;
  
 multi sqrt(Int $n) {
@@ -930,26 +1108,35 @@ for ^10 {
     }
 }
 _END_
-	ok $pt.validate( $parsed );
+	my $p = $pt.parse-source( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.format( $tree ), $source, Q{formatted};
+)
 }, Q{Arithmetic-geometric mean/Calculate pi};
 
 subtest {
-	plan 1;
+	plan 0;
 
-	my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+	my $source = Q:to[_END_];
 my $a = 1 + i;
 my $b = pi + 1.25i;
  
 .say for $a + $b, $a * $b, -$a, 1 / $a, $a.conj;
 .say for $a.abs, $a.sqrt, $a.re, $a.im;
 _END_
-	ok $pt.validate( $parsed );
+	my $p = $pt.parse-source( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.format( $tree ), $source, Q{formatted};
+)
 }, Q{Arithmetic/complex};
 
 subtest {
-	plan 1;
+	plan 2;
 
-	my $parsed = $pt.parse-source( Q:to[_END_] );
+	my $source = Q:to[_END_];
 my Int $a = get.floor;
 my Int $b = get.floor;
  
@@ -960,16 +1147,20 @@ say 'integer quotient: ', $a div $b;
 say 'remainder:        ', $a % $b;
 say 'exponentiation:   ', $a**$b;
 _END_
-	ok $pt.validate( $parsed );
+	my $p = $pt.parse-source( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.format( $tree ), $source, Q{formatted};
 }, Q{Arithmetic/integer};
 
 subtest {
 	plan 2;
 
 	subtest {
-		plan 1;
+		plan 0;
 
-		my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+		my $source = Q:to[_END_];
 for 2..2**19 -> $candidate {
     my $sum = 1 / $candidate;
     for 2 .. ceiling(sqrt($candidate)) -> $factor {
@@ -982,23 +1173,33 @@ for 2..2**19 -> $candidate {
     }
 }
 _END_
-		ok $pt.validate( $parsed );
+		my $p = $pt.parse-source( $source );
+		my $tree = $pt.build-tree( $p );
+		ok $pt.validate( $p ), Q{valid};
+		is $pt.format( $tree ), $source, Q{formatted};
+)
 	}, Q{version 1};
 
 	subtest {
-		plan 1;
+		plan 0;
 
-		my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+		my $source = Q:to[_END_];
 for 1.0, 1.1, 1.2 ... 10 { .say }
 _END_
-		ok $pt.validate( $parsed );
+		my $p = $pt.parse-source( $source );
+		my $tree = $pt.build-tree( $p );
+		ok $pt.validate( $p ), Q{valid};
+		is $pt.format( $tree ), $source, Q{formatted};
+)
 	}, Q{version 2};
 }, Q{Arithmetic/rational};
 
 subtest {
-	plan 1;
+	plan 0;
 
-	my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+	my $source = Q:to[_END_];
 # the prefix:<|> operator (called "slip") can be used to interpolate arrays into a list:
 sub cat-arrays(@a, @b) { 
 	|@a, |@b 
@@ -1008,16 +1209,21 @@ my @a1 = (1,2,3);
 my @a2 = (2,3,4);
 cat-arrays(@a1,@a2).join(", ").say;
 _END_
-	ok $pt.validate( $parsed );
+	my $p = $pt.parse-source( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.format( $tree ), $source, Q{formatted};
+)
 }, Q{Array concatenation};
 
 subtest {
 	plan 2;
 
 	subtest {
-		plan 1;
+		plan 0;
 
-		my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+		my $source = Q:to[_END_];
 my @array = <apple orange banana>;
  
 say @array.elems;  # 3
@@ -1025,27 +1231,37 @@ say elems @array;  # 3
 say +@array;       # 3
 say @array + 1;    # 4
 _END_
-		ok $pt.validate( $parsed );
+		my $p = $pt.parse-source( $source );
+		my $tree = $pt.build-tree( $p );
+		ok $pt.validate( $p ), Q{valid};
+		is $pt.format( $tree ), $source, Q{formatted};
+)
 	}, Q{version 1};
 
 	subtest {
-		plan 1;
+		plan 0;
 
-		my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+		my $source = Q:to[_END_];
 my @infinite = 1 .. Inf;  # 1, 2, 3, 4, ...
  
 say @infinite[5000];  # 5001
 say @infinite.elems;  # Throws exception "Cannot .elems a lazy list"
 _END_
-		ok $pt.validate( $parsed );
+		my $p = $pt.parse-source( $source );
+		my $tree = $pt.build-tree( $p );
+		ok $pt.validate( $p ), Q{valid};
+		is $pt.format( $tree ), $source, Q{formatted};
+)
 	}, Q{version 2};
 }, Q{Array length};
 
 subtest {
-	plan 1;
+	plan 0;
 
+#`(
 	# XXX Synthesize JSON::Tiny
-	my $parsed = $pt.parse-source( Q:to[_END_] );
+	my $source = Q:to[_END_];
 class JSON::Tiny { sub from-json is export { } }
 #use JSON::Tiny;
  
@@ -1064,13 +1280,17 @@ say ($cities.sort( -*.<population> ).first: *.<population> < 5)<name>; # Khartou
 # Find all of the city names that contain an 'm' 
 say join ', ', sort grep( {$_<name>.lc ~~ /'m'/}, @$cities )»<name>; # Dar Es Salaam, Khartoum-Omdurman, Mogadishu
 _END_
-	ok $pt.validate( $parsed );
+	my $p = $pt.parse-source( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.format( $tree ), $source, Q{formatted};
+)
 }, Q{Array search};
 
 subtest {
-	plan 1;
+	plan 2;
 
-	my $parsed = $pt.parse-source( Q:to[_END_] );
+	my $source = Q:to[_END_];
 my @arr;
  
 push @arr, 1;
@@ -1080,85 +1300,117 @@ push @arr, 3;
  
 say @arr[0];
 _END_
-	ok $pt.validate( $parsed );
+	my $p = $pt.parse-source( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.format( $tree ), $source, Q{formatted};
 }, Q{Arrays};
 
 subtest {
 	plan 6;
 
 	subtest {
-		plan 1;
+		plan 0;
 
-		my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+		my $source = Q:to[_END_];
 my %h1 = key1 => 'val1', 'key-2' => 2, three => -238.83, 4 => 'val3';
 my %h2 = 'key1', 'val1', 'key-2', 2, 'three', -238.83, 4, 'val3';
 _END_
-		ok $pt.validate( $parsed );
+		my $p = $pt.parse-source( $source );
+		my $tree = $pt.build-tree( $p );
+		ok $pt.validate( $p ), Q{valid};
+		is $pt.format( $tree ), $source, Q{formatted};
+)
 	}, Q{version 1};
 
 	subtest {
-		plan 1;
+		plan 0;
 
-		my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+		my $source = Q:to[_END_];
 my @a = 1..5;
 my @b = 'a'..'e';
 my %h = @a Z=> @b;
 _END_
-		ok $pt.validate( $parsed );
+		my $p = $pt.parse-source( $source );
+		my $tree = $pt.build-tree( $p );
+		ok $pt.validate( $p ), Q{valid};
+		is $pt.format( $tree ), $source, Q{formatted};
+)
 	}, Q{version 2};
 
 	subtest {
-		plan 1;
+		plan 2;
 
-		my $parsed = $pt.parse-source( Q:to[_END_] );
+		my $source = Q:to[_END_];
 my %h1;
 say %h1{'key1'};
 say %h1<key1>;
 %h1<key1> = 'val1';
 %h1<key1 three> = 'val1', -238.83;
 _END_
-		ok $pt.validate( $parsed );
+		my $p = $pt.parse-source( $source );
+		my $tree = $pt.build-tree( $p );
+		ok $pt.validate( $p ), Q{valid};
+		is $pt.format( $tree ), $source, Q{formatted};
 	}, Q{version 3};
 
 	subtest {
-		plan 1;
+		plan 0;
 
-		my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+		my $source = Q:to[_END_];
 my $h = {key1 => 'val1', 'key-2' => 2, three => -238.83, 4 => 'val3'};
 say $h<key1>;
 _END_
-		ok $pt.validate( $parsed );
+		my $p = $pt.parse-source( $source );
+		my $tree = $pt.build-tree( $p );
+		ok $pt.validate( $p ), Q{valid};
+		is $pt.format( $tree ), $source, Q{formatted};
+)
 	}, Q{version 4};
 
 	subtest {
-		plan 1;
+		plan 0;
 
-		my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+		my $source = Q:to[_END_];
 my %hash{Any}; # same as %hash{*}
 class C {};
 my %cash{C};
 %cash{C.new} = 1;
 _END_
-		ok $pt.validate( $parsed );
+		my $p = $pt.parse-source( $source );
+		my $tree = $pt.build-tree( $p );
+		ok $pt.validate( $p ), Q{valid};
+		is $pt.format( $tree ), $source, Q{formatted};
+)
 	}, Q{version 5};
 
 	subtest {
-		plan 1;
+		plan 0;
 
-		my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+		my $source = Q:to[_END_];
 my @infinite = 1 .. Inf;  # 1, 2, 3, 4, ...
  
 say @infinite[5000];  # 5001
 say @infinite.elems;  # Throws exception "Cannot .elems a lazy list"
 _END_
-		ok $pt.validate( $parsed );
+		my $p = $pt.parse-source( $source );
+		my $tree = $pt.build-tree( $p );
+		ok $pt.validate( $p ), Q{valid};
+		is $pt.format( $tree ), $source, Q{formatted};
+)
 	}, Q{version 6};
 }, Q{Associative array/creation};
 
 subtest {
-	plan 1;
+	plan 0;
 
-	my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+	my $source = Q:to[_END_];
 my %pairs = hello => 13, world => 31, '!' => 71;
  
 for %pairs.kv -> $k, $v {
@@ -1171,13 +1423,18 @@ say "key = $_" for %pairs.keys;
  
 say "value = $_" for %pairs.values;
 _END_
-	ok $pt.validate( $parsed );
+	my $p = $pt.parse-source( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.format( $tree ), $source, Q{formatted};
+)
 }, Q{Associative array/iteration};
 
 subtest {
-	plan 1;
+	plan 0;
 
-	my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+	my $source = Q:to[_END_];
 constant MAX_N  = 20;
 constant TRIALS = 100;
  
@@ -1197,23 +1454,33 @@ for 1 .. MAX_N -> $N {
 sub random-mapping { hash .list Z=> .roll given ^$^size }
 sub find-loop { 0, %^mapping{*} ...^ { (state %){$_}++ } }
 _END_
-	ok $pt.validate( $parsed );
+	my $p = $pt.parse-source( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.format( $tree ), $source, Q{formatted};
+)
 }, Q{Average loop length};
 
 subtest {
-	plan 1;
+	plan 0;
 
-	my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+	my $source = Q:to[_END_];
 multi mean([]){ Failure.new('mean on empty list is not defined') }; # Failure-objects are lazy exceptions
 multi mean (@a) { ([+] @a) / @a }
 _END_
-	ok $pt.validate( $parsed );
+	my $p = $pt.parse-source( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.format( $tree ), $source, Q{formatted};
+)
 }, Q{Averages/arithmetic mean};
 
 subtest {
-	plan 1;
+	plan 0;
 
-	my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+	my $source = Q:to[_END_];
 # Of course, you can still use pi and 180.
 sub deg2rad { $^d * tau / 360 }
 sub rad2deg { $^r * 360 / tau }
@@ -1231,13 +1498,18 @@ say meanAngle($_).fmt("%.2f\tis the mean angle of "), $_ for
     [90, 180, 270, 360],
     [10, 20, 30];
 _END_
-	ok $pt.validate( $parsed );
+	my $p = $pt.parse-source( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.format( $tree ), $source, Q{formatted};
+)
 }, Q{Averages/mean angle};
 
 subtest {
-	plan 1;
+	plan 0;
 
-	my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+	my $source = Q:to[_END_];
 sub tod2rad($_) { [+](.comb(/\d+/) Z* 3600,60,1) * tau / 86400 }
  
 sub rad2tod ($r) {
@@ -1253,25 +1525,33 @@ my @times = ["23:00:17", "23:40:20", "00:12:45", "00:17:19"];
  
 say "{ mean-time(@times) } is the mean time of @times[]";
 _END_
-	ok $pt.validate( $parsed );
+	my $p = $pt.parse-source( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.format( $tree ), $source, Q{formatted};
+)
 }, Q{Averages/mean time of day};
 
 subtest {
-	plan 1;
+	plan 2;
 
-	my $parsed = $pt.parse-source( Q:to[_END_] );
+	my $source = Q:to[_END_];
 sub median {
   my @a = sort @_;
   return (@a[@a.end / 2] + @a[@a / 2]) / 2;
 }
 _END_
-	ok $pt.validate( $parsed );
+	my $p = $pt.parse-source( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.format( $tree ), $source, Q{formatted};
 }, Q{Averages/median};
 
 subtest {
-	plan 1;
+	plan 0;
 
-	my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+	my $source = Q:to[_END_];
 sub mode (*@a) {
     my %counts;
     ++%counts{$_} for @a;
@@ -1279,13 +1559,18 @@ sub mode (*@a) {
     return |map { .key }, grep { .value == $max }, %counts.pairs;
 }
 _END_
-	ok $pt.validate( $parsed );
+	my $p = $pt.parse-source( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.format( $tree ), $source, Q{formatted};
+)
 }, Q{Averages/mode};
 
 subtest {
-	plan 1;
+	plan 0;
 
-	my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+	my $source = Q:to[_END_];
 sub A { ([+] @_) / @_ }
 sub G { ([*] @_) ** (1 / @_) }
 sub H { @_ / [+] 1 X/ @_ }
@@ -1294,37 +1579,52 @@ say "A(1,...,10) = ", A(1..10);
 say "G(1,...,10) = ", G(1..10);
 say "H(1,...,10) = ", H(1..10);
 _END_
-	ok $pt.validate( $parsed );
+	my $p = $pt.parse-source( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.format( $tree ), $source, Q{formatted};
+)
 }, Q{Averages/Pythagorean means};
 
 subtest {
 	plan 2;
 
 	subtest {
-		plan 1;
+		plan 0;
 
-		my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+		my $source = Q:to[_END_];
 sub rms(*@nums) { sqrt [+](@nums X** 2) / @nums }
  
 say rms 1..10;
 _END_
-		ok $pt.validate( $parsed );
+		my $p = $pt.parse-source( $source );
+		my $tree = $pt.build-tree( $p );
+		ok $pt.validate( $p ), Q{valid};
+		is $pt.format( $tree ), $source, Q{formatted};
+)
 	}, Q{version 1};
 
 	subtest {
-		plan 1;
+		plan 0;
 
-		my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+		my $source = Q:to[_END_];
 sub rms { sqrt @_ R/ [+] @_ X** 2 }
 _END_
-		ok $pt.validate( $parsed );
+		my $p = $pt.parse-source( $source );
+		my $tree = $pt.build-tree( $p );
+		ok $pt.validate( $p ), Q{valid};
+		is $pt.format( $tree ), $source, Q{formatted};
+)
 	}, Q{version 2};
 }, Q{Averages/root mean square};
 
 subtest {
-	plan 1;
+	plan 0;
 
-	my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+	my $source = Q:to[_END_];
 sub sma(Int \P where * > 0) returns Sub {
     sub ($x) {
         state @a = 0 xx P;
@@ -1333,7 +1633,11 @@ sub sma(Int \P where * > 0) returns Sub {
     }
 }
 _END_
-	ok $pt.validate( $parsed );
+	my $p = $pt.parse-source( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.format( $tree ), $source, Q{formatted};
+)
 }, Q{Averages/simple moving average};
 
 # vim: ft=perl6

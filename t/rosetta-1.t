@@ -65,7 +65,10 @@ _END_
 }, Q{100 doors};
 
 subtest {
-	plan 1;
+	plan 0;
+
+#`(
+	my $source = Q:to[_END_];
 
 # The parser also recursively parses use'd classes, so since Term::termios might
 # not be present on all systems, stub it out.
@@ -185,13 +188,18 @@ loop {
     new() if $key eq 'n';
 }
 _END_
-	ok $pt.validate( $parsed );
+	my $p = $pt.parse-source( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.format( $tree ), $source, Q{formatted};
+)
 }, Q{15 Puzzle};
 
 subtest {
-	plan 1;
+	plan 0;
 
-	my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+	my $source = Q:to[_END_];
 class Term::termios { has $fd; method getattr {}; method unset_lflags { }; method unset_iflags { }; method setattr { } }
 #use Term::termios;
  
@@ -307,13 +315,18 @@ loop {
     last if $key eq 'q'; # (q)uit
 }
 _END_
-	ok $pt.validate( $parsed );
+	my $p = $pt.parse-source( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.format( $tree ), $source, Q{formatted};
+)
 }, Q{2048};
 
 subtest {
-	plan 1;
+	plan 0;
 
-	my $parsed = $pt.parse-source( Q:to[_END_] );
+#`[
+	my $source = Q:to[_END_];
 use MONKEY-SEE-NO-EVAL;
  
 say "Here are your digits: ", 
@@ -341,13 +354,18 @@ while my $exp = prompt "\n24? " {
     }
 }
 _END_
-	ok $pt.validate( $parsed );
+	my $p = $pt.parse-source( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.format( $tree ), $source, Q{formatted};
+]
 }, Q{24 game};
 
 subtest {
-	plan 1;
+	plan 0;
 
-	my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+	my $source = Q:to[_END_];
 use MONKEY-SEE-NO-EVAL;
 
 my @digits;
@@ -393,13 +411,18 @@ sub unique (@array) {
     %h.values;
 }
 _END_
-	ok $pt.validate( $parsed );
+	my $p = $pt.parse-source( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.format( $tree ), $source, Q{formatted};
+)
 }, Q{24 game/Solve};
 
 subtest {
-	plan 1;
+	plan 0;
 
-	my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+	my $source = Q:to[_END_];
 my @todo = $[1];
 my @sums = 0;
 sub nextrow($n) {
@@ -430,16 +453,21 @@ for 23, 123, 1234, 10000 {
     say $_, "\t", [+] nextrow($_)[];
 }
 _END_
-	ok $pt.validate( $parsed );
+	my $p = $pt.parse-source( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.format( $tree ), $source, Q{formatted};
+)
 }, Q{9 billion names of God};
 
 subtest {
 	plan 3;
 
 	subtest {
-		plan 1;
+		plan 0;
 
-		my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+		my $source = Q:to[_END_];
 my $b = 99;
 
 repeat while --$b {
@@ -454,13 +482,18 @@ sub b($b) {
     "$b bottle{'s' if $b != 1} of beer";
 }
 _END_
-		ok $pt.validate( $parsed );
+		my $p = $pt.parse-source( $source );
+		my $tree = $pt.build-tree( $p );
+		ok $pt.validate( $p ), Q{valid};
+		is $pt.format( $tree ), $source, Q{formatted};
+)
 	}, Q{version 1};
 
 	subtest {
-		plan 1;
+		plan 0;
 
-		my $parsed = $pt.parse-source( Q:to[_END_] );
+#`(
+		my $source = Q:to[_END_];
 for 99...1 -> $bottles {
     sing $bottles, :wall;
     sing $bottles;
@@ -480,7 +513,12 @@ sub sing(
     say "$quantity bottle$plural of beer$location"
 }
 _END_
+		my $p = $pt.parse-source( $source );
+		my $tree = $pt.build-tree( $p );
+		ok $pt.validate( $p ), Q{valid};
+		is $pt.format( $tree ), $source, Q{formatted};
 		ok $pt.validate( $parsed );
+)
 	}, Q{version 2};
 
 	subtest {
