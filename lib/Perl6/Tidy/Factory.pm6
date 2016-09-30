@@ -2714,13 +2714,19 @@ class Perl6::Tidy::Factory {
 				@child.append(
 					self._EXPR( $p.list.[0] )
 				);
-				@child.append(
-					Perl6::WS.between-matches(
-						$p,
-						$p.list.[0],
-						$p.hash.<infix>
-					)
+				my $x = $p.orig.substr(
+					@child[*-1].to
 				);
+				if $x ~~ m{ ^ ( \s+ ) } {
+					@child.append(
+						Perl6::WS.new(
+							:factory-line-number( callframe(1).line ),
+							:from( @child[*-1].to ),
+							:to( @child[*-1].to + $0.chars ),
+							:content( $0.Str )
+						)
+					)
+				}
 				@child.append(
 					self._infix( $p.hash.<infix> )
 				);
