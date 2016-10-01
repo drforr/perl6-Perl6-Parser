@@ -1603,7 +1603,9 @@ class Perl6::Tidy::Factory {
 			)
 		}
 		elsif self.assert-Bool( $p ) {
-			die "Not implemented yet";
+			@child.append(
+				$p.Bool
+			)
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -1639,10 +1641,10 @@ class Perl6::Tidy::Factory {
 				self._EXPR( $_.hash.<EXPR> );
 			}
 			when $_.Str {
-				die "Not implemented yet"
+				$_.Str
 			}
 			when $_.Bool {
-				die "Not implemented yet"
+				$_.Bool
 			}
 			default {
 				say $_.Int if $_.Int;
@@ -1675,7 +1677,7 @@ class Perl6::Tidy::Factory {
 				self._codeblock( $_.hash.<codeblock> )
 			}
 			when $_.Str {
-				die "Not implemented yet";
+				$_.Str
 			}
 			default {
 				say $_.hash.keys.gist;
@@ -1745,7 +1747,7 @@ class Perl6::Tidy::Factory {
 				self._sym( $_.hash.<sym> )
 			}
 			when $_.Str {
-				die "Not implemented yet";
+				$_.Str
 			}
 			default {
 				say $_.hash.keys.gist;
@@ -2343,7 +2345,7 @@ class Perl6::Tidy::Factory {
 				self._longname( $_.hash.<longname> )
 			}
 			when $_.Str {
-				die "Not implemented yet"
+				$_.Str
 			}
 			default {
 				say $_.hash.keys.gist;
@@ -2933,7 +2935,7 @@ class Perl6::Tidy::Factory {
 		if $p.list {
 			for $p.list {
 				if self.assert-Str( $_ ) {
-					die "Not implemented yet"
+					$_.Str
 				}
 				else {
 					say $_.hash.keys.gist;
@@ -3461,7 +3463,7 @@ return True;
 				Perl6::Bareword.from-match( $_ )
 			}
 			when self.assert-hash-keys( $_, [< subshortname >] ) {
-				die "Not implemented yet"
+				self._subshortname( $_.hash.<subshortname> )
 			}
 			when self.assert-hash-keys( $_, [< morename >] ) {
 				Perl6::PackageName.from-match( $_ )
@@ -3483,7 +3485,7 @@ return True;
 				self._termseq( $_.hash.<termseq> )
 			}
 			when $_.Bool {
-				die "Not implemented yet"
+				$_.Bool
 			}
 			default {
 				say $_.hash.keys.gist;
@@ -3590,7 +3592,7 @@ return True;
 				self._integer( $_.hash.<integer> )
 			}
 			when $_.Bool {
-				die "Not implemented yet"
+				$_.Bool
 			}
 			default {
 				say $_.hash.keys.gist;
@@ -4516,7 +4518,11 @@ return True;
 			for $p.list {
 				if self.assert-hash-keys( $_,
 						[< identifier >] ) {
-					die "Not implemented yet"
+					@child.append(
+						self._identifier(
+							$_.hash.<identifier>
+						)
+					)
 				}
 				else {
 					say $_.hash.keys.gist;
@@ -5987,7 +5993,7 @@ else {
 		if $p.list {
 			for $p.list {
 				if $_.Str {
-					die "Not implemented yet"
+					@child.append( $_.Str )
 				}
 				else {
 					say $_.hash.keys.gist;
@@ -5999,10 +6005,10 @@ else {
 			@child = Perl6::Bareword.from-match( $p )
 		}
 		elsif $p.Bool and $p.Str eq '+' {
-			die "Not implemented yet"
+			@child = Perl6::Bareword.from-match( $p )
 		}
 		elsif $p.Bool and $p.Str eq '' {
-			die "Not implemented yet"
+			@child = Perl6::Bareword.from-match( $p )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -6692,7 +6698,7 @@ else {
 		if $p.list {
 			for $p.list {
 				if self.assert-Int( $_ ) {
-					die "Not implemented yet";
+					@child.append( $_.Int )
 				}
 				else {
 					say $_.hash.keys.gist;
