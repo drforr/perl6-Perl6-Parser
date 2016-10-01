@@ -68,11 +68,9 @@ subtest {
 	plan 0;
 
 #`(
-	my $source = Q:to[_END_];
-
 # The parser also recursively parses use'd classes, so since Term::termios might
 # not be present on all systems, stub it out.
-	my $parsed = $pt.parse-source( Q:to[_END_] );
+	my $source = Q:to[_END_];
 class Term::termios { has $fd; method getattr {}; method unset_lflags { }; method unset_iflags { }; method setattr { } }
 #use Term::termios;
 
@@ -517,7 +515,6 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
-		ok $pt.validate( $parsed );
 )
 	}, Q{version 2};
 
@@ -525,27 +522,19 @@ _END_
 		plan 0;
 
 #`(
-#my @quantities = flat (99 ... 1), 'No more', 99;
-#my @bottles = flat 'bottles' xx 98, 'bottle', 'bottles' xx 2;
-#my @actions = flat 'Take one down, pass it around' xx 99,
-#              'Go to the store, buy some more';
-#
-#for @quantities Z @bottles Z @actions Z
-#    @quantities[1 .. *] Z @bottles[1 .. *]
-#    -> ($a, $b, $c, $d, $e) {
-#    say "$a $b of beer on the wall";
-#    say "$a $b of beer";
-#    say $c;
-#    say "$d $e of beer on the wall\n";
-#}
 		my $source = Q:to[_END_];
 my @quantities = flat (99 ... 1), 'No more', 99;
 my @bottles = flat 'bottles' xx 98, 'bottle', 'bottles' xx 2;
 my @actions = flat 'Take one down, pass it around' xx 99,
               'Go to the store, buy some more';
+
 for @quantities Z @bottles Z @actions Z
     @quantities[1 .. *] Z @bottles[1 .. *]
     -> ($a, $b, $c, $d, $e) {
+    say "$a $b of beer on the wall";
+    say "$a $b of beer";
+    say $c;
+    say "$d $e of beer on the wall\n";
 }
 _END_
 		my $p = $pt.parse-source( $source );

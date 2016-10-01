@@ -1590,7 +1590,27 @@ class Perl6::Tidy::Factory {
 		elsif self.assert-hash-keys( $p,
 				[< deftermnow initializer term_init >],
 				[< trait >] ) {
-			die "Not implemented yet";
+			@child = self._deftermnow( $p.hash.<deftermnow> );
+			@child.append(
+				Perl6::WS.between-matches(
+					$p,
+					'deftermnow',
+					'initializer'
+				)
+			);
+			@child.append(
+				self._initializer( $p.hash.<initializer> )
+			);
+			@child.append(
+				Perl6::WS.between-matches(
+					$p,
+					'initializer',
+					'term_init'
+				)
+			);
+			@child.append(
+				self._term_init( $p.hash.<term_init> )
+			)
 		}
 		elsif self.assert-hash-keys( $p, [< EXPR >] ) {
 			@child.append(
@@ -1855,7 +1875,27 @@ class Perl6::Tidy::Factory {
 				if self.assert-hash-keys( $_,
 						[< identifier name sign >],
 						[< charspec >] ) {
-					die "Not implemented yet"
+					@child = self._identifier( $_.hash.<identifier> );
+					@child.append(
+						Perl6::WS.between-matches(
+							$_,
+							'identifier',
+							'name'
+						)
+					);
+					@child.append(
+						self._name( $_.hash.<name> )
+					);
+					@child.append(
+						Perl6::WS.between-matches(
+							$_,
+							'name',
+							'sign'
+						)
+					);
+					@child.append(
+						self._sign( $_.hash.<sign> )
+					)
 				}
 				elsif self.assert-hash-keys( $_,
 						[< sign charspec >] ) {
@@ -2239,12 +2279,52 @@ class Perl6::Tidy::Factory {
 		if self.assert-hash-keys( $p,
 				[< deftermnow initializer term_init >],
 				[< trait >] ) {
-			die "Not implemented yet";
+			@child = self._deftermnow( $p.hash.<deftermnow> );
+			@child.append(
+				Perl6::WS.between-matches(
+					$p,
+					'deftermnow',
+					'initializer'
+				)
+			);
+			@child.append(
+				self._initializer( $p.hash.<initializer> )
+			);
+			@child.append(
+				Perl6::WS.between-matches(
+					$p,
+					'initializer',
+					'term_init'
+				)
+			);
+			@child.append(
+				self._term_init( $p.hash.<term_init> )
+			)
 		}
 		elsif self.assert-hash-keys( $p,
 				[< deftermnow initializer signature >],
 				[< trait >] ) {
-			die "Not implemented yet";
+			@child = self._deftermnow( $p.hash.<deftermnow> );
+			@child.append(
+				Perl6::WS.between-matches(
+					$p,
+					'deftermnow',
+					'initializer'
+				)
+			);
+			@child.append(
+				self._initializer( $p.hash.<initializer> )
+			);
+			@child.append(
+				Perl6::WS.between-matches(
+					$p,
+					'initializer',
+					'signature'
+				)
+			);
+			@child.append(
+				self._signature( $p.hash.<signature> )
+			)
 		}
 		elsif self.assert-hash-keys( $p,
 				[< initializer signature >], [< trait >] ) {
@@ -3691,32 +3771,66 @@ return True;
 	}
 
 	method _name( Mu $p ) {
+		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash-keys( $_,
 				[< param_var type_constraint quant >],
 				[< default_value modifier trait
 				   post_constraint >] ) {
-				die "Not implemented yet"
+				@child = self._param_var( $_.hash.<param_var> );
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						'param_var',
+						'type_constraint'
+					)
+				);
+				@child.append(
+					self._type_constraint(
+						$_.hash.<type_constraint>
+					)
+				);
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						'type_constraint',
+						'quant'
+					)
+				);
+				@child.append(
+					self._quant( $_.hash.<quant> )
+				)
 			}
 			when self.assert-hash-keys( $_,
 				[< identifier >], [< morename >] ) {
-				Perl6::Bareword.from-match( $_ )
+				@child.append(
+					Perl6::Bareword.from-match( $_ )
+				)
 			}
 			when self.assert-hash-keys( $_, [< subshortname >] ) {
-				self._subshortname( $_.hash.<subshortname> )
+				@child.append(
+					self._subshortname(
+						$_.hash.<subshortname>
+					)
+				)
 			}
 			when self.assert-hash-keys( $_, [< morename >] ) {
-				Perl6::PackageName.from-match( $_ )
+				@child.append(
+					Perl6::PackageName.from-match( $_ )
+				)
 				#self._morename( $_.hash.<morename> )
 			}
 			when self.assert-Str( $_ ) {
-				Perl6::Bareword.from-match( $_ )
+				@child.append(
+					Perl6::Bareword.from-match( $_ )
+				)
 			}
 			default {
 				say $_.hash.keys.gist;
 				warn "Unhandled case"
 			}
 		}
+		@child
 	}
 
 	method _nibble( Mu $p ) {
@@ -3766,21 +3880,159 @@ return True;
 				if self.assert-hash-keys( $_,
 					[< sigmaybe sigfinal
 					   quantifier atom >] ) {
-					die "Not implemented yet"
+					@child = self._sigmaybe(
+						$_.hash.<sigmaybe>
+					);
+					@child.append(
+						Perl6::WS.between-matches(
+							$_,
+							'sigmaybe',
+							'sigfinal'
+						)
+					);
+					@child.append(
+						self._sigfinal(
+							$_.hash.<sigfinal>
+						)
+					);
+					@child.append(
+						Perl6::WS.between-matches(
+							$_,
+							'sigfinal',
+							'quantifier'
+						)
+					);
+					@child.append(
+						self._quantifier(
+							$_.hash.<quantifier>
+						)
+					);
+					@child.append(
+						Perl6::WS.between-matches(
+							$_,
+							'quantifier',
+							'atom'
+						)
+					);
+					@child.append(
+						self._atom(
+							$_.hash.<atom>
+						)
+					)
 				}
 				elsif self.assert-hash-keys( $_,
 					[< sigfinal quantifier
 					   separator atom >] ) {
-					die "Not implemented yet"
+					@child = self._sigfinal(
+						$_.hash.<sigfinal>
+					);
+					@child.append(
+						Perl6::WS.between-matches(
+							$_,
+							'sigfinal',
+							'quantifier'
+						)
+					);
+					@child.append(
+						self._quantifier(
+							$_.hash.<quantifier>
+						)
+					);
+					@child.append(
+						Perl6::WS.between-matches(
+							$_,
+							'quantifier',
+							'separator'
+						)
+					);
+					@child.append(
+						self._separator(
+							$_.hash.<separator>
+						)
+					);
+					@child.append(
+						Perl6::WS.between-matches(
+							$_,
+							'separator',
+							'atom'
+						)
+					);
+					@child.append(
+						self._atom(
+							$_.hash.<atom>
+						)
+					)
 				}
 				elsif self.assert-hash-keys( $_,
 					[< sigmaybe sigfinal
 					   separator atom >] ) {
-					die "Not implemented yet"
+					@child = self._sigmaybe(
+						$_.hash.<sigmaybe>
+					);
+					@child.append(
+						Perl6::WS.between-matches(
+							$_,
+							'sigmaybe',
+							'sigfinal'
+						)
+					);
+					@child.append(
+						self._sigfinal(
+							$_.hash.<sigfinal>
+						)
+					);
+					@child.append(
+						Perl6::WS.between-matches(
+							$_,
+							'sigfinal',
+							'separator'
+						)
+					);
+					@child.append(
+						self._separator(
+							$_.hash.<separator>
+						)
+					);
+					@child.append(
+						Perl6::WS.between-matches(
+							$_,
+							'separator',
+							'atom'
+						)
+					);
+					@child.append(
+						self._atom(
+							$_.hash.<atom>
+						)
+					)
 				}
 				elsif self.assert-hash-keys( $_,
 					[< atom sigfinal quantifier >] ) {
-					die "Not implemented yet"
+					@child = self._atom( $_.hash.<atom> );
+					@child.append(
+						Perl6::WS.between-matches(
+							$_,
+							'atom',
+							'sigfinal'
+						)
+					);
+					@child.append(
+						self._sigfinal(
+							$_.hash.<sigfinal>
+						)
+					);
+					@child.append(
+						Perl6::WS.between-matches(
+							$_,
+							'sigfinal',
+							'quantifier'
+						)
+					);
+					@child.append(
+						self._quantifier(
+							$_.hash.<quantifier>
+					 	)
+					)
 				}
 				elsif self.assert-hash-keys( $_,
 					[< atom >], [< sigfinal >] ) {
@@ -3908,7 +4160,23 @@ return True;
 		given $p {
 			when self.assert-hash-keys( $_,
 				     [< infix_prefix_meta_operator OPER >] ) {
-				die "Not implemented yet"
+				@child.append(
+					self._infix_prefix_meta_operator(
+						$_.hash.<infix_prefix_meta_operator>
+					)
+				);
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						'infix_prefix_meta_operator',
+						'OPER'
+					)
+				);
+				@child.append(
+					self._OPER(
+						$_.hash.<OPER>
+					)
+				)
 			}
 			when self.assert-hash-keys( $_, [< infix OPER >] ) {
 				@child = self._infix(
@@ -3939,7 +4207,31 @@ return True;
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash-keys( $_, [< sym infixish O >] ) {
-				die "Not implemented yet"
+				@child = self._sym( $_.hash.<sym> );
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						'sym',
+						'infixish'
+					)
+				);
+				@child.append(
+					self._infixish(
+						$_.hash.<infixish>
+					)
+				);
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						'infixish',
+						'O'
+					)
+				);
+				@child.append(
+					self._O(
+						$_.hash.<O>
+					)
+				)
 			}
 			when self.assert-hash-keys( $_, [< sym dottyop O >] ) {
 				@child.append(
@@ -4694,7 +4986,31 @@ return True;
 		given $p {
 			when self.assert-hash-keys( $_,
 					[< sym postcircumfix O >] ) {
-				die "Not implemented yet"
+				@child = self._sym( $_.hash.<sym> );
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						'sym',
+						'postcircumfix'
+					)
+				);
+				@child.append(
+					self._postcircumfix(
+						$_.hash.<postcircumfix>
+					)
+				);
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						'postcircumfix',
+						'O'
+					)
+				);
+				@child.append(
+					self._O(
+						$_.hash.<O>
+					)
+				)
 			}
 			when self.assert-hash-keys( $_,
 					[< sym postcircumfix >], [< O >] ) {
@@ -4793,7 +5109,45 @@ return True;
 		given $p {
 			when self.assert-hash-keys( $_,
 					[< sym min max backmod >] ) {
-				die "Not implemented yet"
+				@child = self._sym(
+					$_.hash.<sym>
+				);
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						'sym',
+						'min'
+					)
+				);
+				@child.append(
+					self._min(
+						$_.hash.<min>
+					)
+				);
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						'min',
+						'max'
+					)
+				);
+				@child.append(
+					self._max(
+						$_.hash.<max>
+					)
+				);
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						'max',
+						'backmod'
+					)
+				);
+				@child.append(
+					self._backmod(
+						$_.hash.<backmod>
+					)
+				)
 			}
 			when self.assert-hash-keys( $_, [< sym backmod >] ) {
 				@child = self._sym(
@@ -4869,11 +5223,60 @@ return True;
 	# quasi
 	#
 	method _quote( Mu $p ) {
+		my Perl6::Element @child;
 		if self.assert-hash-keys( $p, [< sym quibble rx_adverbs >] ) {
-			die "Not implemented yet"
+			@child = self._sym( $_.hash.<sym> );
+			@child.append(
+				Perl6::WS.between-matches(
+					$_,
+					'sym',
+					'quibble'
+				)
+			);
+			@child.append(
+				self._quibble(
+					$_.hash.<quibble>
+				)
+			);
+			@child.append(
+				Perl6::WS.between-matches(
+					$_,
+					'quibble',
+					'rx_adverbs'
+				)
+			);
+			@child.append(
+				self._rx_adverbs(
+					$_.hash.<rx_adverbs>
+				)
+			)
 		}
 		elsif self.assert-hash-keys( $p, [< sym rx_adverbs sibble >] ) {
-			die "Not implemented yet"
+			@child = self._sym( $_.hash.<sym> );
+			@child.append(
+				Perl6::WS.between-matches(
+					$_,
+					'sym',
+					'quibble'
+				)
+			);
+			@child.append(
+				self._sibble(
+					$_.hash.<sibble>
+				)
+			);
+			@child.append(
+				Perl6::WS.between-matches(
+					$_,
+					'sibble',
+					'rx_adverbs'
+				)
+			);
+			@child.append(
+				self._rx_adverbs(
+					$_.hash.<rx_adverbs>
+				)
+			)
 		}
 		elsif self.assert-hash-keys( $p, [< quibble >] ) {
 			my $leader = $p.Str.substr(
@@ -4899,31 +5302,39 @@ return True;
 			@adverb.append( ':q' ) if $has-q;
 			@adverb.append( ':to' ) if $has-to;
 
-			Perl6::String.new(
-				:factory-line-number( callframe(1).line ),
-				:from( $p.from ),
-				:to( $p.to ),
-				:delimiter( $0.Str, $trailer ),
-				:adverb( @adverb ),
-				:content( $content )
+			@child.append(
+				Perl6::String.new(
+					:factory-line-number( callframe(1).line ),
+					:from( $p.from ),
+					:to( $p.to ),
+					:delimiter( $0.Str, $trailer ),
+					:adverb( @adverb ),
+					:content( $content )
+				)
 			)
 		}
 		elsif self.assert-hash-keys( $p, [< nibble >] ) {
 			$p.Str ~~ m{ ^ ( . ) .*? ( . ) $ };
 			given $0.Str {
 				when Q{'} {
-					Perl6::String::Quote::Single.from-match(
-						$p
+					@child.append(
+						Perl6::String::Quote::Single.from-match(
+							$p
+						)
 					)
 				}
 				when Q{"} {
-					Perl6::String::Quote::Double.from-match(
-						$p
+					@child.append(
+						Perl6::String::Quote::Double.from-match(
+							$p
+						)
 					)
 				}
 				when Q{/} {
 					# XXX Need to pass delimiters in
-					Perl6::Regex.from-match( $p )
+					@child.append(
+						Perl6::Regex.from-match( $p )
+					)
 				}
 				default {
 					# XXX
@@ -4935,6 +5346,7 @@ return True;
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
 		}
+		@child
 	}
 
 	method _quotepair( Mu $p ) {
@@ -4959,7 +5371,31 @@ return True;
 		elsif self.assert-hash-keys( $p,
 				[< circumfix bracket radix >],
 				[< exp base >] ) {
-			die "Not implemented yet"
+			@child = self._circumfix( $_.hash.<circumfix> );
+			@child.append(
+				Perl6::WS.between-matches(
+					$_,
+					'circumfix',
+					'bracket'
+				)
+			);
+			@child.append(
+				self._bracket(
+					$_.hash.<bracket>
+				)
+			);
+			@child.append(
+				Perl6::WS.between-matches(
+					$_,
+					'bracket',
+					'radix'
+				)
+			);
+			@child.append(
+				self._radix(
+					$_.hash.<radix>
+				)
+			)
 		}
 		elsif self.assert-hash-keys( $p, [< identifier >] ) {
 			@child = self._identifier( $p.hash.<identifier> )
@@ -5492,17 +5928,35 @@ return True;
 	}
 
 	method _separator( Mu $p ) {
+		my Perl6::Element @child;
 		warn "Untested method";
 		given $p {
 			when self.assert-hash-keys( $_,
 					[< septype quantified_atom >] ) {
-				die "Not implemented yet"
+				@child.append(
+					self._septype(
+						$_.hash.<septype>
+					)
+				);
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						'septype',
+						'quantified_atom'
+					)
+				);
+				@child.append(
+					self._quantified_atom(
+						$_.hash.<quantified_atom>
+					)
+				)
 			}
 			default {
 				say $_.hash.keys.gist;
 				warn "Unhandled case"
 			}
 		}
+		@child
 	}
 
 	method _septype( Mu $p ) {
@@ -5530,17 +5984,43 @@ return True;
 	}
 
 	method _sibble( Mu $p ) {
+		my Perl6::Element @child;
 		warn "Untested method";
 		given $p {
 			if self.assert-hash-keys( $_,
 					[< right babble left >] ) {
-				die "Not implemented yet"
+				@child = self._right( $_.hash.<right> );
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						'right',
+						'babble'
+					)
+				);
+				@child.append(
+					self._babble(
+						$_.hash.<babble>
+					)
+				);
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						'babble',
+						'left'
+					)
+				);
+				@child.append(
+					self._left(
+						$_.hash.<left>
+					)
+				)
 			}
 			else {
 				say $_.hash.keys.gist;
 				warn "Unhandled case"
 			}
 		}
+		@child
 	}
 
 	method _sigfinal( Mu $p ) {
@@ -5885,26 +6365,210 @@ return True;
 		given $p {
 			if self.assert-hash-keys( $_,
 					[< block sym e1 e2 e3 >] ) {
-				die "Not implemented yet"
+				@child = self._block(
+					$_.hash.<block>
+				);
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						'block',
+						'sym'
+					)
+				);
+				@child.append(
+					self._sym(
+						$_.hash.<sym>
+					)
+				);
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						'sym',
+						'e1'
+					)
+				);
+				@child.append(
+					self._e1(
+						$_.hash.<e1>
+					)
+				);
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						'e1',
+						'e2'
+					)
+				);
+				@child.append(
+					self._e2(
+						$_.hash.<e2>
+					)
+				);
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						'e2',
+						'e3'
+					)
+				);
+				@child.append(
+					self._e3(
+						$_.hash.<e3>
+					)
+				)
 			}
 			elsif self.assert-hash-keys( $_,
 					[< pblock sym EXPR wu >] ) {
-				die "Not implemented yet"
+				@child = self._pblock(
+					$_.hash.<pblock>
+				);
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						'pblock',
+						'sym'
+					)
+				);
+				@child.append(
+					self._sym(
+						$_.hash.<sym>
+					)
+				);
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						'sym',
+						'EXPR'
+					)
+				);
+				@child.append(
+					self._EXPR(
+						$_.hash.<EXPR>
+					)
+				);
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						'EXPR',
+						'wu'
+					)
+				);
+				@child.append(
+					self._wu(
+						$_.hash.<wu>
+					)
+				)
 			}
 			elsif self.assert-hash-keys( $_,
 					[< doc sym module_name >] ) {
-				die "Not implemented yet"
+				@child = self._doc( $_.hash.<doc> );
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						'doc',
+						'sym'
+					)
+				);
+				@child.append(
+					self._sym(
+						$_.hash.<sym>
+					)
+				);
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						'sym',
+						'module_name'
+					)
+				);
+				@child.append(
+					self._module_name(
+						$_.hash.<module_name>
+					)
+				)
 			}
 			elsif self.assert-hash-keys( $_,
 					[< doc sym version >] ) {
-				die "Not implemented yet"
+				@child = self._doc( $_.hash.<doc> );
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						'doc',
+						'sym'
+					)
+				);
+				@child.append(
+					self._sym(
+						$_.hash.<sym>
+					)
+				);
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						'sym',
+						'version'
+					)
+				);
+				@child.append(
+					self._version(
+						$_.hash.<version>
+					)
+				)
 			}
 			elsif self.assert-hash-keys( $_,
 					[< sym else xblock >] ) {
-				die "Not implemented yet"
+				@child = self._sym( $_.hash.<sym> );
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						'sym',
+						'else'
+					)
+				);
+				@child.append(
+					self._else(
+						$_.hash.<else>
+					)
+				);
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						'else',
+						'xblock'
+					)
+				);
+				@child.append(
+					self._xblock(
+						$_.hash.<xblock>
+					)
+				)
 			}
 			elsif self.assert-hash-keys( $_, [< xblock sym wu >] ) {
-				die "Not implemented yet"
+				@child = self._xblock( $_.hash.<xblock> );
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						'xblock',
+						'sym'
+					)
+				);
+				@child.append(
+					self._sym(
+						$_.hash.<sym>
+					)
+				);
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						'sym',
+						'wu'
+					)
+				);
+				@child.append(
+					self._wu(
+						$_.hash.<wu>
+					)
+				)
 			}
 			elsif self.assert-hash-keys( $_, [< sym xblock >] ) {
 				@child = self._sym( $_.hash.<sym> );
@@ -7123,7 +7787,31 @@ else {
 			[< semilist variable shape >],
 			[< postcircumfix signature trait
 			   post_constraint >] ) {
-			die "Not implemented yet"
+			@child = self._semilist( $p.hash.<semilist> );
+			@child.append(
+				Perl6::WS.between-matches(
+					$p,
+					'semilist',
+					'variable'
+				)
+			);
+			@child.append(
+				self._variable(
+					$p.hash.<variable>
+				)
+			);
+			@child.append(
+				Perl6::WS.between-matches(
+					$p,
+					'variable',
+					'shape'
+				)
+			);
+			@child.append(
+				self._shape(
+					$p.hash.<shape>
+				)
+			)
 		}
 		elsif self.assert-hash-keys( $p,
 				[< variable post_constraint >],
