@@ -315,6 +315,10 @@ class Perl6::Tidy {
 					   $root.child.[$_].content ~~ / \s / {
 						@problem.push( 'WS' )
 					}
+					if $root.child.[$_].^can( 'content' ) and
+					   $root.child.[$_].content eq '' {
+						@problem.push( 'WS' )
+					}
 				}
 				$str ~= @problem.join( ' ' ) if @problem;
 				$str ~= self.dump-tree(

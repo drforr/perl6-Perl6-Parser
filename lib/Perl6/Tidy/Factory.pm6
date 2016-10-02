@@ -509,8 +509,12 @@ class Perl6::WS does Token {
 			)
 		}
 		else {
-			warn "Attempting to create empty whitespace token";
-			( )
+			self.bless(
+				:factory-line-number( callframe(1).line ),
+				:from( $start ),
+				:to( $start + $content.chars ),
+				:content( '' )
+			)
 		}
 	}
 
@@ -1706,7 +1710,6 @@ class Perl6::Tidy::Factory {
 	# ~~
 	#
 	method _assertion( Mu $p ) {
-		warn "Untested method";
 		given $p {
 			when self.assert-hash-keys( $_, [< var >] ) {
 				self._var( $_.hash.<var> )
@@ -1745,7 +1748,6 @@ class Perl6::Tidy::Factory {
 	}
 
 	method _babble( Mu $p ) {
-		warn "Untested method";
 		given $p {
 			when self.assert-hash-keys( $_,
 					[< B >], [< quotepair >] ) {
@@ -1785,7 +1787,6 @@ class Perl6::Tidy::Factory {
 	# t
 	#
 	method _backslash( Mu $p ) {
-		warn "Untested method";
 		given $p {
 			when self.assert-hash-keys( $_, [< sym >] ) {
 				self._sym( $_.hash.<sym> )
@@ -1839,7 +1840,6 @@ class Perl6::Tidy::Factory {
 	}
 
 	method _blorst( Mu $p ) {
-		warn "Untested method";
 		given $p {
 			when self.assert-hash-keys( $_, [< statement >] ) {
 				self._statement( $_.hash.<statement> )
@@ -1855,7 +1855,6 @@ class Perl6::Tidy::Factory {
 	}
 
 	method _bracket( Mu $p ) {
-		warn "Untested method";
 		given $p {
 			when self.assert-hash-keys( $_, [< semilist >] ) {
 				self._semilist( $_.hash.<semilist> )
@@ -1869,7 +1868,6 @@ class Perl6::Tidy::Factory {
 
 	method _cclass_elem( Mu $p ) {
 		my Perl6::Element @child;
-		warn "Untested method";
 		if $p.list {
 			for $p.list {
 				if self.assert-hash-keys( $_,
@@ -1927,7 +1925,6 @@ class Perl6::Tidy::Factory {
 	}
 
 	method _charspec( Mu $p ) {
-		warn "Untested method";
 # XXX work on this, of course.
 		return True if $p.list;
 	}
@@ -1993,7 +1990,6 @@ class Perl6::Tidy::Factory {
 	}
 
 	method _codeblock( Mu $p ) {
-		warn "Untested method";
 		given $p {
 			when self.assert-hash-keys( $_, [< block >] ) {
 				self._block( $_.hash.<block> )
@@ -2006,7 +2002,6 @@ class Perl6::Tidy::Factory {
 	}
 
 	method _coercee( Mu $p ) {
-		warn "Untested method";
 		given $p {
 			when self.assert-hash-keys( $_, [< semilist >] ) {
 				self._semilist( $_.hash.<semilist> )
@@ -2112,7 +2107,6 @@ class Perl6::Tidy::Factory {
 	}
 
 	method _colonpairs( Mu $p ) {
-		warn "Untested method";
 		given $p {
 			when $_ ~~ Hash {
 				return True if $_.<D>;
@@ -2311,7 +2305,6 @@ class Perl6::Tidy::Factory {
 
 	method _DECL( Mu $p ) {
 		my Perl6::Element @child;
-		warn "Untested method";
 		if self.assert-hash-keys( $p,
 				[< deftermnow initializer term_init >],
 				[< trait >] ) {
@@ -2533,7 +2526,6 @@ class Perl6::Tidy::Factory {
 	}
 
 	method _deftermnow( Mu $p ) {
-		warn "Untested method";
 		given $p {
 			when self.assert-hash-keys( $_, [< defterm >] ) {
 				self._defterm( $_.hash.<defterm> )
@@ -2561,7 +2553,6 @@ class Perl6::Tidy::Factory {
 	}
 
 	method _dig( Mu $p ) {
-		warn "Untested method";
 		for $p.list {
 			# UTF-8....
 			if $_ {
@@ -2649,7 +2640,6 @@ class Perl6::Tidy::Factory {
 	}
 
 	method _dottyopish( Mu $p ) {
-		warn "Untested method";
 		given $p {
 			when self.assert-hash-keys( $_, [< term >] ) {
 				self._term( $_.hash.<term> )
@@ -2662,7 +2652,6 @@ class Perl6::Tidy::Factory {
 	}
 
 	method _e1( Mu $p ) {
-		warn "Untested method";
 		given $p {
 			when self.assert-hash-keys( $_,
 					[< scope_declarator >] ) {
@@ -2679,7 +2668,6 @@ class Perl6::Tidy::Factory {
 
 	method _e2( Mu $p ) {
 		my Perl6::Element @child;
-		warn "Untested method";
 		given $p {
 			when self.assert-hash-keys( $_, [< infix OPER >] ) {
 				@child = self._infix(
@@ -2708,7 +2696,6 @@ class Perl6::Tidy::Factory {
 
 	method _e3( Mu $p ) {
 		my Perl6::Element @child;
-		warn "Untested method";
 		given $p {
 			when self.assert-hash-keys( $_, [< postfix OPER >],
 					[< postfix_prefix_meta_operator >] ) {
@@ -2738,7 +2725,6 @@ class Perl6::Tidy::Factory {
 
 	method _else( Mu $p ) {
 		my Perl6::Element @child;
-		warn "Untested method";
 		given $p {
 			when self.assert-hash-keys( $_, [< sym blorst >] ) {
 				@child.append(
@@ -2772,7 +2758,6 @@ class Perl6::Tidy::Factory {
 
 	method _escale( Mu $p ) {
 		my Perl6::Element @child;
-		warn "Untested method";
 		given $p {
 			when self.assert-hash-keys( $_, [< sign decint >] ) {
 				@child = self._sign(
@@ -2813,7 +2798,6 @@ class Perl6::Tidy::Factory {
 	#
 	method _escape( Mu $p ) {
 		my Perl6::Element @child;
-		warn "Untested method";
 		given $p {
 			when self.assert-hash-keys( $_, [< sign decint >] ) {
 				@child = self._invocant(
@@ -3138,6 +3122,14 @@ class Perl6::Tidy::Factory {
 		elsif self.assert-hash-keys( $p, [< longname >] ) {
 			@child = self._longname( $p.hash.<longname> )
 		}
+		elsif self.assert-hash-keys( $p, [< sym >] ) {
+			@child = self._sym( $p.hash.<sym> )
+		}
+		elsif self.assert-hash-keys( $p, [< statement_prefix >] ) {
+			@child = self._statement_prefix(
+				$p.hash.<statement_prefix>
+			)
+		}
 		else {
 			say $p.hash.keys.gist;
 			warn "Unhandled case"
@@ -3146,7 +3138,6 @@ class Perl6::Tidy::Factory {
 	}
 
 	method _fake_infix( Mu $p ) {
-		warn "Untested method";
 		given $p {
 			when self.assert-hash-keys( $_, [< O >] ) {
 				self._O( $_.hash.<O> )
@@ -3291,7 +3282,6 @@ class Perl6::Tidy::Factory {
 
 	method _infixish( Mu $p ) {
 		my Perl6::Element @child;
-		warn "Untested method";
 		given $p {
 			when self.assert-hash-keys( $_, [< infix OPER >] ) {
 				@child = self._infix(
@@ -3479,7 +3469,6 @@ class Perl6::Tidy::Factory {
 	}
 
 	method _invocant( Mu $p ) {
-		warn "Untested method";
 		CATCH {
 			when X::Multi::NoMatch { }
 		}
@@ -3498,7 +3487,6 @@ return True;
 	}
 
 	method _left( Mu $p ) {
-		warn "Untested method";
 		given $p {
 			when self.assert-hash-keys( $_, [< termseq >] ) {
 				self._termseq( $_.hash.<termseq> )
@@ -3541,7 +3529,6 @@ return True;
 	# '
 	#
 	method _metachar( Mu $p ) {
-		warn "Untested method";
 		given $p {
 			when self.assert-hash-keys( $_, [< sym >] ) {
 				self._sym( $_.hash.<sym> )
@@ -3653,7 +3640,6 @@ return True;
 	}
 
 	method _min( Mu $p ) {
-		warn "Untested method";
 		given $p {
 			when self.assert-hash-keys( $_, [< decint VALUE >] ) {
 				self._decint( $_.hash.<decint> )
@@ -3666,7 +3652,6 @@ return True;
 	}
 
 	method _modifier_expr( Mu $p ) {
-		warn "Untested method";
 		given $p {
 			when self.assert-hash-keys( $_, [< EXPR >] ) {
 				self._EXPR( $_.hash.<EXPR> )
@@ -3679,7 +3664,6 @@ return True;
 	}
 
 	method _module_name( Mu $p ) {
-		warn "Untested method";
 		given $p {
 			when self.assert-hash-keys( $_, [< longname >] ) {
 				self._longname( $_.hash.<longname> )
@@ -3885,7 +3869,6 @@ return True;
 	}
 
 	method _nibbler( Mu $p ) {
-		warn "Untested method";
 		given $p {
 			when self.assert-hash-keys( $_, [< termseq >] ) {
 				self._termseq( $_.hash.<termseq> )
@@ -4130,7 +4113,6 @@ return True;
 	}
 
 	method _O( Mu $p ) {
-		warn "Untested method";
 		CATCH {
 			when X::Multi::NoMatch { .resume }
 			#default { .resume }
@@ -4192,7 +4174,6 @@ return True;
 
 	method _op( Mu $p ) {
 		my Perl6::Element @child;
-		warn "Untested method";
 		given $p {
 			when self.assert-hash-keys( $_,
 				     [< infix_prefix_meta_operator OPER >] ) {
@@ -5017,7 +4998,6 @@ return True;
 
 	method _postop( Mu $p ) {
 		my Perl6::Element @child;
-		warn "Untested method";
 		given $p {
 			when self.assert-hash-keys( $_,
 					[< sym postcircumfix O >] ) {
@@ -5108,7 +5088,6 @@ return True;
 
 	method _quantified_atom( Mu $p ) {
 		my Perl6::Element @child;
-		warn "Untested method";
 		given $p {
 			when self.assert-hash-keys( $_, [< sigfinal atom >] ) {
 				@child = self._sigfinal(
@@ -5140,7 +5119,6 @@ return True;
 	#
 	method _quantifier( Mu $p ) {
 		my Perl6::Element @child;
-		warn "Untested method";
 		given $p {
 			when self.assert-hash-keys( $_,
 					[< sym min max backmod >] ) {
@@ -5211,7 +5189,6 @@ return True;
 
 	method _quibble( Mu $p ) {
 		my Perl6::Element @child;
-		warn "Untested method";
 		given $p {
 			when self.assert-hash-keys( $_, [< babble nibble >] ) {
 				@child = self._babble(
@@ -5386,7 +5363,6 @@ return True;
 
 	method _quotepair( Mu $p ) {
 		my Perl6::Element @child;
-		warn "Untested method";
 		if $p.list {
 			for $p.list {
 				if self.assert-hash-keys( $_,
@@ -5800,7 +5776,6 @@ return True;
 	}
 
 	method _rx_adverbs( Mu $p ) {
-		warn "Untested method";
 		given $p {
 			when self.assert-hash-keys( $_, [< quotepair >] ) {
 				self._quotepair( $_.hash.<quotepair> )
@@ -5964,7 +5939,6 @@ return True;
 
 	method _separator( Mu $p ) {
 		my Perl6::Element @child;
-		warn "Untested method";
 		given $p {
 			when self.assert-hash-keys( $_,
 					[< septype quantified_atom >] ) {
@@ -6020,7 +5994,6 @@ return True;
 
 	method _sibble( Mu $p ) {
 		my Perl6::Element @child;
-		warn "Untested method";
 		given $p {
 			if self.assert-hash-keys( $_,
 					[< right babble left >] ) {
@@ -6059,7 +6032,6 @@ return True;
 	}
 
 	method _sigfinal( Mu $p ) {
-		warn "Untested method";
 		given $p {
 			when self.assert-hash-keys( $_, [< normspace >] ) {
 				self._normspace( $_.hash.<normspace> )
@@ -6085,7 +6057,6 @@ return True;
 
 	method _sigmaybe( Mu $p ) {
 		my Perl6::Element @child;
-		warn "Untested method";
 		given $p {
 			when self.assert-hash-keys( $_,
 					[< parameter typename >],
@@ -6747,6 +6718,43 @@ else {
 			}
 		}
 		elsif self.assert-hash-keys( $p,
+				[< EXPR statement_mod_cond >] ) {
+			if $p.hash.<EXPR>.Str ~~ m{ ( \s+ ) $ } {
+				@child.append(
+					Perl6::WS.with-trailer(
+						$p.hash.<EXPR>,
+						self._EXPR(
+							$p.hash.<EXPR>,
+						)
+					)
+				);
+				@child.append(
+					self._statement_mod_cond(
+						$p.hash.<statement_mod_cond>
+					)
+				)
+			}
+			else {
+				@child.append(
+					Perl6::WS.with-inter-ws(
+						$p,
+						$p.hash.<EXPR>,
+						[
+							self._EXPR(
+								$p.hash.<EXPR>
+							)
+						],
+						$p.hash.<statement_mod_cond>,
+						[
+							self._statement_mod_cond(
+								$p.hash.<statement_mod_cond>
+							)
+						]
+					)
+				)
+			}
+		}
+		elsif self.assert-hash-keys( $p,
 				[< EXPR statement_mod_loop >] ) {
 			if $p.hash.<EXPR>.Str ~~ m{ ( \s+ ) $ } {
 				@child.append(
@@ -7054,7 +7062,6 @@ else {
 	#
 	method _statement_mod_cond( Mu $p ) {
 		my Perl6::Element @child;
-		warn "Untested method";
 		given $p {
 			when self.assert-hash-keys( $_,
 					[< sym modifier_expr >] ) {
@@ -7149,7 +7156,6 @@ else {
 	#
 	method _statement_prefix( Mu $p ) {
 		my Perl6::Element @child;
-		warn "Untested method";
 		given $p {
 			when self.assert-hash-keys( $_, [< sym blorst >] ) {
 				@child = self._sym(
@@ -7177,7 +7183,6 @@ else {
 	}
 
 	method _subshortname( Mu $p ) {
-		warn "Untested method";
 		given $p {
 			when self.assert-hash-keys( $_, [< desigilname >] ) {
 				self._desigilname( $_.hash.<desigilname> )
@@ -7374,7 +7379,6 @@ else {
 
 	method _term_init( Mu $p ) {
 		my Perl6::Element @child;
-		warn "Untested method";
 		given $p {
 			when self.assert-hash-keys( $_, [< sym EXPR >] ) {
 				@child = self._sym(
@@ -7573,6 +7577,30 @@ else {
 	method _type_declarator( Mu $p ) {
 		my Perl6::Element @child;
 		if self.assert-hash-keys( $p,
+				[< sym initializer variable >], [< trait >] ) {
+			@child = self._sym( $p.hash.<sym> );
+			@child.append(
+				Perl6::WS.between-matches(
+					$p,
+					'sym',
+					'variable'
+				)
+			);
+			@child.append(
+				self._variable( $p.hash.<variable> )
+			);
+			@child.append(
+				Perl6::WS.between-matches(
+					$p,
+					'variable',
+					'initializer'
+				)
+			);
+			@child.append(
+				self._initializer( $p.hash.<initializer> )
+			)
+		}
+		elsif self.assert-hash-keys( $p,
 				[< sym defterm initializer >], [< trait >] ) {
 			@child = self._sym( $p.hash.<sym> );
 			@child.append(
@@ -7928,7 +7956,6 @@ else {
 
 	method _version( Mu $p ) {
 		my Perl6::Element @child;
-		warn "Untested method";
 		given $p {
 			when self.assert-hash-keys( $_, [< vnum vstr >] ) {
 				@child = self._vnum(
@@ -7969,7 +7996,6 @@ else {
 
 	method _vnum( Mu $p ) {
 		my Perl6::Element @child;
-		warn "Untested method";
 		if $p.list {
 			for $p.list {
 				if self.assert-Int( $_ ) {
@@ -8031,10 +8057,8 @@ else {
 		elsif self.assert-hash-keys( $p, [< EXPR pblock >] ) {
 			@child = self._EXPR( $p.hash.<EXPR> );
 			@child.append(
-				Perl6::WS.between-matches(
-					$p,
-					'EXPR',
-					'pblock'
+				Perl6::WS.before-orig(
+					$p.hash.<pblock>
 				)
 			);
 			@child.append(
