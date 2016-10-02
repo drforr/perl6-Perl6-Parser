@@ -6241,8 +6241,8 @@ return True;
 			@child.append(
 				Perl6::Operator::Prefix.new(
 					:factory-line-number( callframe(1).line ),
-					:from( $p.from + $0.Str.from ),
-					:to( $p.from + $0.Str.from +
+					:from( $p.from + $0.from ),
+					:to( $p.from + $0.from +
 						$0.Str.chars ),
 					:content( $0.Str )
 				),
