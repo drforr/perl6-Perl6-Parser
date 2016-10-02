@@ -2193,21 +2193,57 @@ class Perl6::Tidy::Factory {
 		}
 		elsif self.assert-hash-keys( $p,
 				[< initializer signature >], [< trait >] ) {
+			my Perl6::Element @_child;
+			@_child.append(
+				Perl6::Balanced::Enter.new(
+					:factory-line-number(
+						callframe(1).line
+					),
+					:from( $p.hash.<signature>.from - 1 ),
+					:to( $p.hash.<signature>.from ),
+					:content( '(' )
+				)
+			);
+			@_child.append(
+				Perl6::WS.header(
+					$p.hash.<signature>
+				)
+			);
+			@_child.append(
+				self._signature(
+					$p.hash.<signature>
+				)
+			);
+			@_child.append(
+				Perl6::WS.trailer(
+					$p.hash.<signature>
+				)
+			);
+			@_child.append(
+				Perl6::Balanced::Exit.new(
+					:factory-line-number(
+						callframe(1).line
+					),
+					:from( $p.hash.<signature>.to ),
+					:to( $p.hash.<signature>.to + 1 ),
+					:content( ')' )
+				)
+			);
 			@child.append(
-				Perl6::WS.with-inter-ws(
-					$p,
-					$p.hash.<signature>,
-					[
-						self._signature(
-							$p.hash.<signature>
-						)
-					],
-					$p.hash.<initializer>,
-					[
-						self._initializer(
-							$p.hash.<initializer>
-						)
-					]
+				Perl6::Operator::Circumfix.new(
+					:from( @_child[0].from ),
+					:to( @_child[*-1].to ),
+					:child( @_child )
+				)
+			);
+			@child.append(
+				Perl6::WS.before-orig(
+					$p.hash.<initializer>
+				)
+			);
+			@child.append(
+				self._initializer(
+					$p.hash.<initializer>
 				)
 			)
 		}
@@ -4726,8 +4762,7 @@ return True;
 					);
 				$leaf
 			}
-			when self.assert-hash-keys( $_,
-					[< name sigil >] ) {
+			when self.assert-hash-keys( $_, [< name sigil >] ) {
 				# XXX refactor back to a method
 				my Str $sigil       = $_.hash.<sigil>.Str;
 				my Str $twigil      = $_.hash.<twigil> ??
