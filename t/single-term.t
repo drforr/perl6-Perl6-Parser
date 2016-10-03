@@ -11,7 +11,7 @@ subtest {
 	plan 9;
 
 	subtest {
-		plan 5;
+		plan 6;
 
 		ok 1, "Test zero, once the dumper is ready.";
 
@@ -134,6 +134,36 @@ subtest {
 				is $pt.format( $tree ), $source, Q{formatted};
 			}, Q{ws};
 		}, Q{1_1};
+
+		subtest {
+			plan 2;
+
+			subtest {
+				plan 3;
+
+				my $source = Q{Inf};
+				my $parsed = $pt.parse-source( $source );
+				my $tree = $pt.build-tree( $parsed );
+				ok $pt.validate( $parsed ), Q{valid};
+				ok (grep { $_ ~~ Perl6::Infinity },
+						$tree.child.[0].child),
+					Q{found Infinity};
+				is $pt.format( $tree ), $source, Q{formatted};
+			}, Q{no ws};
+
+			subtest {
+				plan 3;
+
+				my $source = Q{ Inf  };
+				my $parsed = $pt.parse-source( $source );
+				my $tree = $pt.build-tree( $parsed );
+				ok $pt.validate( $parsed ), Q{valid};
+				ok (grep { $_ ~~ Perl6::Infinity },
+						$tree.child.[0].child),
+					Q{found number};
+				is $pt.format( $tree ), $source, Q{formatted};
+			}, Q{ws};
+		}, Q{Inf};
 	}, Q{decimal};
 
 	subtest {
@@ -1508,7 +1538,7 @@ subtest {
 
 			my $source = Q{sum};
 			my $parsed = $pt.parse-source( $source );
-say $parsed.dump;
+#say $parsed.dump;
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 #			ok (grep { $_ ~~ Perl6::Number },

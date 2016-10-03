@@ -1025,6 +1025,23 @@ class Perl6::Number::Decimal::Explicit does Prefixed {
 class Perl6::Number::Hexadecimal does Prefixed {
 	also is Perl6::Number;
 }
+class Perl6::Infinity is Token {
+	also is Perl6::Element;
+
+	method from-match( Mu $p ) {
+		if $p.from < $p.to {
+			self.bless(
+				:factory-line-number( callframe(1).line ),
+				:from( $p.from ),
+				:to( $p.to ),
+				:content( $p.Str )
+			)
+		}
+		else {
+			( )
+		}
+	}
+}
 class Perl6::Number::Radix {
 	also is Perl6::Number;
 }
@@ -1623,7 +1640,7 @@ class Perl6::Tidy::Factory {
 		}
 		elsif self.assert-Int( $p ) {
 			@child.append(
-				$p.Int
+				Perl6::Number::Decimal.from-match( $p )
 			)
 		}
 		elsif self.assert-Bool( $p ) {
@@ -2294,7 +2311,7 @@ class Perl6::Tidy::Factory {
 				[< signature >], [< trait >] ) {
 			my Perl6::Element @_child =
 				self._signature( $p.hash.<signature> );
-			@child = Perl6::Operator::circumfix.new( $p, @_child )
+			@child = Perl6::Operator::Circumfix.new( $p, @_child )
 		}
 		else {
 			say $p.hash.keys.gist;
@@ -2463,6 +2480,9 @@ class Perl6::Tidy::Factory {
 			self.__FloatingPoint( $p )
 		}
 		elsif self.assert-hash-keys( $p, [< int coeff escale >] ) {
+			self.__FloatingPoint( $p )
+		}
+		elsif self.assert-hash-keys( $p, [< coeff frac >] ) {
 			self.__FloatingPoint( $p )
 		}
 		else {
@@ -2855,6 +2875,23 @@ class Perl6::Tidy::Factory {
 			}
 		}
 		elsif self.assert-hash-keys( $p,
+				[< infix OPER >],
+				[< infix_postfix_meta_operator >] ) {
+			@child.append(
+				Perl6::WS.with-inter-ws(
+					$p,
+					$p.hash.<infix>,
+					[
+						self._infix( $p.hash.<infix> )
+					],
+					$p.list.[0].list.[0] // $p.list.[0],
+					[
+						self._EXPR( $p.list.[0] )
+					]
+				)
+			)
+		}
+		elsif self.assert-hash-keys( $p,
 				[< prefix OPER >],
 				[< prefix_postfix_meta_operator >] ) {
 			@child.append(
@@ -3128,6 +3165,11 @@ class Perl6::Tidy::Factory {
 		elsif self.assert-hash-keys( $p, [< statement_prefix >] ) {
 			@child = self._statement_prefix(
 				$p.hash.<statement_prefix>
+			)
+		}
+		elsif self.assert-hash-keys( $p, [< methodop >] ) {
+			@child = self._methodop(
+				$p.hash.<methodop>
 			)
 		}
 		else {
@@ -3570,11 +3612,15 @@ return True;
 				my Perl6::Element @_child =
 					 self._multisig( $_.hash.<multisig> );
 				@child =
-					self._longname( $_.hash.<longname> ),
+					self._longname( $_.hash.<longname> );
+				@child.append(
 					Perl6::Operator::Circumfix.from-match(
 						$_, @_child
-					),
+					)
+				);
+				@child.append(
 					self._blockoid( $_.hash.<blockoid> )
+				)
 			}
 			when self.assert-hash-keys( $_,
 				     [< specials longname blockoid >],
@@ -4102,8 +4148,8 @@ return True;
 			when self.assert-hash-keys( $_, [< integer >] ) {
 				self._integer( $_.hash.<integer> )
 			}
-			when $_.Bool {
-				$_.Bool
+			when $_.Str eq 'Inf' {
+				Perl6::Infinity.from-match( $_ )
 			}
 			default {
 				say $_.hash.keys.gist;
@@ -5729,7 +5775,8 @@ return True;
 			@child =
 				Perl6::Operator::Circumfix.new(
 					:factory-line-number( callframe(1).line ),
-					:delimiter( '(', ')' ),
+					:from( $p.hash.<blockoid>.from ),
+					:to( $p.hash.<blockoid>.to ),
 					:child( @_child )
 				);
 			@child.append(
@@ -6092,8 +6139,28 @@ return True;
 	method __Parameter( Mu $p ) {
 		my Perl6::Element @child;
 		if self.assert-hash-keys( $p,
-			[< param_var type_constraint
-			   quant post_constraint >],
+			[< defterm quant >],
+			[< type_constraint post_constraint
+			   default_value modifier trait >] ) {
+			@child = self._defterm(
+				$_.hash.<defterm>
+			);
+			@child.append(
+				Perl6::WS.between-matches(
+					$_,
+					'defterm',
+					'quant'
+				)
+			);
+			@child.append(
+				self._quant(
+					$_.hash.<quant>
+				)
+			)
+		}
+		elsif self.assert-hash-keys( $p,
+			[< type_constraint param_var
+			   post_constraint quant >],
 			[< default_value modifier trait >] ) {
 			# Synthesize the 'from' and 'to' markers for 'where'
 			$p.Str ~~ m{ << (where) >> };
@@ -7199,7 +7266,11 @@ else {
 		if $p.list {
 			for $p.list {
 				if $_.Str {
-					@child.append( $_.Str )
+					@child.append(
+						Perl6::Bareword.from-match(
+							$_
+						)
+					)
 				}
 				else {
 					say $_.hash.keys.gist;
@@ -7261,6 +7332,9 @@ else {
 	method _term( Mu $p ) {
 		my Perl6::Element @child;
 		given $p {
+			when self.assert-hash-keys( $_, [< methodop >] ) {
+				@child = self._methodop( $_.hash.<methodop> )
+			}
 			when self.assert-hash-keys( $_, [< circumfix >] ) {
 				@child = self._circumfix( $_.hash.<circumfix> )
 			}
@@ -7755,6 +7829,25 @@ else {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash-keys( $_,
+					[< postcircumfix OPER >],
+					[< postfix_prefix_meta_operator >] ) {
+				@child = self._postcircumfix(
+					$_.hash.<postcircumfix>
+				);
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						'postcircumfix',
+						'OPER'
+					)
+				);
+				@child.append(
+					self._OPER(
+						$_.hash.<OPER>
+					)
+				)
+			}
+			when self.assert-hash-keys( $_,
 					[< prefix OPER >],
 					[< prefix_postfix_meta_operator >] ) {
 				@child = self._prefix(
@@ -7814,6 +7907,26 @@ else {
 
 	method _var( Mu $p ) {
 		given $p {
+			when self.assert-hash-keys( $_,
+					[< twigil sigil desigilname >] ) {
+				# XXX For heavens' sake refactor.
+				my Str $sigil	= $_.hash.<sigil>.Str;
+				my Str $twigil	= $_.hash.<twigil> ??
+						  $_.hash.<twigil>.Str !! '';
+				my Str $desigilname =
+					$_.hash.<desigilname> ??
+					$_.hash.<desigilname>.Str !! '';
+				my Str $content =
+					$_.hash.<sigil> ~
+					$twigil ~
+					$desigilname;
+				%sigil-map{$sigil ~ $twigil}.new(
+					:factory-line-number( callframe(1).line ),
+					:from( $_.from ),
+					:to( $_.to ),
+					:content( $content )
+				)
+			}
 			when self.assert-hash-keys( $_,
 					[< sigil desigilname >] ) {
 				# XXX For heavens' sake refactor.

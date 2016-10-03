@@ -663,7 +663,8 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
-) }, Q{version 3};
+)
+	}, Q{version 3};
 }, Q{Almost prime};
 
 subtest {
@@ -1181,9 +1182,8 @@ _END_
 	}, Q{version 1};
 
 	subtest {
-		plan 0;
+		plan 2;
 
-#`(
 		my $source = Q:to[_END_];
 for 1.0, 1.1, 1.2 ... 10 { .say }
 _END_
@@ -1191,7 +1191,6 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
-)
 	}, Q{version 2};
 }, Q{Arithmetic/rational};
 
