@@ -1535,18 +1535,6 @@ class Perl6::Tidy::Factory {
 		return False
 	}
 
-	# $parsed can only be Num, by extension Int, by extension Str,
-	# by extension Bool.
-	#
-	method assert-Num( Mu $parsed ) {
-		return False if $parsed.hash;
-		return False if $parsed.list;
-
-		return True if $parsed.Num;
-		warn "Uncaught type";
-		return False
-	}
-
 	# $parsed can only be Str, by extension Bool
 	#
 	method assert-Str( Mu $parsed ) {
@@ -1600,7 +1588,7 @@ class Perl6::Tidy::Factory {
 					)
 				}
 				elsif $_.Bool {
-					# XXX Boolean represents blank?
+					# XXX Zero-width token
 				}
 				else {
 					say $_.hash.keys.gist;
@@ -1641,11 +1629,6 @@ class Perl6::Tidy::Factory {
 		elsif self.assert-Int( $p ) {
 			@child.append(
 				Perl6::Number::Decimal.from-match( $p )
-			)
-		}
-		elsif self.assert-Bool( $p ) {
-			@child.append(
-				$p.Bool
 			)
 		}
 		else {
@@ -1700,18 +1683,7 @@ class Perl6::Tidy::Factory {
 					self._EXPR( $_.hash.<EXPR> )
 				)
 			}
-			when $_.Str {
-				@child.append(
-					$_.Str
-				)
-			}
-			when $_.Bool {
-				@child.append(
-					$_.Bool
-				)
-			}
 			default {
-				say $_.Int if $_.Int;
 				say $_.hash.keys.gist;
 				warn "Unhandled case"
 			}
@@ -1739,9 +1711,6 @@ class Perl6::Tidy::Factory {
 			}
 			when self.assert-hash-keys( $_, [< codeblock >] ) {
 				self._codeblock( $_.hash.<codeblock> )
-			}
-			when $_.Str {
-				$_.Str
 			}
 			default {
 				say $_.hash.keys.gist;
@@ -1779,9 +1748,6 @@ class Perl6::Tidy::Factory {
 
 	method _backmod( Mu $p ) {
 		given $p {
-			when self.assert-hash-keys( $_, [< backmod >] ) {
-				$_.hash.<backmod>.Bool
-			}
 			default {
 				say $_.hash.keys.gist;
 				warn "Unhandled case"
@@ -1807,9 +1773,6 @@ class Perl6::Tidy::Factory {
 		given $p {
 			when self.assert-hash-keys( $_, [< sym >] ) {
 				self._sym( $_.hash.<sym> )
-			}
-			when $_.Str {
-				$_.Str
 			}
 			default {
 				say $_.hash.keys.gist;
@@ -2562,9 +2525,6 @@ class Perl6::Tidy::Factory {
 			when self.assert-hash-keys( $_, [< longname >] ) {
 				self._longname( $_.hash.<longname> )
 			}
-			when $_.Str {
-				$_.Str
-			}
 			default {
 				say $_.hash.keys.gist;
 				warn "Unhandled case"
@@ -2587,9 +2547,6 @@ class Perl6::Tidy::Factory {
 
 	method _doc( Mu $p ) {
 		given $p {
-			when self.assert-hash-keys( $_, [< XXX >] ) {
-				$_.hash.<XXX>.Bool
-			}
 			default {
 				say $_.hash.keys.gist;
 				warn "Unhandled case"
@@ -3208,33 +3165,21 @@ class Perl6::Tidy::Factory {
 		if self.assert-hash-keys( $p, [< key val >] ) {
 			$p.Str ~~ m{ ('=>') };
 			@child = self._key( $p.hash.<key> );
-			if $p.hash.<key>.to < $0.from {
-				@child.append(
-					Perl6::WS.new(
-						$p.hash.<key>.to,
-						substr-match(
-							$p,
-							$p.hash.<key>.to,
-							$0.from - $p.hash.<key>.to
-						)
-					)
+			@child.append(
+				Perl6::WS.after(
+					$p,
+					$p.hash.<key>
 				)
-			}
+			);
 			@child.append(
 				Perl6::Operator::Infix.new( $p, FATARROW ),
 			);
-			if $0.to < $p.hash.<val>.from {
-				@child.append(
-					Perl6::WS.new(
-						$0.to,
-						substr-match(
-							$p,
-							$0.to,
-							$p.hash.<val>.from - $0.to
-						)
-					)
+			@child.append(
+				Perl6::WS.before(
+					$p,
+					$p.hash.<val>
 				)
-			}
+			);
 			@child.append(
 				self._val( $p.hash.<val> )
 			);
@@ -3259,8 +3204,7 @@ class Perl6::Tidy::Factory {
 		my Perl6::Element @child;
 		if $p.list {
 			for $p.list {
-				if self.assert-Str( $_ ) {
-					$_.Str
+				if 0 {
 				}
 				else {
 					say $_.hash.keys.gist;
@@ -3416,10 +3360,9 @@ class Perl6::Tidy::Factory {
 				);
 			if $p.hash.<EXPR>.list.[0] {
 				@child.append(
-					Perl6::WS.between-matches(
+					Perl6::WS.after(
 						$p,
-						$p.hash.<sym>,
-						$p.hash.<EXPR>.list.[0]
+						$p.hash.<sym>
 					)
 				)
 			}
@@ -3555,9 +3498,6 @@ return True;
 
 	method _max( Mu $p ) {
 		given $p {
-			when self.assert-hash-keys( $_, [< max >] ) {
-				$_.hash.<max>.Str
-			}
 			default {
 				say $_.hash.keys.gist;
 				warn "Unhandled case"
@@ -3904,9 +3844,6 @@ return True;
 			when self.assert-hash-keys( $_, [< termseq >] ) {
 				self._termseq( $_.hash.<termseq> )
 			}
-			when $_.Bool {
-				$_.Bool
-			}
 			default {
 				say $_.hash.keys.gist;
 				warn "Unhandled case"
@@ -3928,9 +3865,6 @@ return True;
 
 	method _normspace( Mu $p ) {
 		given $p {
-			when self.assert-hash-keys( $_, [< normspace >] ) {
-				$_.hash.<normspace>.Str
-			}
 			default {
 				say $_.hash.keys.gist;
 				warn "Unhandled case"
@@ -5122,9 +5056,6 @@ return True;
 
 	method _quant( Mu $p ) {
 		given $p {
-			when self.assert-hash-keys( $_, [< quant >] ) {
-				$_.hash.<quant>.Bool
-			}
 			default {
 				say $_.hash.keys.gist;
 				warn "Unhandled case"
@@ -5466,9 +5397,6 @@ return True;
 
 	method _radix( Mu $p ) {
 		given $p {
-			when self.assert-hash-keys( $_, [< radix >] ) {
-				$_.hash.<radix>.Int
-			}
 			default {
 				say $_.hash.keys.gist;
 				warn "Unhandled case"
@@ -5602,9 +5530,6 @@ return True;
 
 	method _right( Mu $p ) {
 		given $p {
-			when self.assert-hash-keys( $_, [< right >] ) {
-				$_.hash.<right>.Bool
-			}
 			default {
 				say $_.hash.keys.gist;
 				warn "Unhandled case"
@@ -6017,9 +5942,6 @@ return True;
 
 	method _septype( Mu $p ) {
 		given $p {
-			when self.assert-hash-keys( $_, [< septype >] ) {
-				$_.hash.<septype>.Str
-			}
 			default {
 				say $_.hash.keys.gist;
 				warn "Unhandled case"
@@ -6029,9 +5951,6 @@ return True;
 
 	method _shape( Mu $p ) {
 		given $p {
-			when self.assert-hash-keys( $_, [< shape >] ) {
-				$_.hash.<shape>.Str
-			}
 			default {
 				say $_.hash.keys.gist;
 				warn "Unhandled case"
@@ -6092,9 +6011,6 @@ return True;
 
 	method _sigil( Mu $p ) {
 		given $p {
-			when self.assert-hash-keys( $_, [< sym >] ) {
-				$_.hash.<sym>.Str
-			}
 			default {
 				say $_.hash.keys.gist;
 				warn "Unhandled case"
@@ -6405,9 +6321,6 @@ return True;
 
 	method _specials( Mu $p ) {
 		given $p {
-			when self.assert-hash-keys( $_, [< specials >] ) {
-				$_.hash.<specials>.Bool
-			}
 			default {
 				say $_.hash.keys.gist;
 				warn "Unhandled case"
@@ -6656,21 +6569,21 @@ return True;
 					self._xblock( $_.hash.<xblock> )
 				);
 			}
-			elsif self.assert-hash-keys( $_, [< block sym >] ) {
-				@child = self._block(
-					$_.hash.<block>
-				);
-				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'block',
-						'sym'
-					)
-				);
+			elsif self.assert-hash-keys( $_, [< sym block >] ) {
 				@child.append(
 					self._sym(
 						$_.hash.<sym>
 					)
+				);
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						'sym',
+						'block'
+					)
+				);
+				@child = self._block(
+					$_.hash.<block>
 				)
 			}
 			else {
@@ -7595,9 +7508,6 @@ else {
 
 	method _twigil( Mu $p ) {
 		given $p {
-			when self.assert-hash-keys( $_, [< sym >] ) {
-				$_.hash.<sym>.Str
-			}
 			default {
 				say $_.hash.keys.gist;
 				warn "Unhandled case"
@@ -7883,6 +7793,8 @@ else {
 #		return $p.hash.<VALUE>.Str if
 #			$p.hash.<VALUE>.Str and $p.hash.<VALUE>.Str eq '0';
 #		$p.hash.<VALUE>.Int
+die "Catching Str";
+die "Catching Int";
 		$p.hash.<VALUE>.Str || $p.hash.<VALUE>.Int
 	}
 
@@ -8097,9 +8009,6 @@ else {
 
 	method _vstr( Mu $p ) {
 		given $p {
-			when self.assert-hash-keys( $_, [< vstr >] ) {
-				$_.hash.<vstr>.Int
-			}
 			default {
 				say $_.hash.keys.gist;
 				warn "Unhandled case"
@@ -8111,8 +8020,7 @@ else {
 		my Perl6::Element @child;
 		if $p.list {
 			for $p.list {
-				if self.assert-Int( $_ ) {
-					@child.append( $_.Int )
+				if 0 {
 				}
 				else {
 					say $_.hash.keys.gist;
@@ -8129,9 +8037,6 @@ else {
 
 	method _wu( Mu $p ) {
 		given $p {
-			when self.assert-hash-keys( $_, [< wu >] ) {
-				$_.hash.<wu>.Str
-			}
 			default {
 				say $_.hash.keys.gist;
 				warn "Unhandled case"
