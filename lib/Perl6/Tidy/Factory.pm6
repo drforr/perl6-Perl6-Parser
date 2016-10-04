@@ -4750,10 +4750,14 @@ return True;
 					[< lambda signature blockoid >] ) {
 				@child = self._lambda( $_.hash.<lambda> );
 				@child.append(
-					Perl6::WS.between-matches(
+#					Perl6::WS.between-matches(
+#						$_,
+#						'lambda',
+#						'signature'
+#					)
+					Perl6::WS.after(
 						$_,
-						'lambda',
-						'signature'
+						$_.hash.<lambda>
 					)
 				);
 				@child.append(
