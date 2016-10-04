@@ -3225,25 +3225,7 @@ class Perl6::Tidy::Factory {
 	method _infix( Mu $p ) {
 		my Perl6::Element @child;
 		given $p {
-			when self.assert-hash-keys( $_, [< infix OPER >] ) {
-				@child = self._infix(
-					$_.hash.<infix>
-				);
-				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'infix',
-						'OPER'
-					)
-				);
-				@child.append(
-					self._OPER(
-						$_.hash.<OPER>
-					)
-				)
-			}
 			when self.assert-hash-keys( $_, [< sym O >] ) {
-				# XXX fix?
 				@child.append(
 					Perl6::Operator::Infix.from-match(
 						$_.hash.<sym>
@@ -6211,9 +6193,19 @@ return True;
 			   type_constraint
 			   post_constraint >] ) {
 			@child.append(
-				self._param_var( $p.hash.<param_var> )#,
-#					self._quant( $p.hash.<quant> )
-			)
+				self._param_var( $p.hash.<param_var> )
+			);
+			if $p.hash.<trait> {
+				@child.append(
+					Perl6::WS.after(
+						$p,
+						$p.hash.<param_var>
+					)
+				);
+				@child.append(
+					self._trait( $p.hash.<trait> )
+				)
+			}
 		}
 		elsif self.assert-hash-keys( $p,
 			[< named_param quant >],
@@ -6856,15 +6848,32 @@ else {
 							$q.hash.<infix>
 						)
 					);
-					@child.append(
-						self._infix( $q.hash.<infix> )
-					);
-					@child.append(
-						Perl6::WS.after(
-							$p,
-							$q.hash.<infix>
+					# XXX Sigh.
+					if $p.hash.<EXPR>.Str.chars > 1 {
+						@child.append(
+							Perl6::Operator::Infix.from-match(
+								$p.hash.<EXPR>
+							)
+						);
+						@child.append(
+							Perl6::WS.after(
+								$p,
+								$p.hash.<EXPR>
+							)
 						)
-					);
+					}
+					else {
+						@child.append(
+							self._infix( $q.hash.<infix> )
+						);
+
+						@child.append(
+							Perl6::WS.after(
+								$p,
+								$q.hash.<infix>
+							)
+						);
+					}
 					@child.append(
 						self._EXPR( $q.list.[1] )
 					)
