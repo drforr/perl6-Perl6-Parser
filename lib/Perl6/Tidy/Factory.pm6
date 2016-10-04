@@ -186,32 +186,6 @@ Should you brave the internals in search of a missing term, the first thing you 
 
 =end pod
 
-#`(
-
-class Perl6::Variable::Contextualizer does Perl6::Branch {
-	also is Perl6::Variable;
-
-	method Str() { '' }
-}
-
-class Perl6::Variable::Contextualizer::Scalar {
-	also is Perl6::Variable::Contextualizer;
-	has $.sigil = '$';
-}
-class Perl6::Variable::Contextualizer::Hash {
-	also is Perl6::Variable::Contextualizer;
-	has $.sigil = '%';
-}
-class Perl6::Variable::Contextualizer::Array {
-	also is Perl6::Variable::Contextualizer;
-	has $.sigil = '@';
-}
-class Perl6::Variable::Contextualizer::Callable {
-	also is Perl6::Variable::Contextualizer;
-	has $.sigil = '&';
-}
-)
-
 class Perl6::Element {
 	has $.factory-line-number; # Purely a debugging aid.
 }
@@ -1051,11 +1025,6 @@ class Perl6::Number::Floating {
 
 class Perl6::Regex does Token {
 	also is Perl6::Element;
-#	has Str $.bare; # Easier to grab it from the parser.
-
-#	has $.q;
-#	has @.delimiter;
-#	has @.adverb;
 
 	multi method from-match( Mu $p ) {
 		if $p.from < $p.to {
@@ -1074,11 +1043,8 @@ class Perl6::Regex does Token {
 
 class Perl6::String does Token {
 	also is Perl6::Element;
-#	has Str $.bare; # Easier to grab it from the parser.
 
-#	has $.q;
 	has @.delimiter;
-#	has @.adverb;
 }
 class Perl6::String::Quote::Single does Token {
 	also is Perl6::String;
@@ -4599,8 +4565,7 @@ return True;
 				   type_constraint
 				   post_constraint >] ) {
 				@child.append(
-					self._param_var( $_.hash.<param_var> )#,
-#					self._quant( $_.hash.<quant> )
+					self._param_var( $_.hash.<param_var> )
 				)
 			}
 			elsif self.assert-hash-keys( $_,
@@ -4750,11 +4715,6 @@ return True;
 					[< lambda signature blockoid >] ) {
 				@child = self._lambda( $_.hash.<lambda> );
 				@child.append(
-#					Perl6::WS.between-matches(
-#						$_,
-#						'lambda',
-#						'signature'
-#					)
 					Perl6::WS.after(
 						$_,
 						$_.hash.<lambda>
@@ -4762,6 +4722,11 @@ return True;
 				);
 				@child.append(
 					self._signature( $_.hash.<signature> )
+				);
+				@child.append(
+					Perl6::WS.trailer(
+						$_.hash.<signature>
+					)
 				);
 				@child.append(
 					self._blockoid( $_.hash.<blockoid> )
