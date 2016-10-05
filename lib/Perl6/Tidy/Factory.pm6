@@ -1713,12 +1713,13 @@ class Perl6::Tidy::Factory {
 	}
 
 	method _backmod( Mu $p ) {
-		given $p {
-			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
-			}
-		}
+		( )
+#		given $p {
+#			default {
+#				say $_.hash.keys.gist;
+#				warn "Unhandled case"
+#			}
+#		}
 	}
 
 	# qq
@@ -2512,12 +2513,13 @@ class Perl6::Tidy::Factory {
 	}
 
 	method _doc( Mu $p ) {
-		given $p {
-			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
-			}
-		}
+		( )
+#		given $p {
+#			default {
+#				say $_.hash.keys.gist;
+#				warn "Unhandled case"
+#			}
+#		}
 	}
 
 	# .
@@ -2770,6 +2772,19 @@ class Perl6::Tidy::Factory {
 	method _EXPR( Mu $p ) {
 		my Perl6::Element @child;
 		if self.assert-hash-keys( $p,
+				[< dotty OPER
+				  postfix_prefix_meta_operator >] ) {
+			@child = self._EXPR( $p.list.[0] );
+			@child.append(
+				self._postfix_prefix_meta_operator(
+					$p.hash.<postfix_prefix_meta_operator>
+				)
+			);
+			@child.append(
+				self._dotty( $p.hash.<dotty> )
+			)
+		}
+		elsif self.assert-hash-keys( $p,
 				[< dotty OPER >],
 				[< postfix_prefix_meta_operator >] ) {
 			# XXX Look into this at some point.
@@ -2979,7 +2994,6 @@ class Perl6::Tidy::Factory {
 			}
 		}
 		elsif self.assert-hash-keys( $p, [< args op >] ) {
-#			@child = self._op( $p.hash.<op> );
 			@child.append(
 				self._args( $p.hash.<args> )
 			)
@@ -3445,12 +3459,13 @@ return True;
 	}
 
 	method _max( Mu $p ) {
-		given $p {
-			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
-			}
-		}
+		( )
+#		given $p {
+#			default {
+#				say $_.hash.keys.gist;
+#				warn "Unhandled case"
+#			}
+#		}
 	}
 
 	# :my
@@ -3812,12 +3827,13 @@ return True;
 	}
 
 	method _normspace( Mu $p ) {
-		given $p {
-			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
-			}
-		}
+		( )
+#		given $p {
+#			default {
+#				say $_.hash.keys.gist;
+#				warn "Unhandled case"
+#			}
+#		}
 	}
 
 	method _noun( Mu $p ) {
@@ -4784,6 +4800,37 @@ return True;
 		self._EXPR( $p.list.[0].hash.<EXPR> )
 	}
 
+	method _postfix_prefix_meta_operator( Mu $p ) {
+		my Perl6::Element @child;
+		if $p.list {
+			for $p.list {
+				if self.assert-hash-keys( $_, [< sym >] ) {
+					@child.append(
+						self._sym(
+							$_.hash.<sym>
+						)
+					)
+				}
+				elsif $_.Str {
+					@child.append(
+						Perl6::Operator::Infix.from-match(
+							$_
+						)
+					)
+				}
+				else {
+					say $_.hash.keys.gist;
+					warn "Unhandled case"
+				}
+			}
+		}
+		else {
+			say $_.hash.keys.gist;
+			warn "Unhandled case"
+		}
+		@child
+	}
+
 	method _post_constraint( Mu $p ) {
 		# XXX fix later
 		self._EXPR( $p.list.[0].hash.<EXPR> )
@@ -5006,12 +5053,13 @@ return True;
 	}
 
 	method _quant( Mu $p ) {
-		given $p {
-			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
-			}
-		}
+		( )
+#		given $p {
+#			default {
+#				say $_.hash.keys.gist;
+#				warn "Unhandled case"
+#			}
+#		}
 	}
 
 	method _quantified_atom( Mu $p ) {
@@ -5347,12 +5395,13 @@ return True;
 	}
 
 	method _radix( Mu $p ) {
-		given $p {
-			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
-			}
-		}
+		( )
+#		given $p {
+#			default {
+#				say $_.hash.keys.gist;
+#				warn "Unhandled case"
+#			}
+#		}
 	}
 
 	method _rad_number( Mu $p ) {
@@ -5480,12 +5529,13 @@ return True;
 	}
 
 	method _right( Mu $p ) {
-		given $p {
-			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
-			}
-		}
+		( )
+#		given $p {
+#			default {
+#				say $_.hash.keys.gist;
+#				warn "Unhandled case"
+#			}
+#		}
 	}
 
 	# sub <name> ... { },
@@ -5892,21 +5942,23 @@ return True;
 	}
 
 	method _septype( Mu $p ) {
-		given $p {
-			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
-			}
-		}
+		( )
+#		given $p {
+#			default {
+#				say $_.hash.keys.gist;
+#				warn "Unhandled case"
+#			}
+#		}
 	}
 
 	method _shape( Mu $p ) {
-		given $p {
-			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
-			}
-		}
+		( )
+#		given $p {
+#			default {
+#				say $_.hash.keys.gist;
+#				warn "Unhandled case"
+#			}
+#		}
 	}
 
 	method _sibble( Mu $p ) {
@@ -5951,7 +6003,7 @@ return True;
 	method _sigfinal( Mu $p ) {
 		given $p {
 			when self.assert-hash-keys( $_, [< normspace >] ) {
-				self._normspace( $_.hash.<normspace> )
+				( )
 			}
 			default {
 				say $_.hash.keys.gist;
@@ -5961,12 +6013,13 @@ return True;
 	}
 
 	method _sigil( Mu $p ) {
-		given $p {
-			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
-			}
-		}
+		( )
+#		given $p {
+#			default {
+#				say $_.hash.keys.gist;
+#				warn "Unhandled case"
+#			}
+#		}
 	}
 
 	method _sigmaybe( Mu $p ) {
@@ -6281,12 +6334,13 @@ return True;
 	}
 
 	method _specials( Mu $p ) {
-		given $p {
-			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
-			}
-		}
+		( )
+#		given $p {
+#			default {
+#				say $_.hash.keys.gist;
+#				warn "Unhandled case"
+#			}
+#		}
 	}
 
 	# if
@@ -6408,7 +6462,6 @@ return True;
 			}
 			elsif self.assert-hash-keys( $_,
 					[< doc sym module_name >] ) {
-				@child = self._doc( $_.hash.<doc> );
 				@child.append(
 					Perl6::WS.between-matches(
 						$_,
@@ -7485,12 +7538,13 @@ else {
 	}
 
 	method _twigil( Mu $p ) {
-		given $p {
-			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
-			}
-		}
+		( )
+#		given $p {
+#			default {
+#				say $_.hash.keys.gist;
+#				warn "Unhandled case"
+#			}
+#		}
 	}
 
 	method _type_constraint( Mu $p ) {
@@ -7986,12 +8040,13 @@ die "Catching Int";
 	}
 
 	method _vstr( Mu $p ) {
-		given $p {
-			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
-			}
-		}
+		( )
+#		given $p {
+#			default {
+#				say $_.hash.keys.gist;
+#				warn "Unhandled case"
+#			}
+#		}
 	}
 
 	method _vnum( Mu $p ) {
@@ -8014,12 +8069,13 @@ die "Catching Int";
 	}
 
 	method _wu( Mu $p ) {
-		given $p {
-			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
-			}
-		}
+		( )
+#		given $p {
+#			default {
+#				say $_.hash.keys.gist;
+#				warn "Unhandled case"
+#			}
+#		}
 	}
 
 	method _xblock( Mu $p ) {
