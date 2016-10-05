@@ -5461,9 +5461,6 @@ return True;
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash-keys( $_, [< sym regex_def >] ) {
-key-bounds $p.hash.<sym>;
-key-bounds $p.hash.<regex_def>;
-say 14;
 				@child.append(
 					Perl6::WS.with-inter-ws(
 						$_,
