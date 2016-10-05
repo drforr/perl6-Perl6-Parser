@@ -3803,15 +3803,39 @@ return True;
 	}
 
 	method _nibble( Mu $p ) {
-		given $p {
-			when self.assert-hash-keys( $_, [< termseq >] ) {
+		my Perl6::Element @child;
+		if self.assert-hash-keys( $_, [< termseq >] ) {
+			@child.append(
 				self._termseq( $_.hash.<termseq> )
-			}
-			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
-			}
+			)
 		}
+		elsif $p.Str {
+			if $p.Str ~~ m{ ^ ( .+? ) ( \s+ ) $ } {
+				@child.append(
+					Perl6::Bareword.new(
+						:factory-line-number(
+							callframe(1).line
+						),
+						:from( $p.from ),
+						:to( $p.from + $0.chars ),
+						:content( $0.Str )
+					)
+				)
+			}
+			else {
+				@child.append(
+					Perl6::Bareword.from-match( $p )
+				)
+			}
+#			@child.append(
+#				Perl6::WS.trailer( $p )
+#			)
+		}
+		else {
+			say $_.hash.keys.gist;
+			warn "Unhandled case"
+		}
+		@child
 	}
 
 	method _nibbler( Mu $p ) {
@@ -3995,6 +4019,12 @@ return True;
 						self._quantifier(
 							$_.hash.<quantifier>
 					 	)
+					)
+				}
+				elsif self.assert-hash-keys( $_,
+					[< atom sigfinal >] ) {
+					@child.append(
+						self._atom( $_.hash.<atom> )
 					)
 				}
 				elsif self.assert-hash-keys( $_,
@@ -5431,6 +5461,9 @@ return True;
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash-keys( $_, [< sym regex_def >] ) {
+key-bounds $p.hash.<sym>;
+key-bounds $p.hash.<regex_def>;
+say 14;
 				@child.append(
 					Perl6::WS.with-inter-ws(
 						$_,
@@ -5459,65 +5492,95 @@ return True;
 
 	method _regex_def( Mu $p ) {
 		my Perl6::Element @child;
+
+		# 'regex Foo { token }'
+		#	deflongname = 'Foo'
+		#	nibble = 'token '
+		#
 		if self.assert-hash-keys( $p,
 				[< deflongname nibble >],
 				[< signature trait >] ) {
 			my Perl6::Element @_child;
-			my $x = $p.Str.substr(
-				0, $p.hash.<nibble>.from - $p.from
+			@child.append(
+				self._deflongname(
+					$p.hash.<deflongname>
+				)
 			);
-			if $x ~~ m{ ( \s+ ) $ } {
+			@child.append(
+				Perl6::WS.after(
+					$p,
+					$p.hash.<deflongname>
+				)
+			);
+			my $left-margin = $p.from;
+			my $right-margin = $p.to;
+			$left-margin += $p.hash.<deflongname>.Str.chars;
+			my $x = $p.Str.substr(
+				$p.hash.<deflongname>.to - $p.from
+			);
+			if $x ~~ m{ ^ ( \s+ ) } {
+				$left-margin += $0.Str.chars;
+			}
+			if $p.Str ~~ m{ ( \s+ ) $ } {
+				$right-margin -= $0.Str.chars;
+			}
+
+			@_child.append(
+				Perl6::Balanced::Enter.new(
+					:factory-line-number(
+						callframe(1).line
+					),
+					:from( $left-margin ),
+					:to( $left-margin + 1 ),
+					:content( '{' )
+				)
+			);
+			$x = $p.Str.substr( $left-margin + 1 - $p.from );
+			if $x ~~ m{ ^ ( \s+ ) } {
 				@_child.append(
 					Perl6::WS.new(
-						:factory-line-number( callframe(1).line ),
-						:from(	$p.hash.<nibble>.from -
-							$0.Str.chars ),
-						:to( $p.hash.<nibble>.from ),
+						:factory-line-number(
+							callframe(1).line
+						),
+						:from(
+							$left-margin + 1
+						),
+						:to( 
+							$left-margin + 1 + $0.Str.chars
+						),
 						:content( $0.Str )
 					)
 				)
 			}
 			@_child.append(
-				Perl6::WS.with-trailer(
-					$p.hash.<nibble>,
-					self._nibble( $p.hash.<nibble> )
+				self._nibble(
+					$p.hash.<nibble>
 				)
 			);
-			@child = self._deflongname( $p.hash.<deflongname> );
-			my $remainder = substr(
-				$p.Str, $p.hash.<deflongname>.Str.chars
-			);
-			my $inset = 0;
-			if $remainder ~~ m{ ^ ( \s+ ) } {
-				$inset = $0.chars;
-				@child.append(
-					Perl6::WS.new(
-						:factory-line-number( callframe(1).line ),
-						:from(
-							$p.hash.<deflongname>.to
-						),
-						:to(
-							$p.hash.<deflongname>.to
-							+ $0.Str.chars
-						),
-						:content( $0.Str )
-					)
+			$x = $p.Str.substr( $p.hash.<nibble>.to - $p.from );
+			@_child.append(
+				Perl6::WS.trailer(
+					$p.hash.<nibble>
 				)
-			}
-			my $right-inset = 0;
-			$p.Str ~~ m{ ( . ) ( \s* ) $ }; my $back = $0.Str;
-			if $1.Str {
-				$right-inset = $1.Str.chars;
-			}
-			# XXX Collect { } from the actual text
+			);
+			@_child.append(
+				Perl6::Balanced::Exit.new(
+					:factory-line-number(
+						callframe(1).line
+					),
+					:from( $right-margin - 1 ),
+					:to( $right-margin ),
+					:content( '}' )
+				)
+			);
 			@child.append(
-				Perl6::Block.from-from-to-XXX(
-					$p.hash.<deflongname>.to + $inset,
-					$p.to - $right-inset,
-					'{',
-					$back,
-					@_child
-					
+				Perl6::Block.new(
+					:factory-line-number(
+						callframe(1).line
+					),
+					:from( @_child[0].from ),
+					:to( @_child[*-1].to ),
+					:child( @_child )
 				)
 			)
 		}
@@ -7332,7 +7395,6 @@ else {
 
 	method _termconj( Mu $p ) {
 		my Perl6::Element @child;
-		CATCH { when X::Hash::Store::OddNumber { .resume } } # XXX ?...
 		if $p.list {
 			for $p.list {
 				if self.assert-hash-keys( $_, [< termish >] ) {
