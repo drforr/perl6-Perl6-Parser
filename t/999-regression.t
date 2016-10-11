@@ -1,11 +1,11 @@
 use v6;
 
 use Test;
-use Perl6::Tidy;
+use Perl6::Parser;
 
 plan 3;
 
-my $pt = Perl6::Tidy.new;
+my $pt = Perl6::Parser.new;
 
 subtest {
 	plan 2;
@@ -13,7 +13,7 @@ subtest {
 	my $source = Q:to[_END_];
 say <closed open>;
 _END_
-	my $p = $pt.parse-source( $source );
+	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
 #say $pt.dump-tree($tree);
 	ok $pt.validate( $p ), Q{valid};
@@ -28,7 +28,7 @@ subtest {
 	my $source = Q:to[_END_];
 my @quantities = flat (99 ... 1), 'No more', 99;
 _END_
-	my $p = $pt.parse-source( $source );
+	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
 #say $pt.dump-tree($tree);
 	ok $pt.validate( $p ), Q{valid};
@@ -41,7 +41,7 @@ subtest {
 	my $source = Q:to[_END_];
 sub foo( $a is copy ) { }
 _END_
-	my $p = $pt.parse-source( $source );
+	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
 #say $pt.dump-tree($tree);
 	ok $pt.validate( $p ), Q{valid};

@@ -1,0 +1,14 @@
+#!/usr/bin/env perl6
+
+use lib '../lib';
+use Perl6::Parser;
+
+sub MAIN( Str $filename ) {
+	my $text = $filename.IO.slurp;
+
+	my $pt = Perl6::Parser.new;
+	my $p = $pt.parse-source( $text );
+	my $tree = $pt.build-tree( $p );
+	say "Source validated!" if $pt.validate( $p );
+	say $pt.dump-tree( $tree );
+}

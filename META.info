@@ -1,13 +1,14 @@
 {
-	"name"         : "Perl6-Tidy",
+	"name"         : "Perl6-Parser",
 	"version"      : "*",
-	"description"  : "Perl 6 tidying tool",
+	"description"  : "Perl 6 parsing",
 	"test-depends" : [
 		"Test"
 	],
 	"provides"     : {
-		"Perl6::Tidy"        : "lib/Perl6/Tidy.pm6"
-		"Perl6::Tidy::Nodes" : "lib/Perl6/Tidy/Nodes.pm6"
+		"Perl6::Parser"        : "lib/Perl6/Parser.pm6"
+		"Perl6::Parser::Factory" : "lib/Perl6/Parser/Factory.pm6"
+		"Perl6::Parser::Validator" : "lib/Perl6/Parser/Validator.pm6"
 	},
-	"source-url"   : "git://github.com/drforr/perl6-Perl6-Tidy.git"
+	"source-url"   : "git://github.com/drforr/perl6-Perl6-Parser.git"
 }

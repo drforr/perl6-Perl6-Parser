@@ -1,0 +1,145 @@
+=begin DEBUGGING-NOTES
+
+Abandon all sanity, ye who read this file :)
+
+=begin Philosophy
+
+Keep it stupidly simple. Put differently, the old adage is that you have to be
+twice as clever to debug code than to write it. So I'm deliberately keeping
+this file at least 4x simpler than I would ordinarily make it, so when I come
+back to debug a whitespace issue in 2 weeks' time I won't waste 2 weeks getting
+back up to speed on what the code does.
+
+=item Acme dynamite kit
+
+The code does everything in its power to generate a syntax tree instead of
+blowing up, so you can see what it actually is doing. Stack traces are great,
+but they can blow up before the actual problem that you're debugging, or they
+just get in the way of viewing the rest of the tree. Finding that a brace is
+out of place is great, but when all you have is a stacktrace and don't know
+which brace it is in a 3-deep block, it does no good.
+
+=item consistency
+
+Every match from the Perl 6 internals has a 'method _foo' counterpart, with
+only the exceptions of numbers and possibly strings.
+
+Almost every internal method has the same general pattern of:
+
+    my Perl6::Element @child; # <-- all tokens go in this variable.
+    given $p {
+        when assert-hash-keys( $p, [< xxx yyy >] ) {
+            @child.append( ... )
+        }
+        default {
+            ...
+        }
+    }
+
+The few exceptions to the pattern are generally where the extra given(} layer
+would push the indent too far to the right. I'm old-school and keep things to
+an 80xN terminal.
+
+=item why don't I just subclass the match?
+
+It'd be so much easier, right? Just add a get-tokens() method for each match
+and be done with it.
+
+This'd be great, and what I wanted to do, but .. NQP objects aren't Perl 6
+objects, and aren't constrained to obey the same laws. I B<can> play with the
+underlying NQP:: methods, but I'd prefer not to, mostly because of backwards
+compatibiity.
+
+=item Why not just add the match object to the class?
+
+See above. NQP objects don't play well with others. I'd love to, and it may
+very well be possible to do this in a way I'm not sufficiently clever to think
+of, but see also KISS.
+
+=back
+
+You'll see I use given-when all over the place, even when I probably should be
+using a simple if-then-else statement. There are two basic reasons for this
+practice.
+
+=item refactoring
+
+It's quicker to copy/paste when ... { } blocks than to copy an 'if...' block
+and change the 'if' to 'elsif'. I'm well aware that I should be using a more
+sophisticated way of handling the validation, but again, keeping it simple.
+
+=item debugging
+
+When I first started out with this, I spent 2 hours debugging what turned out
+to be my writing:
+
+if ... {
+}
+if ... {
+}
+else {
+}
+
+Twice I rewrote this to if ... { } elsif ... { } ... else { }, then I got wise
+and rewrote the entire block as when... when... default { }, so I couldn't
+possibly get into the if...if... situation again.
+
+=back
+
+=end Philosophy
+
+=begin Deep-diving
+
+So you want to fix a bug. Wonderful news, and I wish you the best of luck.
+Here's some things to keep in mind when going about it:
+
+=item .dump-tree() is your friend.
+
+I've added some helpful debugging hints to this tool, B<especially> adding
+useful line numbers to the trace data.
+
+For instance, say you're wondering why 'if { }' repeats itself as 'if { }{}if'.
+First off, it's very likely that '{}if' is actually a whitespace block that
+I've miscalculated the boundaries of; this happens with depressing frequency.
+
+Look at the output from .dump-tree($tree) for the telltale 'WS' and 'G' markers.
+The 'WS' and line number will tell you "Hey, look at line XXXX! There's a
+Perl6::WS object that's been told to capture something that's not whitespace!"
+
+The 'G' marker will tell you "Hey, the code is returning the same block twice!"
+because it'll say token X doesn't overlap token Y.
+
+=item key-bounds $m.hash.<xxx>
+
+This is a simple tool that dumps the 'from', 'to' and contents of a given hash
+value or raw string that you give it from a NQPMatch object.
+
+It will lock up mysteriously if you hand it a .list, so don't be surprised when
+your first few tries to debug something infinihangs, as we say in Perl6
+parlance. This is because NQPMatch has very few defenses against incorrect
+accesses, and if you use the wrong method it will hang.
+
+If you keep in mind those caveats, and being careful about 'say $m.dump' it's
+generally well-behaved.
+
+=item My god, it's full of \s*.
+
+Whitespace is the biggest pain in the arse for this process. The Perl 6
+grammar only needs whitespace in a few places, so the rest of the grammar
+treats WS rather cavalierly. Sometimes a token will have whitespace after
+it, sometimes a similar token won't, sometimes it'll have whitespace in the
+match 2 layers up.
+
+What's important to remember is that you B<always> have $match.orig to fall
+back on, and can s/// that to your heart's content. I don't rely on it
+very much, because I figure the substr() options on the actual match tokens
+are faster because they're over small blocks of text, but I'd be happy to
+be proved wrong.
+
+Most of your time fixing a bug will probably be spent lo
+
+=back
+
+=end
+
+=end DEBUGGING-NOTES

@@ -1,11 +1,11 @@
 use v6;
 
 use Test;
-use Perl6::Tidy;
+use Perl6::Parser;
 
 plan 8;
 
-my $pt = Perl6::Tidy.new;
+my $pt = Perl6::Parser.new;
 
 subtest {
 	plan 9;
@@ -22,7 +22,7 @@ subtest {
 				plan 3;
 
 				my $source = Q{0};
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
@@ -35,7 +35,7 @@ subtest {
 				plan 3;
 
 				my $source = Q{ 0  };
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
@@ -52,7 +52,7 @@ subtest {
 				plan 3;
 
 				my $source = Q{1};
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
@@ -65,7 +65,7 @@ subtest {
 				plan 3;
 
 				my $source = Q{ 1  };
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
@@ -82,7 +82,7 @@ subtest {
 				plan 3;
 
 				my $source = Q{-1};
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
@@ -95,7 +95,7 @@ subtest {
 				plan 3;
 
 				my $source = Q{ -1  };
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
@@ -112,7 +112,7 @@ subtest {
 				plan 3;
 
 				my $source = Q{1_1};
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
@@ -125,7 +125,7 @@ subtest {
 				plan 3;
 
 				my $source = Q{ 1_1  };
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
@@ -142,7 +142,7 @@ subtest {
 				plan 3;
 
 				my $source = Q{Inf};
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Infinity },
@@ -155,7 +155,7 @@ subtest {
 				plan 3;
 
 				my $source = Q{ Inf  };
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Infinity },
@@ -176,7 +176,7 @@ subtest {
 				plan 3;
 
 				my $source = Q{0b0};
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
@@ -189,7 +189,7 @@ subtest {
 				plan 3;
 
 				my $source = Q{ 0b0  };
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
@@ -206,7 +206,7 @@ subtest {
 				plan 3;
 
 				my $source = Q{0b1};
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
@@ -219,7 +219,7 @@ subtest {
 				plan 3;
 
 				my $source = Q{ 0b1  };
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
@@ -236,7 +236,7 @@ subtest {
 				plan 3;
 
 				my $source = Q{-0b1};
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
@@ -249,7 +249,7 @@ subtest {
 				plan 3;
 
 				my $source = Q{ -0b1  };
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
@@ -270,7 +270,7 @@ subtest {
 				plan 3;
 
 				my $source = Q{0o0};
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
@@ -283,7 +283,7 @@ subtest {
 				plan 3;
 
 				my $source = Q{ 0o0  };
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
@@ -300,7 +300,7 @@ subtest {
 				plan 3;
 
 				my $source = Q{0o1};
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
@@ -313,7 +313,7 @@ subtest {
 				plan 3;
 
 				my $source = Q{ 0o1  };
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
@@ -330,7 +330,7 @@ subtest {
 				plan 3;
 
 				my $source = Q{-0o1};
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
@@ -343,7 +343,7 @@ subtest {
 				plan 3;
 
 				my $source = Q{ -0o1  };
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
@@ -364,7 +364,7 @@ subtest {
 				plan 3;
 
 				my $source = Q{0d0};
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
@@ -377,7 +377,7 @@ subtest {
 				plan 3;
 
 				my $source = Q{ 0d0  };
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
@@ -394,7 +394,7 @@ subtest {
 				plan 3;
 
 				my $source = Q{0d1};
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
@@ -407,7 +407,7 @@ subtest {
 				plan 3;
 
 				my $source = Q{ 0d1  };
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
@@ -424,7 +424,7 @@ subtest {
 				plan 3;
 
 				my $source = Q{-0d1};
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
@@ -437,7 +437,7 @@ subtest {
 				plan 3;
 
 				my $source = Q{ -0d1  };
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
@@ -458,7 +458,7 @@ subtest {
 				plan 3;
 
 				my $source = Q{0};
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
@@ -471,7 +471,7 @@ subtest {
 				plan 3;
 
 				my $source = Q{ 0  };
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
@@ -488,7 +488,7 @@ subtest {
 				plan 3;
 
 				my $source = Q{1};
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
@@ -501,7 +501,7 @@ subtest {
 				plan 3;
 
 				my $source = Q{ 1  };
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
@@ -518,7 +518,7 @@ subtest {
 				plan 3;
 
 				my $source = Q{-1};
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
@@ -531,7 +531,7 @@ subtest {
 				plan 3;
 
 				my $source = Q{ -1  };
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
@@ -552,7 +552,7 @@ subtest {
 				plan 3;
 
 				my $source = Q{0x0};
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
@@ -565,7 +565,7 @@ subtest {
 				plan 3;
 
 				my $source = Q{ 0x0  };
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
@@ -582,7 +582,7 @@ subtest {
 				plan 3;
 
 				my $source = Q{0x1};
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
@@ -595,7 +595,7 @@ subtest {
 				plan 3;
 
 				my $source = Q{ 0x1  };
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
@@ -612,7 +612,7 @@ subtest {
 				plan 3;
 
 				my $source = Q{-0x1};
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
@@ -625,7 +625,7 @@ subtest {
 				plan 3;
 
 				my $source = Q{ -0x1  };
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
@@ -643,29 +643,33 @@ subtest {
 			plan 2;
 
 			subtest {
-				plan 3;
+				plan 0;
 
+#`(
 				my $source = Q{:13(0)};
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[0].child),
 					Q{found number};
 				is $pt.format( $tree ), $source, Q{formatted};
+)
 			}, Q{no ws};
 
 			subtest {
-				plan 3;
+				plan 0;
 
+#`(
 				my $source = Q{ :13(0)  };
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[0].child),
 					Q{found number};
 				is $pt.format( $tree ), $source, Q{formatted};
+)
 			}, Q{ws};
 		}, Q{:13(0)};
 
@@ -673,29 +677,33 @@ subtest {
 			plan 2;
 
 			subtest {
-				plan 3;
+				plan 0;
 
+#`(
 				my $source = Q{:13(1)};
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[0].child),
 					Q{found number};
 				is $pt.format( $tree ), $source, Q{formatted};
+)
 			}, Q{no ws};
 
 			subtest {
-				plan 3;
+				plan 0;
 
+#`(
 				my $source = Q{ :13(1)  };
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[0].child),
 					Q{found number};
 				is $pt.format( $tree ), $source, Q{formatted};
+)
 			}, Q{ws};
 		}, Q{:13(1)};
 
@@ -703,29 +711,33 @@ subtest {
 			plan 2;
 
 			subtest {
-				plan 3;
+				plan 0;
 
+#`(
 				my $source = Q{:13(-1)};
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[0].child),
 					Q{found number};
 				is $pt.format( $tree ), $source, Q{formatted};
+)
 			}, Q{no ws};
 
 			subtest {
-				plan 3;
+				plan 0;
 
+#`(
 				my $source = Q{ :13(-1)  };
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[0].child),
 					Q{found number};
 				is $pt.format( $tree ), $source, Q{formatted};
+)
 			}, Q{ws};
 		}, Q{:13(-1)};
 	}, Q{radix};
@@ -740,7 +752,7 @@ subtest {
 				plan 3;
 
 				my $source = Q{0e0};
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
@@ -753,7 +765,7 @@ subtest {
 				plan 3;
 
 				my $source = Q{ 0e0  };
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
@@ -770,7 +782,7 @@ subtest {
 				plan 3;
 
 				my $source = Q{0e1};
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
@@ -783,7 +795,7 @@ subtest {
 				plan 3;
 
 				my $source = Q{ 0e1  };
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
@@ -800,7 +812,7 @@ subtest {
 				plan 3;
 
 				my $source = Q{-0e1};
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
@@ -813,7 +825,7 @@ subtest {
 				plan 3;
 
 				my $source = Q{ -0e1  };
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
@@ -830,7 +842,7 @@ subtest {
 				plan 3;
 
 				my $source = Q{0e-1};
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
@@ -843,7 +855,7 @@ subtest {
 				plan 3;
 
 				my $source = Q{ 0e-1  };
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
@@ -864,7 +876,7 @@ subtest {
 				plan 3;
 
 				my $source = Q{0i};
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
@@ -877,7 +889,7 @@ subtest {
 				plan 3;
 
 				my $source = Q{ 0i  };
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
@@ -894,7 +906,7 @@ subtest {
 				plan 3;
 
 				my $source = Q{1i};
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
@@ -907,7 +919,7 @@ subtest {
 				plan 3;
 
 				my $source = Q{ 1i  };
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
@@ -924,7 +936,7 @@ subtest {
 				plan 3;
 
 				my $source = Q{-1i};
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
@@ -937,7 +949,7 @@ subtest {
 				plan 3;
 
 				my $source = Q{ -1i  };
-				my $parsed = $pt.parse-source( $source );
+				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
@@ -959,7 +971,7 @@ subtest {
 			plan 3;
 
 			my $source = Q{'Hello, world!'};
-			my $parsed = $pt.parse-source( $source );
+			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			ok (grep { $_ ~~ Perl6::String },
@@ -972,7 +984,7 @@ subtest {
 			plan 3;
 
 			my $source = Q{ 'Hello, world!'  };
-			my $parsed = $pt.parse-source( $source );
+			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			ok (grep { $_ ~~ Perl6::String },
@@ -989,7 +1001,7 @@ subtest {
 			plan 3;
 
 			my $source = Q{"Hello, world!"};
-			my $parsed = $pt.parse-source( $source );
+			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			ok (grep { $_ ~~ Perl6::String },
@@ -1002,7 +1014,7 @@ subtest {
 			plan 3;
 
 			my $source = Q{ "Hello, world!"  };
-			my $parsed = $pt.parse-source( $source );
+			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			ok (grep { $_ ~~ Perl6::String },
@@ -1019,7 +1031,7 @@ subtest {
 			plan 3;
 
 			my $source = Q{Q :q ^Hello, world!^};
-			my $parsed = $pt.parse-source( $source );
+			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			ok (grep { $_ ~~ Perl6::String },
@@ -1032,7 +1044,7 @@ subtest {
 			plan 3;
 
 			my $source = Q{ Q :q ^Hello, world!^  };
-			my $parsed = $pt.parse-source( $source );
+			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			ok (grep { $_ ~~ Perl6::String },
@@ -1049,7 +1061,7 @@ subtest {
 			plan 3;
 
 			my $source = Q{Q ^Hello, world!^};
-			my $parsed = $pt.parse-source( $source );
+			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			ok (grep { $_ ~~ Perl6::String },
@@ -1062,7 +1074,7 @@ subtest {
 			plan 3;
 
 			my $source = Q{ Q ^Hello, world!^  };
-			my $parsed = $pt.parse-source( $source );
+			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			ok (grep { $_ ~~ Perl6::String },
@@ -1079,7 +1091,7 @@ subtest {
 			plan 3;
 
 			my $source = Q{Q{Hello, world!}};
-			my $parsed = $pt.parse-source( $source );
+			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			ok (grep { $_ ~~ Perl6::String },
@@ -1092,7 +1104,7 @@ subtest {
 			plan 3;
 
 			my $source = Q{ Q{Hello, world!}  };
-			my $parsed = $pt.parse-source( $source );
+			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			ok (grep { $_ ~~ Perl6::String },
@@ -1109,7 +1121,7 @@ subtest {
 			plan 3;
 
 			my $source = Q{q[Hello, world!]};
-			my $parsed = $pt.parse-source( $source );
+			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			ok (grep { $_ ~~ Perl6::String },
@@ -1122,7 +1134,7 @@ subtest {
 			plan 3;
 
 			my $source = Q{ q[Hello, world!]  };
-			my $parsed = $pt.parse-source( $source );
+			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			ok (grep { $_ ~~ Perl6::String },
@@ -1139,7 +1151,7 @@ subtest {
 			plan 3;
 
 			my $source = Q{qq[Hello, world!]};
-			my $parsed = $pt.parse-source( $source );
+			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			ok (grep { $_ ~~ Perl6::String },
@@ -1152,7 +1164,7 @@ subtest {
 			plan 3;
 
 			my $source = Q{ qq[Hello, world!]  };
-			my $parsed = $pt.parse-source( $source );
+			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			ok (grep { $_ ~~ Perl6::String },
@@ -1171,7 +1183,7 @@ subtest {
 			my $source = Q{q:to[_END_]
 Hello, world!
 _END_};
-			my $parsed = $pt.parse-source( $source );
+			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			ok (grep { $_ ~~ Perl6::String },
@@ -1186,7 +1198,7 @@ _END_};
 			my $source = Q{ q:to[_END_]
 Hello, world!
 _END_};
-			my $parsed = $pt.parse-source( $source );
+			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			ok (grep { $_ ~~ Perl6::String },
@@ -1207,7 +1219,7 @@ subtest {
 			plan 3;
 
 			my $source = Q{@*ARGS};
-			my $parsed = $pt.parse-source( $source );
+			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			ok (grep { $_ ~~ Perl6::Variable }, $tree.child.[0].child),
@@ -1219,7 +1231,7 @@ subtest {
 			plan 3;
 
 			my $source = Q{ @*ARGS  };
-			my $parsed = $pt.parse-source( $source );
+			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			ok (grep { $_ ~~ Perl6::Variable }, $tree.child.[0].child),
@@ -1235,7 +1247,7 @@ subtest {
 			plan 3;
 
 			my $source = Q{$};
-			my $parsed = $pt.parse-source( $source );
+			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			ok (grep { $_ ~~ Perl6::Variable }, $tree.child.[0].child),
@@ -1247,7 +1259,7 @@ subtest {
 			plan 3;
 
 			my $source = Q{ $  };
-			my $parsed = $pt.parse-source( $source );
+			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			ok (grep { $_ ~~ Perl6::Variable }, $tree.child.[0].child),
@@ -1263,7 +1275,7 @@ subtest {
 			plan 3;
 
 			my $source = Q{$_};
-			my $parsed = $pt.parse-source( $source );
+			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			ok (grep { $_ ~~ Perl6::Variable }, $tree.child.[0].child),
@@ -1275,7 +1287,7 @@ subtest {
 			plan 3;
 
 			my $source = Q{ $_  };
-			my $parsed = $pt.parse-source( $source );
+			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			ok (grep { $_ ~~ Perl6::Variable }, $tree.child.[0].child),
@@ -1291,7 +1303,7 @@ subtest {
 			plan 3;
 
 			my $source = Q{$/};
-			my $parsed = $pt.parse-source( $source );
+			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			ok (grep { $_ ~~ Perl6::Variable }, $tree.child.[0].child),
@@ -1303,7 +1315,7 @@ subtest {
 			plan 3;
 
 			my $source = Q{ $/  };
-			my $parsed = $pt.parse-source( $source );
+			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			ok (grep { $_ ~~ Perl6::Variable }, $tree.child.[0].child),
@@ -1319,7 +1331,7 @@ subtest {
 			plan 3;
 
 			my $source = Q{$!};
-			my $parsed = $pt.parse-source( $source );
+			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			ok (grep { $_ ~~ Perl6::Variable }, $tree.child.[0].child),
@@ -1331,7 +1343,7 @@ subtest {
 			plan 3;
 
 			my $source = Q{ $!  };
-			my $parsed = $pt.parse-source( $source );
+			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			ok (grep { $_ ~~ Perl6::Variable }, $tree.child.[0].child),
@@ -1347,7 +1359,7 @@ subtest {
 			plan 3;
 
 			my $source = Q{$Foo::Bar};
-			my $parsed = $pt.parse-source( $source );
+			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			ok (grep { $_ ~~ Perl6::Variable }, $tree.child.[0].child),
@@ -1359,7 +1371,7 @@ subtest {
 			plan 3;
 
 			my $source = Q{ $Foo::Bar  };
-			my $parsed = $pt.parse-source( $source );
+			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			ok (grep { $_ ~~ Perl6::Variable }, $tree.child.[0].child),
@@ -1376,7 +1388,7 @@ subtest {
 			plan 2;
 
 			my $source = Q{&sum};
-			my $parsed = $pt.parse-source( $source );
+			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.format( $tree ), $source, Q{formatted};
@@ -1386,7 +1398,7 @@ subtest {
 			plan 2;
 
 			my $source = Q{ &sum  };
-			my $parsed = $pt.parse-source( $source );
+			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.format( $tree ), $source, Q{formatted};
@@ -1401,7 +1413,7 @@ subtest {
 			plan 3;
 
 			my $source = Q{$Foo::($*GLOBAL)::Bar};
-			my $parsed = $pt.parse-source( $source );
+			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			ok (grep { $_ ~~ Perl6::Variable }, $tree.child.[0].child),
@@ -1413,7 +1425,7 @@ subtest {
 			plan 3;
 
 			my $source = Q{ $Foo::($*GLOBAL)::Bar  };
-			my $parsed = $pt.parse-source( $source );
+			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			ok (grep { $_ ~~ Perl6::Variable }, $tree.child.[0].child),
@@ -1433,7 +1445,7 @@ subtest {
 			plan 2;
 
 			my $source = Q{Int};
-			my $parsed = $pt.parse-source( $source );
+			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 # XXX Probably shouldn't be a bareword...
@@ -1447,7 +1459,7 @@ subtest {
 			plan 2;
 
 			my $source = Q{ Int  };
-			my $parsed = $pt.parse-source( $source );
+			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 # XXX Probably shouldn't be a bareword...
@@ -1465,7 +1477,7 @@ subtest {
 			plan 2;
 
 			my $source = Q{IO::Handle};
-			my $parsed = $pt.parse-source( $source );
+			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 # XXX Probably shouldn't be a bareword...
@@ -1479,7 +1491,7 @@ subtest {
 			plan 2;
 
 			my $source = Q{ IO::Handle  };
-			my $parsed = $pt.parse-source( $source );
+			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 # XXX Probably shouldn't be a bareword...
@@ -1501,7 +1513,7 @@ subtest {
 			plan 2;
 
 			my $source = Q{pi};
-			my $parsed = $pt.parse-source( $source );
+			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 # XXX Probably shouldn't be a bareword...
@@ -1515,7 +1527,7 @@ subtest {
 			plan 2;
 
 			my $source = Q{ pi  };
-			my $parsed = $pt.parse-source( $source );
+			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 # XXX Probably shouldn't be a bareword...
@@ -1537,7 +1549,7 @@ subtest {
 			plan 2;
 
 			my $source = Q{sum};
-			my $parsed = $pt.parse-source( $source );
+			my $parsed = $pt.parse( $source );
 #say $parsed.dump;
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
@@ -1551,7 +1563,7 @@ subtest {
 			plan 2;
 
 			my $source = Q{ sum  };
-			my $parsed = $pt.parse-source( $source );
+			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 #			ok (grep { $_ ~~ Perl6::Number },
@@ -1572,7 +1584,7 @@ subtest {
 			plan 2;
 
 			my $source = Q{()};
-			my $parsed = $pt.parse-source( $source );
+			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 #			ok (grep { $_ ~~ Perl6::Number },
@@ -1585,7 +1597,7 @@ subtest {
 			plan 2;
 
 			my $source = Q{ ()  };
-			my $parsed = $pt.parse-source( $source );
+			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 #			ok (grep { $_ ~~ Perl6::Number },
@@ -1608,7 +1620,7 @@ subtest {
 			plan 2;
 
 			my $source = Q{:()};
-			my $parsed = $pt.parse-source( $source );
+			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 #			ok (grep { $_ ~~ Perl6::Number },
@@ -1621,7 +1633,7 @@ subtest {
 			plan 2;
 
 			my $source = Q{ :()  };
-			my $parsed = $pt.parse-source( $source );
+			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 #			ok (grep { $_ ~~ Perl6::Number },

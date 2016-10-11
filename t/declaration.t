@@ -1,11 +1,11 @@
 use v6;
 
 use Test;
-use Perl6::Tidy;
+use Perl6::Parser;
 
 plan 2;
 
-my $pt = Perl6::Tidy.new;
+my $pt = Perl6::Parser.new;
 
 subtest {
 	plan 2;
@@ -16,7 +16,7 @@ subtest {
 		subtest {
 			plan 2;
 
-			my $p = $pt.parse-source( Q{my Int $a} );
+			my $p = $pt.parse( Q{my Int $a} );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
 			is $pt.format( $tree ), Q{my Int $a}, Q{formatted};
@@ -25,7 +25,7 @@ subtest {
 		subtest {
 			plan 2;
 
-			my $p = $pt.parse-source( Q{my Int:U $a} );
+			my $p = $pt.parse( Q{my Int:U $a} );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
 			is $pt.format( $tree ), Q{my Int:U $a}, Q{formatted};
@@ -34,7 +34,7 @@ subtest {
 		subtest {
 			plan 2;
 
-			my $p = $pt.parse-source( Q{my Int:D $a = 0} );
+			my $p = $pt.parse( Q{my Int:D $a = 0} );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
 			is $pt.format( $tree ),
@@ -49,7 +49,7 @@ subtest {
 		subtest {
 			plan 2;
 
-			my $p = $pt.parse-source( Q{my $a where 1} );
+			my $p = $pt.parse( Q{my $a where 1} );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
 			is $pt.format( $tree ), Q{my $a where 1}, Q{formatted};
@@ -67,7 +67,7 @@ subtest {
 			plan 2;
 
 			my $source = Q{sub foo returns Int {}};
-			my $p = $pt.parse-source( $source );
+			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
 			is $pt.format( $tree ), $source, Q{formatted};
@@ -78,7 +78,7 @@ subtest {
 			my $source = Q:to[_END_];
 sub foo returns Int {}
 _END_
-			my $p = $pt.parse-source( $source );
+			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
 			is $pt.format( $tree ), $source, Q{formatted};

@@ -2,16 +2,16 @@
 
 =begin NAME
 
-Perl6::Tidy - Extract a Perl 6 AST from the NQP Perl 6 Parser
+Perl6::Parser - Extract a Perl 6 AST from the NQP Perl 6 Parser
 
 =end NAME
 
 =begin SYNOPSIS
 
-    my $pt = Perl6::Tidy.new;
-    my $parsed = $pt.tidy( Q:to[_END_] );
-    say $parsed.perl6($format-settings); 
-    my $other = $pt.tidy-file( 't/clean-me.t' );
+    my $pt = Perl6::Parser.new;
+    my $parsed = $pt.parse( Q:to[_END_] );
+    my $tree = $pt.build-tree( $parsed );
+    say $pt.dump-tree( $tree );
 
     # This *will* execute phasers such as BEGIN in your existing code.
     # This may constitute a security hole, at least until the author figures
@@ -21,15 +21,21 @@ Perl6::Tidy - Extract a Perl 6 AST from the NQP Perl 6 Parser
 
 =begin DESCRIPTION
 
-Uses the built-in Perl 6 parser exposed by the nqp module in order to parse Perl 6 from within Perl 6. If this scares you, well, it probably should. Once this is finished, you should be able to call C<.perl6> on the tidied output, along with a so-far-unspecified formatting object, and get back nicely-formatted Perl 6 code.
+Uses the built-in Perl 6 parser exposed by the internal nqp module, so that you can parse Perl 6 using Perl 6 itself. If it scares you... well, it probably should. Assuming everything works out, you'll get back a Perl 6 object tree that exactly mirrors your source file's layout, with every bit of whitespace, POD, and code given one or more tokens.
+
+Redisplaying it becomes a matter of calling the C<format()> method on the tree, which passes an optional formatting hashref down the tree. You can use the format methods as they are, or add a role or subclass the objects created as you see fit to create new objects.
+
+This process B<will> be simplified and encapsulated in the near future, as reformatting Perl 6 code was what this rather extensive module was designed to do.
+
+I've added fairly extensive debugging documentation to the L<README.md> of this module, along with an internal L<DEBUGGING.pod> file talking about what you're seeing here, and why on B<earth> didn't I do it B<this> way? I have my reasons, but can be talked out of it with a good argument.
 
 Please B<please> note that this, out of necessity, does compile your Perl 6 code, which B<does> mean executing phasers such as C<BEGIN>. There may be a way to oerride this behavior, and if you have suggestions that don't involve rewriting the Perl 6 grammar as a standalone library (which would not be such a bad idea in general) then please let the author know.
 
-As it stands, the C<.tidy> method returns a deeply-nested object representation of the Perl 6 code it's given. It handles the regex language, but not the other braided languages such as embedded blocks in strings. It will do so eventually, but for the moment I'm busy getting the grammar rules covered.
+As it stands, the C<.parse> method returns a deeply-nested object representation of the Perl 6 code it's given. It handles the regex language, but not the other braided languages such as embedded blocks in strings. It will do so eventually, but for the moment I'm busy getting the grammar rules covered.
 
 While classes like L<EClass> won't go away, their parent classes like L<DecInteger> will remove them from the tree once their validation job has been done. For example, while the internals need to know that L<< $/<eclass> >> (the exponent for a scientific-notation number) hasn't been renamed or moved elsewhere in the tree, you as a consumer of the L<DecInteger> class don't need to know that. The C<DecInteger.perl6> method will delete the child classes so that we don't end up with a B<horribly> cluttered tree.
 
-Classes representing Perl 6 object code are currently in the same file as the main L<Perl6::Tidy> class, as moving them to separate files caused a severe performance penalty. When the time is right I'll look at moving these to another location, but as shuffling out 20 classes increased my runtime on my little ol' VM from 6 to 20 seconds, it's not worth my time to break them out. And besides, having them all in one file makes editing en masse easier.
+Classes representing Perl 6 object code are currently in the same file as the main L<Perl6::Parser> class, as moving them to separate files caused a severe performance penalty. When the time is right I'll look at moving these to another location, but as shuffling out 20 classes increased my runtime on my little ol' VM from 6 to 20 seconds, it's not worth my time to break them out. And besides, having them all in one file makes editing en masse easier.
 
 =end DESCRIPTION
 
@@ -44,7 +50,7 @@ The first thing is to break the offending bit of code out so it's easier to debu
     my $source = Q:to[_END_];
         my @a; @a[$_, 0 .. 100];
     _END_
-    my $p = $pt.parse-source( $source );
+    my $p = $pt.parse( $source );
     say $p.dump;
     my $tree = $pt.build-tree( $p );
     say $pt.dump-tree($tree);
@@ -57,9 +63,9 @@ Second, I'm not doing anything that you as a user of the class would do. As a us
 
 (side note - This will probably have changed in detail since I wrote this text - Consult your nearest test file for examples of current usage.)
 
-Internally, the library takes sevaral steps to get to the nicely objectified tree that you see on your output. The two important steps in our case are the C<.parse-source( 'text goes here' )> method call, and C<.build-tree( $parse-tree )>.
+Internally, the library takes sevaral steps to get to the nicely objectified tree that you see on your output. The two important steps in our case are the C<.parse( 'text goes here' )> method call, and C<.build-tree( $parse-tree )>.
 
-The C<.parse-source()> call returns a very raw L<NQPMatch> object, which is the Perl 6 internal we're trying to reparse into a more useful form. Most of the time you can call C<.dump()> on this object and get back a semi-useful object tree. On occasion this B<will> lock up, most often because you're trying to C<.dump()> a L<list> accessor, and that hasn't been implemented for NQPMatch. The actual C<list> accessor works, but the C<.dump()> call will not. A simple workaround is to call C<$p.list.[0].dump> on one of the list elements inside, and hope there is one.
+The C<.parse()> call returns a very raw L<NQPMatch> object, which is the Perl 6 internal we're trying to reparse into a more useful form. Most of the time you can call C<.dump()> on this object and get back a semi-useful object tree. On occasion this B<will> lock up, most often because you're trying to C<.dump()> a L<list> accessor, and that hasn't been implemented for NQPMatch. The actual C<list> accessor works, but the C<.dump()> call will not. A simple workaround is to call C<$p.list.[0].dump> on one of the list elements inside, and hope there is one.
 
 Again, these are NQP internals, and aren't quite as stable as the Perl 6 main support layer.
 
@@ -133,28 +139,60 @@ Now we turn to the rather bewildering array of methods on the C<Perl6::WS> class
 
 =begin METHODS
 
-=item tidy( Str $perl-code ) returns Perl6::Tidy::Root
+=item roundtrip( Str $perl-code ) returns Perl6::Parser::Root
 
-Given a Perl 6 code string, return the class structure, so you can see the parse tree in action. This is mostly because the internal L<Perl6::Tidy> objects are poorly named.
+Given a string containing valid Perl 6 code ... well, return that code. This
+is mostly a shortcut for testing purposes, and wil probably be moved out of the
+main file.
 
-=item perl6( Hash %format-settings ) returns Str
+=item parse( Str $source )
 
-Given a so-far undefined hash of format settings, return formatted Perl 6 code to meet the user's expectations.
+Returns the underlying NQPMatch object. This is what gets passed on to C<validate()>, C<build-tree()> and every other important method in this module. It does some minor wizardry to call the Perl 6 reentrant compiler to compile the string you pass it, and return a match object. Please note that it B<has> to compile the string in order to validate things like custom operators, so this step is B<not> optional.
+
+=item validate( Mu $parsed )
+
+Makes certain that the NQPMatch object looks like a valid NQPMatch object to the current version of this Perl 6 module. This is because, while it's highly unlikely at this point, the grammar internals of Perl 6 B<could> change at some later date, and this rather extensive method (it doesn't look it, but to see what it does, look at L<Perl6::Parser::Validator>) checks to see that a given input (say, a large RosettaCode sample) returns the match object we're expecting.
+
+=item build-tree( Mu $parsed )
+
+Build the Perl6::Element tree from the NQPMatch object. This is the core, and runs the factory which silly-walks the match tree and returns one or more tokens for every single match entry it finds, and B<more>.
+
+=item check-tree( Perl6::Element $root )
+
+Check the integrity of the data structure. The Factory at its core puts together the structure very sloppily, to give the tree every possible chance to create actual quasi-valid text. This method makes sure that the factory returned valid tokens, which often doesn't happen. But since you really want to see the data round-tripped, most users don't care what the tree loos like internally.
+
+=item format( Perl6::Element $tree ) returns Str
+
+Call .perl6 on each element of the tree. You can subclass or override this method in any class as you see fit to properly pretty-print the methods. Right now it's awkward to use, and will probably be removed in favor of an upcoming L<Perl6::Tidy> module. That's why I wrote this yak.. er, module in the first place.
+
+=item dump-tree( Perl6::Element $root ) returns Str
+
+Given a Perl6::Document (or other) object, return a full nested tree of text detailing every single token, for debugging purposes.
+
+=item ruler( Str $source )
+
+Purely a debugging aid, it puts an ASCII ruler above your source so that you don't have to go blind counting whitespace to figure out which ' ' a given token belongs to. As a courtesy it also makes newlines visible so you don't have to count those separately. I might use the visible space character later to make it easier to read, if I happen to like it.
 
 =end METHODS
 
+=begin Further-Information
+
+For further information, there's a L<DEBUGGING.pod> file detailing how to go about tracing down a bug in this module, and an extensive test suite in L<t/README.pod> with some ideas of how I'm structuring the test suite.
+
+=end Further-Information
+
 =end pod
 
-use Perl6::Tidy::Validator;
-use Perl6::Tidy::Factory;
+use Perl6::Parser::Validator;
+use Perl6::Parser::Factory;
 
-class Perl6::Tidy {
+class Perl6::Parser {
 	use nqp;
 
 	# These could easily be a single method, but I'll separate them for
 	# testing purposes.
 	#
-	method parse-source( Str $source ) {
+	method parse( Str $source ) {
 		my $*LINEPOSCACHE;
 		my $compiler := nqp::getcomp('perl6');
 		my $g := nqp::findmethod($compiler,'parsegrammar')($compiler);
@@ -171,7 +209,7 @@ class Perl6::Tidy {
 	}
 
 	method validate( Mu $parsed ) {
-		my $validator = Perl6::Tidy::Validator.new;
+		my $validator = Perl6::Parser::Validator.new;
 		my $res       = $validator.validate( $parsed );
 
 		die "Validation failed!" if !$res and %*ENV<AUTHOR_TESTS>;
@@ -180,7 +218,7 @@ class Perl6::Tidy {
 	}
 
 	method build-tree( Mu $parsed ) {
-		my $factory = Perl6::Tidy::Factory.new;
+		my $factory = Perl6::Parser::Factory.new;
 		my $tree    = $factory.build( $parsed );
 
 		self.check-tree( $tree );
@@ -225,22 +263,22 @@ class Perl6::Tidy {
 		if $root.^can('content') {
 			if $root.content.chars < $root.to - $root.from {
 				say $root.perl;
-				warn "Content '{$root.content}' too short for element ({$root.from} - {$root.to}) ({$root.to - $root.from} chars)"
+				#warn "Content '{$root.content}' too short for element ({$root.from} - {$root.to}) ({$root.to - $root.from} chars)"
 			}
 			if $root.content.chars > $root.to - $root.from {
 				say $root.perl;
-				warn "Content '{$root.content}' too long for element ({$root.from} - {$root.to}) ({$root.to - $root.from} glyphs}"
+				#warn "Content '{$root.content}' too long for element ({$root.from} - {$root.to}) ({$root.to - $root.from} glyphs}"
 			}
 			if $root !~~ Perl6::WS and
 					$root !~~ Perl6::Sir-Not-Appearing-In-This-Statement and
 					$root.content ~~ m{ ^ (\s+) } {
 				say $root.perl;
-				warn "Content '{$root.content}' has leading whitespace"
+				#warn "Content '{$root.content}' has leading whitespace"
 			}
 			if $root !~~ Perl6::WS and
 					$root.content ~~ m{ (\s+) $ } {
 				say $root.perl;
-				warn "Content '{$root.content}' has trailing whitespace"
+				#warn "Content '{$root.content}' has trailing whitespace"
 			}
 		}
 	}
@@ -253,6 +291,7 @@ class Perl6::Tidy {
 
 	method dump-term( Perl6::Element $term ) {
 		my $str = $term.WHAT.perl;
+		$str ~~ s/'Perl6::'//;
 		if $term ~~ Perl6::Operator::PostCircumfix or
 		      $term ~~ Perl6::Operator::Circumfix {
 		}
@@ -346,8 +385,8 @@ class Perl6::Tidy {
 		$ruler ~= '#' ~ $munged ~ "\n";
 	}
 
-	method tidy( Str $source, $formatting = { } ) {
-		my $parsed    = self.parse-source( $source );
+	method roundtrip( Str $source, $formatting = { } ) {
+		my $parsed    = self.parse( $source );
 		my $valid     = self.validate( $parsed );
 		my $tree      = self.build-tree( $parsed );
 		my $formatted = self.format( $tree, $formatting );

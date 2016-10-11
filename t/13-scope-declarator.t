@@ -1,7 +1,7 @@
 use v6;
 
 use Test;
-use Perl6::Tidy;
+use Perl6::Parser;
 
 # The terms that get tested here are:
 #
@@ -23,7 +23,7 @@ use Perl6::Tidy;
 
 plan 4;
 
-my $pt = Perl6::Tidy.new;
+my $pt = Perl6::Parser.new;
 
 subtest {
 	plan 2;
@@ -34,7 +34,7 @@ subtest {
 		my $source = Q:to[_END_];
 my$x
 _END_
-		my $p = $pt.parse-source( $source );
+		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
@@ -46,7 +46,7 @@ _END_
 		my $source = Q:to[_END_];
 my     $x
 _END_
-		my $p = $pt.parse-source( $source );
+		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
@@ -62,7 +62,7 @@ subtest {
 		my $source = Q:to[_END_];
 our$x
 _END_
-		my $p = $pt.parse-source( $source );
+		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
@@ -74,7 +74,7 @@ _END_
 		my $source = Q:to[_END_];
 our     $x
 _END_
-		my $p = $pt.parse-source( $source );
+		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
@@ -90,7 +90,7 @@ subtest {
 		my $source = Q:to[_END_];
 class Foo{has$x}
 _END_
-		my $p = $pt.parse-source( $source );
+		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
@@ -102,7 +102,7 @@ _END_
 		my $source = Q:to[_END_];
 class Foo{has     $x}
 _END_
-		my $p = $pt.parse-source( $source );
+		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
@@ -118,7 +118,7 @@ _END_
 #		plan 2;
 #
 #		my $source = Q{class Foo is repr('CStruct'){HAS int $x}};
-#		my $p = $pt.parse-source( $source );
+#		my $p = $pt.parse( $source );
 #		my $tree = $pt.build-tree( $p );
 #		ok $pt.validate( $p ), Q{valid};
 #		is $pt.format( $tree ), $source, Q{formatted};
@@ -130,7 +130,7 @@ _END_
 #		my $source = Q:to[_END_];
 #class Foo is repr( 'CStruct' ) { HAS int $x }
 #_END_
-#		my $p = $pt.parse-source( $source );
+#		my $p = $pt.parse( $source );
 #		my $tree = $pt.build-tree( $p );
 #		ok $pt.validate( $p ), Q{valid};
 #		is $pt.format( $tree ), $source, Q{formatted};
@@ -148,7 +148,7 @@ subtest {
 		plan 2;
 
 		my $source = Q{state$x};
-		my $p = $pt.parse-source( $source );
+		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
@@ -160,7 +160,7 @@ subtest {
 		my $source = Q:to[_END_];
 state     $x
 _END_
-		my $p = $pt.parse-source( $source );
+		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};

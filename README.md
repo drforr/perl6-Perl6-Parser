@@ -1,4 +1,5 @@
-Perl6::Tidy
+# Perl6::Parser [![Build Status](https://secure.travis-ci.org/drforr/perl6-Perl6-Parser.svg?branch=master)](http://travis-ci.org/drforr/perl6-Perl6-Parser)
+Perl6::Parser
 =======
 
 Perl 6's grammar is now pretty much fleshed out, but it's hard to get at from
@@ -7,19 +8,94 @@ hard to put together.
 
 This module aims to fix that.
 
-*THIS IS NOT READY FOR PRIME TIME*. This is very much a work in progress. At
-the moment I'm working on covering the grammar rules. The code is very much
-paranoid, for good reason, as it relies on the underlying match tree, in the
-murky area of NQP, or /Not Quite Perl/. It's pretty stable, but slow and
-relentlessly checks the details of the match object.
+As such, it is very much a work in progress. At the moment I'm working on
+covering the grammar rules. The code is very paranoid, for good reason, as it
+relies on the underlying match tree, in the murky area of NQP, or
+/Not Quite Perl/. It's pretty stable, but slow and relentlessly checks the
+details of the match object.
 
-Next steps will be to properly populate the whitespace in between tokens, and
-after that I'll take the time to make the classes behave more sanely.
+It comes with a single tool, examples/perl6-dumper. Run this tool on a Perl 6
+source file, and with any luck you'll get back a detailed syntax tree, like the
+following:
 
-If you want to play with it, then the only thing to do right now is dump the
-$parsed output from a test suite, and I hope you have a pretty-printer. It
-currently handles non-trivial code as you can see by running the t/inception.t
-test, where the test suite parses itself.
+```
+Document
+        Statement (line 7095)
+                Bareword ("use") (0-3) (line 7286)
+                WS (" ") (3-4) (line 6537)
+                Bareword ("MONKEY-SEE-NO-EVAL") (4-22) (line 3775)
+                Semicolon (22-23) (line 5017)
+        Statement (line 7095)
+		...
+                Operator::Circumfix (75-81) (line 1911)
+                        Balanced::Enter ("(") (75-76) (line 1911)
+                        Number::Decimal (1) (76-77) (line 3406)
+                        Operator::Infix ("..") (77-79) (line 3209)
+                        Number::Decimal (9) (79-80) (line 3406)
+                        Balanced::Exit (")") (80-81) (line 1911)
+
+```
+
+This is an absurdly detailed breakdown of every character in your Perl 6 source
+file, and it deserves a bit of explanation.
+
+The module is designed with the following principles in mind:
+
+    * Each glyph, including WS, comments and POD, is part of exactly one token.
+    * Tokens must never overlap.
+    * Tokens must always abut one another.
+
+(Here-docs of course break all of these rules, but they're accounted for.)
+
+In a typical Perl6:: dump, here's what you'll see:
+
+    * Document - The root of the Perl 6 source tree.
+    * Statement - `my $a = 1;', `class foo {...}' and so on.
+    * Bareword - Terms such as `my', `use', `class'.
+    * WS - Whitespace
+    * Operator::Circumfix - Function signatures, lists, lots of things.
+    * Balanced::{Enter,Exit}
+        * Blocks and circumfix operators generally have balanced delimiters.
+        * `Balanced::Enter' is used for the start, ::Exit for the end.
+    * Number::Decimal - Decimal values.
+        * `Number' is their parent class, so you can just check against
+           $x ~~ Perl6::Number if you don't care what base it's in.
+
+Whitespace, semicolons and braces also belong to a generic `Structure' category
+so you can ignore those if you want to.
+
+What do all the `(...)' mean? And why are there G and WS cluttering up the
+far left side of the display? Well, I'm glad you asked.
+
+    * ("use") is the actual text of the bareword, string or variable name.
+    * (75-76) is the start and end glyph (not character) of the token.
+    * (line 3406) is the line where this object was created.
+
+    * 'G' on the left means there's a gap between the end of token N and the start of token N+1.
+        * This should not happen, and is a bug.
+    * 'WS' on the left means that either a Whitespace token has non-WS, or a non-Whitespace token (strings excepted) has whitespace.
+    * '' means either:
+        * A null token (start == end, shouldn't happen)
+        * A token (for example) spanning (76-78) doesn't have (78-76=2) glyphs.
+
+These are mainly debugging aids, as for performance reasons the entire parser
+core is a single large class. If you'd like to know my reasoning, please ask
+directly; but the TL;DR is that NQPMatch objects and regular Perl 6 objects
+don't play nicely.
+
+In essence, I can take this tool, run it over a source file, and when it breaks
+I've got a good idea of where the problem happens. This parser contains
+waterbed problems on top of waterbed problems - The type where you refactor one
+bit of code from where it is to a higher level, and find out you've broken code
+5 tokens *before* the change.
+
+When testing changes it's very important to run the verification suite,
+especially if you've changed where you're returning whitespace.
+
+Again, the included examples/perl6-dumper tool should help show you the variety
+of what the tool can already parse. There are many known problems, and many more
+unknowns I've yet to encounter.
+
 
 I make no guarantees that any of the tokens in the code are present in the
 final output, although it is my sincere hope that I haven't missed anything. In
@@ -33,7 +109,7 @@ your nose. YOU HAVE BEEN WARNED.
 
 =begin DEBUGGING UTILITIES
 
-There are two methods in L<Perl6::Tidy>, and one core method that you'll find
+There are two methods in L<Perl6::Parser>, and one core method that you'll find
 useful as you delve into the murky waters of the code.
 
 The first one is useful after C<$pt.parse-source( $source )> - You can use
@@ -45,7 +121,7 @@ NQP core, and deprioritized as such.
 
 The next one is useful after C<$pt.build-tree( $p )>, and that is
 C<$pt.dump-tree( $tree )>. This gives a nicely-annotated view of the
-L<Perl6::Tidy> tree, complete with text that it's matched in gist form, and
+L<Perl6::Parser> tree, complete with text that it's matched in gist form, and
 the start and end markers of each leaf on the tree.
 (Start and end markers for constructs like L<Perl6::Document> and
 L<Perl6::Statement> are elided because they're computed from the underlying
@@ -108,7 +184,7 @@ Installation
 * Using panda (a module management tool bundled with Rakudo Star):
 
 ```
-    panda update && panda install Perl6::Tidy
+    panda update && panda install Perl6::Parser
 ```
 
 * Is ufo even still a thing?

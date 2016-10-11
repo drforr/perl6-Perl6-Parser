@@ -1,11 +1,11 @@
 use v6;
 
 use Test;
-use Perl6::Tidy;
+use Perl6::Parser;
 
 plan 9;
 
-my $pt = Perl6::Tidy.new;
+my $pt = Perl6::Parser.new;
 
 # $pt.build-tree verifies that the tokens are contiguous, along with a bunch
 # of other things.
@@ -15,7 +15,7 @@ my $pt = Perl6::Tidy.new;
 subtest {
 	plan 1;
 	
-	my $p = $pt.parse-source( Q{} );
+	my $p = $pt.parse( Q{} );
 	my $t = $pt.build-tree( $p );
 	isa-ok $t, Perl6::Document;
 }, Q{no ws};
@@ -23,7 +23,7 @@ subtest {
 subtest {
 	plan 3;
 	
-	my $p = $pt.parse-source( Q{ } );
+	my $p = $pt.parse( Q{ } );
 	my $t = $pt.build-tree( $p );
 	isa-ok $t, Perl6::Document;
 	isa-ok $t.child.[0], Perl6::Statement;
@@ -33,7 +33,7 @@ subtest {
 subtest {
 	plan 4;
 
-	my $p = $pt.parse-source( Q{my$a} );
+	my $p = $pt.parse( Q{my$a} );
 	my $t = $pt.build-tree( $p );
 
 	isa-ok $t, Perl6::Document;
@@ -45,7 +45,7 @@ subtest {
 subtest {
 	plan 5;
 
-	my $p = $pt.parse-source( Q{ my$a} );
+	my $p = $pt.parse( Q{ my$a} );
 	my $t = $pt.build-tree( $p );
 
 	isa-ok $t, Perl6::Document;
@@ -58,7 +58,7 @@ subtest {
 subtest {
 	plan 5;
 
-	my $p = $pt.parse-source( Q{my $a} );
+	my $p = $pt.parse( Q{my $a} );
 	my $t = $pt.build-tree( $p );
 
 	isa-ok $t, Perl6::Document;
@@ -71,7 +71,7 @@ subtest {
 subtest {
 	plan 5;
 
-	my $p = $pt.parse-source( Q{my$a;} );
+	my $p = $pt.parse( Q{my$a;} );
 	my $t = $pt.build-tree( $p );
 
 	isa-ok $t, Perl6::Document;
@@ -84,7 +84,7 @@ subtest {
 subtest {
 	plan 6;
 
-	my $p = $pt.parse-source( Q{my $a;} );
+	my $p = $pt.parse( Q{my $a;} );
 	my $t = $pt.build-tree( $p );
 
 	isa-ok $t, Perl6::Document;
@@ -98,7 +98,7 @@ subtest {
 subtest {
 	plan 9;
 
-	my $p = $pt.parse-source( Q{my $a = 1} );
+	my $p = $pt.parse( Q{my $a = 1} );
 	my $t = $pt.build-tree( $p );
 
 	isa-ok $t, Perl6::Document;
@@ -115,7 +115,7 @@ subtest {
 subtest {
 	plan 13;
 
-	my $p = $pt.parse-source( Q{my $a = 1 + 2} );
+	my $p = $pt.parse( Q{my $a = 1 + 2} );
 	my $t = $pt.build-tree( $p );
 
 	isa-ok $t, Perl6::Document;

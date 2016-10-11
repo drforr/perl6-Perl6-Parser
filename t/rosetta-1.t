@@ -1,11 +1,11 @@
 use v6;
 
 use Test;
-use Perl6::Tidy;
+use Perl6::Parser;
 
 plan 7;
 
-my $pt = Perl6::Tidy.new;
+my $pt = Perl6::Parser.new;
 
 subtest {
 	plan 4;
@@ -20,7 +20,7 @@ my @doors = False xx 101;
  
 say "Door $_ is ", <closed open>[ @doors[$_] ] for 1..100;
 _END_
-		my $p = $pt.parse-source( $source );
+		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
@@ -32,7 +32,7 @@ _END_
 		my $source = Q:to[_END_];
 say "Door $_ is open" for map {$^n ** 2}, 1..10;
 _END_
-		my $p = $pt.parse-source( $source );
+		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
 #say $pt.dump-tree( $tree );
 		ok $pt.validate( $p ), Q{valid};
@@ -45,7 +45,7 @@ _END_
 		my $source = Q:to[_END_];
 say "Door $_ is open" for 1..10 X** 2;
 _END_
-		my $p = $pt.parse-source( $source );
+		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
@@ -57,7 +57,7 @@ _END_
 		my $source = Q:to[_END_];
 say "Door $_ is ", <closed open>[.sqrt == .sqrt.floor] for 1..100;
 _END_
-		my $p = $pt.parse-source( $source );
+		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
@@ -186,7 +186,7 @@ loop {
     new() if $key eq 'n';
 }
 _END_
-	my $p = $pt.parse-source( $source );
+	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
 say $pt.dump-tree( $tree );
 	ok $pt.validate( $p ), Q{valid};
@@ -314,7 +314,7 @@ loop {
     last if $key eq 'q'; # (q)uit
 }
 _END_
-	my $p = $pt.parse-source( $source );
+	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
@@ -353,7 +353,7 @@ while my $exp = prompt "\n24? " {
     }
 }
 _END_
-	my $p = $pt.parse-source( $source );
+	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
@@ -410,7 +410,7 @@ sub unique (@array) {
     %h.values;
 }
 _END_
-	my $p = $pt.parse-source( $source );
+	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
@@ -452,7 +452,7 @@ for 23, 123, 1234, 10000 {
     say $_, "\t", [+] nextrow($_)[];
 }
 _END_
-	my $p = $pt.parse-source( $source );
+	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
@@ -481,7 +481,7 @@ sub b($b) {
     "$b bottle{'s' if $b != 1} of beer";
 }
 _END_
-		my $p = $pt.parse-source( $source );
+		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
@@ -512,7 +512,7 @@ sub sing(
     say "$quantity bottle$plural of beer$location"
 }
 _END_
-		my $p = $pt.parse-source( $source );
+		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
@@ -538,7 +538,7 @@ for @quantities Z @bottles Z @actions Z
     say "$d $e of beer on the wall\n";
 }
 _END_
-		my $p = $pt.parse-source( $source );
+		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
 #say $pt.dump-tree( $tree );
 		ok $pt.validate( $p ), Q{valid};

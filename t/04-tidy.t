@@ -1,17 +1,17 @@
 use v6;
 
 use Test;
-use Perl6::Tidy;
+use Perl6::Parser;
 
 plan 3;
 
-my $pt = Perl6::Tidy.new;
+my $pt = Perl6::Parser.new;
 
-is $pt.tidy( Q{} ),
+is $pt.roundtrip( Q{} ),
 	Q{},
 	Q{Empty string};
 
-is $pt.tidy( Q{ } ),
+is $pt.roundtrip( Q{ } ),
 	Q{ },
 	Q{whitespace only};
 
@@ -24,19 +24,19 @@ subtest {
 		my $source;
 
 		$source = Q{my$a};
-		is $pt.tidy( $source ), $source, Q{my$a};
+		is $pt.roundtrip( $source ), $source, Q{my$a};
 
 		$source = Q{my$a;};
-		is $pt.tidy( $source ), $source, Q{my$a;};
+		is $pt.roundtrip( $source ), $source, Q{my$a;};
 
 		$source = Q{my $a};
-		is $pt.tidy( $source ), $source, Q{my $a};
+		is $pt.roundtrip( $source ), $source, Q{my $a};
 
 		$source = Q{my $a;};
-		is $pt.tidy( $source ), $source, Q{my $a;};
+		is $pt.roundtrip( $source ), $source, Q{my $a;};
 
 		$source = Q{my $a ;};
-		is $pt.tidy( $source ), $source, Q{my $a ;};
+		is $pt.roundtrip( $source ), $source, Q{my $a ;};
 	}, Q{simple declaration};
 
 	subtest {
@@ -45,19 +45,19 @@ subtest {
 		my $source;
 
 		$source = Q{my$a=1};
-		is $pt.tidy( $source ), $source, Q{my$a=1};
+		is $pt.roundtrip( $source ), $source, Q{my$a=1};
 
 		$source = Q{my$a=1;};
-		is $pt.tidy( $source ), $source, Q{my$a=1;};
+		is $pt.roundtrip( $source ), $source, Q{my$a=1;};
 
 		$source = Q{my $a=1};
-		is $pt.tidy( $source ), $source, Q{my $a=1};
+		is $pt.roundtrip( $source ), $source, Q{my $a=1};
 
 		$source = Q{my $a=1;};
-		is $pt.tidy( $source ), $source, Q{my $a=1;};
+		is $pt.roundtrip( $source ), $source, Q{my $a=1;};
 
 		$source = Q{my $a=1 ;};
-		is $pt.tidy( $source ), $source, Q{my $a=1 ;};
+		is $pt.roundtrip( $source ), $source, Q{my $a=1 ;};
 	}, Q{initializer};
 }, Q{passthrough};
 

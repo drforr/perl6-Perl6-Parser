@@ -1,30 +1,30 @@
 use v6;
 
 use Test;
-use Perl6::Tidy;
+use Perl6::Parser;
 
 plan 3;
 
-my $pt = Perl6::Tidy.new;
+my $pt = Perl6::Parser.new;
 
 subtest {
 	plan 1;
 	
-	my $parsed = $pt.parse-source( Q{} );
+	my $parsed = $pt.parse( Q{} );
 	ok $parsed.hash.<statementlist>, Q{statementlist};
 }, Q{Empty file};
 
 subtest {
 	plan 1;
 	
-	my $parsed = $pt.parse-source( Q {} );
+	my $parsed = $pt.parse( Q {} );
 	ok $parsed.hash.<statementlist>, Q{statementlist};
 }, Q{whitespace-only};
 
 subtest {
 	plan 11;
 
-	my $p = $pt.parse-source( Q{'a'} );
+	my $p = $pt.parse( Q{'a'} );
 	is-deeply [ $p.hash.keys ], [< statementlist >],
 		Q{document has correct hash keys};
 

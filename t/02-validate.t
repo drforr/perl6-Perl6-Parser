@@ -1,19 +1,19 @@
 use v6;
 
 use Test;
-use Perl6::Tidy;
+use Perl6::Parser;
 
 plan 3;
 
-my $pt = Perl6::Tidy.new;
+my $pt = Perl6::Parser.new;
 
-my $p = $pt.parse-source( Q{} );
+my $p = $pt.parse( Q{} );
 ok $pt.validate( $p ), Q{Empty file};
 
-$p = $pt.parse-source( Q{ } );
+$p = $pt.parse( Q{ } );
 ok $pt.validate( $p ),Q{Whitespace only};
 
-$p = $pt.parse-source( Q{'a'} );
+$p = $pt.parse( Q{'a'} );
 ok $pt.validate( $p ), Q{File with string};
 
 # vim: ft=perl6

@@ -1,11 +1,11 @@
 use v6;
 
 use Test;
-use Perl6::Tidy;
+use Perl6::Parser;
 
 plan 1;
 
-my $pt = Perl6::Tidy.new;
+my $pt = Perl6::Parser.new;
 
 subtest {
 	plan 2;
@@ -14,7 +14,7 @@ subtest {
 =begin EMPTY
 =end EMPTY
 _END_
-	my $parsed = $pt.parse-source( $source );
+	my $parsed = $pt.parse( $source );
 	my $tree = $pt.build-tree( $parsed );
 	ok $pt.validate( $parsed ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};

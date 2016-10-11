@@ -1,4 +1,4 @@
-class Perl6::Tidy::Validator {
+class Perl6::Parser::Validator {
 
 	sub dump( Mu $parsed ) {
 		say $parsed.hash.keys.gist;

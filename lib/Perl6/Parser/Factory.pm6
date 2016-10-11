@@ -2,7 +2,7 @@
 
 =begin NAME
 
-Perl6::Tidy::Factory - Builds client-ready Perl 6 data tree
+Perl6::Parser::Factory - Builds client-ready Perl 6 data tree
 
 =end NAME
 
@@ -109,7 +109,7 @@ By way of caveat: If you stick to the APIs mentioned in the documentation, you s
 
 While you should stick to the published APIs, there are of course times when you need to get your proverbial hands dirty. Read on if you want the scoop.
 
-Your humble author has gone to a great deal of trouble to assure that every character of user code is parsed and represented in some fashion, and the internals keep track of the text down to the by..chara...glyph level. More to the point, each Perl6::Tidy element has its own start and end point.
+Your humble author has gone to a great deal of trouble to assure that every character of user code is parsed and represented in some fashion, and the internals keep track of the text down to the by..chara...glyph level. More to the point, each Perl6::Parser element has its own start and end point.
 
 The internal method C<check-tree> does a B<rigorous> check of the entire parse tree, at least while self-tests are runnin. Relevant to the discussion at hand are two things: Checking that each element has exactly the number of glyphs that its start and end claim that it has, and checking that each element exactly overlaps its neighbos, with no gaps.
 
@@ -1392,7 +1392,7 @@ class Perl6::Variable::Callable::SubLanguage {
 	has Str $.twigil = Q{~};
 }
 
-class Perl6::Tidy::Factory {
+class Perl6::Parser::Factory {
 
 	constant COLON = Q{:};
 	constant COMMA = Q{,};
@@ -1485,7 +1485,7 @@ class Perl6::Tidy::Factory {
 		return False if $parsed.Str;
 
 		return True if $parsed.Bool;
-		warn "Uncaught type";
+		warn "Uncaught type" if $*DEBUG;
 		return False
 	}
 
@@ -1497,7 +1497,7 @@ class Perl6::Tidy::Factory {
 
 		return True if $parsed.Int;
 		return True if $parsed.Bool;
-		warn "Uncaught type";
+		warn "Uncaught type" if $*DEBUG;
 		return False
 	}
 
@@ -1510,7 +1510,7 @@ class Perl6::Tidy::Factory {
 		return False if $parsed.Int;
 
 		return True if $parsed.Str;
-		warn "Uncaught type";
+		warn "Uncaught type" if $*DEBUG;
 		return False
 	}
 
@@ -1557,8 +1557,8 @@ class Perl6::Tidy::Factory {
 					# XXX Zero-width token
 				}
 				else {
-					say $_.hash.keys.gist;
-					warn "Unhandled case"
+					say $_.hash.keys.gist if $*DEBUG;
+					warn "Unhandled case if $*DEBUG"
 				}
 			}
 		}
@@ -1598,8 +1598,8 @@ class Perl6::Tidy::Factory {
 			)
 		}
 		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+			say $p.hash.keys.gist if $*DEBUG;
+			warn "Unhandled case if $*DEBUG"
 		}
 		@child
 	}
@@ -1650,8 +1650,8 @@ class Perl6::Tidy::Factory {
 				)
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 		@child
@@ -1679,8 +1679,8 @@ class Perl6::Tidy::Factory {
 				self._codeblock( $_.hash.<codeblock> )
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 	}
@@ -1694,8 +1694,8 @@ class Perl6::Tidy::Factory {
 			Perl6::Bareword.from-match( $p )
 		}
 		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+			say $p.hash.keys.gist if $*DEBUG;
+			warn "Unhandled case" if $*DEBUG
 		}
 	}
 
@@ -1706,8 +1706,8 @@ class Perl6::Tidy::Factory {
 				self._B( $_.hash.<B> )
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 	}
@@ -1716,8 +1716,8 @@ class Perl6::Tidy::Factory {
 		( )
 #		given $p {
 #			default {
-#				say $_.hash.keys.gist;
-#				warn "Unhandled case"
+#				say $_.hash.keys.gist if $*DEBUG;
+#				warn "Unhandled case" if $*DEBUG
 #			}
 #		}
 	}
@@ -1742,8 +1742,8 @@ class Perl6::Tidy::Factory {
 				self._sym( $_.hash.<sym> )
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 	}
@@ -1758,8 +1758,8 @@ class Perl6::Tidy::Factory {
 				self._blockoid( $_.hash.<blockoid> )
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 	}
@@ -1779,8 +1779,8 @@ class Perl6::Tidy::Factory {
 					Perl6::Block.from-match( $_, @_child )
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 		@child
@@ -1795,8 +1795,8 @@ class Perl6::Tidy::Factory {
 				self._block( $_.hash.<block> )
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 	}
@@ -1807,8 +1807,8 @@ class Perl6::Tidy::Factory {
 				self._semilist( $_.hash.<semilist> )
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 	} 
@@ -1859,14 +1859,14 @@ class Perl6::Tidy::Factory {
 					)
 				}
 				else {
-					say $_.hash.keys.gist;
-					warn "Unhandled case"
+					say $_.hash.keys.gist if $*DEBUG;
+					warn "Unhandled case" if $*DEBUG
 				}
 			}
 		}
 		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+			say $p.hash.keys.gist if $*DEBUG;
+			warn "Unhandled case" if $*DEBUG
 		}
 		@child
 	}
@@ -1929,8 +1929,8 @@ class Perl6::Tidy::Factory {
 					)
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 		@child
@@ -1942,8 +1942,8 @@ class Perl6::Tidy::Factory {
 				self._block( $_.hash.<block> )
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 	}
@@ -1954,8 +1954,8 @@ class Perl6::Tidy::Factory {
 				self._semilist( $_.hash.<semilist> )
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 	}
@@ -1966,8 +1966,8 @@ class Perl6::Tidy::Factory {
 				self._circumfix( $_.hash.<circumfix> )
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 	}
@@ -2046,8 +2046,8 @@ class Perl6::Tidy::Factory {
 				)
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 		@child.flat
@@ -2060,8 +2060,8 @@ class Perl6::Tidy::Factory {
 				return True if $_.<U>;
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 	}
@@ -2074,8 +2074,8 @@ class Perl6::Tidy::Factory {
 				die "not implemented yet";
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 	}
@@ -2244,8 +2244,8 @@ class Perl6::Tidy::Factory {
 			@child = Perl6::Operator::Circumfix.new( $p, @_child )
 		}
 		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+			say $p.hash.keys.gist if $*DEBUG;
+			warn "Unhandled case" if $*DEBUG
 		}
 		@child
 	}
@@ -2393,8 +2393,8 @@ class Perl6::Tidy::Factory {
 			)
 		}
 		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+			say $p.hash.keys.gist if $*DEBUG;
+			warn "Unhandled case" if $*DEBUG
 		}
 		@child
 	}
@@ -2416,8 +2416,8 @@ class Perl6::Tidy::Factory {
 			self.__FloatingPoint( $p )
 		}
 		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+			say $p.hash.keys.gist if $*DEBUG;
+			warn "Unhandled case" if $*DEBUG
 		}
 	}
 
@@ -2431,14 +2431,14 @@ class Perl6::Tidy::Factory {
 					)
 				}
 				else {
-					say $_.hash.keys.gist;
-					warn "Unhandled case"
+					say $_.hash.keys.gist if $*DEBUG;
+					warn "Unhandled case" if $*DEBUG
 				}
 			}
 		}
 		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+			say $p.hash.keys.gist if $*DEBUG;
+			warn "Unhandled case" if $*DEBUG
 		}
 		@child.flat
 	}
@@ -2450,8 +2450,8 @@ class Perl6::Tidy::Factory {
 				self._name( $_.hash.<name> )
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 	}
@@ -2469,8 +2469,8 @@ class Perl6::Tidy::Factory {
 			@child = self._identifier( $p.hash.<identifier> )
 		}
 		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+			say $p.hash.keys.gist if $*DEBUG;
+			warn "Unhandled case" if $*DEBUG
 		}
 		@child
 	}
@@ -2481,8 +2481,8 @@ class Perl6::Tidy::Factory {
 				self._defterm( $_.hash.<defterm> )
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 	}
@@ -2493,8 +2493,8 @@ class Perl6::Tidy::Factory {
 				self._longname( $_.hash.<longname> )
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 	}
@@ -2516,8 +2516,8 @@ class Perl6::Tidy::Factory {
 		( )
 #		given $p {
 #			default {
-#				say $_.hash.keys.gist;
-#				warn "Unhandled case"
+#				say $_.hash.keys.gist if $*DEBUG;
+#				warn "Unhandled case" if $*DEBUG
 #			}
 #		}
 	}
@@ -2538,8 +2538,8 @@ class Perl6::Tidy::Factory {
 				)
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 		@child
@@ -2577,8 +2577,8 @@ class Perl6::Tidy::Factory {
 				)
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 		@child
@@ -2590,8 +2590,8 @@ class Perl6::Tidy::Factory {
 				self._term( $_.hash.<term> )
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 	}
@@ -2605,8 +2605,8 @@ class Perl6::Tidy::Factory {
 				)
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 	}
@@ -2632,8 +2632,8 @@ class Perl6::Tidy::Factory {
 				)
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 		@child
@@ -2661,8 +2661,8 @@ class Perl6::Tidy::Factory {
 				)
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 		@child
@@ -2694,8 +2694,8 @@ class Perl6::Tidy::Factory {
 				@child = self._blockoid( $_.hash.<blockoid> )
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 		@child
@@ -2722,8 +2722,8 @@ class Perl6::Tidy::Factory {
 				)
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 		@child
@@ -2762,8 +2762,8 @@ class Perl6::Tidy::Factory {
 				)
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 		@child
@@ -3110,8 +3110,8 @@ class Perl6::Tidy::Factory {
 			)
 		}
 		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+			say $p.hash.keys.gist if $*DEBUG;
+			warn "Unhandled case" if $*DEBUG
 		}
 		@child.flat
 	}
@@ -3122,8 +3122,8 @@ class Perl6::Tidy::Factory {
 				self._O( $_.hash.<O> )
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 	}
@@ -3134,8 +3134,8 @@ class Perl6::Tidy::Factory {
 				self._signature( $_.hash.<signature> )
 			}
 			else {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 	}
@@ -3165,8 +3165,8 @@ class Perl6::Tidy::Factory {
 			);
 		}
 		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+			say $p.hash.keys.gist if $*DEBUG;
+			warn "Unhandled case" if $*DEBUG
 		}
 		@child
 	}
@@ -3187,8 +3187,8 @@ class Perl6::Tidy::Factory {
 				if 0 {
 				}
 				else {
-					say $_.hash.keys.gist;
-					warn "Unhandled case"
+					say $_.hash.keys.gist if $*DEBUG;
+					warn "Unhandled case" if $*DEBUG
 				}
 			}
 		}
@@ -3196,8 +3196,8 @@ class Perl6::Tidy::Factory {
 			@child = Perl6::Bareword.from-match( $p )
 		}
 		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+			say $p.hash.keys.gist if $*DEBUG;
+			warn "Unhandled case" if $*DEBUG
 		}
 		@child
 	}
@@ -3221,8 +3221,8 @@ class Perl6::Tidy::Factory {
 				)
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 		@child
@@ -3249,8 +3249,8 @@ class Perl6::Tidy::Factory {
 				)
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 		@child
@@ -3268,8 +3268,8 @@ class Perl6::Tidy::Factory {
 				)
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 	}
@@ -3284,8 +3284,8 @@ class Perl6::Tidy::Factory {
 				)
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 	}
@@ -3388,8 +3388,8 @@ class Perl6::Tidy::Factory {
 			}
 		}
 		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+			say $p.hash.keys.gist if $*DEBUG;
+			warn "Unhandled case" if $*DEBUG
 		}
 		@child.flat
 	}
@@ -3409,8 +3409,8 @@ class Perl6::Tidy::Factory {
 				Perl6::Number::Hexadecimal.from-match( $_ )
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 	}
@@ -3439,8 +3439,8 @@ return True;
 				self._termseq( $_.hash.<termseq> )
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 	}
@@ -3452,8 +3452,8 @@ return True;
 				self._name( $_.hash.<name> )
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 	}
@@ -3462,8 +3462,8 @@ return True;
 		( )
 #		given $p {
 #			default {
-#				say $_.hash.keys.gist;
-#				warn "Unhandled case"
+#				say $_.hash.keys.gist if $*DEBUG;
+#				warn "Unhandled case" if $*DEBUG
 #			}
 #		}
 	}
@@ -3500,8 +3500,8 @@ return True;
 				self._statement( $_.hash.<statement> )
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 	}
@@ -3547,8 +3547,8 @@ return True;
 				)
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 		@child.flat
@@ -3581,8 +3581,8 @@ return True;
 				@child = self._longname( $_.hash.<longname> )
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 		@child
@@ -3594,8 +3594,8 @@ return True;
 				self._decint( $_.hash.<decint> )
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 	}
@@ -3606,8 +3606,8 @@ return True;
 				self._EXPR( $_.hash.<EXPR> )
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 	}
@@ -3618,8 +3618,8 @@ return True;
 				self._longname( $_.hash.<longname> )
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 	}
@@ -3639,8 +3639,8 @@ return True;
 			}
 		}
 		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+			say $p.hash.keys.gist if $*DEBUG;
+			warn "Unhandled case" if $*DEBUG
 		}
 		@child
 	}
@@ -3699,8 +3699,8 @@ return True;
 				)
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 		@child
@@ -3720,8 +3720,8 @@ return True;
 				)
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 		@child
@@ -3733,8 +3733,8 @@ return True;
 				self._param_var( $_.hash.<param_var> )
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 	}
@@ -3795,8 +3795,8 @@ return True;
 				)
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 		@child
@@ -3832,8 +3832,8 @@ return True;
 #			)
 		}
 		else {
-			say $_.hash.keys.gist;
-			warn "Unhandled case"
+			say $_.hash.keys.gist if $*DEBUG;
+			warn "Unhandled case" if $*DEBUG
 		}
 		@child
 	}
@@ -3844,8 +3844,8 @@ return True;
 				self._termseq( $_.hash.<termseq> )
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 	}
@@ -3854,8 +3854,8 @@ return True;
 		( )
 #		given $p {
 #			default {
-#				say $_.hash.keys.gist;
-#				warn "Unhandled case"
+#				say $_.hash.keys.gist if $*DEBUG;
+#				warn "Unhandled case" if $*DEBUG
 #			}
 #		}
 	}
@@ -4039,14 +4039,14 @@ return True;
 					)
 				}
 				else {
-					say $_.hash.keys.gist;
-					warn "Unhandled case"
+					say $_.hash.keys.gist if $*DEBUG;
+					warn "Unhandled case" if $*DEBUG
 				}
 			}
 		}
 		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+			say $p.hash.keys.gist if $*DEBUG;
+			warn "Unhandled case" if $*DEBUG
 		}
 		@child
 	}
@@ -4059,8 +4059,8 @@ return True;
 				self._numish( $_.hash.<numish> )
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 	}
@@ -4080,8 +4080,8 @@ return True;
 				Perl6::Infinity.from-match( $_ )
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 	}
@@ -4187,8 +4187,8 @@ return True;
 				)
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 		@child
@@ -4344,8 +4344,8 @@ return True;
 				)
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 		@child
@@ -4380,8 +4380,8 @@ return True;
 				)
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 		@child
@@ -4461,8 +4461,8 @@ return True;
 				)
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 		@child
@@ -4531,8 +4531,8 @@ return True;
 				@child = self._blockoid( $_.hash.<blockoid> )
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 		@child.flat
@@ -4644,8 +4644,8 @@ return True;
 				)
 			}
 			else {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 		@child
@@ -4748,8 +4748,8 @@ return True;
 				self._sigil( $_.hash.<sigil> )
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 	}
@@ -4784,8 +4784,8 @@ return True;
 				)
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 		@child
@@ -4849,14 +4849,14 @@ return True;
 					)
 				}
 				else {
-					say $_.hash.keys.gist;
-					warn "Unhandled case"
+					say $_.hash.keys.gist if $*DEBUG;
+					warn "Unhandled case" if $*DEBUG
 				}
 			}
 		}
 		else {
-			say $_.hash.keys.gist;
-			warn "Unhandled case"
+			say $_.hash.keys.gist if $*DEBUG;
+			warn "Unhandled case" if $*DEBUG
 		}
 		@child
 	}
@@ -4972,8 +4972,8 @@ return True;
 				}
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 		@child
@@ -4997,8 +4997,8 @@ return True;
 					)
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 		@child
@@ -5054,8 +5054,8 @@ return True;
 				)
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 		@child
@@ -5075,8 +5075,8 @@ return True;
 				)
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 		@child.flat
@@ -5086,8 +5086,8 @@ return True;
 		( )
 #		given $p {
 #			default {
-#				say $_.hash.keys.gist;
-#				warn "Unhandled case"
+#				say $_.hash.keys.gist if $*DEBUG;
+#				warn "Unhandled case" if $*DEBUG
 #			}
 #		}
 	}
@@ -5113,8 +5113,8 @@ return True;
 				)
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 		@child
@@ -5186,8 +5186,8 @@ return True;
 				)
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 		@child
@@ -5214,8 +5214,8 @@ return True;
 				)
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 		@child
@@ -5361,8 +5361,8 @@ return True;
 			}
 		}
 		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+			say $p.hash.keys.gist if $*DEBUG;
+			warn "Unhandled case" if $*DEBUG
 		}
 		@child
 	}
@@ -5380,8 +5380,8 @@ return True;
 					)
 				}
 				else {
-					say $_.hash.keys.gist;
-					warn "Unhandled case"
+					say $_.hash.keys.gist if $*DEBUG;
+					warn "Unhandled case" if $*DEBUG
 				}
 			}
 		}
@@ -5418,8 +5418,8 @@ return True;
 			@child = self._identifier( $p.hash.<identifier> )
 		}
 		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+			say $p.hash.keys.gist if $*DEBUG;
+			warn "Unhandled case" if $*DEBUG
 		}
 		@child
 	}
@@ -5428,8 +5428,8 @@ return True;
 		( )
 #		given $p {
 #			default {
-#				say $_.hash.keys.gist;
-#				warn "Unhandled case"
+#				say $_.hash.keys.gist if $*DEBUG;
+#				warn "Unhandled case" if $*DEBUG
 #			}
 #		}
 	}
@@ -5447,8 +5447,8 @@ return True;
 				Perl6::Number::Radix.from-match( $_ )
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 	}
@@ -5480,8 +5480,8 @@ return True;
 				)
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 		@child
@@ -5582,8 +5582,8 @@ return True;
 			)
 		}
 		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+			say $p.hash.keys.gist if $*DEBUG;
+			warn "Unhandled case" if $*DEBUG
 		}
 		@child
 	}
@@ -5592,8 +5592,8 @@ return True;
 		( )
 #		given $p {
 #			default {
-#				say $_.hash.keys.gist;
-#				warn "Unhandled case"
+#				say $_.hash.keys.gist if $*DEBUG;
+#				warn "Unhandled case" if $*DEBUG
 #			}
 #		}
 	}
@@ -5628,8 +5628,8 @@ return True;
 			)
 		}
 		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+			say $p.hash.keys.gist if $*DEBUG;
+			warn "Unhandled case" if $*DEBUG
 		}
 		@child.flat
 	}
@@ -5802,8 +5802,8 @@ return True;
 			@child = self._blockoid( $p.hash.<blockoid> )
 		}
 		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+			say $p.hash.keys.gist if $*DEBUG;
+			warn "Unhandled case" if $*DEBUG
 		}
 		@child.flat
 	}
@@ -5818,8 +5818,8 @@ return True;
 				die "Not implemented yet"
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 	}
@@ -5886,8 +5886,8 @@ return True;
 				)
 			}
 			else {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 		@child.flat
@@ -5923,8 +5923,8 @@ return True;
 			)
 		}
 		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+			say $p.hash.keys.gist if $*DEBUG;
+			warn "Unhandled case" if $*DEBUG
 		}
 		@child.flat
 	}
@@ -5935,8 +5935,8 @@ return True;
 				self._arglist( $_.hash.<arglist> )
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 	}
@@ -5963,8 +5963,8 @@ return True;
 				)
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 		@child
@@ -5994,8 +5994,8 @@ return True;
 				)
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 		@child
@@ -6005,8 +6005,8 @@ return True;
 		( )
 #		given $p {
 #			default {
-#				say $_.hash.keys.gist;
-#				warn "Unhandled case"
+#				say $_.hash.keys.gist if $*DEBUG;
+#				warn "Unhandled case" if $*DEBUG
 #			}
 #		}
 	}
@@ -6015,8 +6015,8 @@ return True;
 		( )
 #		given $p {
 #			default {
-#				say $_.hash.keys.gist;
-#				warn "Unhandled case"
+#				say $_.hash.keys.gist if $*DEBUG;
+#				warn "Unhandled case" if $*DEBUG
 #			}
 #		}
 	}
@@ -6053,8 +6053,8 @@ return True;
 				)
 			}
 			else {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 		@child
@@ -6066,8 +6066,8 @@ return True;
 				( )
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 	}
@@ -6076,8 +6076,8 @@ return True;
 		( )
 #		given $p {
 #			default {
-#				say $_.hash.keys.gist;
-#				warn "Unhandled case"
+#				say $_.hash.keys.gist if $*DEBUG;
+#				warn "Unhandled case" if $*DEBUG
 #			}
 #		}
 	}
@@ -6109,8 +6109,8 @@ return True;
 				die "Not implemented yet"
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 		@child
@@ -6319,8 +6319,8 @@ return True;
 			)
 		}
 		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+			say $p.hash.keys.gist if $*DEBUG;
+			warn "Unhandled case" if $*DEBUG
 		}
 		@child
 	}
@@ -6375,8 +6375,8 @@ return True;
 			@child = ( )
 		}
 		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+			say $p.hash.keys.gist if $*DEBUG;
+			warn "Unhandled case" if $*DEBUG
 		}
 		@child.flat
 	}
@@ -6387,8 +6387,8 @@ return True;
 				self._EXPR( $_.hash.<EXPR> )
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 	}
@@ -6397,8 +6397,8 @@ return True;
 		( )
 #		given $p {
 #			default {
-#				say $_.hash.keys.gist;
-#				warn "Unhandled case"
+#				say $_.hash.keys.gist if $*DEBUG;
+#				warn "Unhandled case" if $*DEBUG
 #			}
 #		}
 	}
@@ -6661,8 +6661,8 @@ return True;
 				)
 			}
 			else {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 	}
@@ -6766,8 +6766,8 @@ else {
 					die "Not implemented yet"
 				}
 				else {
-					say $_.hash.keys.gist;
-					warn "Unhandled case"
+					say $_.hash.keys.gist if $*DEBUG;
+					warn "Unhandled case" if $*DEBUG
 				}
 			}
 		}
@@ -6975,8 +6975,8 @@ else {
 			note "Fix null case"
 		}
 		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+			say $p.hash.keys.gist if $*DEBUG;
+			warn "Unhandled case" if $*DEBUG
 		}
 		@child
 	}
@@ -7153,8 +7153,8 @@ else {
 				)
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 		@child
@@ -7188,8 +7188,8 @@ else {
 				)
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 		@child
@@ -7246,8 +7246,8 @@ else {
 				)
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 		@child
@@ -7259,8 +7259,8 @@ else {
 				self._desigilname( $_.hash.<desigilname> )
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 	}
@@ -7277,8 +7277,8 @@ else {
 					)
 				}
 				else {
-					say $_.hash.keys.gist;
-					warn "Unhandled case"
+					say $_.hash.keys.gist if $*DEBUG;
+					warn "Unhandled case" if $*DEBUG
 				}
 			}
 		}
@@ -7292,8 +7292,8 @@ else {
 			@child = Perl6::Bareword.from-match( $p )
 		}
 		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+			say $p.hash.keys.gist if $*DEBUG;
+			warn "Unhandled case" if $*DEBUG
 		}
 		@child
 	}
@@ -7347,8 +7347,8 @@ else {
 				@child = self._name( $_.hash.<name> );
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 		@child
@@ -7366,14 +7366,14 @@ else {
 					)
 				}
 				else {
-					say $_.hash.keys.gist;
-					warn "Unhandled case"
+					say $_.hash.keys.gist if $*DEBUG;
+					warn "Unhandled case" if $*DEBUG
 				}
 			}
 		}
 		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+			say $p.hash.keys.gist if $*DEBUG;
+			warn "Unhandled case" if $*DEBUG
 		}
 		@child
 	}
@@ -7384,8 +7384,8 @@ else {
 				self._termconjseq( $_.hash.<termconjseq> )
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 	}
@@ -7402,14 +7402,14 @@ else {
 					)
 				}
 				else {
-					say $_.hash.keys.gist;
-					warn "Unhandled case"
+					say $_.hash.keys.gist if $*DEBUG;
+					warn "Unhandled case" if $*DEBUG
 				}
 			}
 		}
 		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+			say $p.hash.keys.gist if $*DEBUG;
+			warn "Unhandled case" if $*DEBUG
 		}
 		@child
 	}
@@ -7427,8 +7427,8 @@ else {
 					)
 				}
 				else {
-					say $_.hash.keys.gist;
-					warn "Unhandled case"
+					say $_.hash.keys.gist if $*DEBUG;
+					warn "Unhandled case" if $*DEBUG
 				}
 			}
 		}
@@ -7448,8 +7448,8 @@ else {
 				)
 		}
 		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+			say $p.hash.keys.gist if $*DEBUG;
+			warn "Unhandled case" if $*DEBUG
 		}
 		@child
 	}
@@ -7475,8 +7475,8 @@ else {
 				)
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 		@child
@@ -7494,8 +7494,8 @@ else {
 					)
 				}
 				else {
-					say $_.hash.keys.gist;
-					warn "Unhandled case"
+					say $_.hash.keys.gist if $*DEBUG;
+					warn "Unhandled case" if $*DEBUG
 				}
 			}
 		}
@@ -7503,8 +7503,8 @@ else {
 			@child = self._noun( $p.hash.<noun> )
 		}
 		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+			say $p.hash.keys.gist if $*DEBUG;
+			warn "Unhandled case" if $*DEBUG
 		}
 		@child
 	}
@@ -7515,8 +7515,8 @@ else {
 				self._termaltseq( $_.hash.<termaltseq> )
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 	}
@@ -7531,8 +7531,8 @@ else {
 			}
 		}
 		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+			say $p.hash.keys.gist if $*DEBUG;
+			warn "Unhandled case" if $*DEBUG
 		}
 		@child
 	}
@@ -7589,8 +7589,8 @@ else {
 				)
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 		@child
@@ -7600,8 +7600,8 @@ else {
 		( )
 #		given $p {
 #			default {
-#				say $_.hash.keys.gist;
-#				warn "Unhandled case"
+#				say $_.hash.keys.gist if $*DEBUG;
+#				warn "Unhandled case" if $*DEBUG
 #			}
 #		}
 	}
@@ -7627,8 +7627,8 @@ else {
 					)
 				}
 				else {
-					say $_.hash.keys.gist;
-					warn "Unhandled case"
+					say $_.hash.keys.gist if $*DEBUG;
+					warn "Unhandled case" if $*DEBUG
 				}
 			}
 		}
@@ -7639,8 +7639,8 @@ else {
 			self._typename( $p.hash.<typename> )
 		}
 		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+			say $p.hash.keys.gist if $*DEBUG;
+			warn "Unhandled case" if $*DEBUG
 		}
 		@child
 	}
@@ -7768,8 +7768,8 @@ else {
 			)
 		}
 		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+			say $p.hash.keys.gist if $*DEBUG;
+			warn "Unhandled case" if $*DEBUG
 		}
 		@child
 	}
@@ -7808,8 +7808,8 @@ else {
 					self._longname( $_.hash.<longname> )
 			}
 			else {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 
@@ -7821,8 +7821,8 @@ else {
 			self._longname( $p.hash.<longname> )
 		}
 		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+			say $p.hash.keys.gist if $*DEBUG;
+			warn "Unhandled case" if $*DEBUG
 		}
 	}
 
@@ -7873,8 +7873,8 @@ else {
 				)
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 		@child
@@ -7902,8 +7902,8 @@ die "Catching Int";
 				self._quote( $_.hash.<quote> )
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 	}
@@ -7954,8 +7954,8 @@ die "Catching Int";
 				self._variable( $_.hash.<variable> )
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 	}
@@ -8041,8 +8041,8 @@ die "Catching Int";
 			@child = self._variable( $p.hash.<variable> )
 		}
 		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+			say $p.hash.keys.gist if $*DEBUG;
+			warn "Unhandled case" if $*DEBUG
 		}
 		@child.flat
 	}
@@ -8091,8 +8091,8 @@ die "Catching Int";
 				)
 			}
 			default {
-				say $_.hash.keys.gist;
-				warn "Unhandled case"
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
 			}
 		}
 		@child
@@ -8102,8 +8102,8 @@ die "Catching Int";
 		( )
 #		given $p {
 #			default {
-#				say $_.hash.keys.gist;
-#				warn "Unhandled case"
+#				say $_.hash.keys.gist if $*DEBUG;
+#				warn "Unhandled case" if $*DEBUG
 #			}
 #		}
 	}
@@ -8115,14 +8115,14 @@ die "Catching Int";
 				if 0 {
 				}
 				else {
-					say $_.hash.keys.gist;
-					warn "Unhandled case"
+					say $_.hash.keys.gist if $*DEBUG;
+					warn "Unhandled case" if $*DEBUG
 				}
 			}
 		}
 		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+			say $p.hash.keys.gist if $*DEBUG;
+			warn "Unhandled case" if $*DEBUG
 		}
 		@child
 	}
@@ -8131,8 +8131,8 @@ die "Catching Int";
 		( )
 #		given $p {
 #			default {
-#				say $_.hash.keys.gist;
-#				warn "Unhandled case"
+#				say $_.hash.keys.gist if $*DEBUG;
+#				warn "Unhandled case" if $*DEBUG
 #			}
 #		}
 	}
@@ -8160,8 +8160,8 @@ die "Catching Int";
 					)
 				}
 				else {
-					say $_.hash.keys.gist;
-					warn "Unhandled case"
+					say $_.hash.keys.gist if $*DEBUG;
+					warn "Unhandled case" if $*DEBUG
 				}
 			}
 		}
@@ -8180,8 +8180,8 @@ die "Catching Int";
 			@child = self._blockoid( $p.hash.<blockoid> )
 		}
 		else {
-			say $p.hash.keys.gist;
-			warn "Unhandled case"
+			say $p.hash.keys.gist if $*DEBUG;
+			warn "Unhandled case" if $*DEBUG
 		}
 		@child
 	}
