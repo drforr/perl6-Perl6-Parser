@@ -20,7 +20,6 @@ Leading is 5 characters, intra is 3, trailing is 2.
 It's a happy coincidence that these are the 3rd-5th terms in the Fibonacci
 sequence.
 
-It's not a coincidence, however, that leading, trailing and intrabrace spacing
-all get tested in the same file, however.
+It's not a coincidence, however, that leading, trailing and intrabrace spacing all get tested in the same pass, however. This way if I duplicate a trailing space, it can't be confused with other whitespace because nothing else is 4 spaces (2 + 2) long. Same with the intra of 3, nothing else is 6 spaces long. And duplicating code is the most common failure mode.
 
 =end README
