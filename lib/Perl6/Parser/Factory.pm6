@@ -930,6 +930,15 @@ class Perl6::Comment does Token {
 
 class Perl6::Document does Branching does Bounded {
 	also is Perl6::Element;
+
+	method from-list( Perl6::Element @child ) {
+		self.bless(
+			# No line number needed.
+			:from( @child ?? @child[0].from !! 0 ),
+			:to( @child ?? @child[*-1].to !! 0 ),
+			:child( @child )
+		)
+	}
 }
 
 # If you have any curiosity about this, please search for /Sir-Not in the
@@ -1457,12 +1466,7 @@ class Perl6::Parser::Factory {
 				)
 			)
 		}
-		Perl6::Document.new(
-			# No line number needed.
-			:from( @_child ?? @_child[0].from !! 0 ),
-			:to( @_child ?? @_child[*-1].to !! 0 ),
-			:child( @_child )
-		)
+		Perl6::Document.from-list( @_child )
 	}
 
 	sub key-bounds( Mu $p ) {
