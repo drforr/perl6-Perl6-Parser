@@ -463,9 +463,8 @@ subtest {
 	plan 3;
 
 	subtest {
-		plan 0;
+		plan 2;
 
-#`(
 		my $source = Q:to[_END_];
 my $b = 99;
 
@@ -485,7 +484,6 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
-)
 	}, Q{version 1};
 
 	subtest {

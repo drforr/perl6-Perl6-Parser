@@ -37,9 +37,8 @@ _END_
 	}, Q{version 2};
 
 	subtest {
-		plan 0;
+		plan 2;
 
-#`(
 		my $source = Q:to[_END_];
 my ($a, $b) = $*IN.get.split(" ");
 say $a + $b;
@@ -48,7 +47,6 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
-)
 	}, Q{version 3};
 }, Q{A + B};
 
