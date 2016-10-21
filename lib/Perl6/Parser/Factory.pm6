@@ -1667,7 +1667,7 @@ class Perl6::Parser::Factory {
 	}
 
 	method _backmod( Mu $p ) {
-say "backmod finally used";
+		say "backmod finally used";
 		( )
 	}
 
@@ -2468,7 +2468,7 @@ say "backmod finally used";
 	}
 
 	method _doc( Mu $p ) {
-say "doc finally used";
+		say "doc finally used";
 		( )
 	}
 
@@ -3368,7 +3368,7 @@ say "doc finally used";
 		}
 		#if $p ~~ QAST::Want;
 		#if self.assert-hash( $p, [< XXX >] );
-say "called invocant";
+		say "called invocant";
 return True;
 	}
 
@@ -3407,7 +3407,7 @@ return True;
 	}
 
 	method _max( Mu $p ) {
-say "max finally used";
+		say "max finally used";
 		( )
 	}
 
@@ -3687,7 +3687,6 @@ say "max finally used";
 				[< param_var type_constraint quant >],
 				[< default_value modifier trait
 				   post_constraint >] ) {
-say 1;
 				@child = self._param_var( $_.hash.<param_var> );
 				@child.append(
 					Perl6::WS.between-matches(
@@ -3787,7 +3786,7 @@ say 1;
 	}
 
 	method _normspace( Mu $p ) {
-say "normspace finally used";
+		say "normspace finally used";
 		( )
 	}
 
@@ -4023,7 +4022,6 @@ say "normspace finally used";
 			#default { .resume }
 			default { }
 		}
-say "called O";
 		return True if $p.<thunky>
 			and $p.<prec>
 			and $p.<fiddly>
@@ -4487,7 +4485,6 @@ say "called O";
 				[< param_var type_constraint
 				   quant post_constraint >],
 				[< default_value modifier trait >] ) {
-say 2;
 				# Synthesize the 'from' and 'to' markers for
 				# 'where'
 				$p.Str ~~ m{ << (where) >> };
@@ -4521,7 +4518,6 @@ say 2;
 				[< type_constraint param_var quant >],
 				[< default_value modifier trait
 				   post_constraint >] ) {
-say 3;
 				@child.append(
 					self._type_constraint(
 						$_.hash.<type_constraint>
@@ -4554,7 +4550,6 @@ say 3;
 				[< default_value modifier trait
 				   type_constraint
 				   post_constraint >] ) {
-say 4;
 				@child.append(
 					self._param_var( $_.hash.<param_var> )
 				)
@@ -5027,6 +5022,7 @@ say 4;
 	}
 
 	method _quant( Mu $p ) {
+say $p.dump;
 		if $p.Str {
 			Perl6::Bareword.from-match( $p )
 		}
@@ -5368,7 +5364,7 @@ say 4;
 	}
 
 	method _radix( Mu $p ) {
-say "radix finally used";
+		say "radix finally used";
 		( )
 	}
 
@@ -5527,7 +5523,7 @@ say "radix finally used";
 	}
 
 	method _right( Mu $p ) {
-say "right finally used";
+		say "right finally used";
 		( )
 	}
 
@@ -5934,12 +5930,12 @@ say "right finally used";
 	}
 
 	method _septype( Mu $p ) {
-say "septype finally used";
+		say "septype finally used";
 		( )
 	}
 
 	method _shape( Mu $p ) {
-say "shape finally used";
+		say "shape finally used";
 		( )
 	}
 
@@ -5984,7 +5980,7 @@ say "shape finally used";
 	method _sigfinal( Mu $p ) {
 		given $p {
 			when self.assert-hash( $_, [< normspace >] ) {
-say "sigfinal finally used";
+				say "sigfinal finally used";
 				( )
 			}
 			default {
@@ -5995,7 +5991,7 @@ say "sigfinal finally used";
 	}
 
 	method _sigil( Mu $p ) {
-say "sigil finally used";
+		say "sigil finally used";
 		( )
 	}
 
@@ -6223,6 +6219,11 @@ say "sigil finally used";
 			[< default_value modifier trait
 			   type_constraint
 			   post_constraint >] ) {
+			if $p.hash.<quant>.Str {
+				@child.append(
+					self._quant( $p.hash.<quant> )
+				);
+			}
 			@child.append(
 				self._param_var( $p.hash.<param_var> )
 			);
@@ -6343,7 +6344,7 @@ say "sigil finally used";
 	}
 
 	method _specials( Mu $p ) {
-say "specials finally used";
+		say "specials finally used";
 		( )
 	}
 
@@ -7534,7 +7535,7 @@ else {
 	}
 
 	method _twigil( Mu $p ) {
-say "twigil finally used";
+		say "twigil finally used";
 		( )
 	}
 
@@ -8027,7 +8028,7 @@ die "Catching Int";
 	}
 
 	method _vstr( Mu $p ) {
-say "vstr finally used";
+		say "vstr finally used";
 		( )
 	}
 
@@ -8051,7 +8052,7 @@ say "vstr finally used";
 	}
 
 	method _wu( Mu $p ) {
-say "wu finally used";
+		say "wu finally used";
 		( )
 	}
 
