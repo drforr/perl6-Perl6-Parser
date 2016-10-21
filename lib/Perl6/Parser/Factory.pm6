@@ -281,7 +281,7 @@ class Perl6::Operator::Infix does Token {
 			( )
 		}
 	}
-	multi method new( Int $from, Str $str ) {
+	multi method from-int( Int $from, Str $str ) {
 		self.bless(
 			:factory-line-number( callframe(1).line ),
 			:from( $from ),
@@ -461,7 +461,7 @@ class Perl6::WS does Token {
 	# If there is no whitespace, returns () which is treated as a
 	# nonexistent array element by append().
 	#
-	multi method new( Int $start, $content ) {
+	multi method from-int( Int $start, $content ) {
 		if $content {
 			self.bless(
 				:factory-line-number( callframe(1).line ),
@@ -680,17 +680,17 @@ class Perl6::WS does Token {
 		my ( $lhs, $rhs ) = split( COMMA, $split-me );
 		if $lhs and $lhs ne '' {
 			@child.append(
-				Perl6::WS.new( $start, $lhs )
+				Perl6::WS.from-int( $start, $lhs )
 			);
 			$start += $lhs.chars;
 		}
 		@child.append(
-			Perl6::Operator::Infix.new( $start, COMMA )
+			Perl6::Operator::Infix.from-int( $start, COMMA )
 		);
 		$start += COMMA.chars;
 		if $rhs and $rhs ne '' {
 			@child.append(
-				Perl6::WS.new( $start, $rhs )
+				Perl6::WS.from-int( $start, $rhs )
 			);
 			$start += $rhs.chars;
 		}
@@ -2867,19 +2867,11 @@ class Perl6::Parser::Factory {
 							$p, COMMA
 						)
 					);
-					my $x = $p.orig.substr(
-						$p.hash.<infix>.to# + COMMA.chars
-					);
-					if $x ~~ m{ ^ ( \s+ ) } {
-						@child.append(
-							Perl6::WS.new(
-								:factory-line-number( callframe(1).line ),
-								:from( $p.hash.<infix>.to ),
-								:to( $p.hash.<infix>.to + $0.Str.chars ),
-								:content( $0.Str )
-							)
+					@child.append(
+						Perl6::WS.after-orig(
+							$p.hash.<infix>
 						)
-					}
+					);
 					@child.append(
 						self._EXPR( $p.list.[2] )
 					)
@@ -3208,7 +3200,7 @@ class Perl6::Parser::Factory {
 	method _infix_circumfix_meta_operator( Mu $p ) {
 		given $p {
 			when self.assert-hash( $_, [< sym infixish O >] ) {
-				Perl6::Operator::Infix.new(
+				Perl6::Operator::Infix.from-int(
 					$_.hash.<sym>.from,
 					$_.hash.<sym>.Str ~ $_.hash.<infixish>
 				)
@@ -3224,7 +3216,7 @@ class Perl6::Parser::Factory {
 	method _infix_prefix_meta_operator( Mu $p ) {
 		given $p {
 			when self.assert-hash( $_, [< sym infixish O >] ) {
-				Perl6::Operator::Infix.new(
+				Perl6::Operator::Infix.from-int(
 					$_.hash.<sym>.from,
 					$_.hash.<sym>.Str ~ $_.hash.<infixish>
 				)
@@ -4408,12 +4400,8 @@ say "called O";
 				);
 				if $temp ~~ m{ ^ ( \s+ ) ( ';' )? } {
 					@child.append(
-						Perl6::WS.new(
-							:factory-line-number( callframe(1).line ),
-							:from( $_.hash.<longname>.to ),
-							:to( $_.hash.<longname>.to + $0.chars ),
-							:content( $0.Str )
-							
+						Perl6::WS.after-orig(
+							$_.hash.<longname>
 						)
 					);
 					if $1.chars {
@@ -5821,17 +5809,11 @@ say "called O";
 		my Perl6::Element @child;
 		if self.assert-hash( $p, [< sym scoped >] ) {
 			@child = self._sym( $p.hash.<sym> );
-			if $p.hash.<scoped>.Str ~~ m{ ^ ( \s+ ) } {
-				@child.append(
-					Perl6::WS.new(
-						:factory-line-number( callframe(1).line ),
-						:from( $p.hash.<sym>.to ),
-						:to( $p.hash.<sym>.to +
-							$0.chars ),
-						:content( $0.Str )
-					)
+			@child.append(
+				Perl6::WS.after-orig(
+					$p.hash.<sym>
 				)
-			}
+			);
 			@child.append(
 				self._scoped( $p.hash.<scoped> ).flat
 			)
@@ -6055,7 +6037,7 @@ say "called O";
 			# XXX revisit this later
 			if $p.Str ~~ m{ (\s+) ('where') } {
 				@child.append(
-					Perl6::WS.new(
+					Perl6::WS.from-int(
 						$p.hash.<param_var>.to,
 						~$0
 					)
@@ -6071,7 +6053,7 @@ say "called O";
 			);
 			if $p.Str ~~ m{ ('where') (\s+) } {
 				@child.append(
-					Perl6::WS.new( $p.from + $0.to, ~$1 )
+					Perl6::WS.from-int( $p.from + $0.to, ~$1 )
 				)
 			}
 			@child.append(
@@ -6091,7 +6073,7 @@ say "called O";
 			);
 			if $p.Str ~~ m{ (\s+) } {
 				@child.append(
-					Perl6::WS.new( $p.from + $0.from, ~$0 )
+					Perl6::WS.from-int( $p.from + $0.from, ~$0 )
 				)
 			}
 			@child.append(
@@ -6143,7 +6125,7 @@ say "called O";
 			);
 			if $p.Str ~~ m{ (\s+) ('=') } {
 				@child.append(
-					Perl6::WS.new(
+					Perl6::WS.from-int(
 						$p.hash.<param_var>.to,
 						~$0
 					)
@@ -6154,7 +6136,7 @@ say "called O";
 			);
 			if $p.Str ~~ m{ ('=') (\s+) } {
 				@child.append(
-					Perl6::WS.new( $p.from + $0.to, ~$1 )
+					Perl6::WS.from-int( $p.from + $0.to, ~$1 )
 				)
 			}
 			@child.append(
@@ -7867,7 +7849,7 @@ die "Catching Int";
 				[< semilist postcircumfix
 				   signature trait >] ) {
 			# Synthesize the 'from' and 'to' markers for 'where'
-			$p.Str ~~ m{ (\s*) (where) (\s*) };
+			$p.Str ~~ m{ ( \s* ) ( where ) ( \s* ) };
 			my Int $from = $0.from;
 			@child = self._variable( $p.hash.<variable> );
 			if $0.Str {
