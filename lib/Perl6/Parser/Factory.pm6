@@ -1667,6 +1667,7 @@ class Perl6::Parser::Factory {
 	}
 
 	method _backmod( Mu $p ) {
+say "backmod finally used";
 		( )
 	}
 
@@ -2407,19 +2408,24 @@ class Perl6::Parser::Factory {
 
 	method _defterm( Mu $p ) {
 		my Perl6::Element @child;
-		if self.assert-hash( $p, [< identifier colonpair >] ) {
-			@child =
-				self._identifier( $p.hash.<identifier> ),
-				self._colonpair( $p.hash.<colonpair> ),
-		}
-		elsif self.assert-hash( $p,
-				[< identifier >],
-				[< colonpair >] ) {
-			@child = self._identifier( $p.hash.<identifier> )
-		}
-		else {
-			say $p.hash.keys.gist if $*DEBUG;
-			warn "Unhandled case" if $*DEBUG
+		given $p {
+			when self.assert-hash( $_,
+					[< identifier colonpair >] ) {
+				@child =
+					self._identifier( $_.hash.<identifier> ),
+					self._colonpair( $_.hash.<colonpair> ),
+			}
+			when self.assert-hash( $_,
+					[< identifier >],
+					[< colonpair >] ) {
+				@child = self._identifier(
+					$_.hash.<identifier>
+				)
+			}
+			default {
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
+			}
 		}
 		@child
 	}
@@ -2462,6 +2468,7 @@ class Perl6::Parser::Factory {
 	}
 
 	method _doc( Mu $p ) {
+say "doc finally used";
 		( )
 	}
 
@@ -3400,6 +3407,7 @@ return True;
 	}
 
 	method _max( Mu $p ) {
+say "max finally used";
 		( )
 	}
 
@@ -3679,6 +3687,7 @@ return True;
 				[< param_var type_constraint quant >],
 				[< default_value modifier trait
 				   post_constraint >] ) {
+say 1;
 				@child = self._param_var( $_.hash.<param_var> );
 				@child.append(
 					Perl6::WS.between-matches(
@@ -3778,6 +3787,7 @@ return True;
 	}
 
 	method _normspace( Mu $p ) {
+say "normspace finally used";
 		( )
 	}
 
@@ -4454,6 +4464,22 @@ say "called O";
 		@child.flat
 	}
 
+	method _param_term( Mu $p ) {
+		my Perl6::Element @child;
+		given $p {
+			when self.assert-hash( $_, [< defterm >] ) {
+				@child = self._defterm(
+					$_.hash.<defterm>
+				);
+			}
+			default {
+				say $_.hash.keys.gist if $*DEBUG;
+				warn "Unhandled case" if $*DEBUG
+			}
+		}
+		@child
+	}
+
 	method _parameter( Mu $p ) {
 		my Perl6::Element @child;
 		for $p.list {
@@ -4461,6 +4487,7 @@ say "called O";
 				[< param_var type_constraint
 				   quant post_constraint >],
 				[< default_value modifier trait >] ) {
+say 2;
 				# Synthesize the 'from' and 'to' markers for
 				# 'where'
 				$p.Str ~~ m{ << (where) >> };
@@ -4494,6 +4521,7 @@ say "called O";
 				[< type_constraint param_var quant >],
 				[< default_value modifier trait
 				   post_constraint >] ) {
+say 3;
 				@child.append(
 					self._type_constraint(
 						$_.hash.<type_constraint>
@@ -4526,6 +4554,7 @@ say "called O";
 				[< default_value modifier trait
 				   type_constraint
 				   post_constraint >] ) {
+say 4;
 				@child.append(
 					self._param_var( $_.hash.<param_var> )
 				)
@@ -4998,7 +5027,13 @@ say "called O";
 	}
 
 	method _quant( Mu $p ) {
-		( )
+		if $p.Str {
+			Perl6::Bareword.from-match( $p )
+		}
+		else {
+			say $p.hash.keys.gist if $*DEBUG;
+			warn "Unhandled case" if $*DEBUG
+		}
 	}
 
 	method _quantified_atom( Mu $p ) {
@@ -5333,6 +5368,7 @@ say "called O";
 	}
 
 	method _radix( Mu $p ) {
+say "radix finally used";
 		( )
 	}
 
@@ -5491,6 +5527,7 @@ say "called O";
 	}
 
 	method _right( Mu $p ) {
+say "right finally used";
 		( )
 	}
 
@@ -5897,10 +5934,12 @@ say "called O";
 	}
 
 	method _septype( Mu $p ) {
+say "septype finally used";
 		( )
 	}
 
 	method _shape( Mu $p ) {
+say "shape finally used";
 		( )
 	}
 
@@ -5945,6 +5984,7 @@ say "called O";
 	method _sigfinal( Mu $p ) {
 		given $p {
 			when self.assert-hash( $_, [< normspace >] ) {
+say "sigfinal finally used";
 				( )
 			}
 			default {
@@ -5955,6 +5995,7 @@ say "called O";
 	}
 
 	method _sigil( Mu $p ) {
+say "sigil finally used";
 		( )
 	}
 
@@ -5995,6 +6036,38 @@ say "called O";
 	method __Parameter( Mu $p ) {
 		my Perl6::Element @child;
 		if self.assert-hash( $p,
+			[< param_term type_constraint quant >],
+			[< post_constraint default_value modifier trait >] ) {
+			@child.append(
+				self._type_constraint(
+					$p.hash.<type_constraint>
+				)
+			);
+			@child.append(
+				Perl6::WS.before(
+					$p,
+					$p.hash.<quant>
+				)
+			);
+			@child.append(
+				self._quant(
+					$p.hash.<quant>
+				)
+			);
+			@child.append(
+				Perl6::WS.between-matches(
+					$p,
+					'quant',
+					'param_term'
+				)
+			);
+			@child.append(
+				self._param_term(
+					$p.hash.<param_term>
+				)
+			);
+		}
+		elsif self.assert-hash( $p,
 			[< defterm quant >],
 			[< type_constraint post_constraint
 			   default_value modifier trait >] ) {
@@ -6270,6 +6343,7 @@ say "called O";
 	}
 
 	method _specials( Mu $p ) {
+say "specials finally used";
 		( )
 	}
 
@@ -7460,6 +7534,7 @@ else {
 	}
 
 	method _twigil( Mu $p ) {
+say "twigil finally used";
 		( )
 	}
 
@@ -7952,6 +8027,7 @@ die "Catching Int";
 	}
 
 	method _vstr( Mu $p ) {
+say "vstr finally used";
 		( )
 	}
 
@@ -7975,6 +8051,7 @@ die "Catching Int";
 	}
 
 	method _wu( Mu $p ) {
+say "wu finally used";
 		( )
 	}
 
