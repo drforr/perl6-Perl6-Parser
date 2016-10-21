@@ -353,7 +353,7 @@ class Perl6::Operator::Circumfix does Branching does Bounded {
 			my Perl6::Element @_child;
 			@_child.append(
 				Perl6::Balanced::Enter.new(
-					:factory-line-number( callframe(1).line ),
+					:factory-line-number( callframe(2).line ),
 					:from( $from ),
 					:to( $from + $front.chars ),
 					:content( $front )
@@ -362,14 +362,14 @@ class Perl6::Operator::Circumfix does Branching does Bounded {
 			@_child.append( @child );
 			@_child.append(
 				Perl6::Balanced::Exit.new(
-					:factory-line-number( callframe(1).line ),
+					:factory-line-number( callframe(2).line ),
 					:from( $to - $back.chars ),
 					:to( $to ),
 					:content( $back )
 				)
 			);
 			self.bless(
-				:factory-line-number( callframe(1).line ),
+				:factory-line-number( callframe(2).line ),
 				:from( $from ),
 				:to( $to ),
 				:child( @_child )
@@ -3715,6 +3715,7 @@ return True;
 					[< identifier >],
 					[< morename >] ) {
 				@child.append(
+					# XXX this should be an identifier...
 					Perl6::Bareword.from-match( $_ )
 				)
 			}
@@ -5596,6 +5597,14 @@ say "called O";
 						:from( $p.hash.<deflongname>.to + $0.from ),
 						:to( $p.hash.<deflongname>.to + $0.from + $0.chars ),
 						:content( $0.Str )
+					)
+				)
+			}
+			else {
+				@child.append(
+					Perl6::WS.after(
+						$p,
+						$p.hash.<deflongname>
 					)
 				)
 			}

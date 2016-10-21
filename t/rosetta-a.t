@@ -138,9 +138,8 @@ _END_
 }, Q{Abundant, Deficient and Perfect numbers};
 
 subtest {
-	plan 0;
+	plan 2;
 
-#`(
 	my $source = Q:to[_END_];
 sub accum ($n is copy) { sub { $n += $^x } }
 _END_
@@ -148,7 +147,6 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
-)
 }, Q{Accumulator factory};
 
 subtest {
