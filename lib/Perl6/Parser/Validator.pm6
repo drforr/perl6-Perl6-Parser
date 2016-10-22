@@ -17,7 +17,7 @@ class Perl6::Parser::Validator {
 
 	method record-failure( Str $term ) returns Bool {
 		note "Validation failed for term '$term'" if $*DEBUG;
-		die "Validation failed for term '$term'" if $*VALIDATION-FATAL;
+		die "Validation failed for term '$term'" if $*VALIDATION-FAILURE-FATAL;
 		return False
 	}
 
@@ -29,7 +29,7 @@ class Perl6::Parser::Validator {
 
 		return True if $parsed.Bool;
 
-		die "Uncaught Bool" if $*VALIDATION-FATAL;
+		die "Uncaught Bool" if $*VALIDATION-FAILURE-FATAL;
 		warn "Uncaught type";
 		return False
 	}
@@ -43,7 +43,7 @@ class Perl6::Parser::Validator {
 		return True if $parsed.Int;
 		return True if $parsed.Bool;
 
-		die "Uncaught Int" if $*VALIDATION-FATAL;
+		die "Uncaught Int" if $*VALIDATION-FAILURE-FATAL;
 		warn "Uncaught type";
 		return False
 	}
@@ -56,7 +56,7 @@ class Perl6::Parser::Validator {
 
 		return True if $parsed.Num;
 
-		die "Uncaught Num" if $*VALIDATION-FATAL;
+		die "Uncaught Num" if $*VALIDATION-FAILURE-FATAL;
 		warn "Uncaught type";
 		return False
 	}
@@ -71,7 +71,7 @@ class Perl6::Parser::Validator {
 
 		return True if $parsed.Str;
 
-		die "Uncaught Str" if $*VALIDATION-FATAL;
+		die "Uncaught Str" if $*VALIDATION-FAILURE-FATAL;
 		warn "Uncaught type";
 		return False
 	}
@@ -125,7 +125,7 @@ class Perl6::Parser::Validator {
 				next if self.assert-hash-keys( $_, [< EXPR >] )
 					and self._EXPR( $_.hash.<EXPR> );
 				next if self.assert-Bool( $_ );
-				next if self.assert-Str( $_ );
+				next if $_.Str;
 				debug-match( $_ );
 				return self.record-failure( '_ArgList list' );
 			}
@@ -1589,6 +1589,11 @@ return True;
 					and self._Quant( $_.hash.<quant> );
 				next if self.assert-hash-keys( $_,
 					[< param_var quant >],
+					[< default_value type_constraint modifier trait post_constraint >] )
+					and self._ParamVar( $_.hash.<param_var> )
+					and self._Quant( $_.hash.<quant> );
+				next if self.assert-hash-keys( $_,
+					[< param_var quant >],
 					[< default_value modifier trait
 					   type_constraint
 					   post_constraint >] )
@@ -1627,7 +1632,6 @@ return True;
 					and self._TypeConstraint(
 						$_.hash.<type_constraint>
 					);
-
 				debug-match( $_ );
 				return self.record-failure( '_Parameter list' );
 			}
@@ -1741,6 +1745,7 @@ return True;
 	method _Quant( Mu $parsed ) returns Bool {
 		self.trace( '_Quant' );
 #return True;
+		return True if $parsed.Str;
 		return True if self.assert-Bool( $parsed );
 		debug-match( $parsed );
 		return self.record-failure( '_Quant' );

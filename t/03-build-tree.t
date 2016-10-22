@@ -6,7 +6,8 @@ use Perl6::Parser;
 plan 9;
 
 my $pt = Perl6::Parser.new;
-my $*VALIDATION-FATAL = True;
+my $*VALIDATION-FAILURE-FATAL = True;
+my $*FACTORY-FAILURE-FATAL = True;
 
 # $pt.build-tree verifies that the tokens are contiguous, along with a bunch
 # of other things.

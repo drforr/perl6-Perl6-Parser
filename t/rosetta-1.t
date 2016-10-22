@@ -6,7 +6,8 @@ use Perl6::Parser;
 plan 7;
 
 my $pt = Perl6::Parser.new;
-my $*VALIDATION-FATAL = True;
+my $*VALIDATION-FAILURE-FATAL = True;
+my $*FACTORY-FAILURE-FATAL = True;
 
 subtest {
 	plan 4;
@@ -543,7 +544,7 @@ _END_
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
 )
-	}, Q{version 1};
+	}, Q{version 3};
 }, Q{99 bottles of beer};
 
 # vim: ft=perl6

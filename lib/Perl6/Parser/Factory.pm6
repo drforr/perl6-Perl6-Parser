@@ -242,17 +242,12 @@ class Perl6::Operator::Prefix does Token {
 	also is Perl6::Operator;
 
 	multi method from-match( Mu $p ) {
-		if $p.from < $p.to {
-			self.bless(
-				:factory-line-number( callframe(1).line ),
-				:from( $p.from ),
-				:to( $p.to ),
-				:content( $p.Str )
-			)
-		}
-		else {
-			( )
-		}
+		self.bless(
+			:factory-line-number( callframe(1).line ),
+			:from( $p.from ),
+			:to( $p.to ),
+			:content( $p.Str )
+		)
 	}
 
 	multi method from-match-trimmed( Mu $p ) {
@@ -269,17 +264,12 @@ class Perl6::Operator::Infix does Token {
 	also is Perl6::Operator;
 
 	method from-match( Mu $p ) {
-		if $p.from < $p.to {
-			self.bless(
-				:factory-line-number( callframe(1).line ),
-				:from( $p.from ),
-				:to( $p.to ),
-				:content( $p.Str )
-			)
-		}
-		else {
-			( )
-		}
+		self.bless(
+			:factory-line-number( callframe(1).line ),
+			:from( $p.from ),
+			:to( $p.to ),
+			:content( $p.Str )
+		)
 	}
 	multi method from-int( Int $from, Str $str ) {
 		self.bless(
@@ -304,17 +294,12 @@ class Perl6::Operator::Postfix does Token {
 	also is Perl6::Operator;
 
 	method from-match( Mu $p ) {
-		if $p.from < $p.to {
-			self.bless(
-				:factory-line-number( callframe(1).line ),
-				:from( $p.from ),
-				:to( $p.to ),
-				:content( $p.Str )
-			)
-		}
-		else {
-			( )
-		}
+		self.bless(
+			:factory-line-number( callframe(1).line ),
+			:from( $p.from ),
+			:to( $p.to ),
+			:content( $p.Str )
+		)
 	}
 }
 class Perl6::Operator::Circumfix does Branching does Bounded {
@@ -349,104 +334,89 @@ class Perl6::Operator::Circumfix does Branching does Bounded {
 	}
 
 	method from-from-to-XXX( Int $from, Int $to, Str $front, Str $back, @child ) {
-		if $from < $to {
-			my Perl6::Element @_child;
-			@_child.append(
-				Perl6::Balanced::Enter.new(
-					:factory-line-number( callframe(2).line ),
-					:from( $from ),
-					:to( $from + $front.chars ),
-					:content( $front )
-				)
-			);
-			@_child.append( @child );
-			@_child.append(
-				Perl6::Balanced::Exit.new(
-					:factory-line-number( callframe(2).line ),
-					:from( $to - $back.chars ),
-					:to( $to ),
-					:content( $back )
-				)
-			);
-			self.bless(
+		my Perl6::Element @_child;
+		@_child.append(
+			Perl6::Balanced::Enter.new(
 				:factory-line-number( callframe(2).line ),
 				:from( $from ),
-				:to( $to ),
-				:child( @_child )
+				:to( $from + $front.chars ),
+				:content( $front )
 			)
-		}
-		else {
-			( )
-		}
+		);
+		@_child.append( @child );
+		@_child.append(
+			Perl6::Balanced::Exit.new(
+				:factory-line-number( callframe(2).line ),
+				:from( $to - $back.chars ),
+				:to( $to ),
+				:content( $back )
+			)
+		);
+		self.bless(
+			:factory-line-number( callframe(2).line ),
+			:from( $from ),
+			:to( $to ),
+			:child( @_child )
+		)
 	}
 }
 class Perl6::Operator::PostCircumfix does Branching does Bounded {
 	also is Perl6::Operator;
 
 	method from-match( Mu $p, @child ) {
-		if $p.from < $p.to {
-			my Perl6::Element @_child;
-			$p.Str ~~ m{ ^ (.) }; my Str $front = ~$0;
-			$p.Str ~~ m{ (.) $ }; my Str $back = ~$0;
-			@_child.append(
-				Perl6::Balanced::Enter.new(
-					:factory-line-number( callframe(1).line ),
-					:from( $p.from ),
-					:to( $p.from + $front.chars ),
-					:content( $front )
-				)
-			);
-			@_child.append( @child );
-			@_child.append(
-				Perl6::Balanced::Exit.new(
-					:factory-line-number( callframe(1).line ),
-					:from( $p.to - $back.chars ),
-					:to( $p.to ),
-					:content( $back )
-				)
-			);
-			self.bless(
+		my Perl6::Element @_child;
+		$p.Str ~~ m{ ^ (.) }; my Str $front = ~$0;
+		$p.Str ~~ m{ (.) $ }; my Str $back = ~$0;
+		@_child.append(
+			Perl6::Balanced::Enter.new(
 				:factory-line-number( callframe(1).line ),
 				:from( $p.from ),
-				:to( $p.to ),
-				:child( @_child )
+				:to( $p.from + $front.chars ),
+				:content( $front )
 			)
-		}
-		else {
-			( )
-		}
+		);
+		@_child.append( @child );
+		@_child.append(
+			Perl6::Balanced::Exit.new(
+				:factory-line-number( callframe(1).line ),
+				:from( $p.to - $back.chars ),
+				:to( $p.to ),
+				:content( $back )
+			)
+		);
+		self.bless(
+			:factory-line-number( callframe(1).line ),
+			:from( $p.from ),
+			:to( $p.to ),
+			:child( @_child )
+		)
 	}
 
 	method from-delims( Mu $p, Str $front, Str $back, @child ) {
-		if $p.from < $p.to {
-			my Perl6::Element @_child;
-			@_child.append(
-				Perl6::Balanced::Enter.new(
-					:factory-line-number( callframe(1).line ),
-					:from( $p.from ),
-					:to( $p.from + $front.chars ),
-					:content( $front )
-				)
-			);
-			@_child.append( @child );
-			@_child.append(
-				Perl6::Balanced::Exit.new(
-					:factory-line-number( callframe(1).line ),
-					:from( $p.to - $back.chars ),
-					:to( $p.to ),
-					:content( $back )
-				)
-			);
-			self.bless(
+		my Perl6::Element @_child;
+		@_child.append(
+			Perl6::Balanced::Enter.new(
 				:factory-line-number( callframe(1).line ),
 				:from( $p.from ),
-				:to( $p.to ),
-				:child( @_child )
+				:to( $p.from + $front.chars ),
+				:content( $front )
 			)
-		}
-		else {
-			( )
-		}
+		);
+		@_child.append( @child );
+		@_child.append(
+			Perl6::Balanced::Exit.new(
+				:factory-line-number( callframe(1).line ),
+				:from( $p.to - $back.chars ),
+				:to( $p.to ),
+				:content( $back )
+			)
+		);
+		self.bless(
+			:factory-line-number( callframe(1).line ),
+			:from( $p.from ),
+			:to( $p.to ),
+			:child( @_child )
+		)
 	}
 }
 
@@ -968,17 +938,12 @@ class Perl6::Number does Token {
 	also is Perl6::Element;
 
 	method from-match( Mu $p ) {
-		if $p.from < $p.to {
-			self.bless(
-				:factory-line-number( callframe(1).line ),
-				:from( $p.from ),
-				:to( $p.to ),
-				:content( $p.Str )
-			)
-		}
-		else {
-			( )
-		}
+		self.bless(
+			:factory-line-number( callframe(1).line ),
+			:from( $p.from ),
+			:to( $p.to ),
+			:content( $p.Str )
+		)
 	}
 }
 class Perl6::Number::Binary does Prefixed {
@@ -1000,17 +965,12 @@ class Perl6::Infinity is Token {
 	also is Perl6::Element;
 
 	method from-match( Mu $p ) {
-		if $p.from < $p.to {
-			self.bless(
-				:factory-line-number( callframe(1).line ),
-				:from( $p.from ),
-				:to( $p.to ),
-				:content( $p.Str )
-			)
-		}
-		else {
-			( )
-		}
+		self.bless(
+			:factory-line-number( callframe(1).line ),
+			:from( $p.from ),
+			:to( $p.to ),
+			:content( $p.Str )
+		)
 	}
 }
 class Perl6::Number::Radix {
@@ -1024,17 +984,12 @@ class Perl6::Regex does Token {
 	also is Perl6::Element;
 
 	multi method from-match( Mu $p ) {
-		if $p.from < $p.to {
-			self.bless(
-				:factory-line-number( callframe(1).line ),
-				:from( $p.from ),
-				:to( $p.to ),
-				:content( $p.Str )
-			)
-		}
-		else {
-			( )
-		}
+		self.bless(
+			:factory-line-number( callframe(1).line ),
+			:from( $p.from ),
+			:to( $p.to ),
+			:content( $p.Str )
+		)
 	}
 }
 
@@ -1049,17 +1004,12 @@ class Perl6::String::Quote::Single does Token {
 	has Str @.delimiter = ( Q{'}, Q{'} );
 
 	multi method from-match( Mu $p ) {
-		if $p.from < $p.to {
-			self.bless(
-				:factory-line-number( callframe(1).line ),
-				:from( $p.from ),
-				:to( $p.to ),
-				:content( $p.Str )
-			)
-		}
-		else {
-			( )
-		}
+		self.bless(
+			:factory-line-number( callframe(1).line ),
+			:from( $p.from ),
+			:to( $p.to ),
+			:content( $p.Str )
+		)
 	}
 }
 class Perl6::String::Quote::Double does Token {
@@ -1068,66 +1018,46 @@ class Perl6::String::Quote::Double does Token {
 	has Str @.delimiter = ( Q{"}, Q{"} );
 
 	multi method from-match( Mu $p ) {
-		if $p.from < $p.to {
-			self.bless(
-				:factory-line-number( callframe(1).line ),
-				:from( $p.from ),
-				:to( $p.to ),
-				:content( $p.Str )
-			)
-		}
-		else {
-			( )
-		}
+		self.bless(
+			:factory-line-number( callframe(1).line ),
+			:from( $p.from ),
+			:to( $p.to ),
+			:content( $p.Str )
+		)
 	}
 }
 
 class Perl6::Bareword does Token {
 	also is Perl6::Element;
 	multi method from-match( Mu $p ) {
-		if $p.from < $p.to {
-			self.bless(
-				:factory-line-number( callframe(1).line ),
-				:from( $p.from ),
-				:to( $p.to ),
-				:content( $p.Str )
-			)
-		}
-		else {
-			( )
-		}
+		self.bless(
+			:factory-line-number( callframe(1).line ),
+			:from( $p.from ),
+			:to( $p.to ),
+			:content( $p.Str )
+		)
 	}
 
 	multi method from-match-trimmed( Mu $p ) {
-		if $p.from < $p.to {
-			$p.Str ~~ m{ ^ ( \s* ) ( .+? ) ( \s* ) $ };
-			self.bless(
-				:factory-line-number( callframe(1).line ),
-				:from( $p.from + ( $0.Str ?? $0.Str.chars !! 0 ) ),
-				:to( $p.to - ( $2.Str ?? $2.Str.chars !! 0 ) ),
-				:content( $1.Str )
-			)
-		}
-		else {
-			( )
-		}
+		$p.Str ~~ m{ ^ ( \s* ) ( .+? ) ( \s* ) $ };
+		self.bless(
+			:factory-line-number( callframe(1).line ),
+			:from( $p.from + ( $0.Str ?? $0.Str.chars !! 0 ) ),
+			:to( $p.to - ( $2.Str ?? $2.Str.chars !! 0 ) ),
+			:content( $1.Str )
+		)
 	}
 }
 class Perl6::PackageName does Token {
 	also is Perl6::Element;
 
 	method from-match( Mu $p ) {
-		if $p.from < $p.to {
-			self.bless(
-				:factory-line-number( callframe(1).line ),
-				:from( $p.from ),
-				:to( $p.to ),
-				:content( $p.Str )
-			)
-		}
-		else {
-			( )
-		}
+		self.bless(
+			:factory-line-number( callframe(1).line ),
+			:from( $p.from ),
+			:to( $p.to ),
+			:content( $p.Str )
+		)
 	}
 
 	method namespaces() {
@@ -1138,86 +1068,71 @@ class Perl6::ColonBareword does Token {
 	also is Perl6::Bareword;
 
 	method from-match( Mu $p ) {
-		if $p.from < $p.to {
-			self.bless(
-				:factory-line-number( callframe(1).line ),
-				:from( $p.from ),
-				:to( $p.to ),
-				:content( $p.Str )
-			)
-		}
-		else {
-			( )
-		}
+		self.bless(
+			:factory-line-number( callframe(1).line ),
+			:from( $p.from ),
+			:to( $p.to ),
+			:content( $p.Str )
+		)
 	}
 }
 class Perl6::Block does Branching does Bounded {
 	also is Perl6::Element;
 
 	method from-match( Mu $p, Perl6::Element @child ) {
-		if $p.from < $p.to {
-			my Perl6::Element @_child;
-			$p.Str ~~ m{ ^ (.) }; my Str $front = ~$0;
-			$p.Str ~~ m{ (.) $ }; my Str $back = ~$0;
-			@_child.append(
-				Perl6::Balanced::Enter.new(
-					:factory-line-number( callframe(1).line ),
-					:from( $p.from ),
-					:to( $p.from + $front.chars ),
-					:content( $front )
-				)
-			);
-			@_child.append( @child );
-			@_child.append(
-				Perl6::Balanced::Exit.new(
-					:factory-line-number( callframe(1).line ),
-					:from( $p.to - $back.chars ),
-					:to( $p.to ),
-					:content( $back )
-				)
-			);
-			self.bless(
+		my Perl6::Element @_child;
+		$p.Str ~~ m{ ^ (.) }; my Str $front = ~$0;
+		$p.Str ~~ m{ (.) $ }; my Str $back = ~$0;
+		@_child.append(
+			Perl6::Balanced::Enter.new(
 				:factory-line-number( callframe(1).line ),
 				:from( $p.from ),
-				:to( $p.to ),
-				:child( @_child )
+				:to( $p.from + $front.chars ),
+				:content( $front )
 			)
-		}
-		else {
-			( )
-		}
+		);
+		@_child.append( @child );
+		@_child.append(
+			Perl6::Balanced::Exit.new(
+				:factory-line-number( callframe(1).line ),
+				:from( $p.to - $back.chars ),
+				:to( $p.to ),
+				:content( $back )
+			)
+		);
+		self.bless(
+			:factory-line-number( callframe(1).line ),
+			:from( $p.from ),
+			:to( $p.to ),
+			:child( @_child )
+		)
 	}
 
 	method from-from-to-XXX( Int $from, Int $to, Str $front, Str $back, @child ) {
-		if $from < $to {
-			my Perl6::Element @_child;
-			@_child.append(
-				Perl6::Balanced::Enter.new(
-					:factory-line-number( callframe(1).line ),
-					:from( $from ),
-					:to( $from + $front.chars ),
-					:content( $front )
-				)
-			);
-			@_child.append( @child );
-			@_child.append(
-				Perl6::Balanced::Exit.new(
-					:factory-line-number( callframe(1).line ),
-					:from( $to - $back.chars ),
-					:to( $to ),
-					:content( $back )
-				)
-			);
-			self.bless(
+		my Perl6::Element @_child;
+		@_child.append(
+			Perl6::Balanced::Enter.new(
 				:factory-line-number( callframe(1).line ),
 				:from( $from ),
-				:to( $to ),
-				:child( @_child )
+				:to( $from + $front.chars ),
+				:content( $front )
 			)
-		}
-		else {
-			( )
-		}
+		);
+		@_child.append( @child );
+		@_child.append(
+			Perl6::Balanced::Exit.new(
+				:factory-line-number( callframe(1).line ),
+				:from( $to - $back.chars ),
+				:to( $to ),
+				:content( $back )
+			)
+		);
+		self.bless(
+			:factory-line-number( callframe(1).line ),
+			:from( $from ),
+			:to( $to ),
+			:child( @_child )
+		)
 	}
 }
 
@@ -1407,10 +1322,10 @@ class Perl6::Parser::Factory {
 			@( $required-without ) ~~ @keys-without-content;
 
 		if 0 { # For debugging purposes, but it does get in the way.
-			say "Required keys with content: {@( $required-with )}";
-			say "Actually got: {@keys-with-content.gist}";
-			say "Required keys without content: {@( $required-without )}";
-			say "Actually got: {@keys-without-content.gist}";
+			$*ERR.say: "Required keys with content: {@( $required-with )}";
+			$*ERR.say: "Actually got: {@keys-with-content.gist}";
+			$*ERR.say: "Required keys without content: {@( $required-without )}";
+			$*ERR.say: "Actually got: {@keys-without-content.gist}";
 		}
 		return False;
 	}
@@ -1484,13 +1399,13 @@ class Perl6::Parser::Factory {
 	sub key-bounds( Mu $p ) {
 		if $p.list {
 			#say "-1 -1 *list*"
-			say "{$p.from} {$p.to} [{substr($p.orig,$p.from,$p.to-$p.from)}]"
+			$*ERR.say: "{$p.from} {$p.to} [{substr($p.orig,$p.from,$p.to-$p.from)}]"
 		}
 		elsif $p.orig {
-			say "{$p.from} {$p.to} [{substr($p.orig,$p.from,$p.to-$p.from)}]"
+			$*ERR.say: "{$p.from} {$p.to} [{substr($p.orig,$p.from,$p.to-$p.from)}]"
 		}
 		else {
-			say "-1 -1 NIL"
+			$*ERR.say: "-1 -1 NIL"
 		}
 	}
 
@@ -1524,6 +1439,17 @@ class Perl6::Parser::Factory {
 		return True
 	}
 
+	sub debug-match( Mu $p ) {
+		my %classified = classify {
+			$p.hash.{$_}.Str ?? 'with' !! 'without'
+		}, $p.hash.keys;
+		my @keys-with-content = @( %classified<with> );
+		my @keys-without-content = @( %classified<without> );
+
+		$*ERR.say: "With content: {@keys-with-content.gist}";
+		$*ERR.say: "Without content: {@keys-without-content.gist}";
+	}
+
 	method _arglist( Mu $p ) {
 		my Perl6::Element @child;
 		if $p.list {
@@ -1537,8 +1463,8 @@ class Perl6::Parser::Factory {
 					# XXX Zero-width token
 				}
 				else {
-					say $_.hash.keys.gist if $*DEBUG;
-					warn "Unhandled case if $*DEBUG"
+					debug-match( $_ );
+					die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 				}
 			}
 		}
@@ -1573,8 +1499,8 @@ class Perl6::Parser::Factory {
 			)
 		}
 		else {
-			say $p.hash.keys.gist if $*DEBUG;
-			warn "Unhandled case if $*DEBUG"
+			debug-match( $p );
+			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 		}
 		@child
 	}
@@ -1625,8 +1551,8 @@ class Perl6::Parser::Factory {
 				)
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ );
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -1654,8 +1580,8 @@ class Perl6::Parser::Factory {
 				self._codeblock( $_.hash.<codeblock> )
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ );
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -1669,8 +1595,18 @@ class Perl6::Parser::Factory {
 			Perl6::Bareword.from-match( $p )
 		}
 		else {
-			say $p.hash.keys.gist if $*DEBUG;
-			warn "Unhandled case" if $*DEBUG
+			debug-match( $p );
+			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+		}
+	}
+
+	method _B( Mu $p ) {
+say $p.Str;
+		given $p {
+			default {
+				debug-match( $_ );
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+			}
 		}
 	}
 
@@ -1680,14 +1616,14 @@ class Perl6::Parser::Factory {
 				self._B( $_.hash.<B> )
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ );
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
 
 	method _backmod( Mu $p ) {
-		say "backmod finally used";
+		warn "backmod finally used";
 		( )
 	}
 
@@ -1711,8 +1647,8 @@ class Perl6::Parser::Factory {
 				self._sym( $_.hash.<sym> )
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ );
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -1727,8 +1663,8 @@ class Perl6::Parser::Factory {
 				self._blockoid( $_.hash.<blockoid> )
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ );
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -1748,8 +1684,8 @@ class Perl6::Parser::Factory {
 					Perl6::Block.from-match( $_, @_child )
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ );
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -1764,8 +1700,8 @@ class Perl6::Parser::Factory {
 				self._block( $_.hash.<block> )
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ );
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -1776,8 +1712,8 @@ class Perl6::Parser::Factory {
 				self._semilist( $_.hash.<semilist> )
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ );
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 	} 
@@ -1828,21 +1764,21 @@ class Perl6::Parser::Factory {
 					)
 				}
 				else {
-					say $_.hash.keys.gist if $*DEBUG;
-					warn "Unhandled case" if $*DEBUG
+					debug-match( $_ );
+					die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 				}
 			}
 		}
 		else {
-			say $p.hash.keys.gist if $*DEBUG;
-			warn "Unhandled case" if $*DEBUG
+			debug-match( $p );
+			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 		}
 		@child
 	}
 
 	method _charspec( Mu $p ) {
 # XXX work on this, of course.
-		say "Caught _charspec";
+		warn "Caught _charspec";
 		return True if $p.list;
 	}
 
@@ -1899,8 +1835,8 @@ class Perl6::Parser::Factory {
 					)
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ );
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -1912,8 +1848,8 @@ class Perl6::Parser::Factory {
 				self._block( $_.hash.<block> )
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ );
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -1924,8 +1860,8 @@ class Perl6::Parser::Factory {
 				self._semilist( $_.hash.<semilist> )
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ );
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -1936,8 +1872,8 @@ class Perl6::Parser::Factory {
 				self._circumfix( $_.hash.<circumfix> )
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -2016,8 +1952,8 @@ class Perl6::Parser::Factory {
 				)
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child.flat
@@ -2030,8 +1966,8 @@ class Perl6::Parser::Factory {
 				return True if $_.<U>;
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -2043,8 +1979,8 @@ class Perl6::Parser::Factory {
 				die "not implemented yet";
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -2212,8 +2148,8 @@ class Perl6::Parser::Factory {
 			@child = Perl6::Operator::Circumfix.new( $p, @_child )
 		}
 		else {
-			say $p.hash.keys.gist if $*DEBUG;
-			warn "Unhandled case" if $*DEBUG
+			debug-match( $p ) if $*DEBUG;
+			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 		}
 		@child
 	}
@@ -2360,8 +2296,8 @@ class Perl6::Parser::Factory {
 			)
 		}
 		else {
-			say $p.hash.keys.gist if $*DEBUG;
-			warn "Unhandled case" if $*DEBUG
+			debug-match( $p ) if $*DEBUG;
+			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 		}
 		@child
 	}
@@ -2385,8 +2321,8 @@ class Perl6::Parser::Factory {
 				self.__FloatingPoint( $_ )
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -2401,14 +2337,14 @@ class Perl6::Parser::Factory {
 					)
 				}
 				else {
-					say $_.hash.keys.gist if $*DEBUG;
-					warn "Unhandled case" if $*DEBUG
+					debug-match( $_ ) if $*DEBUG;
+					die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 				}
 			}
 		}
 		else {
-			say $p.hash.keys.gist if $*DEBUG;
-			warn "Unhandled case" if $*DEBUG
+			debug-match( $p ) if $*DEBUG;
+			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 		}
 		@child.flat
 	}
@@ -2420,8 +2356,8 @@ class Perl6::Parser::Factory {
 				self._name( $_.hash.<name> )
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -2443,8 +2379,8 @@ class Perl6::Parser::Factory {
 				)
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -2456,8 +2392,8 @@ class Perl6::Parser::Factory {
 				self._defterm( $_.hash.<defterm> )
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -2468,8 +2404,8 @@ class Perl6::Parser::Factory {
 				self._longname( $_.hash.<longname> )
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -2488,7 +2424,7 @@ class Perl6::Parser::Factory {
 	}
 
 	method _doc( Mu $p ) {
-		say "doc finally used";
+		warn "doc finally used";
 		( )
 	}
 
@@ -2508,8 +2444,8 @@ class Perl6::Parser::Factory {
 				)
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -2546,8 +2482,8 @@ class Perl6::Parser::Factory {
 				)
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -2559,8 +2495,8 @@ class Perl6::Parser::Factory {
 				self._term( $_.hash.<term> )
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -2573,8 +2509,8 @@ class Perl6::Parser::Factory {
 				)
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -2600,8 +2536,8 @@ class Perl6::Parser::Factory {
 				)
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -2630,8 +2566,8 @@ class Perl6::Parser::Factory {
 				)
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -2663,8 +2599,8 @@ class Perl6::Parser::Factory {
 				@child = self._blockoid( $_.hash.<blockoid> )
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -2691,8 +2627,8 @@ class Perl6::Parser::Factory {
 				)
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -2731,8 +2667,8 @@ class Perl6::Parser::Factory {
 				)
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -3071,8 +3007,8 @@ class Perl6::Parser::Factory {
 			)
 		}
 		else {
-			say $p.hash.keys.gist if $*DEBUG;
-			warn "Unhandled case" if $*DEBUG
+			debug-match( $p ) if $*DEBUG;
+			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 		}
 		@child.flat
 	}
@@ -3083,8 +3019,8 @@ class Perl6::Parser::Factory {
 				self._O( $_.hash.<O> )
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -3095,8 +3031,8 @@ class Perl6::Parser::Factory {
 				self._signature( $_.hash.<signature> )
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -3129,8 +3065,8 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -3152,8 +3088,8 @@ class Perl6::Parser::Factory {
 				if 0 {
 				}
 				else {
-					say $_.hash.keys.gist if $*DEBUG;
-					warn "Unhandled case" if $*DEBUG
+					debug-match( $_ ) if $*DEBUG;
+					die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 				}
 			}
 		}
@@ -3161,8 +3097,8 @@ class Perl6::Parser::Factory {
 			@child = Perl6::Bareword.from-match( $p )
 		}
 		else {
-			say $p.hash.keys.gist if $*DEBUG;
-			warn "Unhandled case" if $*DEBUG
+			debug-match( $p ) if $*DEBUG;
+			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 		}
 		@child
 	}
@@ -3186,8 +3122,8 @@ class Perl6::Parser::Factory {
 				)
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -3214,8 +3150,8 @@ class Perl6::Parser::Factory {
 				)
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -3233,8 +3169,8 @@ class Perl6::Parser::Factory {
 				)
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -3249,8 +3185,8 @@ class Perl6::Parser::Factory {
 				)
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -3355,8 +3291,8 @@ class Perl6::Parser::Factory {
 			}
 		}
 		else {
-			say $p.hash.keys.gist if $*DEBUG;
-			warn "Unhandled case" if $*DEBUG
+			debug-match( $p ) if $*DEBUG;
+			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 		}
 		@child.flat
 	}
@@ -3376,8 +3312,8 @@ class Perl6::Parser::Factory {
 				Perl6::Number::Hexadecimal.from-match( $_ )
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -3388,7 +3324,7 @@ class Perl6::Parser::Factory {
 		}
 		#if $p ~~ QAST::Want;
 		#if self.assert-hash( $p, [< XXX >] );
-		say "called invocant";
+		warn "called invocant";
 return True;
 	}
 
@@ -3407,8 +3343,8 @@ return True;
 				self._termseq( $_.hash.<termseq> )
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -3420,14 +3356,14 @@ return True;
 				self._name( $_.hash.<name> )
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
 
 	method _max( Mu $p ) {
-		say "max finally used";
+		warn "max finally used";
 		( )
 	}
 
@@ -3463,8 +3399,8 @@ return True;
 				self._statement( $_.hash.<statement> )
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -3510,8 +3446,8 @@ return True;
 				)
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child.flat
@@ -3544,8 +3480,8 @@ return True;
 				@child = self._longname( $_.hash.<longname> )
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -3557,8 +3493,8 @@ return True;
 				self._decint( $_.hash.<decint> )
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -3569,8 +3505,8 @@ return True;
 				self._EXPR( $_.hash.<EXPR> )
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -3581,8 +3517,8 @@ return True;
 				self._longname( $_.hash.<longname> )
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -3602,8 +3538,8 @@ return True;
 			}
 		}
 		else {
-			say $p.hash.keys.gist if $*DEBUG;
-			warn "Unhandled case" if $*DEBUG
+			debug-match( $p ) if $*DEBUG;
+			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 		}
 		@child
 	}
@@ -3660,8 +3596,8 @@ return True;
 				)
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -3681,8 +3617,8 @@ return True;
 				)
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -3694,8 +3630,8 @@ return True;
 				self._param_var( $_.hash.<param_var> )
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -3753,8 +3689,8 @@ return True;
 				#self._morename( $_.hash.<morename> )
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -3787,8 +3723,8 @@ return True;
 			}
 		}
 		else {
-			say $_.hash.keys.gist if $*DEBUG;
-			warn "Unhandled case" if $*DEBUG
+			debug-match( $_ ) if $*DEBUG;
+			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 		}
 		@child
 	}
@@ -3799,14 +3735,14 @@ return True;
 				self._termseq( $_.hash.<termseq> )
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
 
 	method _normspace( Mu $p ) {
-		say "normspace finally used";
+		warn "normspace finally used";
 		( )
 	}
 
@@ -3989,14 +3925,14 @@ return True;
 					)
 				}
 				else {
-					say $_.hash.keys.gist if $*DEBUG;
-					warn "Unhandled case" if $*DEBUG
+					debug-match( $_ ) if $*DEBUG;
+					die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 				}
 			}
 		}
 		else {
-			say $p.hash.keys.gist if $*DEBUG;
-			warn "Unhandled case" if $*DEBUG
+			debug-match( $p ) if $*DEBUG;
+			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 		}
 		@child
 	}
@@ -4009,8 +3945,8 @@ return True;
 				self._numish( $_.hash.<numish> )
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -4030,8 +3966,8 @@ return True;
 				Perl6::Infinity.from-match( $_ )
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -4137,8 +4073,8 @@ return True;
 				)
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -4294,8 +4230,8 @@ return True;
 				)
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -4329,8 +4265,8 @@ return True;
 				)
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -4409,8 +4345,8 @@ return True;
 				)
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -4475,8 +4411,8 @@ return True;
 				@child = self._blockoid( $_.hash.<blockoid> )
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child.flat
@@ -4491,8 +4427,8 @@ return True;
 				);
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -4604,8 +4540,8 @@ return True;
 				)
 			}
 			else {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -4707,8 +4643,8 @@ return True;
 				self._sigil( $_.hash.<sigil> )
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -4743,8 +4679,8 @@ return True;
 				)
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -4808,14 +4744,14 @@ return True;
 					)
 				}
 				else {
-					say $_.hash.keys.gist if $*DEBUG;
-					warn "Unhandled case" if $*DEBUG
+					debug-match( $_ ) if $*DEBUG;
+					die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 				}
 			}
 		}
 		else {
-			say $_.hash.keys.gist if $*DEBUG;
-			warn "Unhandled case" if $*DEBUG
+			debug-match( $_ ) if $*DEBUG;
+			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 		}
 		@child
 	}
@@ -4931,8 +4867,8 @@ return True;
 				}
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -4956,8 +4892,8 @@ return True;
 					)
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -5013,8 +4949,8 @@ return True;
 				)
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -5034,21 +4970,20 @@ return True;
 				)
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child.flat
 	}
 
 	method _quant( Mu $p ) {
-say $p.dump;
 		if $p.Str {
 			Perl6::Bareword.from-match( $p )
 		}
 		else {
-			say $p.hash.keys.gist if $*DEBUG;
-			warn "Unhandled case" if $*DEBUG
+			debug-match( $p ) if $*DEBUG;
+			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 		}
 	}
 
@@ -5073,8 +5008,8 @@ say $p.dump;
 				)
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -5146,8 +5081,8 @@ say $p.dump;
 				)
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -5157,16 +5092,22 @@ say $p.dump;
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< babble nibble >] ) {
-				@child = self._babble(
-					$_.hash.<babble>
-				);
-				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'babble',
-						'nibble'
-					)
-				);
+key-bounds $_.hash.<babble>;
+key-bounds $_.hash.<nibble>;
+key-bounds $_;
+				# XXX Look at this later
+				if $_.hash.<babble>.Str {
+					@child = self._babble(
+						$_.hash.<babble>
+					);
+					@child.append(
+						Perl6::WS.between-matches(
+							$_,
+							'babble',
+							'nibble'
+						)
+					);
+				}
 				@child.append(
 					self._nibble(
 						$_.hash.<nibble>
@@ -5174,8 +5115,8 @@ say $p.dump;
 				)
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -5202,42 +5143,20 @@ say $p.dump;
 	#
 	method _quote( Mu $p ) {
 		my Perl6::Element @child;
-		if self.assert-hash-strict( $p, [< sym quibble >], [< rx_adverbs >] ) {
-say $p.hash.keys.gist;
-key-bounds $p.hash.<sym>;
-key-bounds $p.hash.<quibble>;
-key-bounds $p;
-
-
-@child.append(
-	Perl6::Bareword.from-match( $_.hash.<sym> )
-);
+		if self.assert-hash-strict( $p,
+				[< sym quibble >], [< rx_adverbs >] ) {
 			@child.append(
 				Perl6::WS.between-matches(
-					$_,
+					$p,
 					'sym',
 					'quibble'
 				)
 			);
 			@child.append(
 				self._quibble(
-					$_.hash.<quibble>
+					$p.hash.<quibble>
 				)
 			);
-#`(
-			@child.append(
-				Perl6::WS.between-matches(
-					$_,
-					'quibble',
-					'rx_adverbs'
-				)
-			);
-			@child.append(
-				self._rx_adverbs(
-					$_.hash.<rx_adverbs>
-				)
-			)
-)
 		}
 		elsif self.assert-hash( $p, [< sym rx_adverbs sibble >] ) {
 			@child = self._sym( $_.hash.<sym> );
@@ -5331,8 +5250,8 @@ key-bounds $p;
 			}
 		}
 		else {
-			say $p.hash.keys.gist if $*DEBUG;
-			warn "Unhandled case" if $*DEBUG
+			debug-match( $p ) if $*DEBUG;
+			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 		}
 		@child
 	}
@@ -5349,8 +5268,8 @@ key-bounds $p;
 					)
 				}
 				else {
-					say $_.hash.keys.gist if $*DEBUG;
-					warn "Unhandled case" if $*DEBUG
+					debug-match( $_ ) if $*DEBUG;
+					die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 				}
 			}
 		}
@@ -5387,14 +5306,14 @@ key-bounds $p;
 			@child = self._identifier( $p.hash.<identifier> )
 		}
 		else {
-			say $p.hash.keys.gist if $*DEBUG;
-			warn "Unhandled case" if $*DEBUG
+			debug-match( $p ) if $*DEBUG;
+			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 		}
 		@child
 	}
 
 	method _radix( Mu $p ) {
-		say "radix finally used";
+		warn "radix finally used";
 		( )
 	}
 
@@ -5411,8 +5330,8 @@ key-bounds $p;
 				Perl6::Number::Radix.from-match( $_ )
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -5444,8 +5363,8 @@ key-bounds $p;
 				)
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -5546,14 +5465,14 @@ key-bounds $p;
 			)
 		}
 		else {
-			say $p.hash.keys.gist if $*DEBUG;
-			warn "Unhandled case" if $*DEBUG
+			debug-match( $p ) if $*DEBUG;
+			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 		}
 		@child
 	}
 
 	method _right( Mu $p ) {
-		say "right finally used";
+		warn "right finally used";
 		( )
 	}
 
@@ -5586,8 +5505,8 @@ key-bounds $p;
 			)
 		}
 		else {
-			say $p.hash.keys.gist if $*DEBUG;
-			warn "Unhandled case" if $*DEBUG
+			debug-match( $p ) if $*DEBUG;
+			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 		}
 		@child.flat
 	}
@@ -5767,8 +5686,8 @@ key-bounds $p;
 			@child = self._blockoid( $p.hash.<blockoid> )
 		}
 		else {
-			say $p.hash.keys.gist if $*DEBUG;
-			warn "Unhandled case" if $*DEBUG
+			debug-match( $p ) if $*DEBUG;
+			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 		}
 		@child.flat
 	}
@@ -5783,8 +5702,8 @@ key-bounds $p;
 				die "Not implemented yet"
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -5851,8 +5770,8 @@ key-bounds $p;
 				)
 			}
 			else {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child.flat
@@ -5882,8 +5801,8 @@ key-bounds $p;
 			)
 		}
 		else {
-			say $p.hash.keys.gist if $*DEBUG;
-			warn "Unhandled case" if $*DEBUG
+			debug-match( $p ) if $*DEBUG;
+			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 		}
 		@child.flat
 	}
@@ -5894,8 +5813,8 @@ key-bounds $p;
 				self._arglist( $_.hash.<arglist> )
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -5921,8 +5840,8 @@ key-bounds $p;
 				)
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -5952,20 +5871,20 @@ key-bounds $p;
 				)
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
 	}
 
 	method _septype( Mu $p ) {
-		say "septype finally used";
+		warn "septype finally used";
 		( )
 	}
 
 	method _shape( Mu $p ) {
-		say "shape finally used";
+		warn "shape finally used";
 		( )
 	}
 
@@ -6000,8 +5919,8 @@ key-bounds $p;
 				)
 			}
 			else {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -6010,18 +5929,17 @@ key-bounds $p;
 	method _sigfinal( Mu $p ) {
 		given $p {
 			when self.assert-hash( $_, [< normspace >] ) {
-				say "sigfinal finally used";
+				warn "sigfinal finally used";
 				( )
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
 			}
 		}
 	}
 
 	method _sigil( Mu $p ) {
-		say "sigil finally used";
+		warn "sigil finally used";
 		( )
 	}
 
@@ -6052,8 +5970,8 @@ key-bounds $p;
 				die "Not implemented yet"
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -6299,8 +6217,8 @@ key-bounds $p;
 			)
 		}
 		else {
-			say $p.hash.keys.gist if $*DEBUG;
-			warn "Unhandled case" if $*DEBUG
+			debug-match( $p ) if $*DEBUG;
+			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 		}
 		@child
 	}
@@ -6355,8 +6273,8 @@ key-bounds $p;
 			@child = ( )
 		}
 		else {
-			say $p.hash.keys.gist if $*DEBUG;
-			warn "Unhandled case" if $*DEBUG
+			debug-match( $p ) if $*DEBUG;
+			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 		}
 		@child.flat
 	}
@@ -6367,14 +6285,14 @@ key-bounds $p;
 				self._EXPR( $_.hash.<EXPR> )
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
 
 	method _specials( Mu $p ) {
-		say "specials finally used";
+		warn "specials finally used";
 		( )
 	}
 
@@ -6596,11 +6514,11 @@ key-bounds $p;
 						'wu'
 					)
 				);
-				@child.append(
-					self._wu(
-						$_.hash.<wu>
-					)
-				)
+#				@child.append(
+#					self._wu(
+#						$_.hash.<wu>
+#					)
+#				)
 			}
 			elsif self.assert-hash( $_, [< sym xblock >] ) {
 				@child = self._sym( $_.hash.<sym> );
@@ -6633,8 +6551,8 @@ key-bounds $p;
 				)
 			}
 			else {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -6737,8 +6655,8 @@ else {
 					die "Not implemented yet"
 				}
 				else {
-					say $_.hash.keys.gist if $*DEBUG;
-					warn "Unhandled case" if $*DEBUG
+					debug-match( $_ ) if $*DEBUG;
+					die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 				}
 			}
 		}
@@ -6944,8 +6862,8 @@ else {
 			note "Fix null case"
 		}
 		else {
-			say $p.hash.keys.gist if $*DEBUG;
-			warn "Unhandled case" if $*DEBUG
+			debug-match( $p ) if $*DEBUG;
+			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 		}
 		@child
 	}
@@ -7121,8 +7039,8 @@ else {
 				)
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -7156,8 +7074,8 @@ else {
 				)
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -7214,8 +7132,8 @@ else {
 				)
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -7227,8 +7145,8 @@ else {
 				self._desigilname( $_.hash.<desigilname> )
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -7245,8 +7163,8 @@ else {
 					)
 				}
 				else {
-					say $_.hash.keys.gist if $*DEBUG;
-					warn "Unhandled case" if $*DEBUG
+					debug-match( $_ ) if $*DEBUG;
+					die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 				}
 			}
 		}
@@ -7260,8 +7178,8 @@ else {
 			@child = Perl6::Bareword.from-match( $p )
 		}
 		else {
-			say $p.hash.keys.gist if $*DEBUG;
-			warn "Unhandled case" if $*DEBUG
+			debug-match( $p ) if $*DEBUG;
+			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 		}
 		@child
 	}
@@ -7315,8 +7233,8 @@ else {
 				@child = self._name( $_.hash.<name> );
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -7334,14 +7252,14 @@ else {
 					)
 				}
 				else {
-					say $_.hash.keys.gist if $*DEBUG;
-					warn "Unhandled case" if $*DEBUG
+					debug-match( $_ ) if $*DEBUG;
+					die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 				}
 			}
 		}
 		else {
-			say $p.hash.keys.gist if $*DEBUG;
-			warn "Unhandled case" if $*DEBUG
+			debug-match( $p ) if $*DEBUG;
+			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 		}
 		@child
 	}
@@ -7352,8 +7270,8 @@ else {
 				self._termconjseq( $_.hash.<termconjseq> )
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -7370,14 +7288,14 @@ else {
 					)
 				}
 				else {
-					say $_.hash.keys.gist if $*DEBUG;
-					warn "Unhandled case" if $*DEBUG
+					debug-match( $_ ) if $*DEBUG;
+					die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 				}
 			}
 		}
 		else {
-			say $p.hash.keys.gist if $*DEBUG;
-			warn "Unhandled case" if $*DEBUG
+			debug-match( $p ) if $*DEBUG;
+			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 		}
 		@child
 	}
@@ -7395,8 +7313,8 @@ else {
 					)
 				}
 				else {
-					say $_.hash.keys.gist if $*DEBUG;
-					warn "Unhandled case" if $*DEBUG
+					debug-match( $_ ) if $*DEBUG;
+					die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 				}
 			}
 		}
@@ -7416,8 +7334,8 @@ else {
 				)
 		}
 		else {
-			say $p.hash.keys.gist if $*DEBUG;
-			warn "Unhandled case" if $*DEBUG
+			debug-match( $p ) if $*DEBUG;
+			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 		}
 		@child
 	}
@@ -7443,8 +7361,8 @@ else {
 				)
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -7462,8 +7380,8 @@ else {
 					)
 				}
 				else {
-					say $_.hash.keys.gist if $*DEBUG;
-					warn "Unhandled case" if $*DEBUG
+					debug-match( $_ ) if $*DEBUG;
+					die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 				}
 			}
 		}
@@ -7471,8 +7389,8 @@ else {
 			@child = self._noun( $p.hash.<noun> )
 		}
 		else {
-			say $p.hash.keys.gist if $*DEBUG;
-			warn "Unhandled case" if $*DEBUG
+			debug-match( $p ) if $*DEBUG;
+			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 		}
 		@child
 	}
@@ -7483,8 +7401,8 @@ else {
 				self._termaltseq( $_.hash.<termaltseq> )
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -7499,8 +7417,8 @@ else {
 			}
 		}
 		else {
-			say $p.hash.keys.gist if $*DEBUG;
-			warn "Unhandled case" if $*DEBUG
+			debug-match( $p ) if $*DEBUG;
+			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 		}
 		@child
 	}
@@ -7557,15 +7475,15 @@ else {
 				)
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
 	}
 
 	method _twigil( Mu $p ) {
-		say "twigil finally used";
+		warn "twigil finally used";
 		( )
 	}
 
@@ -7588,8 +7506,8 @@ else {
 					)
 				}
 				else {
-					say $_.hash.keys.gist if $*DEBUG;
-					warn "Unhandled case" if $*DEBUG
+					debug-match( $_ ) if $*DEBUG;
+					die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 				}
 			}
 		}
@@ -7600,8 +7518,8 @@ else {
 			self._typename( $p.hash.<typename> )
 		}
 		else {
-			say $p.hash.keys.gist if $*DEBUG;
-			warn "Unhandled case" if $*DEBUG
+			debug-match( $p ) if $*DEBUG;
+			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 		}
 		@child
 	}
@@ -7727,8 +7645,8 @@ else {
 			)
 		}
 		else {
-			say $p.hash.keys.gist if $*DEBUG;
-			warn "Unhandled case" if $*DEBUG
+			debug-match( $p ) if $*DEBUG;
+			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 		}
 		@child
 	}
@@ -7767,8 +7685,8 @@ else {
 					self._longname( $_.hash.<longname> )
 			}
 			else {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 
@@ -7780,8 +7698,8 @@ else {
 			self._longname( $p.hash.<longname> )
 		}
 		else {
-			say $p.hash.keys.gist if $*DEBUG;
-			warn "Unhandled case" if $*DEBUG
+			debug-match( $p ) if $*DEBUG;
+			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 		}
 	}
 
@@ -7832,8 +7750,8 @@ else {
 				)
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -7861,8 +7779,8 @@ die "Catching Int";
 				self._quote( $_.hash.<quote> )
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -7912,8 +7830,8 @@ die "Catching Int";
 				self._variable( $_.hash.<variable> )
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -7999,15 +7917,15 @@ die "Catching Int";
 			@child = self._variable( $p.hash.<variable> )
 		}
 		else {
-			say $p.hash.keys.gist if $*DEBUG;
-			warn "Unhandled case" if $*DEBUG
+			debug-match( $p ) if $*DEBUG;
+			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 		}
 		@child.flat
 	}
 
 	method _variable( Mu $p ) {
 		if self.assert-hash( $p, [< contextualizer >] ) {
-			say "Contextualizer";
+			warn "Contextualizer";
 			return;
 		}
 
@@ -8050,15 +7968,15 @@ die "Catching Int";
 				)
 			}
 			default {
-				say $_.hash.keys.gist if $*DEBUG;
-				warn "Unhandled case" if $*DEBUG
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
 	}
 
 	method _vstr( Mu $p ) {
-		say "vstr finally used";
+		warn "vstr finally used";
 		( )
 	}
 
@@ -8069,20 +7987,20 @@ die "Catching Int";
 				if 0 {
 				}
 				else {
-					say $_.hash.keys.gist if $*DEBUG;
-					warn "Unhandled case" if $*DEBUG
+					debug-match( $_ ) if $*DEBUG;
+					die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 				}
 			}
 		}
 		else {
-			say $p.hash.keys.gist if $*DEBUG;
-			warn "Unhandled case" if $*DEBUG
+			debug-match( $p ) if $*DEBUG;
+			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 		}
 		@child
 	}
 
 	method _wu( Mu $p ) {
-		say "wu finally used";
+		warn "wu finally used";
 		( )
 	}
 
@@ -8108,8 +8026,8 @@ die "Catching Int";
 					)
 				}
 				else {
-					say $_.hash.keys.gist if $*DEBUG;
-					warn "Unhandled case" if $*DEBUG
+					debug-match( $_ ) if $*DEBUG;
+					die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 				}
 			}
 		}
@@ -8128,8 +8046,8 @@ die "Catching Int";
 			@child = self._blockoid( $p.hash.<blockoid> )
 		}
 		else {
-			say $p.hash.keys.gist if $*DEBUG;
-			warn "Unhandled case" if $*DEBUG
+			debug-match( $p ) if $*DEBUG;
+			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 		}
 		@child
 	}
