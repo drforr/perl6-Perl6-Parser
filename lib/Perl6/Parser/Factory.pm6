@@ -1601,7 +1601,6 @@ class Perl6::Parser::Factory {
 	}
 
 	method _B( Mu $p ) {
-say $p.Str;
 		given $p {
 			default {
 				debug-match( $_ );
@@ -5092,9 +5091,6 @@ return True;
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< babble nibble >] ) {
-key-bounds $_.hash.<babble>;
-key-bounds $_.hash.<nibble>;
-key-bounds $_;
 				# XXX Look at this later
 				if $_.hash.<babble>.Str {
 					@child = self._babble(
