@@ -6,6 +6,7 @@ use Perl6::Parser;
 plan 3;
 
 my $pt = Perl6::Parser.new;
+my $*VALIDATION-FATAL = True;
 
 my $p = $pt.parse( Q{} );
 ok $pt.validate( $p ), Q{Empty file};

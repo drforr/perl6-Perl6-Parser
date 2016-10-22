@@ -1395,6 +1395,26 @@ class Perl6::Variable::Callable::SubLanguage {
 
 class Perl6::Parser::Factory {
 
+	method assert-hash-strict( Mu $p, $required-with, $required-without ) {
+		my %classified = classify {
+			$p.hash.{$_}.Str ?? 'with' !! 'without'
+		}, $p.hash.keys;
+		my @keys-with-content = @( %classified<with> );
+		my @keys-without-content = @( %classified<without> );
+
+		return True if
+			@( $required-with ) ~~ @keys-with-content and
+			@( $required-without ) ~~ @keys-without-content;
+
+		if 0 { # For debugging purposes, but it does get in the way.
+			say "Required keys with content: {@( $required-with )}";
+			say "Actually got: {@keys-with-content.gist}";
+			say "Required keys without content: {@( $required-without )}";
+			say "Actually got: {@keys-without-content.gist}";
+		}
+		return False;
+	}
+
 	constant COLON = Q{:};
 	constant COMMA = Q{,};
 	constant SEMICOLON = Q{;};
@@ -5182,8 +5202,16 @@ say $p.dump;
 	#
 	method _quote( Mu $p ) {
 		my Perl6::Element @child;
-		if self.assert-hash( $p, [< sym quibble rx_adverbs >] ) {
-			@child = self._sym( $_.hash.<sym> );
+		if self.assert-hash-strict( $p, [< sym quibble >], [< rx_adverbs >] ) {
+say $p.hash.keys.gist;
+key-bounds $p.hash.<sym>;
+key-bounds $p.hash.<quibble>;
+key-bounds $p;
+
+
+@child.append(
+	Perl6::Bareword.from-match( $_.hash.<sym> )
+);
 			@child.append(
 				Perl6::WS.between-matches(
 					$_,
@@ -5196,6 +5224,7 @@ say $p.dump;
 					$_.hash.<quibble>
 				)
 			);
+#`(
 			@child.append(
 				Perl6::WS.between-matches(
 					$_,
@@ -5208,6 +5237,7 @@ say $p.dump;
 					$_.hash.<rx_adverbs>
 				)
 			)
+)
 		}
 		elsif self.assert-hash( $p, [< sym rx_adverbs sibble >] ) {
 			@child = self._sym( $_.hash.<sym> );
@@ -5749,7 +5779,7 @@ say $p.dump;
 				self._quotepair( $_.hash.<quotepair> )
 			}
 			when self.assert-hash( $_,
-					[< >], [< quotepair >] ) {
+					[ ], [< quotepair >] ) {
 				die "Not implemented yet"
 			}
 			default {
@@ -5883,7 +5913,7 @@ say $p.dump;
 					)
 				)
 			}
-			when self.assert-hash( $_, [< >], [< statement >] ) {
+			when self.assert-hash( $_, [ ], [< statement >] ) {
 				@child.append(
 					Perl6::WS.from-match(
 						$_
@@ -6017,7 +6047,7 @@ say $p.dump;
 					)
 				)
 			}
-			when self.assert-hash( $_, [< >],
+			when self.assert-hash( $_, [ ],
 					[< param_sep parameter >] ) {
 				die "Not implemented yet"
 			}
@@ -6320,7 +6350,7 @@ say $p.dump;
 				[< parameter >] ) {
 			@child = self._parameter( $p.hash.<parameter> )
 		}
-		elsif self.assert-hash( $p, [< >],
+		elsif self.assert-hash( $p, [ ],
 				[< param_sep parameter >] ) {
 			@child = ( )
 		}

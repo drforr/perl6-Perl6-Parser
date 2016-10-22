@@ -1,15 +1,23 @@
 class Perl6::Parser::Validator {
 
-	sub dump( Mu $parsed ) {
-		say $parsed.hash.keys.gist;
-	}
-
 	method trace( Str $term ) {
 		note $term if $*TRACE;
 	}
 
+	sub debug-match( Mu $p ) {
+		my %classified = classify {
+			$p.hash.{$_}.Str ?? 'with' !! 'without'
+		}, $p.hash.keys;
+		my @keys-with-content = @( %classified<with> );
+		my @keys-without-content = @( %classified<without> );
+
+		say "With content: {@keys-with-content.gist}";
+		say "Without content: {@keys-without-content.gist}";
+	}
+
 	method record-failure( Str $term ) returns Bool {
-		note "Failure in term '$term'" if $*DEBUG;
+		note "Validation failed for term '$term'" if $*DEBUG;
+		die "Validation failed for term '$term'" if $*VALIDATION-FATAL;
 		return False
 	}
 
@@ -20,6 +28,8 @@ class Perl6::Parser::Validator {
 		return False if $parsed.Str;
 
 		return True if $parsed.Bool;
+
+		die "Uncaught Bool" if $*VALIDATION-FATAL;
 		warn "Uncaught type";
 		return False
 	}
@@ -32,6 +42,8 @@ class Perl6::Parser::Validator {
 
 		return True if $parsed.Int;
 		return True if $parsed.Bool;
+
+		die "Uncaught Int" if $*VALIDATION-FATAL;
 		warn "Uncaught type";
 		return False
 	}
@@ -43,6 +55,8 @@ class Perl6::Parser::Validator {
 		return False if $parsed.list;
 
 		return True if $parsed.Num;
+
+		die "Uncaught Num" if $*VALIDATION-FATAL;
 		warn "Uncaught type";
 		return False
 	}
@@ -56,6 +70,8 @@ class Perl6::Parser::Validator {
 		return False if $parsed.Int;
 
 		return True if $parsed.Str;
+
+		die "Uncaught Str" if $*VALIDATION-FATAL;
 		warn "Uncaught type";
 		return False
 	}
@@ -83,6 +99,7 @@ class Perl6::Parser::Validator {
 #					" against parser " ~
 #					$parsed.hash.keys.gist;
 #				CONTROL { when CX::Warn { warn .message ~ "\n" ~ .backtrace.Str } }
+
 			return False
 		}
 		
@@ -108,6 +125,8 @@ class Perl6::Parser::Validator {
 				next if self.assert-hash-keys( $_, [< EXPR >] )
 					and self._EXPR( $_.hash.<EXPR> );
 				next if self.assert-Bool( $_ );
+				next if self.assert-Str( $_ );
+				debug-match( $_ );
 				return self.record-failure( '_ArgList list' );
 			}
 			return True;
@@ -122,6 +141,7 @@ class Perl6::Parser::Validator {
 			and self._EXPR( $parsed.hash.<EXPR> );
 		return True if self.assert-Int( $parsed );
 		return True if self.assert-Bool( $parsed );
+		debug-match( $parsed );
 		return self.record-failure( '_ArgList' );
 	}
 
@@ -143,6 +163,7 @@ class Perl6::Parser::Validator {
 			and self._EXPR( $parsed.hash.<EXPR> );
 		return True if self.assert-Bool( $parsed );
 		return True if self.assert-Str( $parsed );
+		debug-match( $parsed );
 		return self.record-failure( '_Args' );
 	}
 
@@ -159,6 +180,7 @@ class Perl6::Parser::Validator {
 		return True if self.assert-hash-keys( $parsed, [< codeblock >] )
 			and self._CodeBlock( $parsed.hash.<codeblock> );
 		return True if $parsed.Str;
+		debug-match( $parsed );
 		return self.record-failure( '_Assertion' );
 	}
 
@@ -168,6 +190,7 @@ class Perl6::Parser::Validator {
 		return True if self.assert-hash-keys( $parsed, [< metachar >] )
 			and self._MetaChar( $parsed.hash.<metachar> );
 		return True if self.assert-Str( $parsed );
+		debug-match( $parsed );
 		return self.record-failure( '_Atom' );
 	}
 
@@ -177,6 +200,7 @@ class Perl6::Parser::Validator {
 		return True if self.assert-hash-keys( $parsed,
 				[< B >], [< quotepair >] )
 			and self._B( $parsed.hash.<B> );
+		debug-match( $parsed );
 		return self.record-failure( '_Babble' );
 	}
 
@@ -184,6 +208,7 @@ class Perl6::Parser::Validator {
 		self.trace( '_BackMod' );
 #return True;
 		return True if self.assert-Bool( $parsed );
+		debug-match( $parsed );
 		return self.record-failure( '_BackMod' );
 	}
 
@@ -193,6 +218,7 @@ class Perl6::Parser::Validator {
 		return True if self.assert-hash-keys( $parsed, [< sym >] )
 			and self._Sym( $parsed.hash.<sym> );
 		return True if self.assert-Str( $parsed );
+		debug-match( $parsed );
 		return self.record-failure( '_BackSlash' );
 	}
 
@@ -200,6 +226,7 @@ class Perl6::Parser::Validator {
 		self.trace( '_B' );
 #return True;
 		return True if self.assert-Bool( $parsed );
+		debug-match( $parsed );
 		return self.record-failure( '_B' );
 	}
 
@@ -208,6 +235,7 @@ class Perl6::Parser::Validator {
 #return True;
 		return True if $parsed.Str and $parsed.Str eq '0';
 		return True if self.assert-Int( $parsed );
+		debug-match( $parsed );
 		return self.record-failure( '_BinInt' );
 	}
 
@@ -216,6 +244,7 @@ class Perl6::Parser::Validator {
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< blockoid >] )
 			and self._Blockoid( $parsed.hash.<blockoid> );
+		debug-match( $parsed );
 		return self.record-failure( '_Block' );
 	}
 
@@ -225,6 +254,7 @@ class Perl6::Parser::Validator {
 		return True if self.assert-hash-keys( $parsed,
 				[< statementlist >] )
 			and self._StatementList( $parsed.hash.<statementlist> );
+		debug-match( $parsed );
 		return self.record-failure( '_Blockoid' );
 	}
 
@@ -235,6 +265,7 @@ class Perl6::Parser::Validator {
 			and self._Statement( $parsed.hash.<statement> );
 		return True if self.assert-hash-keys( $parsed, [< block >] )
 			and self._Block( $parsed.hash.<block> );
+		debug-match( $parsed );
 		return self.record-failure( '_Blorst' );
 	}
 
@@ -243,6 +274,7 @@ class Perl6::Parser::Validator {
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< semilist >] )
 			and self._SemiList( $parsed.hash.<semilist> );
+		debug-match( $parsed );
 		return self.record-failure( '_Bracket' );
 	}
 
@@ -261,10 +293,12 @@ class Perl6::Parser::Validator {
 						[< sign charspec >] )
 					and self._Sign( $_.hash.<sign> )
 					and self._CharSpec( $_.hash.<charspec> );
+				debug-match( $_ );
 				return self.record-failure( '_CClassElem list' );
 			}
 			return True
 		}
+		debug-match( $parsed );
 		return self.record-failure( '_CClassElem' );
 	}
 
@@ -273,6 +307,7 @@ class Perl6::Parser::Validator {
 #return True;
 # XXX work on this, of course.
 		return True if $parsed.list;
+		debug-match( $parsed );
 		return self.record-failure( '_CharSpec' );
 	}
 
@@ -297,6 +332,7 @@ class Perl6::Parser::Validator {
 				[< hexint VALUE >] )
 			and self._HexInt( $parsed.hash.<hexint> )
 			and self._VALUE( $parsed.hash.<VALUE> );
+		debug-match( $parsed );
 		return self.record-failure( '_Circumfix' );
 	}
 
@@ -305,6 +341,7 @@ class Perl6::Parser::Validator {
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< block >] )
 			and self._Block( $parsed.hash.<block> );
+		debug-match( $parsed );
 		return self.record-failure( '_CodeBlock' );
 	}
 
@@ -315,6 +352,7 @@ class Perl6::Parser::Validator {
 		   ( $parsed.Str eq '0.0' or
 		     $parsed.Str eq '0' );
 		return True if self.assert-Int( $parsed );
+		debug-match( $parsed );
 		return self.record-failure( '_Coeff' );
 	}
 
@@ -323,6 +361,7 @@ class Perl6::Parser::Validator {
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< semilist >] )
 			and self._SemiList( $parsed.hash.<semilist> );
+		debug-match( $parsed );
 		return self.record-failure( '_Coercee' );
 	}
 
@@ -331,6 +370,7 @@ class Perl6::Parser::Validator {
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< circumfix >] )
 			and self._Circumfix( $parsed.hash.<circumfix> );
+		debug-match( $parsed );
 		return self.record-failure( '_ColonCircumfix' );
 	}
 
@@ -349,6 +389,10 @@ class Perl6::Parser::Validator {
 			and self._FakeSignature( $parsed.hash.<fakesignature> );
 		return True if self.assert-hash-keys( $parsed, [< var >] )
 			and self._Var( $parsed.hash.<var> );
+		return True if self.assert-hash-keys( $parsed,
+				[< coloncircumfix >] )
+			and self._ColonCircumfix( $parsed.hash.<coloncircumfix> );
+		debug-match( $parsed );
 		return self.record-failure( '_ColonPair' );
 	}
 
@@ -369,6 +413,7 @@ class Perl6::Parser::Validator {
 			return True if $parsed.<D>;
 			return True if $parsed.<U>;
 		}
+		debug-match( $parsed );
 		return self.record-failure( '_ColonPairs' );
 	}
 
@@ -380,6 +425,7 @@ class Perl6::Parser::Validator {
 			and self._Coercee( $parsed.hash.<coercee> )
 			and self._Circumfix( $parsed.hash.<circumfix> )
 			and self._Sigil( $parsed.hash.<sigil> );
+		debug-match( $parsed );
 		return self.record-failure( '_Contextualizer' );
 	}
 
@@ -388,6 +434,7 @@ class Perl6::Parser::Validator {
 #return True;
 		return True if $parsed.Str and $parsed.Str eq '0';
 		return True if self.assert-Int( $parsed );
+		debug-match( $parsed );
 		return self.record-failure( '_DecInt' );
 	}
 
@@ -413,6 +460,9 @@ class Perl6::Parser::Validator {
 				[< variable_declarator >], [< trait >] )
 			and self._VariableDeclarator( $parsed.hash.<variable_declarator> );
 		return True if self.assert-hash-keys( $parsed,
+				[< type_declarator >], [< trait >] )
+			and self._TypeDeclarator( $parsed.hash.<type_declarator> );
+		return True if self.assert-hash-keys( $parsed,
 				[< regex_declarator >], [< trait >] )
 			and self._RegexDeclarator( $parsed.hash.<regex_declarator> );
 		return True if self.assert-hash-keys( $parsed,
@@ -421,6 +471,7 @@ class Perl6::Parser::Validator {
 		return True if self.assert-hash-keys( $parsed,
 				[< signature >], [< trait >] )
 			and self._Signature( $parsed.hash.<signature> );
+		debug-match( $parsed );
 		return self.record-failure( '_Declarator' );
 	}
 
@@ -462,14 +513,22 @@ class Perl6::Parser::Validator {
 		return True if self.assert-hash-keys( $parsed,
 					  [< routine_declarator >],
 					  [< trait >] )
-			and self._RoutineDeclarator( $parsed.hash.<routine_declarator> );
+			and self._RoutineDeclarator(
+				$parsed.hash.<routine_declarator>
+			);
 		return True if self.assert-hash-keys( $parsed,
 					  [< package_def sym >] )
 			and self._PackageDef( $parsed.hash.<package_def> )
 			and self._Sym( $parsed.hash.<sym> );
 		return True if self.assert-hash-keys( $parsed,
+				[< type_declarator >], [< trait >] )
+			and self._TypeDeclarator(
+				$parsed.hash.<type_declarator>
+			);
+		return True if self.assert-hash-keys( $parsed,
 					  [< declarator >] )
 			and self._Declarator( $parsed.hash.<declarator> );
+		debug-match( $parsed );
 		return self.record-failure( '_DECL' );
 	}
 
@@ -501,6 +560,7 @@ class Perl6::Parser::Validator {
 				  [< coeff frac >] )
 			and self._Coeff( $parsed.hash.<coeff> )
 			and self._Frac( $parsed.hash.<frac> );
+		debug-match( $parsed );
 		return self.record-failure( '_DecNumber' );
 	}
 
@@ -510,6 +570,7 @@ class Perl6::Parser::Validator {
 		return True if self.assert-hash-keys( $parsed,
 				[< name >], [< colonpair >] )
 			and self._Name( $parsed.hash.<name> );
+		debug-match( $parsed );
 		return self.record-failure( '_DefLongName' );
 	}
 
@@ -523,6 +584,7 @@ class Perl6::Parser::Validator {
 		return True if self.assert-hash-keys( $parsed,
 				[< identifier >], [< colonpair >] )
 			and self._Identifier( $parsed.hash.<identifier> );
+		debug-match( $parsed );
 		return self.record-failure( '_DefTerm' );
 	}
 
@@ -531,6 +593,7 @@ class Perl6::Parser::Validator {
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< defterm >] )
 			and self._DefTerm( $parsed.hash.<defterm> );
+		debug-match( $parsed );
 		return self.record-failure( '_DefTermNow' );
 	}
 
@@ -540,6 +603,7 @@ class Perl6::Parser::Validator {
 		return True if self.assert-hash-keys( $parsed, [< longname >] )
 			and self._LongName( $parsed.hash.<longname> );
 		return True if $parsed.Str;
+		debug-match( $parsed );
 		return self.record-failure( '_DeSigilName' );
 	}
 
@@ -556,10 +620,12 @@ class Perl6::Parser::Validator {
 				else {
 					next
 				}
+				debug-match( $parsed );
 				return self.record-failure( '_Dig list' );
 			}
 			return True
 		}
+		debug-match( $parsed );
 		return self.record-failure( '_Dig' );
 	}
 
@@ -567,6 +633,7 @@ class Perl6::Parser::Validator {
 		self.trace( '_Doc' );
 #return True;
 		return True if self.assert-Bool( $parsed );
+		debug-match( $parsed );
 		return self.record-failure( '_Doc' );
 	}
 
@@ -578,6 +645,11 @@ class Perl6::Parser::Validator {
 			and self._Sym( $parsed.hash.<sym> )
 			and self._DottyOp( $parsed.hash.<dottyop> )
 			and self._O( $parsed.hash.<O> );
+		return True if self.assert-hash-keys( $parsed,
+				[< sym dottyop >], [< O >] )
+			and self._Sym( $parsed.hash.<sym> )
+			and self._DottyOp( $parsed.hash.<dottyop> );
+		debug-match( $parsed );
 		return self.record-failure( '_Dotty' );
 	}
 
@@ -592,6 +664,7 @@ class Perl6::Parser::Validator {
 			and self._MethodOp( $parsed.hash.<methodop> );
 		return True if self.assert-hash-keys( $parsed, [< colonpair >] )
 			and self._ColonPair( $parsed.hash.<colonpair> );
+		debug-match( $parsed );
 		return self.record-failure( '_DottyOp' );
 	}
 
@@ -600,6 +673,7 @@ class Perl6::Parser::Validator {
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< term >] )
 			and self._Term( $parsed.hash.<term> );
+		debug-match( $parsed );
 		return self.record-failure( '_DottyOpish' );
 	}
 
@@ -609,6 +683,7 @@ class Perl6::Parser::Validator {
 		return True if self.assert-hash-keys( $parsed,
 				[< scope_declarator >] )
 			and self._ScopeDeclarator( $parsed.hash.<scope_declarator> );
+		debug-match( $parsed );
 		return self.record-failure( '_E1' );
 	}
 
@@ -619,6 +694,7 @@ class Perl6::Parser::Validator {
 				[< infix OPER >] )
 			and self._Infix( $parsed.hash.<infix> )
 			and self._OPER( $parsed.hash.<OPER> );
+		debug-match( $parsed );
 		return self.record-failure( '_E2' );
 	}
 
@@ -630,6 +706,7 @@ class Perl6::Parser::Validator {
 				[< postfix_prefix_meta_operator >] )
 			and self._Postfix( $parsed.hash.<postfix> )
 			and self._OPER( $parsed.hash.<OPER> );
+		debug-match( $parsed );
 		return self.record-failure( '_E3' );
 	}
 
@@ -641,6 +718,7 @@ class Perl6::Parser::Validator {
 			and self._Blorst( $parsed.hash.<blorst> );
 		return True if self.assert-hash-keys( $parsed, [< blockoid >] )
 			and self._Blockoid( $parsed.hash.<blockoid> );
+		debug-match( $parsed );
 		return self.record-failure( '_Else' );
 	}
 
@@ -651,6 +729,7 @@ class Perl6::Parser::Validator {
 				[< sign decint >] )
 			and self._Sign( $parsed.hash.<sign> )
 			and self._DecInt( $parsed.hash.<decint> );
+		debug-match( $parsed );
 		return self.record-failure( '_EScale' );
 	}
 
@@ -700,6 +779,10 @@ class Perl6::Parser::Validator {
 						[< args op >] )
 					and self._Args( $_.hash.<args> )
 					and self._Op( $_.hash.<op> );
+				next if self.assert-hash-keys( $_,
+						[< infix OPER >] )
+					and self._Infix( $_.hash.<infix> )
+					and self._OPER( $_.hash.<OPER> );
 				next if self.assert-hash-keys( $_, [< value >] )
 					and self._Value( $_.hash.<value> );
 				next if self.assert-hash-keys( $_,
@@ -731,6 +814,7 @@ class Perl6::Parser::Validator {
 						[< statement_prefix >] )
 					and self._StatementPrefix( $_.hash.<statement_prefix> );
 				next if self.assert-Str( $_ );
+				debug-match( $_ );
 				return self.record-failure( '_EXPR list' );
 			}
 			return True if self.assert-hash-keys(
@@ -773,6 +857,7 @@ class Perl6::Parser::Validator {
 					[< OPER >],
 					[< infix_prefix_meta_operator >] )
 				and self._OPER( $parsed.hash.<OPER> );
+			debug-match( $parsed );
 			return self.record-failure( '_EXPR hash' );
 		}
 		return True if self.assert-hash-keys( $parsed,
@@ -796,7 +881,9 @@ class Perl6::Parser::Validator {
 			and self._Args( $parsed.hash.<args> );
 		return True if self.assert-hash-keys( $parsed,
 				[< statement_prefix >] )
-			and self._StatementPrefix( $parsed.hash.<statement_prefix> );
+			and self._StatementPrefix(
+				$parsed.hash.<statement_prefix>
+			);
 		return True if self.assert-hash-keys( $parsed,
 				[< type_declarator >] )
 			and self._TypeDeclarator( $parsed.hash.<type_declarator> );
@@ -829,6 +916,7 @@ class Perl6::Parser::Validator {
 			and self._RegexDeclarator( $parsed.hash.<regex_declarator> );
 		return True if self.assert-hash-keys( $parsed, [< dotty >] )
 			and self._Dotty( $parsed.hash.<dotty> );
+		debug-match( $parsed );
 		return self.record-failure( '_EXPR' ):
 	}
 
@@ -837,6 +925,7 @@ class Perl6::Parser::Validator {
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< O >] )
 			and self._O( $parsed.hash.<O> );
+		debug-match( $parsed );
 		return self.record-failure( '_FakeInfix' );
 	}
 
@@ -845,6 +934,7 @@ class Perl6::Parser::Validator {
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< signature >] )
 			and self._Signature( $parsed.hash.<signature> );
+		debug-match( $parsed );
 		return self.record-failure( '_FakeSignature' );
 	}
 
@@ -854,6 +944,7 @@ class Perl6::Parser::Validator {
 		return True if self.assert-hash-keys( $parsed, [< val key >] )
 			and self._Val( $parsed.hash.<val> )
 			and self._Key( $parsed.hash.<key> );
+		debug-match( $parsed );
 		return self.record-failure( '_FatArrow' );
 	}
 
@@ -862,6 +953,7 @@ class Perl6::Parser::Validator {
 #return True;
 		return True if $parsed.Str and $parsed.Str eq '0';
 		return True if self.assert-Int( $parsed );
+		debug-match( $parsed );
 		return self.record-failure( '_Frac' );
 	}
 
@@ -870,6 +962,7 @@ class Perl6::Parser::Validator {
 #return True;
 		return True if $parsed.Str and $parsed.Str eq '0';
 		return True if self.assert-Int( $parsed );
+		debug-match( $parsed );
 		return self.record-failure( '_HexInt' );
 	}
 
@@ -879,11 +972,13 @@ class Perl6::Parser::Validator {
 		if $parsed.list {
 			for $parsed.list {
 				next if self.assert-Str( $_ );
+				debug-match( $parsed );
 				return self.record-failure( '_Identifier list' );
 			}
 			return True
 		}
 		return True if $parsed.Str;
+		debug-match( $parsed );
 		return self.record-failure( '_Identifier' );
 	}
 
@@ -900,6 +995,10 @@ class Perl6::Parser::Validator {
 		return True if self.assert-hash-keys( $parsed, [< sym O >] )
 			and self._Sym( $parsed.hash.<sym> )
 			and self._O( $parsed.hash.<O> );
+		return True if self.assert-hash-keys( $parsed,
+				[< sym >], [< O >] )
+			and self._Sym( $parsed.hash.<sym> );
+		debug-match( $parsed );
 		return self.record-failure( '_Infix' );
 	}
 
@@ -910,6 +1009,7 @@ class Perl6::Parser::Validator {
 				[< infix OPER >] )
 			and self._Infix( $parsed.hash.<infix> )
 			and self._OPER( $parsed.hash.<OPER> );
+		debug-match( $parsed );
 		return self.record-failure( '_Infixish' );
 	}
 
@@ -921,6 +1021,7 @@ class Perl6::Parser::Validator {
 			and self._Sym( $parsed.hash.<sym> )
 			and self._Infixish( $parsed.hash.<infixish> )
 			and self._O( $parsed.hash.<O> );
+		debug-match( $parsed );
 		return self.record-failure( '_InfixPrefixMetaOperator' );
 	}
 
@@ -934,6 +1035,7 @@ class Perl6::Parser::Validator {
 				[< dottyopish sym >] )
 			and self._DottyOpish( $parsed.hash.<dottyopish> )
 			and self._Sym( $parsed.hash.<sym> );
+		debug-match( $parsed );
 		return self.record-failure( '_Initializer' );
 	}
 
@@ -942,6 +1044,7 @@ class Perl6::Parser::Validator {
 #return True;
 		return True if $parsed.Str and $parsed.Str eq '0';
 		return True if self.assert-Int( $parsed );
+		debug-match( $parsed );
 		return self.record-failure( '_Int' );
 	}
 
@@ -964,6 +1067,7 @@ class Perl6::Parser::Validator {
 				[< hexint VALUE >] )
 			and self._HexInt( $parsed.hash.<hexint> )
 			and self._VALUE( $parsed.hash.<VALUE> );
+		debug-match( $parsed );
 		return self.record-failure( '_Integer' );
 	}
 
@@ -981,6 +1085,7 @@ class Perl6::Parser::Validator {
 #say $parsed.dump_annotations;
 #say "############## " ~$parsed.<annotations>.gist;#<BY>;
 return True;
+		debug-match( $parsed );
 		return self.record-failure( '_Invocant' );
 	}
 
@@ -988,6 +1093,7 @@ return True;
 		self.trace( '_Key' );
 #return True;
 		return True if self.assert-Str( $parsed );
+		debug-match( $parsed );
 		return self.record-failure( '_Key' );
 	}
 
@@ -995,6 +1101,7 @@ return True;
 		self.trace( '_Lambda' );
 #return True;
 		return True if self.assert-Str( $parsed );
+		debug-match( $parsed );
 		return self.record-failure( '_Labmda' );
 	}
 
@@ -1003,6 +1110,7 @@ return True;
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< termseq >] )
 			and self._TermSeq( $parsed.hash.<termseq> );
+		debug-match( $parsed );
 		return self.record-failure( '_Left' );
 	}
 
@@ -1013,6 +1121,7 @@ return True;
 				[< name >],
 				[< colonpair >] )
 			and self._Name( $parsed.hash.<name> );
+		debug-match( $parsed );
 		return self.record-failure( '_LongName' );
 	}
 
@@ -1020,6 +1129,7 @@ return True;
 		self.trace( '_Max' );
 #return True;
 		return True if self.assert-Str( $parsed );
+		debug-match( $parsed );
 		return self.record-failure( '_Max' );
 	}
 
@@ -1042,6 +1152,7 @@ return True;
 			and self._Nibbler( $parsed.hash.<nibbler> );
 		return True if self.assert-hash-keys( $parsed, [< statement >] )
 			and self._Statement( $parsed.hash.<statement> );
+		debug-match( $parsed );
 		return self.record-failure( '_MetaChar' );
 	}
 
@@ -1061,6 +1172,7 @@ return True;
 			and self._Specials( $parsed.hash.<specials> )
 			and self._LongName( $parsed.hash.<longname> )
 			and self._Blockoid( $parsed.hash.<blockoid> );
+		debug-match( $parsed );
 		return self.record-failure( '_MethodDef' );
 	}
 
@@ -1075,6 +1187,7 @@ return True;
 			and self._LongName( $parsed.hash.<longname> );
 		return True if self.assert-hash-keys( $parsed, [< variable >] )
 			and self._Variable( $parsed.hash.<variable> );
+		debug-match( $parsed );
 		return self.record-failure( '_MethodOp' );
 	}
 
@@ -1085,6 +1198,7 @@ return True;
 				[< decint VALUE >] )
 			and self._DecInt( $parsed.hash.<decint> )
 			and self._VALUE( $parsed.hash.<VALUE> );
+		debug-match( $parsed );
 		return self.record-failure( '_Min' );
 	}
 
@@ -1093,6 +1207,7 @@ return True;
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< EXPR >] )
 			and self._EXPR( $parsed.hash.<EXPR> );
+		debug-match( $parsed );
 		return self.record-failure( '_ModifierExpr' );
 	}
 
@@ -1101,6 +1216,7 @@ return True;
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< longname >] )
 			and self._LongName( $parsed.hash.<longname> );
+		debug-match( $parsed );
 		return self.record-failure( '_ModuleName' );
 	}
 
@@ -1112,10 +1228,12 @@ return True;
 				next if self.assert-hash-keys( $_,
 						[< identifier >] )
 					and self._Identifier( $_.hash.<identifier> );
+				debug-match( $_ );
 				return self.record-failure( '_MoreName list' );
 			}
 			return True
 		}
+		debug-match( $parsed );
 		return self.record-failure( '_MoreName' );
 	}
 
@@ -1133,6 +1251,7 @@ return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< declarator >] )
 			and self._Declarator( $parsed.hash.<declarator> );
+		debug-match( $parsed );
 		return self.record-failure( '_MultiDeclarator' );
 	}
 
@@ -1141,6 +1260,7 @@ return True;
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< signature >] )
 			and self._Signature( $parsed.hash.<signature> );
+		debug-match( $parsed );
 		return self.record-failure( '_MultiSig' );
 	}
 
@@ -1150,6 +1270,7 @@ return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< param_var >] )
 			and self._ParamVar( $parsed.hash.<param_var> );
+		debug-match( $parsed );
 		return self.record-failure( '_NamedParam' );
 	}
 
@@ -1171,6 +1292,7 @@ return True;
 		return True if self.assert-hash-keys( $parsed, [< morename >] )
 			and self._MoreName( $parsed.hash.<morename> );
 		return True if self.assert-Str( $parsed );
+		debug-match( $parsed );
 		return self.record-failure( '_Name' );
 	}
 
@@ -1181,6 +1303,7 @@ return True;
 			and self._TermSeq( $parsed.hash.<termseq> );
 		return True if $parsed.Str;
 		return True if $parsed.Bool;
+		debug-match( $parsed );
 		return self.record-failure( '_Nibble' );
 	}
 
@@ -1189,6 +1312,7 @@ return True;
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< termseq >] )
 			and self._TermSeq( $parsed.hash.<termseq> );
+		debug-match( $parsed );
 		return self.record-failure( '_Nibbler' );
 	}
 
@@ -1196,6 +1320,7 @@ return True;
 		self.trace( '_NormSpace' );
 #return True;
 		return True if self.assert-Str( $parsed );
+		debug-match( $parsed );
 		return self.record-failure( '_NormSpace' );
 	}
 
@@ -1233,10 +1358,15 @@ return True;
 				next if self.assert-hash-keys( $_,
 						[< atom >], [< sigfinal >] )
 					and self._Atom( $_.hash.<atom> );
+				next if self.assert-hash-keys( $_,
+						[< atom >], [ ] )
+					and self._Atom( $_.hash.<atom> );
+				debug-match( $_ );
 				return self.record-failure( 'Noun list' );
 			}
 			return True
 		}
+		debug-match( $parsed );
 		return self.record-failure( '_Noun' );
 	}
 
@@ -1245,6 +1375,7 @@ return True;
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< numish >] )
 			and self._Numish( $parsed.hash.<numish> );
+		debug-match( $parsed );
 		return self.record-failure( '_Number' );
 	}
 
@@ -1260,6 +1391,7 @@ return True;
 				[< dec_number >] )
 			and self._DecNumber( $parsed.hash.<dec_number> );
 		return True if self.assert-Num( $parsed );
+		debug-match( $parsed );
 		return self.record-failure( '_Numish' );
 	}
 
@@ -1268,6 +1400,7 @@ return True;
 #return True;
 		return True if $parsed.Str and $parsed.Str eq '0';
 		return True if self.assert-Int( $parsed );
+		debug-match( $parsed );
 		return self.record-failure( '_OctInt' );
 	}
 
@@ -1327,6 +1460,7 @@ return True;
 		return True if $parsed.<prec>
 			and $parsed.<dba>
 			and $parsed.<assoc>;
+		debug-match( $parsed );
 		return self.record-failure( '_O' );
 	}
 
@@ -1340,6 +1474,7 @@ return True;
 		return True if self.assert-hash-keys( $parsed, [< infix OPER >] )
 			and self._Infix( $parsed.hash.<infix> )
 			and self._OPER( $parsed.hash.<OPER> );
+		debug-match( $parsed );
 		return self.record-failure( '_Op' );
 	}
 
@@ -1356,6 +1491,14 @@ return True;
 			and self._Sym( $parsed.hash.<sym> )
 			and self._Infixish( $parsed.hash.<infixish> )
 			and self._O( $parsed.hash.<O> );
+		return True if self.assert-hash-keys( $parsed,
+				[< sym EXPR >], [< O >] )
+			and self._Sym( $parsed.hash.<sym> )
+			and self._EXPR( $parsed.hash.<EXPR> );
+		return True if self.assert-hash-keys( $parsed,
+				[< sym infixish >], [< O >] )
+			and self._Sym( $parsed.hash.<sym> )
+			and self._Infixish( $parsed.hash.<infixish> );
 		return True if self.assert-hash-keys( $parsed, [< sym O >] )
 			and self._Sym( $parsed.hash.<sym> )
 			and self._O( $parsed.hash.<O> );
@@ -1372,11 +1515,26 @@ return True;
 		return True if self.assert-hash-keys( $parsed, [< arglist O >] )
 			and self._ArgList( $parsed.hash.<arglist> )
 			and self._O( $parsed.hash.<O> );
+		return True if self.assert-hash-keys( $parsed,
+				[< sym dottyop >], [< O >] )
+			and self._Sym( $parsed.hash.<sym> )
+			and self._DottyOp( $parsed.hash.<dottyop> );
 		return True if self.assert-hash-keys( $parsed, [< dig O >] )
 			and self._Dig( $parsed.hash.<dig> )
 			and self._O( $parsed.hash.<O> );
+		return True if self.assert-hash-keys( $parsed,
+				[< sym >], [< O >] )
+			and self._Sym( $parsed.hash.<sym> );
+		return True if self.assert-hash-keys( $parsed,
+				[< semilist >], [< O >] )
+			and self._SemiList( $parsed.hash.<semilist> );
+		return True if self.assert-hash-keys( $parsed,
+				[< nibble >], [< O >] )
+			and self._Nibble( $parsed.hash.<nibble> );
 		return True if self.assert-hash-keys( $parsed, [< O >] )
 			and self._O( $parsed.hash.<O> );
+		return True if self.assert-hash-keys( $parsed, [], [< O >] );
+		debug-match( $parsed );
 		return self.record-failure( '_OPER' );
 	}
 
@@ -1387,6 +1545,15 @@ return True;
 				[< sym package_def >] )
 			and self._Sym( $parsed.hash.<sym> )
 			and self._PackageDef( $parsed.hash.<package_def> );
+		return True if self.assert-hash-keys( $parsed,
+				[< sym trait >] )
+			and self._Sym( $parsed.hash.<sym> )
+			and self._Trait( $parsed.hash.<trait> );
+		return True if self.assert-hash-keys( $parsed,
+				[< sym typename >] )
+			and self._Sym( $parsed.hash.<sym> )
+			and self._TypeName( $parsed.hash.<typename> );
+		debug-match( $parsed );
 		return self.record-failure( '_PackageDeclarator' );
 	}
 
@@ -1404,6 +1571,7 @@ return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< blockoid >], [< trait >] )
 			and self._Blockoid( $parsed.hash.<blockoid> );
+		debug-match( $parsed );
 		return self.record-failure( '_PackageDef' );
 	}
 
@@ -1424,7 +1592,9 @@ return True;
 					[< default_value modifier trait
 					   type_constraint
 					   post_constraint >] )
-					and self._ParamVar( $_.hash.<param_var> )
+					and self._ParamVar(
+						$_.hash.<param_var>
+					)
 					and self._Quant( $_.hash.<quant> );
 	
 				next if self.assert-hash-keys( $_,
@@ -1432,7 +1602,9 @@ return True;
 					[< default_value modifier
 					   post_constraint trait
 					   type_constraint >] )
-					and self._NamedParam( $_.hash.<named_param> )
+					and self._NamedParam(
+						$_.hash.<named_param>
+					)
 					and self._Quant( $_.hash.<quant> );
 				next if self.assert-hash-keys( $_,
 					[< defterm quant >],
@@ -1445,11 +1617,23 @@ return True;
 					[< type_constraint >],
 					[< param_var quant default_value						   modifier post_constraint trait
 					   type_constraint >] )
-					and self._TypeConstraint( $_.hash.<type_constraint> );
+					and self._TypeConstraint(
+						$_.hash.<type_constraint>
+					);
+				next if self.assert-hash-keys( $_,
+					[< type_constraint >],
+					[< default_value modifier trait
+					   post_constraint >] )
+					and self._TypeConstraint(
+						$_.hash.<type_constraint>
+					);
+
+				debug-match( $_ );
 				return self.record-failure( '_Parameter list' );
 			}
 			return True
 		}
+		debug-match( $parsed );
 		return self.record-failure( '_Parameter' );
 	}
 
@@ -1461,13 +1645,15 @@ return True;
 			and self._Name( $parsed.hash.<name> )
 			and self._Twigil( $parsed.hash.<twigil> )
 			and self._Sigil( $parsed.hash.<sigil> );
-		return True if self.assert-hash-keys( $parsed, [< name sigil >] )
+		return True if self.assert-hash-keys( $parsed,
+				[< name sigil >] )
 			and self._Name( $parsed.hash.<name> )
 			and self._Sigil( $parsed.hash.<sigil> );
 		return True if self.assert-hash-keys( $parsed, [< signature >] )
 			and self._Signature( $parsed.hash.<signature> );
 		return True if self.assert-hash-keys( $parsed, [< sigil >] )
 			and self._Sigil( $parsed.hash.<sigil> );
+		debug-match( $parsed );
 		return self.record-failure( '_ParamVar' );
 	}
 
@@ -1481,6 +1667,7 @@ return True;
 			and self._Signature( $parsed.hash.<signature> );
 		return True if self.assert-hash-keys( $parsed, [< blockoid >] )
 			and self._Blockoid( $parsed.hash.<blockoid> );
+		debug-match( $parsed );
 		return self.record-failure( '_PBlock' );
 	}
 
@@ -1496,6 +1683,13 @@ return True;
 		return True if self.assert-hash-keys( $parsed, [< arglist O >] )
 			and self._ArgList( $parsed.hash.<arglist> )
 			and self._O( $parsed.hash.<O> );
+		return True if self.assert-hash-keys( $parsed,
+				[< semilist >], [< O >] )
+			and self._SemiList( $parsed.hash.<semilist> );
+		return True if self.assert-hash-keys( $parsed,
+				[< nibble >], [< O >] )
+			and self._Nibble( $parsed.hash.<nibble> );
+		debug-match( $parsed );
 		return self.record-failure( '_PostCircumfix' );
 	}
 
@@ -1508,6 +1702,10 @@ return True;
 		return True if self.assert-hash-keys( $parsed, [< sym O >] )
 			and self._Sym( $parsed.hash.<sym> )
 			and self._O( $parsed.hash.<O> );
+		return True if self.assert-hash-keys( $parsed,
+				[< sym >], [< O >] )
+			and self._Sym( $parsed.hash.<sym> );
+		debug-match( $parsed );
 		return self.record-failure( '_Postfix' );
 	}
 
@@ -1523,6 +1721,7 @@ return True;
 				[< sym postcircumfix >], [< O >] )
 			and self._Sym( $parsed.hash.<sym> )
 			and self._PostCircumfix( $parsed.hash.<postcircumfix> );
+		debug-match( $parsed );
 		return self.record-failure( '_PostOp' );
 	}
 
@@ -1532,6 +1731,10 @@ return True;
 		return True if self.assert-hash-keys( $parsed, [< sym O >] )
 			and self._Sym( $parsed.hash.<sym> )
 			and self._O( $parsed.hash.<O> );
+		return True if self.assert-hash-keys( $parsed,
+				[< sym >], [< O >] )
+			and self._Sym( $parsed.hash.<sym> );
+		debug-match( $parsed );
 		return self.record-failure( '_Prefix' );
 	}
 
@@ -1539,6 +1742,7 @@ return True;
 		self.trace( '_Quant' );
 #return True;
 		return True if self.assert-Bool( $parsed );
+		debug-match( $parsed );
 		return self.record-failure( '_Quant' );
 	}
 
@@ -1550,6 +1754,7 @@ return True;
 				[< sigfinal atom >] )
 			and self._SigFinal( $parsed.hash.<sigfinal> )
 			and self._Atom( $parsed.hash.<atom> );
+		debug-match( $parsed );
 		return self.record-failure( '_QuantifiedAtom' );
 	}
 
@@ -1566,6 +1771,7 @@ return True;
 				[< sym backmod >] )
 			and self._Sym( $parsed.hash.<sym> )
 			and self._BackMod( $parsed.hash.<backmod> );
+		debug-match( $parsed );
 		return self.record-failure( '_Quantifier' );
 	}
 
@@ -1576,6 +1782,7 @@ return True;
 				[< babble nibble >] )
 			and self._Babble( $parsed.hash.<babble> )
 			and self._Nibble( $parsed.hash.<nibble> );
+		debug-match( $parsed );
 		return self.record-failure( '_Quibble' );
 	}
 
@@ -1596,6 +1803,7 @@ return True;
 			and self._Nibble( $parsed.hash.<nibble> );
 		return True if self.assert-hash-keys( $parsed, [< quibble >] )
 			and self._Quibble( $parsed.hash.<quibble> );
+		debug-match( $parsed );
 		return self.record-failure( '_Quote' );
 	}
 
@@ -1606,7 +1814,10 @@ return True;
 			for $parsed.list {
 				next if self.assert-hash-keys( $_,
 					[< identifier >] )
-					and self._Identifier( $_.hash.<identifier> );
+					and self._Identifier(
+						$_.hash.<identifier>
+					);
+				debug-match( $_ );
 				return self.record-failure( '_QuotePair list' );
 			}
 			return True
@@ -1619,6 +1830,7 @@ return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< identifier >] )
 			and self._Identifier( $parsed.hash.<identifier> );
+		debug-match( $parsed );
 		return self.record-failure( '_QuotePair' );
 	}
 
@@ -1626,6 +1838,7 @@ return True;
 		self.trace( '_Radix' );
 #return True;
 		return True if self.assert-Int( $parsed );
+		debug-match( $parsed );
 		return self.record-failure( '_Radix' );
 	}
 
@@ -1641,6 +1854,7 @@ return True;
 				[< circumfix radix >], [< exp base >] )
 			and self._Circumfix( $parsed.hash.<circumfix> )
 			and self._Radix( $parsed.hash.<radix> );
+		debug-match( $parsed );
 		return self.record-failure( '_RadNumber' );
 	}
 
@@ -1651,6 +1865,7 @@ return True;
 				[< sym regex_def >] )
 			and self._Sym( $parsed.hash.<sym> )
 			and self._RegexDef( $parsed.hash.<regex_def> );
+		debug-match( $parsed );
 		return self.record-failure( '_RegexDeclarator' );
 	}
 
@@ -1662,6 +1877,7 @@ return True;
 				[< signature trait >] )
 			and self._DefLongName( $parsed.hash.<deflongname> )
 			and self._Nibble( $parsed.hash.<nibble> );
+		debug-match( $parsed );
 		return self.record-failure( '_RegexDef' );
 	}
 
@@ -1669,6 +1885,7 @@ return True;
 		self.trace( '_Right' );
 #return True;
 		return True if self.assert-Bool( $parsed );
+		debug-match( $parsed );
 		return self.record-failure( '_Right' );
 	}
 
@@ -1677,6 +1894,7 @@ return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< statementlist >] )
 			and self._StatementList( $parsed.hash.<statementlist> );
+		debug-match( $parsed );
 		return self.record-failure( 'Root' );
 	}
 
@@ -1691,6 +1909,7 @@ return True;
 				[< sym routine_def >] )
 			and self._Sym( $parsed.hash.<sym> )
 			and self._RoutineDef( $parsed.hash.<routine_def> );
+		debug-match( $parsed );
 		return self.record-failure( '_RoutineDeclarator' );
 	}
 
@@ -1715,8 +1934,13 @@ return True;
 			and self._Blockoid( $parsed.hash.<blockoid> )
 			and self._MultiSig( $parsed.hash.<multisig> );
 		return True if self.assert-hash-keys( $parsed,
+				[< deflongname >],
+				[< statementlist trait >] )
+			and self._DefLongName( $parsed.hash.<deflongname> );
+		return True if self.assert-hash-keys( $parsed,
 				[< blockoid >], [< trait >] )
 			and self._Blockoid( $parsed.hash.<blockoid> );
+		debug-match( $parsed );
 		return self.record-failure( '_RoutineDef' );
 	}
 
@@ -1727,6 +1951,7 @@ return True;
 			and self._QuotePair( $parsed.hash.<quotepair> );
 		return True if self.assert-hash-keys( $parsed,
 				[], [< quotepair >] );
+		debug-match( $parsed );
 		return self.record-failure( '_RxAdverbs' );
 	}
 
@@ -1739,14 +1964,19 @@ return True;
 			and self._DECL( $parsed.hash.<DECL> );
 		return True if self.assert-hash-keys( $parsed,
 					[< multi_declarator DECL typename >] )
-			and self._MultiDeclarator( $parsed.hash.<multi_declarator> )
+			and self._MultiDeclarator(
+				$parsed.hash.<multi_declarator>
+			)
 			and self._DECL( $parsed.hash.<DECL> )
 			and self._TypeName( $parsed.hash.<typename> );
 		return True if self.assert-hash-keys( $parsed,
 				[< package_declarator DECL >],
 				[< typename >] )
-			and self._PackageDeclarator( $parsed.hash.<package_declarator> )
+			and self._PackageDeclarator(
+				$parsed.hash.<package_declarator>
+			)
 			and self._DECL( $parsed.hash.<DECL> );
+		debug-match( $parsed );
 		return self.record-failure( '_Scoped' );
 	}
 
@@ -1757,6 +1987,7 @@ return True;
 				[< sym scoped >] )
 			and self._Sym( $parsed.hash.<sym> )
 			and self._Scoped( $parsed.hash.<scoped> );
+		debug-match( $parsed );
 		return self.record-failure( '_ScopeDeclarator' );
 	}
 
@@ -1765,6 +1996,7 @@ return True;
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< arglist >] )
 			and self._ArgList( $parsed.hash.<arglist> );
+		debug-match( $parsed );
 		return self.record-failure( '_SemiArgList' );
 	}
 
@@ -1775,13 +2007,17 @@ return True;
 			for $parsed.list {
 				next if self.assert-hash-keys( $_,
 						[< statement >] )
-					and self._Statement( $_.hash.<statement> );
+					and self._Statement(
+						$_.hash.<statement>
+					);
+				debug-match( $_ );
 				return self.record-failure( '_SemiList list' );
 			}
 			return True
 		}
 		return True if self.assert-hash-keys( $parsed, [ ],
 			[< statement >] );
+		debug-match( $parsed );
 		return self.record-failure( '_SemiList' );
 	}
 
@@ -1791,7 +2027,10 @@ return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< septype quantified_atom >] )
 			and self._SepType( $parsed.hash.<septype> )
-			and self._QuantifiedAtom( $parsed.hash.<quantified_atom> );
+			and self._QuantifiedAtom(
+				$parsed.hash.<quantified_atom>
+			);
+		debug-match( $parsed );
 		return self.record-failure( '_Separator' );
 	}
 
@@ -1799,6 +2038,7 @@ return True;
 		self.trace( '_SepType' );
 #return True;
 		return True if self.assert-Str( $parsed );
+		debug-match( $parsed );
 		return self.record-failure( '_SepType' );
 	}
 
@@ -1806,6 +2046,7 @@ return True;
 		self.trace( '_Shape' );
 #return True;
 		return True if self.assert-Str( $parsed );
+		debug-match( $parsed );
 		return self.record-failure( '_Shape' );
 	}
 
@@ -1817,6 +2058,7 @@ return True;
 			and self._Right( $parsed.hash.<right> )
 			and self._Babble( $parsed.hash.<babble> )
 			and self._Left( $parsed.hash.<left> );
+		debug-match( $parsed );
 		return self.record-failure( '_Sibble' );
 	}
 
@@ -1825,6 +2067,7 @@ return True;
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< normspace >] )
 			and self._NormSpace( $parsed.hash.<normspace> );
+		debug-match( $parsed );
 		return self.record-failure( '_SigFinal' );
 	}
 
@@ -1832,6 +2075,7 @@ return True;
 		self.trace( '_Sigil' );
 #return True;
 		return True if self.assert-Str( $parsed );
+		debug-match( $parsed );
 		return self.record-failure( '_Sigil' );
 	}
 
@@ -1845,6 +2089,7 @@ return True;
 			and self._TypeName( $parsed.hash.<typename> );
 		return True if self.assert-hash-keys( $parsed, [],
 				[< param_sep parameter >] );
+		debug-match( $parsed );
 		return self.record-failure( '_SigMaybe' );
 	}
 
@@ -1862,6 +2107,7 @@ return True;
 			and self._Parameter( $parsed.hash.<parameter> );
 		return True if self.assert-hash-keys( $parsed, [],
 				[< param_sep parameter >] );
+		debug-match( $parsed );
 		return self.record-failure( '_Signature' );
 	}
 
@@ -1871,6 +2117,7 @@ return True;
 		return True if $parsed.Str
 			and ( $parsed.Str eq '-' or $parsed.Str eq '+' );
 		return True if self.assert-Bool( $parsed );
+		debug-match( $parsed );
 		return self.record-failure( '_Sign' );
 	}
 
@@ -1879,6 +2126,7 @@ return True;
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< EXPR >] )
 			and self._EXPR( $parsed.hash.<EXPR> );
+		debug-match( $parsed );
 		return self.record-failure( '_SMExpr' );
 	}
 
@@ -1886,6 +2134,7 @@ return True;
 		self.trace( '_Specials' );
 #return True;
 		return True if self.assert-Bool( $parsed );
+		debug-match( $parsed );
 		return self.record-failure( '_Specials' );
 	}
 
@@ -1933,6 +2182,7 @@ return True;
 				[< block sym >] )
 			and self._Block( $parsed.hash.<block> )
 			and self._Sym( $parsed.hash.<sym> );
+		debug-match( $parsed );
 		return self.record-failure( '_StatementControl' );
 	}
 
@@ -1943,28 +2193,38 @@ return True;
 			for $parsed.list {
 				next if self.assert-hash-keys( $_,
 						[< statement_mod_loop EXPR >] )
-					and self._StatementModLoop( $_.hash.<statement_mod_loop> )
+					and self._StatementModLoop(
+						$_.hash.<statement_mod_loop>
+					)
 					and self._EXPR( $_.hash.<EXPR> );
 				next if self.assert-hash-keys( $_,
 						[< statement_mod_cond EXPR >] )
-					and self._StatementModCond( $_.hash.<statement_mod_cond> )
+					and self._StatementModCond(
+						$_.hash.<statement_mod_cond>
+					)
 					and self._EXPR( $_.hash.<EXPR> );
 				next if self.assert-hash-keys( $_, [< EXPR >] )
 					and self._EXPR( $_.hash.<EXPR> );
 				next if self.assert-hash-keys( $_,
 						[< statement_control >] )
-					and self._StatementControl( $_.hash.<statement_control> );
+					and self._StatementControl(
+						$_.hash.<statement_control>
+					);
 				next if self.assert-hash-keys( $_, [],
 						[< statement_control >] );
+				debug-match( $_ );
 				return self.record-failure( '_Statement list' );
 			}
 			return True
 		}
 		return True if self.assert-hash-keys( $parsed,
 				[< statement_control >] )
-			and self._StatementControl( $parsed.hash.<statement_control> );
+			and self._StatementControl(
+				$parsed.hash.<statement_control>
+			);
 		return True if self.assert-hash-keys( $parsed, [< EXPR >] )
 			and self._EXPR( $parsed.hash.<EXPR> );
+		debug-match( $parsed );
 		return self.record-failure( '_Statement' );
 	}
 
@@ -1973,10 +2233,13 @@ return True;
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< statement >] )
 			and self._Statement( $parsed.hash.<statement> );
-		return True if self.assert-hash-keys( $parsed, [], [< statement >] );
+		return True if self.assert-hash-keys( $parsed, [],
+			[< statement >]
+		);
 		# This line is caught above, but is where comments and POD are
 		# stored.
 		return True if self.assert-Str( $parsed );
+		debug-match( $parsed );
 		return self.record-failure( '_StatementList' );
 	}
 
@@ -1987,6 +2250,7 @@ return True;
 				[< sym modifier_expr >] )
 			and self._Sym( $parsed.hash.<sym> )
 			and self._ModifierExpr( $parsed.hash.<modifier_expr> );
+		debug-match( $parsed );
 		return self.record-failure( '_StatementModCond' );
 	}
 
@@ -1997,6 +2261,7 @@ return True;
 				[< sym smexpr >] )
 			and self._Sym( $parsed.hash.<sym> )
 			and self._SMExpr( $parsed.hash.<smexpr> );
+		debug-match( $parsed );
 		return self.record-failure( '_StatementModLoop' );
 	}
 
@@ -2007,6 +2272,7 @@ return True;
 				[< sym blorst >] )
 			and self._Sym( $parsed.hash.<sym> )
 			and self._Blorst( $parsed.hash.<blorst> );
+		debug-match( $parsed );
 		return self.record-failure( '_StatementPrefix' );
 		return False
 	}
@@ -2017,6 +2283,7 @@ return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< desigilname >] )
 			and self._DeSigilName( $parsed.hash.<desigilname> );
+		debug-match( $parsed );
 		return self.record-failure( '_SubShortName' );
 	}
 
@@ -2026,6 +2293,7 @@ return True;
 		if $parsed.list {
 			for $parsed.list {
 				next if $_.Str;
+				debug-match( $_ );
 				return self.record-failure( '_Sym list' );
 			}
 			return True
@@ -2033,6 +2301,7 @@ return True;
 		return True if $parsed.Bool and $parsed.Str eq '+';
 		return True if $parsed.Bool and $parsed.Str eq '';
 		return True if self.assert-Str( $parsed );
+		debug-match( $parsed );
 		return self.record-failure( '_Sym' );
 	}
 
@@ -2041,6 +2310,9 @@ return True;
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< methodop >] )
 			and self._MethodOp( $parsed.hash.<methodop> );
+		return True if self.assert-hash-keys( $parsed, [< circumfix >] )
+			and self._Circumfix( $parsed.hash.<circumfix> );
+		debug-match( $parsed );
 		return self.record-failure( '_Term' );
 	}
 
@@ -2052,10 +2324,12 @@ return True;
 				next if self.assert-hash-keys( $_,
 						[< termconj >] )
 					and self._TermConj( $_.hash.<termconj> );
+				debug-match( $_ );
 				return self.record-failure( '_TermAlt list' );
 			}
 			return True
 		}
+		debug-match( $parsed );
 		return self.record-failure( '_TermAlt' );
 	}
 
@@ -2065,6 +2339,7 @@ return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< termconjseq >] )
 			and self._TermConjSeq( $parsed.hash.<termconjseq> );
+		debug-match( $parsed );
 		return self.record-failure( '_TermAltSeq' );
 	}
 
@@ -2076,10 +2351,12 @@ return True;
 				next if self.assert-hash-keys( $_,
 						[< termish >] )
 					and self._Termish( $_.hash.<termish> );
+				debug-match( $_ );
 				return self.record-failure( '_TermConj list' );
 			}
 			return True
 		}
+		debug-match( $parsed );
 		return self.record-failure( '_TermConj' );
 	}
 
@@ -2091,12 +2368,14 @@ return True;
 				next if self.assert-hash-keys( $_,
 						[< termalt >] )
 					and self._TermAlt( $_.hash.<termalt> );
+				debug-match( $_ );
 				return self.record-failure( '_TermConjSeq list' );
 			}
 			return True
 		}
 		return True if self.assert-hash-keys( $parsed, [< termalt >] )
 			and self._TermAlt( $parsed.hash.<termalt> );
+		debug-match( $parsed );
 		return self.record-failure( '_TermConjSeq' );
 	}
 
@@ -2106,6 +2385,7 @@ return True;
 		return True if self.assert-hash-keys( $parsed, [< sym EXPR >] )
 			and self._Sym( $parsed.hash.<sym> )
 			and self._EXPR( $parsed.hash.<EXPR> );
+		debug-match( $parsed );
 		return self.record-failure( '_TermInit' );
 	}
 
@@ -2116,12 +2396,14 @@ return True;
 			for $parsed.list {
 				next if self.assert-hash-keys( $_, [< noun >] )
 					and self._Noun( $_.hash.<noun> );
+				debug-match( $_ );
 				return self.record-failure( '_Termish list' );
 			}
 			return True
 		}
 		return True if self.assert-hash-keys( $parsed, [< noun >] )
 			and self._Noun( $parsed.hash.<noun> );
+		debug-match( $parsed );
 		return self.record-failure( '_Termish' );
 	}
 
@@ -2131,13 +2413,53 @@ return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< termaltseq >] )
 			and self._TermAltSeq( $parsed.hash.<termaltseq> );
+		debug-match( $parsed );
 		return self.record-failure( '_TermSeq' );
+	}
+
+	method _TraitMod( Mu $parsed ) {
+		self.trace( '_Trait' );
+#return True;
+		return True if self.assert-hash-keys( $parsed,
+				[< sym longname >], [< circumfix >] )
+			and self._Sym( $parsed.hash.<sym> )
+			and self._LongName( $parsed.hash.<longname> );
+		return True if self.assert-hash-keys( $parsed,
+				[< sym typename >] )
+			and self._Sym( $parsed.hash.<sym> )
+			and self._TypeName( $parsed.hash.<typename> );
+		debug-match( $parsed );
+		return self.record-failure( '_TraitMod' );
+	}
+
+	method _Trait( Mu $parsed ) {
+		self.trace( '_Trait' );
+#return True;
+		if $parsed.list {
+			for $parsed.list {
+				return True if self.assert-hash-keys( $_,
+						[< trait_mod >] )
+					and self._TraitMod(
+						$_.hash.<trait_mod>
+					);
+				debug-match( $_ );
+				return self.record-failure( '_XBlock list' );
+			}
+			return True
+		}
+		debug-match( $parsed );
+		return self.record-failure( '_Trait' );
 	}
 
 	method _Triangle( Mu $parsed ) {
 		self.trace( '_Triangle' );
 #return True;
+		return True if self.assert-hash-keys( $parsed,
+				[< sym typename >] )
+			and self._Sym( $parsed.hash.<sym> )
+			and self._TypeName( $parsed.hash.<typename> );
 		return True if self.assert-Str( $parsed );
+		debug-match( $parsed );
 		return self.record-failure( '_Triangle' );
 	}
 
@@ -2146,6 +2468,7 @@ return True;
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< sym >] )
 			and self._Sym( $parsed.hash.<sym> );
+		debug-match( $parsed );
 		return self.record-failure( '_Twigil' );
 	}
 
@@ -2159,6 +2482,7 @@ return True;
 					and self._TypeName( $_.hash.<typename> );
 				next if self.assert-hash-keys( $_, [< value >] )
 					and self._Value( $_.hash.<value> );
+				debug-match( $_ );
 				return self.record-failure( '_TypeConstraint list' );
 			}
 			return True
@@ -2167,6 +2491,7 @@ return True;
 			and self._Value( $parsed.hash.<value> );
 		return True if self.assert-hash-keys( $parsed, [< typename >] )
 			and self._TypeName( $parsed.hash.<typename> );
+		debug-match( $parsed );
 		return self.record-failure( '_TypeConstraint' );
 	}
 
@@ -2184,9 +2509,24 @@ return True;
 			and self._Initializer( $parsed.hash.<initializer> )
 			and self._DefTerm( $parsed.hash.<defterm> );
 		return True if self.assert-hash-keys( $parsed,
+				[< sym longname term >], [< trait >] )
+			and self._Sym( $parsed.hash.<sym> )
+			and self._LongName( $parsed.hash.<longname> )
+			and self._Term( $parsed.hash.<term> );
+		return True if self.assert-hash-keys( $parsed,
+				[< sym longname trait >] )
+			and self._Sym( $parsed.hash.<sym> )
+			and self._LongName( $parsed.hash.<longname> )
+			and self._Trait( $parsed.hash.<trait> );
+		return True if self.assert-hash-keys( $parsed,
+				[< sym longname >], [< trait >] )
+			and self._Sym( $parsed.hash.<sym> )
+			and self._LongName( $parsed.hash.<longname> );
+		return True if self.assert-hash-keys( $parsed,
 				[< sym initializer >] )
 			and self._Sym( $parsed.hash.<sym> )
 			and self._Initializer( $parsed.hash.<initializer> );
+		debug-match( $parsed );
 		return self.record-failure( '_TypeDeclarator' );
 	}
 
@@ -2199,11 +2539,20 @@ return True;
 						[< longname colonpairs >],
 						[< colonpair >] )
 					and self._LongName( $_.hash.<longname> )
-					and self._ColonPairs( $_.hash.<colonpairs> );
+					and self._ColonPairs(
+						$_.hash.<colonpairs>
+					);
+				next if self.assert-hash-keys( $_,
+						[< longname >],
+						[< colonpair colonpair >] )
+					and self._LongName( $_.hash.<longname> );
 				next if self.assert-hash-keys( $_,
 						[< longname >],
 						[< colonpair >] )
-					and self._LongName( $_.hash.<longname> );
+					and self._LongName(
+						$_.hash.<longname>
+					);
+				debug-match( $_ );
 				return self.record-failure( '_TypeName list' );
 			}
 			return True
@@ -2211,6 +2560,7 @@ return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< longname >], [< colonpair >] )
 			and self._LongName( $parsed.hash.<longname> );
+		debug-match( $parsed );
 		return self.record-failure( '_TypeName' );
 	}
 
@@ -2224,6 +2574,7 @@ return True;
 			and self._OPER( $parsed.hash.<OPER> );
 		return True if self.assert-hash-keys( $parsed, [< value >] )
 			and self._Value( $parsed.hash.<value> );
+		debug-match( $parsed );
 		return self.record-failure( '_Val' );
 	}
 
@@ -2234,6 +2585,7 @@ return True;
 			and self._Number( $parsed.hash.<number> );
 		return True if self.assert-hash-keys( $parsed, [< quote >] )
 			and self._Quote( $parsed.hash.<quote> );
+		debug-match( $parsed );
 		return self.record-failure( '_Value' );
 	}
 
@@ -2242,6 +2594,7 @@ return True;
 #return True;
 		return True if $parsed.Str and $parsed.Str eq '0';
 		return True if self.assert-Int( $parsed );
+		debug-match( $parsed );
 		return self.record-failure( '_VALUE' );
 	}
 
@@ -2254,6 +2607,7 @@ return True;
 			and self._DeSigilName( $parsed.hash.<desigilname> );
 		return True if self.assert-hash-keys( $parsed, [< variable >] )
 			and self._Variable( $parsed.hash.<variable> );
+		debug-match( $parsed );
 		return self.record-failure( '_Var' );
 	}
 
@@ -2271,6 +2625,7 @@ return True;
 			[< semilist postcircumfix signature
 			   trait post_constraint >] )
 			and self._Variable( $parsed.hash.<variable> );
+		debug-match( $parsed );
 		return self.record-failure( '_VariableDeclarator' );
 	}
 
@@ -2291,6 +2646,7 @@ return True;
 		return True if self.assert-hash-keys( $parsed,
 				[< contextualizer >] )
 			and self._Contextualizer( $parsed.hash.<contextualizer> );
+		debug-match( $parsed );
 		return self.record-failure( '_Variable' );
 	}
 
@@ -2300,6 +2656,7 @@ return True;
 		return True if self.assert-hash-keys( $parsed, [< vnum vstr >] )
 			and self._VNum( $parsed.hash.<vnum> )
 			and self._VStr( $parsed.hash.<vstr> );
+		debug-match( $parsed );
 		return self.record-failure( '_Version' );
 	}
 
@@ -2309,10 +2666,12 @@ return True;
 		if $parsed.list {
 			for $parsed.list {
 				next if self.assert-Int( $_ );
+				debug-match( $parsed );
 				return self.record-failure( '_VNum list' );
 			}
 			return True
 		}
+		debug-match( $parsed );
 		return self.record-failure( '_VNum' );
 	}
 
@@ -2320,6 +2679,7 @@ return True;
 		self.trace( '_VStr' );
 #return True;
 		return True if self.assert-Int( $parsed );
+		debug-match( $parsed );
 		return self.record-failure( '_VStr' );
 	}
 
@@ -2327,6 +2687,7 @@ return True;
 		self.trace( '_Wu' );
 #return True;
 		return True if self.assert-Str( $parsed );
+		debug-match( $parsed );
 		return self.record-failure( '_Wu' );
 	}
 
@@ -2339,6 +2700,7 @@ return True;
 						[< pblock EXPR >] )
 					and self._PBlock( $_.hash.<pblock> )
 					and self._EXPR( $_.hash.<EXPR> );
+				debug-match( $_ );
 				return self.record-failure( '_XBlock list' );
 			}
 			return True
@@ -2349,6 +2711,7 @@ return True;
 			and self._EXPR( $parsed.hash.<EXPR> );
 		return True if self.assert-hash-keys( $parsed, [< blockoid >] )
 			and self._Blockoid( $parsed.hash.<blockoid> );
+		debug-match( $parsed );
 		return self.record-failure( '_XBlock' );
 	}
 

@@ -24,6 +24,7 @@ plan 25;
 # As will the [+] hyperoperator, as it'll probably get a test suite of its own.
 
 my $pt = Perl6::Parser.new;
+my $*VALIDATION-FATAL = True;
 
 subtest {
 	plan 4;

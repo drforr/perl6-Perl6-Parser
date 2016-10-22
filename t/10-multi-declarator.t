@@ -13,6 +13,7 @@ use Perl6::Parser;
 plan 3;
 
 my $pt = Perl6::Parser.new;
+my $*VALIDATION-FATAL = True;
 
 subtest {
 	plan 2;

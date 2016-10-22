@@ -6,6 +6,7 @@ use Perl6::Parser;
 plan 1;
 
 my $pt = Perl6::Parser.new;
+my $*VALIDATION-FATAL = True;
 
 subtest {
 	plan 2;
