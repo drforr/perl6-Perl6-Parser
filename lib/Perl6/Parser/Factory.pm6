@@ -1580,8 +1580,13 @@ class Perl6::Parser::Factory {
 				self._codeblock( $_.hash.<codeblock> )
 			}
 			default {
-				debug-match( $_ );
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				if $_.Str {
+					Perl6::Bareword.from-match( $_ )
+				}
+				else {
+					debug-match( $_ );
+					die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				}
 			}
 		}
 	}
@@ -1996,10 +2001,10 @@ class Perl6::Parser::Factory {
 			@child.append(
 				Perl6::WS.with-inter-ws(
 					$p,
-					$p.hash.<variable_declarator>,
+					$p.hash.<deftermnow>,
 					[
-						self._variable_declarator(
-							$p.hash.<variable_declarator>
+						self._deftermnow(
+							$p.hash.<deftermnow>
 						)
 					],
 					$p.hash.<initializer>,
@@ -2144,7 +2149,7 @@ class Perl6::Parser::Factory {
 		elsif self.assert-hash( $p, [< signature >], [< trait >] ) {
 			my Perl6::Element @_child =
 				self._signature( $p.hash.<signature> );
-			@child = Perl6::Operator::Circumfix.new( $p, @_child )
+			@child = Perl6::Operator::Circumfix.from-match( $p, @_child )
 		}
 		else {
 			debug-match( $p ) if $*DEBUG;
@@ -3697,9 +3702,9 @@ return True;
 
 	method _nibble( Mu $p ) {
 		my Perl6::Element @child;
-		if self.assert-hash( $_, [< termseq >] ) {
+		if self.assert-hash( $p, [< termseq >] ) {
 			@child.append(
-				self._termseq( $_.hash.<termseq> )
+				self._termseq( $p.hash.<termseq> )
 			)
 		}
 		elsif $p.Str {
@@ -6008,6 +6013,27 @@ return True;
 			);
 		}
 		elsif self.assert-hash( $p,
+			[< param_term quant >],
+			[< default_value type_constraint modifier trait post_constraint >] ) {
+			@child.append(
+				self._quant(
+					$p.hash.<quant>
+				)
+			);
+			@child.append(
+				Perl6::WS.between-matches(
+					$p,
+					'quant',
+					'param_term'
+				)
+			);
+			@child.append(
+				self._param_term(
+					$p.hash.<param_term>
+				)
+			);
+		}
+		elsif self.assert-hash( $p,
 			[< defterm quant >],
 			[< type_constraint post_constraint
 			   default_value modifier trait >] ) {
@@ -8005,19 +8031,19 @@ die "Catching Int";
 		if $p.list {
 			for $p.list {
 				if self.assert-hash( $_, [< pblock EXPR >] ) {
-					@child = self._pblock(
-						$_.hash.<pblock>
+					@child = self._EXPR(
+						$_.hash.<EXPR>
 					);
 					@child.append(
 						Perl6::WS.between-matches(
 							$_,
-							'pblock',
-							'EXPR'
+							'EXPR',
+							'pblock'
 						)
 					);
 					@child.append(
-						self._EXPR(
-							$_.hash.<EXPR>
+						self._pblock(
+							$_.hash.<pblock>
 						)
 					)
 				}

@@ -1588,6 +1588,11 @@ return True;
 					and self._TypeConstraint( $_.hash.<type_constraint> )
 					and self._Quant( $_.hash.<quant> );
 				next if self.assert-hash-keys( $_,
+					[< param_term quant >],
+					[< default_value type_constraint modifier trait post_constraint >] )
+					and self._ParamTerm( $_.hash.<param_term> )
+					and self._Quant( $_.hash.<quant> );
+				next if self.assert-hash-keys( $_,
 					[< param_var quant >],
 					[< default_value type_constraint modifier trait post_constraint >] )
 					and self._ParamVar( $_.hash.<param_var> )
@@ -1639,6 +1644,16 @@ return True;
 		}
 		debug-match( $parsed );
 		return self.record-failure( '_Parameter' );
+	}
+
+	method _ParamTerm( Mu $parsed ) {
+		self.trace( '_ParamTerm' );
+#return True;
+		return True if self.assert-hash-keys( $parsed,
+				[< defterm >] )
+			and self._DefTerm( $parsed.hash.<defterm> );
+		debug-match( $parsed );
+		return self.record-failure( '_ParamTerm' );
 	}
 
 	method _ParamVar( Mu $parsed ) {

@@ -540,7 +540,6 @@ for @quantities Z @bottles Z @actions Z
 _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
-#say $pt.dump-tree( $tree );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
 )
