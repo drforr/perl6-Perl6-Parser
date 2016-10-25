@@ -8,7 +8,7 @@
 	"provides"     : {
 		"Perl6::Parser"        : "lib/Perl6/Parser.pm6",
 		"Perl6::Parser::Factory" : "lib/Perl6/Parser/Factory.pm6",
-		"Perl6::Parser::Validator" : "lib/Perl6/Parser/Validator.pm6",
+		"Perl6::Parser::Validator" : "lib/Perl6/Parser/Validator.pm6"
 	},
 	"source-url"   : "git://github.com/drforr/perl6-Perl6-Parser.git"
 }
