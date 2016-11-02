@@ -1998,6 +1998,7 @@ class Perl6::Parser::Factory {
 		if self.assert-hash( $p,
 				[< deftermnow initializer term_init >],
 				[< trait >] ) {
+			# XXX missing term_init....
 			@child.append(
 				Perl6::WS.with-inter-ws(
 					$p,
@@ -3754,6 +3755,7 @@ return True;
 		my Perl6::Element @child;
 		if $p.list {
 			for $p.list {
+say $_.hash.keys.gist;
 				if self.assert-hash( $_,
 					[< sigmaybe sigfinal
 					   quantifier atom >] ) {
@@ -3912,7 +3914,12 @@ return True;
 					)
 				}
 				elsif self.assert-hash( $_,
-					[< atom sigfinal >] ) {
+					[< sigfinal atom >] ) {
+					@child.append(
+						self._sigfinal(
+							$_.hash.<sigfinal>
+						)
+					);
 					@child.append(
 						self._atom( $_.hash.<atom> )
 					)
@@ -5930,8 +5937,7 @@ return True;
 	method _sigfinal( Mu $p ) {
 		given $p {
 			when self.assert-hash( $_, [< normspace >] ) {
-				warn "sigfinal finally used";
-				( )
+				Perl6::WS.from-match( $_.hash.<normspace> );
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
