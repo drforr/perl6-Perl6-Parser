@@ -3914,14 +3914,14 @@ say $_.hash.keys.gist;
 					)
 				}
 				elsif self.assert-hash( $_,
-					[< sigfinal atom >] ) {
+					[< atom sigfinal >] ) {
+					@child.append(
+						self._atom( $_.hash.<atom> )
+					);
 					@child.append(
 						self._sigfinal(
 							$_.hash.<sigfinal>
 						)
-					);
-					@child.append(
-						self._atom( $_.hash.<atom> )
 					)
 				}
 				elsif self.assert-hash( $_,
