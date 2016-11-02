@@ -1595,7 +1595,6 @@ class Perl6::Parser::Factory {
 		# XXX Interesting, this can't be converted to given-when?
 		if self.assert-hash( $p, [< metachar >] ) {
 			Perl6::Bareword.from-match( $p )
-			#self._metachar( $p.hash.<metachar> )
 		}
 		elsif $p.Str {
 			Perl6::Bareword.from-match( $p )
@@ -1628,7 +1627,7 @@ class Perl6::Parser::Factory {
 	}
 
 	method _backmod( Mu $p ) {
-		warn "backmod finally used";
+#		warn "backmod finally used";
 		( )
 	}
 
@@ -3808,13 +3807,15 @@ return True;
 				elsif self.assert-hash( $_,
 					[< sigfinal quantifier
 					   separator atom >] ) {
-					@child = self._sigfinal(
-						$_.hash.<sigfinal>
+					@child.append(
+						self._atom(
+							$_.hash.<atom>
+						)
 					);
 					@child.append(
 						Perl6::WS.between-matches(
 							$_,
-							'sigfinal',
+							'atom',
 							'quantifier'
 						)
 					);
@@ -3833,18 +3834,6 @@ return True;
 					@child.append(
 						self._separator(
 							$_.hash.<separator>
-						)
-					);
-					@child.append(
-						Perl6::WS.between-matches(
-							$_,
-							'separator',
-							'atom'
-						)
-					);
-					@child.append(
-						self._atom(
-							$_.hash.<atom>
 						)
 					)
 				}
@@ -5888,8 +5877,7 @@ return True;
 	}
 
 	method _septype( Mu $p ) {
-		warn "septype finally used";
-		( )
+		Perl6::Bareword.from-match( $p )
 	}
 
 	method _shape( Mu $p ) {
