@@ -1594,7 +1594,8 @@ class Perl6::Parser::Factory {
 	method _atom( Mu $p ) {
 		# XXX Interesting, this can't be converted to given-when?
 		if self.assert-hash( $p, [< metachar >] ) {
-			self._metachar( $p.hash.<metachar> )
+			Perl6::Bareword.from-match( $p )
+			#self._metachar( $p.hash.<metachar> )
 		}
 		elsif $p.Str {
 			Perl6::Bareword.from-match( $p )
@@ -1729,7 +1730,9 @@ class Perl6::Parser::Factory {
 				if self.assert-hash( $_,
 						[< identifier name sign >],
 						[< charspec >] ) {
-					@child = self._identifier( $_.hash.<identifier> );
+					@child = self._identifier(
+						$_.hash.<identifier>
+					);
 					@child.append(
 						Perl6::WS.between-matches(
 							$_,
@@ -2373,8 +2376,10 @@ class Perl6::Parser::Factory {
 			when self.assert-hash( $_,
 					[< identifier colonpair >] ) {
 				@child =
-					self._identifier( $_.hash.<identifier> ),
-					self._colonpair( $_.hash.<colonpair> ),
+					self._identifier(
+						$_.hash.<identifier>
+					),
+					self._colonpair( $_.hash.<colonpair> )
 			}
 			when self.assert-hash( $_,
 					[< identifier >],
@@ -3088,7 +3093,10 @@ class Perl6::Parser::Factory {
 
 	method _identifier( Mu $p ) {
 		my Perl6::Element @child;
-		if $p.list {
+		if $p.Str {
+			@child = Perl6::Bareword.from-match( $p )
+		}
+		elsif $p.list {
 			for $p.list {
 				if 0 {
 				}
@@ -3097,9 +3105,6 @@ class Perl6::Parser::Factory {
 					die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 				}
 			}
-		}
-		elsif $p.Str {
-			@child = Perl6::Bareword.from-match( $p )
 		}
 		else {
 			debug-match( $p ) if $*DEBUG;
@@ -3675,8 +3680,10 @@ return True;
 			when self.assert-hash( $_,
 					[< identifier >],
 					[< morename >] ) {
+				# XXX This did descend to _identifier, but that
+				# XXX level wouldn't properly catch Foo::Bar
+				# XXX second-level qualified names.
 				@child.append(
-					# XXX this should be an identifier...
 					Perl6::Bareword.from-match( $_ )
 				)
 			}
@@ -3755,7 +3762,6 @@ return True;
 		my Perl6::Element @child;
 		if $p.list {
 			for $p.list {
-say $_.hash.keys.gist;
 				if self.assert-hash( $_,
 					[< sigmaybe sigfinal
 					   quantifier atom >] ) {
@@ -5446,11 +5452,6 @@ say $_.hash.keys.gist;
 				)
 			);
 			$x = $p.Str.substr( $p.hash.<nibble>.to - $p.from );
-			@_child.append(
-				Perl6::WS.trailer(
-					$p.hash.<nibble>
-				)
-			);
 			@_child.append(
 				Perl6::Balanced::Exit.new(
 					:factory-line-number(
