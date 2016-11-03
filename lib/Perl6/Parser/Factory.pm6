@@ -3470,10 +3470,8 @@ return True;
 					$_.hash.<longname>
 				);
 				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'longname',
-						'args'
+					Perl6::WS.header(
+						$_.hash.<args>
 					)
 				);
 				@child.append(
@@ -4997,19 +4995,19 @@ return True;
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< sigfinal atom >] ) {
-				@child = self._sigfinal(
-					$_.hash.<sigfinal>
+				@child = self._atom(
+					$_.hash.<atom>
 				);
 				@child.append(
 					Perl6::WS.between-matches(
 						$_,
-						'sigfinal',
-						'atom'
+						'atom',
+						'sigfinal'
 					)
 				);
 				@child.append(
-					self._atom(
-						$_.hash.<atom>
+					self._sigfinal(
+						$_.hash.<sigfinal>
 					)
 				)
 			}
