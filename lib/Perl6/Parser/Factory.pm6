@@ -6497,24 +6497,24 @@ return True;
 					Perl6::WS.between-matches(
 						$_,
 						'sym',
-						'else'
-					)
-				);
-				@child.append(
-					self._else(
-						$_.hash.<else>
-					)
-				);
-				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'else',
 						'xblock'
 					)
 				);
 				@child.append(
 					self._xblock(
 						$_.hash.<xblock>
+					)
+				);
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						'xblock',
+						'else'
+					)
+				);
+				@child.append(
+					self._else(
+						$_.hash.<else>
 					)
 				);
 			}
