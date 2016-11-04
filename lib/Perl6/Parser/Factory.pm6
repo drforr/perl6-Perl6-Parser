@@ -3476,14 +3476,17 @@ return True;
 					$_.hash.<longname>
 				);
 				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'longname',
-						'args'
+					Perl6::WS.header(
+						$_.hash.<args>
 					)
 				);
 				@child.append(
 					self._args(
+						$_.hash.<args>
+					)
+				);
+				@child.append(
+					Perl6::WS.trailer(
 						$_.hash.<args>
 					)
 				);
