@@ -5196,11 +5196,35 @@ return True;
 					'quibble'
 				)
 			);
-			@child.append(
-				self._quibble(
-					$p.hash.<quibble>
-				)
-			);
+			if $p.hash.<sym>.Str eq 'rx' {
+				# XXX Will need fixing.
+				@child.append(
+					Perl6::Balanced::Enter.new(
+						:from( $p.from ),
+						:to( $p.from + 'rx/'.chars ),
+						:content( 'rx/' )
+					)
+				);
+				@child.append(
+					self._quibble(
+						$p.hash.<quibble>
+					)
+				);
+				@child.append(
+					Perl6::Balanced::Exit.new(
+						:from( $p.to - '/'.chars ),
+						:to( $p.to ),
+						:content( '/' )
+					)
+				);
+			}
+			else {
+				@child.append(
+					self._quibble(
+						$p.hash.<quibble>
+					)
+				);
+			}
 		}
 		elsif self.assert-hash( $p, [< sym rx_adverbs sibble >] ) {
 			@child = self._sym( $_.hash.<sym> );
