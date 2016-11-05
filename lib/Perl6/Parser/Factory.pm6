@@ -3517,11 +3517,6 @@ return True;
 						$_.hash.<args>
 					)
 				);
-				@child.append(
-					Perl6::WS.trailer(
-						$_.hash.<args>
-					)
-				);
 			}
 			when self.assert-hash( $_, [< variable >] ) {
 				@child = self._variable( $_.hash.<variable> );
@@ -3726,6 +3721,16 @@ return True;
 				@child.append(
 					Perl6::Bareword.from-match( $_ )
 				);
+				# XXX Probably should be Enter(':')..Exit('')
+				if $_.orig.Str.substr( $_.to, 1 ) eq COLON {
+					@child.append(
+						Perl6::Bareword.new(
+							:from( $_.to ),
+							:to( $_.to + COLON.chars ),
+							:content( COLON )
+						)
+					)
+				}
 			}
 			when self.assert-hash( $_, [< subshortname >] ) {
 				@child.append(

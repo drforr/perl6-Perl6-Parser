@@ -78,6 +78,20 @@ _END_
 	is $pt.format( $tree ), $source, Q{formatted};
 }, Q{flat (99 ... 1)};
 
+subtest {
+	plan 2;
+
+	my $source = Q:to[_END_];
+my @blocks;
+@blocks.grep: { }
+_END_
+	my $p = $pt.parse( $source );
+	my $tree = $pt.build-tree( $p );
+#say $pt.dump-tree($tree);
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.format( $tree ), $source, Q{formatted};
+}, Q{grep: {}};
+
 done-testing;
 
 # vim: ft=perl6
