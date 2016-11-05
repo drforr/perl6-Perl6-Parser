@@ -1543,7 +1543,6 @@ _END_
 subtest {
 	plan 0;
 
-#`(
 	my $source = Q:to[_END_];
 sub mode (*@a) {
     my %counts;
@@ -1556,7 +1555,6 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
-)
 }, Q{Averages/mode};
 
 subtest {

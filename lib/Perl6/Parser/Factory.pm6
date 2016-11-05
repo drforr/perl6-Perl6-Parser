@@ -6801,20 +6801,18 @@ else {
 			}
 			else {
 				@child.append(
-					Perl6::WS.with-inter-ws(
-						$p,
-						$p.hash.<EXPR>,
-						[
-							self._EXPR(
-								$p.hash.<EXPR>
-							)
-						],
-						$p.hash.<statement_mod_loop>,
-						[
-							self._statement_mod_loop(
-								$p.hash.<statement_mod_loop>
-							)
-						]
+					self._EXPR(
+						$p.hash.<EXPR>
+					)
+				);
+				@child.append(
+					Perl6::WS.before-orig(
+						$p.hash.<statement_mod_loop>
+					)
+				);
+				@child.append(
+					self._statement_mod_loop(
+						$p.hash.<statement_mod_loop>
 					)
 				);
 			}
