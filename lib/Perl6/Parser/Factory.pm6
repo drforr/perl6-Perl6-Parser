@@ -3047,6 +3047,11 @@ class Perl6::Parser::Factory {
 				$p.hash.<methodop>
 			);
 		}
+		elsif self.assert-hash( $p, [< pblock >] ) {
+			@child = self._pblock(
+				$p.hash.<pblock>
+			);
+		}
 		else {
 			debug-match( $p ) if $*DEBUG;
 			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
@@ -5629,14 +5634,7 @@ return True;
 				);
 			}
 			elsif $strip-sides ~~ m{ ( \s+ ) ')' } {
-				@_child.append(
-					Perl6::WS.new(
-						:factory-line-number( callframe(1).line ),
-						:from( $p.hash.<deflongname>.to + $0.from ),
-						:to( $p.hash.<deflongname>.to + $0.from + $0.chars ),
-						:content( $0.Str )
-					)
-				);
+				# XXX May not be redundant
 			}
 			else {
 				@child.append(

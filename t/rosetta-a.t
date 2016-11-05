@@ -53,9 +53,8 @@ _END_
 }, Q{A + B};
 
 subtest {
-	plan 0;
+	plan 2;
 
-#`(
 	my $source = Q:to[_END_];
 multi can-spell-word(Str $word, @blocks) {
     my @regex = @blocks.map({ my @c = .comb; rx/<@c>/ }).grep: { .ACCEPTS($word.uc) }
@@ -83,7 +82,6 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
-)
 }, Q{ABC Problem};
 
 subtest {
@@ -173,9 +171,8 @@ _END_
 	}, Q{version 1};
 
 	subtest {
-		plan 0;
+		plan 2;
 
-#`(
 		my $source = Q:to[_END_];
 multi sub A(0,      Int $n) { $n + 1                   }
 multi sub A(Int $m, 0     ) { A($m - 1, 1)             }
@@ -185,7 +182,6 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
-)
 	}, Q{version 2};
 
 	subtest {
