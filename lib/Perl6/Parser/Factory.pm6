@@ -8095,16 +8095,12 @@ die "Catching Int";
 		my Perl6::Element @child;
 		if $p.list {
 			for $p.list {
-				if self.assert-hash( $_, [< pblock EXPR >] ) {
+				if self.assert-hash( $_, [< EXPR pblock >] ) {
 					@child = self._EXPR(
 						$_.hash.<EXPR>
 					);
 					@child.append(
-						Perl6::WS.between-matches(
-							$_,
-							'EXPR',
-							'pblock'
-						)
+						Perl6::WS.after( $_, $_.hash.<EXPR> )
 					);
 					@child.append(
 						self._pblock(
