@@ -1592,16 +1592,20 @@ class Perl6::Parser::Factory {
 	}
 
 	method _atom( Mu $p ) {
-		# XXX Interesting, this can't be converted to given-when?
-		if self.assert-hash( $p, [< metachar >] ) {
-			Perl6::Bareword.from-match( $p );
-		}
-		elsif $p.Str {
+		if $p.Str {
 			Perl6::Bareword.from-match( $p );
 		}
 		else {
-			debug-match( $p );
-			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+			given $p {
+				when self.assert-hash( $_, [< metachar >] ) {
+					Perl6::Bareword.from-match( $_ );
+				}
+				default {
+					debug-match( $_ );
+					die "Unhandled case" if
+						$*FACTORY-FAILURE-FATAL
+				}
+			}
 		}
 	}
 
@@ -1999,317 +2003,338 @@ class Perl6::Parser::Factory {
 
 	method _declarator( Mu $p ) {
 		my Perl6::Element @child;
-		if self.assert-hash( $p,
+		given $p {
+			when self.assert-hash( $_,
 				[< deftermnow initializer term_init >],
 				[< trait >] ) {
-			# XXX missing term_init....
-			@child.append(
-				Perl6::WS.with-inter-ws(
-					$p,
-					$p.hash.<deftermnow>,
-					[
-						self._deftermnow(
-							$p.hash.<deftermnow>
-						)
-					],
-					$p.hash.<initializer>,
-					[
-						self._initializer(
-							$p.hash.<initializer>
-						)
-					]
-				)
-			);
-		}
-		elsif self.assert-hash( $p,
+				# XXX missing term_init....
+				@child.append(
+					Perl6::WS.with-inter-ws(
+						$_,
+						$_.hash.<deftermnow>,
+						[
+							self._deftermnow(
+								$_.hash.<deftermnow>
+							)
+						],
+						$_.hash.<initializer>,
+						[
+							self._initializer(
+								$_.hash.<initializer>
+							)
+						]
+					)
+				);
+			}
+			when self.assert-hash( $_,
 				[< sym defterm initializer >],
 				[< trait >] ) {
-			@child = self._sym( $p.hash.<sym> );
-			@child.append(
-				Perl6::WS.between-matches(
-					$p,
-					'sym',
-					'defterm'
-				)
-			);
-			@child.append(
-				self._defterm( $p.hash.<defterm> )
-			);
-			@child.append(
-				Perl6::WS.between-matches(
-					$p,
-					'defterm',
-					'initializer'
-				)
-			);
-			@child.append(
-				self._initializer( $p.hash.<initializer> )
-			);
-		}
-		elsif self.assert-hash( $p,
+				@child = self._sym( $_.hash.<sym> );
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						'sym',
+						'defterm'
+					)
+				);
+				@child.append(
+					self._defterm( $_.hash.<defterm> )
+				);
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						'defterm',
+						'initializer'
+					)
+				);
+				@child.append(
+					self._initializer(
+						$_.hash.<initializer>
+					)
+				);
+			}
+			when self.assert-hash( $_,
 				[< initializer signature >], [< trait >] ) {
-			my Perl6::Element @_child;
-			@_child.append(
-				Perl6::Balanced::Enter.new(
-					:factory-line-number(
-						callframe(1).line
-					),
-					:from( $p.hash.<signature>.from - 1 ),
-					:to( $p.hash.<signature>.from ),
-					:content( '(' )
-				)
-			);
-			@_child.append(
-				Perl6::WS.header(
-					$p.hash.<signature>
-				)
-			);
-			@_child.append(
-				self._signature(
-					$p.hash.<signature>
-				)
-			);
-			@_child.append(
-				Perl6::WS.trailer(
-					$p.hash.<signature>
-				)
-			);
-			@_child.append(
-				Perl6::Balanced::Exit.new(
-					:factory-line-number(
-						callframe(1).line
-					),
-					:from( $p.hash.<signature>.to ),
-					:to( $p.hash.<signature>.to + 1 ),
-					:content( ')' )
-				)
-			);
-			@child.append(
-				Perl6::Operator::Circumfix.new(
-					:from( @_child[0].from ),
-					:to( @_child[*-1].to ),
-					:child( @_child )
-				)
-			);
-			@child.append(
-				Perl6::WS.before-orig(
-					$p.hash.<initializer>
-				)
-			);
-			@child.append(
-				self._initializer(
-					$p.hash.<initializer>
-				)
-			);
-		}
-		elsif self.assert-hash( $p,
+				my Perl6::Element @_child;
+				@_child.append(
+					Perl6::Balanced::Enter.new(
+						:factory-line-number(
+							callframe(1).line
+						),
+						:from( $_.hash.<signature>.from - 1 ),
+						:to( $_.hash.<signature>.from ),
+						:content( '(' )
+					)
+				);
+				@_child.append(
+					Perl6::WS.header(
+						$_.hash.<signature>
+					)
+				);
+				@_child.append(
+					self._signature(
+						$_.hash.<signature>
+					)
+				);
+				@_child.append(
+					Perl6::WS.trailer(
+						$_.hash.<signature>
+					)
+				);
+				@_child.append(
+					Perl6::Balanced::Exit.new(
+						:factory-line-number(
+							callframe(1).line
+						),
+						:from( $_.hash.<signature>.to ),
+						:to( $_.hash.<signature>.to + 1 ),
+						:content( ')' )
+					)
+				);
+				@child.append(
+					Perl6::Operator::Circumfix.new(
+						:from( @_child[0].from ),
+						:to( @_child[*-1].to ),
+						:child( @_child )
+					)
+				);
+				@child.append(
+					Perl6::WS.before-orig(
+						$_.hash.<initializer>
+					)
+				);
+				@child.append(
+					self._initializer(
+						$_.hash.<initializer>
+					)
+				);
+			}
+			when self.assert-hash( $_,
 				  [< initializer variable_declarator >],
 				  [< trait >] ) {
-			@child.append(
-				Perl6::WS.with-inter-ws(
-					$p,
-					$p.hash.<variable_declarator>,
-					[
-						self._variable_declarator(
-							$p.hash.<variable_declarator>
-						)
-					],
-					$p.hash.<initializer>,
-					[
-						self._initializer(
-							$p.hash.<initializer>
-						)
-					]
-				)
-			);
-		}
-		elsif self.assert-hash( $p,
+				@child.append(
+					Perl6::WS.with-inter-ws(
+						$_,
+						$_.hash.<variable_declarator>,
+						[
+							self._variable_declarator(
+								$_.hash.<variable_declarator>
+							)
+						],
+						$_.hash.<initializer>,
+						[
+							self._initializer(
+								$_.hash.<initializer>
+							)
+						]
+					)
+				);
+			}
+			when self.assert-hash( $_,
 				[< routine_declarator >], [< trait >] ) {
-			@child =
-				self._routine_declarator(
-					$p.hash.<routine_declarator>
-				);
-		}
-		elsif self.assert-hash( $p,
+				@child =
+					self._routine_declarator(
+						$_.hash.<routine_declarator>
+					);
+			}
+			when self.assert-hash( $_,
 				[< regex_declarator >], [< trait >] ) {
-			@child =
-				self._regex_declarator(
-					$p.hash.<regex_declarator>
-				);
-		}
-		elsif self.assert-hash( $p,
+				@child =
+					self._regex_declarator(
+						$_.hash.<regex_declarator>
+					);
+			}
+			when self.assert-hash( $_,
 				[< variable_declarator >], [< trait >] ) {
-			@child =
-				self._variable_declarator(
-					$p.hash.<variable_declarator>
-				);
-		}
-		elsif self.assert-hash( $p,
+				@child =
+					self._variable_declarator(
+						$_.hash.<variable_declarator>
+					);
+			}
+			when self.assert-hash( $_,
 				[< type_declarator >], [< trait >] ) {
-			@child =
-				self._type_declarator(
-					$p.hash.<type_declarator>
-				);
-		}
-		elsif self.assert-hash( $p, [< signature >], [< trait >] ) {
-			my Perl6::Element @_child =
-				self._signature( $p.hash.<signature> );
-			@child =
-				Perl6::Operator::Circumfix.from-match(
-					$p, @_child
-				);
-		}
-		else {
-			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				@child =
+					self._type_declarator(
+						$_.hash.<type_declarator>
+					);
+			}
+			when self.assert-hash( $_,
+				[< signature >], [< trait >] ) {
+				my Perl6::Element @_child =
+					self._signature( $_.hash.<signature> );
+				@child =
+					Perl6::Operator::Circumfix.from-match(
+						$_, @_child
+					);
+			}
+			default {
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+			}
 		}
 		@child
 	}
 
 	method _DECL( Mu $p ) {
 		my Perl6::Element @child;
-		if self.assert-hash( $p,
-				[< deftermnow initializer term_init >],
-				[< trait >] ) {
-			@child = self._deftermnow( $p.hash.<deftermnow> );
-			@child.append(
-				Perl6::WS.between-matches(
-					$p,
-					'deftermnow',
-					'initializer'
+		given $p {
+			when self.assert-hash( $_,
+					[< deftermnow initializer term_init >],
+					[< trait >] ) {
+				@child = self._deftermnow(
+					$_.hash.<deftermnow>
+				);
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						'deftermnow',
+						'initializer'
+					)
+				);
+				@child.append(
+					self._initializer(
+						$_.hash.<initializer>
+					)
+				);
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						'initializer',
+						'term_init'
+					)
+				);
+				@child.append(
+					self._term_init( $_.hash.<term_init> )
 				)
-			);
-			@child.append(
-				self._initializer( $p.hash.<initializer> )
-			);
-			@child.append(
-				Perl6::WS.between-matches(
-					$p,
-					'initializer',
-					'term_init'
-				)
-			);
-			@child.append(
-				self._term_init( $p.hash.<term_init> )
-			)
-		}
-		elsif self.assert-hash( $p,
-				[< deftermnow initializer signature >],
-				[< trait >] ) {
-			@child = self._deftermnow( $p.hash.<deftermnow> );
-			@child.append(
-				Perl6::WS.between-matches(
-					$p,
-					'deftermnow',
-					'initializer'
-				)
-			);
-			@child.append(
-				self._initializer( $p.hash.<initializer> )
-			);
-			@child.append(
-				Perl6::WS.between-matches(
-					$p,
-					'initializer',
-					'signature'
-				)
-			);
-			@child.append(
-				self._signature( $p.hash.<signature> )
-			);
-		}
-		elsif self.assert-hash( $p,
-				[< initializer signature >], [< trait >] ) {
-			@child = self._initializer( $p.hash.<initializer> );
-			@child.append(
-				Perl6::WS.between-matches(
-					$p,
-					'initializer',
-					'signature'
-				)
-			);
-			@child.append(
-				self._signature(
-					$p.hash.<signature>
-				)
-			);
-		}
-		elsif self.assert-hash( $p,
-				[< initializer variable_declarator >],
-				[< trait >] ) {
-			@child = self._initializer(
-				$p.hash.<initializer>
-			);
-			@child.append(
-				Perl6::WS.between-matches(
-					$p,
-					'initializer',
-					'variable_declarator'
-				)
-			);
-			@child.append(
-				self._variable_declarator(
-					$p.hash.<variable_declarator>
-				)
-			);
-		}
-		elsif self.assert-hash( $p, [< sym package_def >] ) {
-			@child = self._sym(
-				$p.hash.<sym>
-			);
-			@child.append(
-				Perl6::WS.between-matches(
-					$p,
-					'sym',
-					'package_def'
-				)
-			);
-			@child.append(
-				self._package_def(
-					$p.hash.<package_def>
-				)
-			);
-		}
-		elsif self.assert-hash( $p,
-				[< regex_declarator >],
-				[< trait >] ) {
-			@child.append(
-				self._regex_declarator(
-					$p.hash.<regex_declarator>
-				)
-			);
-		}
-		elsif self.assert-hash( $p,
-				[< variable_declarator >],
-				[< trait >] ) {
-			@child.append(
-				self._variable_declarator(
-					$p.hash.<variable_declarator>
-				)
-			);
-		}
-		elsif self.assert-hash( $p,
-				[< routine_declarator >],
-				[< trait >] ) {
-			@child.append(
-				self._routine_declarator(
-					$p.hash.<routine_declarator>
-				)
-			);
-		}
-		elsif self.assert-hash( $p, [< declarator >] ) {
-			@child.append(
-				self._declarator( $p.hash.<declarator> )
-			);
-		}
-		elsif self.assert-hash( $p, [< signature >], [< trait >] ) {
-			@child.append(
-				self.signature( $p.hash.<signature> )
-			);
-		}
-		else {
-			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+			}
+			when self.assert-hash( $_,
+					[< deftermnow initializer signature >],
+					[< trait >] ) {
+				@child = self._deftermnow(
+					$_.hash.<deftermnow>
+				);
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						'deftermnow',
+						'initializer'
+					)
+				);
+				@child.append(
+					self._initializer(
+						$_.hash.<initializer>
+					)
+				);
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						'initializer',
+						'signature'
+					)
+				);
+				@child.append(
+					self._signature( $_.hash.<signature> )
+				);
+			}
+			when self.assert-hash( $_,
+					[< initializer signature >],
+					[< trait >] ) {
+				@child = self._initializer(
+					$_.hash.<initializer>
+				);
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						'initializer',
+						'signature'
+					)
+				);
+				@child.append(
+					self._signature(
+						$_.hash.<signature>
+					)
+				);
+			}
+			when self.assert-hash( $_,
+					[< initializer variable_declarator >],
+					[< trait >] ) {
+				@child = self._initializer(
+					$_.hash.<initializer>
+				);
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						'initializer',
+						'variable_declarator'
+					)
+				);
+				@child.append(
+					self._variable_declarator(
+						$_.hash.<variable_declarator>
+					)
+				);
+			}
+			when self.assert-hash( $_, [< sym package_def >] ) {
+				@child = self._sym(
+					$_.hash.<sym>
+				);
+				@child.append(
+					Perl6::WS.between-matches(
+						$_,
+						'sym',
+						'package_def'
+					)
+				);
+				@child.append(
+					self._package_def(
+						$_.hash.<package_def>
+					)
+				);
+			}
+			when self.assert-hash( $_,
+					[< regex_declarator >],
+					[< trait >] ) {
+				@child.append(
+					self._regex_declarator(
+						$_.hash.<regex_declarator>
+					)
+				);
+			}
+			when self.assert-hash( $_,
+					[< variable_declarator >],
+					[< trait >] ) {
+				@child.append(
+					self._variable_declarator(
+						$_.hash.<variable_declarator>
+					)
+				);
+			}
+			when self.assert-hash( $_,
+					[< routine_declarator >],
+					[< trait >] ) {
+				@child.append(
+					self._routine_declarator(
+						$_.hash.<routine_declarator>
+					)
+				);
+			}
+			when self.assert-hash( $_, [< declarator >] ) {
+				@child.append(
+					self._declarator(
+						$_.hash.<declarator>
+					)
+				);
+			}
+			when self.assert-hash( $_,
+				[< signature >], [< trait >] ) {
+				@child.append(
+					self.signature( $_.hash.<signature> )
+				);
+			}
+			default {
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+			}
 		}
 		@child
 	}
@@ -3190,6 +3215,7 @@ class Perl6::Parser::Factory {
 			}
 		}
 	}
+
 	# « »
 	#
 	method _infix_prefix_meta_operator( Mu $p ) {
@@ -3215,99 +3241,105 @@ class Perl6::Parser::Factory {
 	#
 	method _initializer( Mu $p ) {
 		my Perl6::Element @child;
-		if self.assert-hash( $p, [< dottyopish sym >] ) {
-			@child = self._dottyopish(
-				$p.hash.<dottyopish>
-			);
-			@child.append(
-				Perl6::WS.between-matches(
-					$p,
-					'dottyopish',
-					'sym'
-				)
-			);
-			@child.append(
-				self._sym(
-					$p.hash.<sym>
-				)
-			);
-		}
-		elsif self.assert-hash( $p, [< sym EXPR >] ) {
-			@child =
-				Perl6::Operator::Infix.from-match(
-					$p.hash.<sym>
-				);
-			if $p.hash.<EXPR>.list.[0] {
-				@child.append(
-					Perl6::WS.after(
-						$p,
-						$p.hash.<sym>
-					)
-				);
-			}
-			else {
-				@child.append(
-					Perl6::WS.between-matches(
-						$p,
-						'sym',
-						'EXPR'
-					)
-				);
-			}
-# from here
-			if $p.hash.<sym>.Str eq EQUAL and
-				$p.hash.<EXPR>.list.elems == 2 {
-				@child.append(
-					self._EXPR( $p.hash.<EXPR>.list.[0] )
+		given $p {
+			when self.assert-hash( $_, [< dottyopish sym >] ) {
+				@child = self._dottyopish(
+					$_.hash.<dottyopish>
 				);
 				@child.append(
 					Perl6::WS.between-matches(
-						$p,
-						$p.hash.<EXPR>.list.[0],
-						$p.hash.<EXPR>.hash.<infix>
+						$_,
+						'dottyopish',
+						'sym'
 					)
 				);
 				@child.append(
-					self._infix(
-						$p.hash.<EXPR>.hash.<infix>
+					self._sym(
+						$_.hash.<sym>
 					)
-				);
-				@child.append(
-					Perl6::WS.between-matches(
-						$p,
-						$p.hash.<EXPR>.hash.<infix>,
-						$p.hash.<EXPR>.list.[1]
-					)
-				);
-				@child.append(
-					self._EXPR( $p.hash.<EXPR>.list.[1] )
 				);
 			}
-			else {
-				@child.append(
-					self._EXPR( $p.hash.<EXPR> )
-				);
-			}
-# to here
-			if $p.hash.<EXPR>.to < $p.to and
-			   %.here-doc.keys.elems > 0 {
-				@child.append(
-					Perl6::Sir-Not-Appearing-In-This-Statement.new(
-						:factory-line-number( callframe(1).line ),
-						:from( $p.hash.<EXPR>.to ),
-						:to( $p.to ),
-						:content(
-							$p.Str.substr(
-								$p.hash.<EXPR>.to - $p.from
-							);
+			when self.assert-hash( $_, [< sym EXPR >] ) {
+				@child =
+					Perl6::Operator::Infix.from-match(
+						$_.hash.<sym>
+					);
+				if $_.hash.<EXPR>.list.[0] {
+					@child.append(
+						Perl6::WS.after(
+							$_,
+							$p.hash.<sym>
 						)
-					)
-				);
+					);
+				}
+				else {
+					@child.append(
+						Perl6::WS.between-matches(
+							$_,
+							'sym',
+							'EXPR'
+						)
+					);
+				}
+	# from here
+				if $_.hash.<sym>.Str eq EQUAL and
+					$_.hash.<EXPR>.list.elems == 2 {
+					@child.append(
+						self._EXPR(
+							$_.hash.<EXPR>.list.[0]
+						)
+					);
+					@child.append(
+						Perl6::WS.between-matches(
+							$_,
+							$_.hash.<EXPR>.list.[0],
+							$_.hash.<EXPR>.hash.<infix>
+						)
+					);
+					@child.append(
+						self._infix(
+							$_.hash.<EXPR>.hash.<infix>
+						)
+					);
+					@child.append(
+						Perl6::WS.between-matches(
+							$_,
+							$_.hash.<EXPR>.hash.<infix>,
+							$_.hash.<EXPR>.list.[1]
+						)
+					);
+					@child.append(
+						self._EXPR(
+							$_.hash.<EXPR>.list.[1]
+						)
+					);
+				}
+				else {
+					@child.append(
+						self._EXPR( $_.hash.<EXPR> )
+					);
+				}
+	# to here
+				if $_.hash.<EXPR>.to < $_.to and
+				   %.here-doc.keys.elems > 0 {
+					@child.append(
+						Perl6::Sir-Not-Appearing-In-This-Statement.new(
+							:factory-line-number( callframe(1).line ),
+							:from( $_.hash.<EXPR>.to ),
+							:to( $_.to ),
+							:content(
+								$p.Str.substr(
+									$_.hash.<EXPR>.to - $p.from
+								);
+							)
+						)
+					);
+				}
 			}
-		}
-		else {
-			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+			default {
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+			}
 		}
 		@child.flat
 	}
