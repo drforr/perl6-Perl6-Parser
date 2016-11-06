@@ -3114,6 +3114,11 @@ class Perl6::Parser::Factory {
 				$p.hash.<pblock>
 			);
 		}
+		elsif $p.Str {
+			@child = Perl6::Bareword.from-match(
+				$p
+			)
+		}
 		else {
 			debug-match( $p ) if $*DEBUG;
 			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
@@ -3357,9 +3362,8 @@ class Perl6::Parser::Factory {
 						)
 					);
 					@child.append(
-						Perl6::WS.between-matches(
+						Perl6::WS.before(
 							$_,
-							$_.hash.<EXPR>.list.[0],
 							$_.hash.<EXPR>.hash.<infix>
 						)
 					);

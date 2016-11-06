@@ -14,6 +14,7 @@ plan 3;
 my $pt = Perl6::Parser.new;
 my $*VALIDATION-FAILURE-FATAL = True;
 my $*FACTORY-FAILURE-FATAL = True;
+my $*DEBUG = True;
 
 subtest {
 	plan 2;

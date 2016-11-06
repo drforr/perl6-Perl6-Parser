@@ -8,6 +8,7 @@ plan 42;
 my $pt = Perl6::Parser.new;
 my $*VALIDATION-FAILURE-FATAL = True;
 my $*FACTORY-FAILURE-FATAL = True;
+my $*DEBUG = True;
 
 subtest {
 	plan 3;
@@ -181,9 +182,8 @@ _END_
 	}, Q{version 2};
 
 	subtest {
-		plan 0;
+		plan 2;
 
-#`(
 		my $source = Q:to[_END_];
 proto A(Int \𝑚, Int \𝑛) { (state @)[𝑚][𝑛] //= {*} }
 
@@ -202,7 +202,6 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
-)
 	}, Q{version 3};
 }, Q{Ackermann Function};
 
