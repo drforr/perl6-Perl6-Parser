@@ -813,6 +813,9 @@ class Perl6::Parser::Validator {
 				next if self.assert-hash-keys( $_,
 						[< statement_prefix >] )
 					and self._StatementPrefix( $_.hash.<statement_prefix> );
+				next if self.assert-hash-keys( $_,
+						[< colonpair >] )
+					and self._ColonPair( $_.hash.<colonpair> );
 				next if self.assert-Str( $_ );
 				debug-match( $_ );
 				return self.record-failure( '_EXPR list' );
@@ -916,6 +919,8 @@ class Perl6::Parser::Validator {
 			and self._RegexDeclarator( $parsed.hash.<regex_declarator> );
 		return True if self.assert-hash-keys( $parsed, [< dotty >] )
 			and self._Dotty( $parsed.hash.<dotty> );
+		return True if self.assert-hash-keys( $parsed, [< sym >] )
+			and self._Sym( $parsed.hash.<sym> );
 		debug-match( $parsed );
 		return self.record-failure( '_EXPR' ):
 	}
@@ -985,6 +990,10 @@ class Perl6::Parser::Validator {
 	method _Infix( Mu $parsed ) {
 		self.trace( '_Infix' );
 #return True;
+		return True if self.assert-hash-keys( $parsed,
+				[< sym EXPR >], [< O >] )
+			and self._Sym( $parsed.hash.<sym> )
+			and self._EXPR( $parsed.hash.<EXPR> );
 		return True if self.assert-hash-keys( $parsed, [< EXPR O >] )
 			and self._EXPR( $parsed.hash.<EXPR> )
 			and self._O( $parsed.hash.<O> );
@@ -1021,6 +1030,10 @@ class Perl6::Parser::Validator {
 			and self._Sym( $parsed.hash.<sym> )
 			and self._Infixish( $parsed.hash.<infixish> )
 			and self._O( $parsed.hash.<O> );
+		return True if self.assert-hash-keys( $parsed,
+				[< sym infixish >], [< O >] )
+			and self._Sym( $parsed.hash.<sym> )
+			and self._Infixish( $parsed.hash.<infixish> );
 		debug-match( $parsed );
 		return self.record-failure( '_InfixPrefixMetaOperator' );
 	}
@@ -2621,6 +2634,11 @@ return True;
 	method _Var( Mu $parsed ) {
 		self.trace( '_Var' );
 #return True;
+		return True if self.assert-hash-keys( $parsed,
+				[< sigil twigil desigilname >] )
+			and self._Sigil( $parsed.hash.<sigil> )
+			and self._Twigil( $parsed.hash.<twigil> )
+			and self._DeSigilName( $parsed.hash.<desigilname> );
 		return True if self.assert-hash-keys( $parsed,
 				[< sigil desigilname >] )
 			and self._Sigil( $parsed.hash.<sigil> )

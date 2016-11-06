@@ -100,9 +100,8 @@ subtest {
 	plan 4;
 
 	subtest {
-		plan 0;
+		plan 2;
 
-#`(
 		my $source = Q:to[_END_];
 sub balanced($s) {
     my $l = 0;
@@ -126,7 +125,6 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
-)
 	}, Q{version 1};
 
 	subtest {
@@ -398,9 +396,8 @@ _END_
 	}, Q{version 1};
 
 	subtest {
-		plan 0;
+		plan 2;
 
-#`(
 		my $source = Q:to[_END_];
 constant bernoulli = gather {
     my @a;
@@ -425,7 +422,6 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
-)
 	}, Q{version 2};
 
 	subtest {

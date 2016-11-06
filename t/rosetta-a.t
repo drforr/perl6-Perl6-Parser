@@ -25,9 +25,8 @@ _END_
 	}, Q{version 1};
 
 	subtest {
-		plan 0;
+		plan 2;
 
-#`(
 		my $source = Q:to[_END_];
 say [+] get.words;
 _END_
@@ -35,7 +34,6 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
-)
 	}, Q{version 2};
 
 	subtest {
@@ -1033,9 +1031,9 @@ subtest {
 	plan 2;
 
 	subtest {
-		plan 0;
+		plan 2;
 
-#`(
+		# XXX Restore this bit.
     		#($a, $g) = ($a + $g)/2, sqrt $a * $g until $a ≅ $g;
 		my $source = Q:to[_END_];
 sub agm( $a is copy, $g is copy ) {
@@ -1049,7 +1047,6 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
-)
 	}, Q{version 1};
 
 	subtest {
@@ -1400,9 +1397,8 @@ _END_
 }, Q{Associative array/creation};
 
 subtest {
-	plan 0;
+	plan 2;
 
-#`(
 	my $source = Q:to[_END_];
 my %pairs = hello => 13, world => 31, '!' => 71;
  
@@ -1420,7 +1416,6 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
-)
 }, Q{Associative array/iteration};
 
 subtest {
@@ -1541,7 +1536,7 @@ _END_
 }, Q{Averages/median};
 
 subtest {
-	plan 0;
+	plan 2;
 
 	my $source = Q:to[_END_];
 sub mode (*@a) {
@@ -1558,9 +1553,8 @@ _END_
 }, Q{Averages/mode};
 
 subtest {
-	plan 0;
+	plan 2;
 
-#`(
 	my $source = Q:to[_END_];
 sub A { ([+] @_) / @_ }
 sub G { ([*] @_) ** (1 / @_) }
@@ -1574,16 +1568,14 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
-)
 }, Q{Averages/Pythagorean means};
 
 subtest {
 	plan 2;
 
 	subtest {
-		plan 0;
+		plan 2;
 
-#`(
 		my $source = Q:to[_END_];
 sub rms(*@nums) { sqrt [+](@nums X** 2) / @nums }
  
@@ -1593,13 +1585,11 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
-)
 	}, Q{version 1};
 
 	subtest {
-		plan 0;
+		plan 2;
 
-#`(
 		my $source = Q:to[_END_];
 sub rms { sqrt @_ R/ [+] @_ X** 2 }
 _END_
@@ -1607,7 +1597,6 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
-)
 	}, Q{version 2};
 }, Q{Averages/root mean square};
 

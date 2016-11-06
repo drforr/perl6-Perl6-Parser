@@ -238,6 +238,9 @@ class Perl6::Balanced::Exit does Token {
 class Perl6::Operator {
 	also is Perl6::Element;
 }
+class Perl6::Operator::Hyper does Branching does Bounded {
+	also is Perl6::Operator;
+}
 class Perl6::Operator::Prefix does Token {
 	also is Perl6::Operator;
 
@@ -1330,6 +1333,8 @@ class Perl6::Parser::Factory {
 		return False;
 	}
 
+	constant HYPER-START = Q{[};
+	constant HYPER-END = Q{]};
 	constant COLON = Q{:};
 	constant COMMA = Q{,};
 	constant SEMICOLON = Q{;};
@@ -2932,6 +2937,42 @@ class Perl6::Parser::Factory {
 			}
 		}
 		elsif self.assert-hash( $p, [< args op >] ) {
+			my Perl6::Element @_child;
+			@_child.append(
+				Perl6::Balanced::Enter.new(
+					:factory-line-number( callframe(1).line ),
+					:from( $p.hash.<op>.from - HYPER-START.chars ),
+					:to( $p.hash.<op>.from ),
+					:content( HYPER-START )
+				)
+			);
+			# XXX Should be derived from self._op?
+			@_child.append(
+				Perl6::Operator::Prefix.from-match(
+					$p.hash.<op>
+				)
+			);
+			@_child.append(
+				Perl6::Balanced::Exit.new(
+					:factory-line-number( callframe(1).line ),
+					:from( $p.hash.<op>.to ),
+					:to( $p.hash.<op>.to + HYPER-END.chars ),
+					:content( HYPER-END )
+				)
+			);
+			@child.append(
+				Perl6::Operator::Hyper.new(
+					:factory-line-number( callframe(1).line ),
+					:from( $p.hash.<op>.from - HYPER-START.chars ),
+					:to( $p.hash.<op>.to + HYPER-END.chars ),
+					:child( @_child )
+				)
+			);
+			@child.append(
+				Perl6::WS.header(
+					$p.hash.<args>
+				)
+			);
 			@child.append(
 				self._args( $p.hash.<args> )
 			);
