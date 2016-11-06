@@ -807,9 +807,8 @@ _END_
 }, Q{Apply a callback to an array};
 
 subtest {
-	plan 0;
+	plan 2;
 
-#`(
 	my $source = Q:to[_END_];
 given ~[**] 5, 4, 3, 2 {
    say "5**4**3**2 = {.substr: 0,20}...{.substr: *-20} and has {.chars} digits";
@@ -819,7 +818,6 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
-)
 }, Q{Arbitrary-precision integers};
 
 subtest {

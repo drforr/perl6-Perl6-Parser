@@ -297,7 +297,8 @@ class Perl6::Parser {
 		}
 		elsif $term ~~ Perl6::Bareword or
 		      $term ~~ Perl6::Variable or
-		      $term ~~ Perl6::Operator or
+		      ( $term ~~ Perl6::Operator and
+			$term !~~ Perl6::Operator::Hyper ) or
 		      $term ~~ Perl6::Balanced or
 		      $term ~~ Perl6::WS {
 			$str ~= " ({$term.content.perl})"

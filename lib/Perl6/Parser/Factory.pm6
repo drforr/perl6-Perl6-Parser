@@ -2923,17 +2923,22 @@ class Perl6::Parser::Factory {
 						)
 					);
 				}
-				@child.append(
-					self._infix( $p.hash.<infix> )
-				);
-				@child.append(
-					Perl6::WS.after-orig(
-						$p.hash.<infix>
-					)
-				);
-				@child.append(
-					self._EXPR( $p.list.[1] )
-				);
+				# XXX The bounds of infix and ws have to be
+				# XXX reset.
+				#
+				for 1 .. $p.list.elems - 1 {
+					@child.append(
+						self._infix( $p.hash.<infix> )
+					);
+					@child.append(
+						Perl6::WS.after-orig(
+							$p.hash.<infix>
+						)
+					);
+					@child.append(
+						self._EXPR( $p.list.[$_] )
+					);
+				}
 			}
 		}
 		elsif self.assert-hash( $p, [< args op >] ) {
