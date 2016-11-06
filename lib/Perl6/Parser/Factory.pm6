@@ -1344,6 +1344,7 @@ class Perl6::Parser::Factory {
 	constant BANG-BANG = Q{!!};
 	constant FATARROW = Q{=>};
 	constant HYPER = Q{>>};
+	constant BACKSLASH = Q{\};
 
 	has %.here-doc; # Text for here-docs, indexed by their $p.from.
 
@@ -2418,11 +2419,26 @@ class Perl6::Parser::Factory {
 			when self.assert-hash( $_,
 					[< identifier >],
 					[< colonpair >] ) {
-				@child = self._identifier(
-					$_.hash.<identifier>
-				);
-			}
-			default {
+				if $_.orig.substr( $_.from - 1, 1 ) eq BACKSLASH {
+					@child = Perl6::Bareword.new(
+						:factory-line-number( callframe(1).line ),
+						:from( $_.from - 1 ),
+						:to( $_.to ),
+						:content(
+							$_.orig.substr(
+								$_.from - 1,
+								$_.to - $_.from + 1
+							)
+						)
+					);
+				}
+				else {
+					@child = self._identifier(
+						$_.hash.<identifier>
+					);
+				}
+							}
+							default {
 				debug-match( $_ ) if $*DEBUG;
 				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
@@ -2468,7 +2484,7 @@ class Perl6::Parser::Factory {
 	}
 
 	method _doc( Mu $p ) {
-		warn "doc finally used";
+#		warn "doc finally used";
 		( )
 	}
 
@@ -5082,7 +5098,13 @@ return True;
 
 	method _quant( Mu $p ) {
 		if $p.Str {
-			Perl6::Bareword.from-match( $p );
+			# XXX Need to propagate this back upwards.
+			if $p.Str ne BACKSLASH {
+				Perl6::Bareword.from-match( $p );
+			}
+			else {
+				( )
+			}
 		}
 		else {
 			debug-match( $p ) if $*DEBUG;
@@ -5877,8 +5899,10 @@ return True;
 			elsif self.assert-hash( $_,
 					[< declarator DECL >],
 					[< typename >] ) {
-				@child = self._declarator(
-					$_.hash.<declarator>
+				@child.append(
+					self._declarator(
+						$_.hash.<declarator>
+					)
 				);
 			}
 			else {
@@ -8105,15 +8129,17 @@ die "Catching Int";
 	}
 
 	method _vstr( Mu $p ) {
-		warn "vstr finally used";
-		( )
+		Perl6::Bareword.from-match( $p )
 	}
 
 	method _vnum( Mu $p ) {
 		my Perl6::Element @child;
 		if $p.list {
 			for $p.list {
-				if 0 {
+				if $p.Int {
+					Perl6::Number.from-match(
+						$p
+					)
 				}
 				else {
 					debug-match( $_ ) if $*DEBUG;

@@ -92,6 +92,19 @@ _END_
 	is $pt.format( $tree ), $source, Q{formatted};
 }, Q{grep: {}};
 
+subtest {
+	plan 2;
+
+	my $source = Q:to[_END_];
+my \y = 1;
+_END_
+	my $p = $pt.parse( $source );
+	my $tree = $pt.build-tree( $p );
+#say $pt.dump-tree($tree);
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.format( $tree ), $source, Q{formatted};
+}, Q{my \y};
+
 done-testing;
 
 # vim: ft=perl6

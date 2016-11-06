@@ -115,9 +115,8 @@ _END_
 }, Q{Abstract Class};
 
 subtest {
-	plan 0;
+	plan 2;
 
-#`(
 	my $source = Q:to[_END_];
 sub propdivsum (\x) {
     [+] flat(x > 1, gather for 2 .. x.sqrt.floor -> \d {
@@ -132,7 +131,6 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
-)
 }, Q{Abundant, Deficient and Perfect numbers};
 
 subtest {
