@@ -11,11 +11,7 @@ my $*FACTORY-FAILURE-FATAL = True;
 my $*DEBUG = True;
 
 subtest {
-	plan 4;
-
 	subtest {
-		plan 2;
-
 		my $source = Q:to[_END_];
 my @doors = False xx 101;
  
@@ -27,11 +23,11 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
+
+		done-testing;
 	}, Q{version 1};
 
 	subtest {
-		plan 2;
-
 		my $source = Q:to[_END_];
 say "Door $_ is open" for map {$^n ** 2}, 1..10;
 _END_
@@ -40,11 +36,11 @@ _END_
 #say $pt.dump-tree( $tree );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
+
+		done-testing;
 	}, Q{version 2};
 
 	subtest {
-		plan 2;
-
 		my $source = Q:to[_END_];
 say "Door $_ is open" for 1..10 X** 2;
 _END_
@@ -52,11 +48,11 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
+
+		done-testing;
 	}, Q{version 3};
 
 	subtest {
-		plan 2;
-
 		my $source = Q:to[_END_];
 say "Door $_ is ", <closed open>[.sqrt == .sqrt.floor] for 1..100;
 _END_
@@ -64,12 +60,14 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
+
+		done-testing;
 	}, Q{version 4};
+
+	done-testing;
 }, Q{100 doors};
 
 subtest {
-	plan 0;
-
 #`(
 # The parser also recursively parses use'd classes, so since Term::termios might
 # not be present on all systems, stub it out.
@@ -195,11 +193,11 @@ _END_
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
 )
+
+	done-testing;
 }, Q{15 Puzzle};
 
 subtest {
-	plan 0;
-
 #`(
 	my $source = Q:to[_END_];
 class Term::termios { has $fd; method getattr {}; method unset_lflags { }; method unset_iflags { }; method setattr { } }
@@ -322,11 +320,11 @@ _END_
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
 )
+
+	done-testing;
 }, Q{2048};
 
 subtest {
-	plan 0;
-
 #`[
 	my $source = Q:to[_END_];
 use MONKEY-SEE-NO-EVAL;
@@ -361,11 +359,11 @@ _END_
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
 ]
+
+	done-testing;
 }, Q{24 game};
 
 subtest {
-	plan 0;
-
 #`(
 	my $source = Q:to[_END_];
 use MONKEY-SEE-NO-EVAL;
@@ -418,11 +416,11 @@ _END_
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
 )
+
+	done-testing;
 }, Q{24 game/Solve};
 
 subtest {
-	plan 0;
-
 #`(
 	my $source = Q:to[_END_];
 my @todo = $[1];
@@ -460,14 +458,12 @@ _END_
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
 )
+
+	done-testing;
 }, Q{9 billion names of God};
 
 subtest {
-	plan 3;
-
 	subtest {
-		plan 2;
-
 		my $source = Q:to[_END_];
 my $b = 99;
 
@@ -487,11 +483,11 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
+
+	done-testing;
 	}, Q{version 1};
 
 	subtest {
-		plan 0;
-
 #`(
 		my $source = Q:to[_END_];
 for 99...1 -> $bottles {
@@ -518,11 +514,11 @@ _END_
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
 )
+
+		done-testing;
 	}, Q{version 2};
 
 	subtest {
-		plan 0;
-
 #`(
 		my $source = Q:to[_END_];
 my @quantities = flat (99 ... 1), 'No more', 99;
@@ -544,7 +540,13 @@ _END_
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
 )
+
+		done-testing;
 	}, Q{version 3};
+
+	done-testing;
 }, Q{99 bottles of beer};
+
+done-testing;
 
 # vim: ft=perl6

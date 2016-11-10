@@ -480,8 +480,8 @@ class Perl6::WS does Token {
 	# nonexistent array element by append().
 	#
 	multi method between-matches( Mu $m, Str $lhs, Str $rhs ) {
-		my $_lhs = $m.hash.{$lhs};
-		my $_rhs = $m.hash.{$rhs};
+		my Mu $_lhs = $m.hash.{$lhs};
+		my Mu $_rhs = $m.hash.{$rhs};
 		if $_lhs.to < $_rhs.from {
 			self.bless(
 				:factory-line-number( callframe(1).line ),
@@ -821,7 +821,7 @@ class Perl6::WS does Token {
 	# nonexistent array element by append().
 	#
 	method before( Mu $p, Mu $lhs ) {
-		my $x = $p.Str.substr( 0, $lhs.from - $p.from );
+		my Str $x = $p.Str.substr( 0, $lhs.from - $p.from );
 		if $x ~~ m{ ( \s+ ) $ } {
 			self.bless(
 				:factory-line-number( callframe(1).line ),
@@ -835,7 +835,7 @@ class Perl6::WS does Token {
 		}
 	}
 	method before-orig( Mu $lhs ) {
-		my $x = $lhs.orig.substr( 0, $lhs.from );
+		my Str $x = $lhs.orig.substr( 0, $lhs.from );
 		if $x ~~ m{ ( \s+ ) $ } {
 			self.bless(
 				:factory-line-number( callframe(1).line ),
@@ -856,7 +856,7 @@ class Perl6::WS does Token {
 	# nonexistent array element by append().
 	#
 	method after( Mu $p, Mu $lhs ) {
-		my $x = $p.Str.substr( $lhs.to - $p.from );
+		my Str $x = $p.Str.substr( $lhs.to - $p.from );
 		if $x ~~ m{ ^ ( \s+ ) } {
 			self.bless(
 				:factory-line-number( callframe(1).line ),
@@ -870,7 +870,7 @@ class Perl6::WS does Token {
 		}
 	}
 	method after-orig( Mu $lhs ) {
-		my $x = $lhs.orig.substr( $lhs.to );
+		my Str $x = $lhs.orig.substr( $lhs.to );
 		if $x ~~ m{ ^ ( \s+ ) } {
 			self.bless(
 				:factory-line-number( callframe(1).line ),
@@ -1366,8 +1366,8 @@ class Perl6::Parser::Factory {
 	method __Build-Heredoc-List( Mu $p ) {
 		%.here-doc = ();
 		while $p.Str ~~ m:c{ ( 'q:to[' ) \s* ( <-[ \] ]>+ ) } {
-			my $start = $0.from;
-			my $marker = $1.Str;
+			my Int $start = $0.from;
+			my Str $marker = $1.Str;
 			$p.Str ~~ m{ \s* ']' ( .*? $$ ) (.+?) ( $marker ) };
 			%.here-doc{ $start } =
 				Here-Doc.new(
@@ -1399,7 +1399,20 @@ class Perl6::Parser::Factory {
 				)
 			);
 		}
-		Perl6::Document.from-list( @_child );
+		my Perl6::Element $root = Perl6::Document.from-list(
+			@_child
+		);
+		self.add-comments( $root );
+		$root;
+	}
+
+	# Recursive, naturally.
+	method add-comments( Perl6::Element $root ) {
+#		if $root.is-branch {
+#			for $root.child.elems .. 1 {
+#say $_;
+#			}
+#		}
 	}
 
 	sub key-bounds( Mu $p ) {
@@ -2926,7 +2939,7 @@ class Perl6::Parser::Factory {
 				@child.append(
 					self._EXPR( $p.list.[0] )
 				);
-				my $x = $p.orig.substr(
+				my Str $x = $p.orig.substr(
 					@child[*-1].to
 				);
 				if $x ~~ m{ ^ ( \s+ ) } {
@@ -4482,8 +4495,7 @@ return True;
 			when self.assert-hash( $_,
 				[< longname statementlist >], [< trait >] ) {
 				@child = self._longname( $_.hash.<longname> );
-				my $temp = substr(
-					$_.Str,
+				my Str $temp = $_.Str.substr(
 					$_.hash.<longname>.to - $_.from
 				);
 				if $temp ~~ m{ ^ ( \s+ ) ( ';' )? } {
@@ -5336,7 +5348,7 @@ return True;
 			);
 		}
 		elsif self.assert-hash( $p, [< quibble >] ) {
-			my $leader = $p.Str.substr(
+			my Str $leader = $p.Str.substr(
 				0,
 				$p.hash.<quibble>.hash.<nibble>.from - $p.from
 			);
@@ -5345,10 +5357,10 @@ return True;
 			$has-q = True if $leader ~~ m{ ':q' };
 			$has-to = True if $leader ~~ m{ ':to' };
 
-			my $trailer = $p.Str.substr(
+			my Str $trailer = $p.Str.substr(
 				$p.hash.<quibble>.hash.<nibble>.to - $p.from
 			);
-			my $content = $p.Str;
+			my Str $content = $p.Str;
 			if $has-to {
 				my ( $content, $marker ) =
 					%.here-doc{ $p.from };
@@ -5542,10 +5554,10 @@ return True;
 					$p.hash.<deflongname>
 				)
 			);
-			my $left-margin = $p.from;
-			my $right-margin = $p.to;
+			my Int $left-margin = $p.from;
+			my Int $right-margin = $p.to;
 			$left-margin += $p.hash.<deflongname>.Str.chars;
-			my $x = $p.Str.substr(
+			my Str $x = $p.Str.substr(
 				$p.hash.<deflongname>.to - $p.from
 			);
 			if $x ~~ m{ ^ ( \s+ ) } {
@@ -6764,7 +6776,7 @@ return True;
 				}
 				elsif self.assert-hash( $_, [< EXPR >] ) {
 # XXX Aiyee. Ugly but it does work.
-my $q = $_.hash.<EXPR>;
+my Mu $q = $_.hash.<EXPR>;
 if $q.list.[0] and
    $q.hash.<infix> and
    $q.list.[1] and
@@ -6967,7 +6979,7 @@ else {
 					);
 				}
 				else {
-					my $q = $p.hash.<EXPR>;
+					my Mu $q = $p.hash.<EXPR>;
 					@child = self._EXPR( $q.list.[0] );
 					@child.append(
 						Perl6::WS.between-matches(
@@ -7028,10 +7040,10 @@ else {
 
 	method _statementlist( Mu $p ) {
 		my Perl6::Element @child;
-		my $leftover-ws;
-		my $leftover-ws-from = 0;
-		my $beginning-ws;
-		my $beginning-comment;
+		my Str $leftover-ws;
+		my Int $leftover-ws-from = 0;
+		my Str $beginning-ws;
+		my Str $beginning-comment;
 
 		# XXX Must fix this at some point.
 		my regex comment-eol { \s* '#' .+ $$ };
@@ -7103,8 +7115,7 @@ else {
 					Perl6::WS.trailer( $_ )
 				);
 			}
-			my $temp = substr(
-				$p.Str,
+			my Str $temp = $p.Str.substr(
 				@_child[*-1].to - $p.from
 			);
 			if $temp ~~ m{ ^ ( ';' ) ( \s+ ) } {
