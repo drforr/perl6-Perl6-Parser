@@ -40,7 +40,7 @@ L<Perl6::Element>
 
 The root of the object hierarchy.
 
-This hierarchy is mostly for the clients' convenience, so that they can safely ignore the fact that an object is actually a L<Perl6::Number::Complex::Radix::Floating> when all they really want to know is that it's a L<Perl6::Number>.
+This hierarchy is mostly for the clients' convenience, so that they can safely ignore the fact that an object is actually a L<Perl6::Number::Complex::Radix::FloatingPoint> when all they really want to know is that it's a L<Perl6::Number>.
 
 It'll eventually have a bunch of useful methods attached to it, but for the moment ... well, it doesn't actually exist.
 
@@ -60,7 +60,7 @@ L<Perl6::Number>
     L<Perl6::Number::Binary>
     L<Perl6::Number::Octal>
     L<Perl6::Number::Decimal>
-        L<Perl6::Number::Decimal::Floating>
+        L<Perl6::Number::Decimal::FloatingPoint>
     L<Perl6::Number::Hexadecimal>
     L<Perl6::Number::Radix>
     L<Perl6::Number::Imaginary>
@@ -184,6 +184,28 @@ Should you brave the internals in search of a missing term, the first thing you 
 
 =end pod
 
+role Matchable {
+
+	multi method from-match( Mu $p ) {
+		self.bless(
+			:factory-line-number( callframe(1).line ),
+			:from( $p.from ),
+			:to( $p.to ),
+			:content( $p.Str )
+		)
+	}
+
+	multi method from-match-trimmed( Mu $p ) {
+		$p.Str ~~ m{ ^ ( \s* ) ( .+? ) ( \s* ) $ };
+		self.bless(
+			:factory-line-number( callframe(1).line ),
+			:from( $p.from + ( $0.Str ?? $0.Str.chars !! 0 ) ),
+			:to( $p.to - ( $2.Str ?? $2.Str.chars !! 0 ) ),
+			:content( $1.Str )
+		)
+	}
+}
+
 class Perl6::Element {
 	has $.factory-line-number; # Purely a debugging aid.
 }
@@ -208,6 +230,7 @@ role Bounded {
 
 role Token does Bounded {
 	has Str $.content is required;
+
 	method perl6( $f ) {
 		~$.content
 	}
@@ -235,6 +258,37 @@ class Perl6::Balanced::Exit does Token {
 	also is Perl6::Balanced;
 }
 
+role MatchingBalanced {
+
+	method from-match( Mu $p, @child ) {
+		my Perl6::Element @_child;
+		$p.Str ~~ m{ ^ (.) .* (.) $ };
+		@_child.append(
+			Perl6::Balanced::Enter.new(
+				:factory-line-number( callframe(1).line ),
+				:from( $p.from ),
+				:to( $p.from + $0.Str.chars ),
+				:content( $0.Str )
+			)
+		);
+		@_child.append( @child );
+		@_child.append(
+			Perl6::Balanced::Exit.new(
+				:factory-line-number( callframe(1).line ),
+				:from( $p.to - $1.Str.chars ),
+				:to( $p.to ),
+				:content( $1.Str )
+			)
+		);
+		self.bless(
+			:factory-line-number( callframe(1).line ),
+			:from( $p.from ),
+			:to( $p.to ),
+			:child( @_child )
+		)
+	}
+}
+
 class Perl6::Operator {
 	also is Perl6::Element;
 }
@@ -243,37 +297,12 @@ class Perl6::Operator::Hyper does Branching does Bounded {
 }
 class Perl6::Operator::Prefix does Token {
 	also is Perl6::Operator;
-
-	multi method from-match( Mu $p ) {
-		self.bless(
-			:factory-line-number( callframe(1).line ),
-			:from( $p.from ),
-			:to( $p.to ),
-			:content( $p.Str )
-		)
-	}
-
-	multi method from-match-trimmed( Mu $p ) {
-		$p.Str ~~ m{ ^ ( \s* ) ( .+? ) ( \s* ) $ };
-		self.bless(
-			:factory-line-number( callframe(1).line ),
-			:from( $p.from + ( $0.Str ?? $0.Str.chars !! 0 ) ),
-			:to( $p.to - ( $2.Str ?? $2.Str.chars !! 0 ) ),
-			:content( $1.Str )
-		)
-	}
+	also does Matchable;
 }
 class Perl6::Operator::Infix does Token {
 	also is Perl6::Operator;
+	also does Matchable;
 
-	method from-match( Mu $p ) {
-		self.bless(
-			:factory-line-number( callframe(1).line ),
-			:from( $p.from ),
-			:to( $p.to ),
-			:content( $p.Str )
-		)
-	}
 	multi method from-int( Int $from, Str $str ) {
 		self.bless(
 			:factory-line-number( callframe(1).line ),
@@ -295,46 +324,11 @@ class Perl6::Operator::Infix does Token {
 }
 class Perl6::Operator::Postfix does Token {
 	also is Perl6::Operator;
-
-	method from-match( Mu $p ) {
-		self.bless(
-			:factory-line-number( callframe(1).line ),
-			:from( $p.from ),
-			:to( $p.to ),
-			:content( $p.Str )
-		)
-	}
+	also does Matchable;
 }
 class Perl6::Operator::Circumfix does Branching does Bounded {
 	also is Perl6::Operator;
-	method from-match( Mu $p, @child ) {
-		my Perl6::Element @_child;
-		$p.Str ~~ m{ ^ (.) }; my Str $front = ~$0;
-		$p.Str ~~ m{ (.) $ }; my Str $back = ~$0;
-		@_child.append(
-			Perl6::Balanced::Enter.new(
-				:factory-line-number( callframe(1).line ),
-				:from( $p.from ),
-				:to( $p.from + $front.chars ),
-				:content( $front )
-			)
-		);
-		@_child.append( @child );
-		@_child.append(
-			Perl6::Balanced::Exit.new(
-				:factory-line-number( callframe(1).line ),
-				:from( $p.to - $back.chars ),
-				:to( $p.to ),
-				:content( $back )
-			)
-		);
-		self.bless(
-			:factory-line-number( callframe(1).line ),
-			:from( $p.from ),
-			:to( $p.to ),
-			:child( @_child )
-		)
-	}
+	also does MatchingBalanced;
 
 	method from-from-to-XXX( Int $from, Int $to, Str $front, Str $back, @child ) {
 		my Perl6::Element @_child;
@@ -365,35 +359,7 @@ class Perl6::Operator::Circumfix does Branching does Bounded {
 }
 class Perl6::Operator::PostCircumfix does Branching does Bounded {
 	also is Perl6::Operator;
-
-	method from-match( Mu $p, @child ) {
-		my Perl6::Element @_child;
-		$p.Str ~~ m{ ^ (.) }; my Str $front = ~$0;
-		$p.Str ~~ m{ (.) $ }; my Str $back = ~$0;
-		@_child.append(
-			Perl6::Balanced::Enter.new(
-				:factory-line-number( callframe(1).line ),
-				:from( $p.from ),
-				:to( $p.from + $front.chars ),
-				:content( $front )
-			)
-		);
-		@_child.append( @child );
-		@_child.append(
-			Perl6::Balanced::Exit.new(
-				:factory-line-number( callframe(1).line ),
-				:from( $p.to - $back.chars ),
-				:to( $p.to ),
-				:content( $back )
-			)
-		);
-		self.bless(
-			:factory-line-number( callframe(1).line ),
-			:from( $p.from ),
-			:to( $p.to ),
-			:child( @_child )
-		)
-	}
+	also does MatchingBalanced;
 
 	method from-delims( Mu $p, Str $front, Str $back, @child ) {
 		my Perl6::Element @_child;
@@ -444,12 +410,7 @@ class Perl6::WS does Token {
 			)
 		}
 		else {
-			self.bless(
-				:factory-line-number( callframe(1).line ),
-				:from( $start ),
-				:to( $start + $content.chars ),
-				:content( '' )
-			)
+			( )
 		}
 	}
 
@@ -939,15 +900,7 @@ role Prefixed {
 #
 class Perl6::Number does Token {
 	also is Perl6::Element;
-
-	method from-match( Mu $p ) {
-		self.bless(
-			:factory-line-number( callframe(1).line ),
-			:from( $p.from ),
-			:to( $p.to ),
-			:content( $p.Str )
-		)
-	}
+	also does Matchable;
 }
 class Perl6::Number::Binary does Prefixed {
 	also is Perl6::Number;
@@ -966,102 +919,44 @@ class Perl6::Number::Hexadecimal does Prefixed {
 }
 class Perl6::Infinity is Token {
 	also is Perl6::Element;
-
-	method from-match( Mu $p ) {
-		self.bless(
-			:factory-line-number( callframe(1).line ),
-			:from( $p.from ),
-			:to( $p.to ),
-			:content( $p.Str )
-		)
-	}
+	also does Matchable;
 }
 class Perl6::Number::Radix {
 	also is Perl6::Number;
 }
-class Perl6::Number::Floating {
+class Perl6::Number::FloatingPoint {
 	also is Perl6::Number;
 }
 
 class Perl6::Regex does Token {
 	also is Perl6::Element;
-
-	multi method from-match( Mu $p ) {
-		self.bless(
-			:factory-line-number( callframe(1).line ),
-			:from( $p.from ),
-			:to( $p.to ),
-			:content( $p.Str )
-		)
-	}
+	also does Matchable;
 }
 
 class Perl6::String does Token {
 	also is Perl6::Element;
+	also does Matchable;
 
 	has @.delimiter;
 }
-class Perl6::String::Quote::Single does Token {
+class Perl6::String::Single does Token {
 	also is Perl6::String;
 
 	has Str @.delimiter = ( Q{'}, Q{'} );
-
-	multi method from-match( Mu $p ) {
-		self.bless(
-			:factory-line-number( callframe(1).line ),
-			:from( $p.from ),
-			:to( $p.to ),
-			:content( $p.Str )
-		)
-	}
 }
-class Perl6::String::Quote::Double does Token {
+class Perl6::String::Double does Token {
 	also is Perl6::String;
 
 	has Str @.delimiter = ( Q{"}, Q{"} );
-
-	multi method from-match( Mu $p ) {
-		self.bless(
-			:factory-line-number( callframe(1).line ),
-			:from( $p.from ),
-			:to( $p.to ),
-			:content( $p.Str )
-		)
-	}
 }
 
 class Perl6::Bareword does Token {
 	also is Perl6::Element;
-	multi method from-match( Mu $p ) {
-		self.bless(
-			:factory-line-number( callframe(1).line ),
-			:from( $p.from ),
-			:to( $p.to ),
-			:content( $p.Str )
-		)
-	}
-
-	multi method from-match-trimmed( Mu $p ) {
-		$p.Str ~~ m{ ^ ( \s* ) ( .+? ) ( \s* ) $ };
-		self.bless(
-			:factory-line-number( callframe(1).line ),
-			:from( $p.from + ( $0.Str ?? $0.Str.chars !! 0 ) ),
-			:to( $p.to - ( $2.Str ?? $2.Str.chars !! 0 ) ),
-			:content( $1.Str )
-		)
-	}
+	also does Matchable;
 }
 class Perl6::PackageName does Token {
 	also is Perl6::Element;
-
-	method from-match( Mu $p ) {
-		self.bless(
-			:factory-line-number( callframe(1).line ),
-			:from( $p.from ),
-			:to( $p.to ),
-			:content( $p.Str )
-		)
-	}
+	also does Matchable;
 
 	method namespaces() {
 		$.content.split( '::' )
@@ -1069,47 +964,10 @@ class Perl6::PackageName does Token {
 }
 class Perl6::ColonBareword does Token {
 	also is Perl6::Bareword;
-
-	method from-match( Mu $p ) {
-		self.bless(
-			:factory-line-number( callframe(1).line ),
-			:from( $p.from ),
-			:to( $p.to ),
-			:content( $p.Str )
-		)
-	}
 }
 class Perl6::Block does Branching does Bounded {
 	also is Perl6::Element;
-
-	method from-match( Mu $p, Perl6::Element @child ) {
-		my Perl6::Element @_child;
-		$p.Str ~~ m{ ^ (.) }; my Str $front = ~$0;
-		$p.Str ~~ m{ (.) $ }; my Str $back = ~$0;
-		@_child.append(
-			Perl6::Balanced::Enter.new(
-				:factory-line-number( callframe(1).line ),
-				:from( $p.from ),
-				:to( $p.from + $front.chars ),
-				:content( $front )
-			)
-		);
-		@_child.append( @child );
-		@_child.append(
-			Perl6::Balanced::Exit.new(
-				:factory-line-number( callframe(1).line ),
-				:from( $p.to - $back.chars ),
-				:to( $p.to ),
-				:content( $back )
-			)
-		);
-		self.bless(
-			:factory-line-number( callframe(1).line ),
-			:from( $p.from ),
-			:to( $p.to ),
-			:child( @_child )
-		)
-	}
+	also does MatchingBalanced;
 
 	method from-from-to-XXX( Int $from, Int $to, Str $front, Str $back, @child ) {
 		my Perl6::Element @_child;
@@ -1344,7 +1202,7 @@ class Perl6::Parser::Factory {
 	constant BANG-BANG = Q{!!};
 	constant FATARROW = Q{=>};
 	constant HYPER = Q{>>};
-	constant BACKSLASH = Q{\};
+	constant BACKSLASH = Q'\'; # because the braces confuse vim.
 
 	has %.here-doc; # Text for here-docs, indexed by their $p.from.
 
@@ -1402,17 +1260,12 @@ class Perl6::Parser::Factory {
 		my Perl6::Element $root = Perl6::Document.from-list(
 			@_child
 		);
-		self.add-comments( $root );
-		$root;
-	}
 
-	# Recursive, naturally.
-	method add-comments( Perl6::Element $root ) {
-#		if $root.is-branch {
-#			for $root.child.elems .. 1 {
-#say $_;
-#			}
-#		}
+		# Finally unwilling to scatter comments code throughout the
+		# hierarchy, just do this in one pass.
+		#
+#		self.add-comments( $root );
+		$root;
 	}
 
 	sub key-bounds( Mu $p ) {
@@ -3199,7 +3052,7 @@ class Perl6::Parser::Factory {
 	}
 
 	method __FloatingPoint( Mu $p ) {
-		Perl6::Number::Floating.from-match( $p );
+		Perl6::Number::FloatingPoint.from-match( $p );
 	}
 
 	# XXX Unused
@@ -5367,7 +5220,7 @@ return True;
 				$content = $content;
 			}
 			$leader ~~ m{ ( . ) $ };
-			my @adverb;
+			my Str @adverb;
 			@adverb.append( ':q' ) if $has-q;
 			@adverb.append( ':to' ) if $has-to;
 
@@ -5387,14 +5240,14 @@ return True;
 			given $0.Str {
 				when Q{'} {
 					@child.append(
-						Perl6::String::Quote::Single.from-match(
+						Perl6::String::Single.from-match(
 							$p
 						)
 					);
 				}
 				when Q{"} {
 					@child.append(
-						Perl6::String::Quote::Double.from-match(
+						Perl6::String::Double.from-match(
 							$p
 						)
 					);
