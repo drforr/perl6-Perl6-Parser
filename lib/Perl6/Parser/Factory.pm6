@@ -1244,18 +1244,23 @@ class Perl6::Parser::Factory {
 			self._statementlist( $p.hash.<statementlist> );
 		if $p.hash.<statementlist>.hash.<statement>.list.elems == 1 and
 		   @_child[*-1].child[*-1].to < $p.to {
-			@_child[*-1].child.append(
-				Perl6::Sir-Not-Appearing-In-This-Statement.new(
-					:factory-line-number( callframe(1).line ),
-					:from( @_child[*-1].child[*-1].to ),
-					:to( $p.to ),
-					:content(
-						$p.Str.substr(
-							@_child[*-1].child[*-1].to
-						);
-					)
-				)
+			my $text = $p.Str.substr(
+				@_child[*-1].child[*-1].to
 			);
+			unless $text ~~ m{ ^ '#' } {
+				@_child[*-1].child.append(
+					Perl6::Sir-Not-Appearing-In-This-Statement.new(
+						:factory-line-number( callframe(1).line ),
+						:from( @_child[*-1].child[*-1].to ),
+						:to( $p.to ),
+						:content(
+							$p.Str.substr(
+								@_child[*-1].child[*-1].to
+							)
+						)
+					)
+				);
+			}
 		}
 		my Perl6::Element $root = Perl6::Document.from-list(
 			@_child
@@ -1264,8 +1269,19 @@ class Perl6::Parser::Factory {
 		# Finally unwilling to scatter comments code throughout the
 		# hierarchy, just do this in one pass.
 		#
-#		self.add-comments( $root );
+		add-comments( $root );
 		$root;
+	}
+
+	sub add-comments( $root ) {
+		for reverse( 0 .. $root.child.elems - 1 ) {
+			if $root.child.[$_].^can( 'child' ) {
+				add-comments( $root.child.[$_] );
+			}
+		}
+		if $root.from < $root.child.[0].from {
+#say "Hi";
+		}
 	}
 
 	sub key-bounds( Mu $p ) {
@@ -6896,21 +6912,9 @@ else {
 		my Str $leftover-ws;
 		my Int $leftover-ws-from = 0;
 		my Str $beginning-ws;
-		my Str $beginning-comment;
-
-		# XXX Must fix this at some point.
-		my regex comment-eol { \s* '#' .+ $$ };
-		my regex comment-balanced { \s* '#`(' .+ ')' };
-		my regex comment {
-			<comment-eol> |
-			<comment-balanced>
-		}
 
 		if $p.Str ~~ m{ ^ ( \s+ ) } {
 			$beginning-ws = $0.Str
-		}
-		elsif $p.Str ~~ m{ ^ ( <comment>+ ) } {
-			$beginning-comment = $0.Str
 		}
 		for $p.hash.<statement>.list {
 			my Perl6::Element @_child;
@@ -6921,17 +6925,6 @@ else {
 						:from( $p.from ),
 						:to( $p.from + $beginning-ws.chars ),
 						:content( $beginning-ws )
-					)
-				);
-				$beginning-ws = Nil;
-			}
-			if $beginning-comment {
-				@_child.append(
-					Perl6::Comment.new(
-						:factory-line-number( callframe(1).line ),
-						:from( 0 ),
-						:to( $beginning-comment.chars ),
-						:content( $beginning-comment )
 					)
 				);
 				$beginning-ws = Nil;
