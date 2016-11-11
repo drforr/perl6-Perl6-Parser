@@ -1188,6 +1188,9 @@ class Perl6::Parser::Factory {
 		return False;
 	}
 
+	constant OPEN-PAREN = Q'(';
+	constant CLOSE-PAREN = Q')';
+
 	constant HYPER-START = Q{[};
 	constant HYPER-END = Q{]};
 	constant COLON = Q{:};
@@ -5599,12 +5602,17 @@ return True;
 					)
 				);
 			}
+			my Str $foo = $p.Str.substr(
+				0, $p.hash.<multisig>.from
+			);
+			$foo ~~ m{ '(' ( \s* ) $ };
+			my $margin = $0 ?? $0.Str.chars !! 0;
 			@child.append(
 				Perl6::Operator::Circumfix.from-from-to-XXX(
-					$p.hash.<deflongname>.to + 1,
-					$p.hash.<blockoid>.from - $offset,
-					'(',
-					')',
+					$p.hash.<multisig>.from - $margin - OPEN-PAREN.chars - 1,
+					$p.hash.<multisig>.to + 1,
+					OPEN-PAREN,
+					CLOSE-PAREN,
 					@_child
 				)
 			);
