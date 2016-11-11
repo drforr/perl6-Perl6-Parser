@@ -207,6 +207,8 @@ role Matchable {
 }
 
 class Perl6::Element {
+	has Int $.from is required;
+	has Int $.to is required;
 	has $.factory-line-number; # Purely a debugging aid.
 }
 
@@ -223,12 +225,7 @@ role Branching does Child {
 	}
 }
 
-role Bounded {
-	has Int $.from is required;
-	has Int $.to is required;
-}
-
-role Token does Bounded {
+role Token {
 	has Str $.content is required;
 
 	method perl6( $f ) {
@@ -292,7 +289,7 @@ role MatchingBalanced {
 class Perl6::Operator {
 	also is Perl6::Element;
 }
-class Perl6::Operator::Hyper does Branching does Bounded {
+class Perl6::Operator::Hyper does Branching {
 	also is Perl6::Operator;
 }
 class Perl6::Operator::Prefix does Token {
@@ -326,7 +323,7 @@ class Perl6::Operator::Postfix does Token {
 	also is Perl6::Operator;
 	also does Matchable;
 }
-class Perl6::Operator::Circumfix does Branching does Bounded {
+class Perl6::Operator::Circumfix does Branching {
 	also is Perl6::Operator;
 	also does MatchingBalanced;
 
@@ -357,7 +354,7 @@ class Perl6::Operator::Circumfix does Branching does Bounded {
 		)
 	}
 }
-class Perl6::Operator::PostCircumfix does Branching does Bounded {
+class Perl6::Operator::PostCircumfix does Branching {
 	also is Perl6::Operator;
 	also does MatchingBalanced;
 
@@ -850,7 +847,7 @@ class Perl6::Comment does Token {
 	also is Perl6::Element;
 }
 
-class Perl6::Document does Branching does Bounded {
+class Perl6::Document does Branching {
 	also is Perl6::Element;
 
 	method from-list( Perl6::Element @child ) {
@@ -867,7 +864,7 @@ class Perl6::Document does Branching does Bounded {
 # docs. This workaround may be gone by the time you read about this class,
 # and if so, I'm glad.
 #
-class Perl6::Sir-Not-Appearing-In-This-Statement does Bounded {
+class Perl6::Sir-Not-Appearing-In-This-Statement {
 	also is Perl6::Element;
 	has $.content; # XXX because it's not quite a token.
 
@@ -876,7 +873,7 @@ class Perl6::Sir-Not-Appearing-In-This-Statement does Bounded {
 	}
 }
 
-class Perl6::Statement does Branching does Bounded {
+class Perl6::Statement does Branching {
 	also is Perl6::Element;
 
 	method from-list( Perl6::Element @child ) {
@@ -965,7 +962,7 @@ class Perl6::PackageName does Token {
 class Perl6::ColonBareword does Token {
 	also is Perl6::Bareword;
 }
-class Perl6::Block does Branching does Bounded {
+class Perl6::Block does Branching {
 	also is Perl6::Element;
 	also does MatchingBalanced;
 
@@ -1269,15 +1266,19 @@ class Perl6::Parser::Factory {
 		# Finally unwilling to scatter comments code throughout the
 		# hierarchy, just do this in one pass.
 		#
-		add-comments( $root );
+#		if $root.child.elems {
+#			fill-gaps( $root );
+#		}
 		$root;
 	}
 
-	sub add-comments( $root ) {
+	sub fill-gaps( $root ) {
 		for reverse( 0 .. $root.child.elems - 1 ) {
-			if $root.child.[$_].^can( 'child' ) {
-				add-comments( $root.child.[$_] );
-			}
+			fill-gaps( $root.child.[$_] ) if
+				$root.child.[$_].^can( 'child' );
+#			if $root.child.[$_].to < $root.child.[$_+1].from {
+#say "found gap";
+#			}
 		}
 		if $root.from < $root.child.[0].from {
 #say "Hi";
@@ -1285,12 +1286,13 @@ class Perl6::Parser::Factory {
 	}
 
 	sub key-bounds( Mu $p ) {
+		my $from-to = "{$p.from} {$p.to}";
 		if $p.list {
 			#say "-1 -1 *list*"
-			$*ERR.say: "{$p.from} {$p.to} [{substr($p.orig,$p.from,$p.to-$p.from)}]"
+			$*ERR.say: "$from-to [{substr($p.orig,$p.from,$p.to-$p.from)}]"
 		}
 		elsif $p.orig {
-			$*ERR.say: "{$p.from} {$p.to} [{substr($p.orig,$p.from,$p.to-$p.from)}]"
+			$*ERR.say: "$from-to [{substr($p.orig,$p.from,$p.to-$p.from)}]"
 		}
 		else {
 			$*ERR.say: "-1 -1 NIL"
@@ -8029,7 +8031,7 @@ die "Catching Int";
 						$_.hash.<EXPR>
 					);
 					@child.append(
-						Perl6::WS.after( $_, $_.hash.<EXPR> )
+						Perl6::WS.before( $_, $_.hash.<pblock> )
 					);
 					@child.append(
 						self._pblock(
