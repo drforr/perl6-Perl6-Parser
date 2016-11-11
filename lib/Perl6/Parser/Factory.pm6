@@ -5601,7 +5601,7 @@ return True;
 			}
 			@child.append(
 				Perl6::Operator::Circumfix.from-from-to-XXX(
-					$p.hash.<deflongname>.to,
+					$p.hash.<deflongname>.to + 1,
 					$p.hash.<blockoid>.from - $offset,
 					'(',
 					')',
