@@ -148,7 +148,7 @@ _END_
 
 subtest {
 	subtest {
-#`(
+#`[
 		my $source = Q:to[_END_];
 sub A(Int $m, Int $n) {
     if    $m == 0 { $n + 1 } 
@@ -160,7 +160,7 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
-)
+]
 
 		done-testing;
 	}, Q{version 1};

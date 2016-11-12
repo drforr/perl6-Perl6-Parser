@@ -322,11 +322,13 @@ class Perl6::Parser {
 		$str
 	}
 
+	#constant indent = "\t";
+	constant indent = ' ';
 	method dump-tree( Perl6::Element $root,
 			  Bool $display-ws = True,
 			  Int $depth = 0 ) {
 		return '' if $root ~~ Perl6::WS and !$display-ws;
-		my $str = ( "\t" xx $depth ) ~ self.dump-term( $root ) ~ "\n";
+		my $str = ( indent xx $depth ) ~ self.dump-term( $root ) ~ "\n";
 		if $root.^can('child') {
 			for ^$root.child {
 				my @problem;

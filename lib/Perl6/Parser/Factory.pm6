@@ -6523,10 +6523,9 @@ return True;
 			elsif self.assert-hash( $_, [< sym else xblock >] ) {
 				@child = self._sym( $_.hash.<sym> );
 				@child.append(
-					Perl6::WS.between-matches(
+					Perl6::WS.after(
 						$_,
-						'sym',
-						'xblock'
+						$_.hash.<sym>
 					)
 				);
 				@child.append(
@@ -6535,10 +6534,9 @@ return True;
 					)
 				);
 				@child.append(
-					Perl6::WS.between-matches(
+					Perl6::WS.before(
 						$_,
-						'xblock',
-						'else'
+						$_.hash.<else>
 					)
 				);
 				@child.append(
@@ -7191,7 +7189,8 @@ else {
 				}
 				else {
 					debug-match( $_ ) if $*DEBUG;
-					die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+					die "Unhandled case" if
+						$*FACTORY-FAILURE-FATAL
 				}
 			}
 		}
