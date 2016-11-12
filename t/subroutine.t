@@ -3,7 +3,7 @@ use v6;
 use Test;
 use Perl6::Parser;
 
-plan 2;
+plan 3;
 
 my $pt = Perl6::Parser.new;
 my $*VALIDATION-FAILURE-FATAL = True;
@@ -343,5 +343,17 @@ _END_
 		is $pt.format( $tree ), $source, Q{formatted};
 	}, Q{christmas tree, maximal spacing};
 }, Q{christmas tree};
+
+subtest {
+	plan 2;
+
+	my $source = Q:to[_END_];
+sub foo ( ) { }
+_END_
+	my $p = $pt.parse( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.format( $tree ), $source, Q{formatted};
+}, Q{separate function name and open paren};
 
 # vim: ft=perl6

@@ -5548,87 +5548,89 @@ return True;
 				[< deflongname multisig blockoid >],
 				[< trait >] ) {
 			my Perl6::Element @_child;
+			my $left-margin = $p.Str.substr(
+				0, $p.hash.<multisig>.from - $p.from
+			);
+			$left-margin ~~ m{ ( '(' ) ( \s* ) $ };
+			@_child.append(
+				Perl6::Balanced::Enter.new(
+					:factory-line-number(
+						callframe(1).line
+					),
+					:from(
+						$p.hash.<multisig>.from -
+						$0.Str.chars - $1.Str.chars
+					),
+					:to(
+						$p.hash.<multisig>.from -
+						$1.Str.chars
+					),
+					:content( $0.Str )
+				)
+			);
+			if $1.Str {
+				@_child.append(
+					Perl6::WS.new(
+						:factory-line-number(
+							callframe(1).line
+						),
+						:from(
+							$p.hash.<multisig>.from -
+							$1.Str.chars
+						),
+						:to(
+							$p.hash.<multisig>.from
+						),
+						:content( $1.Str )
+					)
+				);
+			}
 			@_child.append(
 				self._multisig( $p.hash.<multisig> )
 			);
-			my Str $x = substr-match(
-				$p,
-				$p.from,
-				$p.hash.<blockoid>.from - $p.from
+			@_child.append(
+				Perl6::Balanced::Exit.new(
+					:factory-line-number(
+						callframe(1).line
+					),
+					:from(
+						$p.hash.<multisig>.to
+					),
+					:to(
+						$p.hash.<multisig>.to +
+						CLOSE-PAREN.chars
+					),
+					:content( CLOSE-PAREN )
+				)
 			);
-			my Int $offset = 0;
-			if $x {
-				$x ~~ m{ ')' (.*) $ }; $offset = $0.chars;
-			}
 			@child.append(
 				self._deflongname( $p.hash.<deflongname> )
 			);
-			# XXX Why...
-			my Str $strip-sides =
-				substr-match(
-					$p,
-					$p.hash.<deflongname>.to,
-					$p.hash.<blockoid>.from -
-					$p.hash.<deflongname>.to
-				);
-			if $strip-sides ~~ m{ '(' ( \s+ ) ')' } {
-				@_child.append(
-					Perl6::WS.new(
-						:factory-line-number( callframe(1).line ),
-						:from( $p.hash.<deflongname>.to + $0.from ),
-						:to( $p.hash.<deflongname>.to + $0.from + $0.chars ),
-						:content( $0.Str )
-					)
-				);
-			}
-			elsif $strip-sides ~~ m{ '(' ( \s+ ) } {
-				@_child.splice( 0, 0,
-					Perl6::WS.new(
-						:factory-line-number( callframe(1).line ),
-						:from( $p.hash.<deflongname>.to + $0.from ),
-						:to( $p.hash.<deflongname>.to + $0.from + $0.chars ),
-						:content( $0.Str )
-					)
-				);
-			}
-			elsif $strip-sides ~~ m{ ( \s+ ) ')' } {
-				# XXX May not be redundant
-			}
-			else {
-				@child.append(
-					Perl6::WS.after(
-						$p,
-						$p.hash.<deflongname>
-					)
-				);
-			}
-			my Str $foo = $p.Str.substr(
-				0, $p.hash.<multisig>.from
-			);
-			$foo ~~ m{ '(' ( \s* ) $ };
-			my $margin = $0 ?? $0.Str.chars !! 0;
 			@child.append(
-				Perl6::Operator::Circumfix.from-from-to-XXX(
-					$p.hash.<multisig>.from - $margin - OPEN-PAREN.chars - 1,
-					$p.hash.<multisig>.to + 1,
-					OPEN-PAREN,
-					CLOSE-PAREN,
-					@_child
+				Perl6::WS.after(
+					$p,
+					$p.hash.<deflongname>
 				)
 			);
-			my Str $collect-ws = substr(
-				$p.Str, 0, $p.hash.<blockoid>.from - $p.from
+			@child.append(
+				Perl6::Operator::Circumfix.new(
+					:factory-line-number(
+						callframe(1).line 
+					),
+					:from( $p.hash.<multisig>.from - $0.Str.chars - $1.Str.chars ),
+					:to(
+						$p.hash.<multisig>.to +
+						CLOSE-PAREN.chars
+					),
+					:child( @_child ),
+				)
 			);
-			if $collect-ws ~~ m{ ( \s+ ) $ } {
-				@child.append(
-					Perl6::WS.new(
-						:factory-line-number( callframe(1).line ),
-						:from( @child[*-1].to ),
-						:to( @child[*-1].to + $0.chars ),
-						:content( $0.Str )
-					)
-				);
-			}
+			@child.append(
+				Perl6::WS.before(
+					$p,
+					$p.hash.<blockoid>
+				)
+			);
 			@child.append(
 				self._blockoid( $p.hash.<blockoid> )
 			);
