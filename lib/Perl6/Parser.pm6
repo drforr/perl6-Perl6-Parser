@@ -332,6 +332,12 @@ class Perl6::Parser {
 		if $root.^can('child') {
 			for ^$root.child {
 				my @problem;
+				if $root.child.[$_].from < 0 {
+					@problem.push( '-' )
+				}
+				if $root.child.[$_].to < 0 {
+					@problem.push( '-' )
+				}
 				# Mark the tokens that don't overlap.
 				#
 				if $root.child.[$_+1].defined and

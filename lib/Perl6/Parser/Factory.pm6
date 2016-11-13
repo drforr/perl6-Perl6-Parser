@@ -288,16 +288,6 @@ role MatchingBalanced {
 
 class Perl6::Operator {
 	also is Perl6::Element;
-}
-class Perl6::Operator::Hyper does Branching {
-	also is Perl6::Operator;
-}
-class Perl6::Operator::Prefix does Token {
-	also is Perl6::Operator;
-	also does Matchable;
-}
-class Perl6::Operator::Infix does Token {
-	also is Perl6::Operator;
 	also does Matchable;
 
 	multi method from-int( Int $from, Str $str ) {
@@ -308,6 +298,16 @@ class Perl6::Operator::Infix does Token {
 			:content( $str )
 		)
 	}
+}
+class Perl6::Operator::Hyper does Branching {
+	also is Perl6::Operator;
+}
+class Perl6::Operator::Prefix does Token {
+	also is Perl6::Operator;
+}
+class Perl6::Operator::Infix does Token {
+	also is Perl6::Operator;
+
 	multi method new( Mu $p, Str $token ) {
 		$p.Str ~~ m{ ($token) };
 		my Int $offset = $0.from;
@@ -321,7 +321,6 @@ class Perl6::Operator::Infix does Token {
 }
 class Perl6::Operator::Postfix does Token {
 	also is Perl6::Operator;
-	also does Matchable;
 }
 class Perl6::Operator::Circumfix does Branching {
 	also is Perl6::Operator;
@@ -388,458 +387,17 @@ class Perl6::Operator::PostCircumfix does Branching {
 
 class Perl6::WS does Token {
 	also is Perl6::Element;
+	also does Matchable;
 
-	constant COMMA = Q{,};
-
-	# Returns a WS token starting at character $start, consisting of
-	# $content.chars characters.
-	#
-	# If there is no whitespace, returns () which is treated as a
-	# nonexistent array element by append().
-	#
-	multi method from-int( Int $start, $content ) {
-		if $content {
-			self.bless(
-				:factory-line-number( callframe(1).line ),
-				:from( $start ),
-				:to( $start + $content.chars ),
-				:content( $content )
-			)
-		}
-		else {
-			( )
-		}
-	}
-
-	# Returns a WS token consisting entirely of a given match $m
-	#
-	# If there is no whitespace, returns () which is treated as a
-	# nonexistent array element by append().
-	#
-	method from-match( Mu $m ) {
-		if $m.from < $m.to {
-			self.bless(
-				:factory-line-number( callframe(1).line ),
-				:from( $m.from ),
-				:to( $m.to ),
-				:content( $m.Str )
-			)
-		}
-		else {
-			( )
-		}
-	}
-
-	# Returns a WS token starting at the end of match $m.hash.{$lhs},
-	# extending to the start of match $m.hash.{$rhs}.
-	# (uses the whitespace in match $m)
-	#
-	# If there is no whitespace, returns () which is treated as a
-	# nonexistent array element by append().
-	#
-	multi method between-matches( Mu $m, Str $lhs, Str $rhs ) {
-		my Mu $_lhs = $m.hash.{$lhs};
-		my Mu $_rhs = $m.hash.{$rhs};
-		if $_lhs.to < $_rhs.from {
-			self.bless(
-				:factory-line-number( callframe(1).line ),
-				:from( $_lhs.to ),
-				:to( $_rhs.from ),
-				:content(
-					substr(
-						$m.orig,
-						$_lhs.to,
-						$_rhs.from - $_lhs.to
-					)
-				)
-			)
-		}
-		else {
-			()
-		}
-	}
-
-	# The same as above, but instead of $m.hash.{$lhs}, $lhs and $rhs are
-	# the actual matches.
-	#
-	# If there is no whitespace, returns () which is treated as a
-	# nonexistent array element by append().
-	#
-	multi method between-matches( Mu $m, Mu $lhs, Mu $rhs ) {
-		if $lhs.to < $rhs.from {
-			self.bless(
-				:factory-line-number( callframe(1).line ),
-				:from( $lhs.to ),
-				:to( $rhs.from ),
-				:content(
-					substr(
-						$m.orig,
-						$lhs.to,
-						$rhs.from - $lhs.to
-					)
-				)
-			)
-		}
-		else {
-			()
-		}
-	}
-	multi method between-matches-orig( Mu $lhs, Mu $rhs ) {
-		if $lhs.to < $rhs.from {
-			self.bless(
-				:factory-line-number( callframe(1).line ),
-				:from( $lhs.to ),
-				:to( $rhs.from ),
-				:content(
-					substr(
-						$lhs.orig,
-						$lhs.to,
-						$rhs.from - $lhs.to
-					)
-				)
-			)
-		}
-		else {
-			()
-		}
-	}
-
-	# Returns a WS token starting at the beginning of match $m, extending
-	# to the start of match $rhs.
-	#
-	# If there is no whitespace, returns () which is treated as a
-	# nonexistent array element by append().
-	#
-	method leader( Mu $m, Mu $rhs ) {
-		if $m.from < $rhs.from {
-			self.bless(
-				:factory-line-number( callframe(1).line ),
-				:from( $m.from ),
-				:to( $rhs.from ),
-				:content(
-					substr(
-						$m.Str,
-						0,
-						$rhs.from - $m.from
-					)
-				)
-			)
-		}
-		else {
-			()
-		}
-	}
-
-	# Returns a WS token starting at the end of match $lhs, extending to
-	# the end of match $m.
-	#
-	# If there is no whitespace, returns () which is treated as a
-	# nonexistent array element by append().
-	#
-	method terminator( Mu $p, Mu $lhs ) {
-		if $lhs.to < $p.to {
-			self.bless(
-				:factory-line-number( callframe(1).line ),
-				:from( $lhs.to ),
-				:to( $p.to ),
-				:content(
-					substr(
-						$p.Str,
-						$p.Str.chars - ( $p.to - $lhs.to ),
-						$p.to - $lhs.to
-					)
-				)
-			)
-		}
-		else {
-			()
-		}
-	}
-
-	# Returns a WS token starting at the beginning of match $m, extending
-	# to the first non-whitespace character (or the end of the match.)
-	#
-	# If there is no whitespace, returns () which is treated as a
-	# nonexistent array element by append().
-	#
-	method header( Mu $m ) {
-		if $m.Str ~~ m{ ^ ( \s+ ) } {
-			self.bless(
-				:factory-line-number( callframe(1).line ),
-				:from( $m.from ),
-				:to( $m.from + $0.Str.chars ),
-				:content( $0.Str )
-			)
-		}
-		else {
-			()
-		}
-	}
-
-	# Returns a WS token starting at the start of the last WS in the match
-	# $m, extending to the end of the string.
-	#
-	# If there is no whitespace, returns () which is treated as a
-	# nonexistent array element by append().
-	#
-	method trailer( Mu $p ) {
-		if $p.Str ~~ m{ ( \s+ ) $ } {
-			self.bless(
-				:factory-line-number( callframe(1).line ),
-				:from( $p.to - $0.Str.chars ),
-				:to( $p.to ),
-				:content( $0.Str )
-			)
-		}
-		else {
-			()
-		}
-	}
-
-	# Returns a sequence of (maybe WS), (,), (maybe WS) given the string
-	# $split-me. $offset is the offset from the start of the entire
-	# match, since we don't pass in the match object.
-	#
-	# XXX Really should be rethought.
-	#
-	# If there is no whitespace, returns () which is treated as a
-	# nonexistent array element by append().
-	#
-	method comma-separator( Int $offset, Str $split-me ) {
-		my Perl6::Element @child;
-		my Int $start = $offset;
-		my ( $lhs, $rhs ) = split( COMMA, $split-me );
-		if $lhs and $lhs ne '' {
-			@child.append(
-				Perl6::WS.from-int( $start, $lhs )
-			);
-			$start += $lhs.chars;
-		}
-		@child.append(
-			Perl6::Operator::Infix.from-int( $start, COMMA )
-		);
-		$start += COMMA.chars;
-		if $rhs and $rhs ne '' {
-			@child.append(
-				Perl6::WS.from-int( $start, $rhs )
-			);
-			$start += $rhs.chars;
-		}
-		@child.flat
-	}
-
-	# Returns (maybe WS), (;), (maybe WS) at thee end of match.
-	# XXX This can definitely be trimmed down.
-	#
-	# If there is no whitespace, returns () which is treated as a
-	# nonexistent array element by append().
-	#
-	method semicolon-terminator( Mu $m ) {
-		my Perl6::Element @child;
-		if $m.Str ~~ m{ ( \s+ ) ( ';' ) ( \s+ ) $ } {
-			@child =
-				self.bless(
-					:factory-line-number( callframe(1).line ),
-					:from( $m.to - $2.chars - $1.chars - $0.chars ),
-					:to( $m.to - $2.chars - $1.chars ),
-					:content( $0.Str )
-				),
-				Perl6::Semicolon.new(
-					:factory-line-number( callframe(1).line ),
-					:from( $m.to - $2.chars - $1.chars ),
-					:to( $m.to - $2.chars ),
-					:content( $1.Str )
-				)
-		}
-		elsif $m.Str ~~ m{ ( ';' ) ( \s+ ) $ } {
-			@child =
-				Perl6::Semicolon.new(
-					:factory-line-number( callframe(1).line ),
-					:from( $m.to - $1.chars - $0.chars ),
-					:to( $m.to - $1.chars ),
-					:content( $0.Str )
-				)
-		}
-		elsif $m.Str ~~ m{ ( \s+ ) ( ';' ) $ } {
-			@child =
-				self.bless(
-					:factory-line-number( callframe(1).line ),
-					:from( $m.to - $1.chars - $0.chars ),
-					:to( $m.to - $1.chars ),
-					:content( $0.Str )
-				),
-				Perl6::Semicolon.new(
-					:factory-line-number( callframe(1).line ),
-					:from( $m.to - $1.chars ),
-					:to( $m.to ),
-					:content( $1.Str )
-				)
-		}
-		elsif $m.Str ~~ m{ ( ';' ) $ } {
-			@child =
-				Perl6::Semicolon.new(
-					:factory-line-number( callframe(1).line ),
-					:from( $m.to - $0.chars ),
-					:to( $m.to  ),
-					:content( $0.Str )
-				)
-		}
-		else {
-			@child = ( )
-		}
-		@child.flat
-	}
-
-	# Returns the header WS at the start of match $m, followed by
-	# whatever tokens are passed in.
-	#
-	# This really is a splice() operation, and may be rethought.
-	# Of course the real issue is wanting to keep immutability.
-	#
-	# If there is no whitespace, returns () which is treated as a
-	# nonexistent array element by append().
-	#
-	method with-header( Mu $p, *@element ) {
-		my Perl6::Element @_child;
-		@_child.append( Perl6::WS.header( $p ) );
-		@_child.append( @element );
-		@_child
-	}
-
-	# Returns whatever tokens are passed in, followed by the trailer WS.
-	#
-	# This really is a splice() operation, and may be rethought.
-	# Of course the real issue is wanting to keep immutability.
-	#
-	# If there is no whitespace, returns () which is treated as a
-	# nonexistent array element by append().
-	#
-	method with-trailer( Mu $p, *@element ) {
-		my Perl6::Element @_child;
-		@_child.append( @element );
-		@_child.append( Perl6::WS.trailer( $p ) );
-		@_child
-	}
-
-	# Returns the header WS at the start of $m, whatever tokens there
-	# happen to be in the string, then the trailer WS.
-	#
-	# Like its predecessor, it is just a splice() and will be rethought.
-	#
-	# If there is no whitespace, returns () which is treated as a
-	# nonexistent array element by append().
-	#
-	method with-header-trailer( Mu $p, *@element ) {
-		my Perl6::Element @_child;
-		@_child.append( Perl6::WS.header( $p ) );
-		@_child.append( @element );
-		if $p.Str ~~ m{ \S \s+ $ } {
-			@_child.append( Perl6::WS.trailer( $p ) );
-		}
-		@_child
-	}
-
-	# Return tokes before a WS, the WS itself, and the tokens after a WS.
-	# Here $start and $end are the names of the hash keys inside $p.
-	#
-	# If there is no whitespace, returns () which is treated as a
-	# nonexistent array element by append().
-	#
-	multi method with-inter-ws( Mu $p,
-				Str $start, $start-list,
-				Str $end, $end-list ) {
-		my Perl6::Element @_child;
-		@_child.append( @( $start-list ) );
-		@_child.append( Perl6::WS.between-matches( $p, $start, $end ) );
-		@_child.append( @( $end-list ) );
-		@_child
-	}
-
-	# Return tokes before a WS, the WS itself, and the tokens after a WS.
-	# Here $start and $end are the match objects at the start and end of
-	# the main match $p.
-	#
-	# If there is no whitespace, returns () which is treated as a
-	# nonexistent array element by append().
-	#
-	multi method with-inter-ws( Mu $p,
-				Mu $start, $start-list,
-				Mu $end, $end-list ) {
-		my Perl6::Element @_child;
-		@_child.append( @( $start-list ) );
-		@_child.append( Perl6::WS.between-matches( $p, $start, $end ) );
-		@_child.append( @( $end-list ) );
-		@_child
-	}
-
-	# Returns a WS token consisting of the whitespace before the start of
-	# match object $lhs.
-	#
-	# If there is no whitespace, returns () which is treated as a
-	# nonexistent array element by append().
-	#
-	method before( Mu $p, Mu $lhs ) {
-		my Str $x = $p.Str.substr( 0, $lhs.from - $p.from );
-		if $x ~~ m{ ( \s+ ) $ } {
-			self.bless(
-				:factory-line-number( callframe(1).line ),
-				:from( $lhs.from - $0.Str.chars ),
-				:to( $lhs.from ),
-				:content( $0.Str )
-			)
-		}
-		else {
-			()
-		}
-	}
-	method before-orig( Mu $lhs ) {
-		my Str $x = $lhs.orig.substr( 0, $lhs.from );
-		if $x ~~ m{ ( \s+ ) $ } {
-			self.bless(
-				:factory-line-number( callframe(1).line ),
-				:from( $lhs.from - $0.Str.chars ),
-				:to( $lhs.from ),
-				:content( $0.Str )
-			)
-		}
-		else {
-			()
-		}
-	}
-
-	# Returns a WS token consisting of the whitespace after the end of
-	# match object $lhs.
-	#
-	# If there is no whitespace, returns () which is treated as a
-	# nonexistent array element by append().
-	#
-	method after( Mu $p, Mu $lhs ) {
-		my Str $x = $p.Str.substr( $lhs.to - $p.from );
-		if $x ~~ m{ ^ ( \s+ ) } {
-			self.bless(
-				:factory-line-number( callframe(1).line ),
-				:from( $lhs.to ),
-				:to( $lhs.to + $0.Str.chars ),
-				:content( $0.Str )
-			)
-		}
-		else {
-			()
-		}
-	}
-	method after-orig( Mu $lhs ) {
-		my Str $x = $lhs.orig.substr( $lhs.to );
-		if $x ~~ m{ ^ ( \s+ ) } {
-			self.bless(
-				:factory-line-number( callframe(1).line ),
-				:from( $lhs.to ),
-				:to( $lhs.to + $0.Str.chars ),
-				:content( $0.Str )
-			)
-		}
-		else {
-			()
-		}
+	method from-int( Int $offset, Str $str ) {
+		self.bless(
+			:factory-line-number(
+				callframe(1).line
+			),
+			:from( $offset ),
+			:to( $offset + $str.chars ),
+			:content( $str )
+		)
 	}
 }
 
@@ -1168,6 +726,22 @@ class Perl6::Variable::Callable::SubLanguage {
 
 class Perl6::Parser::Factory {
 
+	constant OPEN-PAREN = Q'(';
+	constant CLOSE-PAREN = Q')';
+
+	constant HYPER-START = Q{[};
+	constant HYPER-END = Q{]};
+	constant COLON = Q{:};
+	constant COMMA = Q{,};
+	constant SEMICOLON = Q{;};
+	constant EQUAL = Q{=};
+	constant WHERE = Q{where};
+	constant QUES-QUES = Q{??};
+	constant BANG-BANG = Q{!!};
+	constant FATARROW = Q{=>};
+	constant HYPER = Q{>>};
+	constant BACKSLASH = Q'\'; # because the braces confuse vim.
+
 	method assert-hash-strict( Mu $p, $required-with, $required-without ) {
 		my %classified = classify {
 			$p.hash.{$_}.Str ?? 'with' !! 'without'
@@ -1187,22 +761,6 @@ class Perl6::Parser::Factory {
 		}
 		return False;
 	}
-
-	constant OPEN-PAREN = Q'(';
-	constant CLOSE-PAREN = Q')';
-
-	constant HYPER-START = Q{[};
-	constant HYPER-END = Q{]};
-	constant COLON = Q{:};
-	constant COMMA = Q{,};
-	constant SEMICOLON = Q{;};
-	constant EQUAL = Q{=};
-	constant WHERE = Q{where};
-	constant QUES-QUES = Q{??};
-	constant BANG-BANG = Q{!!};
-	constant FATARROW = Q{=>};
-	constant HYPER = Q{>>};
-	constant BACKSLASH = Q'\'; # because the braces confuse vim.
 
 	has %.here-doc; # Text for here-docs, indexed by their $p.from.
 
@@ -1262,29 +820,73 @@ class Perl6::Parser::Factory {
 				);
 			}
 		}
-		my Perl6::Element $root = Perl6::Document.from-list(
-			@_child
-		);
-
-		# Finally unwilling to scatter comments code throughout the
-		# hierarchy, just do this in one pass.
-		#
-#		if $root.child.elems {
-#			fill-gaps( $root );
-#		}
+		my Perl6::Element $root =
+			Perl6::Document.from-list(
+				@_child
+			);
+		populate-ws( $p, $root );
+		if $p.from < $root.from {
+			my $remainder = $p.orig.Str.substr( 0, $root.from );
+			unless $remainder ~~ /\S/ {
+				$root.child.splice(
+					0, 0, 
+					Perl6::WS.from-int(
+						$p.from, $remainder
+					)
+				);
+			}
+		}
+		if $root.to < $p.to {
+			my $remainder = $p.orig.Str.substr( $root.to );
+			unless $remainder ~~ /\S/ {
+				$root.child.append(
+					Perl6::WS.from-int(
+						$root.to, $remainder
+					)
+				);
+			}
+		}
 		$root;
 	}
 
-	sub fill-gaps( $root ) {
-		for reverse( 0 .. $root.child.elems - 1 ) {
-			fill-gaps( $root.child.[$_] ) if
-				$root.child.[$_].^can( 'child' );
-#			if $root.child.[$_].to < $root.child.[$_+1].from {
-#say "found gap";
-#			}
+	sub _insert-ws-at( Mu $p, Perl6::Element $root, Int $index ) {
+		my $start = $root.child.[$index].to;
+		my $end = $root.child.[$index+1].from;
+
+		if $start < 0 or $end < 0 {
+			say "Negative match index!";
+			return;
 		}
-		if $root.from < $root.child.[0].from {
-#say "Hi";
+
+		if $start < $end {
+			my $x = $p.orig.Str.substr(
+				$start,
+				$end - $start
+			);
+			unless $x ~~ /\S/ {
+				$root.child.splice(
+					$index + 1,
+					0,
+					Perl6::WS.from-int( $start, $x )
+				)
+			}
+		}
+		elsif $start > $end {
+			say "Crossing streams";
+		}
+	}
+
+	sub populate-ws( Mu $p, Perl6::Element $root, Int $depth = 0 ) {
+		if $root.^can( 'child' ) {
+			for reverse( 0 .. $root.child.elems - 1 ) {
+				populate-ws( $p, $root.child.[$_], $depth + 1 );
+				if $_ < $root.child.elems - 1 {
+					if $root.child.[$_].to !=
+					   $root.child.[$_+1].from {
+						_insert-ws-at( $p, $root, $_ );
+					}
+				}
+			}
 		}
 	}
 
@@ -1366,21 +968,7 @@ class Perl6::Parser::Factory {
 				[< trait >] ) {
 			@child = self._deftermnow( $p.hash.<deftermnow> );
 			@child.append(
-				Perl6::WS.between-matches(
-					$p,
-					'deftermnow',
-					'initializer'
-				)
-			);
-			@child.append(
 				self._initializer( $p.hash.<initializer> )
-			);
-			@child.append(
-				Perl6::WS.between-matches(
-					$p,
-					'initializer',
-					'term_init'
-				)
 			);
 			@child.append(
 				self._term_init( $p.hash.<term_init> )
@@ -1405,13 +993,6 @@ class Perl6::Parser::Factory {
 					[< invocant semiarglist >] ) {
 				@child = self._invocant( $p.hash.<invocant> );
 				@child.append(
-					Perl6::WS.between-matches(
-						$p,
-						'invocant',
-						'semiarglist'
-					)
-				);
-				@child.append(
 					self._semiarglist(
 						$p.hash.<semiarglist>
 					)
@@ -1420,11 +1001,8 @@ class Perl6::Parser::Factory {
 			when self.assert-hash( $_, [< semiarglist >] ) {
 				my Perl6::Element @_child;
 				@_child.append(
-					Perl6::WS.with-header-trailer(
-						$_.hash.<semiarglist>,
-						self._semiarglist(
-							$_.hash.<semiarglist>
-						)
+					self._semiarglist(
+						$_.hash.<semiarglist>
 					)
 				);
 				@child.append(
@@ -1506,7 +1084,8 @@ class Perl6::Parser::Factory {
 		given $p {
 			default {
 				debug-match( $_ );
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -1518,7 +1097,8 @@ class Perl6::Parser::Factory {
 			}
 			default {
 				debug-match( $_ );
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -1549,7 +1129,8 @@ class Perl6::Parser::Factory {
 			}
 			default {
 				debug-match( $_ );
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -1565,7 +1146,8 @@ class Perl6::Parser::Factory {
 			}
 			default {
 				debug-match( $_ );
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -1582,9 +1164,7 @@ class Perl6::Parser::Factory {
 					)
 				);
 				@child =
-					Perl6::Block.from-match(
-						$_, @_child
-					);
+					Perl6::Block.from-match( $_, @_child );
 			}
 			default {
 				debug-match( $_ );
@@ -1604,7 +1184,8 @@ class Perl6::Parser::Factory {
 			}
 			default {
 				debug-match( $_ );
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -1616,7 +1197,8 @@ class Perl6::Parser::Factory {
 			}
 			default {
 				debug-match( $_ );
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 	} 
@@ -1632,21 +1214,7 @@ class Perl6::Parser::Factory {
 						$_.hash.<identifier>
 					);
 					@child.append(
-						Perl6::WS.between-matches(
-							$_,
-							'identifier',
-							'name'
-						)
-					);
-					@child.append(
 						self._name( $_.hash.<name> )
-					);
-					@child.append(
-						Perl6::WS.between-matches(
-							$_,
-							'name',
-							'sign'
-						)
 					);
 					@child.append(
 						self._sign( $_.hash.<sign> )
@@ -1656,13 +1224,6 @@ class Perl6::Parser::Factory {
 						[< sign charspec >] ) {
 					@child = self._sign( $p.hash.<sign> );
 					@child.append(
-						Perl6::WS.between-matches(
-							$p,
-							'sign',
-							'charspec'
-						)
-					);
-					@child.append(
 						self._charspec(
 							$p.hash.<charspec>
 						)
@@ -1670,13 +1231,15 @@ class Perl6::Parser::Factory {
 				}
 				else {
 					debug-match( $_ );
-					die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+					die "Unhandled case" if
+						$*FACTORY-FAILURE-FATAL
 				}
 			}
 		}
 		else {
 			debug-match( $p );
-			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+			die "Unhandled case" if
+				$*FACTORY-FAILURE-FATAL
 		}
 		@child
 	}
@@ -1727,11 +1290,8 @@ class Perl6::Parser::Factory {
 			when self.assert-hash( $_, [< nibble >] ) {
 				my Perl6::Element @_child;
 				@_child.append(
-					Perl6::WS.with-header-trailer(
-						$_.hash.<nibble>,
-						Perl6::Operator::Prefix.from-match-trimmed(
-							$_.hash.<nibble>
-						)
+					Perl6::Operator::Prefix.from-match-trimmed(
+						$_.hash.<nibble>
 					)
 				);
 				@child =
@@ -1741,7 +1301,8 @@ class Perl6::Parser::Factory {
 			}
 			default {
 				debug-match( $_ );
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -1754,7 +1315,8 @@ class Perl6::Parser::Factory {
 			}
 			default {
 				debug-match( $_ );
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -1766,7 +1328,8 @@ class Perl6::Parser::Factory {
 			}
 			default {
 				debug-match( $_ );
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -1778,7 +1341,8 @@ class Perl6::Parser::Factory {
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -1787,16 +1351,11 @@ class Perl6::Parser::Factory {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_,
-					     [< identifier coloncircumfix >] ) {
+				     [< identifier coloncircumfix >] ) {
 				# Synthesize the 'from' marker for ':'
 				@child =
-					Perl6::Operator::Prefix.new(
-						:factory-line-number(
-							callframe(1).line
-						),
-						:from( $_.from ),
-						:to( $_.from + COLON.chars ),
-						:content( COLON )
+					Perl6::Operator::Prefix.from-int(
+						$_.from, COLON
 					);
 				@child.append(
 					self._identifier( $_.hash.<identifier> )
@@ -1810,13 +1369,8 @@ class Perl6::Parser::Factory {
 			when self.assert-hash( $_, [< coloncircumfix >] ) {
 				# XXX Note that ':' is part of the expression.
 				@child =
-					Perl6::Operator::Prefix.new(
-						:factory-line-number(
-							callframe(1).line
-						),
-						:from( $_.from ),
-						:to( $_.from + COLON.chars ),
-						:content( COLON )
+					Perl6::Operator::Prefix.from-int(
+						$_.from, COLON
 					);
 				@child.append(
 					self._coloncircumfix(
@@ -1844,13 +1398,8 @@ class Perl6::Parser::Factory {
 				# XXX is this actually a single token?
 				# XXX I think it is.
 				@child =
-					Perl6::Operator::Prefix.new(
-						:factory-line-number(
-							callframe(1).line
-						),
-						:from( $_.from ),
-						:to( $_.from + COLON.chars ),
-						:content( COLON )
+					Perl6::Operator::Prefix.from-int(
+						$_.from, COLON
 					);
 				@child.append(
 					self._var( $_.hash.<var> )
@@ -1858,10 +1407,11 @@ class Perl6::Parser::Factory {
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child.flat
+		@child
 	}
 
 	method _colonpairs( Mu $p ) {
@@ -1872,7 +1422,8 @@ class Perl6::Parser::Factory {
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -1885,7 +1436,8 @@ class Perl6::Parser::Factory {
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -1902,20 +1454,13 @@ class Perl6::Parser::Factory {
 				[< trait >] ) {
 				# XXX missing term_init....
 				@child.append(
-					Perl6::WS.with-inter-ws(
-						$_,
-						$_.hash.<deftermnow>,
-						[
-							self._deftermnow(
-								$_.hash.<deftermnow>
-							)
-						],
-						$_.hash.<initializer>,
-						[
-							self._initializer(
-								$_.hash.<initializer>
-							)
-						]
+					self._deftermnow(
+						$_.hash.<deftermnow>
+					)
+				);
+				@child.append(
+					self._initializer(
+						$_.hash.<initializer>
 					)
 				);
 			}
@@ -1924,21 +1469,7 @@ class Perl6::Parser::Factory {
 				[< trait >] ) {
 				@child = self._sym( $_.hash.<sym> );
 				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'sym',
-						'defterm'
-					)
-				);
-				@child.append(
 					self._defterm( $_.hash.<defterm> )
-				);
-				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'defterm',
-						'initializer'
-					)
 				);
 				@child.append(
 					self._initializer(
@@ -1960,19 +1491,7 @@ class Perl6::Parser::Factory {
 					)
 				);
 				@_child.append(
-					Perl6::WS.header(
-						$_.hash.<signature>
-					)
-				);
-				@_child.append(
-					self._signature(
-						$_.hash.<signature>
-					)
-				);
-				@_child.append(
-					Perl6::WS.trailer(
-						$_.hash.<signature>
-					)
+					self._signature( $_.hash.<signature> )
 				);
 				@_child.append(
 					Perl6::Balanced::Exit.new(
@@ -1992,11 +1511,6 @@ class Perl6::Parser::Factory {
 					)
 				);
 				@child.append(
-					Perl6::WS.before-orig(
-						$_.hash.<initializer>
-					)
-				);
-				@child.append(
 					self._initializer(
 						$_.hash.<initializer>
 					)
@@ -2006,20 +1520,13 @@ class Perl6::Parser::Factory {
 				  [< initializer variable_declarator >],
 				  [< trait >] ) {
 				@child.append(
-					Perl6::WS.with-inter-ws(
-						$_,
-						$_.hash.<variable_declarator>,
-						[
-							self._variable_declarator(
-								$_.hash.<variable_declarator>
-							)
-						],
-						$_.hash.<initializer>,
-						[
-							self._initializer(
-								$_.hash.<initializer>
-							)
-						]
+					self._variable_declarator(
+						$_.hash.<variable_declarator>
+					)
+				);
+				@child.append(
+					self._initializer(
+						$_.hash.<initializer>
 					)
 				);
 			}
@@ -2078,22 +1585,8 @@ class Perl6::Parser::Factory {
 					$_.hash.<deftermnow>
 				);
 				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'deftermnow',
-						'initializer'
-					)
-				);
-				@child.append(
 					self._initializer(
 						$_.hash.<initializer>
-					)
-				);
-				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'initializer',
-						'term_init'
 					)
 				);
 				@child.append(
@@ -2107,22 +1600,8 @@ class Perl6::Parser::Factory {
 					$_.hash.<deftermnow>
 				);
 				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'deftermnow',
-						'initializer'
-					)
-				);
-				@child.append(
 					self._initializer(
 						$_.hash.<initializer>
-					)
-				);
-				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'initializer',
-						'signature'
 					)
 				);
 				@child.append(
@@ -2136,16 +1615,7 @@ class Perl6::Parser::Factory {
 					$_.hash.<initializer>
 				);
 				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'initializer',
-						'signature'
-					)
-				);
-				@child.append(
-					self._signature(
-						$_.hash.<signature>
-					)
+					self._signature( $_.hash.<signature> )
 				);
 			}
 			when self.assert-hash( $_,
@@ -2153,13 +1623,6 @@ class Perl6::Parser::Factory {
 					[< trait >] ) {
 				@child = self._initializer(
 					$_.hash.<initializer>
-				);
-				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'initializer',
-						'variable_declarator'
-					)
 				);
 				@child.append(
 					self._variable_declarator(
@@ -2170,13 +1633,6 @@ class Perl6::Parser::Factory {
 			when self.assert-hash( $_, [< sym package_def >] ) {
 				@child = self._sym(
 					$_.hash.<sym>
-				);
-				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'sym',
-						'package_def'
-					)
 				);
 				@child.append(
 					self._package_def(
@@ -2219,14 +1675,15 @@ class Perl6::Parser::Factory {
 				);
 			}
 			when self.assert-hash( $_,
-				[< signature >], [< trait >] ) {
+					[< signature >], [< trait >] ) {
 				@child.append(
 					self.signature( $_.hash.<signature> )
 				);
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -2252,7 +1709,8 @@ class Perl6::Parser::Factory {
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -2268,15 +1726,17 @@ class Perl6::Parser::Factory {
 				}
 				else {
 					debug-match( $_ ) if $*DEBUG;
-					die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+					die "Unhandled case" if
+						$*FACTORY-FAILURE-FATAL
 				}
 			}
 		}
 		else {
 			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+			die "Unhandled case" if
+				$*FACTORY-FAILURE-FATAL
 		}
-		@child.flat
+		@child
 	}
 
 	method _deflongname( Mu $p ) {
@@ -2287,7 +1747,8 @@ class Perl6::Parser::Factory {
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -2300,15 +1761,19 @@ class Perl6::Parser::Factory {
 				@child =
 					self._identifier(
 						$_.hash.<identifier>
-					),
-					self._colonpair( $_.hash.<colonpair> );
+					);
+				@child.append(
+					self._colonpair( $_.hash.<colonpair> )
+				);	
 			}
 			when self.assert-hash( $_,
 					[< identifier >],
 					[< colonpair >] ) {
 				if $_.orig.substr( $_.from - 1, 1 ) eq BACKSLASH {
 					@child = Perl6::Bareword.new(
-						:factory-line-number( callframe(1).line ),
+						:factory-line-number(
+							callframe(1).line
+						),
 						:from( $_.from - 1 ),
 						:to( $_.to ),
 						:content(
@@ -2324,10 +1789,11 @@ class Perl6::Parser::Factory {
 						$_.hash.<identifier>
 					);
 				}
-							}
-							default {
+			}
+			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -2340,7 +1806,8 @@ class Perl6::Parser::Factory {
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -2352,7 +1819,8 @@ class Perl6::Parser::Factory {
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -2387,12 +1855,13 @@ class Perl6::Parser::Factory {
 						$_.hash.<sym>
 					);
 				@child.append(
-					self._dottyop( $_.hash.<dottyop> ).flat
+					self._dottyop( $_.hash.<dottyop> )
 				);
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -2401,28 +1870,16 @@ class Perl6::Parser::Factory {
 	method _dottyop( Mu $p ) {
 		my Perl6::Element @child;
 		given $p {
-			when self.assert-hash( $_, [< sym postop >], [< O >] ) {
-				@child = self._sym(
-					$p.hash.<sym>
-				);
+			when self.assert-hash( $_,
+					[< sym postop >], [< O >] ) {
+				@child = self._sym( $p.hash.<sym> );
 				@child.append(
-					Perl6::WS.between-matches(
-						$p,
-						'sym',
-						'postop'
-					)
-				);
-				@child.append(
-					self._postop(
-						$p.hash.<postop>
-					)
+					self._postop( $p.hash.<postop> )
 				);
 			}
 			when self.assert-hash( $_, [< colonpair >] ) {
 				@child.append(
-					self._colonpair(
-						$_.hash.<colonpair>
-					)
+					self._colonpair( $_.hash.<colonpair> )
 				);
 			}
 			when self.assert-hash( $_, [< methodop >] ) {
@@ -2432,7 +1889,8 @@ class Perl6::Parser::Factory {
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -2445,7 +1903,8 @@ class Perl6::Parser::Factory {
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -2459,7 +1918,8 @@ class Perl6::Parser::Factory {
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -2468,25 +1928,15 @@ class Perl6::Parser::Factory {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< infix OPER >] ) {
-				@child = self._infix(
-					$p.hash.<infix>
-				);
+				@child = self._infix( $p.hash.<infix> );
 				@child.append(
-					Perl6::WS.between-matches(
-						$p,
-						'infix',
-						'OPER'
-					)
-				);
-				@child.append(
-					self._OPER(
-						$p.hash.<OPER>
-					)
+					self._OPER( $p.hash.<OPER> )
 				);
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -2498,25 +1948,15 @@ class Perl6::Parser::Factory {
 			when self.assert-hash( $_,
 					[< postfix OPER >],
 					[< postfix_prefix_meta_operator >] ) {
-				@child = self._postfix(
-					$p.hash.<postfix>
-				);
+				@child = self._postfix( $p.hash.<postfix> );
 				@child.append(
-					Perl6::WS.between-matches(
-						$p,
-						'postfix',
-						'OPER'
-					)
-				);
-				@child.append(
-					self._OPER(
-						$p.hash.<OPER>
-					)
+					self._OPER( $p.hash.<OPER> )
 				);
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -2527,21 +1967,10 @@ class Perl6::Parser::Factory {
 		given $p {
 			when self.assert-hash( $_, [< sym blorst >] ) {
 				@child.append(
-					Perl6::WS.with-inter-ws(
-						$_,
-						$_.hash.<sym>,
-						[
-							self._sym(
-								$_.hash.<sym>
-							)
-						],
-						$_.hash.<blorst>,
-						[
-							self._blorst(
-								$_.hash.<blorst>
-							)
-						]
-					)
+					self._sym( $_.hash.<sym> )
+				);
+				@child.append(
+					self._blorst( $_.hash.<blorst> )
 				);
 			}
 			when self.assert-hash( $_, [< blockoid >] ) {
@@ -2549,7 +1978,8 @@ class Perl6::Parser::Factory {
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -2559,25 +1989,15 @@ class Perl6::Parser::Factory {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< sign decint >] ) {
-				@child = self._sign(
-					$_.hash.<sign>
-				);
+				@child = self._sign( $_.hash.<sign> );
 				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'sign',
-						'decint'
-					)
-				);
-				@child.append(
-					self._decint(
-						$_.hash.<decint>
-					)
+					self._decint( $_.hash.<decint> )
 				);
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -2599,16 +2019,7 @@ class Perl6::Parser::Factory {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< sign decint >] ) {
-				@child = self._invocant(
-					$_.hash.<invocant>
-				);
-				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'invocant',
-						'semiarglist'
-					)
-				);
+				@child = self._invocant( $_.hash.<invocant> );
 				@child.append(
 					self._semiarglist(
 						$_.hash.<semiarglist>
@@ -2617,7 +2028,8 @@ class Perl6::Parser::Factory {
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -2644,15 +2056,12 @@ class Perl6::Parser::Factory {
 			# XXX Look into this at some point.
 			if substr-match( $p, $p.from, HYPER.chars ) eq HYPER {
 				@child = self._EXPR( $p.list.[0] );
+				my $str = $p.orig.substr(
+					$p.from, HYPER.chars
+				);
 				@child.append(
-					# XXX note that '>>' is a substring
-					Perl6::Operator::Prefix.new(
-						:factory-line-number( callframe(1).line ),
-						:from( $p.from ),
-						:to( $p.from + HYPER.chars ),
-						:content( 
-							substr( $p.orig, $p.from, HYPER.chars )
-						)
+					Perl6::Operator::Prefix.from-int(
+						$p.from, $str
 					)
 				);
 				@child.append(
@@ -2670,34 +2079,20 @@ class Perl6::Parser::Factory {
 				[< infix OPER >],
 				[< infix_postfix_meta_operator >] ) {
 			@child.append(
-				Perl6::WS.with-inter-ws(
-					$p,
-					$p.hash.<infix>,
-					[
-						self._infix( $p.hash.<infix> )
-					],
-					$p.list.[0].list.[0] // $p.list.[0],
-					[
-						self._EXPR( $p.list.[0] )
-					]
-				)
+				self._infix( $p.hash.<infix> )
+			);
+			@child.append(
+				self._EXPR( $p.list.[0] )
 			);
 		}
 		elsif self.assert-hash( $p,
 				[< prefix OPER >],
 				[< prefix_postfix_meta_operator >] ) {
 			@child.append(
-				Perl6::WS.with-inter-ws(
-					$p,
-					$p.hash.<prefix>,
-					[
-						self._prefix( $p.hash.<prefix> )
-					],
-					$p.list.[0].list.[0] // $p.list.[0],
-					[
-						self._EXPR( $p.list.[0] )
-					]
-				)
+				self._prefix( $p.hash.<prefix> )
+			);
+			@child.append(
+				self._EXPR( $p.list.[0] )
 			);
 		}
 		elsif self.assert-hash( $p,
@@ -2705,9 +2100,7 @@ class Perl6::Parser::Factory {
 				[< postfix_prefix_meta_operator >] ) {
 			@child = self._EXPR( $p.list.[0] );
 			@child.append(
-				self._postcircumfix(
-					$p.hash.<postcircumfix>
-				)
+				self._postcircumfix( $p.hash.<postcircumfix> )
 			);
 		}
 		elsif self.assert-hash( $p,
@@ -2722,17 +2115,7 @@ class Perl6::Parser::Factory {
 				[< infix_prefix_meta_operator OPER >] ) {
 			@child = self._EXPR( $p.list.[0] );
 			@child.append(
-				Perl6::WS.before-orig(
-					$p.hash.<infix_prefix_meta_operator>
-				),
-			);
-			@child.append(
 				self._infix_prefix_meta_operator(
-					$p.hash.<infix_prefix_meta_operator>
-				),
-			);
-			@child.append(
-				Perl6::WS.after-orig(
 					$p.hash.<infix_prefix_meta_operator>
 				),
 			);
@@ -2745,43 +2128,19 @@ class Perl6::Parser::Factory {
 		elsif self.assert-hash( $p, [< infix OPER >] ) {
 			if $p.list.elems == 3 {
 				if $p.hash.<infix>.Str eq COMMA {
-					@child.append(
-						Perl6::WS.before-orig(
-							$p.list.[0]
-						)
-					);
 					@child = self._EXPR( $p.list.[0] );
 					@child.append(
-						Perl6::Operator::Infix.new(
-							:factory-line-number(
-								callframe(0).line
-							),
-							:from( @child[*-1].to ),
-							:to( @child[*-1].to + COMMA.chars ),
-							:content( COMMA )
-						)
-					);
-					@child.append(
-						Perl6::WS.before-orig(
-							$p.list.[1]
+						Perl6::Operator::Infix.from-int(
+							@child[*-1].to,
+							COMMA
 						)
 					);
 					@child.append(
 						self._EXPR( $p.list.[1] )
 					);
 					@child.append(
-						Perl6::WS.after-orig(
-							$p.list.[1]
-						)
-					);
-					@child.append(
-						Perl6::Operator::Infix.new(
-							$p, COMMA
-						)
-					);
-					@child.append(
-						Perl6::WS.after-orig(
-							$p.hash.<infix>
+						Perl6::Operator::Infix.from-int(
+							$p.from, COMMA
 						)
 					);
 					@child.append(
@@ -2792,8 +2151,8 @@ class Perl6::Parser::Factory {
 					# XXX Sigh, unify this later.
 					@child = self._EXPR( $p.list.[0] );
 					@child.append(
-						Perl6::Operator::Infix.new(
-							$p, QUES-QUES
+						Perl6::Operator::Infix.from-int(
+							$p.from, QUES-QUES
 						)
 					);
 					@child.append(
@@ -2816,16 +2175,6 @@ class Perl6::Parser::Factory {
 				my Str $x = $p.orig.substr(
 					@child[*-1].to
 				);
-				if $x ~~ m{ ^ ( \s+ ) } {
-					@child.append(
-						Perl6::WS.new(
-							:factory-line-number( callframe(1).line ),
-							:from( @child[*-1].to ),
-							:to( @child[*-1].to + $0.chars ),
-							:content( $0.Str )
-						)
-					);
-				}
 				# XXX The bounds of infix and ws have to be
 				# XXX reset.
 				#
@@ -2833,11 +2182,12 @@ class Perl6::Parser::Factory {
 					@child.append(
 						self._infix( $p.hash.<infix> )
 					);
-					@child.append(
-						Perl6::WS.after-orig(
-							$p.hash.<infix>
-						)
-					);
+		my Str $x = $p.hash.<infix>.orig.substr( $p.hash.<infix>.to );
+		if $x ~~ m{ ^ ( \s+ ) } {
+			@child.append(
+				Perl6::WS.from-int( $p.hash.<infix>.to, $0.Str )
+			)
+		}
 					@child.append(
 						self._EXPR( $p.list.[$_] )
 					);
@@ -2877,11 +2227,6 @@ class Perl6::Parser::Factory {
 				)
 			);
 			@child.append(
-				Perl6::WS.header(
-					$p.hash.<args>
-				)
-			);
-			@child.append(
 				self._args( $p.hash.<args> )
 			);
 		}
@@ -2907,19 +2252,12 @@ class Perl6::Parser::Factory {
 			}
 			else {
 				@child.append(
-					self._longname(
-						$p.hash.<longname>
-					)
+					self._longname( $p.hash.<longname> )
 				);
 				if $p.hash.<args>.hash.keys and
 				   $p.hash.<args>.Str ~~ m{ \S } {
 					@child.append(
-						Perl6::WS.with-header(
-							$p.hash.<args>,
-							self._args(
-								$p.hash.<args>
-							)
-						)
+						self._args( $p.hash.<args> )
 					);
 				}
 			}
@@ -2992,25 +2330,20 @@ class Perl6::Parser::Factory {
 			);
 		}
 		elsif self.assert-hash( $p, [< methodop >] ) {
-			@child = self._methodop(
-				$p.hash.<methodop>
-			);
+			@child = self._methodop( $p.hash.<methodop> );
 		}
 		elsif self.assert-hash( $p, [< pblock >] ) {
-			@child = self._pblock(
-				$p.hash.<pblock>
-			);
+			@child = self._pblock( $p.hash.<pblock> );
 		}
 		elsif $p.Str {
-			@child = Perl6::Bareword.from-match(
-				$p
-			)
+			@child = Perl6::Bareword.from-match( $p )
 		}
 		else {
 			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+			die "Unhandled case" if
+				$*FACTORY-FAILURE-FATAL
 		}
-		@child.flat
+		@child
 	}
 
 	method _fake_infix( Mu $p ) {
@@ -3020,7 +2353,8 @@ class Perl6::Parser::Factory {
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -3032,7 +2366,8 @@ class Perl6::Parser::Factory {
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -3044,20 +2379,8 @@ class Perl6::Parser::Factory {
 				$_.Str ~~ m{ ('=>') };
 				@child = self._key( $_.hash.<key> );
 				@child.append(
-					Perl6::WS.after(
-						$_,
-						$_.hash.<key>
-					)
-				);
-				@child.append(
 					Perl6::Operator::Infix.new(
 						$_, FATARROW
-					)
-				);
-				@child.append(
-					Perl6::WS.before(
-						$_,
-						$_.hash.<val>
 					)
 				);
 				@child.append(
@@ -3066,7 +2389,8 @@ class Perl6::Parser::Factory {
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -3098,7 +2422,8 @@ class Perl6::Parser::Factory {
 		}
 		else {
 			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+			die "Unhandled case" if
+				$*FACTORY-FAILURE-FATAL
 		}
 		@child
 	}
@@ -3123,7 +2448,8 @@ class Perl6::Parser::Factory {
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -3133,25 +2459,15 @@ class Perl6::Parser::Factory {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< infix OPER >] ) {
-				@child = self._infix(
-					$_.hash.<infix>
-				);
+				@child = self._infix( $_.hash.<infix> );
 				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'infix',
-						'OPER'
-					)
-				);
-				@child.append(
-					self._OPER(
-						$_.hash.<OPER>
-					)
+					self._OPER( $_.hash.<OPER> )
 				);
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -3170,7 +2486,8 @@ class Perl6::Parser::Factory {
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -3187,7 +2504,8 @@ class Perl6::Parser::Factory {
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -3206,16 +2524,7 @@ class Perl6::Parser::Factory {
 					$_.hash.<dottyopish>
 				);
 				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'dottyopish',
-						'sym'
-					)
-				);
-				@child.append(
-					self._sym(
-						$_.hash.<sym>
-					)
+					self._sym( $_.hash.<sym> )
 				);
 			}
 			when self.assert-hash( $_, [< sym EXPR >] ) {
@@ -3223,23 +2532,6 @@ class Perl6::Parser::Factory {
 					Perl6::Operator::Infix.from-match(
 						$_.hash.<sym>
 					);
-				if $_.hash.<EXPR>.list.[0] {
-					@child.append(
-						Perl6::WS.after(
-							$_,
-							$p.hash.<sym>
-						)
-					);
-				}
-				else {
-					@child.append(
-						Perl6::WS.between-matches(
-							$_,
-							'sym',
-							'EXPR'
-						)
-					);
-				}
 	# from here
 				if $_.hash.<sym>.Str eq EQUAL and
 					$_.hash.<EXPR>.list.elems == 2 {
@@ -3249,21 +2541,8 @@ class Perl6::Parser::Factory {
 						)
 					);
 					@child.append(
-						Perl6::WS.before(
-							$_,
-							$_.hash.<EXPR>.hash.<infix>
-						)
-					);
-					@child.append(
 						self._infix(
 							$_.hash.<EXPR>.hash.<infix>
-						)
-					);
-					@child.append(
-						Perl6::WS.between-matches(
-							$_,
-							$_.hash.<EXPR>.hash.<infix>,
-							$_.hash.<EXPR>.list.[1]
 						)
 					);
 					@child.append(
@@ -3296,10 +2575,11 @@ class Perl6::Parser::Factory {
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child.flat
+		@child
 	}
 
 	method _integer( Mu $p ) {
@@ -3318,7 +2598,8 @@ class Perl6::Parser::Factory {
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -3349,7 +2630,8 @@ return True;
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -3362,7 +2644,8 @@ return True;
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -3405,7 +2688,8 @@ return True;
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -3418,8 +2702,7 @@ return True;
 				     [< trait >] ) {
 				my Perl6::Element @_child =
 					 self._multisig( $_.hash.<multisig> );
-				@child =
-					self._longname( $_.hash.<longname> );
+				@child = self._longname( $_.hash.<longname> );
 				@child.append(
 					Perl6::Operator::Circumfix.from-match(
 						$_, @_child
@@ -3433,29 +2716,19 @@ return True;
 				     [< specials longname blockoid >],
 				     [< trait >] ) {
 				@child.append(
-					Perl6::WS.with-inter-ws(
-						$_,
-						$_.hash.<longname>,
-						[
-							self._longname(
-								$_.hash.<longname>
-							)
-						],
-						$_.hash.<blockoid>,
-						[
-							self._blockoid(
-								$_.hash.<blockoid>
-							)
-						]
-					)
+					self._longname( $_.hash.<longname> )
+				);
+				@child.append(
+					self._blockoid( $_.hash.<blockoid> )
 				);
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child.flat
+		@child
 	}
 
 	method _methodop( Mu $p ) {
@@ -3466,14 +2739,7 @@ return True;
 					$_.hash.<longname>
 				);
 				@child.append(
-					Perl6::WS.header(
-						$_.hash.<args>
-					)
-				);
-				@child.append(
-					self._args(
-						$_.hash.<args>
-					)
+					self._args( $_.hash.<args> )
 				);
 			}
 			when self.assert-hash( $_, [< variable >] ) {
@@ -3484,7 +2750,8 @@ return True;
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -3497,7 +2764,8 @@ return True;
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -3509,7 +2777,8 @@ return True;
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -3521,7 +2790,8 @@ return True;
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -3542,7 +2812,8 @@ return True;
 		}
 		else {
 			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+			die "Unhandled case" if
+				$*FACTORY-FAILURE-FATAL
 		}
 		@child
 	}
@@ -3557,39 +2828,21 @@ return True;
 		given $p {
 			when self.assert-hash( $_, [< sym routine_def >] ) {
 				@child.append(
-					Perl6::WS.with-inter-ws(
-						$_,
-						$_.hash.<sym>,
-						[
-							self._sym(
-								$_.hash.<sym>
-							)
-						],
-						$_.hash.<routine_def>,
-						[
-							self._routine_def(
-								$_.hash.<routine_def>
-							)
-						]
+					self._sym( $_.hash.<sym> )
+				);
+				@child.append(
+					self._routine_def(
+						$_.hash.<routine_def>
 					)
 				);
 			}
 			when self.assert-hash( $_, [< sym declarator >] ) {
 				@child.append(
-					Perl6::WS.with-inter-ws(
-						$_,
-						$_.hash.<sym>,
-						[
-							self._sym(
-								$_.hash.<sym>
-							)
-						],
-						$_.hash.<declarator>,
-						[
-							self._declarator(
-								$_.hash.<declarator>
-							)
-						]
+					self._sym( $_.hash.<sym> )
+				);
+				@child.append(
+					self._declarator(
+						$_.hash.<declarator>
 					)
 				);
 			}
@@ -3600,7 +2853,8 @@ return True;
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -3611,17 +2865,13 @@ return True;
 		given $p {
 			when self.assert-hash( $_, [< signature >] ) {
 				@child.append(
-					Perl6::WS.with-trailer(
-						$_.hash.<signature>,
-						self._signature(
-							$_.hash.<signature>
-						)
-					)
+					self._signature( $_.hash.<signature> )
 				);
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -3634,7 +2884,8 @@ return True;
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -3648,22 +2899,8 @@ return True;
 				   post_constraint >] ) {
 				@child = self._param_var( $_.hash.<param_var> );
 				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'param_var',
-						'type_constraint'
-					)
-				);
-				@child.append(
 					self._type_constraint(
 						$_.hash.<type_constraint>
-					)
-				);
-				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'type_constraint',
-						'quant'
 					)
 				);
 				@child.append(
@@ -3704,7 +2941,8 @@ return True;
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -3738,7 +2976,8 @@ return True;
 		}
 		else {
 			debug-match( $_ ) if $*DEBUG;
-			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+			die "Unhandled case" if
+				$*FACTORY-FAILURE-FATAL
 		}
 		@child
 	}
@@ -3750,7 +2989,8 @@ return True;
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -3771,22 +3011,8 @@ return True;
 						$_.hash.<sigmaybe>
 					);
 					@child.append(
-						Perl6::WS.between-matches(
-							$_,
-							'sigmaybe',
-							'sigfinal'
-						)
-					);
-					@child.append(
 						self._sigfinal(
 							$_.hash.<sigfinal>
-						)
-					);
-					@child.append(
-						Perl6::WS.between-matches(
-							$_,
-							'sigfinal',
-							'quantifier'
 						)
 					);
 					@child.append(
@@ -3795,43 +3021,18 @@ return True;
 						)
 					);
 					@child.append(
-						Perl6::WS.between-matches(
-							$_,
-							'quantifier',
-							'atom'
-						)
-					);
-					@child.append(
-						self._atom(
-							$_.hash.<atom>
-						)
+						self._atom( $_.hash.<atom> )
 					);
 				}
 				elsif self.assert-hash( $_,
 					[< sigfinal quantifier
 					   separator atom >] ) {
 					@child.append(
-						self._atom(
-							$_.hash.<atom>
-						)
-					);
-					@child.append(
-						Perl6::WS.between-matches(
-							$_,
-							'atom',
-							'quantifier'
-						)
+						self._atom( $_.hash.<atom> )
 					);
 					@child.append(
 						self._quantifier(
 							$_.hash.<quantifier>
-						)
-					);
-					@child.append(
-						Perl6::WS.between-matches(
-							$_,
-							'quantifier',
-							'separator'
 						)
 					);
 					@child.append(
@@ -3847,22 +3048,8 @@ return True;
 						$_.hash.<sigmaybe>
 					);
 					@child.append(
-						Perl6::WS.between-matches(
-							$_,
-							'sigmaybe',
-							'sigfinal'
-						)
-					);
-					@child.append(
 						self._sigfinal(
 							$_.hash.<sigfinal>
-						)
-					);
-					@child.append(
-						Perl6::WS.between-matches(
-							$_,
-							'sigfinal',
-							'separator'
 						)
 					);
 					@child.append(
@@ -3871,38 +3058,15 @@ return True;
 						)
 					);
 					@child.append(
-						Perl6::WS.between-matches(
-							$_,
-							'separator',
-							'atom'
-						)
-					);
-					@child.append(
-						self._atom(
-							$_.hash.<atom>
-						)
+						self._atom( $_.hash.<atom> )
 					);
 				}
 				elsif self.assert-hash( $_,
 					[< atom sigfinal quantifier >] ) {
 					@child = self._atom( $_.hash.<atom> );
 					@child.append(
-						Perl6::WS.between-matches(
-							$_,
-							'atom',
-							'sigfinal'
-						)
-					);
-					@child.append(
 						self._sigfinal(
 							$_.hash.<sigfinal>
-						)
-					);
-					@child.append(
-						Perl6::WS.between-matches(
-							$_,
-							'sigfinal',
-							'quantifier'
 						)
 					);
 					@child.append(
@@ -3942,7 +3106,8 @@ return True;
 		}
 		else {
 			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+			die "Unhandled case" if
+				$*FACTORY-FAILURE-FATAL
 		}
 		@child
 	}
@@ -3956,7 +3121,8 @@ return True;
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -4054,38 +3220,19 @@ return True;
 					)
 				);
 				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'infix_prefix_meta_operator',
-						'OPER'
-					)
-				);
-				@child.append(
-					self._OPER(
-						$_.hash.<OPER>
-					)
+					self._OPER( $_.hash.<OPER> )
 				);
 			}
 			when self.assert-hash( $_, [< infix OPER >] ) {
-				@child = self._infix(
-					$_.hash.<infix>
-				);
+				@child = self._infix( $_.hash.<infix> );
 				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'infix',
-						'OPER'
-					)
-				);
-				@child.append(
-					self._OPER(
-						$_.hash.<OPER>
-					)
+					self._OPER( $_.hash.<OPER> )
 				);
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -4097,28 +3244,10 @@ return True;
 			when self.assert-hash( $_, [< sym infixish O >] ) {
 				@child = self._sym( $_.hash.<sym> );
 				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'sym',
-						'infixish'
-					)
+					self._infixish( $_.hash.<infixish> )
 				);
 				@child.append(
-					self._infixish(
-						$_.hash.<infixish>
-					)
-				);
-				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'infixish',
-						'O'
-					)
-				);
-				@child.append(
-					self._O(
-						$_.hash.<O>
-					)
+					self._O( $_.hash.<O> )
 				);
 			}
 			when self.assert-hash( $_, [< sym dottyop O >] ) {
@@ -4132,117 +3261,50 @@ return True;
 				);
 			}
 			when self.assert-hash( $_, [< sym O >] ) {
-				@child = self._sym(
-					$_.hash.<sym>
-				);
+				@child = self._sym( $_.hash.<sym> );
 				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'sym',
-						'O'
-					)
-				);
-				@child.append(
-					self._O(
-						$_.hash.<O>
-					)
+					self._O( $_.hash.<O> )
 				);
 			}
 			when self.assert-hash( $_, [< EXPR O >] ) {
-				@child = self._EXPR(
-					$_.hash.<EXPR>
-				);
+				@child = self._EXPR( $_.hash.<EXPR> );
 				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'EXPR',
-						'O'
-					)
-				);
-				@child.append(
-					self._O(
-						$_.hash.<O>
-					)
+					self._O( $_.hash.<O> )
 				);
 			}
 			when self.assert-hash( $_, [< semilist O >] ) {
-				@child = self._semilist(
-					$_.hash.<semilist>
-				);
+				@child = self._semilist( $_.hash.<semilist> );
 				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'semilist',
-						'O'
-					)
-				);
-				@child.append(
-					self._O(
-						$_.hash.<O>
-					)
+					self._O( $_.hash.<O> )
 				);
 			}
 			when self.assert-hash( $_, [< nibble O >] ) {
-				@child = self._nibble(
-					$_.hash.<nibble>
-				);
+				@child = self._nibble( $_.hash.<nibble> );
 				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'nibble',
-						'O'
-					)
-				);
-				@child.append(
-					self._O(
-						$_.hash.<O>
-					)
+					self._O( $_.hash.<O> )
 				);
 			}
 			when self.assert-hash( $_, [< arglist O >] ) {
-				@child = self._arglist(
-					$_.hash.<arglist>
-				);
+				@child = self._arglist( $_.hash.<arglist> );
 				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'arglist',
-						'O'
-					)
-				);
-				@child.append(
-					self._O(
-						$_.hash.<O>
-					)
+					self._O( $_.hash.<O> )
 				);
 			}
 			when self.assert-hash( $_, [< dig O >] ) {
-				@child = self._dig(
-					$_.hash.<dig>
-				);
+				@child = self._dig( $_.hash.<dig> );
 				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'dig',
-						'O'
-					)
-				);
-				@child.append(
-					self._O(
-						$_.hash.<O>
-					)
+					self._O( $_.hash.<O> )
 				);
 			}
 			when self.assert-hash( $_, [< O >] ) {
 				@child.append(
-					self._O(
-						$_.hash.<O>
-					)
+					self._O( $_.hash.<O> )
 				);
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -4258,26 +3320,18 @@ return True;
 			# $_ doesn't contain WS after the block.
 			when self.assert-hash( $_, [< sym package_def >] ) {
 				@child.append(
-					Perl6::WS.with-inter-ws(
-						$_,
-						$_.hash.<sym>,
-						[
-							self._sym(
-								$_.hash.<sym>
-							)
-						],
-						$_.hash.<package_def>,
-						[
-							self._package_def(
-								$_.hash.<package_def>
-							)
-						]
+					self._sym( $_.hash.<sym> )
+				);
+				@child.append(
+					self._package_def(
+						$_.hash.<package_def>
 					)
 				);
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -4300,64 +3354,34 @@ return True;
 		given $p {
 			when self.assert-hash( $_, [< sym package_def >] ) {
 				@child.append(
-					Perl6::WS.with-inter-ws(
-						$_,
-						$_.hash.<sym>,
-						[
-							self._sym(
-								$_.hash.<sym>
-							)
-						],
-						$_.hash.<package_def>,
-						[
-							self._package_def(
-								$_.hash.<package_def>
-							)
-						]
+					self._sym( $_.hash.<sym> )
+				);
+				@child.append(
+					self._package_def(
+						$_.hash.<package_def>
 					)
 				);
 			}
 			when self.assert-hash( $_, [< sym typename >] ) {
 				@child.append(
-					Perl6::WS.with-inter-ws(
-						$_,
-						$_.hash.<sym>,
-						[
-							self._sym(
-								$_.hash.<sym>
-							)
-						],
-						$_.hash.<typename>,
-						[
-							self._typename(
-								$_.hash.<typename>
-							)
-						]
-					)
+					self._sym( $_.hash.<sym> )
+				);
+				@child.append(
+					self._typename( $_.hash.<typename> )
 				);
 			}
 			when self.assert-hash( $_, [< sym trait >] ) {
 				@child.append(
-					Perl6::WS.with-inter-ws(
-						$_,
-						$_.hash.<sym>,
-						[
-							self._sym(
-								$_.hash.<sym>
-							)
-						],
-						$_.hash.<trait>,
-						[
-							self._trait(
-								$_.hash.<trait>
-							)
-						]
-					)
+					self._sym( $_.hash.<sym> )
+				);
+				@child.append(
+					self._trait( $_.hash.<trait> )
 				);
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -4373,11 +3397,6 @@ return True;
 					$_.hash.<longname>.to - $_.from
 				);
 				if $temp ~~ m{ ^ ( \s+ ) ( ';' )? } {
-					@child.append(
-						Perl6::WS.after-orig(
-							$_.hash.<longname>
-						)
-					);
 					if $1.chars {
 						@child.append(
 							Perl6::Semicolon.new(
@@ -4398,21 +3417,22 @@ return True;
 			when self.assert-hash( $_,
 					[< longname blockoid >], [< trait >] ) {
 				@child.append(
-					Perl6::WS.with-inter-ws(
-						$_,
-						$_.hash.<longname>,
-						[
-							self._longname(
-								$p.hash.<longname>
-							)
-						],
-						$_.hash.<blockoid>,
-						[
-							self._blockoid(
-								$_.hash.<blockoid>
-							)
-						]
+					self._longname( $_.hash.<longname> )
+				);
+				my $ws =
+					$_.orig.substr(
+						$_.hash.<longname>.to,
+						$_.hash.<blockoid>.from -
+							$_.hash.<longname>.to
+					);
+				@child.append(
+					Perl6::WS.from-int(
+						$_.hash.<longname>.to,
+						$ws
 					)
+				);
+				@child.append(
+					self._blockoid( $_.hash.<blockoid> )
 				);
 			}
 			when self.assert-hash( $_,
@@ -4421,23 +3441,23 @@ return True;
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child.flat
+		@child
 	}
 
 	method _param_term( Mu $p ) {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< defterm >] ) {
-				@child = self._defterm(
-					$_.hash.<defterm>
-				);
+				@child = self._defterm( $_.hash.<defterm> );
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -4507,7 +3527,7 @@ return True;
 				@child.append(
 					self._default_value(
 						$_.hash.<default_value>
-					).flat
+					)
 				);
 			}
 			elsif self.assert-hash( $_,
@@ -4528,11 +3548,11 @@ return True;
 				my Int $from = $0.from;
 				@child.append(
 					Perl6::Operator::Prefix.new(
-						:factory-line-number( callframe(1).line ),
-						:from( $from ),
-						:to( $from + COLON.chars ),
-						:content( COLON )
-					),
+						$from,
+						COLON
+					)
+				);
+				@child.append(
 					self._named_param(
 						$_.hash.<named_param>
 					)
@@ -4550,7 +3570,8 @@ return True;
 			}
 			else {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -4653,7 +3674,8 @@ return True;
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -4665,18 +3687,7 @@ return True;
 					[< lambda signature blockoid >] ) {
 				@child = self._lambda( $_.hash.<lambda> );
 				@child.append(
-					Perl6::WS.after(
-						$_,
-						$_.hash.<lambda>
-					)
-				);
-				@child.append(
 					self._signature( $_.hash.<signature> )
-				);
-				@child.append(
-					Perl6::WS.trailer(
-						$_.hash.<signature>
-					)
 				);
 				@child.append(
 					self._blockoid( $_.hash.<blockoid> )
@@ -4689,7 +3700,8 @@ return True;
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -4740,9 +3752,7 @@ return True;
 			for $p.list {
 				if self.assert-hash( $_, [< sym >] ) {
 					@child.append(
-						self._sym(
-							$_.hash.<sym>
-						)
+						self._sym( $_.hash.<sym> )
 					);
 				}
 				elsif $_.Str {
@@ -4754,13 +3764,15 @@ return True;
 				}
 				else {
 					debug-match( $_ ) if $*DEBUG;
-					die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+					die "Unhandled case" if
+						$*FACTORY-FAILURE-FATAL
 				}
 			}
 		}
 		else {
 			debug-match( $_ ) if $*DEBUG;
-			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+			die "Unhandled case" if
+				$*FACTORY-FAILURE-FATAL
 		}
 		@child
 	}
@@ -4780,34 +3792,15 @@ return True;
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< arglist O >] ) {
-				@child = self._arglist(
-					$_.hash.<arglist>
-				);
+				@child = self._arglist( $_.hash.<arglist> );
 				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'arglist',
-						'O'
-					)
-				);
-				@child.append(
-					self._O(
-						$_.hash.<O>
-					)
+					self._O( $_.hash.<O> )
 				);
 			}
 			when self.assert-hash( $_, [< semilist O >] ) {
 				my Perl6::Element @_child;
 				@_child.append(
-					Perl6::WS.before(
-						$_,
-						$_.hash.<semilist>
-					)
-				);
-				@_child.append(
-					self._semilist(
-						$_.hash.<semilist>
-					)
+					self._semilist( $_.hash.<semilist> )
 				);
 				@child.append(
 					Perl6::Operator::PostCircumfix.from-match(
@@ -4820,16 +3813,6 @@ return True;
 			when self.assert-hash( $_, [< nibble O >] ) {
 				if $_.Str ~~ m{ ^ (.) ( \s+ )? ( .+? ) ( \s+ )? (.) $ } {
 					my Perl6::Element @_child;
-					if $1 and $1.Str.chars {
-						@_child.append(
-							Perl6::WS.new(
-								:factory-line-number( callframe(1).line ),
-								:from( $_.from + $0.Str.chars ),
-								:to( $_.from + $0.Str.chars + $1.Str.chars ),
-								:content( $1.Str )
-							)
-						);
-					}
 					@_child.append(
 						Perl6::Bareword.new(
 							:factory-line-number( callframe(1).line ),
@@ -4838,16 +3821,6 @@ return True;
 							:content( $2.Str )
 						)
 					);
-					if $3 and $3.Str.chars {
-						@_child.append(
-							Perl6::WS.new(
-								:factory-line-number( callframe(1).line ),
-								:from( $_.to - $4.Str.chars - $3.Str.chars ),
-								:to( $_.to - $4.Str.chars ),
-								:content( $3.Str )
-							)
-						);
-					}
 					@child.append(
 						Perl6::Operator::PostCircumfix.from-match(
 							$_, @_child
@@ -4855,29 +3828,17 @@ return True;
 					);
 				}
 				else {
-					if $_.hash.<nibble>.Str ~~ m{ ^ ( \S ) ( \s+ ) } {
-						@child.append(
-							Perl6::WS.new(
-								:factory-line-number( callframe(1).line ),
-								:from( $_.hash.<nibble>.from + $0.Str.chars ),
-								:to( $_.hash.<nibble>.from + $0.Str.chars + $1.Str.chars ),
-								:content( $1.Str )
-							)
-						);
-					}
 					@child.append(
-						Perl6::WS.with-trailer(
-							$_.hash.<nibble>,
-							Perl6::Bareword.from-match-trimmed(
-								$_.hash.<nibble>
-							)
+						Perl6::Bareword.from-match-trimmed(
+							$_.hash.<nibble>
 						)
 					);
 				}
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -4902,7 +3863,8 @@ return True;
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -4915,42 +3877,17 @@ return True;
 					[< sym postcircumfix O >] ) {
 				@child = self._sym( $_.hash.<sym> );
 				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'sym',
-						'postcircumfix'
-					)
-				);
-				@child.append(
 					self._postcircumfix(
 						$_.hash.<postcircumfix>
 					)
 				);
 				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'postcircumfix',
-						'O'
-					)
-				);
-				@child.append(
-					self._O(
-						$_.hash.<O>
-					)
+					self._O( $_.hash.<O> )
 				);
 			}
 			when self.assert-hash( $_,
 					[< sym postcircumfix >], [< O >] ) {
-				@child = self._sym(
-					$_.hash.<sym>
-				);
-				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'sym',
-						'postcircumfix'
-					)
-				);
+				@child = self._sym( $_.hash.<sym> );
 				@child.append(
 					self._postcircumfix(
 						$_.hash.<postcircumfix>
@@ -4959,7 +3896,8 @@ return True;
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -4970,20 +3908,18 @@ return True;
 		given $p {
 			when self.assert-hash( $_, [< sym O >] ) {
 				@child.append(
-					Perl6::WS.with-trailer(
-						$_,
-						Perl6::Operator::Prefix.from-match(
-							$_.hash.<sym>
-						)
+					Perl6::Operator::Prefix.from-match(
+						$_.hash.<sym>
 					)
 				);
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child.flat
+		@child
 	}
 
 	method _quant( Mu $p ) {
@@ -4998,7 +3934,8 @@ return True;
 		}
 		else {
 			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+			die "Unhandled case" if
+				$*FACTORY-FAILURE-FATAL
 		}
 	}
 
@@ -5006,25 +3943,15 @@ return True;
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< sigfinal atom >] ) {
-				@child = self._atom(
-					$_.hash.<atom>
-				);
+				@child = self._atom( $_.hash.<atom> );
 				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'atom',
-						'sigfinal'
-					)
-				);
-				@child.append(
-					self._sigfinal(
-						$_.hash.<sigfinal>
-					)
+					self._sigfinal( $_.hash.<sigfinal> )
 				);
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -5038,66 +3965,27 @@ return True;
 		given $p {
 			when self.assert-hash( $_,
 					[< sym min max backmod >] ) {
-				@child = self._sym(
-					$_.hash.<sym>
+				@child = self._sym( $_.hash.<sym> );
+				@child.append(
+					self._min( $_.hash.<min> )
 				);
 				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'sym',
-						'min'
-					)
+					self._max( $_.hash.<max> )
 				);
 				@child.append(
-					self._min(
-						$_.hash.<min>
-					)
-				);
-				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'min',
-						'max'
-					)
-				);
-				@child.append(
-					self._max(
-						$_.hash.<max>
-					)
-				);
-				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'max',
-						'backmod'
-					)
-				);
-				@child.append(
-					self._backmod(
-						$_.hash.<backmod>
-					)
+					self._backmod( $_.hash.<backmod> )
 				);
 			}
 			when self.assert-hash( $_, [< sym backmod >] ) {
-				@child = self._sym(
-					$_.hash.<sym>
-				);
+				@child = self._sym( $_.hash.<sym> );
 				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'sym',
-						'backmod'
-					)
-				);
-				@child.append(
-					self._backmod(
-						$_.hash.<backmod>
-					)
+					self._backmod( $_.hash.<backmod> )
 				);
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -5112,23 +4000,15 @@ return True;
 					@child = self._babble(
 						$_.hash.<babble>
 					);
-					@child.append(
-						Perl6::WS.between-matches(
-							$_,
-							'babble',
-							'nibble'
-						)
-					);
 				}
 				@child.append(
-					self._nibble(
-						$_.hash.<nibble>
-					)
+					self._nibble( $_.hash.<nibble> )
 				);
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -5157,13 +4037,6 @@ return True;
 		my Perl6::Element @child;
 		if self.assert-hash-strict( $p,
 				[< sym quibble >], [< rx_adverbs >] ) {
-			@child.append(
-				Perl6::WS.between-matches(
-					$p,
-					'sym',
-					'quibble'
-				)
-			);
 			if $p.hash.<sym>.Str eq 'rx' {
 				# XXX Will need fixing.
 				@child.append(
@@ -5174,9 +4047,7 @@ return True;
 					)
 				);
 				@child.append(
-					self._quibble(
-						$p.hash.<quibble>
-					)
+					self._quibble( $p.hash.<quibble> )
 				);
 				@child.append(
 					Perl6::Balanced::Exit.new(
@@ -5188,37 +4059,17 @@ return True;
 			}
 			else {
 				@child.append(
-					self._quibble(
-						$p.hash.<quibble>
-					)
+					self._quibble( $p.hash.<quibble> )
 				);
 			}
 		}
 		elsif self.assert-hash( $p, [< sym rx_adverbs sibble >] ) {
 			@child = self._sym( $_.hash.<sym> );
 			@child.append(
-				Perl6::WS.between-matches(
-					$_,
-					'sym',
-					'quibble'
-				)
+				self._sibble( $_.hash.<sibble> )
 			);
 			@child.append(
-				self._sibble(
-					$_.hash.<sibble>
-				)
-			);
-			@child.append(
-				Perl6::WS.between-matches(
-					$_,
-					'sibble',
-					'rx_adverbs'
-				)
-			);
-			@child.append(
-				self._rx_adverbs(
-					$_.hash.<rx_adverbs>
-				)
+				self._rx_adverbs( $_.hash.<rx_adverbs> )
 			);
 		}
 		elsif self.assert-hash( $p, [< quibble >] ) {
@@ -5287,7 +4138,8 @@ return True;
 		}
 		else {
 			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+			die "Unhandled case" if
+				$*FACTORY-FAILURE-FATAL
 		}
 		@child
 	}
@@ -5305,7 +4157,8 @@ return True;
 				}
 				else {
 					debug-match( $_ ) if $*DEBUG;
-					die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+					die "Unhandled case" if
+						$*FACTORY-FAILURE-FATAL
 				}
 			}
 		}
@@ -5314,28 +4167,10 @@ return True;
 				[< exp base >] ) {
 			@child = self._circumfix( $_.hash.<circumfix> );
 			@child.append(
-				Perl6::WS.between-matches(
-					$_,
-					'circumfix',
-					'bracket'
-				)
+				self._bracket( $_.hash.<bracket> )
 			);
 			@child.append(
-				self._bracket(
-					$_.hash.<bracket>
-				)
-			);
-			@child.append(
-				Perl6::WS.between-matches(
-					$_,
-					'bracket',
-					'radix'
-				)
-			);
-			@child.append(
-				self._radix(
-					$_.hash.<radix>
-				)
+				self._radix( $_.hash.<radix> )
 			);
 		}
 		elsif self.assert-hash( $p, [< identifier >] ) {
@@ -5343,7 +4178,8 @@ return True;
 		}
 		else {
 			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+			die "Unhandled case" if
+				$*FACTORY-FAILURE-FATAL
 		}
 		@child
 	}
@@ -5367,7 +4203,8 @@ return True;
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -5381,26 +4218,16 @@ return True;
 		given $p {
 			when self.assert-hash( $_, [< sym regex_def >] ) {
 				@child.append(
-					Perl6::WS.with-inter-ws(
-						$_,
-						$_.hash.<sym>,
-						[
-							self._sym(
-								$_.hash.<sym>
-							)
-						],
-						$_.hash.<regex_def>,
-						[
-							self._regex_def(
-								$_.hash.<regex_def>
-							)
-						]
-					)
+					self._sym( $_.hash.<sym> )
+				);
+				@child.append(
+					self._regex_def( $_.hash.<regex_def> )
 				);
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -5418,15 +4245,7 @@ return True;
 				[< signature trait >] ) {
 			my Perl6::Element @_child;
 			@child.append(
-				self._deflongname(
-					$p.hash.<deflongname>
-				)
-			);
-			@child.append(
-				Perl6::WS.after(
-					$p,
-					$p.hash.<deflongname>
-				)
+				self._deflongname( $p.hash.<deflongname> )
 			);
 			my Int $left-margin = $p.from;
 			my Int $right-margin = $p.to;
@@ -5452,26 +4271,8 @@ return True;
 				)
 			);
 			$x = $p.Str.substr( $left-margin + 1 - $p.from );
-			if $x ~~ m{ ^ ( \s+ ) } {
-				@_child.append(
-					Perl6::WS.new(
-						:factory-line-number(
-							callframe(1).line
-						),
-						:from(
-							$left-margin + 1
-						),
-						:to( 
-							$left-margin + 1 + $0.Str.chars
-						),
-						:content( $0.Str )
-					)
-				);
-			}
 			@_child.append(
-				self._nibble(
-					$p.hash.<nibble>
-				)
+				self._nibble( $p.hash.<nibble> )
 			);
 			$x = $p.Str.substr( $p.hash.<nibble>.to - $p.from );
 			@_child.append(
@@ -5497,7 +4298,8 @@ return True;
 		}
 		else {
 			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+			die "Unhandled case" if
+				$*FACTORY-FAILURE-FATAL
 		}
 		@child
 	}
@@ -5517,29 +4319,21 @@ return True;
 		if self.assert-hash( $p, [< sym routine_def >] ) {
 			@child = self._sym( $p.hash.<sym> );
 			@child.append(
-				Perl6::WS.with-header(
-					$p.hash.<routine_def>,
-					self._routine_def(
-						$p.hash.<routine_def>
-					)
-				)
+				self._routine_def( $p.hash.<routine_def> )
 			);
 		}
 		elsif self.assert-hash( $p, [< sym method_def >] ) {
 			@child = self._sym( $p.hash.<sym> );
-			# XXX subsume this into the Perl6::WS object later
 			@child.append(
-				Perl6::WS.with-header(
-					$p.hash.<method_def>,
-					self._method_def( $p.hash.<method_def> )
-				)
+				self._method_def( $p.hash.<method_def> )
 			);
 		}
 		else {
 			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+			die "Unhandled case" if
+				$*FACTORY-FAILURE-FATAL
 		}
-		@child.flat
+		@child
 	}
 
 	method _routine_def( Mu $p ) {
@@ -5568,23 +4362,6 @@ return True;
 					:content( $0.Str )
 				)
 			);
-			if $1.Str {
-				@_child.append(
-					Perl6::WS.new(
-						:factory-line-number(
-							callframe(1).line
-						),
-						:from(
-							$p.hash.<multisig>.from -
-							$1.Str.chars
-						),
-						:to(
-							$p.hash.<multisig>.from
-						),
-						:content( $1.Str )
-					)
-				);
-			}
 			@_child.append(
 				self._multisig( $p.hash.<multisig> )
 			);
@@ -5593,9 +4370,7 @@ return True;
 					:factory-line-number(
 						callframe(1).line
 					),
-					:from(
-						$p.hash.<multisig>.to
-					),
+					:from( $p.hash.<multisig>.to ),
 					:to(
 						$p.hash.<multisig>.to +
 						CLOSE-PAREN.chars
@@ -5607,28 +4382,18 @@ return True;
 				self._deflongname( $p.hash.<deflongname> )
 			);
 			@child.append(
-				Perl6::WS.after(
-					$p,
-					$p.hash.<deflongname>
-				)
-			);
-			@child.append(
 				Perl6::Operator::Circumfix.new(
 					:factory-line-number(
 						callframe(1).line 
 					),
-					:from( $p.hash.<multisig>.from - $0.Str.chars - $1.Str.chars ),
+					:from(
+						$p.hash.<multisig>.from -
+						$0.Str.chars - $1.Str.chars ),
 					:to(
 						$p.hash.<multisig>.to +
 						CLOSE-PAREN.chars
 					),
 					:child( @_child ),
-				)
-			);
-			@child.append(
-				Perl6::WS.before(
-					$p,
-					$p.hash.<blockoid>
 				)
 			);
 			@child.append(
@@ -5639,31 +4404,28 @@ return True;
 				[< deflongname statementlist >],
 				[< trait >] ) {
 			@child =
-				self._deflongname(
-					$p.hash.<deflongname>
+				self._deflongname( $p.hash.<deflongname> );
+			if $p.Str ~~ m{ ( ';' ) ( \s* ) $ } {
+				@child.append(
+					Perl6::Semicolon.new(
+						:factory-line-number(
+							callframe(1).line
+						),
+						:from(
+							$p.to - $1.chars -
+							$0.chars
+						),
+						:to( $p.to - $1.chars ),
+						:content( $0.Str )
+					)
 				);
-			@child.append(
-				Perl6::WS.semicolon-terminator( $p )
-			);
+			}
 		}
 		elsif self.assert-hash( $p,
 				[< deflongname trait blockoid >] ) {
-			@child =
-				self._deflongname(
-					$p.hash.<deflongname>
-				);
+			@child = self._deflongname( $p.hash.<deflongname> );
 			@child.append(
-				Perl6::WS.between-matches(
-					$p,
-					$p.hash.<deflongname>,
-					$p.hash.<trait>.list.[0],
-				)
-			);
-			@child.append(
-				Perl6::WS.with-trailer(
-					$p.hash.<trait>.list.[0],
-					self._trait( $p.hash.<trait> )
-				)
+				self._trait( $p.hash.<trait> )
 			);
 			@child.append(
 				self._blockoid( $p.hash.<blockoid> )
@@ -5682,13 +4444,6 @@ return True;
 					:child( @_child )
 				);
 			@child.append(
-				Perl6::WS.between-matches(
-					$p,
-					'multisig',
-					'blockoid',
-				)
-			);
-			@child.append(
 				self._blockoid( $p.hash.<blockoid> )
 			);
 		}
@@ -5696,21 +4451,10 @@ return True;
 				[< deflongname blockoid >],
 				[< trait >] ) {
 			@child.append(
-				Perl6::WS.with-inter-ws(
-					$p,
-					$p.hash.<deflongname>,
-					[
-						self._deflongname(
-							$p.hash.<deflongname>
-						)
-					],
-					$p.hash.<blockoid>,
-					[
-						self._blockoid(
-							$p.hash.<blockoid>
-						)
-					]
-				)
+				self._deflongname( $p.hash.<deflongname> )
+			);
+			@child.append(
+				self._blockoid( $p.hash.<blockoid> )
 			);
 		}
 		elsif self.assert-hash( $p, [< blockoid >], [< trait >] ) {
@@ -5718,9 +4462,10 @@ return True;
 		}
 		else {
 			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+			die "Unhandled case" if
+				$*FACTORY-FAILURE-FATAL
 		}
-		@child.flat
+		@child
 	}
 
 	method _rx_adverbs( Mu $p ) {
@@ -5734,7 +4479,8 @@ return True;
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -5748,20 +4494,11 @@ return True;
 			if self.assert-hash( $_,
 					[< multi_declarator DECL typename >] ) {
 				@child.append(
-					Perl6::WS.with-inter-ws(
-						$_,
-						$_.hash.<typename>,
-						[
-							self._typename(
-								$_.hash.<typename>
-							)
-						],
-						$_.hash.<multi_declarator>,
-						[
-							self._multi_declarator(
-								$_.hash.<multi_declarator>
-							)
-						]
+					self._typename( $_.hash.<typename> )
+				);
+				@child.append(
+					self._multi_declarator(
+						$_.hash.<multi_declarator>
 					)
 				);
 			}
@@ -5776,20 +4513,11 @@ return True;
 			elsif self.assert-hash( $_,
 					[< sym package_declarator >] ) {
 				@child.append(
-					Perl6::WS.with-inter-ws(
-						$_,
-						$_.hash.<sym>,
-						[
-							self._sym(
-								$_.hash.<sym>
-							)
-						],
-						$_.hash.<package_declarator>,
-						[
-							self._package_declarator(
-								$_.hash.<package_declarator>
-							)
-						]
+					self._sym( $_.hash.<sym> )
+				);
+				@child.append(
+					self._package_declarator(
+						$_.hash.<package_declarator>
 					)
 				);
 			}
@@ -5804,10 +4532,11 @@ return True;
 			}
 			else {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child.flat
+		@child
 	}
 
 	# my <name>
@@ -5825,19 +4554,15 @@ return True;
 		if self.assert-hash( $p, [< sym scoped >] ) {
 			@child = self._sym( $p.hash.<sym> );
 			@child.append(
-				Perl6::WS.after-orig(
-					$p.hash.<sym>
-				)
-			);
-			@child.append(
-				self._scoped( $p.hash.<scoped> ).flat
+				self._scoped( $p.hash.<scoped> )
 			);
 		}
 		else {
 			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+			die "Unhandled case" if
+				$*FACTORY-FAILURE-FATAL
 		}
-		@child.flat
+		@child
 	}
 
 	method _semiarglist( Mu $p ) {
@@ -5847,7 +4572,8 @@ return True;
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -5857,24 +4583,16 @@ return True;
 		given $p {
 			when self.assert-hash( $_, [< statement >] ) {
 				@child.append(
-					Perl6::WS.with-header-trailer(
-						$_,
-						self._statement(
-							$_.hash.<statement>
-						)
-					)
+					self._statement( $_.hash.<statement> )
 				);
 			}
 			when self.assert-hash( $_, [ ], [< statement >] ) {
-				@child.append(
-					Perl6::WS.from-match(
-						$_
-					)
-				);
+				( )
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -5886,16 +4604,7 @@ return True;
 			when self.assert-hash( $_,
 					[< septype quantified_atom >] ) {
 				@child.append(
-					self._septype(
-						$_.hash.<septype>
-					)
-				);
-				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'septype',
-						'quantified_atom'
-					)
+					self._septype( $_.hash.<septype> )
 				);
 				@child.append(
 					self._quantified_atom(
@@ -5905,7 +4614,8 @@ return True;
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -5926,33 +4636,16 @@ return True;
 			if self.assert-hash( $_, [< right babble left >] ) {
 				@child = self._right( $_.hash.<right> );
 				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'right',
-						'babble'
-					)
+					self._babble( $_.hash.<babble> )
 				);
 				@child.append(
-					self._babble(
-						$_.hash.<babble>
-					)
-				);
-				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'babble',
-						'left'
-					)
-				);
-				@child.append(
-					self._left(
-						$_.hash.<left>
-					)
+					self._left( $_.hash.<left> )
 				);
 			}
 			else {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -5961,10 +4654,12 @@ return True;
 	method _sigfinal( Mu $p ) {
 		given $p {
 			when self.assert-hash( $_, [< normspace >] ) {
-				Perl6::WS.from-match( $_.hash.<normspace> );
+				( )
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -5980,20 +4675,9 @@ return True;
 			when self.assert-hash( $_,
 					[< parameter typename >],
 					[< param_sep >] ) {
-				@child = self._parameter(
-					$_.hash.<parameter>
-				);
+				@child = self._parameter( $_.hash.<parameter> );
 				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'parameter',
-						'typename'
-					)
-				);
-				@child.append(
-					self._typename(
-						$_.hash.<typename>
-					)
+					self._typename( $_.hash.<typename> )
 				);
 			}
 			when self.assert-hash( $_, [ ],
@@ -6002,7 +4686,8 @@ return True;
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -6019,48 +4704,20 @@ return True;
 				)
 			);
 			@child.append(
-				Perl6::WS.before(
-					$p,
-					$p.hash.<quant>
-				)
+				self._quant( $p.hash.<quant> )
 			);
 			@child.append(
-				self._quant(
-					$p.hash.<quant>
-				)
-			);
-			@child.append(
-				Perl6::WS.between-matches(
-					$p,
-					'quant',
-					'param_term'
-				)
-			);
-			@child.append(
-				self._param_term(
-					$p.hash.<param_term>
-				)
+				self._param_term( $p.hash.<param_term> )
 			);
 		}
 		elsif self.assert-hash( $p,
 			[< param_term quant >],
 			[< default_value type_constraint modifier trait post_constraint >] ) {
 			@child.append(
-				self._quant(
-					$p.hash.<quant>
-				)
+				self._quant( $p.hash.<quant> )
 			);
 			@child.append(
-				Perl6::WS.between-matches(
-					$p,
-					'quant',
-					'param_term'
-				)
-			);
-			@child.append(
-				self._param_term(
-					$p.hash.<param_term>
-				)
+				self._param_term( $p.hash.<param_term> )
 			);
 		}
 		elsif self.assert-hash( $p,
@@ -6071,16 +4728,7 @@ return True;
 				$_.hash.<defterm>
 			);
 			@child.append(
-				Perl6::WS.between-matches(
-					$_,
-					'defterm',
-					'quant'
-				)
-			);
-			@child.append(
-				self._quant(
-					$_.hash.<quant>
-				)
+				self._quant( $_.hash.<quant> )
 			);
 		}
 		elsif self.assert-hash( $p,
@@ -6096,22 +4744,9 @@ return True;
 				)
 			);
 			@child.append(
-				Perl6::WS.trailer(
-					$p.hash.<type_constraint>.list.[*-1]
-				)
-			);
-			@child.append(
 				self._param_var( $p.hash.<param_var> )
 			);
-			# XXX revisit this later
-			if $p.Str ~~ m{ (\s+) ('where') } {
-				@child.append(
-					Perl6::WS.from-int(
-						$p.hash.<param_var>.to,
-						~$0
-					)
-				);
-			}
+			# XXX WHERE is just guessed at now...
 			@child.append(
 				Perl6::Bareword.new(
 					:factory-line-number( callframe(1).line ),
@@ -6120,11 +4755,6 @@ return True;
 					:content( WHERE )
 				)
 			);
-			if $p.Str ~~ m{ ('where') (\s+) } {
-				@child.append(
-					Perl6::WS.from-int( $p.from + $0.to, ~$1 )
-				);
-			}
 			@child.append(
 				self._post_constraint(
 					$p.hash.<post_constraint>
@@ -6140,28 +4770,11 @@ return True;
 					$p.hash.<type_constraint>
 				)
 			);
-			if $p.Str ~~ m{ (\s+) } {
-				@child.append(
-					Perl6::WS.from-int(
-						$p.from + $0.from, ~$0
-					)
-				);
-			}
 			@child.append(
 				self._param_var( $p.hash.<param_var> )
 			);
 			if $p.hash.<default_value> {
 				if $p.Str ~~ m{ ( \s* ) ('=') ( \s* ) } {
-					if $0 and $0.Str.chars {
-						@child.append(
-							Perl6::WS.new(
-								:factory-line-number( callframe(1).line ),
-								:from( $p.from + $0.from ),
-								:to( $p.from + $0.from + $0.Str.chars ),
-								:content( $0.Str )
-							)
-						);
-					}
 					@child.append(
 						Perl6::Operator::Infix.new(
 							:factory-line-number( callframe(1).line ),
@@ -6170,16 +4783,6 @@ return True;
 							:content( $1.Str )
 						)
 					);
-					if $2 and $2.Str.chars {
-						@child.append(
-							Perl6::WS.new(
-								:factory-line-number( callframe(1).line ),
-								:from( $p.from + $2.from ),
-								:to( $p.from + $2.to ),
-								:content( $2.Str )
-							)
-						);
-					}
 					@child.append(
 						self._EXPR( $p.hash.<default_value>.list.[0].hash.<EXPR> )
 					);
@@ -6194,26 +4797,12 @@ return True;
 			@child.append(
 				self._param_var( $p.hash.<param_var> )
 			);
-			if $p.Str ~~ m{ (\s+) ('=') } {
-				@child.append(
-					Perl6::WS.from-int(
-						$p.hash.<param_var>.to,
-						~$0
-					)
-				);
-			}
+			# XXX assumig the location for '='
 			@child.append(
 				Perl6::Operator::Infix.new( $p, EQUAL )
 			);
-			if $p.Str ~~ m{ ('=') (\s+) } {
-				@child.append(
-					Perl6::WS.from-int( $p.from + $0.to, ~$1 )
-				);
-			}
 			@child.append(
-				self._default_value(
-					$p.hash.<default_value>
-				).flat
+				self._default_value( $p.hash.<default_value> )
 			);
 		}
 		elsif self.assert-hash( $p,
@@ -6230,12 +4819,6 @@ return True;
 				self._param_var( $p.hash.<param_var> )
 			);
 			if $p.hash.<trait> {
-				@child.append(
-					Perl6::WS.after(
-						$p,
-						$p.hash.<param_var>
-					)
-				);
 				@child.append(
 					self._trait( $p.hash.<trait> )
 				);
@@ -6272,7 +4855,8 @@ return True;
 		}
 		else {
 			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+			die "Unhandled case" if
+				$*FACTORY-FAILURE-FATAL
 		}
 		@child
 	}
@@ -6305,11 +4889,13 @@ return True;
 					my Str $str = substr(
 						$p.Str, $start - $offset, $end - $start
 					);
+					my Int $_start = $start;
+					my ( $lhs, $rhs ) = split( COMMA, $str );
+					if $lhs and $lhs ne '' {
+						$_start += $lhs.chars;
+					}
 					@child.append(
-						Perl6::WS.comma-separator(
-							$start,
-							$str
-						)
+						Perl6::Operator::Infix.from-int( $_start, COMMA )
 					);
 				}
 				@child.append(
@@ -6328,9 +4914,10 @@ return True;
 		}
 		else {
 			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+			die "Unhandled case" if
+				$*FACTORY-FAILURE-FATAL
 		}
-		@child.flat
+		@child
 	}
 
 	method _smexpr( Mu $p ) {
@@ -6340,7 +4927,8 @@ return True;
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -6372,120 +4960,37 @@ return True;
 		my Perl6::Element @child;
 		given $p {
 			if self.assert-hash( $_, [< block sym e1 e2 e3 >] ) {
-				@child = self._block(
-					$_.hash.<block>
+				@child = self._block( $_.hash.<block> );
+				@child.append(
+					self._sym( $_.hash.<sym> )
 				);
 				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'block',
-						'sym'
-					)
+					self._e1( $_.hash.<e1> )
 				);
 				@child.append(
-					self._sym(
-						$_.hash.<sym>
-					)
+					self._e2( $_.hash.<e2> )
 				);
 				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'sym',
-						'e1'
-					)
-				);
-				@child.append(
-					self._e1(
-						$_.hash.<e1>
-					)
-				);
-				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'e1',
-						'e2'
-					)
-				);
-				@child.append(
-					self._e2(
-						$_.hash.<e2>
-					)
-				);
-				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'e2',
-						'e3'
-					)
-				);
-				@child.append(
-					self._e3(
-						$_.hash.<e3>
-					)
+					self._e3( $_.hash.<e3> )
 				);
 			}
 			elsif self.assert-hash( $_,
 					[< pblock sym EXPR wu >] ) {
-				@child = self._pblock(
-					$_.hash.<pblock>
+				@child = self._pblock( $_.hash.<pblock> );
+				@child.append(
+					self._sym( $_.hash.<sym> )
 				);
 				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'pblock',
-						'sym'
-					)
+					self._EXPR( $_.hash.<EXPR> )
 				);
 				@child.append(
-					self._sym(
-						$_.hash.<sym>
-					)
-				);
-				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'sym',
-						'EXPR'
-					)
-				);
-				@child.append(
-					self._EXPR(
-						$_.hash.<EXPR>
-					)
-				);
-				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'EXPR',
-						'wu'
-					)
-				);
-				@child.append(
-					self._wu(
-						$_.hash.<wu>
-					)
+					self._wu( $_.hash.<wu> )
 				);
 			}
 			elsif self.assert-hash( $_,
 					[< doc sym module_name >] ) {
 				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'doc',
-						'sym'
-					)
-				);
-				@child.append(
-					self._sym(
-						$_.hash.<sym>
-					)
-				);
-				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'sym',
-						'module_name'
-					)
+					self._sym( $_.hash.<sym> )
 				);
 				@child.append(
 					self._module_name(
@@ -6496,115 +5001,46 @@ return True;
 			elsif self.assert-hash( $_, [< doc sym version >] ) {
 				@child = self._doc( $_.hash.<doc> );
 				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'doc',
-						'sym'
-					)
+					self._sym( $_.hash.<sym> )
 				);
 				@child.append(
-					self._sym(
-						$_.hash.<sym>
-					)
-				);
-				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'sym',
-						'version'
-					)
-				);
-				@child.append(
-					self._version(
-						$_.hash.<version>
-					)
+					self._version( $_.hash.<version> )
 				);
 			}
 			elsif self.assert-hash( $_, [< sym else xblock >] ) {
 				@child = self._sym( $_.hash.<sym> );
 				@child.append(
-					Perl6::WS.after(
-						$_,
-						$_.hash.<sym>
-					)
+					self._xblock( $_.hash.<xblock> )
 				);
 				@child.append(
-					self._xblock(
-						$_.hash.<xblock>
-					)
-				);
-				@child.append(
-					Perl6::WS.before(
-						$_,
-						$_.hash.<else>
-					)
-				);
-				@child.append(
-					self._else(
-						$_.hash.<else>
-					)
+					self._else( $_.hash.<else> )
 				);
 			}
 			elsif self.assert-hash( $_, [< xblock sym wu >] ) {
 				@child = self._sym( $_.hash.<sym> );
 				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'sym',
-						'xblock'
-					)
+					self._wu( $_.hash.<wu> )
 				);
 				@child.append(
-					self._xblock(
-						$_.hash.<xblock>
-					)
+					self._xblock( $_.hash.<xblock> )
 				);
-				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'xblock',
-						'wu'
-					)
-				);
-#				@child.append(
-#					self._wu(
-#						$_.hash.<wu>
-#					)
-#				);
 			}
 			elsif self.assert-hash( $_, [< sym xblock >] ) {
 				@child = self._sym( $_.hash.<sym> );
-				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'sym',
-						'xblock'
-					)
-				);
 				@child.append(
 					self._xblock( $_.hash.<xblock> )
 				);
 			}
 			elsif self.assert-hash( $_, [< sym block >] ) {
 				@child.append(
-					self._sym(
-						$_.hash.<sym>
-					)
+					self._sym( $_.hash.<sym> )
 				);
-				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'sym',
-						'block'
-					)
-				);
-				@child = self._block(
-					$_.hash.<block>
-				);
+				@child = self._block( $_.hash.<block> );
 			}
 			else {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -6617,20 +5053,11 @@ return True;
 						[< EXPR
 						   statement_mod_loop >] ) {
 					@child.append(
-						Perl6::WS.with-inter-ws(
-							$_,
-							$_.hash.<EXPR>,
-							[
-								self._EXPR(
-									$_.hash.<EXPR>
-								)
-							],
-							$_.hash.<statement_mod_loop>,
-							[
-								self._statement_mod_loop(
-									$_.hash.<statement_mod_loop>
-								)
-							]
+						self._EXPR( $_.hash.<EXPR> )
+					);
+					@child.append(
+						self._statement_mod_loop(
+							$_.hash.<statement_mod_loop>
 						)
 					);
 				}
@@ -6641,60 +5068,39 @@ return True;
 						$_.hash.<statement_mod_cond>
 					);
 					@child.append(
-						Perl6::WS.between-matches(
-							$_,
-							'statement_mod_cond',
-							'EXPR'
-						)
-					);
-					@child.append(
-						self._EXPR(
-							$_.hash.<EXPR>
-						)
+						self._EXPR( $_.hash.<EXPR> )
 					);
 				}
 				elsif self.assert-hash( $_, [< EXPR >] ) {
-# XXX Aiyee. Ugly but it does work.
-my Mu $q = $_.hash.<EXPR>;
-if $q.list.[0] and
-   $q.hash.<infix> and
-   $q.list.[1] and
-   $q.list.[1].hash.<value> {
-	@child.append(
-		self._EXPR(
-			$q.list.[0]
-		)
-	);
-	@child.append(
-		Perl6::WS.before(
-			$p,
-			$q.hash.<infix>
-		)
-	);
-	@child.append(
-		self._infix(
-			$q.hash.<infix>
-		)
-	);
-	@child.append(
-		Perl6::WS.between-matches-orig(
-			$q.hash.<infix>,
-			$q.list.[1].hash.<value>
-		)
-	);
-	@child.append(
-		self._EXPR(
-			$q.list.[1]
-		)
-	);
-}
-else {
-					@child.append(
-						self._EXPR(
-							$_.hash.<EXPR>
-						)
-					);
-}
+					# XXX Aiyee. Ugly but it does work.
+					my Mu $q = $_.hash.<EXPR>;
+					if $q.list.[0] and
+					   $q.hash.<infix> and
+					   $q.list.[1] and
+					   $q.list.[1].hash.<value> {
+						@child.append(
+							self._EXPR(
+								$q.list.[0]
+							)
+						);
+						@child.append(
+							self._infix(
+								$q.hash.<infix>
+							)
+						);
+						@child.append(
+							self._EXPR(
+								$q.list.[1]
+							)
+						);
+					}
+					else {
+						@child.append(
+							self._EXPR(
+								$_.hash.<EXPR>
+							)
+						);
+					}
 				}
 				elsif self.assert-hash( $_,
 						[< statement_control >] ) {
@@ -6715,12 +5121,7 @@ else {
 		elsif self.assert-hash( $p, [< EXPR statement_mod_cond >] ) {
 			if $p.hash.<EXPR>.Str ~~ m{ ( \s+ ) $ } {
 				@child.append(
-					Perl6::WS.with-trailer(
-						$p.hash.<EXPR>,
-						self._EXPR(
-							$p.hash.<EXPR>,
-						)
-					)
+					self._EXPR( $p.hash.<EXPR> )
 				);
 				@child.append(
 					self._statement_mod_cond(
@@ -6730,20 +5131,11 @@ else {
 			}
 			else {
 				@child.append(
-					Perl6::WS.with-inter-ws(
-						$p,
-						$p.hash.<EXPR>,
-						[
-							self._EXPR(
-								$p.hash.<EXPR>
-							)
-						],
-						$p.hash.<statement_mod_cond>,
-						[
-							self._statement_mod_cond(
-								$p.hash.<statement_mod_cond>
-							)
-						]
+					self._EXPR( $p.hash.<EXPR> )
+				);
+				@child.append(
+					self._statement_mod_cond(
+						$p.hash.<statement_mod_cond>
 					)
 				);
 			}
@@ -6751,12 +5143,7 @@ else {
 		elsif self.assert-hash( $p, [< EXPR statement_mod_loop >] ) {
 			if $p.hash.<EXPR>.Str ~~ m{ ( \s+ ) $ } {
 				@child.append(
-					Perl6::WS.with-trailer(
-						$p.hash.<EXPR>,
-						self._EXPR(
-							$p.hash.<EXPR>,
-						)
-					)
+					self._EXPR( $p.hash.<EXPR> )
 				);
 				@child.append(
 					self._statement_mod_loop(
@@ -6766,14 +5153,7 @@ else {
 			}
 			else {
 				@child.append(
-					self._EXPR(
-						$p.hash.<EXPR>
-					)
-				);
-				@child.append(
-					Perl6::WS.before-orig(
-						$p.hash.<statement_mod_loop>
-					)
+					self._EXPR( $p.hash.<EXPR> )
 				);
 				@child.append(
 					self._statement_mod_loop(
@@ -6802,13 +5182,6 @@ else {
 						$p.hash.<EXPR>.list.[0]
 					);
 					@child.append(
-						Perl6::WS.between-matches(
-							$p,
-							$p.hash.<EXPR>.list.[0],
-							$p.hash.<EXPR>.hash.<infix>
-						)
-					);
-					@child.append(
 						Perl6::Operator::Infix.new(
 							:factory-line-number( callframe(1).line ),
 							:from( $p.hash.<EXPR>.hash.<infix>.from ),
@@ -6816,41 +5189,12 @@ else {
 							:content( QUES-QUES )
 						)
 					);
-					if $p.hash.<EXPR>.hash.<infix>.Str ~~ m{ '??' ( \s+ ) } {
-						@child.append(
-							Perl6::WS.new(
-								:factory-line-number( callframe(1).line ),
-								:from( $p.hash.<EXPR>.hash.<infix>.from + QUES-QUES.chars ),
-								:to( $p.hash.<EXPR>.hash.<infix>.from + QUES-QUES.chars + $0.Str.chars ),
-								:content( $0.Str )
-								
-							)
-						);
-					}
 					@child.append(
 						self._EXPR( $p.hash.<EXPR>.list.[1] )
 					);
-					if $p.hash.<EXPR>.hash.<infix>.Str ~~ m{ ( \s+ ) '!!' } {
-						@child.append(
-							Perl6::WS.new(
-								:factory-line-number( callframe(1).line ),
-								:from( $p.hash.<EXPR>.hash.<infix>.to - BANG-BANG.chars - $0.Str.chars ),
-								:to( $p.hash.<EXPR>.hash.<infix>.to - BANG-BANG.chars ),
-								:content( $0.Str )
-								
-							)
-						);
-					}
 					@child.append(
 						Perl6::Operator::Infix.new(
 							$p.hash.<EXPR>, BANG-BANG
-						)
-					);
-					@child.append(
-						Perl6::WS.between-matches(
-							$p,
-							$p.hash.<EXPR>.hash.<OPER>,
-							$p.hash.<EXPR>.list.[2]
 						)
 					);
 					@child.append(
@@ -6860,13 +5204,6 @@ else {
 				else {
 					my Mu $q = $p.hash.<EXPR>;
 					@child = self._EXPR( $q.list.[0] );
-					@child.append(
-						Perl6::WS.between-matches(
-							$p,
-							$q.list.[0],
-							$q.hash.<infix>
-						)
-					);
 					# XXX Sigh.
 					if $p.hash.<EXPR>.Str.chars > 1 {
 						@child.append(
@@ -6874,22 +5211,10 @@ else {
 								$p.hash.<EXPR>
 							)
 						);
-						@child.append(
-							Perl6::WS.after(
-								$p,
-								$p.hash.<EXPR>
-							)
-						);
 					}
 					else {
 						@child.append(
 							self._infix( $q.hash.<infix> )
-						);
-						@child.append(
-							Perl6::WS.after(
-								$p,
-								$q.hash.<infix>
-							)
 						);
 					}
 					@child.append(
@@ -6905,14 +5230,15 @@ else {
 			@child =
 				self._statement_control(
 					$p.hash.<statement_control>
-				).flat
+				)
 		}
 		elsif !$p.hash.keys {
 			note "Fix null case"
 		}
 		else {
 			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+			die "Unhandled case" if
+				$*FACTORY-FAILURE-FATAL
 		}
 		@child
 	}
@@ -6921,36 +5247,10 @@ else {
 		my Perl6::Element @child;
 		my Str $leftover-ws;
 		my Int $leftover-ws-from = 0;
-		my Str $beginning-ws;
 
-		if $p.Str ~~ m{ ^ ( \s+ ) } {
-			$beginning-ws = $0.Str
-		}
 		for $p.hash.<statement>.list {
 			my Perl6::Element @_child;
-			if $beginning-ws {
-				@_child.append(
-					Perl6::WS.new(
-						:factory-line-number( callframe(1).line ),
-						:from( $p.from ),
-						:to( $p.from + $beginning-ws.chars ),
-						:content( $beginning-ws )
-					)
-				);
-				$beginning-ws = Nil;
-			}
 			if $leftover-ws {
-				@_child.append(
-					Perl6::WS.new(
-						:factory-line-number( callframe(1).line ),
-						:from( $leftover-ws-from ),
-						:to(
-							$leftover-ws-from +
-							$leftover-ws.chars
-						),
-						:content( $leftover-ws )
-					)
-				);
 				$leftover-ws = Nil;
 				$leftover-ws-from = 0
 			}
@@ -6967,9 +5267,13 @@ else {
 					$_.to - $1.Str.chars
 			}
 			else {
-				@_child.append(
-					Perl6::WS.trailer( $_ )
-				);
+		if $_.Str ~~ m{ ( \s+ ) $ } {
+			@_child.append(
+				Perl6::WS.from-int(
+					$_.to - $0.Str.chars, $0.Str
+				)
+			)
+		}
 			}
 			my Str $temp = $p.Str.substr(
 				@_child[*-1].to - $p.from
@@ -7010,22 +5314,18 @@ else {
 		}
 		if $leftover-ws {
 			my Perl6::Element @_child =
-				Perl6::WS.new(
-					:factory-line-number( callframe(1).line ),
-					:from( $leftover-ws-from ),
-					:to(
-						$leftover-ws-from +
-						$leftover-ws.chars
-					),
-					:content( $leftover-ws )
+				Perl6::WS.from-int(
+					$leftover-ws-from, $leftover-ws
 				);
 			@child.append(
 				Perl6::Statement.from-list( @_child )
 			);
 		}
 		elsif !$p.hash.<statement> and $p.Str ~~ m{ . } {
-			my Perl6::Element @_child =
-				Perl6::WS.from-match( $p );
+			my Perl6::Element @_child;
+			if $p.from < $p.to {
+				@_child = Perl6::WS.from-match( $p )
+			}
 			@child.append(
 				Perl6::Statement.from-list( @_child )
 			);
@@ -7047,16 +5347,7 @@ else {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< sym modifier_expr >] ) {
-				@child = self._sym(
-					$_.hash.<sym>
-				);
-				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'sym',
-						'modifier_expr'
-					)
-				);
+				@child = self._sym( $_.hash.<sym> );
 				@child.append(
 					self._modifier_expr(
 						$_.hash.<modifier_expr>
@@ -7065,7 +5356,8 @@ else {
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -7081,26 +5373,16 @@ else {
 		given $p {
 			when self.assert-hash( $_, [< sym smexpr >] ) {
 				@child.append(
-					Perl6::WS.with-inter-ws(
-						$_,
-						$_.hash.<sym>,
-						[
-							self._sym(
-								$_.hash.<sym>
-							)
-						],
-						$_.hash.<smexpr>,
-						[
-							self._smexpr(
-								$_.hash.<smexpr>
-							)
-						]
-					)
+					self._sym( $_.hash.<sym> )
+				);
+				@child.append(
+					self._smexpr( $_.hash.<smexpr> )
 				);
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -7140,25 +5422,15 @@ else {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< sym blorst >] ) {
-				@child = self._sym(
-					$_.hash.<sym>
-				);
+				@child = self._sym( $_.hash.<sym> );
 				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'sym',
-						'blorst'
-					)
-				);
-				@child.append(
-					self._blorst(
-						$_.hash.<blorst>
-					)
+					self._blorst( $_.hash.<blorst> )
 				);
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -7171,7 +5443,8 @@ else {
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -7182,9 +5455,7 @@ else {
 			for $p.list {
 				if $_.Str {
 					@child.append(
-						Perl6::Bareword.from-match(
-							$_
-						)
+						Perl6::Bareword.from-match( $_ )
 					);
 				}
 				else {
@@ -7205,7 +5476,8 @@ else {
 		}
 		else {
 			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+			die "Unhandled case" if
+				$*FACTORY-FAILURE-FATAL
 		}
 		@child
 	}
@@ -7260,7 +5532,8 @@ else {
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -7285,7 +5558,8 @@ else {
 		}
 		else {
 			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+			die "Unhandled case" if
+				$*FACTORY-FAILURE-FATAL
 		}
 		@child
 	}
@@ -7297,7 +5571,8 @@ else {
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -7321,7 +5596,8 @@ else {
 		}
 		else {
 			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+			die "Unhandled case" if
+				$*FACTORY-FAILURE-FATAL
 		}
 		@child
 	}
@@ -7361,7 +5637,8 @@ else {
 		}
 		else {
 			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+			die "Unhandled case" if
+				$*FACTORY-FAILURE-FATAL
 		}
 		@child
 	}
@@ -7370,25 +5647,15 @@ else {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< sym EXPR >] ) {
-				@child = self._sym(
-					$_.hash.<sym>
-				);
+				@child = self._sym( $_.hash.<sym> );
 				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'sym',
-						'EXPR'
-					)
-				);
-				@child.append(
-					self._EXPR(
-						$_.hash.<EXPR>
-					)
+					self._EXPR( $_.hash.<EXPR> )
 				);
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -7400,14 +5667,13 @@ else {
 			for $p.list {
 				if self.assert-hash( $_, [< noun >] ) {
 					@child.append(
-						self._noun(
-							$_.hash.<noun>
-						)
+						self._noun( $_.hash.<noun> )
 					);
 				}
 				else {
 					debug-match( $_ ) if $*DEBUG;
-					die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+					die "Unhandled case" if
+						$*FACTORY-FAILURE-FATAL
 				}
 			}
 		}
@@ -7416,7 +5682,8 @@ else {
 		}
 		else {
 			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+			die "Unhandled case" if
+				$*FACTORY-FAILURE-FATAL
 		}
 		@child
 	}
@@ -7428,7 +5695,8 @@ else {
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -7444,7 +5712,8 @@ else {
 		}
 		else {
 			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+			die "Unhandled case" if
+				$*FACTORY-FAILURE-FATAL
 		}
 		@child
 	}
@@ -7464,45 +5733,24 @@ else {
 					[< sym longname >],
 					[< circumfix >] ) {
 				@child.append(
-					Perl6::WS.with-inter-ws(
-						$_,
-						$_.hash.<sym>,
-						[
-							self._sym(
-								$_.hash.<sym>
-							)
-						],
-						$_.hash.<longname>,
-						[
-							self._longname(
-								$_.hash.<longname>
-							)
-						]
-					)
+					self._sym( $_.hash.<sym> )
+				);
+				@child.append(
+					self._longname( $_.hash.<longname> )
 				);
 			}
 			when self.assert-hash( $_, [< sym typename >] ) {
 				@child.append(
-					Perl6::WS.with-inter-ws(
-						$_,
-						$_.hash.<sym>,
-						[
-							self._sym(
-								$_.hash.<sym>
-							)
-						],
-						$_.hash.<typename>,
-						[
-							self._typename(
-								$_.hash.<typename>
-							)
-						]
-					)
+					self._sym( $_.hash.<sym> )
+				);
+				@child.append(
+					self._typename( $_.hash.<typename> )
 				);
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -7526,14 +5774,13 @@ else {
 				}
 				elsif self.assert-hash( $_, [< value >] ) {
 					@child.append(
-						self._value(
-							$_.hash.<value>
-						)
+						self._value( $_.hash.<value> )
 					);
 				}
 				else {
 					debug-match( $_ ) if $*DEBUG;
-					die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+					die "Unhandled case" if
+						$*FACTORY-FAILURE-FATAL
 				}
 			}
 		}
@@ -7545,7 +5792,8 @@ else {
 		}
 		else {
 			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+			die "Unhandled case" if
+				$*FACTORY-FAILURE-FATAL
 		}
 		@child
 	}
@@ -7560,21 +5808,7 @@ else {
 				[< sym initializer variable >], [< trait >] ) {
 			@child = self._sym( $p.hash.<sym> );
 			@child.append(
-				Perl6::WS.between-matches(
-					$p,
-					'sym',
-					'variable'
-				)
-			);
-			@child.append(
 				self._variable( $p.hash.<variable> )
-			);
-			@child.append(
-				Perl6::WS.between-matches(
-					$p,
-					'variable',
-					'initializer'
-				)
 			);
 			@child.append(
 				self._initializer( $p.hash.<initializer> )
@@ -7584,21 +5818,7 @@ else {
 				[< sym defterm initializer >], [< trait >] ) {
 			@child = self._sym( $p.hash.<sym> );
 			@child.append(
-				Perl6::WS.between-matches(
-					$p,
-					'sym',
-					'defterm'
-				)
-			);
-			@child.append(
 				self._defterm( $p.hash.<defterm> )
-			);
-			@child.append(
-				Perl6::WS.between-matches(
-					$p,
-					'defterm',
-					'initializer'
-				)
 			);
 			@child.append(
 				self._initializer( $p.hash.<initializer> )
@@ -7608,21 +5828,7 @@ else {
 				[< sym longname term >], [< trait >] ) {
 			@child = self._sym( $p.hash.<sym> );
 			@child.append(
-				Perl6::WS.between-matches(
-					$p,
-					'sym',
-					'longname'
-				)
-			);
-			@child.append(
 				self._longname( $p.hash.<longname> )
-			);
-			@child.append(
-				Perl6::WS.between-matches(
-					$p,
-					'longname',
-					'term'
-				)
 			);
 			@child.append(
 				self._term( $p.hash.<term> )
@@ -7631,21 +5837,7 @@ else {
 		elsif self.assert-hash( $p, [< sym longname trait >] ) {
 			@child = self._sym( $p.hash.<sym> );
 			@child.append(
-				Perl6::WS.between-matches(
-					$p,
-					'sym',
-					'longname'
-				)
-			);
-			@child.append(
 				self._longname( $p.hash.<longname> )
-			);
-			@child.append(
-				Perl6::WS.between-matches(
-					$p,
-					'longname',
-					'trait'
-				)
 			);
 			@child.append(
 				self._trait( $p.hash.<trait> )
@@ -7653,26 +5845,16 @@ else {
 		}
 		elsif self.assert-hash( $p, [< sym longname >], [< trait >] ) {
 			@child.append(
-				Perl6::WS.with-inter-ws(
-					$p,
-					$p.hash.<sym>,
-					[
-						self._sym(
-							$p.hash.<sym>
-						)
-					],
-					$p.hash.<longname>,
-					[
-						self._longname(
-							$p.hash.<longname>
-						)
-					]
-				)
+				self._sym( $p.hash.<sym> )
+			);
+			@child.append(
+				self._longname( $p.hash.<longname> )
 			);
 		}
 		else {
 			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+			die "Unhandled case" if
+				$*FACTORY-FAILURE-FATAL
 		}
 		@child
 	}
@@ -7711,7 +5893,8 @@ else {
 			}
 			else {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 
@@ -7724,7 +5907,8 @@ else {
 		}
 		else {
 			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+			die "Unhandled case" if
+				$*FACTORY-FAILURE-FATAL
 		}
 	}
 
@@ -7738,35 +5922,15 @@ else {
 					$_.hash.<postcircumfix>
 				);
 				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'postcircumfix',
-						'OPER'
-					)
-				);
-				@child.append(
-					self._OPER(
-						$_.hash.<OPER>
-					)
+					self._OPER( $_.hash.<OPER> )
 				);
 			}
 			when self.assert-hash( $_,
 					[< prefix OPER >],
 					[< prefix_postfix_meta_operator >] ) {
-				@child = self._prefix(
-					$_.hash.<prefix>
-				);
+				@child = self._prefix( $_.hash.<prefix> );
 				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'prefix',
-						'OPER'
-					)
-				);
-				@child.append(
-					self._OPER(
-						$_.hash.<OPER>
-					)
+					self._OPER( $_.hash.<OPER> )
 				);
 			}
 			when self.assert-hash( $_, [< value >] ) {
@@ -7776,7 +5940,8 @@ else {
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -7805,7 +5970,8 @@ die "Catching Int";
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -7856,96 +6022,64 @@ die "Catching Int";
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
 
 	method _variable_declarator( Mu $p ) {
 		my Perl6::Element @child;
-		if self.assert-hash( $p,
-			[< semilist variable shape >],
-			[< postcircumfix signature trait
-			   post_constraint >] ) {
-			@child = self._semilist( $p.hash.<semilist> );
-			@child.append(
-				Perl6::WS.between-matches(
-					$p,
-					'semilist',
-					'variable'
-				)
-			);
-			@child.append(
-				self._variable(
-					$p.hash.<variable>
-				)
-			);
-			@child.append(
-				Perl6::WS.between-matches(
-					$p,
-					'variable',
-					'shape'
-				)
-			);
-			@child.append(
-				self._shape(
-					$p.hash.<shape>
-				)
-			);
-		}
-		elsif self.assert-hash( $p,
-				[< variable post_constraint >],
-				[< semilist postcircumfix
-				   signature trait >] ) {
-			# Synthesize the 'from' and 'to' markers for 'where'
-			$p.Str ~~ m{ ( \s* ) ( where ) ( \s* ) };
-			my Int $from = $0.from;
-			@child = self._variable( $p.hash.<variable> );
-			if $0.Str {
+		given $p {
+			when self.assert-hash( $_,
+				[< semilist variable shape >],
+				[< postcircumfix signature trait
+				   post_constraint >] ) {
+				@child = self._semilist( $_.hash.<semilist> );
 				@child.append(
-					Perl6::WS.new(
-						:factory-line-number( callframe(1).line ),
-						:from( $p.from + $0.from ),
-						:to( $p.from + $0.to ),
-						:content( $0.Str )
+					self._variable( $_.hash.<variable> )
+				);
+				@child.append(
+					self._shape( $_.hash.<shape> )
+				);
+			}
+			when self.assert-hash( $_,
+					[< variable post_constraint >],
+					[< semilist postcircumfix
+					   signature trait >] ) {
+				# Synthesize the 'from' and 'to' markers
+				$_.Str ~~ m{ ( \s* ) ( where ) ( \s* ) };
+				my Int $from = $0.from;
+				@child = self._variable( $_.hash.<variable> );
+				@child.append(
+					Perl6::Bareword.new(
+						:factory-line-number(
+							callframe(1).line
+						),
+						:from( $_.from + $1.from ),
+						:to( $_.from + $1.from + 5 ),
+						:content( WHERE )
+					)
+				);
+				@child.append(
+					self._post_constraint(
+						$_.hash.<post_constraint>
 					)
 				);
 			}
-			@child.append(
-				Perl6::Bareword.new(
-					:factory-line-number( callframe(1).line ),
-					:from( $p.from + $1.from ),
-					:to( $p.from + $1.from + 5 ),
-					:content( WHERE )
-				)
-			);
-			if $2.Str {
-				@child.append(
-					Perl6::WS.new(
-						:factory-line-number( callframe(1).line ),
-						:from( $p.from + $2.from ),
-						:to( $p.from + $2.to ),
-						:content( $2.Str )
-					)
-				);
+			when self.assert-hash( $_,
+					[< variable >],
+					[< semilist postcircumfix signature
+					   trait post_constraint >] ) {
+				@child = self._variable( $_.hash.<variable> );
 			}
-			@child.append(
-				self._post_constraint(
-					$p.hash.<post_constraint>
-				)
-			);
+			default {
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
+			}
 		}
-		elsif self.assert-hash( $p,
-				[< variable >],
-				[< semilist postcircumfix signature
-				   trait post_constraint >] ) {
-			@child = self._variable( $p.hash.<variable> );
-		}
-		else {
-			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
-		}
-		@child.flat
+		@child
 	}
 
 	method _variable( Mu $p ) {
@@ -7976,25 +6110,15 @@ die "Catching Int";
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< vnum vstr >] ) {
-				@child = self._vnum(
-					$_.hash.<vnum>
-				);
+				@child = self._vnum( $_.hash.<vnum> );
 				@child.append(
-					Perl6::WS.between-matches(
-						$_,
-						'vnum',
-						'vstr'
-					)
-				);
-				@child.append(
-					self._vstr(
-						$_.hash.<vstr>
-					)
+					self._vstr( $_.hash.<vstr> )
 				);
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child
@@ -8009,26 +6133,25 @@ die "Catching Int";
 		if $p.list {
 			for $p.list {
 				if $p.Int {
-					Perl6::Number.from-match(
-						$p
-					)
+					Perl6::Number.from-match( $p )
 				}
 				else {
 					debug-match( $_ ) if $*DEBUG;
-					die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+					die "Unhandled case" if
+						$*FACTORY-FAILURE-FATAL
 				}
 			}
 		}
 		else {
 			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+			die "Unhandled case" if
+				$*FACTORY-FAILURE-FATAL
 		}
 		@child
 	}
 
 	method _wu( Mu $p ) {
-		warn "wu finally used";
-		( )
+		Perl6::Bareword.from-match( $p )
 	}
 
 	method _xblock( Mu $p ) {
@@ -8036,12 +6159,7 @@ die "Catching Int";
 		if $p.list {
 			for $p.list {
 				if self.assert-hash( $_, [< EXPR pblock >] ) {
-					@child = self._EXPR(
-						$_.hash.<EXPR>
-					);
-					@child.append(
-						Perl6::WS.before( $_, $_.hash.<pblock> )
-					);
+					@child = self._EXPR( $_.hash.<EXPR> );
 					@child.append(
 						self._pblock(
 							$_.hash.<pblock>
@@ -8050,17 +6168,13 @@ die "Catching Int";
 				}
 				else {
 					debug-match( $_ ) if $*DEBUG;
-					die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+					die "Unhandled case" if
+						$*FACTORY-FAILURE-FATAL
 				}
 			}
 		}
 		elsif self.assert-hash( $p, [< EXPR pblock >] ) {
 			@child = self._EXPR( $p.hash.<EXPR> );
-			@child.append(
-				Perl6::WS.before-orig(
-					$p.hash.<pblock>
-				)
-			);
 			@child.append(
 				self._pblock( $p.hash.<pblock> )
 			);
@@ -8070,7 +6184,8 @@ die "Catching Int";
 		}
 		else {
 			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+			die "Unhandled case" if
+				$*FACTORY-FAILURE-FATAL
 		}
 		@child
 	}

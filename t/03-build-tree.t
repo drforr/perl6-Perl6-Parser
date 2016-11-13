@@ -52,10 +52,10 @@ subtest {
 	my $t = $pt.build-tree( $p );
 
 	isa-ok $t, Perl6::Document;
-	isa-ok $t.child.[0], Perl6::Statement;
-	isa-ok $t.child.[0].child.[0], Perl6::WS;
-	isa-ok $t.child.[0].child.[1], Perl6::Bareword;
-	isa-ok $t.child.[0].child.[2], Perl6::Variable::Scalar;
+	isa-ok $t.child.[0], Perl6::WS;
+	isa-ok $t.child.[1], Perl6::Statement;
+	isa-ok $t.child.[1].child.[0], Perl6::Bareword;
+	isa-ok $t.child.[1].child.[1], Perl6::Variable::Scalar;
 }, Q{without semi, with};
 
 subtest {

@@ -189,7 +189,7 @@ _END_
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[1].child),
+					$tree.child.[2].child),
 				Q{found operator};
 			is $pt.format( $tree ), $source, Q{formatted};
 		}, Q{ws};
@@ -223,7 +223,7 @@ _END_
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[1].child),
+					$tree.child.[2].child),
 				Q{found operator};
 			is $pt.format( $tree ), $source, Q{formatted};
 		}, Q{ws};
@@ -257,7 +257,7 @@ _END_
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[1].child),
+					$tree.child.[2].child),
 				Q{found operator};
 			is $pt.format( $tree ), $source, Q{formatted};
 		}, Q{ws};
@@ -291,7 +291,7 @@ _END_
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[1].child),
+					$tree.child.[2].child),
 				Q{found operator};
 			is $pt.format( $tree ), $source, Q{formatted};
 		}, Q{ws};
@@ -493,7 +493,7 @@ _END_
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[1].child),
+					$tree.child.[2].child),
 				Q{found operator};
 			is $pt.format( $tree ), $source, Q{formatted};
 		}, Q{ws};
@@ -510,7 +510,7 @@ _END_
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[1].child),
+					$tree.child.[2].child),
 				Q{found operator};
 			is $pt.format( $tree ), $source, Q{formatted};
 		}, Q{no ws};
@@ -525,7 +525,7 @@ _END_
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[1].child),
+					$tree.child.[2].child),
 				Q{found operator};
 			is $pt.format( $tree ), $source, Q{formatted};
 		}, Q{ws};
@@ -561,7 +561,7 @@ _END_
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[1].child),
+					$tree.child.[2].child),
 				Q{found operator};
 			is $pt.format( $tree ), $source, Q{formatted};
 		}, Q{ws};
@@ -593,7 +593,7 @@ _END_
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[1].child),
+					$tree.child.[2].child),
 				Q{found operator};
 			is $pt.format( $tree ), $source, Q{formatted};
 		}, Q{ws};
@@ -625,7 +625,7 @@ _END_
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[1].child),
+					$tree.child.[2].child),
 				Q{found operator};
 			is $pt.format( $tree ), $source, Q{formatted};
 		}, Q{ws};
@@ -657,7 +657,7 @@ _END_
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[1].child),
+					$tree.child.[2].child),
 				Q{found operator};
 			is $pt.format( $tree ), $source, Q{formatted};
 		}, Q{ws};
@@ -1546,7 +1546,7 @@ _END_
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[1].child),
+					$tree.child.[2].child),
 				Q{found operator};
 			is $pt.format( $tree ), $source, Q{formatted};
 		}, Q{ws};
@@ -1566,7 +1566,7 @@ _END_
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[1].child),
+					$tree.child.[2].child),
 				Q{found operator};
 			is $pt.format( $tree ), $source, Q{formatted};
 		}, Q{ws};
@@ -3224,7 +3224,7 @@ _END_
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[1].child),
+					$tree.child.[2].child),
 				Q{found operator};
 			is $pt.format( $tree ), $source, Q{formatted};
 		}, Q{ws};
@@ -3256,7 +3256,7 @@ _END_
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			ok (grep { $_ ~~ Perl6::Operator },
-					$tree.child.[1].child),
+					$tree.child.[2].child),
 				Q{found operator};
 			is $pt.format( $tree ), $source, Q{formatted};
 		}, Q{ws};
