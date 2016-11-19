@@ -11,7 +11,7 @@ my $*FACTORY-FAILURE-FATAL = True;
 my $*DEBUG = True;
 
 subtest {
-#`(
+#`[
 	my $source = Q:to[_END_];
 # For all positives integers from 1 to Infinity
 for 1 .. Inf -> $integer {
@@ -25,13 +25,13 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
-)
+]
 
 	done-testing;
 }, Q{Babbage problem};
 
 subtest {
-#`(
+#`[
 	my $source = Q:to[_END_];
 my $secret = q:to/END/;
     This task is to implement a program for encryption and decryption
@@ -92,7 +92,7 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
-)
+]
 
 	done-testing;
 }, Q{Bacon cipher};
@@ -123,11 +123,11 @@ _END_
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
 
-	done-testing;
+		done-testing;
 	}, Q{version 1};
 
 	subtest {
-#`(
+#`[
 		my $source = Q:to[_END_];
 sub balanced($s) {
     .none < 0 and .[*-1] == 0
@@ -142,13 +142,13 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
-)
+]
 
-	done-testing;
+		done-testing;
 	}, Q{version 2};
 
 	subtest {
-#`(
+#`[
 		my $source = Q:to[_END_];
 sub balanced($_ is copy) {
     Nil while s:g/'[]'//;
@@ -163,13 +163,12 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
-)
+]
 
-	done-testing;
+		done-testing;
 	}, Q{version 3};
 
 	subtest {
-#`(
 		my $source = Q:to[_END_];
 grammar BalBrack { token TOP { '[' <TOP>* ']' } }
  
@@ -181,16 +180,15 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
-)
 
-	done-testing;
+		done-testing;
 	}, Q{version 4};
 
 	done-testing;
 }, Q{Balanced brackets};
 
 subtest {
-#`(
+#`[
 	my $source = Q:to[_END_];
 class BT {
     has @.coeff;
@@ -260,13 +258,13 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
-)
+]
 
 	done-testing;
 }, Q{Balanced ternary};
 
 subtest {
-#`(
+#`[
 	# XXX Make up a 'Image::PNG::Portable' class
 	my $source = Q:to[_END_];
 class Image::PNG::Portable { has ( $.width, $.height ); method set { }; method write { } }
@@ -295,13 +293,13 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
-)
+]
 
 	done-testing;
 }, Q{Barnsley fern};
 
 subtest {
-#`(
+#`[
 	my $source = Q:to[_END_];
 sub MAIN {
     my $buf = slurp("/tmp/favicon.ico", :bin);
@@ -331,13 +329,13 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
-)
+]
 
 	done-testing;
 }, Q{Base64 encode data};
 
 subtest {
-#`(
+#`[
 	my $source = Q:to[_END_];
 sub benford(@a) { bag +« flat @a».comb: /<( <[ 1..9 ]> )> <[ , . \d ]>*/ }
  
@@ -358,14 +356,13 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
-)
+]
 
 	done-testing;
 }, Q{Benford's law};
 
 subtest {
 	subtest {
-#`(
 		my $source = Q:to[_END_];
 sub bernoulli($n) {
     my @a;
@@ -389,9 +386,8 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
-)
 
-	done-testing;
+		done-testing;
 	}, Q{version 1};
 
 	subtest {
@@ -420,11 +416,11 @@ _END_
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
 
-	done-testing;
+		done-testing;
 	}, Q{version 2};
 
 	subtest {
-#`(
+#`[
 		my $source = Q:to[_END_];
 my sub infix:<bop>(\prev,\this) { this.key => this.key * (this.value - prev.value) }
  
@@ -438,16 +434,15 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
-)
+]
 
-	done-testing;
+		done-testing;
 	}, Q{version 3};
 
 	done-testing;
 }, Q{Balanced brackets};
 
 subtest {
-#`(
 	my $source = Q:to[_END_];
 sub best-shuffle(Str $orig) {
  
@@ -478,7 +473,6 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
-)
 
 	done-testing;
 }, Q{Best shuffle};
@@ -497,7 +491,7 @@ _END_
 
 subtest {
 	subtest {
-#`(
+#`[
 		my $source = Q:to[_END_];
 sub search (@a, $x --> Int) {
     binary_search { $x cmp @a[$^i] }, 0, @a.end
@@ -519,13 +513,13 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
-)
+]
 
-	done-testing;
+		done-testing;
 	}, Q{version 1};
 
 	subtest {
-#`(
+#`[
 		my $source = Q:to[_END_];
 sub binary_search (&p, Int $lo, Int $hi --> Int) {
     $lo <= $hi or fail;
@@ -541,16 +535,16 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
-)
+]
 
-	done-testing;
+		done-testing;
 	}, Q{version 2};
 
 	done-testing;
 }, Q{Binary search};
 
 subtest {
-#`(
+#`[
 	my $source = Q:to[_END_];
 # Perl 6 is perfectly fine with NUL *characters* in strings:
  
@@ -640,13 +634,13 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
-)
+]
 
 	done-testing;
 }, Q{Binary strings};
 
 subtest {
-#`(
+#`[
 	# XXX class Digest::SHA exports 'sha256'
 	my $source = Q:to[_END_];
 sub sha256 { }
@@ -672,13 +666,13 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
-)
+]
 
 	done-testing;
 }, Q{Bitcoin validation};
 
 subtest {
-#`(
+#`[
 	# XXX class Digest::SHA exports sub sha256, sub rmd160
 	my $source = Q:to[_END_];
 sub sha256 { }; sub rmd160 { }
@@ -713,13 +707,13 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
-)
+]
 
 	done-testing;
 }, Q{Bitcoin public point to address};
 
 subtest {
-#`(
+#`[
 	my $source = Q:to[_END_];
 class Pixel { has UInt ($.R, $.G, $.B) }
 class Bitmap {
@@ -755,13 +749,12 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
-)
+]
 
 	done-testing;
 }, Q{Bitmap};
 
 subtest {
-#`(
 	# XXX Create a shell 'Bitmap' class.. yes, just above but separation...
 	my $source = Q:to[_END_];
 class Pixel { has UInt ($.R, $.G, $.B) }
@@ -801,13 +794,12 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
-)
 
 	done-testing;
 }, Q{Bitmap / Bresenham's line algorithm};
 
 subtest {
-#`(
+#`[
 	# XXX Create a shell 'Bitmap' class.. yes, just above but separation...
 	my $source = Q:to[_END_];
 use MONKEY-TYPING;
@@ -853,13 +845,13 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
-)
+]
 
 	done-testing;
 }, Q{Bitmap / midpoint circle algorithm};
 
 subtest {
-#`(
+#`[
 	my $source = Q:to[_END_];
 class Pixel { has uint8 ($.R, $.G, $.B) }
 class Bitmap {
@@ -896,13 +888,13 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
-)
+]
 
 	done-testing;
 }, Q{Bitmap / write a PPM file};
 
 subtest {
-#`(
+#`[
 	my $source = Q:to[_END_];
 sub encode-ascii(Str $s) {
     my @b = $s.ords».fmt("%07b")».comb;
@@ -923,13 +915,13 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
-)
+]
 
 	done-testing;
 }, Q{Bitwise I/O};
 
 subtest {
-#`(
+#`[
 	my $source = Q:to[_END_];
 constant MAXINT = uint.Range.max;
 constant BITS = MAXINT.base(2).chars;
@@ -964,7 +956,7 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
-)
+]
 
 	done-testing;
 }, Q{Bitwise operations};
@@ -983,7 +975,7 @@ _END_
 }, Q{Boolean types};
 
 subtest {
-#`(
+#`[
 	my $source = Q:to[_END_];
 sub point (Int $index) {
     my $ix = $index % 32;
@@ -1012,13 +1004,13 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
-)
+]
 
 	done-testing;
 }, Q{Box the compass};
 
 subtest {
-#`(
+#`[
 	my $source = Q:to[_END_];
 grammar BraceExpansion {
     token TOP  { ( <meta> | . )* }
@@ -1069,13 +1061,13 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
-)
+]
 
 	done-testing;
 }, Q{Brace expansion};
 
 subtest {
-#`(
+#`[
 	my $source = Q:to[_END_];
 class Foo {
     has $!shyguy = 42;
@@ -1088,13 +1080,13 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
-)
+]
 
 	done-testing;
 }, Q{Break OO privacy};
 
 subtest {
-#`(
+#`[
 	my $source = Q:to[_END_];
 constant size = 100;
 constant particlenum = 1_000;
@@ -1173,13 +1165,12 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
-)
+]
 
 	done-testing;
 }, Q{Brownian tree};
 
 subtest {
-#`(
 	my $source = Q:to[_END_];
 my $size = 4;
 my @secret = pick $size, '1' .. '9';
@@ -1207,13 +1198,12 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
-)
 
 	done-testing;
 }, Q{Bulls and cows};
 
 subtest {
-#`(
+#`[
 	my $source = Q:to[_END_];
 # we use the [] reduction meta operator along with the Cartesian Product
 # operator X to create the Cartesian Product of four times [1..9] and then get
@@ -1265,10 +1255,11 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
-)
+]
 
 	done-testing;
 }, Q{Bulls and cows / player};
 
 done-testing;
+
 # vim: ft=perl6

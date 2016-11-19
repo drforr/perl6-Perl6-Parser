@@ -364,7 +364,7 @@ _END_
 }, Q{24 game};
 
 subtest {
-#`(
+#`[
 	my $source = Q:to[_END_];
 use MONKEY-SEE-NO-EVAL;
 
@@ -415,13 +415,13 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
-)
+]
 
 	done-testing;
 }, Q{24 game/Solve};
 
 subtest {
-#`(
+#`[
 	my $source = Q:to[_END_];
 my @todo = $[1];
 my @sums = 0;
@@ -457,7 +457,7 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
-)
+]
 
 	done-testing;
 }, Q{9 billion names of God};
@@ -488,7 +488,7 @@ _END_
 	}, Q{version 1};
 
 	subtest {
-#`(
+#`[
 		my $source = Q:to[_END_];
 for 99...1 -> $bottles {
     sing $bottles, :wall;
@@ -513,13 +513,13 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
-)
+]
 
 		done-testing;
 	}, Q{version 2};
 
 	subtest {
-#`(
+#`[
 		my $source = Q:to[_END_];
 my @quantities = flat (99 ... 1), 'No more', 99;
 my @bottles = flat 'bottles' xx 98, 'bottle', 'bottles' xx 2;
@@ -539,7 +539,7 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
-)
+]
 
 		done-testing;
 	}, Q{version 3};
