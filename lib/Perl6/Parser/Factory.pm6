@@ -296,6 +296,27 @@ role MatchingBalanced {
 			:child( @_child )
 		)
 	}
+
+	method from-int( Int $from, Str $str, @child ) {
+		my Perl6::Element @_child;
+		$str ~~ m{ ^ (.) .* (.) $ };
+		@_child.append(
+			Perl6::Balanced::Enter.from-int( $from, $0.Str )
+		);
+		@_child.append( @child );
+		@_child.append(
+			Perl6::Balanced::Exit.from-int(
+				$from + $str.chars - 1,
+				$1.Str
+			)
+		);
+		self.bless(
+			:factory-line-number( callframe(1).line ),
+			:from( $from ),
+			:to( $from + $str.chars ),
+			:child( @_child )
+		)
+	}
 }
 
 class Perl6::Operator {
@@ -917,7 +938,7 @@ class Perl6::Parser::Factory {
 			die "Unhandled case" if
 				$*FACTORY-FAILURE-FATAL
 		}
-		@child
+		@child;
 	}
 
 	method _args( Mu $p ) {
@@ -960,7 +981,7 @@ class Perl6::Parser::Factory {
 				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child
+		@child;
 	}
 
 	# { }
@@ -1106,7 +1127,7 @@ class Perl6::Parser::Factory {
 				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child
+		@child;
 	}
 
 	method _blorst( Mu $p ) {
@@ -1180,7 +1201,7 @@ class Perl6::Parser::Factory {
 			die "Unhandled case" if
 				$*FACTORY-FAILURE-FATAL
 		}
-		@child
+		@child;
 	}
 
 	method _charspec( Mu $p ) {
@@ -1256,7 +1277,7 @@ class Perl6::Parser::Factory {
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child
+		@child;
 	}
 
 	method _codeblock( Mu $p ) {
@@ -1368,7 +1389,7 @@ class Perl6::Parser::Factory {
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child
+		@child;
 	}
 
 	method _colonpairs( Mu $p ) {
@@ -1530,7 +1551,7 @@ class Perl6::Parser::Factory {
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child
+		@child;
 	}
 
 	method _DECL( Mu $p ) {
@@ -1650,7 +1671,7 @@ class Perl6::Parser::Factory {
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child
+		@child;
 	}
 
 	method _dec_number( Mu $p ) {
@@ -1700,7 +1721,7 @@ class Perl6::Parser::Factory {
 			die "Unhandled case" if
 				$*FACTORY-FAILURE-FATAL
 		}
-		@child
+		@child;
 	}
 
 	method _deflongname( Mu $p ) {
@@ -1761,7 +1782,7 @@ class Perl6::Parser::Factory {
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child
+		@child;
 	}
 
 	method _deftermnow( Mu $p ) {
@@ -1830,7 +1851,7 @@ class Perl6::Parser::Factory {
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child
+		@child;
 	}
 
 	method _dottyop( Mu $p ) {
@@ -1859,7 +1880,7 @@ class Perl6::Parser::Factory {
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child
+		@child;
 	}
 
 	method _dottyopish( Mu $p ) {
@@ -1903,7 +1924,7 @@ class Perl6::Parser::Factory {
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child
+		@child;
 	}
 
 	method _e3( Mu $p ) {
@@ -1923,7 +1944,7 @@ class Perl6::Parser::Factory {
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child
+		@child;
 	}
 
 	method _else( Mu $p ) {
@@ -1946,7 +1967,7 @@ class Perl6::Parser::Factory {
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child
+		@child;
 	}
 
 	method _escale( Mu $p ) {
@@ -1964,7 +1985,7 @@ class Perl6::Parser::Factory {
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child
+		@child;
 	}
 
 	# \\
@@ -1998,7 +2019,7 @@ class Perl6::Parser::Factory {
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child
+		@child;
 	}
 
 	method _EXPR( Mu $p ) {
@@ -2308,7 +2329,7 @@ class Perl6::Parser::Factory {
 			die "Unhandled case" if
 				$*FACTORY-FAILURE-FATAL
 		}
-		@child
+		@child;
 	}
 
 	method _fake_infix( Mu $p ) {
@@ -2356,7 +2377,7 @@ class Perl6::Parser::Factory {
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child
+		@child;
 	}
 
 	method __FloatingPoint( Mu $p ) {
@@ -2389,7 +2410,7 @@ class Perl6::Parser::Factory {
 			die "Unhandled case" if
 				$*FACTORY-FAILURE-FATAL
 		}
-		@child
+		@child;
 	}
 
 	method _infix( Mu $p ) {
@@ -2416,7 +2437,7 @@ class Perl6::Parser::Factory {
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child
+		@child;
 	}
 
 	method _infixish( Mu $p ) {
@@ -2432,7 +2453,7 @@ class Perl6::Parser::Factory {
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child
+		@child;
 	}
 
 	# << >>
@@ -2545,7 +2566,7 @@ class Perl6::Parser::Factory {
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child
+		@child;
 	}
 
 	method _integer( Mu $p ) {
@@ -2673,9 +2694,22 @@ return True;
 				@child.append(
 					self._longname( $_.hash.<longname> )
 				);
+				my $x = $_.orig.substr(
+					0, $_.hash.<multisig>.from
+				);
+				$x ~~ m{ ( '(' \s* ) $ };
+				my $from = $0.Str.chars;
+				my $y = $_.orig.substr( $_.hash.<multisig>.to );
+				$y ~~ m{ ^ ( \s* ')' ) };
+				my $to = $0.Str.chars;
 				@child.append(
-					Perl6::Operator::Circumfix.from-match(
-						$_, @_child
+					Perl6::Operator::Circumfix.from-int(
+						$_.hash.<multisig>.from - $from,
+						$_.orig.substr(
+							$_.hash.<multisig>.from - $from,
+							$_.hash.<multisig>.chars + $from + $to
+						),
+						@_child
 					)
 				);
 				@child.append(
@@ -2698,7 +2732,7 @@ return True;
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child
+		@child;
 	}
 
 	method _methodop( Mu $p ) {
@@ -2726,7 +2760,7 @@ return True;
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child
+		@child;
 	}
 
 	method _min( Mu $p ) {
@@ -2787,7 +2821,7 @@ return True;
 			die "Unhandled case" if
 				$*FACTORY-FAILURE-FATAL
 		}
-		@child
+		@child;
 	}
 
 	# multi
@@ -2825,7 +2859,7 @@ return True;
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child
+		@child;
 	}
 
 	method _multisig( Mu $p ) {
@@ -2842,7 +2876,7 @@ return True;
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child
+		@child;
 	}
 
 	method _named_param( Mu $p ) {
@@ -2912,7 +2946,7 @@ return True;
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child
+		@child;
 	}
 
 	method _nibble( Mu $p ) {
@@ -2937,7 +2971,7 @@ return True;
 			die "Unhandled case" if
 				$*FACTORY-FAILURE-FATAL
 		}
-		@child
+		@child;
 	}
 
 	method _nibbler( Mu $p ) {
@@ -3073,7 +3107,7 @@ return True;
 			die "Unhandled case" if
 				$*FACTORY-FAILURE-FATAL
 		}
-		@child
+		@child;
 	}
 
 	# numish # ?
@@ -3114,11 +3148,6 @@ return True;
 	}
 
 	method _O( Mu $p ) {
-		CATCH {
-			when X::Multi::NoMatch { .resume }
-			#default { .resume }
-			default { }
-		}
 		return True if $p.<thunky>
 			and $p.<prec>
 			and $p.<fiddly>
@@ -3195,7 +3224,7 @@ return True;
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child
+		@child;
 	}
 
 	method _OPER( Mu $p ) {
@@ -3257,7 +3286,7 @@ return True;
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child
+		@child;
 	}
 
 	# ?{ }
@@ -3282,7 +3311,7 @@ return True;
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child
+		@child;
 	}
 
 	# package <name> { }
@@ -3324,7 +3353,7 @@ return True;
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child
+		@child;
 	}
 
 	method _package_def( Mu $p ) {
@@ -3389,7 +3418,7 @@ return True;
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child
+		@child;
 	}
 
 	method _param_term( Mu $p ) {
@@ -3406,7 +3435,7 @@ return True;
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child
+		@child;
 	}
 
 	method _parameter( Mu $p ) {
@@ -3517,7 +3546,7 @@ return True;
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child
+		@child;
 	}
 
 	my %sigil-map =
@@ -3648,7 +3677,7 @@ return True;
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child
+		@child;
 	}
 
 	# Needs to be run through a different parser?
@@ -3718,7 +3747,7 @@ return True;
 			die "Unhandled case" if
 				$*FACTORY-FAILURE-FATAL
 		}
-		@child
+		@child;
 	}
 
 	method _post_constraint( Mu $p ) {
@@ -3797,7 +3826,7 @@ return True;
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child
+		@child;
 	}
 
 	# ⁿ
@@ -3825,7 +3854,7 @@ return True;
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child
+		@child;
 	}
 
 	method _postop( Mu $p ) {
@@ -3856,7 +3885,7 @@ return True;
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child
+		@child;
 	}
 
 	method _prefix( Mu $p ) {
@@ -3875,7 +3904,7 @@ return True;
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child
+		@child;
 	}
 
 	method _quant( Mu $p ) {
@@ -3910,7 +3939,7 @@ return True;
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child
+		@child;
 	}
 
 	# **
@@ -3940,7 +3969,7 @@ return True;
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child
+		@child;
 	}
 
 	method _quibble( Mu $p ) {
@@ -3965,7 +3994,7 @@ return True;
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child
+		@child;
 	}
 
 	# apos # ' .. '
@@ -4091,7 +4120,7 @@ return True;
 			die "Unhandled case" if
 				$*FACTORY-FAILURE-FATAL
 		}
-		@child
+		@child;
 	}
 
 	method _quotepair( Mu $p ) {
@@ -4129,7 +4158,7 @@ return True;
 			die "Unhandled case" if
 				$*FACTORY-FAILURE-FATAL
 		}
-		@child
+		@child;
 	}
 
 	method _radix( Mu $p ) {
@@ -4176,7 +4205,7 @@ return True;
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child
+		@child;
 	}
 
 	method _regex_def( Mu $p ) {
@@ -4237,7 +4266,7 @@ return True;
 			die "Unhandled case" if
 				$*FACTORY-FAILURE-FATAL
 		}
-		@child
+		@child;
 	}
 
 	method _right( Mu $p ) {
@@ -4269,7 +4298,7 @@ return True;
 			die "Unhandled case" if
 				$*FACTORY-FAILURE-FATAL
 		}
-		@child
+		@child;
 	}
 
 	method _routine_def( Mu $p ) {
@@ -4374,7 +4403,7 @@ return True;
 			die "Unhandled case" if
 				$*FACTORY-FAILURE-FATAL
 		}
-		@child
+		@child;
 	}
 
 	method _rx_adverbs( Mu $p ) {
@@ -4444,7 +4473,7 @@ return True;
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child
+		@child;
 	}
 
 	# my <name>
@@ -4468,7 +4497,7 @@ return True;
 			die "Unhandled case" if
 				$*FACTORY-FAILURE-FATAL
 		}
-		@child
+		@child;
 	}
 
 	method _semiarglist( Mu $p ) {
@@ -4501,7 +4530,7 @@ return True;
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child
+		@child;
 	}
 
 	method _separator( Mu $p ) {
@@ -4524,7 +4553,7 @@ return True;
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child
+		@child;
 	}
 
 	method _septype( Mu $p ) {
@@ -4552,7 +4581,7 @@ return True;
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child
+		@child;
 	}
 
 	method _sigfinal( Mu $p ) {
@@ -4596,7 +4625,7 @@ return True;
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child
+		@child;
 	}
 
 	method __Parameter( Mu $p ) {
@@ -4744,7 +4773,7 @@ return True;
 			die "Unhandled case" if
 				$*FACTORY-FAILURE-FATAL
 		}
-		@child
+		@child;
 	}
 
 	method _signature( Mu $p ) {
@@ -4798,7 +4827,7 @@ return True;
 			die "Unhandled case" if
 				$*FACTORY-FAILURE-FATAL
 		}
-		@child
+		@child;
 	}
 
 	method _smexpr( Mu $p ) {
@@ -5103,7 +5132,7 @@ return True;
 			die "Unhandled case" if
 				$*FACTORY-FAILURE-FATAL
 		}
-		@child
+		@child;
 	}
 
 	method _statementlist( Mu $p ) {
@@ -5178,7 +5207,7 @@ return True;
 			}
 			@child.append( Perl6::Statement.from-list( @_child ) );
 		}
-		@child
+		@child;
 	}
 
 	# if
@@ -5208,7 +5237,7 @@ return True;
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child
+		@child;
 	}
 
 	# while
@@ -5231,7 +5260,7 @@ return True;
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child
+		@child;
 	}
 
 	# BEGIN
@@ -5279,7 +5308,7 @@ return True;
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child
+		@child;
 	}
 
 	method _subshortname( Mu $p ) {
@@ -5325,7 +5354,7 @@ return True;
 			die "Unhandled case" if
 				$*FACTORY-FAILURE-FATAL
 		}
-		@child
+		@child;
 	}
 
 	# fatarrow
@@ -5386,7 +5415,7 @@ return True;
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child
+		@child;
 	}
 
 	method _termalt( Mu $p ) {
@@ -5412,7 +5441,7 @@ return True;
 			die "Unhandled case" if
 				$*FACTORY-FAILURE-FATAL
 		}
-		@child
+		@child;
 	}
 
 	method _termaltseq( Mu $p ) {
@@ -5451,7 +5480,7 @@ return True;
 			die "Unhandled case" if
 				$*FACTORY-FAILURE-FATAL
 		}
-		@child
+		@child;
 	}
 
 	method _termconjseq( Mu $p ) {
@@ -5489,7 +5518,7 @@ return True;
 			die "Unhandled case" if
 				$*FACTORY-FAILURE-FATAL
 		}
-		@child
+		@child;
 	}
 
 	method _term_init( Mu $p ) {
@@ -5505,7 +5534,7 @@ return True;
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child
+		@child;
 	}
 
 	method _termish( Mu $p ) {
@@ -5532,7 +5561,7 @@ return True;
 			die "Unhandled case" if
 				$*FACTORY-FAILURE-FATAL
 		}
-		@child
+		@child;
 	}
 
 	method _termseq( Mu $p ) {
@@ -5562,7 +5591,7 @@ return True;
 			die "Unhandled case" if
 				$*FACTORY-FAILURE-FATAL
 		}
-		@child
+		@child;
 	}
 
 	# is
@@ -5596,7 +5625,7 @@ return True;
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child
+		@child;
 	}
 
 	method _twigil( Mu $p ) {
@@ -5638,7 +5667,7 @@ return True;
 			die "Unhandled case" if
 				$*FACTORY-FAILURE-FATAL
 		}
-		@child
+		@child;
 	}
 
 	# enum
@@ -5683,34 +5712,21 @@ return True;
 			die "Unhandled case" if
 				$*FACTORY-FAILURE-FATAL
 		}
-		@child
+		@child;
 	}
 
 	method _typename( Mu $p ) {
-		CATCH {
-			when X::Hash::Store::OddNumber { .resume }
-		} # XXX ?...
 		for $p.list {
 			if self.assert-hash( $_,
 					[< longname colonpairs >],
 					[< colonpair >] ) {
-				# XXX Probably could be narrowed.
+				# XXX Can probably be narrowed
 				return Perl6::Bareword.from-match( $_ );
-			}
-			elsif self.assert-hash( $_,
-					[< longname colonpair >] ) {
-				# XXX Fix this later.
-				return Perl6::Bareword.from-int( -42, $_.Str );
 			}
 			elsif self.assert-hash( $_,
 					[< longname >], [< colonpairs >] ) {
 				# XXX Can probably be narrowed
 				return Perl6::Bareword.from-match( $_ );
-			}
-			elsif self.assert-hash( $_,
-					[< longname >], [< colonpair >] ) {
-				# XXX Fix this later.
-				return self._longname( $_.hash.<longname> );
 			}
 			else {
 				debug-match( $_ ) if $*DEBUG;
@@ -5769,7 +5785,7 @@ return True;
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child
+		@child;
 	}
 
 	method _VALUE( Mu $p ) {
@@ -5896,7 +5912,7 @@ die "Catching Int";
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child
+		@child;
 	}
 
 	method _variable( Mu $p ) {
@@ -5934,7 +5950,7 @@ die "Catching Int";
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
-		@child
+		@child;
 	}
 
 	method _vstr( Mu $p ) {
@@ -5960,7 +5976,7 @@ die "Catching Int";
 			die "Unhandled case" if
 				$*FACTORY-FAILURE-FATAL
 		}
-		@child
+		@child;
 	}
 
 	method _wu( Mu $p ) {
@@ -6011,6 +6027,6 @@ die "Catching Int";
 			die "Unhandled case" if
 				$*FACTORY-FAILURE-FATAL
 		}
-		@child
+		@child;
 	}
 }
