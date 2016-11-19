@@ -3722,8 +3722,20 @@ return True;
 	}
 
 	method _post_constraint( Mu $p ) {
-		# XXX fix later
-		self._EXPR( $p.list.[0].hash.<EXPR> );
+		my Perl6::Element @child;
+		if $p.list {
+			for $p.list {
+				@child.append(
+					self._EXPR( $_ )
+				)
+			}
+		}
+		else {
+			debug-match( $_ ) if $*DEBUG;
+			die "Unhandled case" if
+				$*FACTORY-FAILURE-FATAL
+		}
+		@child;
 	}
 
 	# [ ]
@@ -4621,9 +4633,6 @@ return True;
 			[< type_constraint param_var
 			   post_constraint quant >],
 			[< default_value modifier trait >] ) {
-			# Synthesize the 'from' and 'to' markers for 'where'
-			$p.Str ~~ m{ << (where) >> };
-			my Int $from = $0.from;
 			@child.append(
 				self._type_constraint(
 					$p.hash.<type_constraint>
@@ -4631,13 +4640,6 @@ return True;
 			);
 			@child.append(
 				self._param_var( $p.hash.<param_var> )
-			);
-			# XXX WHERE is just guessed at now...
-			@child.append(
-				Perl6::Bareword.from-int(
-					$p.from + $from,
-					WHERE
-				)
 			);
 			@child.append(
 				self._post_constraint(
@@ -4671,11 +4673,9 @@ return True;
 		}
 		elsif self.assert-hash( $p,
 			[< param_var quant default_value >],
-			[< modifier trait
-			   type_constraint
-			   post_constraint >] ) {
+			[< modifier trait type_constraint post_constraint >] ) {
 			@child.append( self._param_var( $p.hash.<param_var> ) );
-			# XXX assumig the location for '='
+			# XXX assuming the location for '='
 			@child.append(
 				Perl6::Operator::Infix.find-match( $p, EQUAL )
 			);
@@ -4684,16 +4684,33 @@ return True;
 			);
 		}
 		elsif self.assert-hash( $p,
+			[< param_var quant post_constraint >],
+			[< modifier trait type_constraint default_value >] ) {
+			@child.append( self._param_var( $p.hash.<param_var> ) );
+			@child.append( self._quant( $p.hash.<quant> ) );
+			@child.append(
+				self._post_constraint(
+					$p.hash.<post_constraint>
+				)
+			);
+		}
+		elsif self.assert-hash( $p,
 			[< param_var quant >],
 			[< default_value modifier trait
-			   type_constraint
-			   post_constraint >] ) {
+			   type_constraint post_constraint >] ) {
 			if $p.hash.<quant>.Str {
 				@child.append( self._quant( $p.hash.<quant> ) );
 			}
 			@child.append( self._param_var( $p.hash.<param_var> ) );
 			if $p.hash.<trait> {
 				@child.append( self._trait( $p.hash.<trait> ) );
+			}
+			if $p.hash.<post_constraint> {
+				@child.append(
+					self._post_constraint(
+						$p.hash.<post_constraint>
+					)
+				);
 			}
 		}
 		elsif self.assert-hash( $p,
@@ -5736,6 +5753,13 @@ return True;
 				);
 				@child.append( self._OPER( $_.hash.<OPER> ) );
 			}
+			when self.assert-hash( $_,
+					[< longname args >] ) {
+				@child.append(
+					self._longname( $_.hash.<longname> )
+				);
+				@child.append( self._args( $_.hash.<args> ) );
+			}
 			when self.assert-hash( $_, [< value >] ) {
 				@child.append( self._value( $_.hash.<value> ) );
 			}
@@ -5851,12 +5875,6 @@ die "Catching Int";
 				my Int $from = $0.from;
 				@child.append(
 					self._variable( $_.hash.<variable> )
-				);
-				@child.append(
-					Perl6::Bareword.from-int(
-						$_.from + $1.from,
-						WHERE
-					)
 				);
 				@child.append(
 					self._post_constraint(
