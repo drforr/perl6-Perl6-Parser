@@ -180,6 +180,7 @@ _END_
 	}, Q{version 2};
 
 	subtest {
+#`[
 		my $source = Q:to[_END_];
 proto A(Int \𝑚, Int \𝑛) { (state @)[𝑚][𝑛] //= {*} }
 
@@ -198,6 +199,7 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
+]
 
 		done-testing;
 	}, Q{version 3};
@@ -1437,7 +1439,6 @@ _END_
 }, Q{Average loop length};
 
 subtest {
-#`[
 	my $source = Q:to[_END_];
 multi mean([]){ Failure.new('mean on empty list is not defined') }; # Failure-objects are lazy exceptions
 multi mean (@a) { ([+] @a) / @a }
@@ -1446,7 +1447,6 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
-]
 
 	done-testing;
 }, Q{Averages/arithmetic mean};

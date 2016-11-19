@@ -1536,6 +1536,9 @@ return True;
 			and self._Dig( $parsed.hash.<dig> )
 			and self._O( $parsed.hash.<O> );
 		return True if self.assert-hash-keys( $parsed,
+				[< dig >], [< O >] )
+			and self._Dig( $parsed.hash.<dig> );
+		return True if self.assert-hash-keys( $parsed,
 				[< sym >], [< O >] )
 			and self._Sym( $parsed.hash.<sym> );
 		return True if self.assert-hash-keys( $parsed,
@@ -1735,6 +1738,9 @@ return True;
 			and self._Sym( $parsed.hash.<sym> )
 			and self._O( $parsed.hash.<O> );
 		return True if self.assert-hash-keys( $parsed,
+				[< dig>], [< O >] )
+			and self._Dig( $parsed.hash.<dig> );
+		return True if self.assert-hash-keys( $parsed,
 				[< sym >], [< O >] )
 			and self._Sym( $parsed.hash.<sym> );
 		debug-match( $parsed );
@@ -1878,6 +1884,12 @@ return True;
 	method _RadNumber( Mu $parsed ) {
 		self.trace( '_RadNumber' );
 #return True;
+		return True if self.assert-hash-keys( $parsed,
+				[< circumfix bracket radix >],
+				[< exp rad_digits base >] )
+			and self._Circumfix( $parsed.hash.<circumfix> )
+			and self._Bracket( $parsed.hash.<bracket> )
+			and self._Radix( $parsed.hash.<radix> );
 		return True if self.assert-hash-keys( $parsed,
 				[< circumfix bracket radix >], [< exp base >] )
 			and self._Circumfix( $parsed.hash.<circumfix> )
@@ -2120,6 +2132,9 @@ return True;
 				[< param_sep >] )
 			and self._Parameter( $parsed.hash.<parameter> )
 			and self._TypeName( $parsed.hash.<typename> );
+		return True if self.assert-hash-keys( $parsed,
+				[< normspace >] )
+			and self._NormSpace( $parsed.hash.<normspace> );
 		return True if self.assert-hash-keys( $parsed, [],
 				[< param_sep parameter >] );
 		debug-match( $parsed );

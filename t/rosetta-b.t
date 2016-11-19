@@ -264,7 +264,6 @@ _END_
 }, Q{Balanced ternary};
 
 subtest {
-#`[
 	# XXX Make up a 'Image::PNG::Portable' class
 	my $source = Q:to[_END_];
 class Image::PNG::Portable { has ( $.width, $.height ); method set { }; method write { } }
@@ -293,7 +292,6 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
-]
 
 	done-testing;
 }, Q{Barnsley fern};
@@ -894,7 +892,6 @@ _END_
 }, Q{Bitmap / write a PPM file};
 
 subtest {
-#`[
 	my $source = Q:to[_END_];
 sub encode-ascii(Str $s) {
     my @b = $s.ords».fmt("%07b")».comb;
@@ -915,7 +912,6 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
-]
 
 	done-testing;
 }, Q{Bitwise I/O};

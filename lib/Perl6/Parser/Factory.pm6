@@ -382,6 +382,7 @@ class Perl6::WS does Token {
 
 class Perl6::Comment does Token {
 	also is Perl6::Element;
+	also does Matchable;
 }
 
 class Perl6::Document does Branching {
@@ -782,7 +783,7 @@ class Perl6::Parser::Factory {
 			}
 		}
 		my Perl6::Element $root = Perl6::Document.from-list( @_child );
-		populate-ws( $p, $root );
+		fill-gaps( $p, $root );
 		if $p.from < $root.from {
 			my $remainder = $p.orig.Str.substr( 0, $root.from );
 			unless $remainder ~~ /\S/ {
@@ -807,7 +808,7 @@ class Perl6::Parser::Factory {
 		$root;
 	}
 
-	sub _insert-ws-at( Mu $p, Perl6::Element $root, Int $index ) {
+	sub _fill-gap( Mu $p, Perl6::Element $root, Int $index ) {
 		my $start = $root.child.[$index].to;
 		my $end = $root.child.[$index+1].from;
 
@@ -815,30 +816,70 @@ class Perl6::Parser::Factory {
 			say "Negative match index!";
 			return;
 		}
-
-		if $start < $end {
-			my $x = $p.orig.Str.substr( $start, $end - $start );
-			unless $x ~~ /\S/ {
-				$root.child.splice(
-					$index + 1,
-					0,
-					Perl6::WS.from-int( $start, $x )
-				)
-			}
-		}
 		elsif $start > $end {
 			say "Crossing streams";
+			return;
+		}
+
+		my $x = $p.orig.Str.substr( $start, $end - $start );
+		if $x ~~ m{ ^ '#`' } {
+		}
+		elsif $x ~~ m{ ^ '#|' } {
+		}
+		elsif $x ~~ m{ ^ ( '#' .+ ) $ } {
+			$root.child.splice(
+				$index + 1,
+				0,
+				Perl6::Comment.from-int( $start, $0.Str )
+			);
+		}
+		elsif $x ~~ m{ ^ ( \s+ ) ( '#' .+ ) $$ ( \s+ ) $ } {
+			$root.child.splice(
+				$index + 1,
+				0,
+				Perl6::WS.from-int( $start, $0.Str )
+			);
+			$root.child.splice(
+				$index + 2,
+				0,
+				Perl6::Comment.from-int(
+					$start + $0.Str.chars,
+					$1.Str
+				)
+			);
+			$root.child.splice(
+				$index + 3,
+				0,
+				Perl6::WS.from-int(
+					$start + $0.Str.chars + $1.Str.chars,
+					$2.Str
+				)
+			);
+		}
+		elsif $x ~~ m{ ^ ( \s+ ) ( '#' .+ ) $$ ( \s+ ) $ } {
+#die 2;
+		}
+		elsif $x ~~ m{ \S } {
+#die 3;
+#say "[$x]";
+		}
+		else {
+			$root.child.splice(
+				$index + 1,
+				0,
+				Perl6::WS.from-int( $start, $x )
+			)
 		}
 	}
 
-	sub populate-ws( Mu $p, Perl6::Element $root, Int $depth = 0 ) {
+	sub fill-gaps( Mu $p, Perl6::Element $root, Int $depth = 0 ) {
 		if $root.^can( 'child' ) {
 			for reverse( 0 .. $root.child.elems - 1 ) {
-				populate-ws( $p, $root.child.[$_], $depth + 1 );
+				fill-gaps( $p, $root.child.[$_], $depth + 1 );
 				if $_ < $root.child.elems - 1 {
 					if $root.child.[$_].to !=
 					   $root.child.[$_+1].from {
-						_insert-ws-at( $p, $root, $_ );
+						_fill-gap( $p, $root, $_ );
 					}
 				}
 			}
@@ -2881,6 +2922,10 @@ return True;
 
 	method _named_param( Mu $p ) {
 		given $p {
+			when self.assert-hash( $_, [< name param_var >] ) {
+				self._name( $_.hash.<name> );
+				self._param_var( $_.hash.<param_var> );
+			}
 			when self.assert-hash( $_, [< param_var >] ) {
 				self._param_var( $_.hash.<param_var> );
 			}
@@ -4170,12 +4215,22 @@ return True;
 		given $p {
 			when self.assert-hash( $_,
 					[< circumfix bracket radix >],
+					[< exp rad_digits base >] ) {
+				Perl6::Number::Radix.from-match( $_ );
+			}
+			when self.assert-hash( $_,
+					[< circumfix bracket radix >],
 					[< exp base >] ) {
 				Perl6::Number::Radix.from-match( $_ );
 			}
 			when self.assert-hash( $_,
 					[< circumfix radix >],
 					[< exp base >] ) {
+				Perl6::Number::Radix.from-match( $_ );
+			}
+			when self.assert-hash( $_,
+					[< circumfix radix >],
+					[< exp rad_digits base >] ) {
 				Perl6::Number::Radix.from-match( $_ );
 			}
 			default {
@@ -4613,6 +4668,11 @@ return True;
 				);
 				@child.append(
 					self._typename( $_.hash.<typename> )
+				);
+			}
+			when self.assert-hash( $_, [< normspace >] ) {
+				@child.append(
+					self._normspace( $_.hash.<normspace> )
 				);
 			}
 			when self.assert-hash( $_, [ ],
@@ -5736,6 +5796,10 @@ return True;
 		}
 
 		if self.assert-hash( $p, [< longname colonpairs >] ) {
+			self._longname( $p.hash.<longname> );
+		}
+		elsif self.assert-hash( $p, [< longname >],
+				[< colonpairs colonpair >] ) {
 			self._longname( $p.hash.<longname> );
 		}
 		elsif self.assert-hash( $p, [< longname >], [< colonpair >] ) {
