@@ -755,6 +755,47 @@ class Perl6::Parser::Factory {
 		}
 	}
 
+	sub _string-to-tokens( Int $from, Str $str ) {
+		my Perl6::Element @child;
+
+		if $str ~~ m{ ^ '#`' } {
+		}
+		elsif $str ~~ m{ ^ '#|' } {
+		}
+		elsif $str ~~ m{ ^ ( '#' .+ ) $ } {
+			@child.append(
+				Perl6::Comment.from-int( $from, $0.Str )
+			);
+		}
+		elsif $str ~~ m{ ^ ( \s+ ) ( '#' .+ ) $$ ( \s+ ) $ } {
+			@child.append(
+				Perl6::WS.from-int( $from, $0.Str )
+			);
+			@child.append(
+				Perl6::Comment.from-int(
+					$from + $0.Str.chars,
+					$1.Str
+				)
+			);
+			@child.append(
+				Perl6::WS.from-int(
+					$from + $0.Str.chars + $1.Str.chars,
+					$2.Str
+				)
+			);
+		}
+		elsif $str ~~ m{ ^ ( \s+ ) ( '#' .+ ) $$ ( \s+ ) $ } {
+		}
+		elsif $str ~~ m{ \S } {
+		}
+		else {
+			@child.append(
+				Perl6::WS.from-int( $from, $str )
+			)
+		}
+		@child;
+	}
+
 	method build( Mu $p ) {
 		self.__Build-Heredoc-List( $p );
 		my Perl6::Element @_child;
@@ -782,28 +823,28 @@ class Perl6::Parser::Factory {
 				);
 			}
 		}
+
 		my Perl6::Element $root = Perl6::Document.from-list( @_child );
 		fill-gaps( $p, $root );
 		if $p.from < $root.from {
 			my $remainder = $p.orig.Str.substr( 0, $root.from );
-			unless $remainder ~~ /\S/ {
-				$root.child.splice(
-					0, 0, 
-					Perl6::WS.from-int(
-						$p.from, $remainder
-					)
-				);
-			}
+			my Perl6::Element @child;
+			@child.append(
+				_string-to-tokens( $p.from, $remainder )
+			);
+			$root.child.splice(
+				0, 0, @child
+			);
 		}
 		if $root.to < $p.to {
 			my $remainder = $p.orig.Str.substr( $root.to );
-			unless $remainder ~~ /\S/ {
-				$root.child.append(
-					Perl6::WS.from-int(
-						$root.to, $remainder
-					)
-				);
-			}
+			my Perl6::Element @child;
+			@child.append(
+				_string-to-tokens( $p.from, $remainder )
+			);
+			$root.child.append(
+				@child
+			);
 		}
 		$root;
 	}
@@ -822,54 +863,12 @@ class Perl6::Parser::Factory {
 		}
 
 		my $x = $p.orig.Str.substr( $start, $end - $start );
-		if $x ~~ m{ ^ '#`' } {
-		}
-		elsif $x ~~ m{ ^ '#|' } {
-		}
-		elsif $x ~~ m{ ^ ( '#' .+ ) $ } {
-			$root.child.splice(
-				$index + 1,
-				0,
-				Perl6::Comment.from-int( $start, $0.Str )
-			);
-		}
-		elsif $x ~~ m{ ^ ( \s+ ) ( '#' .+ ) $$ ( \s+ ) $ } {
-			$root.child.splice(
-				$index + 1,
-				0,
-				Perl6::WS.from-int( $start, $0.Str )
-			);
-			$root.child.splice(
-				$index + 2,
-				0,
-				Perl6::Comment.from-int(
-					$start + $0.Str.chars,
-					$1.Str
-				)
-			);
-			$root.child.splice(
-				$index + 3,
-				0,
-				Perl6::WS.from-int(
-					$start + $0.Str.chars + $1.Str.chars,
-					$2.Str
-				)
-			);
-		}
-		elsif $x ~~ m{ ^ ( \s+ ) ( '#' .+ ) $$ ( \s+ ) $ } {
-#die 2;
-		}
-		elsif $x ~~ m{ \S } {
-#die 3;
-#say "[$x]";
-		}
-		else {
-			$root.child.splice(
-				$index + 1,
-				0,
-				Perl6::WS.from-int( $start, $x )
-			)
-		}
+		my @child = _string-to-tokens( $start, $x );
+		$root.child.splice(
+			$index + 1,
+			0,
+			@child
+		);
 	}
 
 	sub fill-gaps( Mu $p, Perl6::Element $root, Int $depth = 0 ) {
@@ -2457,6 +2456,18 @@ class Perl6::Parser::Factory {
 	method _infix( Mu $p ) {
 		my Perl6::Element @child;
 		given $p {
+			when self.assert-hash( $_, [< sym EXPR >], [< O >] ) {
+				@child.append(
+					self._sym(
+						$_.hash.<sym>
+					)
+				);
+				@child.append(
+					self._EXPR(
+						$_.hash.<EXPR>
+					)
+				);
+			}
 			when self.assert-hash( $_, [< sym O >] ) {
 				@child.append(
 					Perl6::Operator::Infix.from-match(
@@ -4092,6 +4103,13 @@ return True;
 		elsif self.assert-hash( $p, [< sym rx_adverbs sibble >] ) {
 			@child.append( self._sym( $_.hash.<sym> ) );
 			@child.append( self._sibble( $_.hash.<sibble> ) );
+			@child.append(
+				self._rx_adverbs( $_.hash.<rx_adverbs> )
+			);
+		}
+		elsif self.assert-hash( $p, [< sym rx_adverbs quibble >] ) {
+			@child.append( self._sym( $_.hash.<sym> ) );
+			@child.append( self._quibble( $_.hash.<quibble> ) );
 			@child.append(
 				self._rx_adverbs( $_.hash.<rx_adverbs> )
 			);

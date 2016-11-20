@@ -11,7 +11,6 @@ my $*FACTORY-FAILURE-FATAL = True;
 my $*DEBUG = True;
 
 subtest {
-#`[
 	my $source = Q:to[_END_];
 # For all positives integers from 1 to Infinity
 for 1 .. Inf -> $integer {
@@ -25,7 +24,6 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
-]
 
 	done-testing;
 }, Q{Babbage problem};

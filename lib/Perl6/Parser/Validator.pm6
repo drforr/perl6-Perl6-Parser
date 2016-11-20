@@ -930,6 +930,7 @@ class Perl6::Parser::Validator {
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< O >] )
 			and self._O( $parsed.hash.<O> );
+		return True if self.assert-hash-keys( $parsed, [< >], [< O >] );
 		debug-match( $parsed );
 		return self.record-failure( '_FakeInfix' );
 	}

@@ -244,7 +244,6 @@ _END_
 	}, Q{version 1};
 
 	subtest {
-#`[
 		my $source = Q:to[_END_];
 my $lue = 42 but role { has $.answer = "Life, the Universe, and Everything" }
  
@@ -255,13 +254,11 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
-]
 
 		done-testing;
 	}, Q{version 2};
 
 	subtest {
-#`[
 		my $source = Q:to[_END_];
 use MONKEY-TYPING;
 augment class Int {
@@ -273,7 +270,6 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
-]
 
 		done-testing;
 	}, Q{version 3};
@@ -282,7 +278,6 @@ _END_
 }, Q{Add a variable to a class at runtime};
 
 subtest {
-#`[
 	my $source = Q:to[_END_];
 my $x;
 say $x.WHERE;
@@ -298,7 +293,6 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
-]
 
 	done-testing;
 }, Q{Address of a variable};
@@ -1197,7 +1191,6 @@ _END_
 
 subtest {
 	subtest {
-#`[
 		my $source = Q:to[_END_];
 my @array = <apple orange banana>;
  
@@ -1210,13 +1203,11 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
-]
 
 		done-testing;
 	}, Q{version 1};
 
 	subtest {
-#`[
 		my $source = Q:to[_END_];
 my @infinite = 1 .. Inf;  # 1, 2, 3, 4, ...
  
@@ -1227,7 +1218,6 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
-]
 
 		done-testing;
 	}, Q{version 2};
@@ -1366,7 +1356,6 @@ _END_
 	}, Q{version 5};
 
 	subtest {
-#`[
 		my $source = Q:to[_END_];
 my @infinite = 1 .. Inf;  # 1, 2, 3, 4, ...
  
@@ -1377,7 +1366,6 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
-]
 
 		done-testing;
 	}, Q{version 6};
