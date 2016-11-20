@@ -135,6 +135,19 @@ _END_
 	is $pt.format( $tree ), $source, Q{formatted};
 }, Q{method fill-pixel($i)};
 
+grammar Exp24 { rule term { <exp> | <digits> } }
+
+subtest {
+	plan 2;
+
+	my $source = Q:to[_END_];
+grammar Exp24 { rule term { <exp> | <digits> } }
+_END_
+	my $p = $pt.parse( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.format( $tree ), $source, Q{formatted};
+}, Q{alternation};
 done-testing;
 
 # vim: ft=perl6

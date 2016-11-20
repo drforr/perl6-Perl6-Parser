@@ -324,7 +324,6 @@ _END_
 }, Q{2048};
 
 subtest {
-#`[
 	my $source = Q:to[_END_];
 use MONKEY-SEE-NO-EVAL;
  
@@ -357,7 +356,6 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.format( $tree ), $source, Q{formatted};
-]
 
 	done-testing;
 }, Q{24 game};

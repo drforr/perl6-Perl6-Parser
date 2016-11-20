@@ -5575,6 +5575,18 @@ return True;
 							$_.hash.<termish>
 						)
 					);
+					my $x = $_.orig.Str.substr(
+						$_.hash.<termish>.to
+					);
+					if $x ~~ m{ ^ ( \s* ) ( '|' ) } {
+						@child.append(
+							Perl6::Operator::Infix.from-int(
+								$_.hash.<termish>.to + $1.from,
+								$1.Str
+
+							)
+						);
+					}
 				}
 				else {
 					debug-match( $_ ) if $*DEBUG;
