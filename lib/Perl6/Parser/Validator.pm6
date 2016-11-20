@@ -1897,6 +1897,11 @@ return True;
 			and self._Bracket( $parsed.hash.<bracket> )
 			and self._Radix( $parsed.hash.<radix> );
 		return True if self.assert-hash-keys( $parsed,
+				[< circumfix radix >],
+				[< exp rad_digits base >] )
+			and self._Circumfix( $parsed.hash.<circumfix> )
+			and self._Radix( $parsed.hash.<radix> );
+		return True if self.assert-hash-keys( $parsed,
 				[< circumfix radix >], [< exp base >] )
 			and self._Circumfix( $parsed.hash.<circumfix> )
 			and self._Radix( $parsed.hash.<radix> );

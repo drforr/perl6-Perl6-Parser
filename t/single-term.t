@@ -646,9 +646,8 @@ subtest {
 			plan 2;
 
 			subtest {
-				plan 0;
+				plan 3;
 
-#`(
 				my $source = Q{:13(0)};
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -657,22 +656,19 @@ subtest {
 						$tree.child.[0].child),
 					Q{found number};
 				is $pt.format( $tree ), $source, Q{formatted};
-)
 			}, Q{no ws};
 
 			subtest {
-				plan 0;
+				plan 3;
 
-#`(
 				my $source = Q{ :13(0)  };
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
-						$tree.child.[0].child),
+						$tree.child.[1].child),
 					Q{found number};
 				is $pt.format( $tree ), $source, Q{formatted};
-)
 			}, Q{ws};
 		}, Q{:13(0)};
 
@@ -680,9 +676,8 @@ subtest {
 			plan 2;
 
 			subtest {
-				plan 0;
+				plan 3;
 
-#`(
 				my $source = Q{:13(1)};
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -691,22 +686,19 @@ subtest {
 						$tree.child.[0].child),
 					Q{found number};
 				is $pt.format( $tree ), $source, Q{formatted};
-)
 			}, Q{no ws};
 
 			subtest {
-				plan 0;
+				plan 3;
 
-#`(
 				my $source = Q{ :13(1)  };
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
-						$tree.child.[0].child),
+						$tree.child.[1].child),
 					Q{found number};
 				is $pt.format( $tree ), $source, Q{formatted};
-)
 			}, Q{ws};
 		}, Q{:13(1)};
 
@@ -714,9 +706,8 @@ subtest {
 			plan 2;
 
 			subtest {
-				plan 0;
+				plan 3;
 
-#`(
 				my $source = Q{:13(-1)};
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -725,22 +716,19 @@ subtest {
 						$tree.child.[0].child),
 					Q{found number};
 				is $pt.format( $tree ), $source, Q{formatted};
-)
 			}, Q{no ws};
 
 			subtest {
-				plan 0;
+				plan 3;
 
-#`(
 				my $source = Q{ :13(-1)  };
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
 				ok (grep { $_ ~~ Perl6::Number },
-						$tree.child.[0].child),
+						$tree.child.[1].child),
 					Q{found number};
 				is $pt.format( $tree ), $source, Q{formatted};
-)
 			}, Q{ws};
 		}, Q{:13(-1)};
 	}, Q{radix};
