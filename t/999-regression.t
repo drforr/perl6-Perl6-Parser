@@ -120,6 +120,21 @@ _END_
 	is $pt.format( $tree ), $source, Q{formatted};
 }, Q{method fill-pixel($i)};
 
+subtest {
+	plan 2;
+
+	my $source = Q:to[_END_];
+my %dir = (
+   "\e[A" => 'up',
+   "\e[B" => 'down',
+);
+_END_
+	my $p = $pt.parse( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.format( $tree ), $source, Q{formatted};
+}, Q{method fill-pixel($i)};
+
 done-testing;
 
 # vim: ft=perl6

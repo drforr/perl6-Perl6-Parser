@@ -180,7 +180,6 @@ _END_
 	}, Q{version 2};
 
 	subtest {
-#`[
 		my $source = Q:to[_END_];
 proto A(Int \𝑚, Int \𝑛) { (state @)[𝑚][𝑛] //= {*} }
 
@@ -199,7 +198,6 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
-]
 
 		done-testing;
 	}, Q{version 3};
@@ -414,7 +412,6 @@ _END_
 	}, Q{version 2};
 
 	subtest {
-#`[
 		my $source = Q:to[_END_];
 sub MAIN ($alignment where 'left'|'right', $file) {
     my @lines := $file.IO.lines.map(*.split: '$').List;
@@ -428,7 +425,6 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.format( $tree ), $source, Q{formatted};
-]
 
 		done-testing;
 	}, Q{version 3};

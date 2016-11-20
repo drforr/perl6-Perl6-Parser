@@ -758,9 +758,7 @@ class Perl6::Parser::Factory {
 	sub _string-to-tokens( Int $from, Str $str ) {
 		my Perl6::Element @child;
 
-		if $str ~~ m{ ^ '#`' } {
-		}
-		elsif $str ~~ m{ ^ '#|' } {
+		if $str ~~ m{ ^ ( \s* ) '#`' } {
 		}
 		elsif $str ~~ m{ ^ ( '#' .+ ) $ } {
 			@child.append(
@@ -783,8 +781,6 @@ class Perl6::Parser::Factory {
 					$2.Str
 				)
 			);
-		}
-		elsif $str ~~ m{ ^ ( \s+ ) ( '#' .+ ) $$ ( \s+ ) $ } {
 		}
 		elsif $str ~~ m{ \S } {
 		}
@@ -2154,9 +2150,13 @@ class Perl6::Parser::Factory {
 							$p.from, COMMA
 						)
 					);
-					@child.append(
-						self._EXPR( $p.list.[2] )
-					);
+					if $p.list.[2].Str {
+						@child.append(
+							self._EXPR(
+								$p.list.[2]
+							)
+						);
+					}
 				}
 				else {
 					# XXX Sigh, unify this later.
@@ -2203,9 +2203,13 @@ class Perl6::Parser::Factory {
 					)
 				)
 			}
-					@child.append(
-						self._EXPR( $p.list.[$_] )
-					);
+					if $p.list.[$_].Str {
+						@child.append(
+							self._EXPR(
+								$p.list.[$_]
+							)
+						);
+					}
 				}
 			}
 		}
@@ -2576,11 +2580,13 @@ class Perl6::Parser::Factory {
 							$_.hash.<EXPR>.list.[0]
 						)
 					);
-					@child.append(
-						self._infix(
-							$_.hash.<EXPR>.hash.<infix>
-						)
-					);
+					if $_.hash.<EXPR>.hash.<infix>.Str {
+						@child.append(
+							self._infix(
+								$_.hash.<EXPR>.hash.<infix>
+							)
+						);
+					}
 					@child.append(
 						self._EXPR(
 							$_.hash.<EXPR>.list.[1]
@@ -3833,9 +3839,13 @@ return True;
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< arglist O >] ) {
-				@child.append(
-					self._arglist( $_.hash.<arglist> )
-				);
+				if $_.hash.<arglist>.Str {
+					@child.append(
+						self._arglist(
+							$_.hash.<arglist>
+						)
+					);
+				}
 				@child.append( self._O( $_.hash.<O> ) );
 			}
 			when self.assert-hash( $_, [< semilist O >] ) {
@@ -4101,18 +4111,34 @@ return True;
 			}
 		}
 		elsif self.assert-hash( $p, [< sym rx_adverbs sibble >] ) {
-			@child.append( self._sym( $_.hash.<sym> ) );
-			@child.append( self._sibble( $_.hash.<sibble> ) );
-			@child.append(
-				self._rx_adverbs( $_.hash.<rx_adverbs> )
-			);
+			if $_.hash.<sym>.Str {
+				@child.append( self._sym( $_.hash.<sym> ) );
+			}
+			if $_.hash.<sibble>.Str {
+				@child.append(
+					self._sibble( $_.hash.<sibble> )
+				);
+			}
+			if $_.hash.<rx_adverbs>.Str {
+				@child.append(
+					self._rx_adverbs( $_.hash.<rx_adverbs> )
+				);
+			}
 		}
 		elsif self.assert-hash( $p, [< sym rx_adverbs quibble >] ) {
-			@child.append( self._sym( $_.hash.<sym> ) );
-			@child.append( self._quibble( $_.hash.<quibble> ) );
-			@child.append(
-				self._rx_adverbs( $_.hash.<rx_adverbs> )
-			);
+			if $_.hash.<sym>.Str {
+				@child.append( self._sym( $_.hash.<sym> ) );
+			}
+			if $_.hash.<quibble>.Str {
+				@child.append(
+					self._quibble( $_.hash.<quibble> )
+				);
+			}
+			if $_.hash.<rx_adverbs>.Str {
+				@child.append(
+					self._rx_adverbs( $_.hash.<rx_adverbs> )
+				);
+			}
 		}
 		elsif self.assert-hash( $p, [< quibble >] ) {
 			my Str $leader = $p.Str.substr(
@@ -4794,7 +4820,9 @@ return True;
 			[< param_var quant post_constraint >],
 			[< modifier trait type_constraint default_value >] ) {
 			@child.append( self._param_var( $p.hash.<param_var> ) );
-			@child.append( self._quant( $p.hash.<quant> ) );
+			if $p.hash.<quant>.Str {
+				@child.append( self._quant( $p.hash.<quant> ) );
+			}
 			@child.append(
 				self._post_constraint(
 					$p.hash.<post_constraint>
@@ -4833,7 +4861,9 @@ return True;
 				)
 			);
 			@child.append(
-				self._named_param( $p.hash.<named_param> )
+				self._named_param(
+					$p.hash.<named_param>
+				)
 			);
 		}
 		elsif self.assert-hash( $p,
