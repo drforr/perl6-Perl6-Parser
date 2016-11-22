@@ -679,25 +679,7 @@ class Perl6::Variable::Callable::SubLanguage {
 	has Str $.twigil = Q{~};
 }
 
-class Perl6::Parser::Factory {
-
-	constant PAREN-OPEN = Q'(';
-	constant PAREN-CLOSE = Q')';
-	constant BRACE-OPEN = Q'{';
-	constant BRACE-CLOSE = Q'}';
-	constant REDUCE-OPEN = Q'[';
-	constant REDUCE-CLOSE = Q']';
-
-	constant COLON = Q{:};
-	constant COMMA = Q{,};
-	constant SEMICOLON = Q{;};
-	constant EQUAL = Q{=};
-	constant WHERE = Q{where};
-	constant QUES-QUES = Q{??};
-	constant BANG-BANG = Q{!!};
-	constant FAT-ARROW = Q{=>};
-	constant HYPER = Q{>>};
-	constant BACKSLASH = Q'\'; # because the braces confuse vim.
+my role Assertions {
 
 	method assert-hash-strict( Mu $p, $required-with, $required-without ) {
 		my %classified = classify {
@@ -719,15 +701,59 @@ class Perl6::Parser::Factory {
 		return False;
 	}
 
-	has %.here-doc; # Text for here-docs, indexed by their $p.from.
+	method assert-hash( Mu $p, $keys, $defined-keys = [] ) {
+		return False unless $p and $p.hash;
 
-	sub substr-match( Mu $p, Int $offset where * >= 0, Int $chars ) {
-		substr(
-			$p.Str,
-			$offset - $p.from,
-			$chars
-		);
+		my Str @keys;
+		my Str @defined-keys;
+		for $p.hash.keys {
+			if $p.hash.{$_} {
+				@keys.push( $_ );
+			}
+			elsif $p.hash:defined{$_} {
+				@defined-keys.push( $_ );
+			}
+		}
+
+		if $p.hash.keys.elems !=
+			$keys.elems + $defined-keys.elems {
+			return False
+		}
+		
+		for @( $keys ) {
+			next if $p.hash.{$_};
+			return False
+		}
+		for @( $defined-keys ) {
+			next if $p.hash:defined{$_};
+			return False
+		}
+		return True
 	}
+}
+
+class Perl6::Parser::Factory {
+	also does Assertions;
+
+	constant PAREN-OPEN = Q'(';
+	constant PAREN-CLOSE = Q')';
+	constant BRACE-OPEN = Q'{';
+	constant BRACE-CLOSE = Q'}';
+	constant REDUCE-OPEN = Q'[';
+	constant REDUCE-CLOSE = Q']';
+
+	constant COLON = Q{:};
+	constant COMMA = Q{,};
+	constant SEMICOLON = Q{;};
+	constant EQUAL = Q{=};
+	constant WHERE = Q{where};
+	constant QUES-QUES = Q{??};
+	constant BANG-BANG = Q{!!};
+	constant FAT-ARROW = Q{=>};
+	constant HYPER = Q{>>};
+	constant BACKSLASH = Q'\'; # because the braces confuse vim.
+
+	has %.here-doc; # Text for here-docs, indexed by their $p.from.
 
 	my class Here-Doc {
 		has Int $.delimiter-start; # 'q:to[_FOO_]'
@@ -742,16 +768,15 @@ class Perl6::Parser::Factory {
 			my Int $start = $0.from;
 			my Str $marker = $1.Str;
 			$p.Str ~~ m{ \s* ']' ( .*? $$ ) (.+?) ( $marker ) };
-			%.here-doc{ $start } =
-				Here-Doc.new(
-					:factory-line-number(
-						callframe(1).line
-					),
-					:delimiter-start( $start ),
-					:body-from( $1.from ),
-					:body-to( $1.to ),
-					:marker( $marker )
-				);
+			%.here-doc{ $start } = Here-Doc.new(
+				:factory-line-number(
+					callframe(1).line
+				),
+				:delimiter-start( $start ),
+				:body-from( $1.from ),
+				:body-to( $1.to ),
+				:marker( $marker )
+			);
 		}
 	}
 
@@ -893,36 +918,6 @@ class Perl6::Parser::Factory {
 		else {
 			$*ERR.say: "-1 -1 NIL"
 		}
-	}
-
-	method assert-hash( Mu $parsed, $keys, $defined-keys = [] ) {
-		return False unless $parsed and $parsed.hash;
-
-		my Str @keys;
-		my Str @defined-keys;
-		for $parsed.hash.keys {
-			if $parsed.hash.{$_} {
-				@keys.push( $_ );
-			}
-			elsif $parsed.hash:defined{$_} {
-				@defined-keys.push( $_ );
-			}
-		}
-
-		if $parsed.hash.keys.elems !=
-			$keys.elems + $defined-keys.elems {
-			return False
-		}
-		
-		for @( $keys ) -> $key {
-			next if $parsed.hash.{$key};
-			return False
-		}
-		for @( $defined-keys ) -> $key {
-			next if $parsed.hash:defined{$key};
-			return False
-		}
-		return True
 	}
 
 	sub debug-match( Mu $p ) {
@@ -2075,7 +2070,11 @@ class Perl6::Parser::Factory {
 				[< dotty OPER >],
 				[< postfix_prefix_meta_operator >] ) {
 			# XXX Look into this at some point.
-			if substr-match( $p, $p.from, HYPER.chars ) eq HYPER {
+			my $x = $p.Str.substr(
+				0,
+				HYPER.chars
+			);
+			if $x eq HYPER {
 				@child.append( self._EXPR( $p.list.[0] ) );
 				my $str = $p.orig.substr(
 					$p.from, HYPER.chars
