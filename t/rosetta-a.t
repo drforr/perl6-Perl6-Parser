@@ -84,7 +84,6 @@ _END_
 }, Q{ABC Problem};
 
 subtest {
-#`[
 	my $source = Q:to[_END_];
 use v6;
 
@@ -110,7 +109,6 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 	done-testing;
 }, Q{Abstract Class};

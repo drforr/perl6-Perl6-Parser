@@ -735,6 +735,7 @@ my role Assertions {
 class Perl6::Parser::Factory {
 	also does Assertions;
 
+	constant VERSION-STR = Q{v};
 	constant PAREN-OPEN = Q'(';
 	constant PAREN-CLOSE = Q')';
 	constant BRACE-OPEN = Q'{';
@@ -6064,7 +6065,6 @@ die "Catching Int";
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< vnum vstr >] ) {
-				@child.append( self._vnum( $_.hash.<vnum> ) );
 				@child.append( self._vstr( $_.hash.<vstr> ) );
 			}
 			default {
@@ -6077,7 +6077,10 @@ die "Catching Int";
 	}
 
 	method _vstr( Mu $p ) {
-		Perl6::Bareword.from-match( $p )
+		Perl6::Bareword.from-int(
+			$p.from - VERSION-STR.chars,
+			VERSION-STR ~ $p.Str
+		)
 	}
 
 	method _vnum( Mu $p ) {

@@ -10,6 +10,9 @@ Perl6::Parser - Extract a Perl 6 AST from the NQP Perl 6 Parser
 
     my $pt = Perl6::Parser.new;
     my $parsed = $pt.parse( Q:to[_END_] );
+       code-goes-here();
+       that you( $want-to, $parse );
+    _END_
     my $tree = $pt.build-tree( $parsed );
     say $pt.dump-tree( $tree );
 
