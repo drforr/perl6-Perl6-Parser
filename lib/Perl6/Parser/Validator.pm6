@@ -1,25 +1,4 @@
-class Perl6::Parser::Validator {
-
-	method trace( Str $term ) {
-		note $term if $*TRACE;
-	}
-
-	sub debug-match( Mu $p ) {
-		my %classified = classify {
-			$p.hash.{$_}.Str ?? 'with' !! 'without'
-		}, $p.hash.keys;
-		my @keys-with-content = @( %classified<with> );
-		my @keys-without-content = @( %classified<without> );
-
-		say "With content: {@keys-with-content.gist}";
-		say "Without content: {@keys-without-content.gist}";
-	}
-
-	method record-failure( Str $term ) returns Bool {
-		note "Validation failed for term '$term'" if $*DEBUG;
-		die "Validation failed for term '$term'" if $*VALIDATION-FAILURE-FATAL;
-		return False
-	}
+my role Assertion {
 
 	method assert-Bool( Mu $parsed ) {
 		return False if $parsed.hash;
@@ -113,6 +92,42 @@ class Perl6::Parser::Validator {
 		}
 		return True
 	}
+}
+
+class Perl6::Parser::Validator {
+	also does Assertion;
+
+	method trace( Str $term ) {
+		note $term if $*TRACE;
+	}
+
+	method record-failure( Str $term ) returns Bool {
+		note "Validation failed for term '$term'" if $*DEBUG;
+		die "Validation failed for term '$term'" if
+			$*VALIDATION-FAILURE-FATAL;
+		return False
+	}
+
+	sub debug-match( Mu $p ) {
+		my %classified = classify {
+			$p.hash.{$_}.Str ?? 'with' !! 'without'
+		}, $p.hash.keys;
+		my @keys-with-content = @( %classified<with> );
+		my @keys-without-content = @( %classified<without> );
+
+		say "With content: {@keys-with-content.gist}";
+		say "Without content: {@keys-without-content.gist}";
+	}
+
+	method validate( Mu $parsed ) {
+		self.trace( 'validate' );
+		return True if self.assert-hash-keys( $parsed,
+				[< statementlist >] )
+			and self._StatementList( $parsed.hash.<statementlist> );
+		debug-match( $parsed );
+		return self.record-failure( 'Root' );
+	}
+
 
 	method _ArgList( Mu $parsed ) returns Bool {
 		self.trace( '_ArgList' );
@@ -1940,15 +1955,6 @@ return True;
 		return self.record-failure( '_Right' );
 	}
 
-	method validate( Mu $parsed ) {
-		self.trace( 'validate' );
-		return True if self.assert-hash-keys( $parsed,
-				[< statementlist >] )
-			and self._StatementList( $parsed.hash.<statementlist> );
-		debug-match( $parsed );
-		return self.record-failure( 'Root' );
-	}
-
 	method _RoutineDeclarator( Mu $parsed ) {
 		self.trace( '_RoutineDeclarator' );
 #return True;
@@ -2773,5 +2779,4 @@ return True;
 		debug-match( $parsed );
 		return self.record-failure( '_XBlock' );
 	}
-
 }

@@ -23,7 +23,7 @@ Perl6::Parser - Extract a Perl 6 AST from the NQP Perl 6 Parser
 
 Uses the built-in Perl 6 parser exposed by the internal nqp module, so that you can parse Perl 6 using Perl 6 itself. If it scares you... well, it probably should. Assuming everything works out, you'll get back a Perl 6 object tree that exactly mirrors your source file's layout, with every bit of whitespace, POD, and code given one or more tokens.
 
-Redisplaying it becomes a matter of calling the C<format()> method on the tree, which passes an optional formatting hashref down the tree. You can use the format methods as they are, or add a role or subclass the objects created as you see fit to create new objects.
+Redisplaying it becomes a matter of calling the C<to-string()> method on the tree, which passes an optional formatting hashref down the tree. You can use the format methods as they are, or add a role or subclass the objects created as you see fit to create new objects.
 
 This process B<will> be simplified and encapsulated in the near future, as reformatting Perl 6 code was what this rather extensive module was designed to do.
 
@@ -55,11 +55,11 @@ The first thing is to break the offending bit of code out so it's easier to debu
     my $tree = $pt.build-tree( $p );
     say $pt.dump-tree($tree);
     ok $pt.validate( $p ), Q{valid};
-    is $pt.format( $tree ), $source, Q{formatted};
+    is $pt.to-string( $tree ), $source, Q{formatted};
 
 Already a few things might stand out. First, the code inside the here-doc doesn't actually do anything, it'll never print anything to the screen or do anything interesting. That's not the point at this stage in the game. At this point all I need is a syntactically valid bit of Perl 6 that has the constructs that reproduce the bug. I don't care what the code actually does in the real world.
 
-Second, I'm not doing anything that you as a user of the class would do. As a user of a the class, all you have to do is run the format() method, and it does what you want. I'm breaking things down into their component steps.
+Second, I'm not doing anything that you as a user of the class would do. As a user of a the class, all you have to do is run the to-string() method, and it does what you want. I'm breaking things down into their component steps.
 
 (side note - This will probably have changed in detail since I wrote this text - Consult your nearest test file for examples of current usage.)
 
@@ -161,7 +161,7 @@ Build the Perl6::Element tree from the NQPMatch object. This is the core, and ru
 
 Check the integrity of the data structure. The Factory at its core puts together the structure very sloppily, to give the tree every possible chance to create actual quasi-valid text. This method makes sure that the factory returned valid tokens, which often doesn't happen. But since you really want to see the data round-tripped, most users don't care what the tree loos like internally.
 
-=item format( Perl6::Element $tree ) returns Str
+=item to-string( Perl6::Element $tree ) returns Str
 
 Call .perl6 on each element of the tree. You can subclass or override this method in any class as you see fit to properly pretty-print the methods. Right now it's awkward to use, and will probably be removed in favor of an upcoming L<Perl6::Tidy> module. That's why I wrote this yak.. er, module in the first place.
 
@@ -186,44 +186,127 @@ For further information, there's a L<DEBUGGING.pod> file detailing how to go abo
 use Perl6::Parser::Validator;
 use Perl6::Parser::Factory;
 
-class Perl6::Parser {
-	use nqp;
+my role Debugging {
 
-	# These could easily be a single method, but I'll separate them for
-	# testing purposes.
-	#
-	method parse( Str $source ) {
-		my $*LINEPOSCACHE;
-		my $compiler := nqp::getcomp('perl6');
-		my $g := nqp::findmethod($compiler,'parsegrammar')($compiler);
-		#$g.HOW.trace-on($g);
-		my $a := nqp::findmethod($compiler,'parseactions')($compiler);
-
-		my $parsed = $g.parse(
-			$source,
-			:p( 0 ),
-			:actions( $a )
-		);
-
-		return $parsed
+	#constant indent = "\t";
+	my constant indent = ' ';
+	method dump-tree( Perl6::Element $root,
+			  Bool $display-ws = True,
+			  Int $depth = 0 ) {
+		return '' if $root ~~ Perl6::WS and !$display-ws;
+		my $str = ( indent xx $depth ) ~ self.dump-term( $root ) ~ "\n";
+		if $root.^can('child') {
+			for ^$root.child {
+				my @problem;
+				if $root.child.[$_].from < 0 {
+					@problem.push( '-' )
+				}
+				if $root.child.[$_].to < 0 {
+					@problem.push( '-' )
+				}
+				# Mark the tokens that don't overlap.
+				#
+				if $root.child.[$_+1].defined and
+					$root.child.[$_].to !=
+					$root.child.[$_+1].from {
+					@problem.push( 'G' )
+				}
+				if $root.child.[$_].^can( 'content' ) {
+					if $root.child.[$_].from ==
+					   $root.child.[$_].to {
+						@problem.push( Q{''} )
+					}
+					if $root.child.[$_].to -
+					   $root.child.[$_].from != $root.child.[$_].content.chars {
+						@problem.push( Q{''} )
+					}
+					if $root.child.[$_] ~~ Perl6::WS and
+					   $root.child.[$_].content ~~ / \S / {
+						@problem.push( 'WS' )
+					}
+					if $root.child.[$_] !~~ Perl6::WS and
+					   $root.child.[$_] !~~ Perl6::String and
+					   $root.child.[$_].content ~~ / \s / {
+						@problem.push( 'WS' )
+					}
+					if $root.child.[$_].^can( 'content' ) and
+					   $root.child.[$_].content eq '' {
+						@problem.push( 'WS' )
+					}
+				}
+				$str ~= @problem.join( ' ' ) if @problem;
+				$str ~= self.dump-tree(
+					$root.child.[$_],
+					$display-ws, $depth + 1
+				)
+			}
+		}
+		$str
 	}
 
-	method validate( Mu $parsed ) {
-		my $validator = Perl6::Parser::Validator.new;
-		my $res       = $validator.validate( $parsed );
+	method dump-term( Perl6::Element $term ) {
+		my $str = $term.WHAT.perl;
+		$str ~~ s/'Perl6::'//;
+		if $term ~~ Perl6::Operator::PostCircumfix or
+		      $term ~~ Perl6::Operator::Circumfix {
+		}
+		elsif $term ~~ Perl6::Bareword or
+		      $term ~~ Perl6::Variable or
+		      ( $term ~~ Perl6::Operator and
+			$term !~~ Perl6::Operator::Hyper ) or
+		      $term ~~ Perl6::Balanced or
+		      $term ~~ Perl6::WS {
+			$str ~= " ({$term.content.perl})"
+		}
+		elsif $term ~~ Perl6::Number {
+			$str ~= " ({$term.content})"
+		}
+		elsif $term ~~ Perl6::String {
+#			$str ~= " ({$term.content}) ('{$term.bare}')"
+			$str ~= " ({$term.content})"
+		}
 
-		die "Validation failed!" if !$res and %*ENV<AUTHOR_TESTS>;
+		if $term.^can('from') and not (
+				$term ~~ Perl6::Document | Perl6::Statement
+			) {
+			$str ~= " ({$term.from}-{$term.to})";
+		}
 
-		$res
+		$str ~= " (line {$term.factory-line-number})" if
+			$term.factory-line-number;
+		$str
 	}
 
-	method build-tree( Mu $parsed ) {
-		my $factory = Perl6::Parser::Factory.new;
-		my $tree    = $factory.build( $parsed );
+	method ruler( Str $source ) {
+		my Str $munged = substr( $source, 0, min( $source.chars, 72 ) );
+		$munged ~= '...' if $source.chars > 72;
+		my Int $blocks = $munged.chars div 10 + 1;
+		$munged ~~ s:g{ \n } = Q{␤};
+		my Str $nums = '';
+		for ^$blocks {
+			$nums ~= "         {$_+1}";
+		}
 
-		self.check-tree( $tree );
-		$tree
+		my $ruler = '';
+		$ruler ~= '#' ~ ' ' ~ $nums ~ "\n";
+		$ruler ~= '#' ~ ('0123456789' x $blocks) ~ "\n";
+		$ruler ~= '#' ~ $munged ~ "\n";
 	}
+}
+
+my role Testing {
+
+	method roundtrip( Str $source ) {
+		my $parsed    = self.parse( $source );
+		my $valid     = self.validate( $parsed );
+		my $tree      = self.build-tree( $parsed );
+		my $formatted = self.to-string( $tree );
+
+		$formatted
+	}
+}
+
+my role Validating {
 
 	method check-tree( Perl6::Element $root ) {
 		if $root ~~ Perl6::Block {
@@ -283,123 +366,52 @@ class Perl6::Parser {
 		}
 	}
 
-	method format( $tree, $formatting = { } ) {
-		my $str = $tree.perl6( $formatting );
+	method validate( Mu $parsed ) {
+		my $validator = Perl6::Parser::Validator.new;
+		my $res       = $validator.validate( $parsed );
+
+		die "Validation failed!" if !$res and %*ENV<AUTHOR_TESTS>;
+
+		$res
+	}
+}
+
+class Perl6::Parser {
+	also does Debugging;
+	also does Testing;
+	also does Validating;
+	use nqp;
+
+	# These could easily be a single method, but I'll separate them for
+	# testing purposes.
+	#
+	method parse( Str $source ) {
+		my $*LINEPOSCACHE;
+		my $compiler := nqp::getcomp('perl6');
+		my $g := nqp::findmethod($compiler,'parsegrammar')($compiler);
+		#$g.HOW.trace-on($g);
+		my $a := nqp::findmethod($compiler,'parseactions')($compiler);
+
+		my $parsed = $g.parse(
+			$source,
+			:p( 0 ),
+			:actions( $a )
+		);
+
+		return $parsed
+	}
+
+	method build-tree( Mu $parsed ) {
+		my $factory = Perl6::Parser::Factory.new;
+		my $tree    = $factory.build( $parsed );
+
+		self.check-tree( $tree );
+		$tree
+	}
+
+	method to-string( $tree ) {
+		my $str = $tree.to-string( );
 
 		$str
-	}
-
-	method dump-term( Perl6::Element $term ) {
-		my $str = $term.WHAT.perl;
-		$str ~~ s/'Perl6::'//;
-		if $term ~~ Perl6::Operator::PostCircumfix or
-		      $term ~~ Perl6::Operator::Circumfix {
-		}
-		elsif $term ~~ Perl6::Bareword or
-		      $term ~~ Perl6::Variable or
-		      ( $term ~~ Perl6::Operator and
-			$term !~~ Perl6::Operator::Hyper ) or
-		      $term ~~ Perl6::Balanced or
-		      $term ~~ Perl6::WS {
-			$str ~= " ({$term.content.perl})"
-		}
-		elsif $term ~~ Perl6::Number {
-			$str ~= " ({$term.content})"
-		}
-		elsif $term ~~ Perl6::String {
-#			$str ~= " ({$term.content}) ('{$term.bare}')"
-			$str ~= " ({$term.content})"
-		}
-
-		if $term.^can('from') and not (
-				$term ~~ Perl6::Document | Perl6::Statement
-			) {
-			$str ~= " ({$term.from}-{$term.to})";
-		}
-
-		$str ~= " (line {$term.factory-line-number})" if
-			$term.factory-line-number;
-		$str
-	}
-
-	#constant indent = "\t";
-	constant indent = ' ';
-	method dump-tree( Perl6::Element $root,
-			  Bool $display-ws = True,
-			  Int $depth = 0 ) {
-		return '' if $root ~~ Perl6::WS and !$display-ws;
-		my $str = ( indent xx $depth ) ~ self.dump-term( $root ) ~ "\n";
-		if $root.^can('child') {
-			for ^$root.child {
-				my @problem;
-				if $root.child.[$_].from < 0 {
-					@problem.push( '-' )
-				}
-				if $root.child.[$_].to < 0 {
-					@problem.push( '-' )
-				}
-				# Mark the tokens that don't overlap.
-				#
-				if $root.child.[$_+1].defined and
-					$root.child.[$_].to !=
-					$root.child.[$_+1].from {
-					@problem.push( 'G' )
-				}
-				if $root.child.[$_].^can( 'content' ) {
-					if $root.child.[$_].from ==
-					   $root.child.[$_].to {
-						@problem.push( Q{''} )
-					}
-					if $root.child.[$_].to -
-					   $root.child.[$_].from != $root.child.[$_].content.chars {
-						@problem.push( Q{''} )
-					}
-					if $root.child.[$_] ~~ Perl6::WS and
-					   $root.child.[$_].content ~~ / \S / {
-						@problem.push( 'WS' )
-					}
-					if $root.child.[$_] !~~ Perl6::WS and
-					   $root.child.[$_] !~~ Perl6::String and
-					   $root.child.[$_].content ~~ / \s / {
-						@problem.push( 'WS' )
-					}
-					if $root.child.[$_].^can( 'content' ) and
-					   $root.child.[$_].content eq '' {
-						@problem.push( 'WS' )
-					}
-				}
-				$str ~= @problem.join( ' ' ) if @problem;
-				$str ~= self.dump-tree(
-					$root.child.[$_],
-					$display-ws, $depth + 1
-				)
-			}
-		}
-		$str
-	}
-
-	method ruler( Str $source ) {
-		my Str $munged = substr( $source, 0, min( $source.chars, 72 ) );
-		$munged ~= '...' if $source.chars > 72;
-		my Int $blocks = $munged.chars div 10 + 1;
-		$munged ~~ s:g{ \n } = Q{␤};
-		my Str $nums = '';
-		for ^$blocks {
-			$nums ~= "         {$_+1}";
-		}
-
-		my $ruler = '';
-		$ruler ~= '#' ~ ' ' ~ $nums ~ "\n";
-		$ruler ~= '#' ~ ('0123456789' x $blocks) ~ "\n";
-		$ruler ~= '#' ~ $munged ~ "\n";
-	}
-
-	method roundtrip( Str $source, $formatting = { } ) {
-		my $parsed    = self.parse( $source );
-		my $valid     = self.validate( $parsed );
-		my $tree      = self.build-tree( $parsed );
-		my $formatted = self.format( $tree, $formatting );
-
-		$formatted
 	}
 }

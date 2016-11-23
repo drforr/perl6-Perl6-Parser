@@ -22,7 +22,7 @@ _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
-		is $pt.format( $tree ), $source, Q{formatted};
+		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
 	}, Q{version 1};
@@ -35,7 +35,7 @@ _END_
 		my $tree = $pt.build-tree( $p );
 #say $pt.dump-tree( $tree );
 		ok $pt.validate( $p ), Q{valid};
-		is $pt.format( $tree ), $source, Q{formatted};
+		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
 	}, Q{version 2};
@@ -47,7 +47,7 @@ _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
-		is $pt.format( $tree ), $source, Q{formatted};
+		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
 	}, Q{version 3};
@@ -59,7 +59,7 @@ _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
-		is $pt.format( $tree ), $source, Q{formatted};
+		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
 	}, Q{version 4};
@@ -190,7 +190,7 @@ _END_
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
-	is $pt.format( $tree ), $source, Q{formatted};
+	is $pt.to-string( $tree ), $source, Q{formatted};
 )
 
 	done-testing;
@@ -317,7 +317,7 @@ _END_
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
-	is $pt.format( $tree ), $source, Q{formatted};
+	is $pt.to-string( $tree ), $source, Q{formatted};
 )
 
 	done-testing;
@@ -355,7 +355,7 @@ _END_
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
-	is $pt.format( $tree ), $source, Q{formatted};
+	is $pt.to-string( $tree ), $source, Q{formatted};
 
 	done-testing;
 }, Q{24 game};
@@ -411,7 +411,7 @@ _END_
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
-	is $pt.format( $tree ), $source, Q{formatted};
+	is $pt.to-string( $tree ), $source, Q{formatted};
 ]
 
 	done-testing;
@@ -453,7 +453,7 @@ _END_
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
-	is $pt.format( $tree ), $source, Q{formatted};
+	is $pt.to-string( $tree ), $source, Q{formatted};
 ]
 
 	done-testing;
@@ -479,7 +479,7 @@ _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
-		is $pt.format( $tree ), $source, Q{formatted};
+		is $pt.to-string( $tree ), $source, Q{formatted};
 
 	done-testing;
 	}, Q{version 1};
@@ -509,7 +509,7 @@ _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
-		is $pt.format( $tree ), $source, Q{formatted};
+		is $pt.to-string( $tree ), $source, Q{formatted};
 ]
 
 		done-testing;
@@ -535,7 +535,7 @@ _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
-		is $pt.format( $tree ), $source, Q{formatted};
+		is $pt.to-string( $tree ), $source, Q{formatted};
 ]
 
 		done-testing;

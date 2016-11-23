@@ -32,7 +32,7 @@ _END_
 			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -44,7 +44,7 @@ _END_
 			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{leading ws};
 
 		subtest {
@@ -54,7 +54,7 @@ _END_
 			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{trailing ws};
 
 		subtest {
@@ -64,7 +64,7 @@ _END_
 			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{leading, trailing ws};
 	}, Q{no intrabrace spacing};
 
@@ -80,7 +80,7 @@ _END_
 			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -92,7 +92,7 @@ _END_
 			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{leading ws};
 
 		subtest {
@@ -102,7 +102,7 @@ _END_
 			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{trailing ws};
 
 		subtest {
@@ -112,7 +112,7 @@ _END_
 			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{leading, trailing ws};
 	}, Q{intrabrace spacing};
 }, Q{multi};
@@ -132,7 +132,7 @@ _END_
 			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -144,7 +144,7 @@ _END_
 			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{leading ws};
 
 		subtest {
@@ -154,7 +154,7 @@ _END_
 			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{trailing ws};
 
 		subtest {
@@ -164,7 +164,7 @@ _END_
 			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{leading, trailing ws};
 	}, Q{no intrabrace spacing};
 
@@ -180,7 +180,7 @@ _END_
 			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -192,7 +192,7 @@ _END_
 			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{leading ws};
 
 		subtest {
@@ -202,7 +202,7 @@ _END_
 			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{trailing ws};
 
 		subtest {
@@ -212,7 +212,7 @@ _END_
 			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{leading, trailing ws};
 	}, Q{intrabrace spacing};
 }, Q{proto};
@@ -232,7 +232,7 @@ _END_
 			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -244,7 +244,7 @@ _END_
 			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{leading ws};
 
 		subtest {
@@ -254,7 +254,7 @@ _END_
 			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{trailing ws};
 
 		subtest {
@@ -264,7 +264,7 @@ _END_
 			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{leading, trailing ws};
 	}, Q{no intrabrace spacing};
 
@@ -280,7 +280,7 @@ _END_
 			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -292,7 +292,7 @@ _END_
 			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{leading ws};
 
 		subtest {
@@ -302,7 +302,7 @@ _END_
 			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{trailing ws};
 
 		subtest {
@@ -312,7 +312,7 @@ _END_
 			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{leading, trailing ws};
 	}, Q{intrabrace spacing};
 }, Q{only};

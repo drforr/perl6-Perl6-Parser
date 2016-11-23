@@ -22,7 +22,7 @@ subtest {
 			my $p = $pt.parse( Q{my Int $a} );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
-			is $pt.format( $tree ), Q{my Int $a}, Q{formatted};
+			is $pt.to-string( $tree ), Q{my Int $a}, Q{formatted};
 		}, Q{regular};
 
 		subtest {
@@ -31,7 +31,7 @@ subtest {
 			my $p = $pt.parse( Q{my Int:U $a} );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
-			is $pt.format( $tree ), Q{my Int:U $a}, Q{formatted};
+			is $pt.to-string( $tree ), Q{my Int:U $a}, Q{formatted};
 		}, Q{undefined};
 
 		subtest {
@@ -40,7 +40,7 @@ subtest {
 			my $p = $pt.parse( Q{my Int:D $a = 0} );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
-			is $pt.format( $tree ),
+			is $pt.to-string( $tree ),
 				Q{my Int:D $a = 0},
 				Q{formatted};
 		}, Q{defined};
@@ -55,7 +55,7 @@ subtest {
 			my $p = $pt.parse( Q{my $a where 1} );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
-			is $pt.format( $tree ), Q{my $a where 1}, Q{formatted};
+			is $pt.to-string( $tree ), Q{my $a where 1}, Q{formatted};
 		}, Q{my $a where 1};
 	}, Q{constrained};
 }, Q{variable};
@@ -73,7 +73,7 @@ subtest {
 			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 		subtest {
 			plan 2;
@@ -84,7 +84,7 @@ _END_
 			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{sub foo returns Int {}};
 }, Q{subroutine};

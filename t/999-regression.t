@@ -18,7 +18,7 @@ _END_
 	my $tree = $pt.build-tree( $p );
 #say $pt.dump-tree($tree);
 	ok $pt.validate( $p ), Q{valid};
-	is $pt.format( $tree ), $source, Q{formatted};
+	is $pt.to-string( $tree ), $source, Q{formatted};
 }, Q{say <closed open>};
 
 my @quantities = flat (99 ... 1), 'No more', 99;
@@ -33,7 +33,7 @@ _END_
 	my $tree = $pt.build-tree( $p );
 #say $pt.dump-tree($tree);
 	ok $pt.validate( $p ), Q{valid};
-	is $pt.format( $tree ), $source, Q{formatted};
+	is $pt.to-string( $tree ), $source, Q{formatted};
 }, Q{flat (99 ... 1)};
 
 subtest {
@@ -46,7 +46,7 @@ _END_
 	my $tree = $pt.build-tree( $p );
 #say $pt.dump-tree($tree);
 	ok $pt.validate( $p ), Q{valid};
-	is $pt.format( $tree ), $source, Q{formatted};
+	is $pt.to-string( $tree ), $source, Q{formatted};
 }, Q{flat (99 ... 1)};
 
 subtest {
@@ -61,7 +61,7 @@ _END_
 	my $tree = $pt.build-tree( $p );
 #say $pt.dump-tree($tree);
 	ok $pt.validate( $p ), Q{valid};
-	is $pt.format( $tree ), $source, Q{formatted};
+	is $pt.to-string( $tree ), $source, Q{formatted};
 }, Q{flat (99 ... 1)};
 
 subtest {
@@ -76,7 +76,7 @@ _END_
 	my $tree = $pt.build-tree( $p );
 #say $pt.dump-tree($tree);
 	ok $pt.validate( $p ), Q{valid};
-	is $pt.format( $tree ), $source, Q{formatted};
+	is $pt.to-string( $tree ), $source, Q{formatted};
 }, Q{flat (99 ... 1)};
 
 subtest {
@@ -90,7 +90,7 @@ _END_
 	my $tree = $pt.build-tree( $p );
 #say $pt.dump-tree($tree);
 	ok $pt.validate( $p ), Q{valid};
-	is $pt.format( $tree ), $source, Q{formatted};
+	is $pt.to-string( $tree ), $source, Q{formatted};
 }, Q{grep: {}};
 
 subtest {
@@ -103,7 +103,7 @@ _END_
 	my $tree = $pt.build-tree( $p );
 #say $pt.dump-tree($tree);
 	ok $pt.validate( $p ), Q{valid};
-	is $pt.format( $tree ), $source, Q{formatted};
+	is $pt.to-string( $tree ), $source, Q{formatted};
 }, Q{my \y};
 
 subtest {
@@ -117,7 +117,7 @@ _END_
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
-	is $pt.format( $tree ), $source, Q{formatted};
+	is $pt.to-string( $tree ), $source, Q{formatted};
 }, Q{method fill-pixel($i)};
 
 subtest {
@@ -132,7 +132,7 @@ _END_
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
-	is $pt.format( $tree ), $source, Q{formatted};
+	is $pt.to-string( $tree ), $source, Q{formatted};
 }, Q{method fill-pixel($i)};
 
 grammar Exp24 { rule term { <exp> | <digits> } }
@@ -146,7 +146,7 @@ _END_
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
-	is $pt.format( $tree ), $source, Q{formatted};
+	is $pt.to-string( $tree ), $source, Q{formatted};
 }, Q{alternation};
 done-testing;
 

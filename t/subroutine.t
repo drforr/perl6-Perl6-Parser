@@ -26,7 +26,7 @@ subtest {
 				my $p = $pt.parse( $source );
 				my $tree = $pt.build-tree( $p );
 				ok $pt.validate( $p ), Q{valid};
-				is $pt.format( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source, Q{formatted};
 			}, Q{no ws};
 
 			subtest {
@@ -36,7 +36,7 @@ subtest {
 				my $p = $pt.parse( $source );
 				my $tree = $pt.build-tree( $p );
 				ok $pt.validate( $p ), Q{valid};
-				is $pt.format( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source, Q{formatted};
 			}, Q{intra-term ws};
 		}, Q{empty};
 
@@ -50,7 +50,7 @@ subtest {
 				my $p = $pt.parse( $source );
 				my $tree = $pt.build-tree( $p );
 				ok $pt.validate( $p ), Q{valid};
-				is $pt.format( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source, Q{formatted};
 			}, Q{no ws};
 
 			subtest {
@@ -62,7 +62,7 @@ _END_
 				my $p = $pt.parse( $source );
 				my $tree = $pt.build-tree( $p );
 				ok $pt.validate( $p ), Q{valid};
-				is $pt.format( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source, Q{formatted};
 			}, Q{ws};
 		}, Q{constant};
 
@@ -76,7 +76,7 @@ _END_
 				my $p = $pt.parse( $source );
 				my $tree = $pt.build-tree( $p );
 				ok $pt.validate( $p ), Q{valid};
-				is $pt.format( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source, Q{formatted};
 			}, Q{no ws};
 
 			subtest {
@@ -87,7 +87,7 @@ _END_
 				my $p = $pt.parse( $source );
 				my $tree = $pt.build-tree( $p );
 				ok $pt.validate( $p ), Q{valid};
-				is $pt.format( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source, Q{formatted};
 			}, Q{ws};
 		}, Q{untyped};
 
@@ -104,7 +104,7 @@ _END_
 					my $p = $pt.parse( $source );
 					my $tree = $pt.build-tree( $p );
 					ok $pt.validate( $p ), Q{valid};
-					is $pt.format( $tree ), $source, Q{formatted};
+					is $pt.to-string( $tree ), $source, Q{formatted};
 				}, Q{no ws};
 
 				subtest {
@@ -116,7 +116,7 @@ _END_
 					my $p = $pt.parse( $source );
 					my $tree = $pt.build-tree( $p );
 					ok $pt.validate( $p ), Q{valid};
-					is $pt.format( $tree ), $source, Q{formatted};
+					is $pt.to-string( $tree ), $source, Q{formatted};
 				}, Q{ws};
 			}, Q{typed};
 
@@ -130,7 +130,7 @@ _END_
 					my $p = $pt.parse( $source );
 					my $tree = $pt.build-tree( $p );
 					ok $pt.validate( $p ), Q{valid};
-					is $pt.format( $tree ), $source, Q{formatted};
+					is $pt.to-string( $tree ), $source, Q{formatted};
 				}, Q{no ws};
 
 				subtest {
@@ -142,7 +142,7 @@ _END_
 					my $p = $pt.parse( $source );
 					my $tree = $pt.build-tree( $p );
 					ok $pt.validate( $p ), Q{valid};
-					is $pt.format( $tree ), $source, Q{formatted};
+					is $pt.to-string( $tree ), $source, Q{formatted};
 				}, Q{ws};
 			}, Q{typed and declared};
 
@@ -156,7 +156,7 @@ _END_
 					my $p = $pt.parse( $source );
 					my $tree = $pt.build-tree( $p );
 					ok $pt.validate( $p ), Q{valid};
-					is $pt.format( $tree ), $source, Q{formatted};
+					is $pt.to-string( $tree ), $source, Q{formatted};
 				}, Q{no ws};
 
 				subtest {
@@ -168,7 +168,7 @@ _END_
 					my $p = $pt.parse( $source );
 					my $tree = $pt.build-tree( $p );
 					ok $pt.validate( $p ), Q{valid};
-					is $pt.format( $tree ), $source, Q{formatted};
+					is $pt.to-string( $tree ), $source, Q{formatted};
 				}, Q{ws};
 			}, Q{type-capture};
 
@@ -182,7 +182,7 @@ _END_
 					my $p = $pt.parse( $source );
 					my $tree = $pt.build-tree( $p );
 					ok $pt.validate( $p ), Q{valid};
-					is $pt.format( $tree ), $source, Q{formatted};
+					is $pt.to-string( $tree ), $source, Q{formatted};
 				}, Q{no ws};
 
 				subtest {
@@ -194,7 +194,7 @@ _END_
 					my $p = $pt.parse( $source );
 					my $tree = $pt.build-tree( $p );
 					ok $pt.validate( $p ), Q{valid};
-					is $pt.format( $tree ), $source, Q{formatted};
+					is $pt.to-string( $tree ), $source, Q{formatted};
 				}, Q{ws};
 			}, Q{type-only};
 
@@ -208,7 +208,7 @@ _END_
 					my $p = $pt.parse( $source );
 					my $tree = $pt.build-tree( $p );
 					ok $pt.validate( $p ), Q{valid};
-					is $pt.format( $tree ), $source, Q{formatted};
+					is $pt.to-string( $tree ), $source, Q{formatted};
 				}, Q{no ws};
 
 				subtest {
@@ -220,7 +220,7 @@ _END_
 					my $p = $pt.parse( $source );
 					my $tree = $pt.build-tree( $p );
 					ok $pt.validate( $p ), Q{valid};
-					is $pt.format( $tree ), $source, Q{formatted};
+					is $pt.to-string( $tree ), $source, Q{formatted};
 				}, Q{ws};
 			}, Q{type-constrained};
 		}, Q{typed};
@@ -235,7 +235,7 @@ _END_
 				my $p = $pt.parse( $source );
 				my $tree = $pt.build-tree( $p );
 				ok $pt.validate( $p ), Q{valid};
-				is $pt.format( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source, Q{formatted};
 			}, Q{no ws};
 
 			subtest {
@@ -247,7 +247,7 @@ _END_
 				my $p = $pt.parse( $source );
 				my $tree = $pt.build-tree( $p );
 				ok $pt.validate( $p ), Q{valid};
-				is $pt.format( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source, Q{formatted};
 			}, Q{ws};
 		}, Q{default};
 
@@ -264,7 +264,7 @@ _END_
 			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -276,7 +276,7 @@ _END_
 			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
 			ok $pt.validate( $p ), Q{valid};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{multiple};
 }, Q{scalar arguments};
@@ -291,7 +291,7 @@ subtest {
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
-		is $pt.format( $tree ), $source, Q{formatted};
+		is $pt.to-string( $tree ), $source, Q{formatted};
 	}, Q{christmas tree, minimal spacing};
 
 	subtest {
@@ -303,7 +303,7 @@ _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
-		is $pt.format( $tree ), $source, Q{formatted};
+		is $pt.to-string( $tree ), $source, Q{formatted};
 	}, Q{christmas tree, minimal spacing};
 
 	# Having differing whitespace on each side of an operator assures
@@ -328,7 +328,7 @@ _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
-		is $pt.format( $tree ), $source, Q{formatted};
+		is $pt.to-string( $tree ), $source, Q{formatted};
 	}, Q{christmas tree, alternating spacing};
 
 	subtest {
@@ -340,7 +340,7 @@ _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
-		is $pt.format( $tree ), $source, Q{formatted};
+		is $pt.to-string( $tree ), $source, Q{formatted};
 	}, Q{christmas tree, maximal spacing};
 }, Q{christmas tree};
 
@@ -353,7 +353,7 @@ _END_
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
-	is $pt.format( $tree ), $source, Q{formatted};
+	is $pt.to-string( $tree ), $source, Q{formatted};
 }, Q{separate function name and open paren};
 
 # vim: ft=perl6

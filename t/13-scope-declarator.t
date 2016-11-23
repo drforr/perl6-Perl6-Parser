@@ -40,7 +40,7 @@ _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
-		is $pt.format( $tree ), $source, Q{formatted};
+		is $pt.to-string( $tree ), $source, Q{formatted};
 	}, Q{no ws};
 
 	subtest {
@@ -52,7 +52,7 @@ _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
-		is $pt.format( $tree ), $source, Q{formatted};
+		is $pt.to-string( $tree ), $source, Q{formatted};
 	}, Q{leading ws};
 }, Q{my};
 
@@ -68,7 +68,7 @@ _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
-		is $pt.format( $tree ), $source, Q{formatted};
+		is $pt.to-string( $tree ), $source, Q{formatted};
 	}, Q{no ws};
 
 	subtest {
@@ -80,7 +80,7 @@ _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
-		is $pt.format( $tree ), $source, Q{formatted};
+		is $pt.to-string( $tree ), $source, Q{formatted};
 	}, Q{leading ws};
 }, Q{our};
 
@@ -96,7 +96,7 @@ _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
-		is $pt.format( $tree ), $source, Q{formatted};
+		is $pt.to-string( $tree ), $source, Q{formatted};
 	}, Q{no ws};
 
 	subtest {
@@ -108,7 +108,7 @@ _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
-		is $pt.format( $tree ), $source, Q{formatted};
+		is $pt.to-string( $tree ), $source, Q{formatted};
 	}, Q{leading ws};
 }, Q{has};
 
@@ -124,7 +124,7 @@ _END_
 #		my $p = $pt.parse( $source );
 #		my $tree = $pt.build-tree( $p );
 #		ok $pt.validate( $p ), Q{valid};
-#		is $pt.format( $tree ), $source, Q{formatted};
+#		is $pt.to-string( $tree ), $source, Q{formatted};
 #	}, Q{no ws};
 #
 #	subtest {
@@ -136,7 +136,7 @@ _END_
 #		my $p = $pt.parse( $source );
 #		my $tree = $pt.build-tree( $p );
 #		ok $pt.validate( $p ), Q{valid};
-#		is $pt.format( $tree ), $source, Q{formatted};
+#		is $pt.to-string( $tree ), $source, Q{formatted};
 #	}, Q{leading ws};
 #}, Q{HAS};
 
@@ -154,7 +154,7 @@ subtest {
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
-		is $pt.format( $tree ), $source, Q{formatted};
+		is $pt.to-string( $tree ), $source, Q{formatted};
 	}, Q{no ws};
 
 	subtest {
@@ -166,7 +166,7 @@ _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
-		is $pt.format( $tree ), $source, Q{formatted};
+		is $pt.to-string( $tree ), $source, Q{formatted};
 	}, Q{leading ws};
 }, Q{state};
 

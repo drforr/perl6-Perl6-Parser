@@ -18,7 +18,7 @@ subtest {
 		my $parsed = $pt.parse( $source );
 		my $tree = $pt.build-tree( $parsed );
 		ok $pt.validate( $parsed ), Q{valid};
-		is $pt.format( $tree ), $source, Q{formatted};
+		is $pt.to-string( $tree ), $source, Q{formatted};
 	}, Q{no ws};
 
 	subtest {
@@ -30,7 +30,7 @@ _END_
 		my $parsed = $pt.parse( $source );
 		my $tree = $pt.build-tree( $parsed );
 		ok $pt.validate( $parsed ), Q{valid};
-		is $pt.format( $tree ), $source, Q{formatted};
+		is $pt.to-string( $tree ), $source, Q{formatted};
 	}, Q{ws};
 }, Q{/pi/};
 
@@ -44,7 +44,7 @@ subtest {
 		my $parsed = $pt.parse( $source );
 		my $tree = $pt.build-tree( $parsed );
 		ok $pt.validate( $parsed ), Q{valid};
-		is $pt.format( $tree ), $source, Q{formatted};
+		is $pt.to-string( $tree ), $source, Q{formatted};
 	}, Q{no ws};
 
 	subtest {
@@ -56,7 +56,7 @@ _END_
 		my $parsed = $pt.parse( $source );
 		my $tree = $pt.build-tree( $parsed );
 		ok $pt.validate( $parsed ), Q{valid};
-		is $pt.format( $tree ), $source, Q{formatted};
+		is $pt.to-string( $tree ), $source, Q{formatted};
 	}, Q{ws};
 }, Q{/<[ p i ]>/};
 
@@ -70,7 +70,7 @@ subtest {
 		my $parsed = $pt.parse( $source );
 		my $tree = $pt.build-tree( $parsed );
 		ok $pt.validate( $parsed ), Q{valid};
-		is $pt.format( $tree ), $source, Q{formatted};
+		is $pt.to-string( $tree ), $source, Q{formatted};
 	}, Q{no ws};
 
 	subtest {
@@ -82,7 +82,7 @@ _END_
 		my $parsed = $pt.parse( $source );
 		my $tree = $pt.build-tree( $parsed );
 		ok $pt.validate( $parsed ), Q{valid};
-		is $pt.format( $tree ), $source, Q{formatted};
+		is $pt.to-string( $tree ), $source, Q{formatted};
 	}, Q{ws};
 }, Q{/ \d /};
 
@@ -96,7 +96,7 @@ subtest {
 		my $parsed = $pt.parse( $source );
 		my $tree = $pt.build-tree( $parsed );
 		ok $pt.validate( $parsed ), Q{valid};
-		is $pt.format( $tree ), $source, Q{formatted};
+		is $pt.to-string( $tree ), $source, Q{formatted};
 	}, Q{no ws};
 
 	subtest {
@@ -108,7 +108,7 @@ _END_
 		my $parsed = $pt.parse( $source );
 		my $tree = $pt.build-tree( $parsed );
 		ok $pt.validate( $parsed ), Q{valid};
-		is $pt.format( $tree ), $source, Q{formatted};
+		is $pt.to-string( $tree ), $source, Q{formatted};
 	}, Q{ws};
 }, Q{/ . /};
 

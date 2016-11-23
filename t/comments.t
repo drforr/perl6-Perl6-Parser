@@ -19,7 +19,7 @@ _END_
 	my $parsed = $pt.parse( $source );
 	my $tree = $pt.build-tree( $parsed );
 	ok $pt.validate( $parsed ), Q{valid};
-	is $pt.format( $tree ), $source, Q{formatted};
+	is $pt.to-string( $tree ), $source, Q{formatted};
 }, Q{shebang line};
 
 subtest {
@@ -34,7 +34,7 @@ _END_
 		my $parsed = $pt.parse( $source );
 		my $tree = $pt.build-tree( $parsed );
 		ok $pt.validate( $parsed ), Q{valid};
-		is $pt.format( $tree ), $source, Q{formatted};
+		is $pt.to-string( $tree ), $source, Q{formatted};
 	}, Q{single EOL comment};
 
 	subtest {
@@ -47,7 +47,7 @@ _END_
 		my $parsed = $pt.parse( $source );
 		my $tree = $pt.build-tree( $parsed );
 		ok $pt.validate( $parsed ), Q{valid};
-		is $pt.format( $tree ), $source, Q{formatted};
+		is $pt.to-string( $tree ), $source, Q{formatted};
 	}, Q{Two EOL comments in a row};
 }, Q{full-line comments};
 
@@ -63,7 +63,7 @@ _END_
 		my $parsed = $pt.parse( $source );
 		my $tree = $pt.build-tree( $parsed );
 		ok $pt.validate( $parsed ), Q{valid};
-		is $pt.format( $tree ), $source, Q{formatted};
+		is $pt.to-string( $tree ), $source, Q{formatted};
 	}, Q{single EOL comment};
 
 	subtest {
@@ -78,7 +78,7 @@ _END_
 		my $parsed = $pt.parse( $source );
 		my $tree = $pt.build-tree( $parsed );
 		ok $pt.validate( $parsed ), Q{valid};
-		is $pt.format( $tree ), $source, Q{formatted};
+		is $pt.to-string( $tree ), $source, Q{formatted};
 	}, Q{Two EOL comments in a row};
 }, Q{spanning comment};
 

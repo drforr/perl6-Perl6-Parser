@@ -229,15 +229,15 @@ role Child {
 # XXX I could use wrap() probably...
 #
 role Branching does Child {
-	method perl6( $f ) {
-		join( '', map { $_.perl6( $f ) }, @.child )
+	method to-string( ) {
+		join( '', map { .to-string( ) }, @.child )
 	}
 }
 
 role Token {
 	has Str $.content is required;
 
-	method perl6( $f ) {
+	method to-string( ) {
 		~$.content
 	}
 }
@@ -406,7 +406,7 @@ class Perl6::Sir-Not-Appearing-In-This-Statement {
 	also is Perl6::Element;
 	has $.content; # XXX because it's not quite a token.
 
-	method perl6( $f ) {
+	method to-string( ) {
 		~$.content
 	}
 }
@@ -758,7 +758,7 @@ class Perl6::Parser::Factory {
 	my class Here-Doc {
 		has Int $.delimiter-start; # 'q:to[_FOO_]'
 		has Int $.body-from; # 'Hello, world!\n_FOO_'
-		has Int $.body-to; #  'Hello, world!\n_FOO_'
+		has Int $.body-to;   # 'Hello, world!\n_FOO_'
 		has Str $.marker;
 	}
 

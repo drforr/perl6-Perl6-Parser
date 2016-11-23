@@ -44,7 +44,7 @@ subtest {
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -59,7 +59,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{<>};
 
@@ -76,7 +76,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -91,7 +91,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{()};
 
@@ -108,7 +108,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Block },
 					$tree.child.[0].child),
 				Q{found block};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -123,7 +123,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Block },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q[{}];
 
@@ -140,7 +140,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -155,7 +155,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{[]}
 }, Q{Term Precedence};
@@ -176,7 +176,7 @@ subtest {
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[1].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -191,7 +191,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[2].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{[]};
 
@@ -209,7 +209,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[1].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -225,7 +225,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[2].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{%a{}};
 
@@ -243,7 +243,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[1].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -259,7 +259,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[2].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{%a{}};
 
@@ -277,7 +277,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[1].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -293,7 +293,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[2].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{%a«»};
 
@@ -311,7 +311,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no arguments, no ws};
 
 		subtest {
@@ -327,7 +327,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no arguments, ws};
 
 		subtest {
@@ -343,7 +343,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{with arguments};
 	}, Q{func()};
 
@@ -359,7 +359,7 @@ _END_
 		ok (grep { $_ ~~ Perl6::Operator },
 				$tree.child.[0].child),
 			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
+		is $pt.to-string( $tree ), $source, Q{formatted};
 	}, Q{.};
 
 	subtest {
@@ -374,7 +374,7 @@ _END_
 		ok (grep { $_ ~~ Perl6::Operator },
 				$tree.child.[0].child),
 			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
+		is $pt.to-string( $tree ), $source, Q{formatted};
 	}, Q{.&};
 
 	subtest {
@@ -389,7 +389,7 @@ _END_
 		ok (grep { $_ ~~ Perl6::Operator },
 				$tree.child.[0].child),
 			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
+		is $pt.to-string( $tree ), $source, Q{formatted};
 	}, Q{.=};
 
 	subtest {
@@ -404,7 +404,7 @@ _END_
 		ok (grep { $_ ~~ Perl6::Operator },
 				$tree.child.[0].child),
 			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
+		is $pt.to-string( $tree ), $source, Q{formatted};
 	}, Q{.^};
 
 	subtest {
@@ -419,7 +419,7 @@ _END_
 		ok (grep { $_ ~~ Perl6::Operator },
 				$tree.child.[0].child),
 			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
+		is $pt.to-string( $tree ), $source, Q{formatted};
 	}, Q{.?};
 
 	subtest {
@@ -434,7 +434,7 @@ _END_
 		ok (grep { $_ ~~ Perl6::Operator },
 				$tree.child.[0].child),
 			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
+		is $pt.to-string( $tree ), $source, Q{formatted};
 	}, Q{.+};
 
 	subtest {
@@ -449,7 +449,7 @@ _END_
 		ok (grep { $_ ~~ Perl6::Operator },
 				$tree.child.[0].child),
 			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
+		is $pt.to-string( $tree ), $source, Q{formatted};
 	}, Q{.*};
 
 	subtest {
@@ -464,7 +464,7 @@ _END_
 		ok (grep { $_ ~~ Perl6::Operator },
 				$tree.child.[0].child),
 			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
+		is $pt.to-string( $tree ), $source, Q{formatted};
 	}, Q{>>.};
 
 	subtest {
@@ -480,7 +480,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[1].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -495,7 +495,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[2].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{.:};
 
@@ -512,7 +512,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[2].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -527,7 +527,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[2].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{.::};
 }, Q{Method Postfix Precedence};
@@ -548,7 +548,7 @@ subtest {
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[1].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -563,7 +563,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[2].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{++$a};
 
@@ -580,7 +580,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[1].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -595,7 +595,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[2].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{--$a};
 
@@ -612,7 +612,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[1].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -627,7 +627,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[2].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{$a++};
 
@@ -644,7 +644,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[1].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -659,7 +659,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[2].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{$a--};
 }, Q{Autoincrement Precedence};
@@ -680,7 +680,7 @@ subtest {
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -695,7 +695,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{**};
 }, Q{Exponentiation Precedence};
@@ -716,7 +716,7 @@ subtest {
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -731,7 +731,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{?};
 
@@ -748,7 +748,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -763,7 +763,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{!};
 
@@ -779,7 +779,7 @@ _END_
 		ok (grep { $_ ~~ Perl6::Operator },
 				$tree.child.[0].child),
 			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
+		is $pt.to-string( $tree ), $source, Q{formatted};
 	}, Q{+};
 
 	subtest {
@@ -794,7 +794,7 @@ _END_
 		ok (grep { $_ ~~ Perl6::Operator },
 				$tree.child.[0].child),
 			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
+		is $pt.to-string( $tree ), $source, Q{formatted};
 	}, Q{-};
 
 	subtest {
@@ -809,7 +809,7 @@ _END_
 		ok (grep { $_ ~~ Perl6::Operator },
 				$tree.child.[0].child),
 			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
+		is $pt.to-string( $tree ), $source, Q{formatted};
 	}, Q{~};
 
 	subtest {
@@ -824,7 +824,7 @@ _END_
 		ok (grep { $_ ~~ Perl6::Operator },
 				$tree.child.[0].child),
 			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
+		is $pt.to-string( $tree ), $source, Q{formatted};
 	}, Q{|};
 
 	subtest {
@@ -839,7 +839,7 @@ _END_
 		ok (grep { $_ ~~ Perl6::Operator },
 				$tree.child.[0].child),
 			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
+		is $pt.to-string( $tree ), $source, Q{formatted};
 	}, Q{+^};
 
 	subtest {
@@ -854,7 +854,7 @@ _END_
 		ok (grep { $_ ~~ Perl6::Operator },
 				$tree.child.[0].child),
 			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
+		is $pt.to-string( $tree ), $source, Q{formatted};
 	}, Q{?^};
 
 	subtest {
@@ -869,7 +869,7 @@ _END_
 		ok (grep { $_ ~~ Perl6::Operator },
 				$tree.child.[0].child),
 			Q{found operator};
-		is $pt.format( $tree ), $source, Q{formatted};
+		is $pt.to-string( $tree ), $source, Q{formatted};
 	}, Q{^};
 }, Q{Symbolic Unary Precedence};
 
@@ -889,7 +889,7 @@ subtest {
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -904,7 +904,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{*};
 
@@ -921,7 +921,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -936,7 +936,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{/};
 
@@ -956,7 +956,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{div};
 
@@ -973,7 +973,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -988,7 +988,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{%};
 
@@ -1005,7 +1005,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -1020,7 +1020,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{%%};
 
@@ -1040,7 +1040,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{mod};
 
@@ -1057,7 +1057,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -1072,7 +1072,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{+&};
 
@@ -1089,7 +1089,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -1104,7 +1104,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{+<};
 
@@ -1121,7 +1121,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -1136,7 +1136,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{+>};
 
@@ -1156,7 +1156,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{gcd};
 
@@ -1176,7 +1176,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{lcm};
 }, Q{Multipicative Precedence};
@@ -1197,7 +1197,7 @@ subtest {
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -1212,7 +1212,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{+};
 
@@ -1229,7 +1229,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -1244,7 +1244,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{-};
 
@@ -1261,7 +1261,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -1276,7 +1276,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{+|};
 
@@ -1293,7 +1293,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -1308,7 +1308,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{+^};
 
@@ -1325,7 +1325,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -1340,7 +1340,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{?|};
 }, Q{Additive Precedence};
@@ -1364,7 +1364,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{x};
 
@@ -1384,7 +1384,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{xx};
 }, Q{Replication Precedence};
@@ -1405,7 +1405,7 @@ subtest {
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -1420,7 +1420,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{~};
 }, Q{Concatenation Precedence};
@@ -1441,7 +1441,7 @@ subtest {
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -1456,7 +1456,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{&};
 }, Q{Junctive AND Precedence};
@@ -1477,7 +1477,7 @@ subtest {
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -1492,7 +1492,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{|};
 
@@ -1509,7 +1509,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -1524,7 +1524,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{^};
 }, Q{Junctive OR Precedence};
@@ -1548,7 +1548,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[2].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{temp};
 
@@ -1568,7 +1568,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[2].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{let};
 }, Q{Named Unary Precedence};
@@ -1592,7 +1592,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{does};
 
@@ -1612,7 +1612,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{but};
 
@@ -1632,7 +1632,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{cmp};
 
@@ -1652,7 +1652,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{leg};
 
@@ -1672,7 +1672,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{<=>};
 
@@ -1689,7 +1689,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -1704,7 +1704,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{..};
 
@@ -1721,7 +1721,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -1736,7 +1736,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{^..};
 
@@ -1753,7 +1753,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -1768,7 +1768,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{..^};
 
@@ -1785,7 +1785,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -1800,7 +1800,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{^..^};
 }, Q{Nonchaining Binary Precedence};
@@ -1821,7 +1821,7 @@ subtest {
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -1836,7 +1836,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{==};
 
@@ -1853,7 +1853,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -1868,7 +1868,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{!=};
 
@@ -1888,7 +1888,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{<};
 
@@ -1905,7 +1905,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -1920,7 +1920,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{>};
 
@@ -1940,7 +1940,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{<=};
 
@@ -1957,7 +1957,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -1972,7 +1972,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{>};
 
@@ -1989,7 +1989,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -2004,7 +2004,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{>=};
 
@@ -2024,7 +2024,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{eq};
 
@@ -2044,7 +2044,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{ne};
 
@@ -2064,7 +2064,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{gt};
 
@@ -2084,7 +2084,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{ge};
 
@@ -2104,7 +2104,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{lt};
 
@@ -2124,7 +2124,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{le};
 
@@ -2144,7 +2144,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{before};
 
@@ -2164,7 +2164,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{after};
 
@@ -2184,7 +2184,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{eqv};
 
@@ -2201,7 +2201,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -2216,7 +2216,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{===};
 
@@ -2233,7 +2233,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -2248,7 +2248,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{=:=};
 
@@ -2265,7 +2265,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -2280,7 +2280,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{~~};
 
@@ -2297,7 +2297,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -2312,7 +2312,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{=~=};
 }, Q{Chaining Binary Precedence};
@@ -2333,7 +2333,7 @@ subtest {
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -2348,7 +2348,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{&&};
 }, Q{Tight AND Precedence};
@@ -2369,7 +2369,7 @@ subtest {
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -2384,7 +2384,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{||};
 
@@ -2401,7 +2401,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -2416,7 +2416,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{^^};
 
@@ -2433,7 +2433,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -2448,7 +2448,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{//};
 
@@ -2468,7 +2468,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{min};
 
@@ -2488,7 +2488,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{max};
 }, Q{Tight OR Precedence};
@@ -2509,7 +2509,7 @@ subtest {
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -2524,7 +2524,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{?? !!};
 
@@ -2544,7 +2544,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{ff};
 
@@ -2561,7 +2561,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -2576,7 +2576,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{^ff};
 
@@ -2596,7 +2596,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{ff^};
 
@@ -2613,7 +2613,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -2628,7 +2628,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{^ff^};
 
@@ -2648,7 +2648,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{fff};
 
@@ -2668,7 +2668,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{^fff};
 
@@ -2688,7 +2688,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{fff^};
 
@@ -2705,7 +2705,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -2720,7 +2720,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{^fff^};
 }, Q{Conditional Operator Precedence};
@@ -2741,7 +2741,7 @@ subtest {
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -2756,7 +2756,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{=};
 
@@ -2773,7 +2773,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -2788,7 +2788,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{=>};
 }, Q{Item Assignment Precedence};
@@ -2812,7 +2812,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{not};
 
@@ -2832,7 +2832,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{so};
 }, Q{Loose Unary Precedence};
@@ -2853,7 +2853,7 @@ subtest {
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -2868,7 +2868,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{,};
 }, Q{Comma Operator Precedence};
@@ -2894,7 +2894,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{Z};
 
@@ -2914,7 +2914,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{X};
 
@@ -2931,7 +2931,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -2946,7 +2946,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{...};
 }, Q{List Infix Precedence};
@@ -2967,7 +2967,7 @@ subtest {
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -2982,7 +2982,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{=};
 
@@ -2999,7 +2999,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -3014,7 +3014,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{:=};
 
@@ -3033,7 +3033,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -3048,7 +3048,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{...};
 
@@ -3065,7 +3065,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -3080,7 +3080,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{!!!};
 
@@ -3097,7 +3097,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -3112,7 +3112,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{???};
 
@@ -3138,7 +3138,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{and};
 
@@ -3158,7 +3158,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{andthen};
 }, Q{Loose AND Precedence};
@@ -3182,7 +3182,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{or};
 
@@ -3202,7 +3202,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[0].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{orelse};
 }, Q{Loose OR Precedence};
@@ -3226,7 +3226,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[2].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{<==};
 
@@ -3243,7 +3243,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[1].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
 
 		subtest {
@@ -3258,7 +3258,7 @@ _END_
 			ok (grep { $_ ~~ Perl6::Operator },
 					$tree.child.[2].child),
 				Q{found operator};
-			is $pt.format( $tree ), $source, Q{formatted};
+			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{ws};
 	}, Q{==>};
 }, Q{Sequencer Precedence};
