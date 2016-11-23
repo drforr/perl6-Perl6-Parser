@@ -5010,10 +5010,18 @@ return True;
 				);
 			}
 			elsif self.assert-hash( $_, [< sym else xblock >] ) {
-				@child.append( self._sym( $_.hash.<sym> ) );
-				@child.append(
-					self._xblock( $_.hash.<xblock> )
-				);
+				for 0 .. ( $_.hash.<sym>.list.elems - 1 ) -> $idx {
+					@child.append(
+						Perl6::Bareword.from-match(
+							$_.hash.<sym>.list.[$idx]
+						)
+					);
+					@child.append(
+						self._xblock(
+							$_.hash.<xblock>.list.[$idx]
+						)
+					);
+				}
 				my $x = $_.Str.substr( 0, $_.hash.<else>.from );
 				if $x ~~ m{ ('else') } {
 					@child.append(

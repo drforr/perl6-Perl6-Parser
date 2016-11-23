@@ -295,7 +295,6 @@ _END_
 }, Q{Barnsley fern};
 
 subtest {
-#`[
 	my $source = Q:to[_END_];
 sub MAIN {
     my $buf = slurp("/tmp/favicon.ico", :bin);
@@ -325,7 +324,6 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 	done-testing;
 }, Q{Base64 encode data};
