@@ -148,6 +148,19 @@ _END_
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
 }, Q{alternation};
+
+subtest {
+	plan 2;
+
+	my $source = Q:to[_END_];
+say $[0];
+_END_
+	my $p = $pt.parse( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.to-string( $tree ), $source, Q{formatted};
+}, Q{contextualized};
+
 done-testing;
 
 # vim: ft=perl6

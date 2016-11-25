@@ -125,7 +125,6 @@ _END_
 	}, Q{version 1};
 
 	subtest {
-#`[
 		my $source = Q:to[_END_];
 sub balanced($s) {
     .none < 0 and .[*-1] == 0
@@ -140,7 +139,6 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 		done-testing;
 	}, Q{version 2};

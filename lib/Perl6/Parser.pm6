@@ -228,6 +228,7 @@ my role Debugging {
 						@problem.push( 'WS' )
 					}
 					if $root.child.[$_] !~~ Perl6::WS and
+					   $root.child.[$_] !~~ Perl6::Comment and
 					   $root.child.[$_] !~~ Perl6::String and
 					   $root.child.[$_].content ~~ / \s / {
 						@problem.push( 'WS' )

@@ -84,6 +84,7 @@ L<Perl6::Variable>
         L<Perl6::Variable::Scalar::Named>
         L<Perl6::Variable::Scalar::Pod>
         L<Perl6::Variable::Scalar::SubLanguage>
+        L<Perl6::Variable::Scalar::Contextualizer>
     L<Perl6::Variable::Hash>
         (and the same subtypes)
     L<Perl6::Variable::Array>
@@ -93,11 +94,11 @@ L<Perl6::Variable>
 
 =cut
 
-=item L<Perl6::Variable::Contextualizer>
+=item L<Perl6::Variable::Scalar::Contextualizer>
 
-Children: L<Perl6::Variable::Contextualizer::Scalar> and so forth.
+Children: L<Perl6::Variable::Scalar::Contextualizer> and so forth.
 
-(a side note - These really should be L<Perl6::Variable::Scalar:Contextualizer::>, but that would mean that these were both a Leaf (from the parent L<Perl6::Variable::Scalar> and Branching because they have children). Resolving this would mean removing the L<Perl6::Leaf> role from the L<Perl6::Variable::Scalar> class, which means that I either have to create a longer class name for L<Perl6::Variable::JustAPlainScalarVariable> or manually add the L<Perl6::Leaf>'s contents to the L<Perl6::Variable::Scalar>, and forget to update it when I change my mind in a few weeks' time about what L<Perl6::Leaf> does. Adding a separate class for this seems the lesser of two evils, especially given how often they'll appear in "real world" code.)
+(a side note - These really should be L<Perl6::Variable::Scalar::Contextualizer>, but that would mean that these were both a Leaf (from the parent L<Perl6::Variable::Scalar> and Branching because they have children). Resolving this would mean removing the L<Perl6::Leaf> role from the L<Perl6::Variable::Scalar> class, which means that I either have to create a longer class name for L<Perl6::Variable::JustAPlainScalarVariable> or manually add the L<Perl6::Leaf>'s contents to the L<Perl6::Variable::Scalar>, and forget to update it when I change my mind in a few weeks' time about what L<Perl6::Leaf> does. Adding a separate class for this seems the lesser of two evils, especially given how often they'll appear in "real world" code.)
 
 =cut
 
@@ -1439,10 +1440,35 @@ class Perl6::Parser::Factory {
 	}
 
 	method _contextualizer( Mu $p ) {
+		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_,
+					[< coercee sigil sequence >] ) {
+				@child.append(
+					self._sigil(
+						$_.hash.<sigil>
+					)
+				);
+				# XXX coercee handled inside circumfix
+				@child.append(
+					self._sequence(
+						$_.hash.<sequence>
+					)
+				);
+			}
+			when self.assert-hash( $_,
 					[< coercee circumfix sigil >] ) {
-				die "not implemented yet";
+				@child.append(
+					self._sigil(
+						$_.hash.<sigil>
+					)
+				);
+				# XXX coercee handled inside circumfix
+				@child.append(
+					self._circumfix(
+						$_.hash.<circumfix>
+					)
+				);
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
@@ -1450,6 +1476,7 @@ class Perl6::Parser::Factory {
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
+		@child;
 	}
 
 	method _decint( Mu $p ) {
@@ -3311,7 +3338,8 @@ return True;
 			}
 			when self.assert-hash( $_, [< sym O >] ) {
 				@child.append( self._sym( $_.hash.<sym> ) );
-				@child.append( self._O( $_.hash.<O> ) );
+# XXX Probably needs to be rethought
+#				@child.append( self._O( $_.hash.<O> ) );
 			}
 			when self.assert-hash( $_, [< EXPR O >] ) {
 				@child.append( self._EXPR( $_.hash.<EXPR> ) );
@@ -3321,7 +3349,8 @@ return True;
 				@child.append(
 					self._semilist( $_.hash.<semilist> )
 				);
-				@child.append( self._O( $_.hash.<O> ) );
+# XXX probably needs to be rethought
+#				@child.append( self._O( $_.hash.<O> ) );
 			}
 			when self.assert-hash( $_, [< nibble O >] ) {
 				@child.append(
@@ -3934,7 +3963,8 @@ return True;
 						$_.hash.<postcircumfix>
 					)
 				);
-				@child.append( self._O( $_.hash.<O> ) );
+# XXX Probably needs to be rethought
+#				@child.append( self._O( $_.hash.<O> ) );
 			}
 			when self.assert-hash( $_,
 					[< sym postcircumfix >], [< O >] ) {
@@ -4659,6 +4689,26 @@ return True;
 		Perl6::Bareword.from-match( $p );
 	}
 
+	method _sequence( Mu $p ) {
+		my Perl6::Element @child;
+		given $p {
+			when self.assert-hash( $_,
+					[< statement >] ) {
+				@child.append(
+					self._statement(
+						$_.hash.<statement>
+					)
+				);
+			}
+			default {
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
+			}
+		}
+		@child;
+	}
+
 	method _shape( Mu $p ) {
 		warn "shape finally used";
 		( )
@@ -4697,8 +4747,7 @@ return True;
 	}
 
 	method _sigil( Mu $p ) {
-		warn "sigil finally used";
-		( )
+		Perl6::Bareword.from-match( $p )
 	}
 
 	method _sigmaybe( Mu $p ) {
@@ -6049,24 +6098,22 @@ die "Catching Int";
 
 	method _variable( Mu $p ) {
 		if self.assert-hash( $p, [< contextualizer >] ) {
-			warn "Contextualizer";
-			return;
+			self._contextualizer( $p.hash.<contextualizer> );
 		}
-
-		my Str $sigil	= $p.hash.<sigil>.Str;
-		my Str $twigil	= $p.hash.<twigil> ??
-			          $p.hash.<twigil>.Str !! '';
-		my Str $desigilname =
-			$p.hash.<desigilname> ??
-			$p.hash.<desigilname>.Str !! '';
-		my Str $content =
-			$p.hash.<sigil> ~ $twigil ~ $desigilname;
-
-		my Perl6::Element $leaf = %sigil-map{$sigil ~ $twigil}.from-int(
-			$p.from,
-			$content
-		);
-		$leaf;
+		else {
+			my Str $sigil	= $p.hash.<sigil>.Str;
+			my Str $twigil	= $p.hash.<twigil> ??
+					  $p.hash.<twigil>.Str !! '';
+			my Str $desigilname =
+				$p.hash.<desigilname> ??
+				$p.hash.<desigilname>.Str !! '';
+			my Str $content =
+				$p.hash.<sigil> ~ $twigil ~ $desigilname;
+			%sigil-map{$sigil ~ $twigil}.from-int(
+				$p.from,
+				$content
+			);
+		}
 	}
 
 	method _version( Mu $p ) {

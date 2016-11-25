@@ -376,6 +376,8 @@ class Perl6::Parser::Validator {
 #return True;
 		return True if self.assert-hash-keys( $parsed, [< semilist >] )
 			and self._SemiList( $parsed.hash.<semilist> );
+		return True if self.assert-hash-keys( $parsed, [< statement >] )
+			and self._Statement( $parsed.hash.<statement> );
 		debug-match( $parsed );
 		return self.record-failure( '_Coercee' );
 	}
@@ -439,6 +441,11 @@ class Perl6::Parser::Validator {
 				[< coercee circumfix sigil >] )
 			and self._Coercee( $parsed.hash.<coercee> )
 			and self._Circumfix( $parsed.hash.<circumfix> )
+			and self._Sigil( $parsed.hash.<sigil> );
+		return True if self.assert-hash-keys( $parsed,
+				[< coercee sequence sigil >] )
+			and self._Coercee( $parsed.hash.<coercee> )
+			and self._Sequence( $parsed.hash.<sequence> )
 			and self._Sigil( $parsed.hash.<sigil> );
 		debug-match( $parsed );
 		return self.record-failure( '_Contextualizer' );
@@ -2099,6 +2106,16 @@ return True;
 		return self.record-failure( '_SepType' );
 	}
 
+	method _Sequence( Mu $parsed ) returns Bool {
+		self.trace( '_Sequence' );
+#return True;
+		return True if self.assert-hash-keys( $parsed,
+				[< statement >] )
+			and self._Statement( $parsed.hash.<statement> );
+		debug-match( $parsed );
+		return self.record-failure( '_Sequence' );
+	}
+
 	method _Shape( Mu $parsed ) returns Bool {
 		self.trace( '_Shape' );
 #return True;
@@ -2627,6 +2644,15 @@ return True;
 	method _Val( Mu $parsed ) {
 		self.trace( '_Val' );
 #return True;
+		return True if self.assert-hash-keys( $parsed,
+				[< postcircumfix OPER >],
+				[< postfix_prefix_meta_operator >] )
+			and self._PostCircumfix( $parsed.hash.<postcircumfix> )
+			and self._OPER( $parsed.hash.<OPER> );
+		return True if self.assert-hash-keys( $parsed,
+				[< longname args >] )
+			and self._LongName( $parsed.hash.<longname> )
+			and self._Args( $parsed.hash.<args> );
 		return True if self.assert-hash-keys( $parsed,
 				[< prefix OPER >],
 				[< prefix_postfix_meta_operator >] )
