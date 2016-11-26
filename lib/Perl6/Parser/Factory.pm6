@@ -2220,16 +2220,16 @@ class Perl6::Parser::Factory {
 					@child.append(
 						self._infix( $p.hash.<infix> )
 					);
-			my Str $x = $p.hash.<infix>.orig.substr(
-				$p.hash.<infix>.to
-			);
-			if $x ~~ m{ ^ ( \s+ ) } {
-				@child.append(
-					Perl6::WS.from-int(
-						$p.hash.<infix>.to, $0.Str
-					)
-				)
-			}
+					my Str $x = $p.hash.<infix>.orig.substr(
+						$p.hash.<infix>.to
+					);
+					if $x ~~ m{ ^ ( \s+ ) } {
+						@child.append(
+							Perl6::WS.from-int(
+								$p.hash.<infix>.to, $0.Str
+							)
+						)
+					}
 					if $p.list.[$_].Str {
 						@child.append(
 							self._EXPR(
@@ -5147,16 +5147,19 @@ return True;
 								$q.list.[0]
 							)
 						);
-						@child.append(
-							self._infix(
-								$q.hash.<infix>
-							)
-						);
-						@child.append(
-							self._EXPR(
-								$q.list.[1]
-							)
-						);
+						for 1 .. ( $q.list.elems - 1 ) -> $idx {
+							# XXX Yes, this needs to be fixed
+							@child.append(
+								self._infix(
+									$q.hash.<infix>
+								)
+							);
+							@child.append(
+								self._EXPR(
+									$q.list.[$idx]
+								)
+							);
+						}
 					}
 					else {
 						@child.append(

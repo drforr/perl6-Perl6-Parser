@@ -1161,7 +1161,6 @@ _END_
 }, Q{Arithmetic/rational};
 
 subtest {
-#`[
 	my $source = Q:to[_END_];
 # the prefix:<|> operator (called "slip") can be used to interpolate arrays into a list:
 sub cat-arrays(@a, @b) { 
@@ -1176,7 +1175,6 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 	done-testing;
 }, Q{Array concatenation};

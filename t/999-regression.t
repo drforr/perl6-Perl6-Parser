@@ -161,6 +161,18 @@ _END_
 	is $pt.to-string( $tree ), $source, Q{formatted};
 }, Q{contextualized};
 
+subtest {
+	plan 2;
+
+	my $source = Q:to[_END_];
+my @solved = [1,2,3,4],[5,6,7,8],[9,10,11,12],[13,14,15,' '];
+_END_
+	my $p = $pt.parse( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.to-string( $tree ), $source, Q{formatted};
+}, Q{list reference};
+
 done-testing;
 
 # vim: ft=perl6
