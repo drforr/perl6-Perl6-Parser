@@ -453,6 +453,10 @@ class Perl6::Number::Decimal::Explicit does Prefixed {
 class Perl6::Number::Hexadecimal does Prefixed {
 	also is Perl6::Number;
 }
+class Perl6::NotANumber is Token {
+	also is Perl6::Element;
+	also does Matchable;
+}
 class Perl6::Infinity is Token {
 	also is Perl6::Element;
 	also does Matchable;
@@ -2965,13 +2969,19 @@ return True;
 	}
 
 	method _named_param( Mu $p ) {
+		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< name param_var >] ) {
-				self._name( $_.hash.<name> );
-				self._param_var( $_.hash.<param_var> );
+# XXX Needs to be added back in...
+#				self._name( $_.hash.<name> );
+				@child.append(
+					self._param_var( $_.hash.<param_var> )
+				);
 			}
 			when self.assert-hash( $_, [< param_var >] ) {
-				self._param_var( $_.hash.<param_var> );
+				@child.append(
+					self._param_var( $_.hash.<param_var> );
+				);
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
@@ -2979,6 +2989,7 @@ return True;
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
+		@child;
 	}
 
 	method _name( Mu $p ) {
@@ -3227,6 +3238,9 @@ return True;
 			}
 			when $_.Str eq 'Inf' {
 				Perl6::Infinity.from-match( $_ );
+			}
+			when $_.Str eq 'NaN' {
+				Perl6::NotANumber.from-match( $_ );
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
@@ -3875,7 +3889,8 @@ return True;
 						)
 					);
 				}
-				@child.append( self._O( $_.hash.<O> ) );
+# XXX Probably unused at this point, actually.
+#				@child.append( self._O( $_.hash.<O> ) );
 			}
 			when self.assert-hash( $_, [< semilist O >] ) {
 				my Perl6::Element @_child;
@@ -4644,6 +4659,10 @@ return True;
 
 	method _semilist( Mu $p ) {
 		my Perl6::Element @child;
+		# XXX remove later
+		CATCH {
+			when X::Hash::Store::OddNumber { }
+		}
 		given $p {
 			when self.assert-hash( $_, [< statement >] ) {
 				@child.append(
@@ -4710,8 +4729,17 @@ return True;
 	}
 
 	method _shape( Mu $p ) {
-		warn "shape finally used";
-		( )
+		my Perl6::Element @_child;
+		$p.Str ~~ m{ ^ '{' \s* ( .+ ) \s* '}' };
+		@_child.append(
+			Perl6::Bareword.from-int(
+				$p.from + $0.from,
+				$0.Str
+			)
+		);
+		Perl6::Operator::Circumfix.from-match(
+			$p, @_child
+		);
 	}
 
 	method _sibble( Mu $p ) {
@@ -5154,11 +5182,13 @@ return True;
 									$q.hash.<infix>
 								)
 							);
+if $q.list.[$idx].Str {
 							@child.append(
 								self._EXPR(
 									$q.list.[$idx]
 								)
 							);
+}
 						}
 					}
 					else {
@@ -6062,9 +6092,7 @@ die "Catching Int";
 				@child.append(
 					self._variable( $_.hash.<variable> )
 				);
-				@child.append(
-					self._shape( $_.hash.<shape> )
-				);
+				@child.append( self._shape( $_.hash.<shape> ) );
 			}
 			when self.assert-hash( $_,
 					[< variable post_constraint >],

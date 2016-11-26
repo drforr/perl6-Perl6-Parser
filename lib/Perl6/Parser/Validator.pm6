@@ -152,6 +152,9 @@ class Perl6::Parser::Validator {
 			and self._DefTermNow( $parsed.hash.<deftermnow> )
 			and self._Initializer( $parsed.hash.<initializer> )
 			and self._TermInit( $parsed.hash.<term_init> );
+		return True if self.assert-hash-keys( $parsed,
+				[< arglist >], [< O >] )
+			and self._ArgList( $parsed.hash.<arglist> );
 		return True if self.assert-hash-keys( $parsed, [< EXPR >] )
 			and self._EXPR( $parsed.hash.<EXPR> );
 		return True if self.assert-Int( $parsed );
@@ -1552,6 +1555,9 @@ return True;
 			and self._ArgList( $parsed.hash.<arglist> )
 			and self._O( $parsed.hash.<O> );
 		return True if self.assert-hash-keys( $parsed,
+				[< arglist >], [< O >] )
+			and self._ArgList( $parsed.hash.<arglist> );
+		return True if self.assert-hash-keys( $parsed,
 				[< sym dottyop >], [< O >] )
 			and self._Sym( $parsed.hash.<sym> )
 			and self._DottyOp( $parsed.hash.<dottyop> );
@@ -1741,6 +1747,9 @@ return True;
 		return True if self.assert-hash-keys( $parsed, [< arglist O >] )
 			and self._ArgList( $parsed.hash.<arglist> )
 			and self._O( $parsed.hash.<O> );
+		return True if self.assert-hash-keys( $parsed,
+				[< arglist >], [< O >] )
+			and self._ArgList( $parsed.hash.<arglist> );
 		return True if self.assert-hash-keys( $parsed,
 				[< semilist >], [< O >] )
 			and self._SemiList( $parsed.hash.<semilist> );
