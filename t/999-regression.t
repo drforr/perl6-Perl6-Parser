@@ -173,6 +173,34 @@ _END_
 	is $pt.to-string( $tree ), $source, Q{formatted};
 }, Q{list reference};
 
+subtest {
+	plan 2;
+
+	my $source = Q:to[_END_];
+role a_role {             # role to add a variable: foo,
+   has $.foo is rw = 2;   # with an initial value of 2
+}
+_END_
+	my $p = $pt.parse( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.to-string( $tree ), $source, Q{formatted};
+}, Q{class attribute traits};
+
+subtest {
+	plan 2;
+
+	my $source = Q:to[_END_];
+constant expansions = 1;
+ 
+expansions[1].[2]
+_END_
+	my $p = $pt.parse( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.to-string( $tree ), $source, Q{formatted};
+}, Q{infix period};
+
 done-testing;
 
 # vim: ft=perl6

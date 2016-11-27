@@ -750,6 +750,7 @@ class Perl6::Parser::Factory {
 
 	constant COLON = Q{:};
 	constant COMMA = Q{,};
+	constant PERIOD = Q{.};
 	constant SEMICOLON = Q{;};
 	constant EQUAL = Q{=};
 	constant WHERE = Q{where};
@@ -2139,6 +2140,14 @@ class Perl6::Parser::Factory {
 				[< postcircumfix OPER >],
 				[< postfix_prefix_meta_operator >] ) {
 			@child.append( self._EXPR( $p.list.[0] ) );
+			if $p.Str ~~ m{ ^ ( '.' ) } {
+				@child.append(
+					Perl6::Operator::Infix.from-int(
+						$p.from,
+						PERIOD
+					)
+				);
+			}
 			@child.append(
 				self._postcircumfix( $p.hash.<postcircumfix> )
 			);
@@ -2980,7 +2989,7 @@ return True;
 			}
 			when self.assert-hash( $_, [< param_var >] ) {
 				@child.append(
-					self._param_var( $_.hash.<param_var> );
+					self._param_var( $_.hash.<param_var> )
 				);
 			}
 			default {
@@ -6109,6 +6118,15 @@ die "Catching Int";
 						$_.hash.<post_constraint>
 					)
 				);
+			}
+			when self.assert-hash( $_,
+					[< variable trait >],
+					[< semilist postcircumfix signature
+					   post_constraint >] ) {
+				@child.append(
+					self._variable( $_.hash.<variable> )
+				);
+				@child.append( self._trait( $_.hash.<trait> ) );
 			}
 			when self.assert-hash( $_,
 					[< variable >],

@@ -292,7 +292,6 @@ _END_
 }, Q{Address of a variable};
 
 subtest {
-#`[
 	my $source = Q:to[_END_];
 constant expansions = [1], [1,-1], -> @prior { [|@prior,0 Z- 0,|@prior] } ... *;
  
@@ -324,7 +323,6 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 	done-testing;
 }, Q{AKS test for primality};
