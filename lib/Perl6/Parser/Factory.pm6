@@ -1259,60 +1259,82 @@ class Perl6::Parser::Factory {
 	#
 	method _circumfix( Mu $p ) {
 		my Perl6::Element @child;
-		given $p {
-			when self.assert-hash( $_, [< binint VALUE >] ) {
-				@child.append(
-					self._binint( $_.hash.<binint> )
-				);
+		if $p.list {
+			for $p.list {
+				if self.assert-hash( $_, [< semilist >] ) {
+					my Perl6::Element @_child;
+					@_child.append(
+						self._semilist( $_.hash.<semilist> )
+					);
+					@child.append(
+						Perl6::Operator::Circumfix.from-match(
+							$_, @_child
+						)
+					);
+				}
+				else {
+					debug-match( $_ );
+					die "Unhandled case" if
+						$*FACTORY-FAILURE-FATAL
+				}
 			}
-			when self.assert-hash( $_, [< octint VALUE >] ) {
-				@child.append(
-					self._octint( $_.hash.<octint> )
-				);
-			}
-			when self.assert-hash( $_, [< decint VALUE >] ) {
-				@child.append(
-					self._decint( $_.hash.<decint> )
-				);
-			}
-			when self.assert-hash( $_, [< hexint VALUE >] ) {
-				@child.append(
-					self._hexint( $_.hash.<hexint> )
-				);
-			}
-			when self.assert-hash( $_, [< pblock >] ) {
-				@child.append(
-					self._pblock( $_.hash.<pblock> )
-				);
-			}
-			when self.assert-hash( $_, [< semilist >] ) {
-				my Perl6::Element @_child;
-				@_child.append(
-					self._semilist( $_.hash.<semilist> )
-				);
-				@child.append(
-					Perl6::Operator::Circumfix.from-match(
-						$_, @_child
-					)
-				);
-			}
-			when self.assert-hash( $_, [< nibble >] ) {
-				my Perl6::Element @_child;
-				@_child.append(
-					Perl6::Operator::Prefix.from-match-trimmed(
-						$_.hash.<nibble>
-					)
-				);
-				@child.append(
-					Perl6::Operator::Circumfix.from-match(
-						$_, @_child
-					)
-				);
-			}
-			default {
-				debug-match( $_ );
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+		}
+		else {
+			given $p {
+				when self.assert-hash( $_, [< binint VALUE >] ) {
+					@child.append(
+						self._binint( $_.hash.<binint> )
+					);
+				}
+				when self.assert-hash( $_, [< octint VALUE >] ) {
+					@child.append(
+						self._octint( $_.hash.<octint> )
+					);
+				}
+				when self.assert-hash( $_, [< decint VALUE >] ) {
+					@child.append(
+						self._decint( $_.hash.<decint> )
+					);
+				}
+				when self.assert-hash( $_, [< hexint VALUE >] ) {
+					@child.append(
+						self._hexint( $_.hash.<hexint> )
+					);
+				}
+				when self.assert-hash( $_, [< pblock >] ) {
+					@child.append(
+						self._pblock( $_.hash.<pblock> )
+					);
+				}
+				when self.assert-hash( $_, [< semilist >] ) {
+					my Perl6::Element @_child;
+					@_child.append(
+						self._semilist( $_.hash.<semilist> )
+					);
+					@child.append(
+						Perl6::Operator::Circumfix.from-match(
+							$_, @_child
+						)
+					);
+				}
+				when self.assert-hash( $_, [< nibble >] ) {
+					my Perl6::Element @_child;
+					@_child.append(
+						Perl6::Operator::Prefix.from-match-trimmed(
+							$_.hash.<nibble>
+						)
+					);
+					@child.append(
+						Perl6::Operator::Circumfix.from-match(
+							$_, @_child
+						)
+					);
+				}
+				default {
+					debug-match( $_ );
+					die "Unhandled case" if
+						$*FACTORY-FAILURE-FATAL
+				}
 			}
 		}
 		@child;
@@ -2912,6 +2934,11 @@ return True;
 						)
 					);
 				}
+				else {
+					debug-match( $_ ) if $*DEBUG;
+					die "Unhandled case" if
+						$*FACTORY-FAILURE-FATAL
+				}
 			}
 		}
 		else {
@@ -3498,7 +3525,18 @@ return True;
 					self._longname( $_.hash.<longname> )
 				);
 			}
-			# $p doesn't contain WS after the block.
+			when self.assert-hash( $_,
+					[< longname trait blockoid >] ) {
+				@child.append(
+					self._longname( $_.hash.<longname> )
+				);
+				@child.append(
+					self._trait( $_.hash.<trait> )
+				);
+				@child.append(
+					self._blockoid( $_.hash.<blockoid> )
+				);
+			}
 			when self.assert-hash( $_,
 					[< longname blockoid >], [< trait >] ) {
 				@child.append(
@@ -3868,9 +3906,16 @@ return True;
 		my Perl6::Element @child;
 		if $p.list {
 			for $p.list {
-				@child.append(
-					self._EXPR( $_ )
-				)
+				if self.assert-hash( $_, [< EXPR >] ) {
+					@child.append(
+						self._EXPR( $_ )
+					);
+				}
+				else {
+					debug-match( $_ ) if $*DEBUG;
+					die "Unhandled case" if
+						$*FACTORY-FAILURE-FATAL
+				}
 			}
 		}
 		else {
@@ -5875,9 +5920,18 @@ if $q.list.[$idx].Str {
 		my Perl6::Element @child;
 		if $p.list {
 			for $p.list {
-				@child.append(
-					self._trait_mod( $_.hash.<trait_mod> )
-				);
+				if self.assert-hash( $_, [< trait_mod >] ) {
+					@child.append(
+						self._trait_mod(
+							$_.hash.<trait_mod>
+						)
+					);
+				}
+				else {
+					debug-match( $_ );
+					die "Unhandled case" if
+						$*FACTORY-FAILURE-FATAL
+				}
 			}
 		}
 		else {
@@ -5899,6 +5953,16 @@ if $q.list.[$idx].Str {
 	method _trait_mod( Mu $p ) {
 		my Perl6::Element @child;
 		given $p {
+			when self.assert-hash( $_,
+					[< sym longname circumfix >] ) {
+				@child.append( self._sym( $_.hash.<sym> ) );
+				@child.append(
+					self._longname( $_.hash.<longname> )
+				);
+				@child.append(
+					self._circumfix( $_.hash.<circumfix> )
+				);
+			}
 			when self.assert-hash( $_,
 					[< sym longname >],
 					[< circumfix >] ) {
