@@ -4456,105 +4456,180 @@ return True;
 
 	method _routine_def( Mu $p ) {
 		my Perl6::Element @child;
-		if self.assert-hash( $p,
-				[< deflongname multisig blockoid >],
-				[< trait >] ) {
-			my Perl6::Element @_child;
-			my $left-margin = $p.Str.substr(
-				0, $p.hash.<multisig>.from - $p.from
-			);
-			$left-margin ~~ m{ ( '(' ) ( \s* ) $ };
-			@_child.append(
-				Perl6::Balanced::Enter.from-int(
-					$p.hash.<multisig>.from -
-					PAREN-OPEN.chars - $1.Str.chars,
-					PAREN-OPEN
-				)
-			);
-			@_child.append( self._multisig( $p.hash.<multisig> ) );
-			@_child.append(
-				Perl6::Balanced::Exit.from-int(
-					$p.hash.<multisig>.to,
-					PAREN-CLOSE
-				)
-			);
-			@child.append(
-				self._deflongname( $p.hash.<deflongname> )
-			);
-			@child.append(
-				Perl6::Operator::Circumfix.new(
-					:factory-line-number(
-						callframe(1).line 
-					),
-					:from(
+		given $p {
+			when self.assert-hash( $_,
+					[< deflongname multisig
+					   blockoid trait >] ) {
+				my Perl6::Element @_child;
+				my $left-margin = $_.Str.substr(
+					0, $_.hash.<multisig>.from - $_.from
+				);
+				$left-margin ~~ m{ ( '(' ) ( \s* ) $ };
+				@_child.append(
+					Perl6::Balanced::Enter.from-int(
 						$p.hash.<multisig>.from -
-						$0.Str.chars - $1.Str.chars ),
-					:to(
-						$p.hash.<multisig>.to +
-						PAREN-CLOSE.chars
-					),
-					:child( @_child ),
-				)
-			);
-			@child.append(
-				self._blockoid( $p.hash.<blockoid> )
-			);
-		}
-		elsif self.assert-hash( $p,
-				[< deflongname statementlist >],
-				[< trait >] ) {
-			@child.append(
-				self._deflongname( $p.hash.<deflongname> )
-			);
-			if $p.Str ~~ m{ ( ';' ) ( \s* ) $ } {
-				@child.append(
-					Perl6::Semicolon.from-int(
-						$p.to - $1.chars -
-						$0.chars,
-						$0.Str
+						PAREN-OPEN.chars - $1.Str.chars,
+						PAREN-OPEN
 					)
 				);
+				@_child.append(
+					self._multisig( $_.hash.<multisig> )
+				);
+				@_child.append(
+					Perl6::Balanced::Exit.from-int(
+						$_.hash.<multisig>.to,
+						PAREN-CLOSE
+					)
+				);
+				@child.append(
+					self._deflongname(
+						$_.hash.<deflongname>
+					)
+				);
+				@child.append(
+					Perl6::Operator::Circumfix.new(
+						:factory-line-number(
+							callframe(1).line 
+						),
+						:from(
+							$_.hash.<multisig>.from -
+							$0.Str.chars - $1.Str.chars ),
+						:to(
+							$_.hash.<multisig>.to +
+							PAREN-CLOSE.chars
+						),
+						:child( @_child ),
+					)
+				);
+				@child.append(
+					self._trait( $_.hash.<trait> )
+				);
+				@child.append(
+					self._blockoid( $_.hash.<blockoid> )
+				);
 			}
-		}
-		elsif self.assert-hash( $p,
-				[< deflongname trait blockoid >] ) {
-			@child.append(
-				self._deflongname( $p.hash.<deflongname> )
-			);
-			@child.append( self._trait( $p.hash.<trait> ) );
-			@child.append( self._blockoid( $p.hash.<blockoid> ) );
-		}
-		elsif self.assert-hash( $p,
-				[< blockoid multisig >], [< trait >] ) {
-			my Perl6::Element @_child;
-			@_child.append( self._multisig( $p.hash.<multisig> ) );
-			@child.append(
-				Perl6::Operator::Circumfix.new(
-					:factory-line-number(
-						callframe(1).line
-					),
-					:from( $p.hash.<blockoid>.from ),
-					:to( $p.hash.<blockoid>.to ),
-					:child( @_child )
-				)
-			);
-			@child.append( self._blockoid( $p.hash.<blockoid> ) );
-		}
-		elsif self.assert-hash( $p,
-				[< deflongname blockoid >],
-				[< trait >] ) {
-			@child.append(
-				self._deflongname( $p.hash.<deflongname> )
-			);
-			@child.append( self._blockoid( $p.hash.<blockoid> ) );
-		}
-		elsif self.assert-hash( $p, [< blockoid >], [< trait >] ) {
-			@child.append( self._blockoid( $p.hash.<blockoid> ) );
-		}
-		else {
-			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if
-				$*FACTORY-FAILURE-FATAL
+			when self.assert-hash( $_,
+					[< deflongname multisig
+					   blockoid >],
+					[< trait >] ) {
+				my Perl6::Element @_child;
+				my $left-margin = $_.Str.substr(
+					0, $_.hash.<multisig>.from - $_.from
+				);
+				$left-margin ~~ m{ ( '(' ) ( \s* ) $ };
+				@_child.append(
+					Perl6::Balanced::Enter.from-int(
+						$p.hash.<multisig>.from -
+						PAREN-OPEN.chars - $1.Str.chars,
+						PAREN-OPEN
+					)
+				);
+				@_child.append(
+					self._multisig( $_.hash.<multisig> )
+				);
+				@_child.append(
+					Perl6::Balanced::Exit.from-int(
+						$_.hash.<multisig>.to,
+						PAREN-CLOSE
+					)
+				);
+				@child.append(
+					self._deflongname(
+						$_.hash.<deflongname>
+					)
+				);
+				@child.append(
+					Perl6::Operator::Circumfix.new(
+						:factory-line-number(
+							callframe(1).line 
+						),
+						:from(
+							$_.hash.<multisig>.from -
+							$0.Str.chars - $1.Str.chars ),
+						:to(
+							$_.hash.<multisig>.to +
+							PAREN-CLOSE.chars
+						),
+						:child( @_child ),
+					)
+				);
+				@child.append(
+					self._blockoid( $_.hash.<blockoid> )
+				);
+			}
+			when self.assert-hash( $_,
+					[< deflongname statementlist >],
+					[< trait >] ) {
+				@child.append(
+					self._deflongname(
+						$_.hash.<deflongname>
+					)
+				);
+				if $_.Str ~~ m{ ( ';' ) ( \s* ) $ } {
+					@child.append(
+						Perl6::Semicolon.from-int(
+							$_.to - $1.chars -
+							$0.chars,
+							$0.Str
+						)
+					);
+				}
+			}
+			when self.assert-hash( $_,
+					[< deflongname trait blockoid >] ) {
+				@child.append(
+					self._deflongname(
+						$_.hash.<deflongname>
+					)
+				);
+				@child.append( self._trait( $_.hash.<trait> ) );
+				@child.append(
+					self._blockoid( $_.hash.<blockoid> )
+				);
+			}
+			when self.assert-hash( $_,
+					[< blockoid multisig >], [< trait >] ) {
+				my Perl6::Element @_child;
+				@_child.append(
+					self._multisig( $_.hash.<multisig> )
+				);
+				@child.append(
+					Perl6::Operator::Circumfix.new(
+						:factory-line-number(
+							callframe(1).line
+						),
+						:from(
+							$_.hash.<blockoid>.from
+						),
+						:to( $_.hash.<blockoid>.to ),
+						:child( @_child )
+					)
+				);
+				@child.append( self._blockoid( $_.hash.<blockoid> ) );
+			}
+			when self.assert-hash( $_,
+					[< deflongname blockoid >],
+					[< trait >] ) {
+				@child.append(
+					self._deflongname(
+						$_.hash.<deflongname>
+					)
+				);
+				@child.append(
+					self._blockoid( $_.hash.<blockoid> )
+				);
+			}
+			when self.assert-hash( $_,
+					[< blockoid >], [< trait >] ) {
+				@child.append(
+					self._blockoid( $_.hash.<blockoid> )
+				);
+			}
+			default {
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
+			}
 		}
 		@child;
 	}
