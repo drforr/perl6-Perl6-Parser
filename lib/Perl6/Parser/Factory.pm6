@@ -1016,7 +1016,8 @@ class Perl6::Parser::Factory {
 			}
 			default {
 				debug-match( $_ );
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child;
@@ -2190,88 +2191,85 @@ class Perl6::Parser::Factory {
 			);
 			@child.append( self._EXPR( $p.list.[1] ) );
 		}
-		# XXX ternary operators don't follow the string boundary rules
-		# XXX $p.list.[0] is actually the start of the expression.
+		# XXX Still needs rewriting to a reasonable size.
 		elsif self.assert-hash( $p, [< infix OPER >] ) {
+			@child.append( self._EXPR( $p.list.[0] ) );
 			if $p.list.elems == 3 {
-				if $p.hash.<infix>.Str eq COMMA {
-					@child.append(
-						self._EXPR( $p.list.[0] )
-					);
-					@child.append(
-						Perl6::Operator::Infix.from-int(
-							@child[*-1].to,
-							COMMA
-						)
-					);
-					@child.append(
-						self._EXPR( $p.list.[1] )
-					);
-					@child.append(
-						Perl6::Operator::Infix.from-int(
-							$p.from, COMMA
-						)
-					);
-					if $p.list.[2].Str {
+				given $p.hash.<infix>.Str {
+					when COMMA {
 						@child.append(
-							self._EXPR(
-								$p.list.[2]
+							Perl6::Operator::Infix.from-int(
+								@child[*-1].to,
+								COMMA
+							)
+						);
+						@child.append(
+							self._EXPR( $p.list.[1] )
+						);
+						@child.append(
+							Perl6::Operator::Infix.find-match(
+								$p, COMMA
+							)
+						);
+					}
+					default {
+						@child.append(
+							Perl6::Operator::Infix.from-int(
+								$p.from, QUES-QUES
+							)
+						);
+						@child.append(
+							self._EXPR( $p.list.[1] )
+						);
+						@child.append(
+							Perl6::Operator::Infix.find-match(
+								$p, BANG-BANG
 							)
 						);
 					}
 				}
-				else {
-					# XXX Sigh, unify this later.
+				if $p.list.[2].Str {
 					@child.append(
-						self._EXPR( $p.list.[0] )
-					);
-					@child.append(
-						Perl6::Operator::Infix.from-int(
-							$p.from, QUES-QUES
+						self._EXPR(
+							$p.list.[2]
 						)
-					);
-					@child.append(
-						self._EXPR( $p.list.[1] )
-					);
-					@child.append(
-						Perl6::Operator::Infix.find-match(
-							$p, BANG-BANG
-						)
-					);
-					@child.append(
-						self._EXPR( $p.list.[2] )
 					);
 				}
 			}
 			else {
-				@child.append( self._EXPR( $p.list.[0] ) );
-				my Str $x = $p.orig.substr(
-					@child[*-1].to
-				);
-				# XXX The bounds of infix and ws have to be
-				# XXX reset.
-				#
 				for 1 .. $p.list.elems - 1 {
-					@child.append(
-						self._infix( $p.hash.<infix> )
+					my Str $y = $p.orig.Str.substr(
+						0,
+						$p.list.[$_].from
 					);
-					my Str $x = $p.hash.<infix>.orig.substr(
-						$p.hash.<infix>.to
-					);
-					if $x ~~ m{ ^ ( \s+ ) } {
+					if $p.hash.<infix>.Str eq ',' and $y ~~ m{ ( ',' ) ( \s* ) $ } {
 						@child.append(
-							Perl6::WS.from-int(
-								$p.hash.<infix>.to, $0.Str
-							)
-						)
-					}
-					if $p.list.[$_].Str {
-						@child.append(
-							self._EXPR(
-								$p.list.[$_]
+							Perl6::Operator::Infix.from-int(
+								$p.list.[$_].from - $0.Str.chars - $1.Str.chars,
+								COMMA
 							)
 						);
 					}
+					else {
+						@child.append(
+							self._infix( $p.hash.<infix> )
+						);
+						my Str $x = $p.hash.<infix>.orig.substr(
+							$p.hash.<infix>.to
+						);
+						if $x ~~ m{ ^ ( \s+ ) } {
+							@child.append(
+								Perl6::WS.from-int(
+									$p.hash.<infix>.to, $0.Str
+								)
+							)
+						}
+					}
+					@child.append(
+						self._EXPR(
+							$p.list.[$_]
+						)
+					);
 				}
 			}
 		}
@@ -5892,6 +5890,10 @@ if $q.list.[$idx].Str {
 				}
 			}
 		}
+		elsif self.assert-hash( $p, [< sym term >] ) {
+			@child.append( self._sym( $p.hash.<sym> ) );
+			@child.append( self._term( $p.hash.<term> ) );
+		}
 		elsif self.assert-hash( $p, [< noun >] ) {
 			@child.append( self._noun( $p.hash.<noun> ) );
 		}
@@ -5970,6 +5972,10 @@ if $q.list.[$idx].Str {
 				@child.append(
 					self._longname( $_.hash.<longname> )
 				);
+			}
+			when self.assert-hash( $_, [< sym term >] ) {
+				@child.append( self._sym( $_.hash.<sym> ) );
+				@child.append( self._term( $_.hash.<term> ) );
 			}
 			when self.assert-hash( $_, [< sym typename >] ) {
 				@child.append( self._sym( $_.hash.<sym> ) );
