@@ -4183,58 +4183,34 @@ return True;
 		my Perl6::Element @child;
 		if self.assert-hash-strict( $p,
 				[< sym quibble >], [< rx_adverbs >] ) {
-			if $p.hash.<sym>.Str eq 'rx' {
-				# XXX Will need fixing.
-				@child.append(
-					Perl6::Balanced::Enter.from-int(
-						$p.from,
-						'rx/'
-					)
-				);
-				@child.append(
-					self._quibble( $p.hash.<quibble> )
-				);
-				@child.append(
-					Perl6::Balanced::Exit.from-int(
-						$p.to - '/'.chars,
-						'/'
-					)
-				);
-			}
-			else {
-				@child.append(
-					self._quibble( $p.hash.<quibble> )
-				);
-			}
-		}
-		elsif self.assert-hash( $p, [< sym rx_adverbs sibble >] ) {
-			if $_.hash.<sym>.Str {
-				@child.append( self._sym( $_.hash.<sym> ) );
-			}
-			if $_.hash.<sibble>.Str {
-				@child.append(
-					self._sibble( $_.hash.<sibble> )
-				);
-			}
-			if $_.hash.<rx_adverbs>.Str {
-				@child.append(
-					self._rx_adverbs( $_.hash.<rx_adverbs> )
-				);
-			}
-		}
-		elsif self.assert-hash( $p, [< sym rx_adverbs quibble >] ) {
-			if $_.hash.<sym>.Str {
-				@child.append( self._sym( $_.hash.<sym> ) );
-			}
-			if $_.hash.<quibble>.Str {
-				@child.append(
-					self._quibble( $_.hash.<quibble> )
-				);
-			}
-			if $_.hash.<rx_adverbs>.Str {
-				@child.append(
-					self._rx_adverbs( $_.hash.<rx_adverbs> )
-				);
+			given $p {
+				when $_.hash.<sym>.Str eq 'rx' {
+					# XXX Will need fixing.
+					@child.append(
+						Perl6::Balanced::Enter.from-int(
+							$_.from,
+							'rx/'
+						)
+					);
+					@child.append(
+						self._quibble(
+							$_.hash.<quibble>
+						)
+					);
+					@child.append(
+						Perl6::Balanced::Exit.from-int(
+							$_.to - '/'.chars,
+							'/'
+						)
+					);
+				}
+				default {
+					@child.append(
+						self._quibble(
+							$_.hash.<quibble>
+						)
+					);
+				}
 			}
 		}
 		elsif self.assert-hash( $p, [< quibble >] ) {
@@ -4263,7 +4239,9 @@ return True;
 
 			@child.append(
 				Perl6::String.new(
-					:factory-line-number( callframe(1).line ),
+					:factory-line-number(
+						callframe(1).line
+					),
 					:from( $p.from ),
 					:to( $p.to ),
 					:delimiter( $0.Str, $trailer ),
