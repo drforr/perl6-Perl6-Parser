@@ -252,6 +252,7 @@ my role Debugging {
 		my $str = $term.WHAT.perl;
 		$str ~~ s/'Perl6::'//;
 		if $term ~~ Perl6::Operator::PostCircumfix or
+		      $term ~~ Perl6::String or
 		      $term ~~ Perl6::Operator::Circumfix {
 		}
 		elsif $term ~~ Perl6::Bareword or
@@ -259,7 +260,8 @@ my role Debugging {
 		      ( $term ~~ Perl6::Operator and
 			$term !~~ Perl6::Operator::Hyper ) or
 		      $term ~~ Perl6::Balanced or
-		      $term ~~ Perl6::WS {
+		      $term ~~ Perl6::WS or
+		      $term ~~ Perl6::String::XXX::Body {
 			$str ~= " ({$term.content.perl})"
 		}
 		elsif $term ~~ Perl6::Number {

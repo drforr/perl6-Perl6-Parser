@@ -1870,12 +1870,25 @@ return True;
 			and self._Sym( $parsed.hash.<sym> )
 			and self._RxAdverbs( $parsed.hash.<rx_adverbs> )
 			and self._Sibble( $parsed.hash.<sibble> );
+		return True if self.assert-hash-keys( $parsed,
+				[< quibble quote_mod >] )
+			and self._Quibble( $parsed.hash.<quibble> )
+			and self._QuoteMod( $parsed.hash.<quote_mod> );
 		return True if self.assert-hash-keys( $parsed, [< nibble >] )
 			and self._Nibble( $parsed.hash.<nibble> );
 		return True if self.assert-hash-keys( $parsed, [< quibble >] )
 			and self._Quibble( $parsed.hash.<quibble> );
 		debug-match( $parsed );
 		return self.record-failure( '_Quote' );
+	}
+
+	method _QuoteMod( Mu $parsed ) {
+		self.trace( '_QuoteMod' );
+#return True;
+		return True if self.assert-hash-keys( $parsed, [< sym >] )
+			and self._Sym( $parsed.hash.<sym> );
+		debug-match( $parsed );
+		return self.record-failure( '_QuoteMod' );
 	}
 
 	method _QuotePair( Mu $parsed ) {

@@ -3,7 +3,7 @@ use v6;
 use Test;
 use Perl6::Parser;
 
-plan 8;
+plan 7;
 
 my $pt = Perl6::Parser.new;
 my $*VALIDATION-FAILURE-FATAL = True;
@@ -31,7 +31,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[0].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{no ws};
 
 			subtest {
@@ -44,7 +45,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[1].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{ws};
 		}, Q{Zero};
 
@@ -61,7 +63,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[0].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{no ws};
 
 			subtest {
@@ -74,7 +77,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[1].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{ws};
 		}, Q{1};
 
@@ -91,7 +95,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[0].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{no ws};
 
 			subtest {
@@ -104,7 +109,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[1].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{ws};
 		}, Q{-1};
 
@@ -121,7 +127,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[0].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{no ws};
 
 			subtest {
@@ -134,7 +141,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[1].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{ws};
 		}, Q{1_1};
 
@@ -151,7 +159,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Infinity },
 						$tree.child.[0].child),
 					Q{found Infinity};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{no ws};
 
 			subtest {
@@ -164,7 +173,40 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Infinity },
 						$tree.child.[1].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
+			}, Q{ws};
+		}, Q{Inf};
+
+		subtest {
+			plan 2;
+
+			subtest {
+				plan 3;
+
+				my $source = Q{NaN};
+				my $parsed = $pt.parse( $source );
+				my $tree = $pt.build-tree( $parsed );
+				ok $pt.validate( $parsed ), Q{valid};
+				ok (grep { $_ ~~ Perl6::NotANumber },
+						$tree.child.[0].child),
+					Q{found NotANumber};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
+			}, Q{no ws};
+
+			subtest {
+				plan 3;
+
+				my $source = Q{ Inf  };
+				my $parsed = $pt.parse( $source );
+				my $tree = $pt.build-tree( $parsed );
+				ok $pt.validate( $parsed ), Q{valid};
+				ok (grep { $_ ~~ Perl6::NotANumber },
+						$tree.child.[1].child),
+					Q{found NotANumber};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{ws};
 		}, Q{Inf};
 	}, Q{decimal};
@@ -185,7 +227,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[0].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{no ws};
 
 			subtest {
@@ -198,7 +241,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[1].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{ws};
 		}, Q{0b0};
 
@@ -215,7 +259,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[0].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{no ws};
 
 			subtest {
@@ -228,7 +273,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[1].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{ws};
 		}, Q{0b1};
 
@@ -245,7 +291,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[0].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{no ws};
 
 			subtest {
@@ -258,7 +305,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[1].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{ws};
 		}, Q{-0b1};
 	}, Q{binary};
@@ -279,7 +327,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[0].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{no ws};
 
 			subtest {
@@ -292,7 +341,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[1].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{ws};
 		}, Q{0o0};
 
@@ -309,7 +359,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[0].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{no ws};
 
 			subtest {
@@ -322,7 +373,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[1].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{ws};
 		}, Q{0o1};
 
@@ -339,7 +391,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[0].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{no ws};
 
 			subtest {
@@ -352,7 +405,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[1].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{ws};
 		}, Q{-0o1};
 	}, Q{octal};
@@ -373,7 +427,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[0].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{no ws};
 
 			subtest {
@@ -386,7 +441,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[1].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{ws};
 		}, Q{0d0};
 
@@ -403,7 +459,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[0].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{no ws};
 
 			subtest {
@@ -416,7 +473,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[1].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{ws};
 		}, Q{0d1};
 
@@ -433,7 +491,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[0].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{no ws};
 
 			subtest {
@@ -446,7 +505,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[1].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{ws};
 		}, Q{-0d1};
 	}, Q{explicit decimal};
@@ -467,7 +527,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[0].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{no ws};
 
 			subtest {
@@ -480,7 +541,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[1].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{ws};
 		}, Q{0};
 
@@ -497,7 +559,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[0].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{no ws};
 
 			subtest {
@@ -510,7 +573,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[1].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{ws};
 		}, Q{1};
 
@@ -527,7 +591,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[0].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{no ws};
 
 			subtest {
@@ -540,7 +605,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[1].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{ws};
 		}, Q{-1};
 	}, Q{implicit decimal};
@@ -561,7 +627,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[0].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{no ws};
 
 			subtest {
@@ -574,7 +641,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[1].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{ws};
 		}, Q{0x0};
 
@@ -591,7 +659,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[0].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{no ws};
 
 			subtest {
@@ -604,7 +673,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[1].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{ws};
 		}, Q{0x1};
 
@@ -621,7 +691,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[0].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{no ws};
 
 			subtest {
@@ -634,7 +705,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[1].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{ws};
 		}, Q{-0x1};
 	}, Q{hexadecimal};
@@ -655,7 +727,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[0].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{no ws};
 
 			subtest {
@@ -668,7 +741,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[1].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{ws};
 		}, Q{:13(0)};
 
@@ -685,7 +759,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[0].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{no ws};
 
 			subtest {
@@ -698,7 +773,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[1].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{ws};
 		}, Q{:13(1)};
 
@@ -715,7 +791,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[0].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{no ws};
 
 			subtest {
@@ -728,7 +805,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[1].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{ws};
 		}, Q{:13(-1)};
 	}, Q{radix};
@@ -749,7 +827,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[0].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{no ws};
 
 			subtest {
@@ -762,7 +841,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[1].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{ws};
 		}, Q{0e0};
 
@@ -779,7 +859,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[0].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{no ws};
 
 			subtest {
@@ -792,7 +873,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[1].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{ws};
 		}, Q{0e1};
 
@@ -809,7 +891,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[0].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{no ws};
 
 			subtest {
@@ -822,7 +905,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[1].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{ws};
 		}, Q{-0e1};
 
@@ -839,7 +923,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[0].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{no ws};
 
 			subtest {
@@ -852,7 +937,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[1].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{ws};
 		}, Q{-0e1};
 	}, Q{scientific};
@@ -873,7 +959,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[0].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{no ws};
 
 			subtest {
@@ -886,7 +973,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[1].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{ws};
 		}, Q{0i};
 
@@ -903,7 +991,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[0].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{no ws};
 
 			subtest {
@@ -916,7 +1005,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[1].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{ws};
 		}, Q{1i};
 
@@ -933,7 +1023,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[0].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{no ws};
 
 			subtest {
@@ -946,7 +1037,8 @@ subtest {
 				ok (grep { $_ ~~ Perl6::Number },
 						$tree.child.[1].child),
 					Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pt.to-string( $tree ), $source,
+					Q{formatted};
 			}, Q{ws};
 		}, Q{-1i};
 	}, Q{imaginary};
@@ -961,259 +1053,12 @@ subtest {
 		subtest {
 			plan 3;
 
-			my $source = Q{'Hello, world!'};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::String },
-					$tree.child.[0].child),
-				Q{found string};
-			is $pt.to-string( $tree ), $source, Q{formatted};
-		}, Q{no ws};
-
-		subtest {
-			plan 3;
-
-			my $source = Q{ 'Hello, world!'  };
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::String },
-					$tree.child.[1].child),
-				Q{found string};
-			is $pt.to-string( $tree ), $source, Q{formatted};
-		}, Q{ws};
-	}, Q{'Hello, world!'};
-
-	subtest {
-		plan 2;
-
-		subtest {
-			plan 3;
-
-			my $source = Q{"Hello, world!"};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::String },
-					$tree.child.[0].child),
-				Q{found string};
-			is $pt.to-string( $tree ), $source, Q{formatted};
-		}, Q{no ws};
-
-		subtest {
-			plan 3;
-
-			my $source = Q{ "Hello, world!"  };
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::String },
-					$tree.child.[1].child),
-				Q{found string};
-			is $pt.to-string( $tree ), $source, Q{formatted};
-		}, Q{ws};
-	}, Q{"Hello, world!"};
-
-	subtest {
-		plan 2;
-
-		subtest {
-			plan 3;
-
-			my $source = Q{Q :q ^Hello, world!^};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::String },
-					$tree.child.[0].child),
-				Q{found string};
-			is $pt.to-string( $tree ), $source, Q{formatted};
-		}, Q{no ws};
-
-		subtest {
-			plan 3;
-
-			my $source = Q{ Q :q ^Hello, world!^  };
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::String },
-					$tree.child.[1].child),
-				Q{found string};
-			is $pt.to-string( $tree ), $source, Q{formatted};
-		}, Q{ws};
-	}, Q{Q :q ^Hello, world!^};
-
-	subtest {
-		plan 2;
-
-		subtest {
-			plan 3;
-
-			my $source = Q{Q ^Hello, world!^};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::String },
-					$tree.child.[0].child),
-				Q{found string};
-			is $pt.to-string( $tree ), $source, Q{formatted};
-		}, Q{no ws};
-
-		subtest {
-			plan 3;
-
-			my $source = Q{ Q ^Hello, world!^  };
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::String },
-					$tree.child.[1].child),
-				Q{found string};
-			is $pt.to-string( $tree ), $source, Q{formatted};
-		}, Q{ws};
-	}, Q{Q ^Hello, world!^};
-
-	subtest {
-		plan 2;
-
-		subtest {
-			plan 3;
-
-			my $source = Q{Q{Hello, world!}};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::String },
-					$tree.child.[0].child),
-				Q{found string};
-			is $pt.to-string( $tree ), $source, Q{formatted};
-		}, Q{no ws};
-
-		subtest {
-			plan 3;
-
-			my $source = Q{ Q{Hello, world!}  };
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::String },
-					$tree.child.[1].child),
-				Q{found string};
-			is $pt.to-string( $tree ), $source, Q{formatted};
-		}, Q{ws};
-	}, Q{Q{Hello, world!}};
-
-	subtest {
-		plan 2;
-
-		subtest {
-			plan 3;
-
-			my $source = Q{q[Hello, world!]};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::String },
-					$tree.child.[0].child),
-				Q{found string};
-			is $pt.to-string( $tree ), $source, Q{formatted};
-		}, Q{no ws};
-
-		subtest {
-			plan 3;
-
-			my $source = Q{ q[Hello, world!]  };
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::String },
-					$tree.child.[1].child),
-				Q{found string};
-			is $pt.to-string( $tree ), $source, Q{formatted};
-		}, Q{ws};
-	}, Q{q[Hello, world!]};
-
-	subtest {
-		plan 2;
-
-		subtest {
-			plan 3;
-
-			my $source = Q{qq[Hello, world!]};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::String },
-					$tree.child.[0].child),
-				Q{found string};
-			is $pt.to-string( $tree ), $source, Q{formatted};
-		}, Q{no ws};
-
-		subtest {
-			plan 3;
-
-			my $source = Q{ qq[Hello, world!]  };
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::String },
-					$tree.child.[1].child),
-				Q{found string};
-			is $pt.to-string( $tree ), $source, Q{formatted};
-		}, Q{ws};
-	}, Q{qq[Hello, world!]};
-
-	subtest {
-		plan 2;
-
-		subtest {
-			plan 3;
-
-			my $source = Q{q:to[_END_]
-Hello, world!
-_END_};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::String },
-					$tree.child.[0].child),
-				Q{found string};
-			is $pt.to-string( $tree ), $source, Q{formatted};
-		}, Q{no ws};
-
-		subtest {
-			plan 3;
-
-			my $source = Q{ q:to[_END_]
-Hello, world!
-_END_};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
-			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::String },
-					$tree.child.[1].child),
-				Q{found string};
-			is $pt.to-string( $tree ), $source, Q{formatted};
-		}, Q{ws};
-	}, Q{q:to[_END_]};
-}, Q{string};
-
-subtest {
-	plan 8;
-
-	subtest {
-		plan 2;
-
-		subtest {
-			plan 3;
-
 			my $source = Q{@*ARGS};
 			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::Variable }, $tree.child.[0].child),
+			ok (grep { $_ ~~ Perl6::Variable },
+					$tree.child.[0].child),
 				Q{found variable};
 			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
@@ -1242,7 +1087,8 @@ subtest {
 			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::Variable }, $tree.child.[0].child),
+			ok (grep { $_ ~~ Perl6::Variable },
+					$tree.child.[0].child),
 				Q{found variable};
 			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
@@ -1271,7 +1117,8 @@ subtest {
 			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::Variable }, $tree.child.[0].child),
+			ok (grep { $_ ~~ Perl6::Variable },
+					$tree.child.[0].child),
 				Q{found variable};
 			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
@@ -1300,7 +1147,8 @@ subtest {
 			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::Variable }, $tree.child.[0].child),
+			ok (grep { $_ ~~ Perl6::Variable },
+					$tree.child.[0].child),
 				Q{found variable};
 			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
@@ -1329,7 +1177,8 @@ subtest {
 			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::Variable }, $tree.child.[0].child),
+			ok (grep { $_ ~~ Perl6::Variable },
+					$tree.child.[0].child),
 				Q{found variable};
 			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
@@ -1358,7 +1207,8 @@ subtest {
 			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::Variable }, $tree.child.[0].child),
+			ok (grep { $_ ~~ Perl6::Variable },
+					$tree.child.[0].child),
 				Q{found variable};
 			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
@@ -1413,7 +1263,8 @@ subtest {
 			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::Variable }, $tree.child.[0].child),
+			ok (grep { $_ ~~ Perl6::Variable },
+					$tree.child.[0].child),
 				Q{found variable};
 			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{no ws};
