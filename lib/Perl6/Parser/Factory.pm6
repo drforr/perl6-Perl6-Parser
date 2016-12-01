@@ -4825,8 +4825,6 @@ return True;
 			}
 			when self.assert-hash( $_,
 					[< blockoid multisig >], [< trait >] ) {
-key-bounds $_.hash.<multisig>;
-key-bounds $_;
 				my Perl6::Element @_child;
 				my $x = $_.Str.substr(
 					0, $_.hash.<multisig>.from - $_.from
@@ -5139,206 +5137,242 @@ key-bounds $_;
 
 	method __Parameter( Mu $p ) {
 		my Perl6::Element @child;
-		if self.assert-hash( $p,
-			[< param_term type_constraint quant >],
-			[< post_constraint default_value modifier trait >] ) {
-			@child.append(
-				self._type_constraint(
-					$p.hash.<type_constraint>
-				)
-			);
-			@child.append( self._quant( $p.hash.<quant> ) );
-			@child.append(
-				self._param_term( $p.hash.<param_term> )
-			);
-		}
-		elsif self.assert-hash( $p,
-			[< param_term quant >],
-			[< default_value type_constraint modifier trait post_constraint >] ) {
-			@child.append( self._quant( $p.hash.<quant> ) );
-			@child.append(
-				self._param_term( $p.hash.<param_term> )
-			);
-		}
-		elsif self.assert-hash( $p,
-			[< defterm quant >],
-			[< type_constraint post_constraint
-			   default_value modifier trait >] ) {
-			@child.append( self._defterm( $_.hash.<defterm> ) );
-			@child.append( self._quant( $_.hash.<quant> ) );
-		}
-		elsif self.assert-hash( $p,
-			[< type_constraint param_var
-			   post_constraint quant >],
-			[< default_value modifier trait >] ) {
-			@child.append(
-				self._type_constraint(
-					$p.hash.<type_constraint>
-				)
-			);
-			@child.append(
-				self._param_var( $p.hash.<param_var> )
-			);
-			@child.append(
-				self._post_constraint(
-					$p.hash.<post_constraint>
-				)
-			);
-		}
-		elsif self.assert-hash( $p,
-			[< type_constraint param_var quant >],
-			[< default_value modifier trait
-			   post_constraint >] ) {
-			@child.append(
-				self._type_constraint(
-					$p.hash.<type_constraint>
-				)
-			);
-			@child.append( self._param_var( $p.hash.<param_var> ) );
-			if $p.hash.<default_value> {
-				if $p.Str ~~ m{ ( \s* ) ('=') ( \s* ) } {
-					@child.append(
-						Perl6::Operator::Infix.from-int(
-							$p.from + $1.from,
-							$1.Str
-						)
-					);
-					@child.append(
-						self._EXPR( $p.hash.<default_value>.list.[0].hash.<EXPR> )
-					);
-				}
-			}
-		}
-		elsif self.assert-hash( $p,
-			[< param_var quant default_value >],
-			[< modifier trait type_constraint post_constraint >] ) {
-			@child.append( self._param_var( $p.hash.<param_var> ) );
-			# XXX assuming the location for '='
-			@child.append(
-				Perl6::Operator::Infix.find-match( $p, EQUAL )
-			);
-			@child.append(
-				self._default_value( $p.hash.<default_value> )
-			);
-		}
-		elsif self.assert-hash( $p,
-			[< param_var quant post_constraint >],
-			[< modifier trait type_constraint default_value >] ) {
-			@child.append( self._param_var( $p.hash.<param_var> ) );
-			if $p.hash.<quant>.Str {
-				@child.append( self._quant( $p.hash.<quant> ) );
-			}
-			@child.append(
-				self._post_constraint(
-					$p.hash.<post_constraint>
-				)
-			);
-		}
-		elsif self.assert-hash( $p,
-			[< param_var quant >],
-			[< default_value modifier trait
-			   type_constraint post_constraint >] ) {
-			if $p.hash.<quant>.Str {
-				@child.append( self._quant( $p.hash.<quant> ) );
-			}
-			@child.append( self._param_var( $p.hash.<param_var> ) );
-			if $p.hash.<trait> {
-				@child.append( self._trait( $p.hash.<trait> ) );
-			}
-			if $p.hash.<post_constraint> {
+		given $p {
+			when self.assert-hash( $_,
+					[< param_term type_constraint quant post_constraint >],
+					[< default_value modifier trait >] ) {
+				@child.append(
+					self._type_constraint(
+						$_.hash.<type_constraint>
+					)
+				);
+				@child.append( self._quant( $_.hash.<quant> ) );
+				@child.append(
+					self._param_term( $_.hash.<param_term> )
+				);
 				@child.append(
 					self._post_constraint(
-						$p.hash.<post_constraint>
+						$_.hash.<post_constraint>
 					)
 				);
 			}
-		}
-		elsif self.assert-hash( $p,
-			[< named_param quant >],
-			[< default_value type_constraint modifier
-			   trait post_constraint >] ) {
-			# Synthesize the 'from' and 'to' markers for ':'
-			$p.Str ~~ m{ (':') };
-			@child.append(
-				Perl6::Operator::Prefix.from-int(
-					$p.from + $0.from,
-					$0.Str
-				)
-			);
-			@child.append(
-				self._named_param(
-					$p.hash.<named_param>
-				)
-			);
-		}
-		elsif self.assert-hash( $p,
-			[< type_constraint >],
-			[< default_value modifier trait
-			   post_constraint >] ) {
-			@child.append(
-				self._type_constraint(
-					$p.hash.<type_constraint>
-				)
-			);
-		}
-		else {
-			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if
-				$*FACTORY-FAILURE-FATAL
+			when self.assert-hash( $_,
+					[< param_term type_constraint quant >],
+					[< post_constraint default_value modifier trait >] ) {
+				@child.append(
+					self._type_constraint(
+						$_.hash.<type_constraint>
+					)
+				);
+				@child.append( self._quant( $_.hash.<quant> ) );
+				@child.append(
+					self._param_term( $_.hash.<param_term> )
+				);
+			}
+			when self.assert-hash( $_,
+					[< param_term quant >],
+					[< default_value type_constraint modifier trait post_constraint >] ) {
+				@child.append( self._quant( $_.hash.<quant> ) );
+				@child.append(
+					self._param_term( $_.hash.<param_term> )
+				);
+			}
+			when self.assert-hash( $_,
+					[< defterm quant >],
+					[< type_constraint post_constraint
+					   default_value modifier trait >] ) {
+				@child.append( self._defterm( $_.hash.<defterm> ) );
+				@child.append( self._quant( $_.hash.<quant> ) );
+			}
+			when self.assert-hash( $_,
+					[< type_constraint param_var
+					   post_constraint quant >],
+					[< default_value modifier trait >] ) {
+				@child.append(
+					self._type_constraint(
+						$_.hash.<type_constraint>
+					)
+				);
+				@child.append(
+					self._param_var( $_.hash.<param_var> )
+				);
+				@child.append(
+					self._post_constraint(
+						$_.hash.<post_constraint>
+					)
+				);
+			}
+			when self.assert-hash( $_,
+					[< type_constraint param_var quant >],
+					[< default_value modifier trait
+					   post_constraint >] ) {
+				@child.append(
+					self._type_constraint(
+						$_.hash.<type_constraint>
+					)
+				);
+				@child.append(
+					self._param_var( $_.hash.<param_var> )
+				);
+				if $p.hash.<default_value> {
+					if $_.Str ~~ m{ ( \s* ) ('=') ( \s* ) } {
+						@child.append(
+							Perl6::Operator::Infix.from-int(
+								$p.from + $1.from,
+								$1.Str
+							)
+						);
+						@child.append(
+							self._EXPR( $p.hash.<default_value>.list.[0].hash.<EXPR> )
+						);
+					}
+				}
+			}
+			when self.assert-hash( $_,
+					[< param_var quant default_value >],
+					[< modifier trait type_constraint post_constraint >] ) {
+				@child.append(
+					self._param_var( $_.hash.<param_var> )
+				);
+				# XXX assuming the location for '='
+				@child.append(
+					Perl6::Operator::Infix.find-match( $_, EQUAL )
+				);
+				@child.append(
+					self._default_value( $_.hash.<default_value> )
+				);
+			}
+			when self.assert-hash( $_,
+					[< param_var quant post_constraint >],
+					[< modifier trait type_constraint default_value >] ) {
+				@child.append(
+					self._param_var( $_.hash.<param_var> )
+				);
+				if $_.hash.<quant>.Str {
+					@child.append(
+						self._quant( $_.hash.<quant> )
+					);
+				}
+				@child.append(
+					self._post_constraint(
+						$_.hash.<post_constraint>
+					)
+				);
+			}
+			when self.assert-hash( $_,
+					[< param_var quant >],
+					[< default_value modifier trait
+					   type_constraint post_constraint >] ) {
+				if $_.hash.<quant>.Str {
+					@child.append(
+						self._quant( $_.hash.<quant> )
+					);
+				}
+				@child.append(
+					self._param_var( $_.hash.<param_var> )
+				);
+				if $p.hash.<trait> {
+					@child.append(
+						self._trait( $_.hash.<trait> )
+					);
+				}
+				if $_.hash.<post_constraint> {
+					@child.append(
+						self._post_constraint(
+							$_.hash.<post_constraint>
+						)
+					);
+				}
+			}
+			when self.assert-hash( $_,
+					[< named_param quant >],
+					[< default_value type_constraint modifier
+					   trait post_constraint >] ) {
+				# Synthesize the 'from' and 'to' markers for ':'
+				$_.Str ~~ m{ (':') };
+				@child.append(
+					Perl6::Operator::Prefix.from-int(
+						$p.from + $0.from,
+						$0.Str
+					)
+				);
+				@child.append(
+					self._named_param(
+						$p.hash.<named_param>
+					)
+				);
+			}
+			when self.assert-hash( $_,
+					[< type_constraint >],
+					[< default_value modifier trait
+					   post_constraint >] ) {
+				@child.append(
+					self._type_constraint(
+						$_.hash.<type_constraint>
+					)
+				);
+			}
+			default {
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
+			}
 		}
 		@child;
 	}
 
 	method _signature( Mu $p ) {
 		my Perl6::Element @child;
-		if self.assert-hash( $p,
-				[< parameter typename >],
-				[< param_sep >] ) {
-			@child.append( self._typename( $p.hash.<typename> ) );
-			@child.append( self._parameter( $p.hash.<parameter> ) );
-		}
-		elsif self.assert-hash( $p,
-				[< parameter >],
-				[< param_sep >] ) {
-			my Mu $parameter = $p.hash.<parameter>;
-			my Int $offset = $p.from;
-			for $parameter.list.kv -> $index, $_ {
-				if $index > 0 {
-					my Int $inset = 0;
-					if $parameter.list.[$index-1].Str ~~ m{ (\s+) $} {
-						$inset = $0.chars
-					}
-					my Int $start = $parameter.list.[$index-1].to - $inset;
-					my Int $end = $parameter.list.[$index].from;
-					my Str $str = substr(
-						$p.Str, $start - $offset, $end - $start
-					);
-					my Int $_start = $start;
-					my ( $lhs, $rhs ) = split( COMMA, $str );
-					if $lhs and $lhs ne '' {
-						$_start += $lhs.chars;
+		given $p {
+			when self.assert-hash( $_,
+					[< parameter typename >],
+					[< param_sep >] ) {
+				@child.append( self._typename( $_.hash.<typename> ) );
+				@child.append( self._parameter( $_.hash.<parameter> ) );
+			}
+			when self.assert-hash( $_,
+					[< parameter >],
+					[< param_sep >] ) {
+				my Mu $parameter = $_.hash.<parameter>;
+				my Int $offset = $_.from;
+				for $parameter.list.kv -> $index, $q {
+					if $index > 0 {
+						my Int $inset = 0;
+						if $parameter.list.[$index-1].Str ~~ m{ ( \s+ ) $} {
+							$inset = $0.chars
+						}
+						my Int $start = $parameter.list.[$index-1].to - $inset;
+						my Int $end = $parameter.list.[$index].from;
+						my Str $str = substr(
+							$p.Str, $start - $offset, $end - $start
+						);
+						my Int $_start = $start;
+						my ( $lhs, $rhs ) = split( COMMA, $str );
+						if $lhs and $lhs ne '' {
+							$_start += $lhs.chars;
+						}
+						@child.append(
+							Perl6::Operator::Infix.from-int( $_start, COMMA )
+						);
 					}
 					@child.append(
-						Perl6::Operator::Infix.from-int( $_start, COMMA )
+						self.__Parameter( $q )
 					);
 				}
-				@child.append(
-					self.__Parameter( $_ )
-				);
 			}
-		}
-		elsif self.assert-hash( $p,
-				[< param_sep >],
-				[< parameter >] ) {
-			@child.append( self._parameter( $p.hash.<parameter> ) );
-		}
-		elsif self.assert-hash( $p, [ ],
-				[< param_sep parameter >] ) {
-		}
-		else {
-			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if
-				$*FACTORY-FAILURE-FATAL
+			when self.assert-hash( $_,
+					[< param_sep >],
+					[< parameter >] ) {
+				@child.append( self._parameter( $_.hash.<parameter> ) );
+			}
+			when self.assert-hash( $_, [ ],
+					[< param_sep parameter >] ) {
+			}
+			default {
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
+			}
 		}
 		@child;
 	}

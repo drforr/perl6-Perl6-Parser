@@ -247,6 +247,19 @@ _END_
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
 }, Q{rx with bracketed array};
+
+subtest {
+	plan 2;
+
+	my $source = Q:to[_END_];
+sub sma(Int \P where * > 0) returns Sub { }
+_END_
+	my $p = $pt.parse( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.to-string( $tree ), $source, Q{formatted};
+}, Q{subroutine with 'where' clause};
+
 done-testing;
 
 # vim: ft=perl6

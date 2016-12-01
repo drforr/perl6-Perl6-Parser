@@ -1562,7 +1562,6 @@ _END_
 }, Q{Averages/root mean square};
 
 subtest {
-#`[
 	my $source = Q:to[_END_];
 sub sma(Int \P where * > 0) returns Sub {
     sub ($x) {
@@ -1576,7 +1575,6 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 	done-testing;
 }, Q{Averages/simple moving average};
