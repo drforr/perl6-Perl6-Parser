@@ -214,6 +214,20 @@ _END_
 	is $pt.to-string( $tree ), $source, Q{formatted};
 }, Q{rx with bracketed array};
 
+subtest {
+	plan 2;
+
+	my $source = Q:to[_END_];
+for 99...1 -> $bottles { }
+
+#| Prints a verse about a certain number of beers, possibly on a wall.
+_END_
+	my $p = $pt.parse( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.to-string( $tree ), $source, Q{formatted};
+}, Q{rx with bracketed array};
+
 done-testing;
 
 # vim: ft=perl6

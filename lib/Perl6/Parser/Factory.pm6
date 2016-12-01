@@ -831,7 +831,7 @@ class Perl6::Parser::Factory {
 				Perl6::Comment.from-int( $from, $0.Str )
 			);
 		}
-		elsif $str ~~ m{ ^ ( \s+ ) ( '#' .+ ) $$ ( \s+ ) $ } {
+		elsif $str ~~ m{ ^ ( \s+ ) ( '#' .+ ) $$ ( \s* ) $ } {
 			@child.append(
 				Perl6::WS.from-int( $from, $0.Str )
 			);
@@ -841,12 +841,14 @@ class Perl6::Parser::Factory {
 					$1.Str
 				)
 			);
-			@child.append(
-				Perl6::WS.from-int(
-					$from + $0.Str.chars + $1.Str.chars,
-					$2.Str
-				)
-			);
+			if $2.Str {
+				@child.append(
+					Perl6::WS.from-int(
+						$from + $0.Str.chars + $1.Str.chars,
+						$2.Str
+					)
+				);
+			}
 		}
 		elsif $str ~~ m{ \S } {
 		}
