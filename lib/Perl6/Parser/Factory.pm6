@@ -2880,6 +2880,7 @@ return True;
 				@child.append(
 					self._longname( $_.hash.<longname> )
 				);
+				# XXX has an exact twin at  blockoid multisig in EXPR
 				my $x = $_.orig.substr(
 					0, $_.hash.<multisig>.from
 				);
@@ -4824,20 +4825,28 @@ return True;
 			}
 			when self.assert-hash( $_,
 					[< blockoid multisig >], [< trait >] ) {
+key-bounds $_.hash.<multisig>;
+key-bounds $_;
 				my Perl6::Element @_child;
+				my $x = $_.Str.substr(
+					0, $_.hash.<multisig>.from - $_.from
+				);
+				$x ~~ m{ ( '(' \s* ) $ };
+				my $from = $0.Str.chars;
+				my $y = $_.orig.substr( $_.hash.<multisig>.to );
+				$y ~~ m{ ^ ( \s* ')' ) };
+				my $to = $0.Str.chars;
 				@_child.append(
 					self._multisig( $_.hash.<multisig> )
 				);
 				@child.append(
-					Perl6::Operator::Circumfix.new(
-						:factory-line-number(
-							callframe(1).line
+					Perl6::Operator::Circumfix.from-int(
+						$_.hash.<multisig>.from - $from,
+						$_.orig.substr(
+							$_.hash.<multisig>.from - $from,
+							$_.hash.<multisig>.chars + $from + $to
 						),
-						:from(
-							$_.hash.<blockoid>.from
-						),
-						:to( $_.hash.<blockoid>.to ),
-						:child( @_child )
+						@_child
 					)
 				);
 				@child.append( self._blockoid( $_.hash.<blockoid> ) );

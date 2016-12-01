@@ -228,6 +228,25 @@ _END_
 	is $pt.to-string( $tree ), $source, Q{formatted};
 }, Q{rx with bracketed array};
 
+sub sma(Int \P where * > 0) returns Sub {
+    sub ($x) {
+    }
+}
+
+subtest {
+	plan 2;
+
+	my $source = Q:to[_END_];
+sub sma(Int \P) returns Sub {
+    sub ($x) {
+    }
+}
+_END_
+	my $p = $pt.parse( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.to-string( $tree ), $source, Q{formatted};
+}, Q{rx with bracketed array};
 done-testing;
 
 # vim: ft=perl6
