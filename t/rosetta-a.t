@@ -203,7 +203,6 @@ _END_
 
 subtest {
 	subtest {
-#`[
 		my $source = Q:to[_END_];
 class Bar { }             # an empty class
  
@@ -232,7 +231,6 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 		done-testing;
 	}, Q{version 1};
@@ -427,7 +425,6 @@ _END_
 }, Q{Align columns};
 
 subtest {
-#`[
 	my $source = Q:to[_END_];
 sub propdivsum (\x) {
     my @l = x > 1, gather for 2 .. x.sqrt.floor -> \d {
@@ -469,7 +466,6 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 	done-testing;
 }, Q{Aliquot sequence};

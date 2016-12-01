@@ -2191,6 +2191,11 @@ class Perl6::Parser::Factory {
 			@child.append( self._dotty( $p.hash.<dotty> ) );
 		}
 		elsif self.assert-hash( $p,
+				[< fake_infix OPER colonpair >] ) {
+			@child.append( self._EXPR( $p.list.[0] ) );
+			@child.append( self._colonpair( $p.hash.<colonpair> ) );
+		}
+		elsif self.assert-hash( $p,
 				[< dotty OPER >],
 				[< postfix_prefix_meta_operator >] ) {
 			# XXX Look into this at some point.
@@ -2494,6 +2499,7 @@ class Perl6::Parser::Factory {
 			@child.append( self._pblock( $p.hash.<pblock> ) );
 		}
 		elsif $p.Str {
+say $p.dump;
 			@child.append( Perl6::Bareword.from-match( $p ) );
 		}
 		else {
@@ -4958,14 +4964,18 @@ return True;
 	#
 	method _scope_declarator( Mu $p ) {
 		my Perl6::Element @child;
-		if self.assert-hash( $p, [< sym scoped >] ) {
-			@child.append( self._sym( $p.hash.<sym> ) );
-			@child.append( self._scoped( $p.hash.<scoped> ) );
-		}
-		else {
-			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if
-				$*FACTORY-FAILURE-FATAL
+		given $p {
+			when self.assert-hash( $_, [< sym scoped >] ) {
+				@child.append( self._sym( $_.hash.<sym> ) );
+				@child.append(
+					self._scoped( $_.hash.<scoped> )
+				);
+			}
+			default {
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
+			}
 		}
 		@child;
 	}
@@ -5139,7 +5149,8 @@ return True;
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_,
-					[< param_term type_constraint quant post_constraint >],
+					[< param_term type_constraint quant
+					   post_constraint >],
 					[< default_value modifier trait >] ) {
 				@child.append(
 					self._type_constraint(
@@ -5158,7 +5169,8 @@ return True;
 			}
 			when self.assert-hash( $_,
 					[< param_term type_constraint quant >],
-					[< post_constraint default_value modifier trait >] ) {
+					[< post_constraint default_value
+					   modifier trait >] ) {
 				@child.append(
 					self._type_constraint(
 						$_.hash.<type_constraint>
@@ -5171,7 +5183,8 @@ return True;
 			}
 			when self.assert-hash( $_,
 					[< param_term quant >],
-					[< default_value type_constraint modifier trait post_constraint >] ) {
+					[< default_value type_constraint
+					   modifier trait post_constraint >] ) {
 				@child.append( self._quant( $_.hash.<quant> ) );
 				@child.append(
 					self._param_term( $_.hash.<param_term> )
@@ -5181,7 +5194,9 @@ return True;
 					[< defterm quant >],
 					[< type_constraint post_constraint
 					   default_value modifier trait >] ) {
-				@child.append( self._defterm( $_.hash.<defterm> ) );
+				@child.append(
+					self._defterm( $_.hash.<defterm> )
+				);
 				@child.append( self._quant( $_.hash.<quant> ) );
 			}
 			when self.assert-hash( $_,
