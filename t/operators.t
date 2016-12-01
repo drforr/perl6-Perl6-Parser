@@ -41,7 +41,7 @@ subtest {
 			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::Operator },
+			ok (grep { $_ ~~ Perl6::String },
 					$tree.child.[0].child),
 				Q{found operator};
 			is $pt.to-string( $tree ), $source, Q{formatted};
@@ -56,7 +56,7 @@ _END_
 			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
-			ok (grep { $_ ~~ Perl6::Operator },
+			ok (grep { $_ ~~ Perl6::String },
 					$tree.child.[0].child),
 				Q{found operator};
 			is $pt.to-string( $tree ), $source, Q{formatted};

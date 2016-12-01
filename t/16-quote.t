@@ -3,7 +3,7 @@ use v6;
 use Test;
 use Perl6::Parser;
 
-plan 18;
+plan 15;
 
 my $pt = Perl6::Parser.new;
 my $*VALIDATION-FAILURE-FATAL = True;
@@ -36,40 +36,902 @@ my $*DEBUG = True;
 # Also, only worry about whitespace *inside* adverb selection.
 #
 
-subtest {
-
-	done-testing;
-}, Q{Qqww<>};
+# Qqww is illegal
 
 subtest {
+	# qqww:q is illegal
+#`(
+	subtest {
+		subtest {
+			my $source = Q{qqww :to <END>
+pi
+END};
+			my $parsed = $pt.parse( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			is $pt.to-string( $tree ), $source,
+				Q{formatted};
+			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting::QuoteProtection },
+					$tree.child.[0].child),
+				Q{found string};
+
+			done-testing;
+		}, Q{all intervening ws};
+
+		subtest {
+			my $source = Q{qqww :to<END>
+pi
+END};
+			my $parsed = $pt.parse( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			is $pt.to-string( $tree ), $source,
+				Q{formatted};
+			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting::QuoteProtection },
+					$tree.child.[0].child),
+				Q{found string};
+
+			done-testing;
+		}, Q{leading intervening ws};
+
+		subtest {
+			my $source = Q{qqww:to <END>
+pi
+END};
+			my $parsed = $pt.parse( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			is $pt.to-string( $tree ), $source,
+				Q{formatted};
+			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting::QuoteProtection },
+					$tree.child.[0].child),
+				Q{found string};
+
+			done-testing;
+		}, Q{trailing intervening ws};
+
+		subtest {
+			my $source = Q{qqww:to<END>
+pi
+END};
+			my $parsed = $pt.parse( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			is $pt.to-string( $tree ), $source,
+				Q{formatted};
+			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting::QuoteProtection },
+					$tree.child.[0].child),
+				Q{found string};
+
+			done-testing;
+		}, Q{no intervening ws};
+
+		done-testing;
+	}, Q{Qx:to<pi>};
+)
+
+	subtest {
+		subtest {
+			my $source = Q{qqww :w <pi>};
+			my $parsed = $pt.parse( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			is $pt.to-string( $tree ), $source,
+				Q{formatted};
+			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting::QuoteProtection },
+					$tree.child.[0].child),
+				Q{found string};
+
+			done-testing;
+		}, Q{all intervening ws};
+
+		subtest {
+			my $source = Q{qqww :w<pi>};
+			my $parsed = $pt.parse( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			is $pt.to-string( $tree ), $source,
+				Q{formatted};
+			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting::QuoteProtection },
+					$tree.child.[0].child),
+				Q{found string};
+
+			done-testing;
+		}, Q{leading intervening ws};
+
+		subtest {
+			my $source = Q{qqww:w <pi>};
+			my $parsed = $pt.parse( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			is $pt.to-string( $tree ), $source,
+				Q{formatted};
+			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting::QuoteProtection },
+					$tree.child.[0].child),
+				Q{found string};
+
+			done-testing;
+		}, Q{trailing intervening ws};
+
+		subtest {
+			my $source = Q{qqww:w<pi>};
+			my $parsed = $pt.parse( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			is $pt.to-string( $tree ), $source,
+				Q{formatted};
+			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting::QuoteProtection },
+					$tree.child.[0].child),
+				Q{found string};
+
+			done-testing;
+		}, Q{no intervening ws};
+
+		done-testing;
+	}, Q{qqww:w<pi>};
+
+	subtest {
+		subtest {
+			my $source = Q{qqww :x <pi>};
+			my $parsed = $pt.parse( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			is $pt.to-string( $tree ), $source,
+				Q{formatted};
+			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting::QuoteProtection },
+					$tree.child.[0].child),
+				Q{found string};
+
+			done-testing;
+		}, Q{all intervening ws};
+
+		subtest {
+			my $source = Q{qqww :x<pi>};
+			my $parsed = $pt.parse( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			is $pt.to-string( $tree ), $source,
+				Q{formatted};
+			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting::QuoteProtection },
+					$tree.child.[0].child),
+				Q{found string};
+
+			done-testing;
+		}, Q{leading intervening ws};
+
+		subtest {
+			my $source = Q{qqww:x <pi>};
+			my $parsed = $pt.parse( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			is $pt.to-string( $tree ), $source,
+				Q{formatted};
+			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting::QuoteProtection },
+					$tree.child.[0].child),
+				Q{found string};
+
+			done-testing;
+		}, Q{trailing intervening ws};
+
+		subtest {
+			my $source = Q{qqww:x<pi>};
+			my $parsed = $pt.parse( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			is $pt.to-string( $tree ), $source,
+				Q{formatted};
+			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting::QuoteProtection },
+					$tree.child.[0].child),
+				Q{found string};
+
+			done-testing;
+		}, Q{no intervening ws};
+
+		done-testing;
+	}, Q{qqww:x<pi>};
+
+	subtest {
+		my $source = Q{qqww <pi>};
+		my $parsed = $pt.parse( $source );
+		my $tree = $pt.build-tree( $parsed );
+		ok $pt.validate( $parsed ), Q{valid};
+		is $pt.to-string( $tree ), $source,
+			Q{formatted};
+		ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting::QuoteProtection },
+				$tree.child.[0].child),
+			Q{found string};
+
+		done-testing;
+	}, Q{ws, no adverbs};
+
+	subtest {
+		my $source = Q{qqww<pi>};
+		my $parsed = $pt.parse( $source );
+		my $tree = $pt.build-tree( $parsed );
+		ok $pt.validate( $parsed ), Q{valid};
+		is $pt.to-string( $tree ), $source,
+			Q{formatted};
+		ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting::QuoteProtection },
+				$tree.child.[0].child),
+			Q{found string};
+
+		done-testing;
+	}, Q{no ws, no adverbs};
 
 	done-testing;
 }, Q{qqww<>};
 
-subtest {
+# Qqw is illegal
 
-	done-testing;
-}, Q{Qqw<>};
-
-subtest {
-
-	done-testing;
-}, Q{Qqx<>};
+# Qqx is illegal
 
 subtest {
+	# qqw:q is illegal
+#`(
+	subtest {
+		subtest {
+			my $source = Q{qqw :to <END>
+pi
+END};
+			my $parsed = $pt.parse( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			is $pt.to-string( $tree ), $source,
+				Q{formatted};
+			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting },
+					$tree.child.[0].child),
+				Q{found string};
+
+			done-testing;
+		}, Q{all intervening ws};
+
+		subtest {
+			my $source = Q{qqw :to<END>
+pi
+END};
+			my $parsed = $pt.parse( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			is $pt.to-string( $tree ), $source,
+				Q{formatted};
+			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting },
+					$tree.child.[0].child),
+				Q{found string};
+
+			done-testing;
+		}, Q{leading intervening ws};
+
+		subtest {
+			my $source = Q{qqw:to <END>
+pi
+END};
+			my $parsed = $pt.parse( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			is $pt.to-string( $tree ), $source,
+				Q{formatted};
+			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting },
+					$tree.child.[0].child),
+				Q{found string};
+
+			done-testing;
+		}, Q{trailing intervening ws};
+
+		subtest {
+			my $source = Q{qqw:to<END>
+pi
+END};
+			my $parsed = $pt.parse( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			is $pt.to-string( $tree ), $source,
+				Q{formatted};
+			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting },
+					$tree.child.[0].child),
+				Q{found string};
+
+			done-testing;
+		}, Q{no intervening ws};
+
+		done-testing;
+	}, Q{adverb :to};
+)
+	subtest {
+		subtest {
+			my $source = Q{qqw :w <pi>};
+			my $parsed = $pt.parse( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			is $pt.to-string( $tree ), $source,
+				Q{formatted};
+			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting },
+					$tree.child.[0].child),
+				Q{found string};
+
+			done-testing;
+		}, Q{all intervening ws};
+
+		subtest {
+			my $source = Q{qqw :w<pi>};
+			my $parsed = $pt.parse( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			is $pt.to-string( $tree ), $source,
+				Q{formatted};
+			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting },
+					$tree.child.[0].child),
+				Q{found string};
+
+			done-testing;
+		}, Q{leading intervening ws};
+
+		subtest {
+			my $source = Q{qqw:w <pi>};
+			my $parsed = $pt.parse( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			is $pt.to-string( $tree ), $source,
+				Q{formatted};
+			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting },
+					$tree.child.[0].child),
+				Q{found string};
+
+			done-testing;
+		}, Q{trailing intervening ws};
+
+		subtest {
+			my $source = Q{qqw:w<pi>};
+			my $parsed = $pt.parse( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			is $pt.to-string( $tree ), $source,
+				Q{formatted};
+			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting },
+					$tree.child.[0].child),
+				Q{found string};
+
+			done-testing;
+		}, Q{no intervening ws};
+
+		done-testing;
+	}, Q{adverb :w};
+
+	subtest {
+		subtest {
+			my $source = Q{qqw :x <pi>};
+			my $parsed = $pt.parse( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			is $pt.to-string( $tree ), $source,
+				Q{formatted};
+			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting },
+					$tree.child.[0].child),
+				Q{found string};
+
+			done-testing;
+		}, Q{all intervening ws};
+
+		subtest {
+			my $source = Q{qqw :x<pi>};
+			my $parsed = $pt.parse( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			is $pt.to-string( $tree ), $source,
+				Q{formatted};
+			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting },
+					$tree.child.[0].child),
+				Q{found string};
+
+			done-testing;
+		}, Q{leading intervening ws};
+
+		subtest {
+			my $source = Q{qqw:x <pi>};
+			my $parsed = $pt.parse( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			is $pt.to-string( $tree ), $source,
+				Q{formatted};
+			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting },
+					$tree.child.[0].child),
+				Q{found string};
+
+			done-testing;
+		}, Q{trailing intervening ws};
+
+		subtest {
+			my $source = Q{qqw:x<pi>};
+			my $parsed = $pt.parse( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			is $pt.to-string( $tree ), $source,
+				Q{formatted};
+			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting },
+					$tree.child.[0].child),
+				Q{found string};
+
+			done-testing;
+		}, Q{no intervening ws};
+
+		done-testing;
+	}, Q{adverb :x};
+
+	subtest {
+		my $source = Q{qqw <pi>};
+		my $parsed = $pt.parse( $source );
+		my $tree = $pt.build-tree( $parsed );
+		ok $pt.validate( $parsed ), Q{valid};
+		is $pt.to-string( $tree ), $source,
+			Q{formatted};
+		ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting },
+				$tree.child.[0].child),
+			Q{found string};
+
+		done-testing;
+	}, Q{ws, no adverbs};
+
+	subtest {
+		my $source = Q{qqw<pi>};
+		my $parsed = $pt.parse( $source );
+		my $tree = $pt.build-tree( $parsed );
+		ok $pt.validate( $parsed ), Q{valid};
+		is $pt.to-string( $tree ), $source,
+			Q{formatted};
+		ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting },
+				$tree.child.[0].child),
+			Q{found string};
+
+		done-testing;
+	}, Q{no ws, no adverbs};
 
 	done-testing;
 }, Q{qqw<>};
 
 subtest {
+	# qqx:q is illegal
+#`(
+	subtest {
+		subtest {
+			my $source = Q{qqx :to <END>
+pi
+END};
+			my $parsed = $pt.parse( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			is $pt.to-string( $tree ), $source,
+				Q{formatted};
+			ok (grep { $_ ~~ Perl6::String::Interpolation::Shell },
+					$tree.child.[0].child),
+				Q{found string};
+
+			done-testing;
+		}, Q{all intervening ws};
+
+		subtest {
+			my $source = Q{qqx :to<END>
+pi
+END};
+			my $parsed = $pt.parse( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			is $pt.to-string( $tree ), $source,
+				Q{formatted};
+			ok (grep { $_ ~~ Perl6::String::Interpolation::Shell },
+					$tree.child.[0].child),
+				Q{found string};
+
+			done-testing;
+		}, Q{leading intervening ws};
+
+		subtest {
+			my $source = Q{qqx:to <END>
+pi
+END};
+			my $parsed = $pt.parse( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			is $pt.to-string( $tree ), $source,
+				Q{formatted};
+			ok (grep { $_ ~~ Perl6::String::Interpolation::Shell },
+					$tree.child.[0].child),
+				Q{found string};
+
+			done-testing;
+		}, Q{trailing intervening ws};
+
+		subtest {
+			my $source = Q{qqx:to<END>
+pi
+END};
+			my $parsed = $pt.parse( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			is $pt.to-string( $tree ), $source,
+				Q{formatted};
+			ok (grep { $_ ~~ Perl6::String::Interpolation::Shell },
+					$tree.child.[0].child),
+				Q{found string};
+
+			done-testing;
+		}, Q{no intervening ws};
+
+		done-testing;
+	}, Q{adverb :to};
+)
+	subtest {
+		subtest {
+			my $source = Q{qqx :w <pi>};
+			my $parsed = $pt.parse( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			is $pt.to-string( $tree ), $source,
+				Q{formatted};
+			ok (grep { $_ ~~ Perl6::String::Interpolation::Shell },
+					$tree.child.[0].child),
+				Q{found string};
+
+			done-testing;
+		}, Q{all intervening ws};
+
+		subtest {
+			my $source = Q{qqx :w<pi>};
+			my $parsed = $pt.parse( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			is $pt.to-string( $tree ), $source,
+				Q{formatted};
+			ok (grep { $_ ~~ Perl6::String::Interpolation::Shell },
+					$tree.child.[0].child),
+				Q{found string};
+
+			done-testing;
+		}, Q{leading intervening ws};
+
+		subtest {
+			my $source = Q{qqx:w <pi>};
+			my $parsed = $pt.parse( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			is $pt.to-string( $tree ), $source,
+				Q{formatted};
+			ok (grep { $_ ~~ Perl6::String::Interpolation::Shell },
+					$tree.child.[0].child),
+				Q{found string};
+
+			done-testing;
+		}, Q{trailing intervening ws};
+
+		subtest {
+			my $source = Q{qqx:w<pi>};
+			my $parsed = $pt.parse( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			is $pt.to-string( $tree ), $source,
+				Q{formatted};
+			ok (grep { $_ ~~ Perl6::String::Interpolation::Shell },
+					$tree.child.[0].child),
+				Q{found string};
+
+			done-testing;
+		}, Q{no intervening ws};
+
+		done-testing;
+	}, Q{adverb :w};
+
+	subtest {
+		subtest {
+			my $source = Q{qqx :x <pi>};
+			my $parsed = $pt.parse( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			is $pt.to-string( $tree ), $source,
+				Q{formatted};
+			ok (grep { $_ ~~ Perl6::String::Interpolation::Shell },
+					$tree.child.[0].child),
+				Q{found string};
+
+			done-testing;
+		}, Q{all intervening ws};
+
+		subtest {
+			my $source = Q{qqx :x<pi>};
+			my $parsed = $pt.parse( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			is $pt.to-string( $tree ), $source,
+				Q{formatted};
+			ok (grep { $_ ~~ Perl6::String::Interpolation::Shell },
+					$tree.child.[0].child),
+				Q{found string};
+
+			done-testing;
+		}, Q{leading intervening ws};
+
+		subtest {
+			my $source = Q{qqx:x <pi>};
+			my $parsed = $pt.parse( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			is $pt.to-string( $tree ), $source,
+				Q{formatted};
+			ok (grep { $_ ~~ Perl6::String::Interpolation::Shell },
+					$tree.child.[0].child),
+				Q{found string};
+
+			done-testing;
+		}, Q{trailing intervening ws};
+
+		subtest {
+			my $source = Q{qqx:x<pi>};
+			my $parsed = $pt.parse( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			is $pt.to-string( $tree ), $source,
+				Q{formatted};
+			ok (grep { $_ ~~ Perl6::String::Interpolation::Shell },
+					$tree.child.[0].child),
+				Q{found string};
+
+			done-testing;
+		}, Q{no intervening ws};
+
+		done-testing;
+	}, Q{adverb :x};
+
+	subtest {
+		my $source = Q{qqx <pi>};
+		my $parsed = $pt.parse( $source );
+		my $tree = $pt.build-tree( $parsed );
+		ok $pt.validate( $parsed ), Q{valid};
+		is $pt.to-string( $tree ), $source,
+			Q{formatted};
+		ok (grep { $_ ~~ Perl6::String::Interpolation::Shell },
+				$tree.child.[0].child),
+			Q{found string};
+
+		done-testing;
+	}, Q{ws, no adverbs};
+
+	subtest {
+		my $source = Q{qqx<pi>};
+		my $parsed = $pt.parse( $source );
+		my $tree = $pt.build-tree( $parsed );
+		ok $pt.validate( $parsed ), Q{valid};
+		is $pt.to-string( $tree ), $source,
+			Q{formatted};
+		ok (grep { $_ ~~ Perl6::String::Interpolation::Shell },
+				$tree.child.[0].child),
+			Q{found string};
+
+		done-testing;
+	}, Q{no ws, no adverbs};
 
 	done-testing;
 }, Q{qqx<>};
 
 subtest {
+	# qww:q is illegal
+#`(
+	subtest {
+		subtest {
+			my $source = Q{qww :to <END>
+pi
+END};
+			my $parsed = $pt.parse( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			is $pt.to-string( $tree ), $source,
+				Q{formatted};
+			ok (grep { $_ ~~ Perl6::String::WordQuoting::QuoteProtection },
+					$tree.child.[0].child),
+				Q{found string};
+
+			done-testing;
+		}, Q{all intervening ws};
+
+		subtest {
+			my $source = Q{qww :to<END>
+pi
+END};
+			my $parsed = $pt.parse( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			is $pt.to-string( $tree ), $source,
+				Q{formatted};
+			ok (grep { $_ ~~ Perl6::String::WordQuoting::QuoteProtection },
+					$tree.child.[0].child),
+				Q{found string};
+
+			done-testing;
+		}, Q{leading intervening ws};
+
+		subtest {
+			my $source = Q{qww:to <END>
+pi
+END};
+			my $parsed = $pt.parse( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			is $pt.to-string( $tree ), $source,
+				Q{formatted};
+			ok (grep { $_ ~~ Perl6::String::WordQuoting::QuoteProtection },
+					$tree.child.[0].child),
+				Q{found string};
+
+			done-testing;
+		}, Q{trailing intervening ws};
+
+		subtest {
+			my $source = Q{qww:to<END>
+pi
+END};
+			my $parsed = $pt.parse( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			is $pt.to-string( $tree ), $source,
+				Q{formatted};
+			ok (grep { $_ ~~ Perl6::String::WordQuoting::QuoteProtection },
+					$tree.child.[0].child),
+				Q{found string};
+
+			done-testing;
+		}, Q{no intervening ws};
+
+		done-testing;
+	}, Q{adverb :to};
+)
+	subtest {
+		subtest {
+			my $source = Q{qww :w <pi>};
+			my $parsed = $pt.parse( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			is $pt.to-string( $tree ), $source,
+				Q{formatted};
+			ok (grep { $_ ~~ Perl6::String::WordQuoting::QuoteProtection },
+					$tree.child.[0].child),
+				Q{found string};
+
+			done-testing;
+		}, Q{all intervening ws};
+
+		subtest {
+			my $source = Q{qww :w<pi>};
+			my $parsed = $pt.parse( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			is $pt.to-string( $tree ), $source,
+				Q{formatted};
+			ok (grep { $_ ~~ Perl6::String::WordQuoting::QuoteProtection },
+					$tree.child.[0].child),
+				Q{found string};
+
+			done-testing;
+		}, Q{leading intervening ws};
+
+		subtest {
+			my $source = Q{qww:w <pi>};
+			my $parsed = $pt.parse( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			is $pt.to-string( $tree ), $source,
+				Q{formatted};
+			ok (grep { $_ ~~ Perl6::String::WordQuoting::QuoteProtection },
+					$tree.child.[0].child),
+				Q{found string};
+
+			done-testing;
+		}, Q{trailing intervening ws};
+
+		subtest {
+			my $source = Q{qww:w<pi>};
+			my $parsed = $pt.parse( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			is $pt.to-string( $tree ), $source,
+				Q{formatted};
+			ok (grep { $_ ~~ Perl6::String::WordQuoting::QuoteProtection },
+					$tree.child.[0].child),
+				Q{found string};
+
+			done-testing;
+		}, Q{no intervening ws};
+
+		done-testing;
+	}, Q{adverb :w};
+
+	subtest {
+		subtest {
+			my $source = Q{qww :x <pi>};
+			my $parsed = $pt.parse( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			is $pt.to-string( $tree ), $source,
+				Q{formatted};
+			ok (grep { $_ ~~ Perl6::String::WordQuoting::QuoteProtection },
+					$tree.child.[0].child),
+				Q{found string};
+
+			done-testing;
+		}, Q{all intervening ws};
+
+		subtest {
+			my $source = Q{qww :x<pi>};
+			my $parsed = $pt.parse( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			is $pt.to-string( $tree ), $source,
+				Q{formatted};
+			ok (grep { $_ ~~ Perl6::String::WordQuoting::QuoteProtection },
+					$tree.child.[0].child),
+				Q{found string};
+
+			done-testing;
+		}, Q{leading intervening ws};
+
+		subtest {
+			my $source = Q{qww:x <pi>};
+			my $parsed = $pt.parse( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			is $pt.to-string( $tree ), $source,
+				Q{formatted};
+			ok (grep { $_ ~~ Perl6::String::WordQuoting::QuoteProtection },
+					$tree.child.[0].child),
+				Q{found string};
+
+			done-testing;
+		}, Q{trailing intervening ws};
+
+		subtest {
+			my $source = Q{qww:x<pi>};
+			my $parsed = $pt.parse( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			is $pt.to-string( $tree ), $source,
+				Q{formatted};
+			ok (grep { $_ ~~ Perl6::String::WordQuoting::QuoteProtection },
+					$tree.child.[0].child),
+				Q{found string};
+
+			done-testing;
+		}, Q{no intervening ws};
+
+		done-testing;
+	}, Q{adverb :x};
+
+	subtest {
+		my $source = Q{qww <pi>};
+		my $parsed = $pt.parse( $source );
+		my $tree = $pt.build-tree( $parsed );
+		ok $pt.validate( $parsed ), Q{valid};
+		is $pt.to-string( $tree ), $source,
+			Q{formatted};
+		ok (grep { $_ ~~ Perl6::String::WordQuoting::QuoteProtection },
+				$tree.child.[0].child),
+			Q{found string};
+
+		done-testing;
+	}, Q{ws, no adverbs};
+
+	subtest {
+		my $source = Q{qww<pi>};
+		my $parsed = $pt.parse( $source );
+		my $tree = $pt.build-tree( $parsed );
+		ok $pt.validate( $parsed ), Q{valid};
+		is $pt.to-string( $tree ), $source,
+			Q{formatted};
+		ok (grep { $_ ~~ Perl6::String::WordQuoting::QuoteProtection },
+				$tree.child.[0].child),
+			Q{found string};
+
+		done-testing;
+	}, Q{no ws, no adverbs};
 
 	done-testing;
-}, Q{Qq<>};
+}, Q{qww<>};
+
+# Qq is illegal
 
 subtest {
 	subtest {
@@ -80,7 +942,7 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting::Escaping },
+			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -94,7 +956,7 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting::Escaping },
+			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -108,7 +970,7 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting::Escaping },
+			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -122,7 +984,7 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting::Escaping },
+			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -130,7 +992,7 @@ subtest {
 		}, Q{no intervening ws};
 
 		done-testing;
-	}, Q{Qw:q<pi>};
+	}, Q{adverb :q};
 
 #`(
 	subtest {
@@ -143,7 +1005,7 @@ END};
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Shell::WordQuoting },
+			ok (grep { $_ ~~ Perl6::String::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -159,7 +1021,7 @@ END};
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Shell::WordQuoting },
+			ok (grep { $_ ~~ Perl6::String::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -175,7 +1037,7 @@ END};
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Shell::WordQuoting },
+			ok (grep { $_ ~~ Perl6::String::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -191,7 +1053,7 @@ END};
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Shell::WordQuoting },
+			ok (grep { $_ ~~ Perl6::String::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -199,7 +1061,7 @@ END};
 		}, Q{no intervening ws};
 
 		done-testing;
-	}, Q{Qx:to<pi>};
+	}, Q{adverb :to};
 )
 
 	subtest {
@@ -210,7 +1072,7 @@ END};
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting::WordQuoting },
+			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -224,7 +1086,7 @@ END};
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting::WordQuoting },
+			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -238,7 +1100,7 @@ END};
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting::WordQuoting },
+			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -252,7 +1114,7 @@ END};
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting::WordQuoting },
+			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -260,7 +1122,7 @@ END};
 		}, Q{no intervening ws};
 
 		done-testing;
-	}, Q{Qw:w<pi>};
+	}, Q{adverb :w};
 
 	subtest {
 		subtest {
@@ -270,7 +1132,7 @@ END};
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting::Shell },
+			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -284,7 +1146,7 @@ END};
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting::Shell },
+			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -298,7 +1160,7 @@ END};
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting::Shell },
+			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -312,7 +1174,7 @@ END};
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting::Shell },
+			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -320,7 +1182,7 @@ END};
 		}, Q{no intervening ws};
 
 		done-testing;
-	}, Q{Qw:x<pi>};
+	}, Q{adverb :x};
 
 	subtest {
 		my $source = Q{Qw <pi>};
@@ -362,7 +1224,7 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal::Shell::Escaping },
+			ok (grep { $_ ~~ Perl6::String::Literal::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -376,7 +1238,7 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal::Shell::Escaping },
+			ok (grep { $_ ~~ Perl6::String::Literal::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -390,7 +1252,7 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal::Shell::Escaping },
+			ok (grep { $_ ~~ Perl6::String::Literal::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -404,7 +1266,7 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal::Shell::Escaping },
+			ok (grep { $_ ~~ Perl6::String::Literal::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -412,7 +1274,7 @@ subtest {
 		}, Q{no intervening ws};
 
 		done-testing;
-	}, Q{Qx:q<pi>};
+	}, Q{adverb :q};
 
 #`(
 	subtest {
@@ -481,7 +1343,7 @@ END};
 		}, Q{no intervening ws};
 
 		done-testing;
-	}, Q{Qx:to<pi>};
+	}, Q{adverb :to};
 )
 
 	subtest {
@@ -492,7 +1354,7 @@ END};
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal::Shell::WordQuoting },
+			ok (grep { $_ ~~ Perl6::String::Literal::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -506,7 +1368,7 @@ END};
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal::Shell::WordQuoting },
+			ok (grep { $_ ~~ Perl6::String::Literal::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -520,7 +1382,7 @@ END};
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal::Shell::WordQuoting },
+			ok (grep { $_ ~~ Perl6::String::Literal::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -534,7 +1396,7 @@ END};
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal::Shell::WordQuoting },
+			ok (grep { $_ ~~ Perl6::String::Literal::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -542,7 +1404,7 @@ END};
 		}, Q{no intervening ws};
 
 		done-testing;
-	}, Q{Qx:w<pi>};
+	}, Q{adverb :w};
 
 	subtest {
 		subtest {
@@ -602,7 +1464,7 @@ END};
 		}, Q{no intervening ws};
 
 		done-testing;
-	}, Q{Qx:x<pi>};
+	}, Q{adverb :x};
 
 	subtest {
 		my $source = Q{Qx <pi>};
@@ -638,13 +1500,73 @@ END};
 subtest {
 	subtest {
 		subtest {
+			my $source = Q{qq :w <pi>};
+			my $parsed = $pt.parse( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			is $pt.to-string( $tree ), $source,
+				Q{formatted};
+			ok (grep { $_ ~~ Perl6::String::Interpolation },
+					$tree.child.[0].child),
+				Q{found string};
+
+			done-testing;
+		}, Q{all intervening ws};
+
+		subtest {
+			my $source = Q{qq :w<pi>};
+			my $parsed = $pt.parse( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			is $pt.to-string( $tree ), $source,
+				Q{formatted};
+			ok (grep { $_ ~~ Perl6::String::Interpolation },
+					$tree.child.[0].child),
+				Q{found string};
+
+			done-testing;
+		}, Q{leading intervening ws};
+
+		subtest {
+			my $source = Q{qq:w <pi>};
+			my $parsed = $pt.parse( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			is $pt.to-string( $tree ), $source,
+				Q{formatted};
+			ok (grep { $_ ~~ Perl6::String::Interpolation },
+					$tree.child.[0].child),
+				Q{found string};
+
+			done-testing;
+		}, Q{trailing intervening ws};
+
+		subtest {
+			my $source = Q{qq:w<pi>};
+			my $parsed = $pt.parse( $source );
+			my $tree = $pt.build-tree( $parsed );
+			ok $pt.validate( $parsed ), Q{valid};
+			is $pt.to-string( $tree ), $source,
+				Q{formatted};
+			ok (grep { $_ ~~ Perl6::String::Interpolation },
+					$tree.child.[0].child),
+				Q{found string};
+
+			done-testing;
+		}, Q{no intervening ws};
+
+		done-testing;
+	}, Q{adverb :w};
+
+	subtest {
+		subtest {
 			my $source = Q{qq :x <pi>};
 			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Interpolation::Shell },
+			ok (grep { $_ ~~ Perl6::String::Interpolation },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -658,7 +1580,7 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Interpolation::Shell },
+			ok (grep { $_ ~~ Perl6::String::Interpolation },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -672,7 +1594,7 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Interpolation::Shell },
+			ok (grep { $_ ~~ Perl6::String::Interpolation },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -686,7 +1608,7 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Interpolation::Shell },
+			ok (grep { $_ ~~ Perl6::String::Interpolation },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -694,7 +1616,7 @@ subtest {
 		}, Q{no intervening ws};
 
 		done-testing;
-	}, Q{qq:x<pi>};
+	}, Q{adverb :x};
 
 	subtest {
 		my $source = Q{qq <pi>};
@@ -740,7 +1662,7 @@ END};
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::WordQuoting::HereDoc },
+			ok (grep { $_ ~~ Perl6::String::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -756,7 +1678,7 @@ END};
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::WordQuoting::HereDoc },
+			ok (grep { $_ ~~ Perl6::String::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -772,7 +1694,7 @@ END};
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::WordQuoting::HereDoc },
+			ok (grep { $_ ~~ Perl6::String::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -788,7 +1710,7 @@ END};
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::WordQuoting::HereDoc },
+			ok (grep { $_ ~~ Perl6::String::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -796,7 +1718,7 @@ END};
 		}, Q{no intervening ws};
 
 		done-testing;
-	}, Q{qw:to<pi>};
+	}, Q{adverb :to};
 )
 	subtest {
 		subtest {
@@ -806,7 +1728,7 @@ END};
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::WordQuoting::QuoteProtection },
+			ok (grep { $_ ~~ Perl6::String::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -820,7 +1742,7 @@ END};
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::WordQuoting::QuoteProtection },
+			ok (grep { $_ ~~ Perl6::String::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -834,7 +1756,7 @@ END};
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::WordQuoting::QuoteProtection },
+			ok (grep { $_ ~~ Perl6::String::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -848,7 +1770,7 @@ END};
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::WordQuoting::QuoteProtection },
+			ok (grep { $_ ~~ Perl6::String::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -856,7 +1778,7 @@ END};
 		}, Q{no intervening ws};
 
 		done-testing;
-	}, Q{qw:w<pi>};
+	}, Q{adverb :w};
 
 	subtest {
 		subtest {
@@ -866,7 +1788,7 @@ END};
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Shell },
+			ok (grep { $_ ~~ Perl6::String::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -880,7 +1802,7 @@ END};
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Shell },
+			ok (grep { $_ ~~ Perl6::String::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -894,7 +1816,7 @@ END};
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Shell },
+			ok (grep { $_ ~~ Perl6::String::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -908,7 +1830,7 @@ END};
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Shell },
+			ok (grep { $_ ~~ Perl6::String::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -916,7 +1838,7 @@ END};
 		}, Q{no intervening ws};
 
 		done-testing;
-	}, Q{qw:x<pi>};
+	}, Q{adverb :x};
 
 	subtest {
 		my $source = Q{qw <pi>};
@@ -962,7 +1884,7 @@ END};
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Shell::WordQuoting },
+			ok (grep { $_ ~~ Perl6::String::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -978,7 +1900,7 @@ END};
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Shell::WordQuoting },
+			ok (grep { $_ ~~ Perl6::String::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -994,7 +1916,7 @@ END};
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Shell::WordQuoting },
+			ok (grep { $_ ~~ Perl6::String::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1010,7 +1932,7 @@ END};
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Shell::WordQuoting },
+			ok (grep { $_ ~~ Perl6::String::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1018,7 +1940,7 @@ END};
 		}, Q{no intervening ws};
 
 		done-testing;
-	}, Q{qx:to<pi>};
+	}, Q{adverb :to};
 )
 
 	subtest {
@@ -1029,7 +1951,7 @@ END};
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Escaping::Shell::WordQuoting },
+			ok (grep { $_ ~~ Perl6::String::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1043,7 +1965,7 @@ END};
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Escaping::Shell::WordQuoting },
+			ok (grep { $_ ~~ Perl6::String::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1057,7 +1979,7 @@ END};
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Escaping::Shell::WordQuoting },
+			ok (grep { $_ ~~ Perl6::String::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1071,7 +1993,7 @@ END};
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Escaping::Shell::WordQuoting },
+			ok (grep { $_ ~~ Perl6::String::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1079,7 +2001,7 @@ END};
 		}, Q{no intervening ws};
 
 		done-testing;
-	}, Q{qx:w<pi>};
+	}, Q{adverb :w};
 
 	subtest {
 		subtest {
@@ -1089,7 +2011,7 @@ END};
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Escaping::Shell::Shell },
+			ok (grep { $_ ~~ Perl6::String::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1103,7 +2025,7 @@ END};
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Escaping::Shell::Shell },
+			ok (grep { $_ ~~ Perl6::String::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1117,7 +2039,7 @@ END};
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Escaping::Shell::Shell },
+			ok (grep { $_ ~~ Perl6::String::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1131,7 +2053,7 @@ END};
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Escaping::Shell::Shell },
+			ok (grep { $_ ~~ Perl6::String::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1139,7 +2061,7 @@ END};
 		}, Q{no intervening ws};
 
 		done-testing;
-	}, Q{qx:x<pi>};
+	}, Q{adverb :x};
 
 	subtest {
 		my $source = Q{qx <pi>};
@@ -1181,7 +2103,7 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Escaping },
+			ok (grep { $_ ~~ Perl6::String::Literal },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1195,7 +2117,7 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Escaping },
+			ok (grep { $_ ~~ Perl6::String::Literal },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1209,7 +2131,7 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Escaping },
+			ok (grep { $_ ~~ Perl6::String::Literal },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1223,7 +2145,7 @@ subtest {
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Escaping },
+			ok (grep { $_ ~~ Perl6::String::Literal },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1231,7 +2153,7 @@ subtest {
 		}, Q{no intervening ws};
 
 		done-testing;
-	}, Q{Q:q<pi>};
+	}, Q{adverb :q};
 
 #`(
 	subtest {
@@ -1245,7 +2167,7 @@ END
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::HereDoc },
+			ok (grep { $_ ~~ Perl6::String::Literal },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1262,7 +2184,7 @@ END
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::HereDoc },
+			ok (grep { $_ ~~ Perl6::String::Literal },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1279,7 +2201,7 @@ END
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::HereDoc },
+			ok (grep { $_ ~~ Perl6::String::Literal },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1296,7 +2218,7 @@ END
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::HereDoc },
+			ok (grep { $_ ~~ Perl6::String::Literal },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1304,7 +2226,7 @@ END
 		}, Q{no intervening ws};
 
 		done-testing;
-	}, Q{Q:to<pi>};
+	}, Q{adverb :to};
 )
 
 	subtest {
@@ -1315,7 +2237,7 @@ END
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::WordQuoting },
+			ok (grep { $_ ~~ Perl6::String::Literal },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1329,7 +2251,7 @@ END
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::WordQuoting },
+			ok (grep { $_ ~~ Perl6::String::Literal },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1343,7 +2265,7 @@ END
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::WordQuoting },
+			ok (grep { $_ ~~ Perl6::String::Literal },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1357,7 +2279,7 @@ END
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::WordQuoting },
+			ok (grep { $_ ~~ Perl6::String::Literal },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1365,7 +2287,7 @@ END
 		}, Q{no intervening ws};
 
 		done-testing;
-	}, Q{Q:w<pi>};
+	}, Q{adverb :w};
 
 	subtest {
 		subtest {
@@ -1375,7 +2297,7 @@ END
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Shell },
+			ok (grep { $_ ~~ Perl6::String::Literal },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1389,7 +2311,7 @@ END
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Shell },
+			ok (grep { $_ ~~ Perl6::String::Literal },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1403,7 +2325,7 @@ END
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Shell },
+			ok (grep { $_ ~~ Perl6::String::Literal },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1417,7 +2339,7 @@ END
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Shell },
+			ok (grep { $_ ~~ Perl6::String::Literal },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1425,7 +2347,7 @@ END
 		}, Q{no intervening ws};
 
 		done-testing;
-	}, Q{Q:x<pi>};
+	}, Q{adverb :x};
 
 	subtest {
 		my $source = Q{Q <pi>};
@@ -1531,7 +2453,7 @@ END
 		}, Q{no intervening ws};
 
 		done-testing;
-	}, Q{q:to<pi>};
+	}, Q{adverb :to};
 )
 
 	subtest {
@@ -1542,7 +2464,7 @@ END
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::WordQuoting },
+			ok (grep { $_ ~~ Perl6::String::Escaping },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1556,7 +2478,7 @@ END
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::WordQuoting },
+			ok (grep { $_ ~~ Perl6::String::Escaping },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1570,7 +2492,7 @@ END
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::WordQuoting },
+			ok (grep { $_ ~~ Perl6::String::Escaping },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1584,7 +2506,7 @@ END
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::WordQuoting },
+			ok (grep { $_ ~~ Perl6::String::Escaping },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1592,7 +2514,7 @@ END
 		}, Q{no intervening ws};
 
 		done-testing;
-	}, Q{q:w<pi>};
+	}, Q{adverb :w};
 
 	subtest {
 		subtest {
@@ -1602,7 +2524,7 @@ END
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Shell },
+			ok (grep { $_ ~~ Perl6::String::Escaping },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1616,7 +2538,7 @@ END
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Shell },
+			ok (grep { $_ ~~ Perl6::String::Escaping },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1630,7 +2552,7 @@ END
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Shell },
+			ok (grep { $_ ~~ Perl6::String::Escaping },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1644,7 +2566,7 @@ END
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Shell },
+			ok (grep { $_ ~~ Perl6::String::Escaping },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1652,7 +2574,7 @@ END
 		}, Q{no intervening ws};
 
 		done-testing;
-	}, Q{q:x<pi>};
+	}, Q{adverb :x};
 
 	subtest {
 		my $source = Q{q <pi>};

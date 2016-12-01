@@ -11,19 +11,9 @@ my $*FACTORY-FAILURE-FATAL = True;
 my $*DEBUG = True;
 
 subtest {
-	plan 9;
-
 	subtest {
-		plan 6;
-
-		ok 1, "Test zero, once the dumper is ready.";
-
 		subtest {
-			plan 2;
-
 			subtest {
-				plan 3;
-
 				my $source = Q{0};
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -33,11 +23,11 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{no ws};
 
 			subtest {
-				plan 3;
-
 				my $source = Q{ 0  };
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -47,15 +37,15 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{ws};
+
+			done-testing;
 		}, Q{Zero};
 
 		subtest {
-			plan 2;
-
 			subtest {
-				plan 3;
-
 				my $source = Q{1};
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -65,11 +55,11 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{no ws};
 
 			subtest {
-				plan 3;
-
 				my $source = Q{ 1  };
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -79,15 +69,15 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{ws};
+
+			done-testing;
 		}, Q{1};
 
 		subtest {
-			plan 2;
-
 			subtest {
-				plan 3;
-
 				my $source = Q{-1};
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -97,11 +87,11 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{no ws};
 
 			subtest {
-				plan 3;
-
 				my $source = Q{ -1  };
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -111,15 +101,15 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{ws};
+
+			done-testing;
 		}, Q{-1};
 
 		subtest {
-			plan 2;
-
 			subtest {
-				plan 3;
-
 				my $source = Q{1_1};
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -129,11 +119,11 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{no ws};
 
 			subtest {
-				plan 3;
-
 				my $source = Q{ 1_1  };
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -143,15 +133,15 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{ws};
+
+			done-testing;
 		}, Q{1_1};
 
 		subtest {
-			plan 2;
-
 			subtest {
-				plan 3;
-
 				my $source = Q{Inf};
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -161,11 +151,11 @@ subtest {
 					Q{found Infinity};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{no ws};
 
 			subtest {
-				plan 3;
-
 				my $source = Q{ Inf  };
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -175,15 +165,15 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{ws};
+
+			done-testing;
 		}, Q{Inf};
 
 		subtest {
-			plan 2;
-
 			subtest {
-				plan 3;
-
 				my $source = Q{NaN};
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -193,12 +183,12 @@ subtest {
 					Q{found NotANumber};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{no ws};
 
 			subtest {
-				plan 3;
-
-				my $source = Q{ Inf  };
+				my $source = Q{ NaN  };
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
 				ok $pt.validate( $parsed ), Q{valid};
@@ -207,19 +197,19 @@ subtest {
 					Q{found NotANumber};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{ws};
+
+			done-testing;
 		}, Q{Inf};
+
+		done-testing;
 	}, Q{decimal};
 
 	subtest {
-		plan 3;
-
 		subtest {
-			plan 2;
-
 			subtest {
-				plan 3;
-
 				my $source = Q{0b0};
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -229,11 +219,11 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{no ws};
 
 			subtest {
-				plan 3;
-
 				my $source = Q{ 0b0  };
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -243,15 +233,13 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{ws};
 		}, Q{0b0};
 
 		subtest {
-			plan 2;
-
 			subtest {
-				plan 3;
-
 				my $source = Q{0b1};
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -261,11 +249,11 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{no ws};
 
 			subtest {
-				plan 3;
-
 				my $source = Q{ 0b1  };
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -275,15 +263,13 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{ws};
 		}, Q{0b1};
 
 		subtest {
-			plan 2;
-
 			subtest {
-				plan 3;
-
 				my $source = Q{-0b1};
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -293,11 +279,11 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{no ws};
 
 			subtest {
-				plan 3;
-
 				my $source = Q{ -0b1  };
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -307,19 +293,19 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{ws};
+
+			done-testing;
 		}, Q{-0b1};
+
+		done-testing;
 	}, Q{binary};
 
 	subtest {
-		plan 3;
-
 		subtest {
-			plan 2;
-
 			subtest {
-				plan 3;
-
 				my $source = Q{0o0};
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -329,11 +315,11 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{no ws};
 
 			subtest {
-				plan 3;
-
 				my $source = Q{ 0o0  };
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -343,15 +329,15 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{ws};
+
+			done-testing;
 		}, Q{0o0};
 
 		subtest {
-			plan 2;
-
 			subtest {
-				plan 3;
-
 				my $source = Q{0o1};
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -361,11 +347,11 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{no ws};
 
 			subtest {
-				plan 3;
-
 				my $source = Q{ 0o1  };
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -375,15 +361,15 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{ws};
+
+			done-testing;
 		}, Q{0o1};
 
 		subtest {
-			plan 2;
-
 			subtest {
-				plan 3;
-
 				my $source = Q{-0o1};
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -393,11 +379,11 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{no ws};
 
 			subtest {
-				plan 3;
-
 				my $source = Q{ -0o1  };
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -407,19 +393,19 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{ws};
+
+			done-testing;
 		}, Q{-0o1};
+
+		done-testing;
 	}, Q{octal};
 
 	subtest {
-		plan 3;
-
 		subtest {
-			plan 2;
-
 			subtest {
-				plan 3;
-
 				my $source = Q{0d0};
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -429,11 +415,11 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{no ws};
 
 			subtest {
-				plan 3;
-
 				my $source = Q{ 0d0  };
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -443,15 +429,15 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{ws};
+
+			done-testing;
 		}, Q{0d0};
 
 		subtest {
-			plan 2;
-
 			subtest {
-				plan 3;
-
 				my $source = Q{0d1};
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -461,11 +447,11 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{no ws};
 
 			subtest {
-				plan 3;
-
 				my $source = Q{ 0d1  };
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -475,15 +461,15 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{ws};
+
+			done-testing;
 		}, Q{0d1};
 
 		subtest {
-			plan 2;
-
 			subtest {
-				plan 3;
-
 				my $source = Q{-0d1};
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -493,11 +479,11 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{no ws};
 
 			subtest {
-				plan 3;
-
 				my $source = Q{ -0d1  };
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -507,19 +493,19 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{ws};
+
+			done-testing;
 		}, Q{-0d1};
+
+		done-testing;
 	}, Q{explicit decimal};
 
 	subtest {
-		plan 3;
-
 		subtest {
-			plan 2;
-
 			subtest {
-				plan 3;
-
 				my $source = Q{0};
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -529,11 +515,11 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{no ws};
 
 			subtest {
-				plan 3;
-
 				my $source = Q{ 0  };
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -543,15 +529,15 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{ws};
+
+			done-testing;
 		}, Q{0};
 
 		subtest {
-			plan 2;
-
 			subtest {
-				plan 3;
-
 				my $source = Q{1};
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -561,11 +547,11 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{no ws};
 
 			subtest {
-				plan 3;
-
 				my $source = Q{ 1  };
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -575,15 +561,15 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{ws};
+
+			done-testing;
 		}, Q{1};
 
 		subtest {
-			plan 2;
-
 			subtest {
-				plan 3;
-
 				my $source = Q{-1};
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -593,11 +579,11 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{no ws};
 
 			subtest {
-				plan 3;
-
 				my $source = Q{ -1  };
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -607,19 +593,19 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{ws};
+
+			done-testing;
 		}, Q{-1};
+
+		done-testing;
 	}, Q{implicit decimal};
 
 	subtest {
-		plan 3;
-
 		subtest {
-			plan 2;
-
 			subtest {
-				plan 3;
-
 				my $source = Q{0x0};
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -629,11 +615,11 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{no ws};
 
 			subtest {
-				plan 3;
-
 				my $source = Q{ 0x0  };
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -643,15 +629,15 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{ws};
+
+			done-testing;
 		}, Q{0x0};
 
 		subtest {
-			plan 2;
-
 			subtest {
-				plan 3;
-
 				my $source = Q{0x1};
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -661,11 +647,11 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{no ws};
 
 			subtest {
-				plan 3;
-
 				my $source = Q{ 0x1  };
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -675,15 +661,15 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{ws};
+
+			done-testing;
 		}, Q{0x1};
 
 		subtest {
-			plan 2;
-
 			subtest {
-				plan 3;
-
 				my $source = Q{-0x1};
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -693,11 +679,11 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{no ws};
 
 			subtest {
-				plan 3;
-
 				my $source = Q{ -0x1  };
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -707,19 +693,19 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{ws};
+
+			done-testing;
 		}, Q{-0x1};
+
+		done-testing;
 	}, Q{hexadecimal};
 
 	subtest {
-		plan 3;
-
 		subtest {
-			plan 2;
-
 			subtest {
-				plan 3;
-
 				my $source = Q{:13(0)};
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -729,11 +715,11 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{no ws};
 
 			subtest {
-				plan 3;
-
 				my $source = Q{ :13(0)  };
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -743,15 +729,15 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{ws};
+
+			done-testing;
 		}, Q{:13(0)};
 
 		subtest {
-			plan 2;
-
 			subtest {
-				plan 3;
-
 				my $source = Q{:13(1)};
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -761,11 +747,11 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{no ws};
 
 			subtest {
-				plan 3;
-
 				my $source = Q{ :13(1)  };
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -775,15 +761,15 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{ws};
+
+			done-testing;
 		}, Q{:13(1)};
 
 		subtest {
-			plan 2;
-
 			subtest {
-				plan 3;
-
 				my $source = Q{:13(-1)};
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -793,11 +779,11 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{no ws};
 
 			subtest {
-				plan 3;
-
 				my $source = Q{ :13(-1)  };
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -807,19 +793,19 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{ws};
+
+			done-testing;
 		}, Q{:13(-1)};
+
+		done-testing;
 	}, Q{radix};
 
 	subtest {
-		plan 4;
-
 		subtest {
-			plan 2;
-
 			subtest {
-				plan 3;
-
 				my $source = Q{0e0};
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -829,11 +815,11 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{no ws};
 
 			subtest {
-				plan 3;
-
 				my $source = Q{ 0e0  };
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -843,15 +829,15 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{ws};
+
+			done-testing;
 		}, Q{0e0};
 
 		subtest {
-			plan 2;
-
 			subtest {
-				plan 3;
-
 				my $source = Q{0e1};
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -861,11 +847,11 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{no ws};
 
 			subtest {
-				plan 3;
-
 				my $source = Q{ 0e1  };
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -875,15 +861,15 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{ws};
+
+			done-testing;
 		}, Q{0e1};
 
 		subtest {
-			plan 2;
-
 			subtest {
-				plan 3;
-
 				my $source = Q{-0e1};
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -893,11 +879,11 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{no ws};
 
 			subtest {
-				plan 3;
-
 				my $source = Q{ -0e1  };
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -907,15 +893,15 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{ws};
+
+			done-testing;
 		}, Q{-0e1};
 
 		subtest {
-			plan 2;
-
 			subtest {
-				plan 3;
-
 				my $source = Q{0e-1};
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -925,11 +911,11 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{no ws};
 
 			subtest {
-				plan 3;
-
 				my $source = Q{ 0e-1  };
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -939,19 +925,19 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{ws};
+
+			done-testing;
 		}, Q{-0e1};
+
+		done-testing;
 	}, Q{scientific};
 
 	subtest {
-		plan 3;
-
 		subtest {
-			plan 2;
-
 			subtest {
-				plan 3;
-
 				my $source = Q{0i};
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -961,11 +947,11 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{no ws};
 
 			subtest {
-				plan 3;
-
 				my $source = Q{ 0i  };
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -975,15 +961,15 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{ws};
+
+			done-testing;
 		}, Q{0i};
 
 		subtest {
-			plan 2;
-
 			subtest {
-				plan 3;
-
 				my $source = Q{1i};
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -993,11 +979,11 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{no ws};
 
 			subtest {
-				plan 3;
-
 				my $source = Q{ 1i  };
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -1007,15 +993,15 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{ws};
+
+			done-testing;
 		}, Q{1i};
 
 		subtest {
-			plan 2;
-
 			subtest {
-				plan 3;
-
 				my $source = Q{-1i};
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -1025,11 +1011,11 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{no ws};
 
 			subtest {
-				plan 3;
-
 				my $source = Q{ -1i  };
 				my $parsed = $pt.parse( $source );
 				my $tree = $pt.build-tree( $parsed );
@@ -1039,20 +1025,22 @@ subtest {
 					Q{found number};
 				is $pt.to-string( $tree ), $source,
 					Q{formatted};
+
+				done-testing;
 			}, Q{ws};
+
+			done-testing;
 		}, Q{-1i};
+
+		done-testing;
 	}, Q{imaginary};
+
+	done-testing;
 }, Q{number};
 
 subtest {
-	plan 8;
-
 	subtest {
-		plan 2;
-
 		subtest {
-			plan 3;
-
 			my $source = Q{@*ARGS};
 			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
@@ -1061,11 +1049,11 @@ subtest {
 					$tree.child.[0].child),
 				Q{found variable};
 			is $pt.to-string( $tree ), $source, Q{formatted};
+
+			done-testing;
 		}, Q{no ws};
 
 		subtest {
-			plan 3;
-
 			my $source = Q{ @*ARGS  };
 			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
@@ -1074,15 +1062,15 @@ subtest {
 				$tree.child.[1].child),
 				Q{found variable};
 			is $pt.to-string( $tree ), $source, Q{formatted};
+
+			done-testing;
 		}, Q{ws};
+
+		done-testing;
 	}, Q{@*ARGS (is a global, so available everywhere)};
 
 	subtest {
-		plan 2;
-
 		subtest {
-			plan 3;
-
 			my $source = Q{$};
 			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
@@ -1091,11 +1079,11 @@ subtest {
 					$tree.child.[0].child),
 				Q{found variable};
 			is $pt.to-string( $tree ), $source, Q{formatted};
+
+			done-testing;
 		}, Q{no ws};
 
 		subtest {
-			plan 3;
-
 			my $source = Q{ $  };
 			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
@@ -1104,15 +1092,15 @@ subtest {
 				$tree.child.[1].child),
 				Q{found variable};
 			is $pt.to-string( $tree ), $source, Q{formatted};
+
+			done-testing;
 		}, Q{ws};
+
+		done-testing;
 	}, Q{$};
 
 	subtest {
-		plan 2;
-
 		subtest {
-			plan 3;
-
 			my $source = Q{$_};
 			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
@@ -1121,11 +1109,11 @@ subtest {
 					$tree.child.[0].child),
 				Q{found variable};
 			is $pt.to-string( $tree ), $source, Q{formatted};
+
+			done-testing;
 		}, Q{no ws};
 
 		subtest {
-			plan 3;
-
 			my $source = Q{ $_  };
 			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
@@ -1134,15 +1122,15 @@ subtest {
 				$tree.child.[1].child),
 				Q{found variable};
 			is $pt.to-string( $tree ), $source, Q{formatted};
+
+			done-testing;
 		}, Q{ws};
+
+		done-testing;
 	}, Q{$_};
 
 	subtest {
-		plan 2;
-
 		subtest {
-			plan 3;
-
 			my $source = Q{$/};
 			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
@@ -1151,11 +1139,11 @@ subtest {
 					$tree.child.[0].child),
 				Q{found variable};
 			is $pt.to-string( $tree ), $source, Q{formatted};
+
+			done-testing;
 		}, Q{no ws};
 
 		subtest {
-			plan 3;
-
 			my $source = Q{ $/  };
 			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
@@ -1164,15 +1152,15 @@ subtest {
 				$tree.child.[1].child),
 				Q{found variable};
 			is $pt.to-string( $tree ), $source, Q{formatted};
+
+			done-testing;
 		}, Q{ws};
+
+		done-testing;
 	}, Q{$/};
 
 	subtest {
-		plan 2;
-
 		subtest {
-			plan 3;
-
 			my $source = Q{$!};
 			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
@@ -1181,11 +1169,11 @@ subtest {
 					$tree.child.[0].child),
 				Q{found variable};
 			is $pt.to-string( $tree ), $source, Q{formatted};
+
+			done-testing;
 		}, Q{no ws};
 
 		subtest {
-			plan 3;
-
 			my $source = Q{ $!  };
 			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
@@ -1194,15 +1182,15 @@ subtest {
 				$tree.child.[1].child),
 				Q{found variable};
 			is $pt.to-string( $tree ), $source, Q{formatted};
+
+			done-testing;
 		}, Q{ws};
+
+		done-testing;
 	}, Q{$!};
 
 	subtest {
-		plan 2;
-
 		subtest {
-			plan 3;
-
 			my $source = Q{$Foo::Bar};
 			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
@@ -1211,11 +1199,11 @@ subtest {
 					$tree.child.[0].child),
 				Q{found variable};
 			is $pt.to-string( $tree ), $source, Q{formatted};
+
+			done-testing;
 		}, Q{no ws};
 
 		subtest {
-			plan 3;
-
 			my $source = Q{ $Foo::Bar  };
 			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
@@ -1224,41 +1212,40 @@ subtest {
 				$tree.child.[1].child),
 				Q{found variable};
 			is $pt.to-string( $tree ), $source, Q{formatted};
+
+			done-testing;
 		}, Q{ws};
 
+
+		done-testing;
 	}, Q{$Foo::Bar};
 
 	subtest {
-		plan 2;
-
 		subtest {
-			plan 2;
-
 			my $source = Q{&sum};
 			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source, Q{formatted};
+
+			done-testing;
 		}, Q{no ws};
 
 		subtest {
-			plan 2;
-
 			my $source = Q{ &sum  };
 			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source, Q{formatted};
+
+			done-testing;
 		}, Q{ws};
+
+		done-testing;
 	}, Q{&sum};
 
-	todo Q{$Foo::($bar)::Bar (requires a second term) to compile};
 	subtest {
-		plan 2;
-
 		subtest {
-			plan 3;
-
 			my $source = Q{$Foo::($*GLOBAL)::Bar};
 			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
@@ -1267,6 +1254,8 @@ subtest {
 					$tree.child.[0].child),
 				Q{found variable};
 			is $pt.to-string( $tree ), $source, Q{formatted};
+
+			done-testing;
 		}, Q{no ws};
 
 		subtest {
@@ -1280,19 +1269,17 @@ subtest {
 				$tree.child.[1].child),
 				Q{found variable};
 			is $pt.to-string( $tree ), $source, Q{formatted};
+
+			done-testing;
 		}, Q{ws};
-	}, Q[$Foo::($*GLOBAL)::Bar (Need $*GLOBAL in order to compile)];
+
+		done-testing;
+	}, Q[$Foo::($*GLOBAL)::Bar];
 }, Q{variable};
 
 subtest {
-	plan 2;
-
 	subtest {
-		plan 2;
-
 		subtest {
-			plan 2;
-
 			my $source = Q{Int};
 			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
@@ -1302,11 +1289,11 @@ subtest {
 #					$tree.child.[0].child),
 #				Q{found number};
 			is $pt.to-string( $tree ), $source, Q{formatted};
+
+			done-testing;
 		}, Q{no ws};
 
 		subtest {
-			plan 2;
-
 			my $source = Q{ Int  };
 			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
@@ -1316,15 +1303,15 @@ subtest {
 #					$tree.child.[0].child),
 #				Q{found number};
 			is $pt.to-string( $tree ), $source, Q{formatted};
+
+			done-testing;
 		}, Q{ws};
+
+		done-testing;
 	}, Q{Int};
 
 	subtest {
-		plan 2;
-
 		subtest {
-			plan 2;
-
 			my $source = Q{IO::Handle};
 			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
@@ -1334,11 +1321,11 @@ subtest {
 #					$tree.child.[0].child),
 #				Q{found number};
 			is $pt.to-string( $tree ), $source, Q{formatted};
+
+			done-testing;
 		}, Q{no ws};
 
 		subtest {
-			plan 2;
-
 			my $source = Q{ IO::Handle  };
 			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
@@ -1348,19 +1335,19 @@ subtest {
 #					$tree.child.[0].child),
 #				Q{found number};
 			is $pt.to-string( $tree ), $source, Q{formatted};
+
+			done-testing;
 		}, Q{ws};
+
+		done-testing;
 	}, Q{IO::Handle (Two package names)};
+
+	done-testing;
 }, Q{type};
 
 subtest {
-	plan 1;
-
 	subtest {
-		plan 2;
-
 		subtest {
-			plan 2;
-
 			my $source = Q{pi};
 			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
@@ -1370,11 +1357,11 @@ subtest {
 #					$tree.child.[0].child),
 #				Q{found number};
 			is $pt.to-string( $tree ), $source, Q{formatted};
+
+			done-testing;
 		}, Q{no ws};
 
 		subtest {
-			plan 2;
-
 			my $source = Q{ pi  };
 			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
@@ -1384,19 +1371,19 @@ subtest {
 #					$tree.child.[0].child),
 #				Q{found number};
 			is $pt.to-string( $tree ), $source, Q{formatted};
+
+			done-testing;
 		}, Q{ws};
+
+		done-testing;
 	}, Q{pi};
+
+	done-testing;
 }, Q{constant};
 
 subtest {
-	plan 1;
-
 	subtest {
-		plan 2;
-
 		subtest {
-			plan 2;
-
 			my $source = Q{sum};
 			my $parsed = $pt.parse( $source );
 #say $parsed.dump;
@@ -1406,11 +1393,11 @@ subtest {
 #					$tree.child.[0].child),
 #				Q{found number};
 			is $pt.to-string( $tree ), $source, Q{formatted};
+
+			done-testing;
 		}, Q{no ws};
 
 		subtest {
-			plan 2;
-
 			my $source = Q{ sum  };
 			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
@@ -1419,19 +1406,19 @@ subtest {
 #					$tree.child.[0].child),
 #				Q{found number};
 			is $pt.to-string( $tree ), $source, Q{formatted};
+
+			done-testing;
 		}, Q{ws};
+
+		done-testing;
 	}, Q{sum};
+
+	done-testing;
 }, Q{function call};
 
 subtest {
-	plan 1;
-
 	subtest {
-		plan 2;
-
 		subtest {
-			plan 2;
-
 			my $source = Q{()};
 			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
@@ -1440,11 +1427,11 @@ subtest {
 #					$tree.child.[0].child),
 #				Q{found number};
 			is $pt.to-string( $tree ), $source, Q{formatted};
+
+			done-testing;
 		}, Q{no ws};
 
 		subtest {
-			plan 2;
-
 			my $source = Q{ ()  };
 			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
@@ -1453,21 +1440,21 @@ subtest {
 #					$tree.child.[0].child),
 #				Q{found number};
 			is $pt.to-string( $tree ), $source, Q{formatted};
+
+			done-testing;
 		}, Q{ws};
+
+		done-testing;
 	}, Q{circumfix};
+
+	done-testing;
 }, Q{operator};
 
 # :foo (adverbial-pair) is already tested in t/pair.t
 
 subtest {
-	plan 1;
-
 	subtest {
-		plan 2;
-
 		subtest {
-			plan 2;
-
 			my $source = Q{:()};
 			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
@@ -1476,11 +1463,11 @@ subtest {
 #					$tree.child.[0].child),
 #				Q{found number};
 			is $pt.to-string( $tree ), $source, Q{formatted};
+
+			done-testing;
 		}, Q{no ws};
 
 		subtest {
-			plan 2;
-
 			my $source = Q{ :()  };
 			my $parsed = $pt.parse( $source );
 			my $tree = $pt.build-tree( $parsed );
@@ -1489,8 +1476,14 @@ subtest {
 #					$tree.child.[0].child),
 #				Q{found number};
 			is $pt.to-string( $tree ), $source, Q{formatted};
+
+			done-testing;
 		}, Q{ws};
+
+		done-testing;
 	}, Q{:()};
+
+	done-testing;
 }, Q{signature};
 
 # vim: ft=perl6

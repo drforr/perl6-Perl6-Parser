@@ -252,7 +252,6 @@ my role Debugging {
 		my $str = $term.WHAT.perl;
 		$str ~~ s/'Perl6::'//;
 		if $term ~~ Perl6::Operator::PostCircumfix or
-		      $term ~~ Perl6::String or
 		      $term ~~ Perl6::Operator::Circumfix {
 		}
 		elsif $term ~~ Perl6::Bareword or
@@ -269,7 +268,7 @@ my role Debugging {
 		}
 		elsif $term ~~ Perl6::String {
 #			$str ~= " ({$term.content}) ('{$term.bare}')"
-			$str ~= " ({$term.content})"
+			$str ~= " adv: ({$term.adverb})";
 		}
 
 		if $term.^can('from') and not (

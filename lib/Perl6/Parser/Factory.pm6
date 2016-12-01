@@ -475,6 +475,8 @@ class Perl6::String::XXX::Body does Token {
 
 class Perl6::String does Branching {
 	also is Perl6::Element;
+
+	has Str @.adverb;
 }
 class Perl6::String::WordQuoting {
 	also is Perl6::String;
@@ -494,6 +496,12 @@ class Perl6::String::Interpolation {
 }
 class Perl6::String::Interpolation::Shell {
 	also is Perl6::String::Interpolation;
+}
+class Perl6::String::Interpolation::WordQuoting {
+	also is Perl6::String::Interpolation;
+}
+class Perl6::String::Interpolation::WordQuoting::QuoteProtection {
+	also is Perl6::String::Interpolation::WordQuoting;
 }
 class Perl6::String::Shell {
 	also is Perl6::String;
@@ -537,8 +545,10 @@ class Perl6::String::Literal::Shell::Escaping {
 class Perl6::String::Literal::Shell::WordQuoting {
 	also is Perl6::String::Literal::Shell;
 }
-class Perl6::String::Regex {
-	also is Perl6::String;
+class Perl6::Regex does Branching {
+	also is Perl6::Element;
+
+	has Str @.adverb;
 }
 
 class Perl6::Bareword does Token {
@@ -4249,36 +4259,17 @@ return True;
 		Q{｢} => Perl6::String::Literal;
 
 	my %q-map =
-		Q{qqww} => Perl6::String::WordQuoting::Interpolation::QuoteProtection,
-		Q{qqw:w} => Perl6::String::WordQuoting::Interpolation::QuoteProtection,
-		Q{qqw:x} => Perl6::String::Shell,
-		Q{qqw} => Perl6::String::WordQuoting::Interpolation,
-		Q{qww:x} => Perl6::String::Shell,
+		Q{qqww} => Perl6::String::Interpolation::WordQuoting::QuoteProtection,
+		Q{qqw} => Perl6::String::Interpolation::WordQuoting,
+		Q{qqx} => Perl6::String::Interpolation::Shell,
 		Q{qww} => Perl6::String::WordQuoting::QuoteProtection,
-		Q{Qx:q} => Perl6::String::Literal::Shell::Escaping,
-		Q{Qx:w} => Perl6::String::Literal::Shell::WordQuoting,
-		Q{Qx:x} => Perl6::String::Literal::Shell,
 		Q{Qx} => Perl6::String::Literal::Shell,
-		Q{qw:w} => Perl6::String::WordQuoting::QuoteProtection,
-		Q{qw:x} => Perl6::String::Shell,
 		Q{qw} => Perl6::String::WordQuoting,
-		Q{Qw:q} => Perl6::String::Literal::WordQuoting::Escaping,
-		Q{Qw:w} => Perl6::String::Literal::WordQuoting::WordQuoting,
-		Q{Qw:x} => Perl6::String::Literal::WordQuoting::Shell,
 		Q{Qw} => Perl6::String::Literal::WordQuoting,
-		Q{qx:w} => Perl6::String::Escaping::Shell::WordQuoting,
-		Q{qx:x} => Perl6::String::Escaping::Shell::Shell,
 		Q{qx} => Perl6::String::Shell,
 
-		Q{qq:w} => Perl6::String::WordQuoting::Interpolation,
-		Q{qq:x} => Perl6::String::Interpolation::Shell,
 		Q{qq} => Perl6::String::Interpolation,
-		Q{Q:q} => Perl6::String::Escaping,
-		Q{Q:w} => Perl6::String::WordQuoting,
-		Q{Q:x} => Perl6::String::Shell,
 		Q{Q} => Perl6::String::Literal,
-		Q{q:w} => Perl6::String::WordQuoting,
-		Q{q:x} => Perl6::String::Shell,
 		Q{q} => Perl6::String::Escaping;
 		
 
@@ -4304,610 +4295,93 @@ return True;
 	method _quote( Mu $p ) {
 		my Perl6::Element @child;
 		given $p {
-			when self.assert-hash( $_, [< quibble quote_mod >] ) {
-print "quibble: ";key-bounds $_.hash.<quibble>;
-print "quote_mod: ";key-bounds $_.hash.<quote_mod>;
-key-bounds $_;
+			when self.assert-hash( $_,
+					[< sym quibble >], [< rx_adverbs >] ) {
+				my Str @rx-adverb;
 				my Perl6::Element @_child;
-				my Str $q-map-name;
-				if $_.Str ~~ m{ ^ ( qqww ) ( \s? ) ( . ) .*? ( . ) $ } {
+				@child.append(
+					self._sym( $_.hash.<sym> )
+				);
+				# XXX The first place negative indices are used
+				@_child.append(
+					Perl6::Balanced::Enter.from-int(
+						$_.hash.<quibble>.hash.<nibble>.from - 1,
+						$_.hash.<quibble>.Str.substr(
+							*-($_.hash.<quibble>.hash.<nibble>.chars + 2),
+							1
+						)
+					)
+				);
+				@_child.append(
+					Perl6::String::XXX::Body.from-match(
+						$_.hash.<quibble>.hash.<nibble>
+					)
+				);
+				@_child.append(
+					Perl6::Balanced::Exit.from-int(
+						$_.hash.<quibble>.hash.<nibble>.to,
+						$_.hash.<quibble>.Str.substr(
+							$_.hash.<quibble>.chars - 1,
+							1
+						)
+					)
+				);
+				@child.append(
+					Perl6::Regex.new(
+						:factory-line-number(
+							callframe(1).line
+						),
+						:from( $_.hash.<quibble>.from ),
+						:to( $_.hash.<quibble>.to ),
+						:child( @_child ),
+						:adverb( @rx-adverb )
+					)
+				);
+			}
+			when self.assert-hash( $_, [< quibble quote_mod >] ) {
+				my Perl6::Element @_child;
+				$_.Str ~~ m{ ^ (\w+) };
+				my Str $q-map-name = $0.Str;
+				my Str @q-adverb;
+				@_child.append(
+					Perl6::Bareword.from-int(
+						$p.from,
+						$0.Str
+					)
+				);
+				if $_.hash.<quibble>.hash.<babble> {
 					@_child.append(
-						Perl6::Bareword.from-int(
-							$_.from,
-							$0.Str
+						Perl6::Bareword.from-match(
+							$_.hash.<quibble>.hash.<babble>
 						)
 					);
-					@_child.append(
-						Perl6::Balanced::Enter.from-int(
-							$_.from + $0.Str.chars + $1.Str.chars,
-							$2.Str
-						)
-					);
-					@_child.append(
-						Perl6::String::XXX::Body.from-match(
-							$_.hash.<quibble>.hash.<nibble>
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Exit.from-int(
-							$_.to - $3.Str.chars,
-							$3.Str
-						)
-					);
-					$q-map-name = 'qqww';
+					@q-adverb =
+						$_.hash.<quibble>.hash.<babble>.Str;
 				}
-				elsif $p.Str ~~ m{ ^ ( qqw ) ( \s? ) ( ':w' ) ( \s? ) ( \S ) .*? ( \S ) $ } {
-					@_child.append(
-						Perl6::Bareword.from-int(
-							$p.from,
-							$0.Str
-						)
-					);
-					@_child.append(
-						Perl6::Bareword.from-int(
-							$p.from + $0.Str.chars + $1.Str.chars,
-							$2.Str
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Enter.from-int(
-							$p.from + $0.Str.chars + $1.chars + $2.Str.chars + $3.Str.chars,
-							$4.Str
-						)
-					);
-					@_child.append(
-						Perl6::String::XXX::Body.from-match(
-							$p.hash.<quibble>.hash.<nibble>
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Exit.from-int(
-							$p.to - $5.Str.chars,
-							$5.Str
-						)
-					);
-					$q-map-name = 'qqw:w';
-				}
-				elsif $p.Str ~~ m{ ^ ( qqw ) ( \s? ) ( ':x' ) ( \s? ) ( \S ) .*? ( \S ) $ } {
-					@_child.append(
-						Perl6::Bareword.from-int(
-							$p.from,
-							$0.Str
-						)
-					);
-					@_child.append(
-						Perl6::Bareword.from-int(
-							$p.from + $0.Str.chars + $1.Str.chars,
-							$2.Str
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Enter.from-int(
-							$p.from + $0.Str.chars + $1.chars + $2.Str.chars + $3.Str.chars,
-							$4.Str
-						)
-					);
-					@_child.append(
-						Perl6::String::XXX::Body.from-match(
-							$p.hash.<quibble>.hash.<nibble>
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Exit.from-int(
-							$p.to - $5.Str.chars,
-							$5.Str
-						)
-					);
-					$q-map-name = 'qqw:x';
-				}
-				elsif $_.Str ~~ m{ ^ ( qqw ) ( \s? ) ( . ) .*? ( . ) $ } {
-					@_child.append(
-						Perl6::Bareword.from-int(
-							$_.from,
-							$0.Str
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Enter.from-int(
-							$_.from + $0.Str.chars + $1.Str.chars,
-							$2.Str
-						)
-					);
-					@_child.append(
-						Perl6::String::XXX::Body.from-match(
-							$_.hash.<quibble>.hash.<nibble>
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Exit.from-int(
-							$_.to - $3.Str.chars,
-							$3.Str
-						)
-					);
-					$q-map-name = 'qqw';
-				}
-				elsif $p.Str ~~ m{ ^ ( qww ) ( \s? ) ( ':x' ) ( \s? ) ( \S ) .*? ( \S ) $ } {
-					@_child.append(
-						Perl6::Bareword.from-int(
-							$p.from,
-							$0.Str
-						)
-					);
-					@_child.append(
-						Perl6::Bareword.from-int(
-							$p.from + $0.Str.chars + $1.Str.chars,
-							$2.Str
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Enter.from-int(
-							$p.from + $0.Str.chars + $1.chars + $2.Str.chars + $3.Str.chars,
-							$4.Str
-						)
-					);
-					@_child.append(
-						Perl6::String::XXX::Body.from-match(
-							$p.hash.<quibble>.hash.<nibble>
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Exit.from-int(
-							$p.to - $5.Str.chars,
-							$5.Str
-						)
-					);
-					$q-map-name = 'qww:x';
-				}
-				elsif $_.Str ~~ m{ ^ ( qww ) ( \s? ) ( . ) .*? ( . ) $ } {
-					@_child.append(
-						Perl6::Bareword.from-int(
-							$_.from,
-							$0.Str
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Enter.from-int(
-							$_.from + $0.Str.chars + $1.Str.chars,
-							$2.Str
-						)
-					);
-					@_child.append(
-						Perl6::String::XXX::Body.from-match(
-							$_.hash.<quibble>.hash.<nibble>
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Exit.from-int(
-							$_.to - $3.Str.chars,
-							$3.Str
-						)
-					);
-					$q-map-name = 'qww';
-				}
-				elsif $p.Str ~~ m{ ^ ( Qx ) ( \s? ) ( ':q' ) ( \s? ) ( \S ) .*? ( \S ) $ } {
-					@_child.append(
-						Perl6::Bareword.from-int(
-							$p.from,
-							$0.Str
-						)
-					);
-					@_child.append(
-						Perl6::Bareword.from-int(
-							$p.from + $0.Str.chars + $1.Str.chars,
-							$2.Str
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Enter.from-int(
-							$p.from + $0.Str.chars + $1.chars + $2.Str.chars + $3.Str.chars,
-							$4.Str
-						)
-					);
-					@_child.append(
-						Perl6::String::XXX::Body.from-match(
-							$p.hash.<quibble>.hash.<nibble>
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Exit.from-int(
-							$p.to - $5.Str.chars,
-							$5.Str
-						)
-					);
-					$q-map-name = 'Qx:q';
-				}
-				elsif $p.Str ~~ m{ ^ ( Qx ) ( \s? ) ( ':w' ) ( \s? ) ( \S ) .*? ( \S ) $ } {
-					@_child.append(
-						Perl6::Bareword.from-int(
-							$p.from,
-							$0.Str
-						)
-					);
-					@_child.append(
-						Perl6::Bareword.from-int(
-							$p.from + $0.Str.chars + $1.Str.chars,
-							$2.Str
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Enter.from-int(
-							$p.from + $0.Str.chars + $1.chars + $2.Str.chars + $3.Str.chars,
-							$4.Str
-						)
-					);
-					@_child.append(
-						Perl6::String::XXX::Body.from-match(
-							$p.hash.<quibble>.hash.<nibble>
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Exit.from-int(
-							$p.to - $5.Str.chars,
-							$5.Str
-						)
-					);
-					$q-map-name = 'Qx:w';
-				}
-				elsif $p.Str ~~ m{ ^ ( Qx ) ( \s? ) ( ':x' ) ( \s? ) ( \S ) .*? ( \S ) $ } {
-					@_child.append(
-						Perl6::Bareword.from-int(
-							$p.from,
-							$0.Str
-						)
-					);
-					@_child.append(
-						Perl6::Bareword.from-int(
-							$p.from + $0.Str.chars + $1.Str.chars,
-							$2.Str
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Enter.from-int(
-							$p.from + $0.Str.chars + $1.chars + $2.Str.chars + $3.Str.chars,
-							$4.Str
-						)
-					);
-					@_child.append(
-						Perl6::String::XXX::Body.from-match(
-							$p.hash.<quibble>.hash.<nibble>
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Exit.from-int(
-							$p.to - $5.Str.chars,
-							$5.Str
-						)
-					);
-					$q-map-name = 'Qx:x';
-				}
-				elsif $_.Str ~~ m{ ^ ( Qx ) ( \s? ) ( . ) .*? ( . ) $ } {
-					@_child.append(
-						Perl6::Bareword.from-int(
-							$_.from,
-							$0.Str
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Enter.from-int(
-							$_.from + $0.Str.chars + $1.Str.chars,
-							$2.Str
-						)
-					);
-					@_child.append(
-						Perl6::String::XXX::Body.from-match(
-							$_.hash.<quibble>.hash.<nibble>
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Exit.from-int(
-							$_.to - $3.Str.chars,
-							$3.Str
-						)
-					);
-					$q-map-name = 'Qx';
-				}
-				elsif $p.Str ~~ m{ ^ ( qw ) ( \s? ) ( ':w' ) ( \s? ) ( \S ) .*? ( \S ) $ } {
-					@_child.append(
-						Perl6::Bareword.from-int(
-							$p.from,
-							$0.Str
-						)
-					);
-					@_child.append(
-						Perl6::Bareword.from-int(
-							$p.from + $0.Str.chars + $1.Str.chars,
-							$2.Str
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Enter.from-int(
-							$p.from + $0.Str.chars + $1.chars + $2.Str.chars + $3.Str.chars,
-							$4.Str
-						)
-					);
-					@_child.append(
-						Perl6::String::XXX::Body.from-match(
-							$p.hash.<quibble>.hash.<nibble>
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Exit.from-int(
-							$p.to - $5.Str.chars,
-							$5.Str
-						)
-					);
-					$q-map-name = 'qw:w';
-				}
-				elsif $p.Str ~~ m{ ^ ( qw ) ( \s? ) ( ':x' ) ( \s? ) ( \S ) .*? ( \S ) $ } {
-					@_child.append(
-						Perl6::Bareword.from-int(
-							$p.from,
-							$0.Str
-						)
-					);
-					@_child.append(
-						Perl6::Bareword.from-int(
-							$p.from + $0.Str.chars + $1.Str.chars,
-							$2.Str
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Enter.from-int(
-							$p.from + $0.Str.chars + $1.chars + $2.Str.chars + $3.Str.chars,
-							$4.Str
-						)
-					);
-					@_child.append(
-						Perl6::String::XXX::Body.from-match(
-							$p.hash.<quibble>.hash.<nibble>
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Exit.from-int(
-							$p.to - $5.Str.chars,
-							$5.Str
-						)
-					);
-					$q-map-name = 'qw:x';
-				}
-				elsif $_.Str ~~ m{ ^ ( qw ) ( \s? ) ( . ) .*? ( . ) $ } {
-					@_child.append(
-						Perl6::Bareword.from-int(
-							$_.from,
-							$0.Str
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Enter.from-int(
-							$_.from + $0.Str.chars + $1.Str.chars,
-							$2.Str
-						)
-					);
-					@_child.append(
-						Perl6::String::XXX::Body.from-match(
-							$_.hash.<quibble>.hash.<nibble>
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Exit.from-int(
-							$_.to - $3.Str.chars,
-							$3.Str
-						)
-					);
-					$q-map-name = 'qw';
-				}
-				elsif $p.Str ~~ m{ ^ ( Qw ) ( \s? ) ( ':q' ) ( \s? ) ( \S ) .*? ( \S ) $ } {
-					@_child.append(
-						Perl6::Bareword.from-int(
-							$p.from,
-							$0.Str
-						)
-					);
-					@_child.append(
-						Perl6::Bareword.from-int(
-							$p.from + $0.Str.chars + $1.Str.chars,
-							$2.Str
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Enter.from-int(
-							$p.from + $0.Str.chars + $1.chars + $2.Str.chars + $3.Str.chars,
-							$4.Str
-						)
-					);
-					@_child.append(
-						Perl6::String::XXX::Body.from-match(
-							$p.hash.<quibble>.hash.<nibble>
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Exit.from-int(
-							$p.to - $5.Str.chars,
-							$5.Str
-						)
-					);
-					$q-map-name = 'Qw:q';
-				}
-				elsif $p.Str ~~ m{ ^ ( Qw ) ( \s? ) ( ':w' ) ( \s? ) ( \S ) .*? ( \S ) $ } {
-					@_child.append(
-						Perl6::Bareword.from-int(
-							$p.from,
-							$0.Str
-						)
-					);
-					@_child.append(
-						Perl6::Bareword.from-int(
-							$p.from + $0.Str.chars + $1.Str.chars,
-							$2.Str
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Enter.from-int(
-							$p.from + $0.Str.chars + $1.chars + $2.Str.chars + $3.Str.chars,
-							$4.Str
-						)
-					);
-					@_child.append(
-						Perl6::String::XXX::Body.from-match(
-							$p.hash.<quibble>.hash.<nibble>
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Exit.from-int(
-							$p.to - $5.Str.chars,
-							$5.Str
-						)
-					);
-					$q-map-name = 'Qw:w';
-				}
-				elsif $p.Str ~~ m{ ^ ( Qw ) ( \s? ) ( ':x' ) ( \s? ) ( \S ) .*? ( \S ) $ } {
-					@_child.append(
-						Perl6::Bareword.from-int(
-							$p.from,
-							$0.Str
-						)
-					);
-					@_child.append(
-						Perl6::Bareword.from-int(
-							$p.from + $0.Str.chars + $1.Str.chars,
-							$2.Str
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Enter.from-int(
-							$p.from + $0.Str.chars + $1.chars + $2.Str.chars + $3.Str.chars,
-							$4.Str
-						)
-					);
-					@_child.append(
-						Perl6::String::XXX::Body.from-match(
-							$p.hash.<quibble>.hash.<nibble>
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Exit.from-int(
-							$p.to - $5.Str.chars,
-							$5.Str
-						)
-					);
-					$q-map-name = 'Qw:x';
-				}
-				elsif $p.Str ~~ m{ ^ ( Qw ) ( \s? ) ( \S ) .*? ( \S ) $ } {
-					@_child.append(
-						Perl6::Bareword.from-int(
-							$p.from,
-							$0.Str
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Enter.from-int(
-							$p.from + $0.Str.chars + $1.chars,
-							$2.Str
-						)
-					);
-					@_child.append(
-						Perl6::String::XXX::Body.from-match(
-							$p.hash.<quibble>.hash.<nibble>
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Exit.from-int(
-							$p.to - $3.Str.chars,
-							$3.Str
-						)
-					);
-					$q-map-name = 'Qw';
-				}
-				elsif $p.Str ~~ m{ ^ ( qx ) ( \s? ) ( ':w' ) ( \s? ) ( \S ) .*? ( \S ) $ } {
-					@_child.append(
-						Perl6::Bareword.from-int(
-							$p.from,
-							$0.Str
-						)
-					);
-					@_child.append(
-						Perl6::Bareword.from-int(
-							$p.from + $0.Str.chars + $1.Str.chars,
-							$2.Str
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Enter.from-int(
-							$p.from + $0.Str.chars + $1.chars + $2.Str.chars + $3.Str.chars,
-							$4.Str
-						)
-					);
-					@_child.append(
-						Perl6::String::XXX::Body.from-match(
-							$p.hash.<quibble>.hash.<nibble>
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Exit.from-int(
-							$p.to - $5.Str.chars,
-							$5.Str
-						)
-					);
-					$q-map-name = 'qx:w';
-				}
-				elsif $p.Str ~~ m{ ^ ( qx ) ( \s? ) ( ':x' ) ( \s? ) ( \S ) .*? ( \S ) $ } {
-					@_child.append(
-						Perl6::Bareword.from-int(
-							$p.from,
-							$0.Str
-						)
-					);
-					@_child.append(
-						Perl6::Bareword.from-int(
-							$p.from + $0.Str.chars + $1.Str.chars,
-							$2.Str
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Enter.from-int(
-							$p.from + $0.Str.chars + $1.chars + $2.Str.chars + $3.Str.chars,
-							$4.Str
-						)
-					);
-					@_child.append(
-						Perl6::String::XXX::Body.from-match(
-							$p.hash.<quibble>.hash.<nibble>
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Exit.from-int(
-							$p.to - $5.Str.chars,
-							$5.Str
-						)
-					);
-					$q-map-name = 'qx:x';
-				}
-				elsif $_.Str ~~ m{ ^ ( qx ) ( \s? ) ( . ) .*? ( . ) $ } {
-					@_child.append(
-						Perl6::Bareword.from-int(
-							$_.from,
-							$0.Str
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Enter.from-int(
-							$_.from + $0.Str.chars + $1.Str.chars,
-							$2.Str
-						)
-					);
-					@_child.append(
-						Perl6::String::XXX::Body.from-match(
-							$_.hash.<quibble>.hash.<nibble>
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Exit.from-int(
-							$_.to - $3.Str.chars,
-							$3.Str
-						)
-					);
-					$q-map-name = 'qx';
-				}
+				# XXX The first place negative indices are used
+				@_child.append(
+					Perl6::Balanced::Enter.from-int(
+						$_.hash.<quibble>.hash.<nibble>.from - 1,
+						$_.hash.<quibble>.Str.substr(
+							*-($_.hash.<quibble>.hash.<nibble>.chars + 2),
+							1
+						)
+					)
+				);
+				@_child.append(
+					Perl6::String::XXX::Body.from-match(
+						$_.hash.<quibble>.hash.<nibble>
+					)
+				);
+				@_child.append(
+					Perl6::Balanced::Exit.from-int(
+						$p.hash.<quibble>.hash.<nibble>.to,
+						$p.hash.<quibble>.Str.substr(
+							$p.hash.<quibble>.chars - 1,
+							1
+						)
+					)
+				);
 				@child.append(
 					%q-map{$q-map-name}.new(
 						:factory-line-number(
@@ -4915,322 +4389,55 @@ key-bounds $_;
 						),
 						:from( $_.from ),
 						:to( $_.to ),
-						:child( @_child )
+						:child( @_child ),
+						:adverb( @q-adverb )
 					)
 				);
 			}
 			when self.assert-hash( $_, [< quibble >] ) {
-print "quibble: ";key-bounds $_.hash.<quibble>;
-key-bounds $_;
 				my Perl6::Element @_child;
-				my Str $q-map-name;
-				if $p.Str ~~ m{ ^ ( qq ) ( \s? ) ( ':w' ) ( \s? ) ( \S ) .*? ( \S ) $ } {
+				$_.Str ~~ m{ ^ (\w+) };
+				my Str $q-map-name = $0.Str;
+				my Str @q-adverb;
+				@_child.append(
+					Perl6::Bareword.from-int(
+						$p.from,
+						$0.Str
+					)
+				);
+				if $_.hash.<quibble>.hash.<babble> {
 					@_child.append(
-						Perl6::Bareword.from-int(
-							$p.from,
-							$0.Str
+						Perl6::Bareword.from-match(
+							$_.hash.<quibble>.hash.<babble>
 						)
 					);
-					@_child.append(
-						Perl6::Bareword.from-int(
-							$p.from + $0.Str.chars + $1.Str.chars,
-							$2.Str
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Enter.from-int(
-							$p.from + $0.Str.chars + $1.chars + $2.Str.chars + $3.Str.chars,
-							$4.Str
-						)
-					);
-					@_child.append(
-						Perl6::String::XXX::Body.from-match(
-							$p.hash.<quibble>.hash.<nibble>
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Exit.from-int(
-							$p.to - $5.Str.chars,
-							$5.Str
-						)
-					);
-					$q-map-name = 'qq:w';
+					@q-adverb =
+						$_.hash.<quibble>.hash.<babble>.Str;
 				}
-				elsif $p.Str ~~ m{ ^ ( qq ) ( \s? ) ( ':x' ) ( \s? ) ( \S ) .*? ( \S ) $ } {
-					@_child.append(
-						Perl6::Bareword.from-int(
-							$p.from,
-							$0.Str
+				# XXX The first place negative indices are used
+				@_child.append(
+					Perl6::Balanced::Enter.from-int(
+						$_.hash.<quibble>.hash.<nibble>.from - 1,
+						$_.hash.<quibble>.Str.substr(
+							*-($_.hash.<quibble>.hash.<nibble>.chars + 2),
+							1
 						)
-					);
-					@_child.append(
-						Perl6::Bareword.from-int(
-							$p.from + $0.Str.chars + $1.Str.chars,
-							$2.Str
+					)
+				);
+				@_child.append(
+					Perl6::String::XXX::Body.from-match(
+						$p.hash.<quibble>.hash.<nibble>
+					)
+				);
+				@_child.append(
+					Perl6::Balanced::Exit.from-int(
+						$p.hash.<quibble>.hash.<nibble>.to,
+						$p.hash.<quibble>.Str.substr(
+							$p.hash.<quibble>.chars - 1,
+							1
 						)
-					);
-					@_child.append(
-						Perl6::Balanced::Enter.from-int(
-							$p.from + $0.Str.chars + $1.chars + $2.Str.chars + $3.Str.chars,
-							$4.Str
-						)
-					);
-					@_child.append(
-						Perl6::String::XXX::Body.from-match(
-							$p.hash.<quibble>.hash.<nibble>
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Exit.from-int(
-							$p.to - $5.Str.chars,
-							$5.Str
-						)
-					);
-					$q-map-name = 'qq:x';
-				}
-				elsif $_.Str ~~ m{ ^ ( qq ) ( \s? ) ( . ) .*? ( . ) $ } {
-					@_child.append(
-						Perl6::Bareword.from-int(
-							$_.from,
-							$0.Str
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Enter.from-int(
-							$_.from + $0.Str.chars + $1.Str.chars,
-							$2.Str
-						)
-					);
-					@_child.append(
-						Perl6::String::XXX::Body.from-match(
-							$_.hash.<quibble>.hash.<nibble>
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Exit.from-int(
-							$_.to - $3.Str.chars,
-							$3.Str
-						)
-					);
-					$q-map-name = 'qq';
-				}
-				elsif $p.Str ~~ m{ ^ ( Q ) ( \s? ) ( ':q' ) ( \s? ) ( \S ) .*? ( \S ) $ } {
-					@_child.append(
-						Perl6::Bareword.from-int(
-							$p.from,
-							$0.Str
-						)
-					);
-					@_child.append(
-						Perl6::Bareword.from-int(
-							$p.from + $0.Str.chars + $1.Str.chars,
-							$2.Str
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Enter.from-int(
-							$p.from + $0.Str.chars + $1.chars + $2.Str.chars + $3.Str.chars,
-							$4.Str
-						)
-					);
-					@_child.append(
-						Perl6::String::XXX::Body.from-match(
-							$p.hash.<quibble>.hash.<nibble>
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Exit.from-int(
-							$p.to - $5.Str.chars,
-							$5.Str
-						)
-					);
-					$q-map-name = 'Q:q';
-				}
-				elsif $p.Str ~~ m{ ^ ( Q ) ( \s? ) ( ':w' ) ( \s? ) ( \S ) .*? ( \S ) $ } {
-					@_child.append(
-						Perl6::Bareword.from-int(
-							$p.from,
-							$0.Str
-						)
-					);
-					@_child.append(
-						Perl6::Bareword.from-int(
-							$p.from + $0.Str.chars + $1.Str.chars,
-							$2.Str
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Enter.from-int(
-							$p.from + $0.Str.chars + $1.chars + $2.Str.chars + $3.Str.chars,
-							$4.Str
-						)
-					);
-					@_child.append(
-						Perl6::String::XXX::Body.from-match(
-							$p.hash.<quibble>.hash.<nibble>
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Exit.from-int(
-							$p.to - $5.Str.chars,
-							$5.Str
-						)
-					);
-					$q-map-name = 'Q:w';
-				}
-				elsif $p.Str ~~ m{ ^ ( Q ) ( \s? ) ( ':x' ) ( \s? ) ( \S ) .*? ( \S ) $ } {
-					@_child.append(
-						Perl6::Bareword.from-int(
-							$p.from,
-							$0.Str
-						)
-					);
-					@_child.append(
-						Perl6::Bareword.from-int(
-							$p.from + $0.Str.chars + $1.Str.chars,
-							$2.Str
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Enter.from-int(
-							$p.from + $0.Str.chars + $1.chars + $2.Str.chars + $3.Str.chars,
-							$4.Str
-						)
-					);
-					@_child.append(
-						Perl6::String::XXX::Body.from-match(
-							$p.hash.<quibble>.hash.<nibble>
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Exit.from-int(
-							$p.to - $5.Str.chars,
-							$5.Str
-						)
-					);
-					$q-map-name = 'Q:x';
-				}
-				elsif $p.Str ~~ m{ ^ ( Q ) ( \s? ) ( \S ) .*? ( \S ) $ } {
-					@_child.append(
-						Perl6::Bareword.from-int(
-							$p.from,
-							$0.Str
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Enter.from-int(
-							$p.from + $0.Str.chars + $1.Str.chars,
-							$2.Str
-						)
-					);
-					@_child.append(
-						Perl6::String::XXX::Body.from-match(
-							$p.hash.<quibble>.hash.<nibble>
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Exit.from-int(
-							$p.to - $3.Str.chars,
-							$3.Str
-						)
-					);
-					$q-map-name = 'Q';
-				}
-				elsif $_.Str ~~ m{ ^ ( q ) ( \s? ) ( ':w' ) ( \s? ) ( . ) .*? ( . ) $ } {
-					@_child.append(
-						Perl6::Bareword.from-int(
-							$_.from,
-							$0.Str
-						)
-					);
-					@_child.append(
-						Perl6::Bareword.from-int(
-							$_.from + $0.Str.chars + $1.Str.chars,
-							$2.Str
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Enter.from-int(
-							$_.from + $0.Str.chars + $1.Str.chars + $2.Str.chars + $3.Str.chars,
-							$4.Str
-						)
-					);
-					@_child.append(
-						Perl6::String::XXX::Body.from-match(
-							$_.hash.<quibble>.hash.<nibble>
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Exit.from-int(
-							$_.to - $5.Str.chars,
-							$5.Str
-						)
-					);
-					$q-map-name = 'q:w';
-				}
-				elsif $_.Str ~~ m{ ^ ( q ) ( \s? ) ( ':x' ) ( \s? ) ( . ) .*? ( . ) $ } {
-					@_child.append(
-						Perl6::Bareword.from-int(
-							$_.from,
-							$0.Str
-						)
-					);
-					@_child.append(
-						Perl6::Bareword.from-int(
-							$_.from + $0.Str.chars + $1.Str.chars,
-							$2.Str
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Enter.from-int(
-							$_.from + $0.Str.chars + $1.Str.chars + $2.Str.chars + $3.Str.chars,
-							$4.Str
-						)
-					);
-					@_child.append(
-						Perl6::String::XXX::Body.from-match(
-							$_.hash.<quibble>.hash.<nibble>
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Exit.from-int(
-							$_.to - $5.Str.chars,
-							$5.Str
-						)
-					);
-					$q-map-name = 'q:x';
-				}
-				elsif $p.Str ~~ m{ ^ ( q ) ( \s? ) ( . ) .*? ( . ) $ } {
-					@_child.append(
-						Perl6::Bareword.from-int(
-							$p.from,
-							$0.Str
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Enter.from-int(
-							$p.from + $0.Str.chars + $1.Str.chars,
-							$2.Str
-						)
-					);
-					@_child.append(
-						Perl6::String::XXX::Body.from-match(
-							$p.hash.<quibble>.hash.<nibble>
-						)
-					);
-					@_child.append(
-						Perl6::Balanced::Exit.from-int(
-							$p.to - $3.Str.chars,
-							$3.Str
-						)
-					);
-					$q-map-name = 'q';
-				}
-				else {
-					debug-match( $p ) if $*DEBUG;
-					die "Unhandled case" if
-						$*FACTORY-FAILURE-FATAL
-				}
+					)
+				);
 				@child.append(
 					%q-map.{$q-map-name}.new(
 						:factory-line-number(
@@ -5238,12 +4445,14 @@ key-bounds $_;
 						),
 						:from( $p.from ),
 						:to( $p.to ),
-						:child( @_child )
+						:child( @_child ),
+						:adverb( @q-adverb )
 					)
 				);
 			}
 			when self.assert-hash( $p, [< nibble >] ) {
- 				if $p.Str ~~ m{ ^ ( . ) .*? ( . ) $ } {
+ 				$p.Str ~~ m{ ^ ( . ) .*? ( . ) $ };
+				if $0.Str eq Q{/} {
 					my Perl6::Element @_child;
 					@_child.append(
 						Perl6::Balanced::Enter.from-int(
@@ -5264,7 +4473,7 @@ key-bounds $_;
 						)
 					);
 					@child.append(
-						%delimiter-map{$0.Str}.new(
+						Perl6::Regex.new(
 							:factory-line-number(
 								callframe(1).line
 							),
@@ -5275,9 +4484,37 @@ key-bounds $_;
 					);
 				}
 				else {
-					debug-match( $p ) if $*DEBUG;
-					die "Unhandled case" if
-						$*FACTORY-FAILURE-FATAL
+					my Perl6::Element @_child;
+					@_child.append(
+						Perl6::Balanced::Enter.from-int(
+							$p.from,
+							$0.Str
+						)
+					);
+					if $p.hash.<nibble>.Str {
+						@_child.append(
+							self._nibble(
+								$p.hash.<nibble>
+								
+							)
+						);
+					}
+					@_child.append(
+						Perl6::Balanced::Exit.from-int(
+							$p.to - $1.Str.chars,
+							$1.Str
+						)
+					);
+					@child.append(
+						%delimiter-map{$0.Str}.new(
+							:factory-line-number(
+								callframe(1).line
+							),
+							:from( $p.from ),
+							:to( $p.to ),
+							:child( @_child )
+						)
+					);
 				}
 			}
 			default {

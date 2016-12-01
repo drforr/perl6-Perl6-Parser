@@ -201,6 +201,19 @@ _END_
 	is $pt.to-string( $tree ), $source, Q{formatted};
 }, Q{infix period};
 
+subtest {
+	plan 2;
+
+	my $source = Q:to[_END_];
+my @c;
+rx/<@c>/;
+_END_
+	my $p = $pt.parse( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.to-string( $tree ), $source, Q{formatted};
+}, Q{rx with bracketed array};
+
 done-testing;
 
 # vim: ft=perl6
