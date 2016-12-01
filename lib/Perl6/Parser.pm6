@@ -364,6 +364,8 @@ my role Validating {
 				#warn "Content '{$root.content}' has leading whitespace"
 			}
 			if $root !~~ Perl6::WS and
+					$root !~~ Perl6::Comment and
+					$root !~~ Perl6::String::XXX::Body and
 					$root.content ~~ m{ (\s+) $ } {
 				say $root.perl;
 				#warn "Content '{$root.content}' has trailing whitespace"

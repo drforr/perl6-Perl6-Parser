@@ -482,12 +482,6 @@ class Perl6::String::WordQuoting {
 	also is Perl6::String;
 	also does Matchable;
 }
-class Perl6::String::WordQuoting::Interpolation {
-	also is Perl6::String::WordQuoting;
-}
-class Perl6::String::WordQuoting::Interpolation::QuoteProtection {
-	also is Perl6::String::WordQuoting::Interpolation;
-}
 class Perl6::String::WordQuoting::QuoteProtection {
 	also is Perl6::String::WordQuoting;
 }
@@ -506,20 +500,8 @@ class Perl6::String::Interpolation::WordQuoting::QuoteProtection {
 class Perl6::String::Shell {
 	also is Perl6::String;
 }
-class Perl6::String::Shell::WordQuoting {
-	also is Perl6::String::Shell;
-}
 class Perl6::String::Escaping {
 	also is Perl6::String;
-}
-class Perl6::String::Escaping::Shell {
-	also is Perl6::String::Escaping;
-}
-class Perl6::String::Escaping::Shell::Shell {
-	also is Perl6::String::Escaping::Shell;
-}
-class Perl6::String::Escaping::Shell::WordQuoting {
-	also is Perl6::String::Escaping::Shell;
 }
 class Perl6::String::Literal {
 	also is Perl6::String;
@@ -527,24 +509,15 @@ class Perl6::String::Literal {
 class Perl6::String::Literal::WordQuoting {
 	also is Perl6::String::Literal;
 }
-class Perl6::String::Literal::WordQuoting::Escaping {
-	also is Perl6::String::Literal::WordQuoting;
-}
-class Perl6::String::Literal::WordQuoting::Shell {
-	also is Perl6::String::Literal::WordQuoting;
-}
-class Perl6::String::Literal::WordQuoting::WordQuoting {
-	also is Perl6::String::Literal::WordQuoting;
-}
 class Perl6::String::Literal::Shell {
 	also is Perl6::String::Literal;
 }
-class Perl6::String::Literal::Shell::Escaping {
-	also is Perl6::String::Literal::Shell;
+class Perl6::String::HereDoc {
+	also is Perl6::String;
+
+	has Str $.hiddden-content;
 }
-class Perl6::String::Literal::Shell::WordQuoting {
-	also is Perl6::String::Literal::Shell;
-}
+
 class Perl6::Regex does Branching {
 	also is Perl6::Element;
 
