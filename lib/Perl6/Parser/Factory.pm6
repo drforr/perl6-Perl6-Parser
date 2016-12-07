@@ -226,9 +226,6 @@ role Child {
 	has Perl6::Element @.child;
 }
 
-# XXX There should be a better way to do this.
-# XXX I could use wrap() probably...
-#
 role Branching does Child {
 	method to-string( ) {
 		join( '', map { .to-string( ) }, @.child )
@@ -808,14 +805,14 @@ class Perl6::Parser::Factory {
 		while $p.Str ~~ m:c{ ( 'q:to[' ) \s* ( <-[ \] ]>+ ) } {
 			my Int $start = $0.from;
 			my Str $marker = $1.Str;
-			$p.Str ~~ m{ \s* ']' ( .*? $$ ) (.+?) ( $marker ) };
+			$p.Str ~~ m{ \s* ']' .*? $$ ( .+? ) ( $marker ) };
 			%.here-doc{ $start } = Here-Doc.new(
 				:factory-line-number(
 					callframe(1).line
 				),
 				:delimiter-start( $start ),
-				:body-from( $1.from ),
-				:body-to( $1.to ),
+				:body-from( $0.from ),
+				:body-to( $0.to ),
 				:marker( $marker )
 			);
 		}
@@ -1018,17 +1015,6 @@ class Perl6::Parser::Factory {
 	method _args( Mu $p ) {
 		my Perl6::Element @child;
 		given $p {
-			when self.assert-hash( $_,
-					[< invocant semiarglist >] ) {
-				@child.append(
-					self._invocant( $p.hash.<invocant> )
-				);
-				@child.append(
-					self._semiarglist(
-						$p.hash.<semiarglist>
-					)
-				);
-			}
 			when self.assert-hash( $_, [< semiarglist >] ) {
 				my Perl6::Element @_child;
 				@_child.append(
@@ -1069,25 +1055,24 @@ class Perl6::Parser::Factory {
 	method _assertion( Mu $p ) {
 		given $p {
 			when self.assert-hash( $_, [< var >] ) {
+				die; # XXX unused? Or just untested?
 				self._var( $_.hash.<var> );
 			}
 			when self.assert-hash( $_, [< longname >] ) {
+				die; # XXX unused? Or just untested?
 				self._longname( $_.hash.<longname> );
 			}
 			when self.assert-hash( $_, [< cclass_elem >] ) {
+				die; # XXX unused? Or just untested?
 				self._cclass_elem( $_.hash.<cclass_elem> );
 			}
 			when self.assert-hash( $_, [< codeblock >] ) {
+				die; # XXX unused? Or just untested?
 				self._codeblock( $_.hash.<codeblock> );
 			}
 			default {
-				if $_.Str {
-					Perl6::Bareword.from-match( $_ );
-				}
-				else {
-					debug-match( $_ );
-					die "Unhandled case" if $*FACTORY-FAILURE-FATAL
-				}
+				debug-match( $_ );
+				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
 			}
 		}
 	}
@@ -1098,9 +1083,6 @@ class Perl6::Parser::Factory {
 		}
 		else {
 			given $p {
-				when self.assert-hash( $_, [< metachar >] ) {
-					Perl6::Bareword.from-match( $_ );
-				}
 				default {
 					debug-match( $_ );
 					die "Unhandled case" if
@@ -1122,9 +1104,6 @@ class Perl6::Parser::Factory {
 
 	method _babble( Mu $p ) {
 		given $p {
-			when self.assert-hash( $_, [< B >], [< quotepair >] ) {
-				self._B( $_.hash.<B> );
-			}
 			default {
 				debug-match( $_ );
 				die "Unhandled case" if
@@ -1154,9 +1133,6 @@ class Perl6::Parser::Factory {
 	#
 	method _backslash( Mu $p ) {
 		given $p {
-			when self.assert-hash( $_, [< sym >] ) {
-				self._sym( $_.hash.<sym> );
-			}
 			default {
 				debug-match( $_ );
 				die "Unhandled case" if
@@ -1199,7 +1175,8 @@ class Perl6::Parser::Factory {
 			}
 			default {
 				debug-match( $_ );
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
 			}
 		}
 		@child;
@@ -1223,9 +1200,6 @@ class Perl6::Parser::Factory {
 
 	method _bracket( Mu $p ) {
 		given $p {
-			when self.assert-hash( $_, [< semilist >] ) {
-				self._semilist( $_.hash.<semilist> );
-			}
 			default {
 				debug-match( $_ );
 				die "Unhandled case" if
@@ -1318,26 +1292,6 @@ class Perl6::Parser::Factory {
 		}
 		else {
 			given $p {
-				when self.assert-hash( $_, [< binint VALUE >] ) {
-					@child.append(
-						self._binint( $_.hash.<binint> )
-					);
-				}
-				when self.assert-hash( $_, [< octint VALUE >] ) {
-					@child.append(
-						self._octint( $_.hash.<octint> )
-					);
-				}
-				when self.assert-hash( $_, [< decint VALUE >] ) {
-					@child.append(
-						self._decint( $_.hash.<decint> )
-					);
-				}
-				when self.assert-hash( $_, [< hexint VALUE >] ) {
-					@child.append(
-						self._hexint( $_.hash.<hexint> )
-					);
-				}
 				when self.assert-hash( $_, [< pblock >] ) {
 					@child.append(
 						self._pblock( $_.hash.<pblock> )
@@ -1411,9 +1365,6 @@ class Perl6::Parser::Factory {
 
 	method _codeblock( Mu $p ) {
 		given $p {
-			when self.assert-hash( $_, [< block >] ) {
-				self._block( $_.hash.<block> );
-			}
 			default {
 				debug-match( $_ );
 				die "Unhandled case" if
@@ -1424,9 +1375,6 @@ class Perl6::Parser::Factory {
 
 	method _coercee( Mu $p ) {
 		given $p {
-			when self.assert-hash( $_, [< semilist >] ) {
-				self._semilist( $_.hash.<semilist> );
-			}
 			default {
 				debug-match( $_ );
 				die "Unhandled case" if
@@ -1452,8 +1400,8 @@ class Perl6::Parser::Factory {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_,
-				     [< identifier coloncircumfix >] ) {
-				# Synthesize the 'from' marker for ':'
+					[< identifier coloncircumfix >] ) {
+				# XXX Synthesize the 'from' marker for ':'
 				@child.append(
 					Perl6::Operator::Prefix.from-int(
 						$_.from, COLON
@@ -1502,9 +1450,6 @@ class Perl6::Parser::Factory {
 				);
 			}
 			when self.assert-hash( $_, [< var >] ) {
-				# Synthesize the 'from' marker for ':'
-				# XXX is this actually a single token?
-				# XXX I think it is.
 				@child.append(
 					Perl6::Operator::Prefix.from-int(
 						$_.from, COLON
@@ -1539,20 +1484,6 @@ class Perl6::Parser::Factory {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_,
-					[< coercee sigil sequence >] ) {
-				@child.append(
-					self._sigil(
-						$_.hash.<sigil>
-					)
-				);
-				# XXX coercee handled inside circumfix
-				@child.append(
-					self._sequence(
-						$_.hash.<sequence>
-					)
-				);
-			}
-			when self.assert-hash( $_,
 					[< coercee circumfix sigil >] ) {
 				@child.append(
 					self._sigil(
@@ -1583,9 +1514,8 @@ class Perl6::Parser::Factory {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_,
-				[< deftermnow initializer term_init >],
-				[< trait >] ) {
-				# XXX missing term_init....
+					[< deftermnow initializer term_init >],
+					[< trait >] ) {
 				@child.append(
 					self._deftermnow(
 						$_.hash.<deftermnow>
@@ -1598,20 +1528,8 @@ class Perl6::Parser::Factory {
 				);
 			}
 			when self.assert-hash( $_,
-				[< sym defterm initializer >],
-				[< trait >] ) {
-				@child.append( self._sym( $_.hash.<sym> ) );
-				@child.append(
-					self._defterm( $_.hash.<defterm> )
-				);
-				@child.append(
-					self._initializer(
-						$_.hash.<initializer>
-					)
-				);
-			}
-			when self.assert-hash( $_,
-				[< initializer signature >], [< trait >] ) {
+					[< initializer signature >],
+					[< trait >] ) {
 				my Perl6::Element @_child;
 				@_child.append(
 					Perl6::Balanced::Enter.from-int(
@@ -1643,8 +1561,8 @@ class Perl6::Parser::Factory {
 				);
 			}
 			when self.assert-hash( $_,
-				  [< initializer variable_declarator >],
-				  [< trait >] ) {
+					[< initializer variable_declarator >],
+					[< trait >] ) {
 				@child.append(
 					self._variable_declarator(
 						$_.hash.<variable_declarator>
@@ -1657,7 +1575,8 @@ class Perl6::Parser::Factory {
 				);
 			}
 			when self.assert-hash( $_,
-				[< routine_declarator >], [< trait >] ) {
+					[< routine_declarator >],
+					[< trait >] ) {
 				@child.append(
 					self._routine_declarator(
 						$_.hash.<routine_declarator>
@@ -1665,7 +1584,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			when self.assert-hash( $_,
-				[< regex_declarator >], [< trait >] ) {
+					[< regex_declarator >], [< trait >] ) {
 				@child.append(
 					self._regex_declarator(
 						$_.hash.<regex_declarator>
@@ -1673,7 +1592,8 @@ class Perl6::Parser::Factory {
 				);
 			}
 			when self.assert-hash( $_,
-				[< variable_declarator >], [< trait >] ) {
+					[< variable_declarator >],
+					[< trait >] ) {
 				@child.append(
 					self._variable_declarator(
 						$_.hash.<variable_declarator>
@@ -1681,7 +1601,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			when self.assert-hash( $_,
-				[< type_declarator >], [< trait >] ) {
+					[< type_declarator >], [< trait >] ) {
 				@child.append(
 					self._type_declarator(
 						$_.hash.<type_declarator>
@@ -1689,7 +1609,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			when self.assert-hash( $_,
-				[< signature >], [< trait >] ) {
+					[< signature >], [< trait >] ) {
 				my Perl6::Element @_child;
 				@_child.append(
 					self._signature( $_.hash.<signature> )
@@ -1715,6 +1635,7 @@ class Perl6::Parser::Factory {
 			when self.assert-hash( $_,
 					[< deftermnow initializer term_init >],
 					[< trait >] ) {
+				die; # XXX unused? Or just untested?
 				@child.append(
 					self._deftermnow(
 						$_.hash.<deftermnow>
@@ -1732,6 +1653,7 @@ class Perl6::Parser::Factory {
 			when self.assert-hash( $_,
 					[< deftermnow initializer signature >],
 					[< trait >] ) {
+				die; # XXX unused? Or just untested?
 				@child.append(
 					self._deftermnow(
 						$_.hash.<deftermnow>
@@ -1749,6 +1671,7 @@ class Perl6::Parser::Factory {
 			when self.assert-hash( $_,
 					[< initializer signature >],
 					[< trait >] ) {
+				die; # XXX unused? Or just untested?
 				@child.append(
 					self._initializer(
 						$_.hash.<initializer>
@@ -1761,6 +1684,7 @@ class Perl6::Parser::Factory {
 			when self.assert-hash( $_,
 					[< initializer variable_declarator >],
 					[< trait >] ) {
+				die; # XXX unused? Or just untested?
 				@child.append(
 					self._initializer(
 						$_.hash.<initializer>
@@ -1773,6 +1697,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			when self.assert-hash( $_, [< sym package_def >] ) {
+				die; # XXX unused? Or just untested?
 				@child.append( self._sym( $_.hash.<sym> ) );
 				@child.append(
 					self._package_def(
@@ -1783,6 +1708,7 @@ class Perl6::Parser::Factory {
 			when self.assert-hash( $_,
 					[< regex_declarator >],
 					[< trait >] ) {
+				die; # XXX unused? Or just untested?
 				@child.append(
 					self._regex_declarator(
 						$_.hash.<regex_declarator>
@@ -1792,6 +1718,7 @@ class Perl6::Parser::Factory {
 			when self.assert-hash( $_,
 					[< variable_declarator >],
 					[< trait >] ) {
+				die; # XXX unused? Or just untested?
 				@child.append(
 					self._variable_declarator(
 						$_.hash.<variable_declarator>
@@ -1801,6 +1728,7 @@ class Perl6::Parser::Factory {
 			when self.assert-hash( $_,
 					[< routine_declarator >],
 					[< trait >] ) {
+				die; # XXX unused? Or just untested?
 				@child.append(
 					self._routine_declarator(
 						$_.hash.<routine_declarator>
@@ -1808,6 +1736,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			when self.assert-hash( $_, [< declarator >] ) {
+				die; # XXX unused? Or just untested?
 				@child.append(
 					self._declarator(
 						$_.hash.<declarator>
@@ -1816,6 +1745,7 @@ class Perl6::Parser::Factory {
 			}
 			when self.assert-hash( $_,
 					[< signature >], [< trait >] ) {
+				die; # XXX unused? Or just untested?
 				@child.append(
 					self.signature( $_.hash.<signature> )
 				);
@@ -1831,20 +1761,10 @@ class Perl6::Parser::Factory {
 
 	method _dec_number( Mu $p ) {
 		given $p {
-			when self.assert-hash( $_,
-					[< int coeff escale frac >] ) {
-				self.__FloatingPoint( $_ );
-			}
-			when self.assert-hash( $_, [< coeff frac escale >] ) {
-				self.__FloatingPoint( $_ );
-			}
 			when self.assert-hash( $_, [< int coeff frac >] ) {
 				self.__FloatingPoint( $_ );
 			}
 			when self.assert-hash( $_, [< int coeff escale >] ) {
-				self.__FloatingPoint( $_ );
-			}
-			when self.assert-hash( $_, [< coeff frac >] ) {
 				self.__FloatingPoint( $_ );
 			}
 			default {
@@ -1897,17 +1817,6 @@ class Perl6::Parser::Factory {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_,
-					[< identifier colonpair >] ) {
-				@child.append(
-					self._identifier(
-						$_.hash.<identifier>
-					)
-				);
-				@child.append(
-					self._colonpair( $_.hash.<colonpair> )
-				);	
-			}
-			when self.assert-hash( $_,
 					[< identifier >],
 					[< colonpair >] ) {
 				if $_.orig.substr( $_.from - 1, 1 ) eq
@@ -1955,9 +1864,6 @@ class Perl6::Parser::Factory {
 
 	method _desigilname( Mu $p ) {
 		given $p {
-			when self.assert-hash( $_, [< longname >] ) {
-				self._longname( $_.hash.<longname> );
-			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
 				die "Unhandled case" if
@@ -2012,8 +1918,7 @@ class Perl6::Parser::Factory {
 	method _dottyop( Mu $p ) {
 		my Perl6::Element @child;
 		given $p {
-			when self.assert-hash( $_,
-					[< sym postop >], [< O >] ) {
+			when self.assert-hash( $_, [< sym postop >], [< O >] ) {
 				@child.append( self._sym( $p.hash.<sym> ) );
 				@child.append(
 					self._postop( $p.hash.<postop> )
@@ -2040,9 +1945,6 @@ class Perl6::Parser::Factory {
 
 	method _dottyopish( Mu $p ) {
 		given $p {
-			when self.assert-hash( $_, [< term >] ) {
-				self._term( $_.hash.<term> );
-			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
 				die "Unhandled case" if
@@ -2053,11 +1955,6 @@ class Perl6::Parser::Factory {
 
 	method _e1( Mu $p ) {
 		given $p {
-			when self.assert-hash( $_, [< scope_declarator >] ) {
-				self._scope_declarator(
-					$_.hash.<scope_declarator>
-				);
-			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
 				die "Unhandled case" if
@@ -2069,10 +1966,6 @@ class Perl6::Parser::Factory {
 	method _e2( Mu $p ) {
 		my Perl6::Element @child;
 		given $p {
-			when self.assert-hash( $_, [< infix OPER >] ) {
-				@child.append( self._infix( $p.hash.<infix> ) );
-				@child.append( self._OPER( $p.hash.<OPER> ) );
-			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
 				die "Unhandled case" if
@@ -2085,14 +1978,6 @@ class Perl6::Parser::Factory {
 	method _e3( Mu $p ) {
 		my Perl6::Element @child;
 		given $p {
-			when self.assert-hash( $_,
-					[< postfix OPER >],
-					[< postfix_prefix_meta_operator >] ) {
-				@child.append(
-					self._postfix( $p.hash.<postfix> )
-				);
-				@child.append( self._OPER( $p.hash.<OPER> ) );
-			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
 				die "Unhandled case" if
@@ -2105,12 +1990,6 @@ class Perl6::Parser::Factory {
 	method _else( Mu $p ) {
 		my Perl6::Element @child;
 		given $p {
-			when self.assert-hash( $_, [< sym blorst >] ) {
-				@child.append( self._sym( $_.hash.<sym> ) );
-				@child.append(
-					self._blorst( $_.hash.<blorst> )
-				);
-			}
 			when self.assert-hash( $_, [< blockoid >] ) {
 				@child.append(
 					self._blockoid( $_.hash.<blockoid> )
@@ -2128,12 +2007,6 @@ class Perl6::Parser::Factory {
 	method _escale( Mu $p ) {
 		my Perl6::Element @child;
 		given $p {
-			when self.assert-hash( $_, [< sign decint >] ) {
-				@child.append( self._sign( $_.hash.<sign> ) );
-				@child.append(
-					self._decint( $_.hash.<decint> )
-				);
-			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
 				die "Unhandled case" if
@@ -2158,16 +2031,6 @@ class Perl6::Parser::Factory {
 	method _escape( Mu $p ) {
 		my Perl6::Element @child;
 		given $p {
-			when self.assert-hash( $_, [< sign decint >] ) {
-				@child.append(
-					self._invocant( $_.hash.<invocant> )
-				);
-				@child.append(
-					self._semiarglist(
-						$_.hash.<semiarglist>
-					)
-				);
-			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
 				die "Unhandled case" if
@@ -2213,12 +2076,11 @@ class Perl6::Parser::Factory {
 						$p.from, $str
 					)
 				);
-				@child.append( self._dotty( $p.hash.<dotty> ) );
 			}
 			else {
 				@child.append( self._EXPR( $p.list.[0] ) );
-				@child.append( self._dotty( $p.hash.<dotty> ) );
 			}
+			@child.append( self._dotty( $p.hash.<dotty> ) );
 		}
 		elsif self.assert-hash( $p,
 				[< infix OPER >],
@@ -2236,7 +2098,7 @@ class Perl6::Parser::Factory {
 				[< postcircumfix OPER >],
 				[< postfix_prefix_meta_operator >] ) {
 			@child.append( self._EXPR( $p.list.[0] ) );
-			if $p.Str ~~ m{ ^ ( '.' ) } {
+			if $p.Str ~~ m{ ^ '.' } {
 				@child.append(
 					Perl6::Operator::Infix.from-int(
 						$p.from,
@@ -2391,6 +2253,8 @@ class Perl6::Parser::Factory {
 			@child.append( self._args( $p.hash.<args> ) );
 		}
 		elsif self.assert-hash( $p, [< sym args >] ) {
+			# XXX _sym(...) falls back to Bareword because it's used
+			# XXX for 'my' among other things.
 			@child.append(
 				Perl6::Operator::Infix.from-match(
 					$p.hash.<sym>
@@ -2499,7 +2363,6 @@ class Perl6::Parser::Factory {
 			@child.append( self._pblock( $p.hash.<pblock> ) );
 		}
 		elsif $p.Str {
-say $p.dump;
 			@child.append( Perl6::Bareword.from-match( $p ) );
 		}
 		else {
@@ -2512,9 +2375,6 @@ say $p.dump;
 
 	method _fake_infix( Mu $p ) {
 		given $p {
-			when self.assert-hash( $_, [< O >] ) {
-				self._O( $_.hash.<O> );
-			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
 				die "Unhandled case" if
@@ -2540,7 +2400,7 @@ say $p.dump;
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< key val >] ) {
-				$_.Str ~~ m{ ('=>') };
+				$_.Str ~~ m{ '=>' };
 				@child.append( self._key( $_.hash.<key> ) );
 				@child.append(
 					Perl6::Operator::Infix.find-match(
@@ -2594,30 +2454,10 @@ say $p.dump;
 	method _infix( Mu $p ) {
 		my Perl6::Element @child;
 		given $p {
-			when self.assert-hash( $_, [< sym EXPR >], [< O >] ) {
-				@child.append(
-					self._sym(
-						$_.hash.<sym>
-					)
-				);
-				@child.append(
-					self._EXPR(
-						$_.hash.<EXPR>
-					)
-				);
-			}
 			when self.assert-hash( $_, [< sym O >] ) {
 				@child.append(
 					Perl6::Operator::Infix.from-match(
 						$_.hash.<sym>
-					)
-				);
-			}
-			when self.assert-hash( $_, [< EXPR O >] ) {
-				# XXX fix?
-				@child.append(
-					Perl6::Operator::Infix.from-match(
-						$_.hash.<EXPR>
 					)
 				);
 			}
@@ -2633,10 +2473,6 @@ say $p.dump;
 	method _infixish( Mu $p ) {
 		my Perl6::Element @child;
 		given $p {
-			when self.assert-hash( $_, [< infix OPER >] ) {
-				@child.append( self._infix( $_.hash.<infix> ) );
-				@child.append( self._OPER( $_.hash.<OPER> ) );
-			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
 				die "Unhandled case" if
@@ -2651,12 +2487,6 @@ say $p.dump;
 	#
 	method _infix_circumfix_meta_operator( Mu $p ) {
 		given $p {
-			when self.assert-hash( $_, [< sym infixish O >] ) {
-				Perl6::Operator::Infix.from-int(
-					$_.hash.<sym>.from,
-					$_.hash.<sym>.Str ~ $_.hash.<infixish>
-				);
-			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
 				die "Unhandled case" if
@@ -2670,6 +2500,8 @@ say $p.dump;
 	method _infix_prefix_meta_operator( Mu $p ) {
 		given $p {
 			when self.assert-hash( $_, [< sym infixish O >] ) {
+				# XXX have to distinguish _sym(...) bareword
+				# XXX from operator
 				Perl6::Operator::Infix.from-int(
 					$_.hash.<sym>.from,
 					$_.hash.<sym>.Str ~ $_.hash.<infixish>
@@ -2692,21 +2524,14 @@ say $p.dump;
 	method _initializer( Mu $p ) {
 		my Perl6::Element @child;
 		given $p {
-			when self.assert-hash( $_, [< dottyopish sym >] ) {
-				@child.append(
-					self._dottyopish(
-						$_.hash.<dottyopish>
-					)
-				);
-				@child.append( self._sym( $_.hash.<sym> ) );
-			}
 			when self.assert-hash( $_, [< sym EXPR >] ) {
+				# XXX have to distinguish _sym(...) bareword
+				# XXX from operator
 				@child.append(
 					Perl6::Operator::Infix.from-match(
 						$_.hash.<sym>
 					)
 				);
-	# from here
 				if $_.hash.<sym>.Str eq EQUAL and
 					$_.hash.<EXPR>.list.elems == 2 {
 					@child.append(
@@ -2732,12 +2557,9 @@ say $p.dump;
 						self._EXPR( $_.hash.<EXPR> )
 					);
 				}
-	# to here
 				if $_.hash.<EXPR>.to < $_.to and
-				   %.here-doc.keys.elems > 0 {
-					my $content = $p.Str.substr(
-						$_.hash.<EXPR>.to - $p.from
-					);
+					%.here-doc.keys.elems > 0 {
+					my $content = $p.Str.substr( $_.hash.<EXPR>.to - $p.from);
 					@child.append(
 						Perl6::Sir-Not-Appearing-In-This-Statement.new(
 							:factory-line-number(
@@ -2804,9 +2626,6 @@ return True;
 
 	method _left( Mu $p ) {
 		given $p {
-			when self.assert-hash( $_, [< termseq >] ) {
-				self._termseq( $_.hash.<termseq> );
-			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
 				die "Unhandled case" if
@@ -2842,27 +2661,35 @@ return True;
 	method _metachar( Mu $p ) {
 		given $p {
 			when self.assert-hash( $_, [< sym >] ) {
+				die; # XXX unused? Or just untested?
 				self._sym( $_.hash.<sym> );
 			}
 			when self.assert-hash( $_, [< codeblock >] ) {
+				die; # XXX unused? Or just untested?
 				self._codeblock( $_.hash.<codeblock> );
 			}
 			when self.assert-hash( $_, [< backslash >] ) {
+				die; # XXX unused? Or just untested?
 				self._backslash( $_.hash.<backslash> );
 			}
 			when self.assert-hash( $_, [< assertion >] ) {
+				die; # XXX unused? Or just untested?
 				self._assertion( $_.hash.<assertion> );
 			}
 			when self.assert-hash( $_, [< nibble >] ) {
+				die; # XXX unused? Or just untested?
 				self._nibble( $_.hash.<nibble> );
 			}
 			when self.assert-hash( $_, [< quote >] ) {
+				die; # XXX unused? Or just untested?
 				self._quote( $_.hash.<quote> );
 			}
 			when self.assert-hash( $_, [< nibbler >] ) {
+				die; # XXX unused? Or just untested?
 				self._nibbler( $_.hash.<nibbler> );
 			}
 			when self.assert-hash( $_, [< statement >] ) {
+				die; # XXX unused? Or just untested?
 				self._statement( $_.hash.<statement> );
 			}
 			default {
@@ -2958,9 +2785,6 @@ return True;
 
 	method _min( Mu $p ) {
 		given $p {
-			when self.assert-hash( $_, [< decint VALUE >] ) {
-				self._decint( $_.hash.<decint> );
-			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
 				die "Unhandled case" if
@@ -2997,10 +2821,10 @@ return True;
 
 	method _morename( Mu $p ) {
 		my Perl6::Element @child;
-		# XXX This probably needs further work.
 		if $p.list {
 			for $p.list {
 				if self.assert-hash( $p, [< identifier >] ) {
+					# XXX replace with _identifier(..)
 					@child.append(
 						Perl6::PackageName.from-match(
 							$_.hash.<identifier>
@@ -3081,6 +2905,7 @@ return True;
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< name param_var >] ) {
+				die; # XXX unused? Or just untested?
 # XXX Needs to be added back in...
 #				self._name( $_.hash.<name> );
 				@child.append(
@@ -3088,6 +2913,7 @@ return True;
 				);
 			}
 			when self.assert-hash( $_, [< param_var >] ) {
+				die; # XXX unused? Or just untested?
 				@child.append(
 					self._param_var( $_.hash.<param_var> )
 				);
@@ -3105,25 +2931,9 @@ return True;
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_,
-				[< param_var type_constraint quant >],
-				[< default_value modifier trait
-				   post_constraint >] ) {
-				@child.append(
-					self._param_var( $_.hash.<param_var> )
-				);
-				@child.append(
-					self._type_constraint(
-						$_.hash.<type_constraint>
-					)
-				);
-				@child.append( self._quant( $_.hash.<quant> ) )
-			}
-			when self.assert-hash( $_,
 					[< identifier >],
 					[< morename >] ) {
-				# XXX This did descend to _identifier, but that
-				# XXX level wouldn't properly catch Foo::Bar
-				# XXX second-level qualified names.
+				# XXX replace with _identifier(..)
 				@child.append(
 					Perl6::Bareword.from-match( $_ )
 				);
@@ -3137,14 +2947,8 @@ return True;
 					)
 				}
 			}
-			when self.assert-hash( $_, [< subshortname >] ) {
-				@child.append(
-					self._subshortname(
-						$_.hash.<subshortname>
-					)
-				);
-			}
 			when self.assert-hash( $_, [< morename >] ) {
+				# XXX replace with _morename(..)
 				@child.append(
 					Perl6::PackageName.from-match( $_ )
 				);
@@ -3164,14 +2968,19 @@ return True;
 			@child.append( self._termseq( $p.hash.<termseq> ) );
 		}
 		elsif $p.Str {
-			if $p.Str ~~ m{ ^ ( .+? ) ( \s+ ) $ } {
+			if $p.Str ~~ m{ ^ ( .+? ) \s+ $ } {
 				@child.append(
-					Perl6::String::XXX::Body.from-int( $p.from, $0.Str )
+					Perl6::String::XXX::Body.from-int(
+						$p.from,
+						$0.Str
+					)
 				);
 			}
 			else {
 				@child.append(
-					Perl6::String::XXX::Body.from-match( $p )
+					Perl6::String::XXX::Body.from-match(
+						$p
+					)
 				);
 			}
 		}
@@ -3185,9 +2994,6 @@ return True;
 
 	method _nibbler( Mu $p ) {
 		given $p {
-			when self.assert-hash( $_, [< termseq >] ) {
-				self._termseq( $_.hash.<termseq> );
-			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
 				die "Unhandled case" if
@@ -3334,6 +3140,14 @@ return True;
 		}
 	}
 
+	method __Inf( Mu $p ) {
+		Perl6::Infinity.from-match( $p );
+	}
+
+	method __NaN( Mu $p ) {
+		Perl6::NotANumber.from-match( $p );
+	}
+
 	method _numish( Mu $p ) {
 		given $p {
 			when self.assert-hash( $_, [< dec_number >] ) {
@@ -3346,10 +3160,10 @@ return True;
 				self._integer( $_.hash.<integer> );
 			}
 			when $_.Str eq 'Inf' {
-				Perl6::Infinity.from-match( $_ );
+				self.__Inf( $_ );
 			}
 			when $_.Str eq 'NaN' {
-				Perl6::NotANumber.from-match( $_ );
+				self.__NaN( $_ );
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
@@ -3417,19 +3231,6 @@ return True;
 	method _op( Mu $p ) {
 		my Perl6::Element @child;
 		given $p {
-			when self.assert-hash( $_,
-				     [< infix_prefix_meta_operator OPER >] ) {
-				@child.append(
-					self._infix_prefix_meta_operator(
-						$_.hash.<infix_prefix_meta_operator>
-					)
-				);
-				@child.append( self._OPER( $_.hash.<OPER> ) );
-			}
-			when self.assert-hash( $_, [< infix OPER >] ) {
-				@child.append( self._infix( $_.hash.<infix> ) );
-				@child.append( self._OPER( $_.hash.<OPER> ) );
-			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
 				die "Unhandled case" if
@@ -3443,6 +3244,7 @@ return True;
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< sym infixish O >] ) {
+				die; # XXX unused? Or just untested?
 				@child.append( self._sym( $_.hash.<sym> ) );
 				@child.append(
 					self._infixish( $_.hash.<infixish> )
@@ -3450,6 +3252,8 @@ return True;
 				@child.append( self._O( $_.hash.<O> ) );
 			}
 			when self.assert-hash( $_, [< sym dottyop O >] ) {
+				die; # XXX unused? Or just untested?
+				# XXX replace with _sym(..)
 				@child.append(
 					Perl6::Operator::Infix.from-match(
 						$_.hash.<sym>
@@ -3460,15 +3264,18 @@ return True;
 				);
 			}
 			when self.assert-hash( $_, [< sym O >] ) {
+				die; # XXX unused? Or just untested?
 				@child.append( self._sym( $_.hash.<sym> ) );
 # XXX Probably needs to be rethought
 #				@child.append( self._O( $_.hash.<O> ) );
 			}
 			when self.assert-hash( $_, [< EXPR O >] ) {
+				die; # XXX unused? Or just untested?
 				@child.append( self._EXPR( $_.hash.<EXPR> ) );
 				@child.append( self._O( $_.hash.<O> ) );
 			}
 			when self.assert-hash( $_, [< semilist O >] ) {
+				die; # XXX unused? Or just untested?
 				@child.append(
 					self._semilist( $_.hash.<semilist> )
 				);
@@ -3476,22 +3283,26 @@ return True;
 #				@child.append( self._O( $_.hash.<O> ) );
 			}
 			when self.assert-hash( $_, [< nibble O >] ) {
+				die; # XXX unused? Or just untested?
 				@child.append(
 					self._nibble( $_.hash.<nibble> )
 				);
 				@child.append( self._O( $_.hash.<O> ) );
 			}
 			when self.assert-hash( $_, [< arglist O >] ) {
+				die; # XXX unused? Or just untested?
 				@child.append(
 					self._arglist( $_.hash.<arglist> )
 				);
 				@child.append( self._O( $_.hash.<O> ) );
 			}
 			when self.assert-hash( $_, [< dig O >] ) {
+				die; # XXX unused? Or just untested?
 				@child.append( self._dig( $_.hash.<dig> ) );
 				@child.append( self._O( $_.hash.<O> ) );
 			}
 			when self.assert-hash( $_, [< O >] ) {
+				die; # XXX unused? Or just untested?
 				@child.append( self._O( $_.hash.<O> ) );
 			}
 			default {
@@ -3510,15 +3321,6 @@ return True;
 	method _p5metachar( Mu $p ) {
 		my Perl6::Element @child;
 		given $p {
-			# $_ doesn't contain WS after the block.
-			when self.assert-hash( $_, [< sym package_def >] ) {
-				@child.append( self._sym( $_.hash.<sym> ) );
-				@child.append(
-					self._package_def(
-						$_.hash.<package_def>
-					)
-				);
-			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
 				die "Unhandled case" if
@@ -3574,7 +3376,8 @@ return True;
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_,
-				[< longname statementlist >], [< trait >] ) {
+					[< longname statementlist >],
+					[< trait >] ) {
 				@child.append(
 					self._longname( $_.hash.<longname> )
 				);
@@ -3591,12 +3394,6 @@ return True;
 						);
 					}
 				}
-			}
-			when self.assert-hash( $_,
-					[< longname >], [< colonpair >] ) {
-				@child.append(
-					self._longname( $_.hash.<longname> )
-				);
 			}
 			when self.assert-hash( $_,
 					[< longname trait blockoid >] ) {
@@ -3672,7 +3469,7 @@ return True;
 				[< default_value modifier trait >] ) {
 				# Synthesize the 'from' and 'to' markers for
 				# 'where'
-				$p.Str ~~ m{ << (where) >> };
+				$p.Str ~~ m{ << ( where ) >> };
 				my Int $from = $0.from;
 				@child.append(
 					self._type_constraint(
@@ -3715,7 +3512,7 @@ return True;
 				@child.append(
 					self._param_var( $_.hash.<param_var> )
 				);
-				# XXX Should be possible to refactor...
+				# XXX replace with _quant(..) &c
 				@child.append(
 					Perl6::Operator::Infix.find-match(
 						$p, EQUAL
@@ -3741,7 +3538,7 @@ return True;
 				[< default_value type_constraint modifier
 				   trait post_constraint >] ) {
 				# Synthesize the 'from' and 'to' markers for ':'
-				$p.Str ~~ m{ (':') };
+				$p.Str ~~ m{ ( ':' ) };
 				my Int $from = $0.from;
 				@child.append(
 					Perl6::Operator::Prefix.from-int(
@@ -4008,17 +3805,6 @@ return True;
 	method _postcircumfix( Mu $p ) {
 		my Perl6::Element @child;
 		given $p {
-			when self.assert-hash( $_, [< arglist O >] ) {
-				if $_.hash.<arglist>.Str {
-					@child.append(
-						self._arglist(
-							$_.hash.<arglist>
-						)
-					);
-				}
-# XXX Probably unused at this point, actually.
-#				@child.append( self._O( $_.hash.<O> ) );
-			}
 			when self.assert-hash( $_, [< semilist O >] ) {
 				my Perl6::Element @_child;
 				@_child.append(
@@ -4033,7 +3819,7 @@ return True;
 			}
 			# XXX can probably be rewritten to use utils
 			when self.assert-hash( $_, [< nibble O >] ) {
-				if $_.Str ~~ m{ ^ (.) ( \s+ )? ( .+? ) ( \s+ )? (.) $ } {
+				if $_.Str ~~ m{ ^ ( . ) ( \s+ )? ( .+? ) ( \s+ )? . $ } {
 					my Perl6::Element @_child;
 					@_child.append(
 						Perl6::Bareword.from-int(
@@ -4072,6 +3858,7 @@ return True;
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< sym O >] ) {
+				# XXX replace with _sym(..)
 				@child.append(
 					Perl6::Operator::Postfix.from-match(
 						$_.hash.<sym>
@@ -4079,6 +3866,7 @@ return True;
 				);
 			}
 			when self.assert-hash( $_, [< dig O >] ) {
+				# XXX replace with _dig(..)
 				@child.append(
 					Perl6::Operator::Postfix.from-match(
 						$_.hash.<dig>
@@ -4108,15 +3896,6 @@ return True;
 # XXX Probably needs to be rethought
 #				@child.append( self._O( $_.hash.<O> ) );
 			}
-			when self.assert-hash( $_,
-					[< sym postcircumfix >], [< O >] ) {
-				@child.append( self._sym( $_.hash.<sym> ) );
-				@child.append(
-					self._postcircumfix(
-						$_.hash.<postcircumfix>
-					)
-				);
-			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
 				die "Unhandled case" if
@@ -4130,6 +3909,7 @@ return True;
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< sym O >] ) {
+				# XXX replace with _sym(..)
 				@child.append(
 					Perl6::Operator::Prefix.from-match(
 						$_.hash.<sym>
@@ -4186,15 +3966,6 @@ return True;
 	method _quantifier( Mu $p ) {
 		my Perl6::Element @child;
 		given $p {
-			when self.assert-hash( $_,
-					[< sym min max backmod >] ) {
-				@child.append( self._sym( $_.hash.<sym> ) );
-				@child.append( self._min( $_.hash.<min> ) );
-				@child.append( self._max( $_.hash.<max> ) );
-				@child.append(
-					self._backmod( $_.hash.<backmod> )
-				);
-			}
 			when self.assert-hash( $_, [< sym backmod >] ) {
 				@child.append( self._sym( $_.hash.<sym> ) );
 				@child.append(
@@ -4213,19 +3984,6 @@ return True;
 	method _quibble( Mu $p ) {
 		my Perl6::Element @child;
 		given $p {
-			when self.assert-hash( $_, [< babble nibble >] ) {
-				# XXX Look at this later
-				if $_.hash.<babble>.Str {
-					@child.append(
-						self._babble(
-							$_.hash.<babble>
-						)
-					);
-				}
-				@child.append(
-					self._nibble( $_.hash.<nibble> )
-				);
-			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
 				die "Unhandled case" if
@@ -4322,7 +4080,7 @@ return True;
 			}
 			when self.assert-hash( $_, [< quibble quote_mod >] ) {
 				my Perl6::Element @_child;
-				$_.Str ~~ m{ ^ (\w+) };
+				$_.Str ~~ m{ ^ ( \w+ ) };
 				my Str $q-map-name = $0.Str;
 				my Str @q-adverb;
 				@_child.append(
@@ -4378,7 +4136,7 @@ return True;
 			}
 			when self.assert-hash( $_, [< quibble >] ) {
 				my Perl6::Element @_child;
-				$_.Str ~~ m{ ^ (\w+) };
+				$_.Str ~~ m{ ^ ( \w+ ) };
 				my Str $q-map-name = $0.Str;
 				my Str @q-adverb;
 				@_child.append(
@@ -4551,27 +4309,16 @@ return True;
 		( )
 	}
 
+	method __Radix( Mu $p ) {
+		Perl6::Number::Radix.from-match( $p );
+	}
+
 	method _rad_number( Mu $p ) {
 		given $p {
 			when self.assert-hash( $_,
-					[< circumfix bracket radix >],
-					[< exp rad_digits base >] ) {
-				Perl6::Number::Radix.from-match( $_ );
-			}
-			when self.assert-hash( $_,
-					[< circumfix bracket radix >],
-					[< exp base >] ) {
-				Perl6::Number::Radix.from-match( $_ );
-			}
-			when self.assert-hash( $_,
-					[< circumfix radix >],
-					[< exp base >] ) {
-				Perl6::Number::Radix.from-match( $_ );
-			}
-			when self.assert-hash( $_,
 					[< circumfix radix >],
 					[< exp rad_digits base >] ) {
-				Perl6::Number::Radix.from-match( $_ );
+				self.__Radix( $_ );
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
@@ -4751,8 +4498,7 @@ return True;
 				);
 			}
 			when self.assert-hash( $_,
-					[< deflongname multisig
-					   blockoid >],
+					[< deflongname multisig blockoid >],
 					[< trait >] ) {
 				my Perl6::Element @_child;
 				my $left-margin = $_.Str.substr(
@@ -4885,10 +4631,11 @@ return True;
 	method _rx_adverbs( Mu $p ) {
 		given $p {
 			when self.assert-hash( $_, [< quotepair >] ) {
+				die; # XXX unused? Or just untested?
 				self._quotepair( $_.hash.<quotepair> );
 			}
-			when self.assert-hash( $_,
-					[ ], [< quotepair >] ) {
+			when self.assert-hash( $_, [ ], [< quotepair >] ) {
+				die; # XXX unused? Or just untested?
 				die "Not implemented yet"
 			}
 			default {
@@ -5047,14 +4794,6 @@ return True;
 	method _sequence( Mu $p ) {
 		my Perl6::Element @child;
 		given $p {
-			when self.assert-hash( $_,
-					[< statement >] ) {
-				@child.append(
-					self._statement(
-						$_.hash.<statement>
-					)
-				);
-			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
 				die "Unhandled case" if
@@ -5120,6 +4859,7 @@ return True;
 			when self.assert-hash( $_,
 					[< parameter typename >],
 					[< param_sep >] ) {
+				die; # XXX unused? Or just untested?
 				@child.append(
 					self._parameter( $_.hash.<parameter> )
 				);
@@ -5128,12 +4868,14 @@ return True;
 				);
 			}
 			when self.assert-hash( $_, [< normspace >] ) {
+				die; # XXX unused? Or just untested?
 				@child.append(
 					self._normspace( $_.hash.<normspace> )
 				);
 			}
 			when self.assert-hash( $_, [ ],
 					[< param_sep parameter >] ) {
+				die; # XXX unused? Or just untested?
 				die "Not implemented yet"
 			}
 			default {
@@ -5191,15 +4933,6 @@ return True;
 				);
 			}
 			when self.assert-hash( $_,
-					[< defterm quant >],
-					[< type_constraint post_constraint
-					   default_value modifier trait >] ) {
-				@child.append(
-					self._defterm( $_.hash.<defterm> )
-				);
-				@child.append( self._quant( $_.hash.<quant> ) );
-			}
-			when self.assert-hash( $_,
 					[< type_constraint param_var
 					   post_constraint quant >],
 					[< default_value modifier trait >] ) {
@@ -5230,11 +4963,11 @@ return True;
 					self._param_var( $_.hash.<param_var> )
 				);
 				if $p.hash.<default_value> {
-					if $_.Str ~~ m{ ( \s* ) ('=') ( \s* ) } {
+					if $_.Str ~~ m{ \s* ( '=' ) \s* } {
 						@child.append(
 							Perl6::Operator::Infix.from-int(
-								$p.from + $1.from,
-								$1.Str
+								$p.from + $0.from,
+								$0.Str
 							)
 						);
 						@child.append(
@@ -5245,7 +4978,8 @@ return True;
 			}
 			when self.assert-hash( $_,
 					[< param_var quant default_value >],
-					[< modifier trait type_constraint post_constraint >] ) {
+					[< modifier trait type_constraint
+					   post_constraint >] ) {
 				@child.append(
 					self._param_var( $_.hash.<param_var> )
 				);
@@ -5259,7 +4993,8 @@ return True;
 			}
 			when self.assert-hash( $_,
 					[< param_var quant post_constraint >],
-					[< modifier trait type_constraint default_value >] ) {
+					[< modifier trait type_constraint
+					   default_value >] ) {
 				@child.append(
 					self._param_var( $_.hash.<param_var> )
 				);
@@ -5277,7 +5012,8 @@ return True;
 			when self.assert-hash( $_,
 					[< param_var quant >],
 					[< default_value modifier trait
-					   type_constraint post_constraint >] ) {
+					   type_constraint
+					   post_constraint >] ) {
 				if $_.hash.<quant>.Str {
 					@child.append(
 						self._quant( $_.hash.<quant> )
@@ -5298,24 +5034,6 @@ return True;
 						)
 					);
 				}
-			}
-			when self.assert-hash( $_,
-					[< named_param quant >],
-					[< default_value type_constraint modifier
-					   trait post_constraint >] ) {
-				# Synthesize the 'from' and 'to' markers for ':'
-				$_.Str ~~ m{ (':') };
-				@child.append(
-					Perl6::Operator::Prefix.from-int(
-						$p.from + $0.from,
-						$0.Str
-					)
-				);
-				@child.append(
-					self._named_param(
-						$p.hash.<named_param>
-					)
-				);
 			}
 			when self.assert-hash( $_,
 					[< type_constraint >],
@@ -5340,12 +5058,6 @@ return True;
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_,
-					[< parameter typename >],
-					[< param_sep >] ) {
-				@child.append( self._typename( $_.hash.<typename> ) );
-				@child.append( self._parameter( $_.hash.<parameter> ) );
-			}
-			when self.assert-hash( $_,
 					[< parameter >],
 					[< param_sep >] ) {
 				my Mu $parameter = $_.hash.<parameter>;
@@ -5353,7 +5065,7 @@ return True;
 				for $parameter.list.kv -> $index, $q {
 					if $index > 0 {
 						my Int $inset = 0;
-						if $parameter.list.[$index-1].Str ~~ m{ ( \s+ ) $} {
+						if $parameter.list.[$index-1].Str ~~ m{ ( \s+ ) $ } {
 							$inset = $0.chars
 						}
 						my Int $start = $parameter.list.[$index-1].to - $inset;
@@ -5367,18 +5079,15 @@ return True;
 							$_start += $lhs.chars;
 						}
 						@child.append(
-							Perl6::Operator::Infix.from-int( $_start, COMMA )
+							Perl6::Operator::Infix.from-int(
+								$_start, COMMA
+							)
 						);
 					}
 					@child.append(
 						self.__Parameter( $q )
 					);
 				}
-			}
-			when self.assert-hash( $_,
-					[< param_sep >],
-					[< parameter >] ) {
-				@child.append( self._parameter( $_.hash.<parameter> ) );
 			}
 			when self.assert-hash( $_, [ ],
 					[< param_sep parameter >] ) {
@@ -5477,7 +5186,7 @@ return True;
 					);
 				}
 				my $x = $_.Str.substr( 0, $_.hash.<else>.from );
-				if $x ~~ m{ ('else') } {
+				if $x ~~ m{ ( 'else' ) } {
 					@child.append(
 						Perl6::Bareword.from-int(
 							$p.from + $0.from,
@@ -5593,40 +5302,20 @@ if $q.list.[$idx].Str {
 			}
 		}
 		elsif self.assert-hash( $p, [< EXPR statement_mod_cond >] ) {
-			if $p.hash.<EXPR>.Str ~~ m{ ( \s+ ) $ } {
-				@child.append( self._EXPR( $p.hash.<EXPR> ) );
-				@child.append(
-					self._statement_mod_cond(
-						$p.hash.<statement_mod_cond>
-					)
-				);
-			}
-			else {
-				@child.append( self._EXPR( $p.hash.<EXPR> ) );
-				@child.append(
-					self._statement_mod_cond(
-						$p.hash.<statement_mod_cond>
-					)
-				);
-			}
+			@child.append( self._EXPR( $p.hash.<EXPR> ) );
+			@child.append(
+				self._statement_mod_cond(
+					$p.hash.<statement_mod_cond>
+				)
+			);
 		}
 		elsif self.assert-hash( $p, [< EXPR statement_mod_loop >] ) {
-			if $p.hash.<EXPR>.Str ~~ m{ ( \s+ ) $ } {
-				@child.append( self._EXPR( $p.hash.<EXPR> ) );
-				@child.append(
-					self._statement_mod_loop(
-						$p.hash.<statement_mod_loop>
-					)
-				);
-			}
-			else {
-				@child.append( self._EXPR( $p.hash.<EXPR> ) );
-				@child.append(
-					self._statement_mod_loop(
-						$p.hash.<statement_mod_loop>
-					)
-				);
-			}
+			@child.append( self._EXPR( $p.hash.<EXPR> ) );
+			@child.append(
+				self._statement_mod_loop(
+					$p.hash.<statement_mod_loop>
+				)
+			);
 		}
 		elsif self.assert-hash( $p, [< sym trait >] ) {
 			@child.append( self._sym( $p.hash.<sym> ) );
@@ -5726,10 +5415,10 @@ if $q.list.[$idx].Str {
 			# WS trailing terms the grammar below might add
 			# redundantly.
 			#
-			if $_.Str ~~ m{ ( ';' ) ( \s+ ) $ } {
-				$leftover-ws = $1.Str;
+			if $_.Str ~~ m{ ';' ( \s+ ) $ } {
+				$leftover-ws = $0.Str;
 				$leftover-ws-from =
-					$_.to - $1.Str.chars
+					$_.to - $0.Str.chars
 			}
 			else {
 				if $_.Str ~~ m{ ( \s+ ) $ } {
@@ -5888,9 +5577,6 @@ if $q.list.[$idx].Str {
 
 	method _subshortname( Mu $p ) {
 		given $p {
-			when self.assert-hash( $_, [< desigilname >] ) {
-				self._desigilname( $_.hash.<desigilname> );
-			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
 				die "Unhandled case" if
@@ -5916,7 +5602,9 @@ if $q.list.[$idx].Str {
 			}
 		}
 		elsif $p.Str {
-			@child.append( Perl6::Bareword.from-match( $p ) );
+			@child.append(
+				Perl6::Bareword.from-match( $p )
+			);
 		}
 		elsif $p.Bool and $p.Str eq '+' {
 			@child.append( Perl6::Bareword.from-match( $p ) );
@@ -5970,19 +5658,10 @@ if $q.list.[$idx].Str {
 	method _term( Mu $p ) {
 		my Perl6::Element @child;
 		given $p {
-			when self.assert-hash( $_, [< methodop >] ) {
-				@child.append(
-					self._methodop( $_.hash.<methodop> )
-				);
-			}
 			when self.assert-hash( $_, [< circumfix >] ) {
 				@child.append(
 					self._circumfix( $_.hash.<circumfix> )
 				);
-			}
-			when self.assert-hash( $_,
-					[< name >], [< colonpair >] ) {
-				@child.append( self._name( $_.hash.<name> ) );
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
@@ -6111,10 +5790,6 @@ if $q.list.[$idx].Str {
 	method _term_init( Mu $p ) {
 		my Perl6::Element @child;
 		given $p {
-			when self.assert-hash( $_, [< sym EXPR >] ) {
-				@child.append( self._sym( $_.hash.<sym> ) );
-				@child.append( self._EXPR( $_.hash.<EXPR> ) );
-			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
 				die "Unhandled case" if
@@ -6222,10 +5897,6 @@ if $q.list.[$idx].Str {
 				@child.append(
 					self._longname( $_.hash.<longname> )
 				);
-			}
-			when self.assert-hash( $_, [< sym term >] ) {
-				@child.append( self._sym( $_.hash.<sym> ) );
-				@child.append( self._term( $_.hash.<term> ) );
 			}
 			when self.assert-hash( $_, [< sym typename >] ) {
 				@child.append( self._sym( $_.hash.<sym> ) );
@@ -6369,31 +6040,6 @@ if $q.list.[$idx].Str {
 	method _val( Mu $p ) {
 		my Perl6::Element @child;
 		given $p {
-			when self.assert-hash( $_,
-					[< postcircumfix OPER >],
-					[< postfix_prefix_meta_operator >] ) {
-				@child.append(
-					self._postcircumfix(
-						$_.hash.<postcircumfix>
-					)
-				);
-				@child.append( self._OPER( $_.hash.<OPER> ) );
-			}
-			when self.assert-hash( $_,
-					[< prefix OPER >],
-					[< prefix_postfix_meta_operator >] ) {
-				@child.append(
-					self._prefix( $_.hash.<prefix> )
-				);
-				@child.append( self._OPER( $_.hash.<OPER> ) );
-			}
-			when self.assert-hash( $_,
-					[< longname args >] ) {
-				@child.append(
-					self._longname( $_.hash.<longname> )
-				);
-				@child.append( self._args( $_.hash.<args> ) );
-			}
 			when self.assert-hash( $_, [< value >] ) {
 				@child.append( self._value( $_.hash.<value> ) );
 			}
@@ -6437,24 +6083,6 @@ die "Catching Int";
 
 	method _var( Mu $p ) {
 		given $p {
-			when self.assert-hash( $_,
-					[< twigil sigil desigilname >] ) {
-				# XXX For heavens' sake refactor.
-				my Str $sigil	= $_.hash.<sigil>.Str;
-				my Str $twigil	= $_.hash.<twigil> ??
-						  $_.hash.<twigil>.Str !! '';
-				my Str $desigilname =
-					$_.hash.<desigilname> ??
-					$_.hash.<desigilname>.Str !! '';
-				my Str $content =
-					$_.hash.<sigil> ~
-					$twigil ~
-					$desigilname;
-				%sigil-map{$sigil ~ $twigil}.from-int(
-					$_.from,
-					$content
-				);
-			}
 			when self.assert-hash( $_, [< sigil desigilname >] ) {
 				# XXX For heavens' sake refactor.
 				my Str $sigil	= $_.hash.<sigil>.Str;
@@ -6472,9 +6100,6 @@ die "Catching Int";
 					$content
 				);
 			}
-			when self.assert-hash( $_, [< variable >] ) {
-				self._variable( $_.hash.<variable> );
-			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
 				die "Unhandled case" if
@@ -6486,18 +6111,6 @@ die "Catching Int";
 	method _variable_declarator( Mu $p ) {
 		my Perl6::Element @child;
 		given $p {
-			when self.assert-hash( $_,
-				[< semilist variable shape >],
-				[< postcircumfix signature trait
-				   post_constraint >] ) {
-				@child.append(
-					self._semilist( $_.hash.<semilist> )
-				);
-				@child.append(
-					self._variable( $_.hash.<variable> )
-				);
-				@child.append( self._shape( $_.hash.<shape> ) );
-			}
 			when self.assert-hash( $_,
 					[< variable post_constraint >],
 					[< semilist postcircumfix
@@ -6616,7 +6229,7 @@ die "Catching Int";
 					my $x = $_.Str.substr(
 						0, $_.hash.<EXPR>.from
 					);
-					if $x ~~ m{ ('elsif') } {
+					if $x ~~ m{ ( 'elsif' ) } {
 						@child.append(
 							Perl6::Bareword.from-int(
 								$_.from + $0.from,

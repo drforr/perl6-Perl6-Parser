@@ -2,6 +2,40 @@
 Perl6::Parser
 =======
 
+## Caveat
+
+This is very much an Alpha release. The code style here is in *NO WAY* meant to reflect common Perl 6 usage patterns. I'm *deliberately* keeping this simple so that as many people as possible can understand the code and try to improve it.
+
+Most common Perl 6 constructs work at the moment.
+
+Actually, almost all of them do, but not all are referenced "correctly." For instance, ',' is used in lists, obviously. The Perl 6 compiler has to know that a list is comma-separated, but it doesn't have to match each comma explicitly. Perl6::Parser, however, has to know where each one is. So any construct that's not explicitly matched, I have to seek out in the text and find.
+
+Not all of the classes representing the full complexity of Perl 6 terms are there, and looking at the output of the tree (please look at the .dump-tree method for more info) there are probably a lot of keywords and operators that are mis-classified.
+
+## Contributing
+
+Read DEBUGGING.pod in this distribution for more information, but on the whole I *encourage* you to liberally copy/paste from the existing code. If other people go and write the same branch in their own style, it just makes it that much harder for me to search for the code later when I want to refactor. So please, copy/paste as much as you like.
+
+### APIs
+
+Send a PR with a t/20-my-failing-API.t file in it, and I'll either just code it right up if it looks good, or ask questions trying to figure out what you're trying to achieve.
+
+* Searching for a class of tokens
+* Walking the token tree (see the Debugging role in lib/Perl6/Parser.pm for inspiration)
+* Ignoring whitespace and/or structural tags like ()[]{}; while walking
+* Editing existing code
+
+### Out-of-scope
+
+(but likely to be modules in the Perl6::Parser space)
+
+* Dataflow
+* method, subroutine, variable and keyword completion
+* Perl6::Tidy - This is what I started out working on, will be next.
+* Perl6::Critic - This is where I want to get to.
+
+## Back to documentation
+
 Perl 6's grammar is now pretty much fleshed out, but it's hard to get at from
 within. This makes tools like code formatters, coverage and analysis tools
 hard to put together.
@@ -187,16 +221,6 @@ Installation
     panda update && panda install Perl6::Parser
 ```
 
-* Is ufo even still a thing?
-* Using ufo (a project Makefile creation script bundled with Rakudo Star) and make:
-
-```
-    ufo                    
-    make
-    make test
-    make install
-```
-
 ## Testing
 
 To run tests:
@@ -204,6 +228,21 @@ To run tests:
 ```
     prove -e perl6
 ```
+
+## Known Bugs
+
+```
+    max=
+    #`(..)
+    Some comma-separated lists
+    Z=>
+    Z in certain situations
+    here-docs
+       I wrote one pass at it, but two corner cases in the grammar cause a
+       problem.
+```
+By all means, please file bugs as you see them.
+
 
 ## Author
 
