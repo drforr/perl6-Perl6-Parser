@@ -2185,9 +2185,18 @@ class Perl6::Parser::Factory {
 							)
 						}
 					}
-					@child.append(
-						self._EXPR( $p.list.[$_] )
-					);
+
+					# Sigh. Lists can have trailing commas,
+					# in which case the last list entry
+					# will be blank.
+					#
+					if $p.list.[$_].Str {
+						@child.append(
+							self._EXPR(
+								$p.list.[$_]
+							)
+						);
+					}
 				}
 			}
 		}
