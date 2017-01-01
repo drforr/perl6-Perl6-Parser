@@ -751,8 +751,7 @@ my role Assertions {
 			}
 		}
 
-		if $p.hash.keys.elems !=
-			$keys.elems + $defined-keys.elems {
+		if $p.hash.keys.elems != $keys.elems + $defined-keys.elems {
 			return False
 		}
 		
@@ -807,9 +806,7 @@ class Perl6::Parser::Factory {
 			my Str $marker = $1.Str;
 			$p.Str ~~ m{ \s* ']' .*? $$ ( .+? ) ( $marker ) };
 			%.here-doc{ $start } = Here-Doc.new(
-				:factory-line-number(
-					callframe(1).line
-				),
+				:factory-line-number( callframe(1).line ),
 				:delimiter-start( $start ),
 				:body-from( $0.from ),
 				:body-to( $0.to ),
@@ -821,39 +818,42 @@ class Perl6::Parser::Factory {
 	sub _string-to-tokens( Int $from, Str $str ) {
 		my Perl6::Element @child;
 
-		if $str ~~ m{ ^ ( \s* ) '#`' } {
-		}
-		elsif $str ~~ m{ ^ ( '#' .+ ) $ } {
-			@child.append(
-				Perl6::Comment.from-int( $from, $0.Str )
-			);
-		}
-		elsif $str ~~ m{ ^ ( \s+ ) ( '#' .+ ) $$ ( \s* ) $ } {
-			@child.append(
-				Perl6::WS.from-int( $from, $0.Str )
-			);
-			@child.append(
-				Perl6::Comment.from-int(
-					$from + $0.Str.chars,
-					$1.Str
-				)
-			);
-			if $2.Str {
+		given $str {
+			when m{ ^ ( \s* ) '#`' } {
+			}
+			when m{ ^ ( '#' .+ ) $ } {
 				@child.append(
-					Perl6::WS.from-int(
-						$from + $0.Str.chars + $1.Str.chars,
-						$2.Str
-					)
+					Perl6::Comment.from-int( $from, $0.Str )
 				);
 			}
+			when m{ ^ ( \s+ ) ( '#' .+ ) $$ ( \s* ) $ } {
+				@child.append(
+					Perl6::WS.from-int( $from, $0.Str )
+				);
+				@child.append(
+					Perl6::Comment.from-int(
+						$from + $0.Str.chars,
+						$1.Str
+					)
+				);
+				if $2.Str {
+					@child.append(
+						Perl6::WS.from-int(
+							$from + $0.Str.chars + $1.Str.chars,
+							$2.Str
+						)
+					);
+				}
+			}
+			when $str ~~ m{ \S } {
+			}
+			default {
+				@child.append(
+					Perl6::WS.from-int( $from, $str )
+				)
+			}
 		}
-		elsif $str ~~ m{ \S } {
-		}
-		else {
-			@child.append(
-				Perl6::WS.from-int( $from, $str )
-			)
-		}
+
 		@child;
 	}
 
@@ -893,9 +893,7 @@ class Perl6::Parser::Factory {
 			@child.append(
 				_string-to-tokens( $p.from, $remainder )
 			);
-			$root.child.splice(
-				0, 0, @child
-			);
+			$root.child.splice( 0, 0, @child );
 		}
 		if $root.to < $p.to {
 			my $remainder = $p.orig.Str.substr( $root.to );
@@ -903,9 +901,7 @@ class Perl6::Parser::Factory {
 			@child.append(
 				_string-to-tokens( $p.from, $remainder )
 			);
-			$root.child.append(
-				@child
-			);
+			$root.child.append( @child );
 		}
 		$root;
 	}
@@ -933,14 +929,14 @@ class Perl6::Parser::Factory {
 	}
 
 	sub fill-gaps( Mu $p, Perl6::Element $root, Int $depth = 0 ) {
-		if $root.^can( 'child' ) {
-			for reverse( 0 .. $root.child.elems - 1 ) {
-				fill-gaps( $p, $root.child.[$_], $depth + 1 );
-				if $_ < $root.child.elems - 1 {
-					if $root.child.[$_].to !=
-					   $root.child.[$_+1].from {
-						_fill-gap( $p, $root, $_ );
-					}
+		return unless $root.^can( 'child' );
+
+		for reverse( 0 .. $root.child.elems - 1 ) {
+			fill-gaps( $p, $root.child.[$_], $depth + 1 );
+			if $_ < $root.child.elems - 1 {
+				if $root.child.[$_].to !=
+				   $root.child.[$_+1].from {
+					_fill-gap( $p, $root, $_ );
 				}
 			}
 		}
@@ -1052,30 +1048,30 @@ class Perl6::Parser::Factory {
 	# name
 	# ~~
 	#
-	method _assertion( Mu $p ) {
-		given $p {
-			when self.assert-hash( $_, [< var >] ) {
-				die; # XXX unused? Or just untested?
-				self._var( $_.hash.<var> );
-			}
-			when self.assert-hash( $_, [< longname >] ) {
-				die; # XXX unused? Or just untested?
-				self._longname( $_.hash.<longname> );
-			}
-			when self.assert-hash( $_, [< cclass_elem >] ) {
-				die; # XXX unused? Or just untested?
-				self._cclass_elem( $_.hash.<cclass_elem> );
-			}
-			when self.assert-hash( $_, [< codeblock >] ) {
-				die; # XXX unused? Or just untested?
-				self._codeblock( $_.hash.<codeblock> );
-			}
-			default {
-				debug-match( $_ );
-				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
-			}
-		}
-	}
+#	method _assertion( Mu $p ) {
+#		given $p {
+#			when self.assert-hash( $_, [< var >] ) {
+#				die; # XXX unused? Or just untested?
+#				self._var( $_.hash.<var> );
+#			}
+#			when self.assert-hash( $_, [< longname >] ) {
+#				die; # XXX unused? Or just untested?
+#				self._longname( $_.hash.<longname> );
+#			}
+#			when self.assert-hash( $_, [< cclass_elem >] ) {
+#				die; # XXX unused? Or just untested?
+#				self._cclass_elem( $_.hash.<cclass_elem> );
+#			}
+#			when self.assert-hash( $_, [< codeblock >] ) {
+#				die; # XXX unused? Or just untested?
+#				self._codeblock( $_.hash.<codeblock> );
+#			}
+#			default {
+#				debug-match( $_ );
+#				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+#			}
+#		}
+#	}
 
 	method _atom( Mu $p ) {
 		if $p.Str {
@@ -1092,25 +1088,24 @@ class Perl6::Parser::Factory {
 		}
 	}
 
-	method _B( Mu $p ) {
-		given $p {
-			default {
-				debug-match( $_ );
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
-			}
-		}
-	}
+#	method _B( Mu $p ) { #		given $p {
+#			default {
+#				debug-match( $_ );
+#				die "Unhandled case" if
+#					$*FACTORY-FAILURE-FATAL
+#			}
+#		}
+#	}
 
-	method _babble( Mu $p ) {
-		given $p {
-			default {
-				debug-match( $_ );
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
-			}
-		}
-	}
+#	method _babble( Mu $p ) {
+#		given $p {
+#			default {
+#				debug-match( $_ );
+#				die "Unhandled case" if
+#					$*FACTORY-FAILURE-FATAL
+#			}
+#		}
+#	}
 
 	method _backmod( Mu $p ) {
 #		warn "backmod finally used";
@@ -1131,19 +1126,19 @@ class Perl6::Parser::Factory {
 	# rn
 	# t
 	#
-	method _backslash( Mu $p ) {
-		given $p {
-			default {
-				debug-match( $_ );
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
-			}
-		}
-	}
+#	method _backslash( Mu $p ) {
+#		given $p {
+#			default {
+#				debug-match( $_ );
+#				die "Unhandled case" if
+#					$*FACTORY-FAILURE-FATAL
+#			}
+#		}
+#	}
 
-	method _binint( Mu $p ) {
-		Perl6::Number::Binary.from-match( $p );
-	}
+#	method _binint( Mu $p ) {
+#		Perl6::Number::Binary.from-match( $p );
+#	}
 
 	method _block( Mu $p ) {
 		given $p {
@@ -1208,56 +1203,56 @@ class Perl6::Parser::Factory {
 		}
 	} 
 
-	method _cclass_elem( Mu $p ) {
-		my Perl6::Element @child;
-		if $p.list {
-			for $p.list {
-				if self.assert-hash( $_,
-						[< identifier name sign >],
-						[< charspec >] ) {
-					@child.append(
-						self._identifier(
-							$_.hash.<identifier>
-						)
-					);
-					@child.append(
-						self._name( $_.hash.<name> )
-					);
-					@child.append(
-						self._sign( $_.hash.<sign> )
-					);
-				}
-				elsif self.assert-hash( $_,
-						[< sign charspec >] ) {
-					@child.append(
-						self._sign( $p.hash.<sign> )
-					);
-					@child.append(
-						self._charspec(
-							$p.hash.<charspec>
-						)
-					);
-				}
-				else {
-					debug-match( $_ );
-					die "Unhandled case" if
-						$*FACTORY-FAILURE-FATAL
-				}
-			}
-		}
-		else {
-			debug-match( $p );
-			die "Unhandled case" if
-				$*FACTORY-FAILURE-FATAL
-		}
-		@child;
-	}
+#	method _cclass_elem( Mu $p ) {
+#		my Perl6::Element @child;
+#		if $p.list {
+#			for $p.list {
+#				if self.assert-hash( $_,
+#						[< identifier name sign >],
+#						[< charspec >] ) {
+#					@child.append(
+#						self._identifier(
+#							$_.hash.<identifier>
+#						)
+#					);
+#					@child.append(
+#						self._name( $_.hash.<name> )
+#					);
+#					@child.append(
+#						self._sign( $_.hash.<sign> )
+#					);
+#				}
+#				elsif self.assert-hash( $_,
+#						[< sign charspec >] ) {
+#					@child.append(
+#						self._sign( $p.hash.<sign> )
+#					);
+#					@child.append(
+#						self._charspec(
+#							$p.hash.<charspec>
+#						)
+#					);
+#				}
+#				else {
+#					debug-match( $_ );
+#					die "Unhandled case" if
+#						$*FACTORY-FAILURE-FATAL
+#				}
+#			}
+#		}
+#		else {
+#			debug-match( $p );
+#			die "Unhandled case" if
+#				$*FACTORY-FAILURE-FATAL
+#		}
+#		@child;
+#	}
 
-	method _charspec( Mu $p ) {
-# XXX work on this, of course.
-		warn "Caught _charspec";
-		return True if $p.list;
-	}
+#	method _charspec( Mu $p ) {
+## XXX work on this, of course.
+#		warn "Caught _charspec";
+#		return True if $p.list;
+#	}
 
 	# ( )
 	# STATEMENT_LIST( )
@@ -1363,25 +1358,25 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-	method _codeblock( Mu $p ) {
-		given $p {
-			default {
-				debug-match( $_ );
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
-			}
-		}
-	}
+#	method _codeblock( Mu $p ) {
+#		given $p {
+#			default {
+#				debug-match( $_ );
+#				die "Unhandled case" if
+#					$*FACTORY-FAILURE-FATAL
+#			}
+#		}
+#	}
 
-	method _coercee( Mu $p ) {
-		given $p {
-			default {
-				debug-match( $_ );
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
-			}
-		}
-	}
+#	method _coercee( Mu $p ) {
+#		given $p {
+#			default {
+#				debug-match( $_ );
+#				die "Unhandled case" if
+#					$*FACTORY-FAILURE-FATAL
+#			}
+#		}
+#	}
 
 	method _coloncircumfix( Mu $p ) {
 		given $p {
@@ -1466,19 +1461,19 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-	method _colonpairs( Mu $p ) {
-		given $p {
-			when $_ ~~ Hash {
-				return True if $_.<D>;
-				return True if $_.<U>;
-			}
-			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
-			}
-		}
-	}
+#	method _colonpairs( Mu $p ) {
+#		given $p {
+#			when $_ ~~ Hash {
+#				return True if $_.<D>;
+#				return True if $_.<U>;
+#			}
+#			default {
+#				debug-match( $_ ) if $*DEBUG;
+#				die "Unhandled case" if
+#					$*FACTORY-FAILURE-FATAL
+#			}
+#		}
+#	}
 
 	method _contextualizer( Mu $p ) {
 		my Perl6::Element @child;
@@ -1486,15 +1481,11 @@ class Perl6::Parser::Factory {
 			when self.assert-hash( $_,
 					[< coercee circumfix sigil >] ) {
 				@child.append(
-					self._sigil(
-						$_.hash.<sigil>
-					)
+					self._sigil( $_.hash.<sigil> )
 				);
 				# XXX coercee handled inside circumfix
 				@child.append(
-					self._circumfix(
-						$_.hash.<circumfix>
-					)
+					self._circumfix( $_.hash.<circumfix> )
 				);
 			}
 			default {
@@ -1506,9 +1497,9 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-	method _decint( Mu $p ) {
-		Perl6::Number::Decimal.from-match( $p );
-	}
+#	method _decint( Mu $p ) {
+#		Perl6::Number::Decimal.from-match( $p );
+#	}
 
 	method _declarator( Mu $p ) {
 		my Perl6::Element @child;
@@ -1629,135 +1620,135 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-	method _DECL( Mu $p ) {
-		my Perl6::Element @child;
-		given $p {
-			when self.assert-hash( $_,
-					[< deftermnow initializer term_init >],
-					[< trait >] ) {
-				die; # XXX unused? Or just untested?
-				@child.append(
-					self._deftermnow(
-						$_.hash.<deftermnow>
-					)
-				);
-				@child.append(
-					self._initializer(
-						$_.hash.<initializer>
-					)
-				);
-				@child.append(
-					self._term_init( $_.hash.<term_init> )
-				)
-			}
-			when self.assert-hash( $_,
-					[< deftermnow initializer signature >],
-					[< trait >] ) {
-				die; # XXX unused? Or just untested?
-				@child.append(
-					self._deftermnow(
-						$_.hash.<deftermnow>
-					)
-				);
-				@child.append(
-					self._initializer(
-						$_.hash.<initializer>
-					)
-				);
-				@child.append(
-					self._signature( $_.hash.<signature> )
-				);
-			}
-			when self.assert-hash( $_,
-					[< initializer signature >],
-					[< trait >] ) {
-				die; # XXX unused? Or just untested?
-				@child.append(
-					self._initializer(
-						$_.hash.<initializer>
-					)
-				);
-				@child.append(
-					self._signature( $_.hash.<signature> )
-				);
-			}
-			when self.assert-hash( $_,
-					[< initializer variable_declarator >],
-					[< trait >] ) {
-				die; # XXX unused? Or just untested?
-				@child.append(
-					self._initializer(
-						$_.hash.<initializer>
-					)
-				);
-				@child.append(
-					self._variable_declarator(
-						$_.hash.<variable_declarator>
-					)
-				);
-			}
-			when self.assert-hash( $_, [< sym package_def >] ) {
-				die; # XXX unused? Or just untested?
-				@child.append( self._sym( $_.hash.<sym> ) );
-				@child.append(
-					self._package_def(
-						$_.hash.<package_def>
-					)
-				);
-			}
-			when self.assert-hash( $_,
-					[< regex_declarator >],
-					[< trait >] ) {
-				die; # XXX unused? Or just untested?
-				@child.append(
-					self._regex_declarator(
-						$_.hash.<regex_declarator>
-					)
-				);
-			}
-			when self.assert-hash( $_,
-					[< variable_declarator >],
-					[< trait >] ) {
-				die; # XXX unused? Or just untested?
-				@child.append(
-					self._variable_declarator(
-						$_.hash.<variable_declarator>
-					)
-				);
-			}
-			when self.assert-hash( $_,
-					[< routine_declarator >],
-					[< trait >] ) {
-				die; # XXX unused? Or just untested?
-				@child.append(
-					self._routine_declarator(
-						$_.hash.<routine_declarator>
-					)
-				);
-			}
-			when self.assert-hash( $_, [< declarator >] ) {
-				die; # XXX unused? Or just untested?
-				@child.append(
-					self._declarator(
-						$_.hash.<declarator>
-					)
-				);
-			}
-			when self.assert-hash( $_,
-					[< signature >], [< trait >] ) {
-				die; # XXX unused? Or just untested?
-				@child.append(
-					self.signature( $_.hash.<signature> )
-				);
-			}
-			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
-			}
-		}
-		@child;
-	}
+#	method _DECL( Mu $p ) {
+#		my Perl6::Element @child;
+#		given $p {
+#			when self.assert-hash( $_,
+#					[< deftermnow initializer term_init >],
+#					[< trait >] ) {
+#				die; # XXX unused? Or just untested?
+#				@child.append(
+#					self._deftermnow(
+#						$_.hash.<deftermnow>
+#					)
+#				);
+#				@child.append(
+#					self._initializer(
+#						$_.hash.<initializer>
+#					)
+#				);
+#				@child.append(
+#					self._term_init( $_.hash.<term_init> )
+#				)
+#			}
+#			when self.assert-hash( $_,
+#					[< deftermnow initializer signature >],
+#					[< trait >] ) {
+#				die; # XXX unused? Or just untested?
+#				@child.append(
+#					self._deftermnow(
+#						$_.hash.<deftermnow>
+#					)
+#				);
+#				@child.append(
+#					self._initializer(
+#						$_.hash.<initializer>
+#					)
+#				);
+#				@child.append(
+#					self._signature( $_.hash.<signature> )
+#				);
+#			}
+#			when self.assert-hash( $_,
+#					[< initializer signature >],
+#					[< trait >] ) {
+#				die; # XXX unused? Or just untested?
+#				@child.append(
+#					self._initializer(
+#						$_.hash.<initializer>
+#					)
+#				);
+#				@child.append(
+#					self._signature( $_.hash.<signature> )
+#				);
+#			}
+#			when self.assert-hash( $_,
+#					[< initializer variable_declarator >],
+#					[< trait >] ) {
+#				die; # XXX unused? Or just untested?
+#				@child.append(
+#					self._initializer(
+#						$_.hash.<initializer>
+#					)
+#				);
+#				@child.append(
+#					self._variable_declarator(
+#						$_.hash.<variable_declarator>
+#					)
+#				);
+#			}
+#			when self.assert-hash( $_, [< sym package_def >] ) {
+#				die; # XXX unused? Or just untested?
+#				@child.append( self._sym( $_.hash.<sym> ) );
+#				@child.append(
+#					self._package_def(
+#						$_.hash.<package_def>
+#					)
+#				);
+#			}
+#			when self.assert-hash( $_,
+#					[< regex_declarator >],
+#					[< trait >] ) {
+#				die; # XXX unused? Or just untested?
+#				@child.append(
+#					self._regex_declarator(
+#						$_.hash.<regex_declarator>
+#					)
+#				);
+#			}
+#			when self.assert-hash( $_,
+#					[< variable_declarator >],
+#					[< trait >] ) {
+#				die; # XXX unused? Or just untested?
+#				@child.append(
+#					self._variable_declarator(
+#						$_.hash.<variable_declarator>
+#					)
+#				);
+#			}
+#			when self.assert-hash( $_,
+#					[< routine_declarator >],
+#					[< trait >] ) {
+#				die; # XXX unused? Or just untested?
+#				@child.append(
+#					self._routine_declarator(
+#						$_.hash.<routine_declarator>
+#					)
+#				);
+#			}
+#			when self.assert-hash( $_, [< declarator >] ) {
+#				die; # XXX unused? Or just untested?
+#				@child.append(
+#					self._declarator(
+#						$_.hash.<declarator>
+#					)
+#				);
+#			}
+#			when self.assert-hash( $_,
+#					[< signature >], [< trait >] ) {
+#				die; # XXX unused? Or just untested?
+#				@child.append(
+#					self.signature( $_.hash.<signature> )
+#				);
+#			}
+#			default {
+#				debug-match( $_ ) if $*DEBUG;
+#				die "Unhandled case" if
+#					$*FACTORY-FAILURE-FATAL
+#			}
+#		}
+#		@child;
+#	}
 
 	method _dec_number( Mu $p ) {
 		given $p {
@@ -1862,31 +1853,30 @@ class Perl6::Parser::Factory {
 		}
 	}
 
-	method _desigilname( Mu $p ) {
-		given $p {
-			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
-			}
-		}
-	}
+#	method _desigilname( Mu $p ) {
+#		given $p {
+#			default {
+#				debug-match( $_ ) if $*DEBUG;
+#				die "Unhandled case" if
+#					$*FACTORY-FAILURE-FATAL
+#			}
+#		}
+#	}
 
-	method _dig( Mu $p ) {
-		for $p.list {
-			# UTF-8....
-			if $_ {
-				# XXX
-				next
-			}
-			else {
-				next
-			}
-		}
-	}
+#	method _dig( Mu $p ) {
+#		for $p.list {
+#			# UTF-8....
+#			if $_ {
+#				# XXX
+#				next
+#			}
+#			else {
+#				next
+#			}
+#		}
+#	}
 
 	method _doc( Mu $p ) {
-#		warn "doc finally used";
 		( )
 	}
 
@@ -1943,15 +1933,15 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-	method _dottyopish( Mu $p ) {
-		given $p {
-			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
-			}
-		}
-	}
+#	method _dottyopish( Mu $p ) {
+#		given $p {
+#			default {
+#				debug-match( $_ ) if $*DEBUG;
+#				die "Unhandled case" if
+#					$*FACTORY-FAILURE-FATAL
+#			}
+#		}
+#	}
 
 	method _e1( Mu $p ) {
 		given $p {
@@ -2004,17 +1994,17 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-	method _escale( Mu $p ) {
-		my Perl6::Element @child;
-		given $p {
-			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
-			}
-		}
-		@child;
-	}
+#	method _escale( Mu $p ) {
+#		my Perl6::Element @child;
+#		given $p {
+#			default {
+#				debug-match( $_ ) if $*DEBUG;
+#				die "Unhandled case" if
+#					$*FACTORY-FAILURE-FATAL
+#			}
+#		}
+#		@child;
+#	}
 
 	# \\
 	# {}
@@ -2028,17 +2018,17 @@ class Perl6::Parser::Factory {
 	# “ ”
 	# colonpair
 	#
-	method _escape( Mu $p ) {
-		my Perl6::Element @child;
-		given $p {
-			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
-			}
-		}
-		@child;
-	}
+#	method _escape( Mu $p ) {
+#		my Perl6::Element @child;
+#		given $p {
+#			default {
+#				debug-match( $_ ) if $*DEBUG;
+#				die "Unhandled case" if
+#					$*FACTORY-FAILURE-FATAL
+#			}
+#		}
+#		@child;
+#	}
 
 	method _EXPR( Mu $p ) {
 		my Perl6::Element @child;
@@ -2062,10 +2052,7 @@ class Perl6::Parser::Factory {
 				[< dotty OPER >],
 				[< postfix_prefix_meta_operator >] ) {
 			# XXX Look into this at some point.
-			my $x = $p.Str.substr(
-				0,
-				HYPER.chars
-			);
+			my $x = $p.Str.substr( 0, HYPER.chars );
 			if $x eq HYPER {
 				@child.append( self._EXPR( $p.list.[0] ) );
 				my $str = $p.orig.substr(
@@ -2165,9 +2152,7 @@ class Perl6::Parser::Factory {
 				}
 				if $p.list.[2].Str {
 					@child.append(
-						self._EXPR(
-							$p.list.[2]
-						)
+						self._EXPR( $p.list.[2] )
 					);
 				}
 			}
@@ -2201,9 +2186,7 @@ class Perl6::Parser::Factory {
 						}
 					}
 					@child.append(
-						self._EXPR(
-							$p.list.[$_]
-						)
+						self._EXPR( $p.list.[$_] )
 					);
 				}
 			}
@@ -2373,15 +2356,15 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-	method _fake_infix( Mu $p ) {
-		given $p {
-			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
-			}
-		}
-	}
+#	method _fake_infix( Mu $p ) {
+#		given $p {
+#			default {
+#				debug-match( $_ ) if $*DEBUG;
+#				die "Unhandled case" if
+#					$*FACTORY-FAILURE-FATAL
+#			}
+#		}
+#	}
 
 	method _fakesignature( Mu $p ) {
 		given $p {
@@ -2422,10 +2405,9 @@ class Perl6::Parser::Factory {
 		Perl6::Number::FloatingPoint.from-match( $p );
 	}
 
-	# XXX Unused
-	method _hexint( Mu $p ) {
-		Perl6::Number::Hexadecimal.from-match( $p );
-	}
+#	method _hexint( Mu $p ) {
+#		Perl6::Number::Hexadecimal.from-match( $p );
+#	}
 
 	method _identifier( Mu $p ) {
 		my Perl6::Element @child;
@@ -2470,30 +2452,30 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-	method _infixish( Mu $p ) {
-		my Perl6::Element @child;
-		given $p {
-			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
-			}
-		}
-		@child;
-	}
+#	method _infixish( Mu $p ) {
+#		my Perl6::Element @child;
+#		given $p {
+#			default {
+#				debug-match( $_ ) if $*DEBUG;
+#				die "Unhandled case" if
+#					$*FACTORY-FAILURE-FATAL
+#			}
+#		}
+#		@child;
+#	}
 
 	# << >>
 	# « »
 	#
-	method _infix_circumfix_meta_operator( Mu $p ) {
-		given $p {
-			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
-			}
-		}
-	}
+#	method _infix_circumfix_meta_operator( Mu $p ) {
+#		given $p {
+#			default {
+#				debug-match( $_ ) if $*DEBUG;
+#				die "Unhandled case" if
+#					$*FACTORY-FAILURE-FATAL
+#			}
+#		}
+#	}
 
 	# « »
 	#
@@ -2605,15 +2587,15 @@ class Perl6::Parser::Factory {
 		}
 	}
 
-	method _invocant( Mu $p ) {
-		CATCH {
-			when X::Multi::NoMatch { }
-		}
-		#if $p ~~ QAST::Want;
-		#if self.assert-hash( $p, [< XXX >] );
-		warn "called invocant";
-return True;
-	}
+#	method _invocant( Mu $p ) {
+#		CATCH {
+#			when X::Multi::NoMatch { }
+#		}
+#		#if $p ~~ QAST::Want;
+#		#if self.assert-hash( $p, [< XXX >] );
+#		warn "called invocant";
+#return True;
+#	}
 
 	method _key( Mu $p ) {
 		Perl6::Bareword.from-match( $p );
@@ -2624,15 +2606,15 @@ return True;
 		Perl6::Operator::Infix.from-match( $p );
 	}
 
-	method _left( Mu $p ) {
-		given $p {
-			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
-			}
-		}
-	}
+#	method _left( Mu $p ) {
+#		given $p {
+#			default {
+#				debug-match( $_ ) if $*DEBUG;
+#				die "Unhandled case" if
+#					$*FACTORY-FAILURE-FATAL
+#			}
+#		}
+#	}
 
 	method _longname( Mu $p ) {
 		given $p {
@@ -2648,57 +2630,57 @@ return True;
 		}
 	}
 
-	method _max( Mu $p ) {
-		warn "max finally used";
-		( )
-	}
+#	method _max( Mu $p ) {
+#		warn "max finally used";
+#		( )
+#	}
 
 	# :my
 	# { }
 	# qw
 	# '
 	#
-	method _metachar( Mu $p ) {
-		given $p {
-			when self.assert-hash( $_, [< sym >] ) {
-				die; # XXX unused? Or just untested?
-				self._sym( $_.hash.<sym> );
-			}
-			when self.assert-hash( $_, [< codeblock >] ) {
-				die; # XXX unused? Or just untested?
-				self._codeblock( $_.hash.<codeblock> );
-			}
-			when self.assert-hash( $_, [< backslash >] ) {
-				die; # XXX unused? Or just untested?
-				self._backslash( $_.hash.<backslash> );
-			}
-			when self.assert-hash( $_, [< assertion >] ) {
-				die; # XXX unused? Or just untested?
-				self._assertion( $_.hash.<assertion> );
-			}
-			when self.assert-hash( $_, [< nibble >] ) {
-				die; # XXX unused? Or just untested?
-				self._nibble( $_.hash.<nibble> );
-			}
-			when self.assert-hash( $_, [< quote >] ) {
-				die; # XXX unused? Or just untested?
-				self._quote( $_.hash.<quote> );
-			}
-			when self.assert-hash( $_, [< nibbler >] ) {
-				die; # XXX unused? Or just untested?
-				self._nibbler( $_.hash.<nibbler> );
-			}
-			when self.assert-hash( $_, [< statement >] ) {
-				die; # XXX unused? Or just untested?
-				self._statement( $_.hash.<statement> );
-			}
-			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
-			}
-		}
-	}
+#	method _metachar( Mu $p ) {
+#		given $p {
+#			when self.assert-hash( $_, [< sym >] ) {
+#				die; # XXX unused? Or just untested?
+#				self._sym( $_.hash.<sym> );
+#			}
+#			when self.assert-hash( $_, [< codeblock >] ) {
+#				die; # XXX unused? Or just untested?
+#				self._codeblock( $_.hash.<codeblock> );
+#			}
+#			when self.assert-hash( $_, [< backslash >] ) {
+#				die; # XXX unused? Or just untested?
+#				self._backslash( $_.hash.<backslash> );
+#			}
+#			when self.assert-hash( $_, [< assertion >] ) {
+#				die; # XXX unused? Or just untested?
+#				self._assertion( $_.hash.<assertion> );
+#			}
+#			when self.assert-hash( $_, [< nibble >] ) {
+#				die; # XXX unused? Or just untested?
+#				self._nibble( $_.hash.<nibble> );
+#			}
+#			when self.assert-hash( $_, [< quote >] ) {
+#				die; # XXX unused? Or just untested?
+#				self._quote( $_.hash.<quote> );
+#			}
+#			when self.assert-hash( $_, [< nibbler >] ) {
+#				die; # XXX unused? Or just untested?
+#				self._nibbler( $_.hash.<nibbler> );
+#			}
+#			when self.assert-hash( $_, [< statement >] ) {
+#				die; # XXX unused? Or just untested?
+#				self._statement( $_.hash.<statement> );
+#			}
+#			default {
+#				debug-match( $_ ) if $*DEBUG;
+#				die "Unhandled case" if
+#					$*FACTORY-FAILURE-FATAL
+#			}
+#		}
+#	}
 
 	method _method_def( Mu $p ) {
 		my Perl6::Element @child;
@@ -2783,15 +2765,15 @@ return True;
 		@child;
 	}
 
-	method _min( Mu $p ) {
-		given $p {
-			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
-			}
-		}
-	}
+#	method _min( Mu $p ) {
+#		given $p {
+#			default {
+#				debug-match( $_ ) if $*DEBUG;
+#				die "Unhandled case" if
+#					$*FACTORY-FAILURE-FATAL
+#			}
+#		}
+#	}
 
 	method _modifier_expr( Mu $p ) {
 		given $p {
@@ -2819,32 +2801,32 @@ return True;
 		}
 	}
 
-	method _morename( Mu $p ) {
-		my Perl6::Element @child;
-		if $p.list {
-			for $p.list {
-				if self.assert-hash( $p, [< identifier >] ) {
-					# XXX replace with _identifier(..)
-					@child.append(
-						Perl6::PackageName.from-match(
-							$_.hash.<identifier>
-						)
-					);
-				}
-				else {
-					debug-match( $_ ) if $*DEBUG;
-					die "Unhandled case" if
-						$*FACTORY-FAILURE-FATAL
-				}
-			}
-		}
-		else {
-			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if
-				$*FACTORY-FAILURE-FATAL
-		}
-		@child;
-	}
+#	method _morename( Mu $p ) {
+#		my Perl6::Element @child;
+#		if $p.list {
+#			for $p.list {
+#				if self.assert-hash( $p, [< identifier >] ) {
+#					# XXX replace with _identifier(..)
+#					@child.append(
+#						Perl6::PackageName.from-match(
+#							$_.hash.<identifier>
+#						)
+#					);
+#				}
+#				else {
+#					debug-match( $_ ) if $*DEBUG;
+#					die "Unhandled case" if
+#						$*FACTORY-FAILURE-FATAL
+#				}
+#			}
+#		}
+#		else {
+#			debug-match( $p ) if $*DEBUG;
+#			die "Unhandled case" if
+#				$*FACTORY-FAILURE-FATAL
+#		}
+#		@child;
+#	}
 
 	# multi
 	# proto
@@ -2872,7 +2854,9 @@ return True;
 			}
 			when self.assert-hash( $_, [< declarator >] ) {
 				@child.append(
-					self._declarator( $_.hash.<declarator> )
+					self._declarator(
+						$_.hash.<declarator>
+					)
 				);
 			}
 			default {
@@ -2992,15 +2976,15 @@ return True;
 		@child;
 	}
 
-	method _nibbler( Mu $p ) {
-		given $p {
-			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
-			}
-		}
-	}
+#	method _nibbler( Mu $p ) {
+#		given $p {
+#			default {
+#				debug-match( $_ ) if $*DEBUG;
+#				die "Unhandled case" if
+#					$*FACTORY-FAILURE-FATAL
+#			}
+#		}
+#	}
 
 	method _normspace( Mu $p ) {
 		warn "normspace finally used";
@@ -3173,162 +3157,162 @@ return True;
 		}
 	}
 
-	method _O( Mu $p ) {
-		return True if $p.<thunky>
-			and $p.<prec>
-			and $p.<fiddly>
-			and $p.<reducecheck>
-			and $p.<pasttype>
-			and $p.<dba>
-			and $p.<assoc>;
-		return True if $p.<thunky>
-			and $p.<prec>
-			and $p.<pasttype>
-			and $p.<dba>
-			and $p.<iffy>
-			and $p.<assoc>;
-		return True if $p.<prec>
-			and $p.<pasttype>
-			and $p.<dba>
-			and $p.<diffy>
-			and $p.<iffy>
-			and $p.<assoc>;
-		return True if $p.<prec>
-			and $p.<fiddly>
-			and $p.<sub>
-			and $p.<dba>
-			and $p.<assoc>;
-		return True if $p.<prec>
-			and $p.<nextterm>
-			and $p.<fiddly>
-			and $p.<dba>
-			and $p.<assoc>;
-		return True if $p.<thunky>
-			and $p.<prec>
-			and $p.<dba>
-			and $p.<assoc>;
-		return True if $p.<prec>
-			and $p.<diffy>
-			and $p.<dba>
-			and $p.<assoc>;
-		return True if $p.<prec>
-			and $p.<iffy>
-			and $p.<dba>
-			and $p.<assoc>;
-		return True if $p.<prec>
-			and $p.<fiddly>
-			and $p.<dba>
-			and $p.<assoc>;
-		return True if $p.<prec>
-			and $p.<dba>
-			and $p.<assoc>;
-	}
+#	method _O( Mu $p ) {
+#		return True if $p.<thunky>
+#			and $p.<prec>
+#			and $p.<fiddly>
+#			and $p.<reducecheck>
+#			and $p.<pasttype>
+#			and $p.<dba>
+#			and $p.<assoc>;
+#		return True if $p.<thunky>
+#			and $p.<prec>
+#			and $p.<pasttype>
+#			and $p.<dba>
+#			and $p.<iffy>
+#			and $p.<assoc>;
+#		return True if $p.<prec>
+#			and $p.<pasttype>
+#			and $p.<dba>
+#			and $p.<diffy>
+#			and $p.<iffy>
+#			and $p.<assoc>;
+#		return True if $p.<prec>
+#			and $p.<fiddly>
+#			and $p.<sub>
+#			and $p.<dba>
+#			and $p.<assoc>;
+#		return True if $p.<prec>
+#			and $p.<nextterm>
+#			and $p.<fiddly>
+#			and $p.<dba>
+#			and $p.<assoc>;
+#		return True if $p.<thunky>
+#			and $p.<prec>
+#			and $p.<dba>
+#			and $p.<assoc>;
+#		return True if $p.<prec>
+#			and $p.<diffy>
+#			and $p.<dba>
+#			and $p.<assoc>;
+#		return True if $p.<prec>
+#			and $p.<iffy>
+#			and $p.<dba>
+#			and $p.<assoc>;
+#		return True if $p.<prec>
+#			and $p.<fiddly>
+#			and $p.<dba>
+#			and $p.<assoc>;
+#		return True if $p.<prec>
+#			and $p.<dba>
+#			and $p.<assoc>;
+#	}
 
-	method _octint( Mu $p ) {
-		Perl6::Number::Octal.from-match( $p );
-	}
+#	method _octint( Mu $p ) {
+#		Perl6::Number::Octal.from-match( $p );
+#	}
 
-	method _op( Mu $p ) {
-		my Perl6::Element @child;
-		given $p {
-			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
-			}
-		}
-		@child;
-	}
+#	method _op( Mu $p ) {
+#		my Perl6::Element @child;
+#		given $p {
+#			default {
+#				debug-match( $_ ) if $*DEBUG;
+#				die "Unhandled case" if
+#					$*FACTORY-FAILURE-FATAL
+#			}
+#		}
+#		@child;
+#	}
 
-	method _OPER( Mu $p ) {
-		my Perl6::Element @child;
-		given $p {
-			when self.assert-hash( $_, [< sym infixish O >] ) {
-				die; # XXX unused? Or just untested?
-				@child.append( self._sym( $_.hash.<sym> ) );
-				@child.append(
-					self._infixish( $_.hash.<infixish> )
-				);
-				@child.append( self._O( $_.hash.<O> ) );
-			}
-			when self.assert-hash( $_, [< sym dottyop O >] ) {
-				die; # XXX unused? Or just untested?
-				# XXX replace with _sym(..)
-				@child.append(
-					Perl6::Operator::Infix.from-match(
-						$_.hash.<sym>
-					)
-				);
-				@child.append(
-					self._dottyop( $_.hash.<dottyop> )
-				);
-			}
-			when self.assert-hash( $_, [< sym O >] ) {
-				die; # XXX unused? Or just untested?
-				@child.append( self._sym( $_.hash.<sym> ) );
-# XXX Probably needs to be rethought
+#	method _OPER( Mu $p ) {
+#		my Perl6::Element @child;
+#		given $p {
+#			when self.assert-hash( $_, [< sym infixish O >] ) {
+#				die; # XXX unused? Or just untested?
+#				@child.append( self._sym( $_.hash.<sym> ) );
+#				@child.append(
+#					self._infixish( $_.hash.<infixish> )
+#				);
 #				@child.append( self._O( $_.hash.<O> ) );
-			}
-			when self.assert-hash( $_, [< EXPR O >] ) {
-				die; # XXX unused? Or just untested?
-				@child.append( self._EXPR( $_.hash.<EXPR> ) );
-				@child.append( self._O( $_.hash.<O> ) );
-			}
-			when self.assert-hash( $_, [< semilist O >] ) {
-				die; # XXX unused? Or just untested?
-				@child.append(
-					self._semilist( $_.hash.<semilist> )
-				);
-# XXX probably needs to be rethought
+#			}
+#			when self.assert-hash( $_, [< sym dottyop O >] ) {
+#				die; # XXX unused? Or just untested?
+#				# XXX replace with _sym(..)
+#				@child.append(
+#					Perl6::Operator::Infix.from-match(
+#						$_.hash.<sym>
+#					)
+#				);
+#				@child.append(
+#					self._dottyop( $_.hash.<dottyop> )
+#				);
+#			}
+#			when self.assert-hash( $_, [< sym O >] ) {
+#				die; # XXX unused? Or just untested?
+#				@child.append( self._sym( $_.hash.<sym> ) );
+## XXX Probably needs to be rethought
+##				@child.append( self._O( $_.hash.<O> ) );
+#			}
+#			when self.assert-hash( $_, [< EXPR O >] ) {
+#				die; # XXX unused? Or just untested?
+#				@child.append( self._EXPR( $_.hash.<EXPR> ) );
 #				@child.append( self._O( $_.hash.<O> ) );
-			}
-			when self.assert-hash( $_, [< nibble O >] ) {
-				die; # XXX unused? Or just untested?
-				@child.append(
-					self._nibble( $_.hash.<nibble> )
-				);
-				@child.append( self._O( $_.hash.<O> ) );
-			}
-			when self.assert-hash( $_, [< arglist O >] ) {
-				die; # XXX unused? Or just untested?
-				@child.append(
-					self._arglist( $_.hash.<arglist> )
-				);
-				@child.append( self._O( $_.hash.<O> ) );
-			}
-			when self.assert-hash( $_, [< dig O >] ) {
-				die; # XXX unused? Or just untested?
-				@child.append( self._dig( $_.hash.<dig> ) );
-				@child.append( self._O( $_.hash.<O> ) );
-			}
-			when self.assert-hash( $_, [< O >] ) {
-				die; # XXX unused? Or just untested?
-				@child.append( self._O( $_.hash.<O> ) );
-			}
-			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
-			}
-		}
-		@child;
-	}
+#			}
+#			when self.assert-hash( $_, [< semilist O >] ) {
+#				die; # XXX unused? Or just untested?
+#				@child.append(
+#					self._semilist( $_.hash.<semilist> )
+#				);
+## XXX probably needs to be rethought
+##				@child.append( self._O( $_.hash.<O> ) );
+#			}
+#			when self.assert-hash( $_, [< nibble O >] ) {
+#				die; # XXX unused? Or just untested?
+#				@child.append(
+#					self._nibble( $_.hash.<nibble> )
+#				);
+#				@child.append( self._O( $_.hash.<O> ) );
+#			}
+#			when self.assert-hash( $_, [< arglist O >] ) {
+#				die; # XXX unused? Or just untested?
+#				@child.append(
+#					self._arglist( $_.hash.<arglist> )
+#				);
+#				@child.append( self._O( $_.hash.<O> ) );
+#			}
+#			when self.assert-hash( $_, [< dig O >] ) {
+#				die; # XXX unused? Or just untested?
+#				@child.append( self._dig( $_.hash.<dig> ) );
+#				@child.append( self._O( $_.hash.<O> ) );
+#			}
+#			when self.assert-hash( $_, [< O >] ) {
+#				die; # XXX unused? Or just untested?
+#				@child.append( self._O( $_.hash.<O> ) );
+#			}
+#			default {
+#				debug-match( $_ ) if $*DEBUG;
+#				die "Unhandled case" if
+#					$*FACTORY-FAILURE-FATAL
+#			}
+#		}
+#		@child;
+#	}
 
 	# ?{ }
 	# ??{ }
 	# var
 	#
-	method _p5metachar( Mu $p ) {
-		my Perl6::Element @child;
-		given $p {
-			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
-			}
-		}
-		@child;
-	}
+#	method _p5metachar( Mu $p ) {
+#		my Perl6::Element @child;
+#		given $p {
+#			default {
+#				debug-match( $_ ) if $*DEBUG;
+#				die "Unhandled case" if
+#					$*FACTORY-FAILURE-FATAL
+#			}
+#		}
+#		@child;
+#	}
 
 	# package <name> { }
 	# module <name> { }
@@ -3720,26 +3704,26 @@ return True;
 	# config
 	# text
 	#
-	method _pod_block( Mu $p ) {
-		# XXX fix later
-		self._EXPR( $p.list.[0].hash.<EXPR> );
-	}
+#	method _pod_block( Mu $p ) {
+#		# XXX fix later
+#		self._EXPR( $p.list.[0].hash.<EXPR> );
+#	}
 
 	# block
 	# text
 	#
-	method _pod_content( Mu $p ) {
-		# XXX fix later
-		self._EXPR( $p.list.[0].hash.<EXPR> );
-	}
+#	method _pod_content( Mu $p ) {
+#		# XXX fix later
+#		self._EXPR( $p.list.[0].hash.<EXPR> );
+#	}
 
 	# regular
 	# code
 	#
-	method _pod_textcontent( Mu $p ) {
-		# XXX fix later
-		self._EXPR( $p.list.[0].hash.<EXPR> );
-	}
+#	method _pod_textcontent( Mu $p ) {
+#		# XXX fix later
+#		self._EXPR( $p.list.[0].hash.<EXPR> );
+#	}
 
 	method _postfix_prefix_meta_operator( Mu $p ) {
 		my Perl6::Element @child;
@@ -3777,9 +3761,7 @@ return True;
 		if $p.list {
 			for $p.list {
 				if self.assert-hash( $_, [< EXPR >] ) {
-					@child.append(
-						self._EXPR( $_ )
-					);
+					@child.append( self._EXPR( $_ ) );
 				}
 				else {
 					debug-match( $_ ) if $*DEBUG;
@@ -3981,17 +3963,17 @@ return True;
 		@child;
 	}
 
-	method _quibble( Mu $p ) {
-		my Perl6::Element @child;
-		given $p {
-			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
-			}
-		}
-		@child;
-	}
+#	method _quibble( Mu $p ) {
+#		my Perl6::Element @child;
+#		given $p {
+#			default {
+#				debug-match( $_ ) if $*DEBUG;
+#				die "Unhandled case" if
+#					$*FACTORY-FAILURE-FATAL
+#			}
+#		}
+#		@child;
+#	}
 
 	my %delimiter-map =
 		Q{'} => Perl6::String::Escaping,
@@ -4203,7 +4185,6 @@ return True;
 					@_child.append(
 						self._nibble(
 							$p.hash.<nibble>
-							
 						)
 					);
 					@_child.append(
@@ -4266,48 +4247,48 @@ return True;
 		@child;
 	}
 
-	method _quotepair( Mu $p ) {
-		my Perl6::Element @child;
-		if $p.list {
-			for $p.list {
-				if self.assert-hash( $_, [< identifier >] ) {
-					@child.append(
-						self._identifier(
-							$_.hash.<identifier>
-						)
-					);
-				}
-				else {
-					debug-match( $_ ) if $*DEBUG;
-					die "Unhandled case" if
-						$*FACTORY-FAILURE-FATAL
-				}
-			}
-		}
-		elsif self.assert-hash( $p,
-				[< circumfix bracket radix >],
-				[< exp base >] ) {
-			@child.append( self._circumfix( $_.hash.<circumfix> ) );
-			@child.append( self._bracket( $_.hash.<bracket> ) );
-			@child.append( self._radix( $_.hash.<radix> ) );
-		}
-		elsif self.assert-hash( $p, [< identifier >] ) {
-			@child.append(
-				self._identifier( $p.hash.<identifier> )
-			);
-		}
-		else {
-			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if
-				$*FACTORY-FAILURE-FATAL
-		}
-		@child;
-	}
+#	method _quotepair( Mu $p ) {
+#		my Perl6::Element @child;
+#		if $p.list {
+#			for $p.list {
+#				if self.assert-hash( $_, [< identifier >] ) {
+#					@child.append(
+#						self._identifier(
+#							$_.hash.<identifier>
+#						)
+#					);
+#				}
+#				else {
+#					debug-match( $_ ) if $*DEBUG;
+#					die "Unhandled case" if
+#						$*FACTORY-FAILURE-FATAL
+#				}
+#			}
+#		}
+#		elsif self.assert-hash( $p,
+#				[< circumfix bracket radix >],
+#				[< exp base >] ) {
+#			@child.append( self._circumfix( $_.hash.<circumfix> ) );
+#			@child.append( self._bracket( $_.hash.<bracket> ) );
+#			@child.append( self._radix( $_.hash.<radix> ) );
+#		}
+#		elsif self.assert-hash( $p, [< identifier >] ) {
+#			@child.append(
+#				self._identifier( $p.hash.<identifier> )
+#			);
+#		}
+#		else {
+#			debug-match( $p ) if $*DEBUG;
+#			die "Unhandled case" if
+#				$*FACTORY-FAILURE-FATAL
+#		}
+#		@child;
+#	}
 
-	method _radix( Mu $p ) {
-		warn "radix finally used";
-		( )
-	}
+#	method _radix( Mu $p ) {
+#		warn "radix finally used";
+#		( )
+#	}
 
 	method __Radix( Mu $p ) {
 		Perl6::Number::Radix.from-match( $p );
@@ -4411,10 +4392,10 @@ return True;
 		@child;
 	}
 
-	method _right( Mu $p ) {
-		warn "right finally used";
-		( )
-	}
+#	method _right( Mu $p ) {
+#		warn "right finally used";
+#		( )
+#	}
 
 	# sub <name> ... { },
 	# method <name> ... { },
@@ -4490,9 +4471,7 @@ return True;
 						:child( @_child ),
 					)
 				);
-				@child.append(
-					self._trait( $_.hash.<trait> )
-				);
+				@child.append( self._trait( $_.hash.<trait> ) );
 				@child.append(
 					self._blockoid( $_.hash.<blockoid> )
 				);
@@ -4628,23 +4607,23 @@ return True;
 		@child;
 	}
 
-	method _rx_adverbs( Mu $p ) {
-		given $p {
-			when self.assert-hash( $_, [< quotepair >] ) {
-				die; # XXX unused? Or just untested?
-				self._quotepair( $_.hash.<quotepair> );
-			}
-			when self.assert-hash( $_, [ ], [< quotepair >] ) {
-				die; # XXX unused? Or just untested?
-				die "Not implemented yet"
-			}
-			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
-			}
-		}
-	}
+#	method _rx_adverbs( Mu $p ) {
+#		given $p {
+#			when self.assert-hash( $_, [< quotepair >] ) {
+#				die; # XXX unused? Or just untested?
+#				self._quotepair( $_.hash.<quotepair> );
+#			}
+#			when self.assert-hash( $_, [ ], [< quotepair >] ) {
+#				die; # XXX unused? Or just untested?
+#				die "Not implemented yet"
+#			}
+#			default {
+#				debug-match( $_ ) if $*DEBUG;
+#				die "Unhandled case" if
+#					$*FACTORY-FAILURE-FATAL
+#			}
+#		}
+#	}
 
 	method _scoped( Mu $p ) {
 		my Perl6::Element @child;
@@ -4791,50 +4770,50 @@ return True;
 		Perl6::Bareword.from-match( $p );
 	}
 
-	method _sequence( Mu $p ) {
-		my Perl6::Element @child;
-		given $p {
-			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
-			}
-		}
-		@child;
-	}
+#	method _sequence( Mu $p ) {
+#		my Perl6::Element @child;
+#		given $p {
+#			default {
+#				debug-match( $_ ) if $*DEBUG;
+#				die "Unhandled case" if
+#					$*FACTORY-FAILURE-FATAL
+#			}
+#		}
+#		@child;
+#	}
 
-	method _shape( Mu $p ) {
-		my Perl6::Element @_child;
-		$p.Str ~~ m{ ^ '{' \s* ( .+ ) \s* '}' };
-		@_child.append(
-			Perl6::Bareword.from-int(
-				$p.from + $0.from,
-				$0.Str
-			)
-		);
-		Perl6::Operator::Circumfix.from-match(
-			$p, @_child
-		);
-	}
+#	method _shape( Mu $p ) {
+#		my Perl6::Element @_child;
+#		$p.Str ~~ m{ ^ '{' \s* ( .+ ) \s* '}' };
+#		@_child.append(
+#			Perl6::Bareword.from-int(
+#				$p.from + $0.from,
+#				$0.Str
+#			)
+#		);
+#		Perl6::Operator::Circumfix.from-match(
+#			$p, @_child
+#		);
+#	}
 
-	method _sibble( Mu $p ) {
-		my Perl6::Element @child;
-		given $p {
-			if self.assert-hash( $_, [< right babble left >] ) {
-				@child.append( self._right( $_.hash.<right> ) );
-				@child.append(
-					self._babble( $_.hash.<babble> )
-				);
-				@child.append( self._left( $_.hash.<left> ) );
-			}
-			else {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
-			}
-		}
-		@child;
-	}
+#	method _sibble( Mu $p ) {
+#		my Perl6::Element @child;
+#		given $p {
+#			if self.assert-hash( $_, [< right babble left >] ) {
+#				@child.append( self._right( $_.hash.<right> ) );
+#				@child.append(
+#					self._babble( $_.hash.<babble> )
+#				);
+#				@child.append( self._left( $_.hash.<left> ) );
+#			}
+#			else {
+#				debug-match( $_ ) if $*DEBUG;
+#				die "Unhandled case" if
+#					$*FACTORY-FAILURE-FATAL
+#			}
+#		}
+#		@child;
+#	}
 
 	method _sigfinal( Mu $p ) {
 		given $p {
@@ -5084,9 +5063,7 @@ return True;
 							)
 						);
 					}
-					@child.append(
-						self.__Parameter( $q )
-					);
+					@child.append( self.__Parameter( $q ) );
 				}
 			}
 			when self.assert-hash( $_, [ ],
@@ -5114,10 +5091,10 @@ return True;
 		}
 	}
 
-	method _specials( Mu $p ) {
-		warn "specials finally used";
-		( )
-	}
+#	method _specials( Mu $p ) {
+#		warn "specials finally used";
+#		( )
+#	}
 
 	# if
 	# unless
@@ -5417,8 +5394,7 @@ if $q.list.[$idx].Str {
 			#
 			if $_.Str ~~ m{ ';' ( \s+ ) $ } {
 				$leftover-ws = $0.Str;
-				$leftover-ws-from =
-					$_.to - $0.Str.chars
+				$leftover-ws-from = $_.to - $0.Str.chars;
 			}
 			else {
 				if $_.Str ~~ m{ ( \s+ ) $ } {
@@ -5575,15 +5551,15 @@ if $q.list.[$idx].Str {
 		@child;
 	}
 
-	method _subshortname( Mu $p ) {
-		given $p {
-			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
-			}
-		}
-	}
+#	method _subshortname( Mu $p ) {
+#		given $p {
+#			default {
+#				debug-match( $_ ) if $*DEBUG;
+#				die "Unhandled case" if
+#					$*FACTORY-FAILURE-FATAL
+#			}
+#		}
+#	}
 
 	method _sym( Mu $p ) {
 		my Perl6::Element @child;
@@ -5913,10 +5889,10 @@ if $q.list.[$idx].Str {
 		@child;
 	}
 
-	method _twigil( Mu $p ) {
-		warn "twigil finally used";
-		( )
-	}
+#	method _twigil( Mu $p ) {
+#		warn "twigil finally used";
+#		( )
+#	}
 
 	method _type_constraint( Mu $p ) {
 		my Perl6::Element @child;
@@ -6052,14 +6028,8 @@ if $q.list.[$idx].Str {
 		@child;
 	}
 
-	method _VALUE( Mu $p ) {
-#		return $p.hash.<VALUE>.Str if
-#			$p.hash.<VALUE>.Str and $p.hash.<VALUE>.Str eq '0';
-#		$p.hash.<VALUE>.Int
-die "Catching Str";
-die "Catching Int";
-		$p.hash.<VALUE>.Str || $p.hash.<VALUE>.Int
-	}
+#	method _VALUE( Mu $p ) {
+#	}
 
 	# quote
 	# number
@@ -6195,27 +6165,29 @@ die "Catching Int";
 		)
 	}
 
-	method _vnum( Mu $p ) {
-		my Perl6::Element @child;
-		if $p.list {
-			for $p.list {
-				if $p.Int {
-					Perl6::Number.from-match( $p )
-				}
-				else {
-					debug-match( $_ ) if $*DEBUG;
-					die "Unhandled case" if
-						$*FACTORY-FAILURE-FATAL
-				}
-			}
-		}
-		else {
-			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if
-				$*FACTORY-FAILURE-FATAL
-		}
-		@child;
-	}
+#	method _vnum( Mu $p ) {
+#		my Perl6::Element @child;
+#		if $p.list {
+#			for $p.list {
+#				if $p.Int {
+#					@child.append(
+#						Perl6::Number.from-match( $p )
+#					)
+#				}
+#				else {
+#					debug-match( $_ ) if $*DEBUG;
+#					die "Unhandled case" if
+#						$*FACTORY-FAILURE-FATAL
+#				}
+#			}
+#		}
+#		else {
+#			debug-match( $p ) if $*DEBUG;
+#			die "Unhandled case" if
+#				$*FACTORY-FAILURE-FATAL
+#		}
+#		@child;
+#	}
 
 	method _wu( Mu $p ) {
 		Perl6::Bareword.from-match( $p )
