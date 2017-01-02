@@ -127,6 +127,7 @@ subtest {
 my %dir = (
    "\e[A" => 'up',
    "\e[B" => 'down',
+   "\e[C" => 'left',
 );
 _END_
 	my $p = $pt.parse( $source );

@@ -516,7 +516,6 @@ _END_
 	}, Q{version 2};
 
 	subtest {
-#`[
 		my $source = Q:to[_END_];
 my @quantities = flat (99 ... 1), 'No more', 99;
 my @bottles = flat 'bottles' xx 98, 'bottle', 'bottles' xx 2;
@@ -536,7 +535,6 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 		done-testing;
 	}, Q{version 3};

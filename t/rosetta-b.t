@@ -632,7 +632,6 @@ _END_
 }, Q{Binary strings};
 
 subtest {
-#`[
 	# XXX class Digest::SHA exports 'sha256'
 	my $source = Q:to[_END_];
 sub sha256 { }
@@ -658,7 +657,6 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 	done-testing;
 }, Q{Bitcoin validation};
@@ -1057,7 +1055,6 @@ _END_
 }, Q{Brace expansion};
 
 subtest {
-#`[
 	my $source = Q:to[_END_];
 class Foo {
     has $!shyguy = 42;
@@ -1070,7 +1067,6 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 	done-testing;
 }, Q{Break OO privacy};
