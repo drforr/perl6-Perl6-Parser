@@ -836,14 +836,12 @@ class Perl6::Parser::Factory {
 						$1.Str
 					)
 				);
-				if $2.Str {
-					@child.append(
-						Perl6::WS.from-int(
-							$from + $0.Str.chars + $1.Str.chars,
-							$2.Str
-						)
-					);
-				}
+				@child.append(
+					Perl6::WS.from-int(
+						$from + $0.Str.chars + $1.Str.chars,
+						$2.Str
+					)
+				);
 			}
 			when $str ~~ m{ \S } {
 			}
@@ -1193,15 +1191,15 @@ class Perl6::Parser::Factory {
 		}
 	}
 
-	method _bracket( Mu $p ) {
-		given $p {
-			default {
-				debug-match( $_ );
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
-			}
-		}
-	} 
+#	method _bracket( Mu $p ) {
+#		given $p {
+#			default {
+#				debug-match( $_ );
+#				die "Unhandled case" if
+#					$*FACTORY-FAILURE-FATAL
+#			}
+#		}
+#	} 
 
 #	method _cclass_elem( Mu $p ) {
 #		my Perl6::Element @child;
@@ -2185,18 +2183,11 @@ class Perl6::Parser::Factory {
 							)
 						}
 					}
-
-					# Sigh. Lists can have trailing commas,
-					# in which case the last list entry
-					# will be blank.
-					#
-					if $p.list.[$_].Str {
-						@child.append(
-							self._EXPR(
-								$p.list.[$_]
-							)
-						);
-					}
+					@child.append(
+						self._EXPR(
+							$p.list.[$_]
+						)
+					);
 				}
 			}
 		}
@@ -2530,13 +2521,11 @@ class Perl6::Parser::Factory {
 							$_.hash.<EXPR>.list.[0]
 						)
 					);
-					if $_.hash.<EXPR>.hash.<infix>.Str {
-						@child.append(
-							self._infix(
-								$_.hash.<EXPR>.hash.<infix>
-							)
-						);
-					}
+					@child.append(
+						self._infix(
+							$_.hash.<EXPR>.hash.<infix>
+						)
+					);
 					@child.append(
 						self._EXPR(
 							$_.hash.<EXPR>.list.[1]
@@ -5254,13 +5243,11 @@ class Perl6::Parser::Factory {
 									$q.hash.<infix>
 								)
 							);
-if $q.list.[$idx].Str {
 							@child.append(
 								self._EXPR(
 									$q.list.[$idx]
 								)
 							);
-}
 						}
 					}
 					else {
