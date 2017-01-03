@@ -1420,7 +1420,6 @@ _END_
 }, Q{Averages/arithmetic mean};
 
 subtest {
-#`[
 	my $source = Q:to[_END_];
 # Of course, you can still use pi and 180.
 sub deg2rad { $^d * tau / 360 }
@@ -1443,7 +1442,6 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 	done-testing;
 }, Q{Averages/mean angle};

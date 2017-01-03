@@ -2196,7 +2196,7 @@ class Perl6::Parser::Factory {
 							)
 						);
 					}
-					if $_ != $end {
+					if $_ < $end {
 						my $x = $p.orig.Str.substr(
 							$p.list.[$_].to,
 							$p.list.[$_+1].from -
@@ -5356,24 +5356,32 @@ class Perl6::Parser::Factory {
 					   $q.hash.<infix> and
 					   $q.list.[1] and
 					   $q.list.[1].hash.<value> {
-						@child.append(
-							self._EXPR(
-								$q.list.[0]
-							)
-						);
-						for 1 .. ( $q.list.elems - 1 ) -> $idx {
-							# XXX Yes, this needs to be fixed
-							@child.append(
-								self._infix(
-									$q.hash.<infix>
-								)
-							);
-							if $q.list.[$idx].Str {
+						# XXX Most assuredly repeated elsewhere.
+						my $end = $q.list.elems - 1;
+						my $infix-str = $q.hash.<infix>.Str;
+						for $q.list.keys {
+							if $q.list.[$_].Str {
 								@child.append(
 									self._EXPR(
-										$q.list.[$idx]
+										$q.list.[$_]
 									)
 								);
+							}
+							if $_ < $end {
+								my $x = $q.orig.Str.substr(
+									$q.list.[$_].to,
+									$q.list.[$_+1].from -
+										$q.list.[$_].to
+								);
+								if $x ~~ m{ ( $infix-str ) } {
+									@child.append(
+										Perl6::Operator::Infix.from-int(
+											$q.list.[$_].to +
+												$0.from,
+											$infix-str
+										)
+									);
+								}
 							}
 						}
 					}

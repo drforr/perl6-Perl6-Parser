@@ -963,7 +963,6 @@ _END_
 }, Q{Boolean types};
 
 subtest {
-#`[
 	my $source = Q:to[_END_];
 sub point (Int $index) {
     my $ix = $index % 32;
@@ -992,7 +991,6 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 	done-testing;
 }, Q{Box the compass};
