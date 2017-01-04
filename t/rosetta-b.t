@@ -325,7 +325,6 @@ _END_
 }, Q{Base64 encode data};
 
 subtest {
-#`[
 	my $source = Q:to[_END_];
 sub benford(@a) { bag +« flat @a».comb: /<( <[ 1..9 ]> )> <[ , . \d ]>*/ }
  
@@ -346,7 +345,6 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 	done-testing;
 }, Q{Benford's law};

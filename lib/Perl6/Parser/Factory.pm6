@@ -2098,6 +2098,17 @@ class Perl6::Parser::Factory {
 			@child.append( self._colonpair( $p.hash.<colonpair> ) );
 		}
 		elsif self.assert-hash( $p,
+				[< prefix OPER
+				   prefix_postfix_meta_operator >] ) {
+			@child.append( self._prefix( $p.hash.<prefix> ) );
+			@child.append(
+				self._prefix_postfix_meta_operator(
+					$p.hash.<prefix_postfix_meta_operator>
+				)
+			);
+			@child.append( self._EXPR( $p.list.[0] ) );
+		}
+		elsif self.assert-hash( $p,
 				[< dotty OPER >],
 				[< postfix_prefix_meta_operator >] ) {
 			# XXX Look into this at some point.
@@ -3958,6 +3969,30 @@ class Perl6::Parser::Factory {
 				die "Unhandled case" if
 					$*FACTORY-FAILURE-FATAL
 			}
+		}
+		@child;
+	}
+
+	method _prefix_postfix_meta_operator( Mu $p ) {
+		my Perl6::Element @child;
+		if $p.list {
+			for $p.list {
+				if self.assert-hash( $_, [< sym >] ) {
+					@child.append(
+						self._sym( $_.hash.<sym> )
+					);
+				}
+				else {
+					debug-match( $_ ) if $*DEBUG;
+					die "Unhandled case" if
+						$*FACTORY-FAILURE-FATAL
+				}
+			}
+		}
+		else {
+			debug-match( $_ ) if $*DEBUG;
+			die "Unhandled case" if
+				$*FACTORY-FAILURE-FATAL
 		}
 		@child;
 	}
