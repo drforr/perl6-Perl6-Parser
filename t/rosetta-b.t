@@ -144,7 +144,6 @@ _END_
 	}, Q{version 2};
 
 	subtest {
-#`[
 		my $source = Q:to[_END_];
 sub balanced($_ is copy) {
     Nil while s:g/'[]'//;
@@ -159,7 +158,6 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 		done-testing;
 	}, Q{version 3};

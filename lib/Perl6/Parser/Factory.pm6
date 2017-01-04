@@ -788,6 +788,7 @@ class Perl6::Parser::Factory {
 	constant BANG-BANG = Q{!!};
 	constant FAT-ARROW = Q{=>};
 	constant HYPER = Q{>>};
+	constant SLASH = Q'/';
 	constant BACKSLASH = Q'\'; # because the braces confuse vim.
 
 	has %.here-doc; # Text for here-docs, indexed by their $p.from.
@@ -1095,15 +1096,19 @@ class Perl6::Parser::Factory {
 #		}
 #	}
 
-#	method _babble( Mu $p ) {
-#		given $p {
-#			default {
-#				debug-match( $_ );
-#				die "Unhandled case" if
-#					$*FACTORY-FAILURE-FATAL
-#			}
-#		}
-#	}
+	method _babble( Mu $p ) {
+		my Perl6::Element @child;
+		given $p {
+			when self.assert-hash( $_, [ ], [< quotepair B >] ) {
+			}
+			default {
+				debug-match( $_ );
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
+			}
+		}
+		@child;
+	}
 
 	method _backmod( Mu $p ) {
 #		warn "backmod finally used";
@@ -2151,9 +2156,7 @@ class Perl6::Parser::Factory {
 			my $end = $p.list.elems - 1;
 			my $infix-str = $p.hash.<infix>.Str;
 			if $infix-str ~~ m{ '??' } {
-				@child.append(
-					self._EXPR( $p.list.[0] )
-				);
+				@child.append( self._EXPR( $p.list.[0] ) );
 
 				my $x = $p.orig.Str.substr(
 					$p.list.[0].to,
@@ -2167,9 +2170,7 @@ class Perl6::Parser::Factory {
 					)
 				);
 				
-				@child.append(
-					self._EXPR( $p.list.[1] )
-				);
+				@child.append( self._EXPR( $p.list.[1] ) );
 
 				my $y = $p.orig.Str.substr(
 					$p.list.[1].to,
@@ -2183,9 +2184,7 @@ class Perl6::Parser::Factory {
 					)
 				);
 				
-				@child.append(
-					self._EXPR( $p.list.[2] )
-				);
+				@child.append( self._EXPR( $p.list.[2] ) );
 			}
 			else {
 				for $p.list.keys {
@@ -2561,11 +2560,13 @@ class Perl6::Parser::Factory {
 							$_.hash.<EXPR>.list.[0]
 						)
 					);
-					@child.append(
-						self._infix(
-							$_.hash.<EXPR>.hash.<infix>
-						)
-					);
+					if $_.hash.<EXPR>.hash.<infix>.Str {
+						@child.append(
+							self._infix(
+								$_.hash.<EXPR>.hash.<infix>
+							)
+						);
+					}
 					@child.append(
 						self._EXPR(
 							$_.hash.<EXPR>.list.[1]
@@ -2644,15 +2645,22 @@ class Perl6::Parser::Factory {
 		Perl6::Operator::Infix.from-match( $p );
 	}
 
-#	method _left( Mu $p ) {
-#		given $p {
-#			default {
-#				debug-match( $_ ) if $*DEBUG;
-#				die "Unhandled case" if
-#					$*FACTORY-FAILURE-FATAL
-#			}
-#		}
-#	}
+	method _left( Mu $p ) {
+		my Perl6::Element @child;
+		given $p {
+			when self.assert-hash( $_, [< termseq >] ) {
+				@child.append(
+					self._termseq( $_.hash.<termseq> )
+				);
+			}
+			default {
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
+			}
+		}
+		@child;
+	}
 
 	method _longname( Mu $p ) {
 		given $p {
@@ -3863,9 +3871,13 @@ class Perl6::Parser::Factory {
 				}
 			}
 			when self.assert-hash( $_, [< arglist >], [< O >] ) {
-				@child.append(
-					self._arglist( $_.hash.<arglist> )
-				);
+				if $_.hash.<arglist>.Str {
+					@child.append(
+						self._arglist(
+							$_.hash.<arglist>
+						)
+					);
+				}
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
@@ -4062,11 +4074,11 @@ class Perl6::Parser::Factory {
 			when self.assert-hash( $_,
 					[< sym rx_adverbs sibble >] ) {
 				@child.append( self._sym( $p.hash.<sym> ) );
-				@child.append( self._rx_adverbs(
-					$p.hash.<rx_adverbs> )
+				@child.append(
+					self._rx_adverbs( $p.hash.<rx_adverbs> )
 				);
-				@child.append( self._sibble(
-					$p.hash.<sibble> )
+				@child.append(
+					self._sibble( $p.hash.<sibble> )
 				);
 			}
 			when self.assert-hash( $_,
@@ -4304,6 +4316,11 @@ class Perl6::Parser::Factory {
 		if $p.list {
 			for $p.list {
 				if self.assert-hash( $_, [< identifier >] ) {
+					@child.append(
+						Perl6::Operator::Prefix.from-int(
+							$_.hash.<identifier>.from, COLON
+						)
+					);
 					@child.append(
 						self._identifier(
 							$_.hash.<identifier>
@@ -4863,12 +4880,38 @@ class Perl6::Parser::Factory {
 	method _sibble( Mu $p ) {
 		my Perl6::Element @child;
 		given $p {
-			when self.assert-hash( $_, [< right babble left >] ) {
-				@child.append( self._right( $_.hash.<right> ) );
+			when self.assert-hash( $_, [< left babble right >] ) {
+				# XXX Don't need babble, apparently.
 				@child.append(
-					self._babble( $_.hash.<babble> )
+					Perl6::Operator::Prefix.from-int(
+						$_.hash.<left>.from -
+							SLASH.chars,
+						SLASH
+					)
 				);
-				@child.append( self._left( $_.hash.<left> ) );
+				if $_.hash.<left>.Str {
+					@child.append(
+						self._left( $_.hash.<left> )
+					);
+				}
+				@child.append(
+					Perl6::Operator::Prefix.from-int(
+						$_.hash.<left>.to -
+							SLASH.chars,
+						SLASH
+					)
+				);
+				if $_.hash.<right>.Str {
+					@child.append(
+						self._right( $_.hash.<right> )
+					);
+				}
+				@child.append(
+					Perl6::Operator::Prefix.from-int(
+						$_.hash.<right>.to,
+						SLASH
+					)
+				);
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
@@ -5433,33 +5476,12 @@ class Perl6::Parser::Factory {
 		# This *should* be handled in _statementlist
 		#
 		elsif self.assert-hash( $p, [< EXPR >] ) {
-			# XXX Sigh, need to handle *this* where we have the
-			# XXX proper matching string available.
 			if $p.hash.<EXPR>.hash.<infix> {
 				if $p.hash.<EXPR>.list.elems == 3 and
 					$p.hash.<EXPR>.hash.<infix> and
 					$p.hash.<EXPR>.hash.<OPER> {
 					@child.append(
-						self._EXPR(
-							$p.hash.<EXPR>.list.[0]
-						)
-					);
-					@child.append(
-						Perl6::Operator::Infix.from-int(
-							$p.hash.<EXPR>.hash.<infix>.from,
-							QUES-QUES
-						)
-					);
-					@child.append(
-						self._EXPR( $p.hash.<EXPR>.list.[1] )
-					);
-					@child.append(
-						Perl6::Operator::Infix.find-match(
-							$p.hash.<EXPR>, BANG-BANG
-						)
-					);
-					@child.append(
-						self._EXPR( $p.hash.<EXPR>.list.[2] )
+						self._EXPR( $p.hash.<EXPR> )
 					);
 				}
 				else {
@@ -6345,11 +6367,7 @@ class Perl6::Parser::Factory {
 				@child.append(
 					self._variable( $_.hash.<variable> )
 				);
-				@child.append(
-					self._shape(
-						$_.hash.<shape>
-					)
-				);
+				# XXX Need to restore shape?
 			}
 			when self.assert-hash( $_,
 					[< variable post_constraint >],
