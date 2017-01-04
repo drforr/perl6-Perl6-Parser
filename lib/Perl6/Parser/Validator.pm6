@@ -1191,6 +1191,7 @@ return True;
 			and self._Nibbler( $parsed.hash.<nibbler> );
 		return True if self.assert-hash-keys( $parsed, [< statement >] )
 			and self._Statement( $parsed.hash.<statement> );
+		return True if self.assert-Str( $parsed ); # XXX not sure this should be needed.
 		debug-match( $parsed );
 		return self.record-failure( '_MetaChar' );
 	}

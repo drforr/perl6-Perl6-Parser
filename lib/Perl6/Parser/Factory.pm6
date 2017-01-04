@@ -1073,8 +1073,17 @@ class Perl6::Parser::Factory {
 #	}
 
 	method _atom( Mu $p ) {
-		if $p.Str {
-			Perl6::Bareword.from-match( $p );
+		my Perl6::Element @child;
+		if self.assert-hash( $p, [< quantifier atom >] ) {
+			@child.append(
+				self._quantifier( $p.hash.<quantifier> )
+			);
+			@child.append( self._atom( $p.hash.<atom> ) );
+		}
+		elsif $p.Str {
+			@child.append(
+				Perl6::Bareword.from-match( $p )
+			);
 		}
 		else {
 			given $p {
@@ -1085,6 +1094,7 @@ class Perl6::Parser::Factory {
 				}
 			}
 		}
+		@child;
 	}
 
 #	method _B( Mu $p ) { #		given $p {
@@ -3110,6 +3120,17 @@ class Perl6::Parser::Factory {
 						self._sigfinal(
 							$_.hash.<sigfinal>
 						)
+					);
+					@child.append(
+						self._quantifier(
+							$_.hash.<quantifier>
+					 	)
+					);
+				}
+				elsif self.assert-hash( $_,
+					[< atom quantifier >] ) {
+					@child.append(
+						self._atom( $_.hash.<atom> )
 					);
 					@child.append(
 						self._quantifier(
@@ -5885,7 +5906,6 @@ class Perl6::Parser::Factory {
 
 	method _termconjseq( Mu $p ) {
 		my Perl6::Element @child;
-		# XXX Work on this later.
 		if $p.list {
 			for $p.list {
 				if self.assert-hash( $_, [< termalt >] ) {
