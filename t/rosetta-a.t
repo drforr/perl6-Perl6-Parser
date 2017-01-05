@@ -659,7 +659,6 @@ _END_
 
 subtest {
 	subtest {
-#`[
 		my $source = Q:to[_END_];
 my %anagram = slurp('unixdict.txt').words.classify( { .comb.sort.join } );
  
@@ -671,7 +670,6 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 		done-testing;
 	}, Q{version 1};
@@ -700,7 +698,6 @@ _END_
 }, Q{Anagrams};
 
 subtest {
-#`[
 	my $source = Q:to[_END_];
 my %anagram = slurp('dict.ie').words.map({[.comb]}).classify({ .sort.join });
 
@@ -719,7 +716,6 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 	done-testing;
 }, Q{Anagrams / Derangements};
@@ -748,7 +744,6 @@ _END_
 }, Q{Anonymous recursion};
 
 subtest {
-#`[
 	my $source = Q:to[_END_];
 sub function { 2 * $^x + 3 };
 my @array = 1 .. 5;
@@ -774,7 +769,6 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 	done-testing;
 }, Q{Apply a callback to an array};
@@ -1447,7 +1441,6 @@ _END_
 }, Q{Averages/mean angle};
 
 subtest {
-#`[
 	my $source = Q:to[_END_];
 sub tod2rad($_) { [+](.comb(/\d+/) Z* 3600,60,1) * tau / 86400 }
  
@@ -1468,7 +1461,6 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 	done-testing;
 }, Q{Averages/mean time of day};

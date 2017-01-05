@@ -1381,15 +1381,18 @@ class Perl6::Parser::Factory {
 #		}
 #	}
 
-#	method _coercee( Mu $p ) {
-#		given $p {
-#			default {
-#				debug-match( $_ );
-#				die "Unhandled case" if
-#					$*FACTORY-FAILURE-FATAL
-#			}
-#		}
-#	}
+	method _coercee( Mu $p ) {
+		given $p {
+			when self.assert-hash( $_, [< statement >] ) {
+				self._statement( $_.hash.<statement> );
+			}
+			default {
+				debug-match( $_ );
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
+			}
+		}
+	}
 
 	method _coloncircumfix( Mu $p ) {
 		given $p {
@@ -1493,12 +1496,44 @@ class Perl6::Parser::Factory {
 		given $p {
 			when self.assert-hash( $_,
 					[< coercee sigil sequence >] ) {
+				my Perl6::Element @_child;
 				@child.append(
 					self._sigil( $_.hash.<sigil> )
 				);
-				# XXX coercee handled inside circumfix
+				my $left-margin = $_.Str.substr(
+					0, $_.hash.<coercee>.from - $_.from
+				);
+				$left-margin ~~ m{ ( '(' ) ( \s* ) $ };
+				@_child.append(
+					Perl6::Balanced::Enter.from-int(
+						$p.hash.<coercee>.from -
+						PAREN-OPEN.chars - $1.Str.chars,
+						PAREN-OPEN
+					)
+				);
+				@_child.append(
+					self._coercee( $_.hash.<coercee> )
+				);
+				@_child.append(
+					Perl6::Balanced::Exit.from-int(
+						$_.hash.<coercee>.to,
+						PAREN-CLOSE
+					)
+				);
 				@child.append(
-					self._sequence( $_.hash.<sequence> )
+					Perl6::Operator::Circumfix.new(
+						:factory-line-number(
+							callframe(1).line 
+						),
+						:from(
+							$_.hash.<coercee>.from -
+							$0.Str.chars - $1.Str.chars ),
+						:to(
+							$_.hash.<coercee>.to +
+							PAREN-CLOSE.chars
+						),
+						:child( @_child ),
+					)
 				);
 			}
 			when self.assert-hash( $_,
@@ -4992,7 +5027,7 @@ class Perl6::Parser::Factory {
 	}
 
 	method _sigil( Mu $p ) {
-		Perl6::Bareword.from-match( $p )
+		Perl6::Bareword.from-match( $p );
 	}
 
 	method _sigmaybe( Mu $p ) {
