@@ -182,7 +182,6 @@ _END_
 }, Q{Balanced brackets};
 
 subtest {
-#`[
 	my $source = Q:to[_END_];
 class BT {
     has @.coeff;
@@ -252,7 +251,6 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 	done-testing;
 }, Q{Balanced ternary};
@@ -479,7 +477,6 @@ _END_
 
 subtest {
 	subtest {
-#`[
 		my $source = Q:to[_END_];
 sub search (@a, $x --> Int) {
     binary_search { $x cmp @a[$^i] }, 0, @a.end
@@ -501,13 +498,11 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 		done-testing;
 	}, Q{version 1};
 
 	subtest {
-#`[
 		my $source = Q:to[_END_];
 sub binary_search (&p, Int $lo, Int $hi --> Int) {
     $lo <= $hi or fail;
@@ -523,7 +518,6 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 		done-testing;
 	}, Q{version 2};
@@ -532,7 +526,6 @@ _END_
 }, Q{Binary search};
 
 subtest {
-#`[
 	my $source = Q:to[_END_];
 # Perl 6 is perfectly fine with NUL *characters* in strings:
  
@@ -622,7 +615,6 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 	done-testing;
 }, Q{Binary strings};
@@ -658,7 +650,6 @@ _END_
 }, Q{Bitcoin validation};
 
 subtest {
-#`[
 	# XXX class Digest::SHA exports sub sha256, sub rmd160
 	my $source = Q:to[_END_];
 sub sha256 { }; sub rmd160 { }
@@ -693,13 +684,11 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 	done-testing;
 }, Q{Bitcoin public point to address};
 
 subtest {
-#`[
 	my $source = Q:to[_END_];
 class Pixel { has UInt ($.R, $.G, $.B) }
 class Bitmap {
@@ -735,7 +724,6 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 	done-testing;
 }, Q{Bitmap};
@@ -785,7 +773,6 @@ _END_
 }, Q{Bitmap / Bresenham's line algorithm};
 
 subtest {
-#`[
 	# XXX Create a shell 'Bitmap' class.. yes, just above but separation...
 	my $source = Q:to[_END_];
 use MONKEY-TYPING;
@@ -831,13 +818,11 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 	done-testing;
 }, Q{Bitmap / midpoint circle algorithm};
 
 subtest {
-#`[
 	my $source = Q:to[_END_];
 class Pixel { has uint8 ($.R, $.G, $.B) }
 class Bitmap {
@@ -874,7 +859,6 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 	done-testing;
 }, Q{Bitmap / write a PPM file};
@@ -905,7 +889,6 @@ _END_
 }, Q{Bitwise I/O};
 
 subtest {
-#`[
 	my $source = Q:to[_END_];
 constant MAXINT = uint.Range.max;
 constant BITS = MAXINT.base(2).chars;
@@ -940,7 +923,6 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 	done-testing;
 }, Q{Bitwise operations};
@@ -992,7 +974,6 @@ _END_
 }, Q{Box the compass};
 
 subtest {
-#`[
 	my $source = Q:to[_END_];
 grammar BraceExpansion {
     token TOP  { ( <meta> | . )* }
@@ -1043,7 +1024,6 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 	done-testing;
 }, Q{Brace expansion};
@@ -1066,7 +1046,6 @@ _END_
 }, Q{Break OO privacy};
 
 subtest {
-#`[
 	my $source = Q:to[_END_];
 constant size = 100;
 constant particlenum = 1_000;
@@ -1145,7 +1124,6 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 	done-testing;
 }, Q{Brownian tree};
@@ -1183,7 +1161,6 @@ _END_
 }, Q{Bulls and cows};
 
 subtest {
-#`[
 	my $source = Q:to[_END_];
 # we use the [] reduction meta operator along with the Cartesian Product
 # operator X to create the Cartesian Product of four times [1..9] and then get
@@ -1235,7 +1212,6 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 	done-testing;
 }, Q{Bulls and cows / player};
