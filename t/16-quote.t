@@ -40,7 +40,6 @@ my $*DEBUG = True;
 
 subtest {
 	# qqww:q is illegal
-#`(
 	subtest {
 		subtest {
 			my $source = Q{qqww :to <END>
@@ -108,7 +107,6 @@ END};
 
 		done-testing;
 	}, Q{Qx:to<pi>};
-)
 
 	subtest {
 		subtest {
@@ -267,7 +265,7 @@ END};
 
 subtest {
 	# qqw:q is illegal
-#`(
+
 	subtest {
 		subtest {
 			my $source = Q{qqw :to <END>
@@ -335,7 +333,7 @@ END};
 
 		done-testing;
 	}, Q{adverb :to};
-)
+
 	subtest {
 		subtest {
 			my $source = Q{qqw :w <pi>};
@@ -489,7 +487,7 @@ END};
 
 subtest {
 	# qqx:q is illegal
-#`(
+
 	subtest {
 		subtest {
 			my $source = Q{qqx :to <END>
@@ -557,7 +555,7 @@ END};
 
 		done-testing;
 	}, Q{adverb :to};
-)
+
 	subtest {
 		subtest {
 			my $source = Q{qqx :w <pi>};
@@ -711,7 +709,7 @@ END};
 
 subtest {
 	# qww:q is illegal
-#`(
+
 	subtest {
 		subtest {
 			my $source = Q{qww :to <END>
@@ -779,7 +777,7 @@ END};
 
 		done-testing;
 	}, Q{adverb :to};
-)
+
 	subtest {
 		subtest {
 			my $source = Q{qww :w <pi>};
@@ -1651,7 +1649,7 @@ subtest {
 
 subtest {
 	# qw:q is illegal
-#`(
+
 	subtest {
 		subtest {
 			my $source = Q{qw :to <END>
@@ -1719,7 +1717,7 @@ END};
 
 		done-testing;
 	}, Q{adverb :to};
-)
+
 	subtest {
 		subtest {
 			my $source = Q{qw :w <pi>};
@@ -1873,7 +1871,7 @@ END};
 
 subtest {
 	# qx:q is illegal
-#`(
+
 	subtest {
 		subtest {
 			my $source = Q{qx :to <END>
@@ -1941,7 +1939,6 @@ END};
 
 		done-testing;
 	}, Q{adverb :to};
-)
 
 	subtest {
 		subtest {
