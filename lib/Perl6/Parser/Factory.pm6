@@ -198,8 +198,8 @@ role Matchable {
 
 	multi method from-match-trimmed( Mu $p ) {
 		$p.Str ~~ m{ ^ ( \s* ) ( .+? ) ( \s* ) $ };
-		my $left-margin = $0.Str ?? $0.Str.chars !! 0;
-		my $right-margin = $2.Str ?? $2.Str.chars !! 0;
+		my Int $left-margin = $0.Str ?? $0.Str.chars !! 0;
+		my Int $right-margin = $2.Str ?? $2.Str.chars !! 0;
 		self.bless(
 			:factory-line-number( callframe(1).line ),
 			:from( $left-margin + $p.from  ),
@@ -332,7 +332,7 @@ class Perl6::Operator::Prefix does Token {
 class Perl6::Operator::Infix does Token {
 	also is Perl6::Operator;
 
-	multi method find-match( Mu $p, Str $token ) {
+	multi method from-sample( Mu $p, Str $token ) {
 		$p.Str ~~ m{ ($token) };
 		my Int $left-margin = $0.from;
 		self.bless(
@@ -723,8 +723,8 @@ my role Assertions {
 		my %classified = classify {
 			$p.hash.{$_}.Str ?? 'with' !! 'without'
 		}, $p.hash.keys;
-		my @keys-with-content = @( %classified<with> );
-		my @keys-without-content = @( %classified<without> );
+		my Str @keys-with-content = @( %classified<with> );
+		my Str @keys-without-content = @( %classified<without> );
 
 		return True if
 			@( $required-with ) ~~ @keys-with-content and
@@ -805,12 +805,12 @@ class Perl6::Parser::Factory {
 	method __Build-Heredoc-List( Mu $p ) {
 		%.here-doc = ();
 		while $p.Str ~~ m:c{ ( 'q:to[' ) \s* ( <-[ \] ]>+ ) } {
-			my Int $start = $0.from;
+			my Int $left-margin = $0.from;
 			my Str $marker = $1.Str;
-			$p.Str ~~ m{ \s* ']' .*? $$ ( .+? ) ( $marker ) };
-			%.here-doc{ $start } = Here-Doc.new(
+			$p.Str ~~ m{ \s* ']' .*? $$ ( .+? ) ($marker) };
+			%.here-doc{ $left-margin } = Here-Doc.new(
 				:factory-line-number( callframe(1).line ),
-				:delimiter-start( $start ),
+				:delimiter-start( $left-margin ),
 				:body-from( $0.from ),
 				:body-to( $0.to ),
 				:marker( $marker )
@@ -865,7 +865,7 @@ class Perl6::Parser::Factory {
 		);
 		if $p.hash.<statementlist>.hash.<statement>.list.elems == 1 and
 		   @_child[*-1].child[*-1].to < $p.to {
-			my $content = $p.Str.substr(
+			my Str $content = $p.Str.substr(
 				@_child[*-1].child[*-1].to
 			);
 			@_child[*-1].child.append(
@@ -885,7 +885,7 @@ class Perl6::Parser::Factory {
 		my Perl6::Element $root = Perl6::Document.from-list( @_child );
 		fill-gaps( $p, $root );
 		if $p.from < $root.from {
-			my $remainder = $p.orig.Str.substr( 0, $root.from );
+			my Str $remainder = $p.orig.Str.substr( 0, $root.from );
 			my Perl6::Element @child;
 			@child.append(
 				_string-to-tokens( $p.from, $remainder )
@@ -893,7 +893,7 @@ class Perl6::Parser::Factory {
 			$root.child.splice( 0, 0, @child );
 		}
 		if $root.to < $p.to {
-			my $remainder = $p.orig.Str.substr( $root.to );
+			my Str $remainder = $p.orig.Str.substr( $root.to );
 			my Perl6::Element @child;
 			@child.append(
 				_string-to-tokens( $p.from, $remainder )
@@ -904,8 +904,8 @@ class Perl6::Parser::Factory {
 	}
 
 	sub _fill-gap( Mu $p, Perl6::Element $root, Int $index ) {
-		my $start = $root.child.[$index].to;
-		my $end = $root.child.[$index+1].from;
+		my Int $start = $root.child.[$index].to;
+		my Int $end = $root.child.[$index+1].from;
 
 		if $start < 0 or $end < 0 {
 			say "Negative match index!";
@@ -916,8 +916,8 @@ class Perl6::Parser::Factory {
 			return;
 		}
 
-		my $x = $p.orig.Str.substr( $start, $end - $start );
-		my @child = _string-to-tokens( $start, $x );
+		my Str $x = $p.orig.Str.substr( $start, $end - $start );
+		my Perl6::Element @child = _string-to-tokens( $start, $x );
 		$root.child.splice(
 			$index + 1,
 			0,
@@ -940,7 +940,7 @@ class Perl6::Parser::Factory {
 	}
 
 	sub key-bounds( Mu $p ) {
-		my $from-to = "{$p.from} {$p.to}";
+		my Str $from-to = "{$p.from} {$p.to}";
 		if $p.list {
 			#say "-1 -1 *list*"
 			$*ERR.say: "$from-to [{substr($p.orig,$p.from,$p.to-$p.from)}]"
@@ -957,8 +957,8 @@ class Perl6::Parser::Factory {
 		my %classified = classify {
 			$p.hash.{$_}.Str ?? 'with' !! 'without'
 		}, $p.hash.keys;
-		my @keys-with-content = @( %classified<with> );
-		my @keys-without-content = @( %classified<without> );
+		my Str @keys-with-content = @( %classified<with> );
+		my Str @keys-without-content = @( %classified<without> );
 
 		$*ERR.say: "With content: {@keys-with-content.gist}";
 		$*ERR.say: "Without content: {@keys-without-content.gist}";
@@ -1315,49 +1315,35 @@ class Perl6::Parser::Factory {
 					);
 				}
 				when self.assert-hash( $_, [< nibble >] ) {
-					if $_.Str ~~ m{ ^ ( '<' ) .*? ( '>' ) $ } {
-						my Perl6::Element @_child;
-						@_child.append(
-							Perl6::Balanced::Enter.from-int(
-								$_.from,
-								$0.Str
-							)
-						);
-						@_child.append(
-							Perl6::String::XXX::Body.from-match(
-								$_.hash.<nibble>
-							)
-						);
-						@_child.append(
-							Perl6::Balanced::Exit.from-int(
-								$_.to - $1.Str.chars,
-								$1.Str
-							)
-						);
-						@child.append(
-							Perl6::String::WordQuoting.new(
-								:factory-line-number(
-									callframe(1).line
-								),
-								:from( $_.from ),
-								:to( $_.to ),
-								:child( @_child )
-							)
-						);
-					}
-					else {
-						my Perl6::Element @_child;
-						@_child.append(
-							Perl6::Operator::Prefix.from-match-trimmed(
-								$_.hash.<nibble>
-							)
-						);
-						@child.append(
-							Perl6::Operator::Circumfix.from-match(
-								$_, @_child
-							)
-						);
-					}
+					my Perl6::Element @_child;
+					$_.Str ~~ m{ ^ ( '<' ) .*? ( '>' ) $ };
+					@_child.append(
+						Perl6::Balanced::Enter.from-int(
+							$_.from,
+							$0.Str
+						)
+					);
+					@_child.append(
+						Perl6::String::XXX::Body.from-match(
+							$_.hash.<nibble>
+						)
+					);
+					@_child.append(
+						Perl6::Balanced::Exit.from-int(
+							$_.to - $1.Str.chars,
+							$1.Str
+						)
+					);
+					@child.append(
+						Perl6::String::WordQuoting.new(
+							:factory-line-number(
+								callframe(1).line
+							),
+							:from( $_.from ),
+							:to( $_.to ),
+							:child( @_child )
+						)
+					);
 				}
 				default {
 					debug-match( $_ );
@@ -1498,11 +1484,12 @@ class Perl6::Parser::Factory {
 				@child.append(
 					self._sigil( $_.hash.<sigil> )
 				);
-				my $left-margin = $_.Str.substr(
+				my Str $left-string = $_.Str.substr(
 					0, $_.hash.<coercee>.from - $_.from
 				);
-				$left-margin ~~ m{ ( '(' ) ( \s* ) $ };
-				my $right-margin = $1.Str ?? $1.Str.chars !! 0;
+				$left-string ~~ m{ ( '(' ) ( \s* ) $ };
+				my Int $right-margin =
+					$1.Str ?? $1.Str.chars !! 0;
 				@_child.append(
 					Perl6::Balanced::Enter.from-int(
 						$p.hash.<coercee>.from -
@@ -1873,7 +1860,7 @@ class Perl6::Parser::Factory {
 					[< colonpair >] ) {
 				if $_.orig.substr( $_.from - 1, 1 ) eq
 						BACKSLASH {
-					my $content = $_.orig.substr(
+					my Str $content = $_.orig.substr(
 						$_.from - 1,
 						$_.to - $_.from + 1
 					);
@@ -2147,10 +2134,10 @@ class Perl6::Parser::Factory {
 				[< dotty OPER >],
 				[< postfix_prefix_meta_operator >] ) {
 			# XXX Look into this at some point.
-			my $x = $p.Str.substr( 0, HYPER.chars );
+			my Str $x = $p.Str.substr( 0, HYPER.chars );
 			if $x eq HYPER {
 				@child.append( self._EXPR( $p.list.[0] ) );
-				my $str = $p.orig.substr(
+				my Str $str = $p.orig.substr(
 					$p.from, HYPER.chars
 				);
 				@child.append(
@@ -2209,39 +2196,24 @@ class Perl6::Parser::Factory {
 			@child.append( self._EXPR( $p.list.[1] ) );
 		}
 		elsif self.assert-hash( $p, [< infix OPER >] ) {
-			my $end = $p.list.elems - 1;
-			my $infix-str = $p.hash.<infix>.Str;
+			my Int $end = $p.list.elems - 1;
+			my Str $infix-str = $p.hash.<infix>.Str;
 			if $infix-str ~~ m{ '??' } {
 				@child.append( self._EXPR( $p.list.[0] ) );
-
-				my $x = $p.orig.Str.substr(
-					$p.list.[0].to,
-					$p.list.[1].from - $p.list.[0].to
-				);
-				$x ~~ m{ ( '??' ) };
-				my Int $left-margin = $0.from;
 				@child.append(
-					Perl6::Operator::Infix.from-int(
-						$left-margin + $p.list.[0].to,
-						$0.Str
+					Perl6::Operator::Infix.from-sample(
+						$p,
+						QUES-QUES
 					)
 				);
 				
 				@child.append( self._EXPR( $p.list.[1] ) );
-
-				my $y = $p.orig.Str.substr(
-					$p.list.[1].to,
-					$p.list.[2].from - $p.list.[1].to
-				);
-				$y ~~ m{ ( '!!' ) };
-				$left-margin = $0.from;
 				@child.append(
-					Perl6::Operator::Infix.from-int(
-						$left-margin + $p.list.[1].to,
-						$0.Str
+					Perl6::Operator::Infix.from-sample(
+						$p,
+						BANG-BANG
 					)
 				);
-				
 				@child.append( self._EXPR( $p.list.[2] ) );
 			}
 			else {
@@ -2254,13 +2226,13 @@ class Perl6::Parser::Factory {
 						);
 					}
 					if $_ < $end {
-						my $x = $p.orig.Str.substr(
+						my Str $x = $p.orig.Str.substr(
 							$p.list.[$_].to,
 							$p.list.[$_+1].from -
 								$p.list.[$_].to
 						);
 						if $x ~~ m{ ($infix-str) } {
-							my $left-margin = $0.from;
+							my Int $left-margin = $0.from;
 							@child.append(
 								Perl6::Operator::Infix.from-int(
 									$left-margin + $p.list.[$_].to,
@@ -2466,7 +2438,7 @@ class Perl6::Parser::Factory {
 			when self.assert-hash( $_, [< key val >] ) {
 				@child.append( self._key( $_.hash.<key> ) );
 				@child.append(
-					Perl6::Operator::Infix.find-match(
+					Perl6::Operator::Infix.from-sample(
 						$_, FAT-ARROW
 					)
 				);
@@ -2637,7 +2609,9 @@ class Perl6::Parser::Factory {
 				}
 				if $_.hash.<EXPR>.to < $_.to and
 					%.here-doc.keys.elems > 0 {
-					my $content = $p.Str.substr( $_.hash.<EXPR>.to - $p.from);
+					my Str $content = $p.Str.substr(
+						$_.hash.<EXPR>.to - $p.from
+					);
 					@child.append(
 						Perl6::Sir-Not-Appearing-In-This-Statement.new(
 							:factory-line-number(
@@ -2799,14 +2773,16 @@ class Perl6::Parser::Factory {
 					self._longname( $_.hash.<longname> )
 				);
 				# XXX has an exact twin at  blockoid multisig in EXPR
-				my $x = $_.orig.substr(
+				my Str $x = $_.orig.substr(
 					0, $_.hash.<multisig>.from
 				);
 				$x ~~ m{ ( '(' \s* ) $ };
-				my $from = $0.Str.chars;
-				my $y = $_.orig.substr( $_.hash.<multisig>.to );
+				my Int $from = $0.Str.chars;
+				my Str $y = $_.orig.substr(
+					$_.hash.<multisig>.to
+				);
 				$y ~~ m{ ^ ( \s* ')' ) };
-				my $to = $0.Str.chars;
+				my Int $to = $0.Str.chars;
 				@child.append(
 					Perl6::Operator::Circumfix.from-int(
 						$_.hash.<multisig>.from - $from,
@@ -3482,7 +3458,7 @@ class Perl6::Parser::Factory {
 					$_.hash.<longname>.to - $_.from
 				);
 				if $temp ~~ m{ ^ ( \s+ ) ( ';' ) } {
-					my $left-margin = $0.Str.chars;
+					my Int $left-margin = $0.Str.chars;
 					@child.append(
 						Perl6::Semicolon.from-int(
 							$left-margin + $_.hash.<longname>.to,
@@ -3508,7 +3484,7 @@ class Perl6::Parser::Factory {
 				@child.append(
 					self._longname( $_.hash.<longname> )
 				);
-				my $ws =
+				my Str $ws =
 					$_.orig.substr(
 						$_.hash.<longname>.to,
 						$_.hash.<blockoid>.from -
@@ -3610,7 +3586,7 @@ class Perl6::Parser::Factory {
 				);
 				# XXX replace with _quant(..) &c
 				@child.append(
-					Perl6::Operator::Infix.find-match(
+					Perl6::Operator::Infix.from-sample(
 						$p, EQUAL
 					)
 				);
@@ -4584,10 +4560,10 @@ class Perl6::Parser::Factory {
 					[< deflongname multisig
 					   blockoid trait >] ) {
 				my Perl6::Element @_child;
-				my $left-margin = $_.Str.substr(
+				my Str $left-edge = $_.Str.substr(
 					0, $_.hash.<multisig>.from - $_.from
 				);
-				$left-margin ~~ m{ ( '(' ) ( \s* ) $ };
+				$left-edge ~~ m{ ( '(' ) ( \s* ) $ };
 				@_child.append(
 					Perl6::Balanced::Enter.from-int(
 						$p.hash.<multisig>.from -
@@ -4633,10 +4609,10 @@ class Perl6::Parser::Factory {
 					[< deflongname multisig blockoid >],
 					[< trait >] ) {
 				my Perl6::Element @_child;
-				my $left-margin = $_.Str.substr(
+				my Str $left-edge = $_.Str.substr(
 					0, $_.hash.<multisig>.from - $_.from
 				);
-				$left-margin ~~ m{ ( '(' ) ( \s* ) $ };
+				$left-edge ~~ m{ ( '(' ) ( \s* ) $ };
 				@_child.append(
 					Perl6::Balanced::Enter.from-int(
 						$p.hash.<multisig>.from -
@@ -4710,14 +4686,16 @@ class Perl6::Parser::Factory {
 			when self.assert-hash( $_,
 					[< blockoid multisig >], [< trait >] ) {
 				my Perl6::Element @_child;
-				my $x = $_.Str.substr(
+				my Str $x = $_.Str.substr(
 					0, $_.hash.<multisig>.from - $_.from
 				);
 				$x ~~ m{ ( '(' \s* ) $ };
-				my $from = $0.Str.chars;
-				my $y = $_.orig.substr( $_.hash.<multisig>.to );
+				my Int $from = $0.Str.chars;
+				my Str $y = $_.orig.substr(
+					$_.hash.<multisig>.to
+				);
 				$y ~~ m{ ^ ( \s* ')' ) };
-				my $to = $0.Str.chars;
+				my Int $to = $0.Str.chars;
 				@_child.append(
 					self._multisig( $_.hash.<multisig> )
 				);
@@ -5123,9 +5101,9 @@ class Perl6::Parser::Factory {
 				if $p.hash.<default_value> {
 					if $_.Str ~~ m{ \s* ( '=' ) \s* } {
 						@child.append(
-							Perl6::Operator::Infix.from-int(
-								$p.from + $0.from,
-								$0.Str
+							Perl6::Operator::Infix.from-sample(
+								$p,
+								EQUAL
 							)
 						);
 						@child.append(
@@ -5143,7 +5121,9 @@ class Perl6::Parser::Factory {
 				);
 				# XXX assuming the location for '='
 				@child.append(
-					Perl6::Operator::Infix.find-match( $_, EQUAL )
+					Perl6::Operator::Infix.from-sample(
+						$_, EQUAL
+					)
 				);
 				@child.append(
 					self._default_value( $_.hash.<default_value> )
@@ -5251,23 +5231,9 @@ class Perl6::Parser::Factory {
 				);
 				for $parameter.list.kv -> $index, $q {
 					if $index > 0 {
-						my Int $right-margin = 0;
-						if $parameter.list.[$index-1].Str ~~ m{ ( \s+ ) $ } {
-							$right-margin = $0.chars
-						}
-						my Int $start = $parameter.list.[$index-1].to - $right-margin;
-						my Int $end = $parameter.list.[$index].from;
-						my Str $str = substr(
-							$p.Str, $start - $offset, $end - $start
-						);
-						my Int $_start = $start;
-						my ( $lhs, $rhs ) = split( COMMA, $str );
-						if $lhs and $lhs ne '' {
-							$_start += $lhs.chars;
-						}
 						@child.append(
-							Perl6::Operator::Infix.from-int(
-								$_start, COMMA
+							Perl6::Operator::Infix.from-sample(
+								$p, COMMA
 							)
 						);
 					}
@@ -5400,7 +5366,9 @@ class Perl6::Parser::Factory {
 						)
 					);
 				}
-				my $x = $_.Str.substr( 0, $_.hash.<else>.from );
+				my Str $x = $_.Str.substr(
+					0, $_.hash.<else>.from
+				);
 				if $x ~~ m{ << (else) >> } {
 					@child.append(
 						Perl6::Bareword.from-int(
@@ -5472,8 +5440,8 @@ class Perl6::Parser::Factory {
 					   $q.list.[1] and
 					   $q.list.[1].hash.<value> {
 						# XXX Most assuredly repeated elsewhere.
-						my $end = $q.list.elems - 1;
-						my $infix-str = $q.hash.<infix>.Str;
+						my Int $end = $q.list.elems - 1;
+						my Str $infix-str = $q.hash.<infix>.Str;
 						for $q.list.keys {
 							if $q.list.[$_].Str {
 								@child.append(
@@ -5483,7 +5451,7 @@ class Perl6::Parser::Factory {
 								);
 							}
 							if $_ < $end {
-								my $x = $q.orig.Str.substr(
+								my Str $x = $q.orig.Str.substr(
 									$q.list.[$_].to,
 									$q.list.[$_+1].from -
 										$q.list.[$_].to
@@ -5618,13 +5586,13 @@ class Perl6::Parser::Factory {
 			# redundantly.
 			#
 			if $_.Str ~~ m{ ';' ( \s+ ) $ } {
-				my $right-margin = $0.Str.chars;
+				my Int $right-margin = $0.Str.chars;
 				$leftover-ws = $0.Str;
 				$leftover-ws-from = $_.to - $right-margin;
 			}
 			else {
 				if $_.Str ~~ m{ ( \s+ ) $ } {
-					my $right-margin = $0.Str.chars;
+					my Int $right-margin = $0.Str.chars;
 					@_child.append(
 						Perl6::WS.from-int(
 							$_.to - $right-margin,
@@ -5921,7 +5889,7 @@ class Perl6::Parser::Factory {
 							$_.hash.<termish>
 						)
 					);
-					my $x = $_.orig.Str.substr(
+					my Str $x = $_.orig.Str.substr(
 						$_.hash.<termish>.to
 					);
 					if $x ~~ m{ ^ \s* ( '|' ) } {
@@ -6272,20 +6240,20 @@ class Perl6::Parser::Factory {
 			}
 			when self.assert-hash( $_, [< infix OPER >] ) {
 				if $_.hash.<infix>.Str ~~ m{ '??' } {
-					my $x = $_.orig.Str.substr(
+					my Str $x = $_.orig.Str.substr(
 						$_.list.[0].to,
 						$_.list.[1].from -
 							$_.list.[0].to
 					);
 					$x ~~ m{ ( '??' ) };
-					my $ques-from = $0.from;
-					my $y = $_.orig.Str.substr(
+					my Int $ques-from = $0.from;
+					my Str $y = $_.orig.Str.substr(
 						$_.list.[1].to,
 						$_.list.[2].from -
 							$_.list.[1].to
 					);
 					$y ~~ m{ ( '!!' ) };
-					my $bang-from = $0.from;
+					my Int $bang-from = $0.from;
 					@child.append(
 						self._value(
 							$_.list.[0].hash.<value>
@@ -6549,7 +6517,7 @@ class Perl6::Parser::Factory {
 		if $p.list {
 			for $p.list {
 				if self.assert-hash( $_, [< EXPR pblock >] ) {
-					my $x = $_.Str.substr(
+					my Str $x = $_.Str.substr(
 						0, $_.hash.<EXPR>.from
 					);
 					if $x ~~ m{ << (elsif) >> } {
