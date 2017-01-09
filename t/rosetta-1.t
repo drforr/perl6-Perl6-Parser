@@ -361,7 +361,6 @@ _END_
 }, Q{24 game};
 
 subtest {
-#`[
 	my $source = Q:to[_END_];
 use MONKEY-SEE-NO-EVAL;
 
@@ -412,7 +411,6 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 	done-testing;
 }, Q{24 game/Solve};

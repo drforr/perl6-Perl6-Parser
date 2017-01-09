@@ -271,7 +271,7 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
-}, Q{subroutine with 'where' clause};
+}, Q{regex modifier};
 
 subtest {
 	plan 2;
@@ -284,7 +284,7 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
-}, Q{subroutine with 'where' clause};
+}, Q{guillemot};
 
 subtest {
 	plan 2;
@@ -296,7 +296,19 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
-}, Q{subroutine with 'where' clause};
+}, Q{Dereference};
+
+subtest {
+	plan 2;
+
+	my $source = Q:to[_END_];
+roundrobin( 1 ; 2 );
+_END_
+	my $p = $pt.parse( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.to-string( $tree ), $source, Q{formatted};
+}, Q{semicolon in function call};
 
 done-testing;
 

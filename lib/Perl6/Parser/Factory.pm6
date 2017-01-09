@@ -322,15 +322,6 @@ role MatchingBalanced {
 class Perl6::Operator {
 	also is Perl6::Element;
 	also does Matchable;
-}
-class Perl6::Operator::Hyper does Branching {
-	also is Perl6::Operator;
-}
-class Perl6::Operator::Prefix does Token {
-	also is Perl6::Operator;
-}
-class Perl6::Operator::Infix does Token {
-	also is Perl6::Operator;
 
 	multi method from-sample( Mu $p, Str $token ) {
 		$p.Str ~~ m{ ($token) };
@@ -342,6 +333,15 @@ class Perl6::Operator::Infix does Token {
 			:content( $token )
 		)
 	}
+}
+class Perl6::Operator::Hyper does Branching {
+	also is Perl6::Operator;
+}
+class Perl6::Operator::Prefix does Token {
+	also is Perl6::Operator;
+}
+class Perl6::Operator::Infix does Token {
+	also is Perl6::Operator;
 }
 class Perl6::Operator::Postfix does Token {
 	also is Perl6::Operator;
@@ -1396,10 +1396,10 @@ class Perl6::Parser::Factory {
 		given $p {
 			when self.assert-hash( $_,
 					[< identifier coloncircumfix >] ) {
-				# XXX Synthesize the 'from' marker for ':'
+				# XXX Should be combined with the identifier?
 				@child.append(
-					Perl6::Operator::Prefix.from-int(
-						$_.from, COLON
+					Perl6::Operator::Prefix.from-sample(
+						$_, COLON
 					)
 				);
 				@child.append(
@@ -1412,10 +1412,10 @@ class Perl6::Parser::Factory {
 				);
 			}
 			when self.assert-hash( $_, [< coloncircumfix >] ) {
-				# XXX Note that ':' is part of the expression.
+				# XXX Should be combined with the identifier?
 				@child.append(
-					Perl6::Operator::Prefix.from-int(
-						$_.from, COLON
+					Perl6::Operator::Prefix.from-sample(
+						$_, COLON
 					)
 				);
 				@child.append(
@@ -1445,9 +1445,10 @@ class Perl6::Parser::Factory {
 				);
 			}
 			when self.assert-hash( $_, [< var >] ) {
+				# XXX Should be combined with the identifier?
 				@child.append(
-					Perl6::Operator::Prefix.from-int(
-						$_.from, COLON
+					Perl6::Operator::Prefix.from-sample(
+						$_, COLON
 					)
 				);
 				@child.append( self._var( $_.hash.<var> ) );
@@ -4837,9 +4838,49 @@ class Perl6::Parser::Factory {
 	}
 
 	method _semiarglist( Mu $p ) {
+		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< arglist >] ) {
-				self._arglist( $_.hash.<arglist> );
+				if $_.hash.<arglist>.list.elems >= 2 and
+					$_.Str.substr(
+						$_.hash.<arglist>.list.[0].to - $_.hash.<arglist>.from,
+						$_.hash.<arglist>.list.[1].from - $_.hash.<arglist>.list.[0].to
+					) ~~ m{ ';' } {
+					my $q = $_.hash.<arglist>;
+					my Int $end = $q.list.elems - 1;
+					for $q.list.keys {
+						if $q.list.[$_].Str {
+							@child.append(
+								self._EXPR(
+									$q.list.[$_]
+								)
+							);
+						}
+						if $_ < $end {
+							my Str $x = $p.orig.Str.substr(
+								$q.list.[$_].to,
+								$q.list.[$_+1].from -
+									$q.list.[$_].to
+							);
+							if $x ~~ m{ (';') } {
+								my Int $left-margin = $0.from;
+								@child.append(
+									Perl6::Operator::Infix.from-int(
+										$left-margin + $q.list.[$_].to,
+										';'
+									)
+								);
+							}
+						}
+					}
+				}
+				else {
+					@child.append(
+						self._arglist(
+							$_.hash.<arglist>
+						)
+					);
+				}
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
@@ -4847,6 +4888,7 @@ class Perl6::Parser::Factory {
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
+		@child;
 	}
 
 	method _semilist( Mu $p ) {
@@ -6240,28 +6282,14 @@ class Perl6::Parser::Factory {
 			}
 			when self.assert-hash( $_, [< infix OPER >] ) {
 				if $_.hash.<infix>.Str ~~ m{ '??' } {
-					my Str $x = $_.orig.Str.substr(
-						$_.list.[0].to,
-						$_.list.[1].from -
-							$_.list.[0].to
-					);
-					$x ~~ m{ ( '??' ) };
-					my Int $ques-from = $0.from;
-					my Str $y = $_.orig.Str.substr(
-						$_.list.[1].to,
-						$_.list.[2].from -
-							$_.list.[1].to
-					);
-					$y ~~ m{ ( '!!' ) };
-					my Int $bang-from = $0.from;
 					@child.append(
 						self._value(
 							$_.list.[0].hash.<value>
 						)
 					);
 					@child.append(
-						Perl6::Operator::Infix.from-int(
-							$_.list.[0].to + $ques-from,
+						Perl6::Operator::Infix.from-sample(
+							$_.hash.<infix>,
 							QUES-QUES
 						)
 					);
@@ -6271,8 +6299,8 @@ class Perl6::Parser::Factory {
 						)
 					);
 					@child.append(
-						Perl6::Operator::Infix.from-int(
-							$_.list.[1].to + $bang-from,
+						Perl6::Operator::Infix.from-sample(
+							$_.hash.<infix>,
 							BANG-BANG
 						)
 					);
