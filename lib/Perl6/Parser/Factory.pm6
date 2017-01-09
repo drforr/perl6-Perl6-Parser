@@ -4899,9 +4899,46 @@ class Perl6::Parser::Factory {
 		}
 		given $p {
 			when self.assert-hash( $_, [< statement >] ) {
-				@child.append(
-					self._statement( $_.hash.<statement> )
-				);
+				if $_.hash.<statement>.list.elems >= 2 and
+					$_.Str.substr(
+						$_.hash.<statement>.list.[0].to - $_.hash.<statement>.list.[0].from,
+						$_.hash.<statement>.list.[1].from - $_.hash.<statement>.list.[0].to
+					) ~~ m{ ';' } {
+					my $q = $_.hash.<statement>;
+					my Int $end = $q.list.elems - 1;
+					for $q.list.keys {
+						if $q.list.[$_].Str {
+							@child.append(
+								self._EXPR(
+									$q.list.[$_]
+								)
+							);
+						}
+						if $_ < $end {
+							my Str $x = $p.orig.Str.substr(
+								$q.list.[$_].to,
+								$q.list.[$_+1].from -
+									$q.list.[$_].to
+							);
+							if $x ~~ m{ (';') } {
+								my Int $left-margin = $0.from;
+								@child.append(
+									Perl6::Operator::Infix.from-int(
+										$left-margin + $q.list.[$_].to,
+										';'
+									)
+								);
+							}
+						}
+					}
+				}
+				else {
+					@child.append(
+						self._statement(
+							$_.hash.<statement>
+						)
+					);
+				}
 			}
 			when self.assert-hash( $_, [ ], [< statement >] ) {
 				( )
