@@ -806,7 +806,7 @@ class Perl6::Parser::Factory {
 		while $p.Str ~~ m:c{ ( 'q:to[' ) \s* ( <-[ \] ]>+ ) } {
 			my Int $left-margin = $0.from;
 			my Str $marker = $1.Str;
-			$p.Str ~~ m{ \s* ']' .*? $$ ( .+? ) ($marker) };
+			$p.Str ~~ m{ \s* ']' .*? $$ .+? $marker };
 			%.here-doc{ $left-margin } = Here-Doc.new(
 				:factory-line-number( callframe(1).line ),
 				:delimiter-start( $left-margin ),
@@ -828,6 +828,7 @@ class Perl6::Parser::Factory {
 			}
 			when m{ ^ ( \s+ ) ( '#' .+ ) $$ ( \s* ) $ } {
 				my Int $left-margin = $0.Str.chars;
+				my Int $right-margin = $2.Str.chars;
 				@child.append(
 					Perl6::WS.from-int( $from, $0.Str )
 				);
@@ -839,7 +840,7 @@ class Perl6::Parser::Factory {
 				);
 				@child.append(
 					Perl6::WS.from-int(
-						$left-margin + $from + $1.Str.chars,
+						$from - $right-margin,
 						$2.Str
 					)
 				);
@@ -1276,16 +1277,11 @@ class Perl6::Parser::Factory {
 	method _circumfix( Mu $p ) {
 		my Perl6::Element @child;
 		if $p.list {
+			my Perl6::Element @_child;
 			for $p.list {
 				if self.assert-hash( $_, [< semilist >] ) {
-					my Perl6::Element @_child;
 					@_child.append(
 						self._semilist( $_.hash.<semilist> )
-					);
-					@child.append(
-						Perl6::Operator::Circumfix.from-match(
-							$_, @_child
-						)
 					);
 				}
 				else {
@@ -1294,6 +1290,11 @@ class Perl6::Parser::Factory {
 						$*FACTORY-FAILURE-FATAL
 				}
 			}
+			@child.append(
+				Perl6::Operator::Circumfix.from-match(
+					$p, @_child
+				)
+			);
 		}
 		else {
 			given $p {
@@ -2298,23 +2299,20 @@ class Perl6::Parser::Factory {
 			);
 		}
 		elsif self.assert-hash( $p, [< longname args >] ) {
+			@child.append( self._longname( $p.hash.<longname> ) );
 			if $p.hash.<args> and
 			   $p.hash.<args>.hash.<semiarglist> {
-				@child.append(
-					self._longname( $p.hash.<longname> )
-				);
+				@child.append( self._args( $p.hash.<args> ) );
+			}
+			elsif $p.hash.<args>.hash.keys and
+			      $p.hash.<args>.Str ~~ m{ \S } {
 				@child.append( self._args( $p.hash.<args> ) );
 			}
 			else {
-				@child.append(
-					self._longname( $p.hash.<longname> )
-				);
-				if $p.hash.<args>.hash.keys and
-				   $p.hash.<args>.Str ~~ m{ \S } {
-					@child.append(
-						self._args( $p.hash.<args> )
-					);
-				}
+# XXX needs to be filled in
+#				debug-match( $p ) if $*DEBUG;
+#				die "Unhandled case" if
+#					$*FACTORY-FAILURE-FATAL
 			}
 		}
 		elsif self.assert-hash( $p, [< circumfix >] ) {
@@ -3485,18 +3483,6 @@ class Perl6::Parser::Factory {
 				@child.append(
 					self._longname( $_.hash.<longname> )
 				);
-				my Str $ws =
-					$_.orig.substr(
-						$_.hash.<longname>.to,
-						$_.hash.<blockoid>.from -
-							$_.hash.<longname>.to
-					);
-				@child.append(
-					Perl6::WS.from-int(
-						$_.hash.<longname>.to,
-						$ws
-					)
-				);
 				@child.append(
 					self._blockoid( $_.hash.<blockoid> )
 				);
@@ -3582,7 +3568,6 @@ class Perl6::Parser::Factory {
 				[< modifier trait
 				   type_constraint
 				   post_constraint >] ) {
-die $_.dump;
 				@child.append(
 					self._param_var( $_.hash.<param_var> )
 				);
@@ -5669,16 +5654,14 @@ die $_.dump;
 				$leftover-ws = $0.Str;
 				$leftover-ws-from = $_.to - $right-margin;
 			}
-			else {
-				if $_.Str ~~ m{ ( \s+ ) $ } {
-					my Int $right-margin = $0.Str.chars;
-					@_child.append(
-						Perl6::WS.from-int(
-							$_.to - $right-margin,
-							$0.Str
-						)
+			elsif $_.Str ~~ m{ ( \s+ ) $ } {
+				my Int $right-margin = $0.Str.chars;
+				@_child.append(
+					Perl6::WS.from-int(
+						$_.to - $right-margin,
+						$0.Str
 					)
-				}
+				)
 			}
 			my Str $temp = $p.Str.substr(
 				@_child[*-1].to - $p.from
@@ -6606,7 +6589,8 @@ die $_.dump;
 					if $x ~~ m{ << (elsif) >> } {
 						@child.append(
 							Perl6::Bareword.from-int(
-								$_.from + $0.from,
+								$_.from +
+									$0.from,
 								$0.Str
 							)
 						);
