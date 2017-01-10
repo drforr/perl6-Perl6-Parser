@@ -467,15 +467,14 @@ class Perl6::Number::FloatingPoint {
 	also is Perl6::Number;
 }
 
-class Perl6::String::XXX::Body does Token {
-	also is Perl6::Element;
-	also does Matchable;
-}
-
 class Perl6::String does Branching {
 	also is Perl6::Element;
 
 	has Str @.adverb;
+}
+class Perl6::String::Body does Token {
+	also is Perl6::String;
+	also does Matchable;
 }
 class Perl6::String::WordQuoting {
 	also is Perl6::String;
@@ -1324,7 +1323,7 @@ class Perl6::Parser::Factory {
 						)
 					);
 					@_child.append(
-						Perl6::String::XXX::Body.from-match(
+						Perl6::String::Body.from-match(
 							$_.hash.<nibble>
 						)
 					);
@@ -2237,7 +2236,7 @@ class Perl6::Parser::Factory {
 							@child.append(
 								Perl6::Operator::Infix.from-int(
 									$left-margin + $p.list.[$_].to,
-									$infix-str
+									$0.Str
 								)
 							);
 						}
@@ -2543,7 +2542,8 @@ class Perl6::Parser::Factory {
 				# XXX from operator
 				Perl6::Operator::Infix.from-int(
 					$_.hash.<sym>.from,
-					$_.hash.<sym>.Str ~ $_.hash.<infixish>
+					$_.hash.<sym>.Str ~
+						$_.hash.<infixish>
 				);
 			}
 			default {
@@ -3033,7 +3033,7 @@ class Perl6::Parser::Factory {
 		elsif $p.Str {
 			if $p.Str ~~ m{ ^ ( .+? ) \s+ $ } {
 				@child.append(
-					Perl6::String::XXX::Body.from-int(
+					Perl6::String::Body.from-int(
 						$p.from,
 						$0.Str
 					)
@@ -3041,7 +3041,7 @@ class Perl6::Parser::Factory {
 			}
 			else {
 				@child.append(
-					Perl6::String::XXX::Body.from-match(
+					Perl6::String::Body.from-match(
 						$p
 					)
 				);
@@ -3582,6 +3582,7 @@ class Perl6::Parser::Factory {
 				[< modifier trait
 				   type_constraint
 				   post_constraint >] ) {
+die $_.dump;
 				@child.append(
 					self._param_var( $_.hash.<param_var> )
 				);
@@ -4148,7 +4149,7 @@ class Perl6::Parser::Factory {
 					)
 				);
 				@_child.append(
-					Perl6::String::XXX::Body.from-match(
+					Perl6::String::Body.from-match(
 						$_.hash.<quibble>.hash.<nibble>
 					)
 				);
@@ -4204,7 +4205,7 @@ class Perl6::Parser::Factory {
 					)
 				);
 				@_child.append(
-					Perl6::String::XXX::Body.from-match(
+					Perl6::String::Body.from-match(
 						$_.hash.<quibble>.hash.<nibble>
 					)
 				);
@@ -4260,7 +4261,7 @@ class Perl6::Parser::Factory {
 					)
 				);
 				@_child.append(
-					Perl6::String::XXX::Body.from-match(
+					Perl6::String::Body.from-match(
 						$p.hash.<quibble>.hash.<nibble>
 					)
 				);
@@ -4867,7 +4868,7 @@ class Perl6::Parser::Factory {
 								@child.append(
 									Perl6::Operator::Infix.from-int(
 										$left-margin + $q.list.[$_].to,
-										';'
+										$0.Str
 									)
 								);
 							}
@@ -5178,11 +5179,11 @@ class Perl6::Parser::Factory {
 					self._param_var( $_.hash.<param_var> )
 				);
 				if $p.hash.<default_value> {
-					if $_.Str ~~ m{ \s* ( '=' ) \s* } {
+					if $_.Str ~~ m{ ( '=' ) } {
 						@child.append(
 							Perl6::Operator::Infix.from-sample(
 								$p,
-								EQUAL
+								$0.Str
 							)
 						);
 						@child.append(
@@ -5324,29 +5325,28 @@ class Perl6::Parser::Factory {
 					[< param_sep >] ) {
 				my Mu $parameter = $_.hash.<parameter>;
 				my Int $offset = $_.from;
-				for $parameter.list.kv -> $index, $q {
-					if $index > 0 {
-						my Int $right-margin = 0;
-						if $parameter.list.[$index-1].Str ~~ m{ ( \s+ ) $ } {
-							$right-margin = $0.chars
-						}
-						my Int $start = $parameter.list.[$index-1].to - $right-margin;
-						my Int $end = $parameter.list.[$index].from;
-						my Str $str = substr(
-							$p.Str, $start - $offset, $end - $start
+				for $parameter.list.keys {
+					if $_ > 0 {
+						my Str $x = $p.orig.Str.substr(
+							$parameter.list.[$_-1].to,
+							$parameter.list.[$_].from -
+								$parameter.list.[$_-1].to
 						);
-						my Int $_start = $start;
-						my ( $lhs, $rhs ) = split( COMMA, $str );
-						if $lhs and $lhs ne '' {
-							$_start += $lhs.chars;
+						if $x ~~ m{ (',') } {
+							my Int $left-margin = $0.from;
+							@child.append(
+								Perl6::Operator::Infix.from-int(
+									$left-margin + $parameter.list.[$_-1].to,
+									$0.Str
+								)
+							);
 						}
-						@child.append(
-							Perl6::Operator::Infix.from-int(
-								$_start, COMMA
-							)
-						);
 					}
-					@child.append( self.__Parameter( $q ) );
+					@child.append(
+						self.__Parameter(
+							$parameter.list.[$_]
+						)
+					);
 				}
 			}
 			when self.assert-hash( $_, [ ],
@@ -5540,7 +5540,7 @@ class Perl6::Parser::Factory {
 										Perl6::Operator::Infix.from-int(
 											$q.list.[$_].to +
 												$0.from,
-											$infix-str
+											$0.Str
 										)
 									);
 								}
@@ -6348,27 +6348,45 @@ class Perl6::Parser::Factory {
 					);
 				}
 				else {
-					@child.append( self._value( $_.list.[0].hash.<value> ) );
-					@child.append( self._infix( $_.hash.<infix> ) );
-					@child.append( self._value( $_.list.[1].hash.<value> ) );
+					@child.append(
+						self._value(
+							$_.list.[0].hash.<value>
+						)
+					);
+					@child.append(
+						self._infix( $_.hash.<infix> )
+					);
+					@child.append(
+						self._value(
+							$_.list.[1].hash.<value>
+						)
+					);
 				}
 			}
 			when self.assert-hash( $_, [< longname args >] ) {
 				if $_.hash.<args> and
 				   $_.hash.<args>.hash.<semiarglist> {
 					@child.append(
-						self._longname( $_.hash.<longname> )
+						self._longname(
+							$_.hash.<longname>
+						)
 					);
-					@child.append( self._args( $_.hash.<args> ) );
+					@child.append(
+						self._args( $_.hash.<args> )
+					);
 				}
 				else {
 					@child.append(
-						self._longname( $_.hash.<longname> )
+						self._longname(
+							$_.hash.<longname>
+						)
 					);
 					if $_.hash.<args>.hash.keys and
 					   $_.hash.<args>.Str ~~ m{ \S } {
 						@child.append(
-							self._args( $_.hash.<args> )
+							self._args(
+								$_.hash.<args>
+							)
 						);
 					}
 				}

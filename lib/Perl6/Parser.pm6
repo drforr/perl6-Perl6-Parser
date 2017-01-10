@@ -260,7 +260,7 @@ my role Debugging {
 			$term !~~ Perl6::Operator::Hyper ) or
 		      $term ~~ Perl6::Balanced or
 		      $term ~~ Perl6::WS or
-		      $term ~~ Perl6::String::XXX::Body {
+		      $term ~~ Perl6::String::Body {
 			$str ~= " ({$term.content.perl})"
 		}
 		elsif $term ~~ Perl6::Number {
@@ -358,6 +358,7 @@ my role Validating {
 				#warn "Content '{$root.content}' too long for element ({$root.from} - {$root.to}) ({$root.to - $root.from} glyphs}"
 			}
 			if $root !~~ Perl6::WS and
+					$root !~~ Perl6::String::Body and
 					$root !~~ Perl6::Sir-Not-Appearing-In-This-Statement and
 					$root.content ~~ m{ ^ (\s+) } {
 				say $root.perl;
@@ -365,7 +366,7 @@ my role Validating {
 			}
 			if $root !~~ Perl6::WS and
 					$root !~~ Perl6::Comment and
-					$root !~~ Perl6::String::XXX::Body and
+					$root !~~ Perl6::String::Body and
 					$root.content ~~ m{ (\s+) $ } {
 				say $root.perl;
 				#warn "Content '{$root.content}' has trailing whitespace"
