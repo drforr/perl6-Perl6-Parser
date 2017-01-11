@@ -349,6 +349,26 @@ class Perl6::Operator::Postfix does Token {
 class Perl6::Operator::Circumfix does Branching {
 	also is Perl6::Operator;
 	also does MatchingBalanced;
+
+	method from-delims( Mu $p, Str $front, Str $back, @child ) {
+		my Perl6::Element @_child;
+		@_child.append(
+			Perl6::Balanced::Enter.from-int( $p.from, $front )
+		);
+		@_child.append( @child );
+		@_child.append(
+			Perl6::Balanced::Exit.from-int(
+				$p.to - $back.chars,
+				$back
+			)
+		);
+		self.bless(
+			:factory-line-number( callframe(1).line ),
+			:from( $p.from ),
+			:to( $p.to ),
+			:child( @_child )
+		)
+	}
 }
 class Perl6::Operator::PostCircumfix does Branching {
 	also is Perl6::Operator;
@@ -1438,6 +1458,9 @@ class Perl6::Parser::Factory {
 					)
 				);
 				# XXX properly match delimiter
+				@_child.append(
+					self._coercee( $_.hash.<coercee> )
+				);
 				@child.append(
 					Perl6::Operator::PostCircumfix.from-delims(
 						$_, ':(', ')', @_child
@@ -1482,45 +1505,17 @@ class Perl6::Parser::Factory {
 			when self.assert-hash( $_,
 					[< coercee sigil sequence >] ) {
 				my Perl6::Element @_child;
-				@child.append(
-					self._sigil( $_.hash.<sigil> )
-				);
-				my Str $left-string = $_.Str.substr(
-					0, $_.hash.<coercee>.from - $_.from
-				);
-				$left-string ~~ m{ ( '(' ) ( \s* ) $ };
-				my Int $right-margin =
-					$1.Str ?? $1.Str.chars !! 0;
-				@_child.append(
-					Perl6::Balanced::Enter.from-int(
-						$p.hash.<coercee>.from -
-						$0.Str.chars - $right-margin,
-						$0.Str
-					)
-				);
+				# XXX Capture the '(' and ')' properly, or
+				# XXX at least better than was done before.
 				@_child.append(
 					self._coercee( $_.hash.<coercee> )
 				);
-				@_child.append(
-					Perl6::Balanced::Exit.from-int(
-						$_.hash.<coercee>.to,
-						PAREN-CLOSE
-					)
-				);
 				@child.append(
-					Perl6::Operator::Circumfix.new(
-						:factory-line-number(
-							callframe(1).line 
-						),
-						:from(
-							$_.hash.<coercee>.from -
-							$0.Str.chars - $right-margin
-						),
-						:to(
-							$_.hash.<coercee>.to +
-							PAREN-CLOSE.chars
-						),
-						:child( @_child ),
+					Perl6::Operator::Circumfix.from-delims(
+						$_,
+						$_.hash.<sigil>.Str ~ '(',
+						')',
+						@_child
 					)
 				);
 			}
@@ -2693,10 +2688,13 @@ class Perl6::Parser::Factory {
 	}
 
 	method _longname( Mu $p ) {
+		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_,
 					[< name >], [< colonpair >] ) {
-				self._name( $_.hash.<name> );
+				@child.append(
+					self._name( $_.hash.<name> )
+				);
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
@@ -2704,6 +2702,7 @@ class Perl6::Parser::Factory {
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
+		@child;
 	}
 
 #	method _max( Mu $p ) {
@@ -2765,12 +2764,6 @@ class Perl6::Parser::Factory {
 				     [< specials longname blockoid multisig >],
 				     [< trait >] ) {
 				my Perl6::Element @_child;
-				@_child.append(
-					 self._multisig( $_.hash.<multisig> )
-				);
-				@child.append(
-					self._longname( $_.hash.<longname> )
-				);
 				# XXX has an exact twin at  blockoid multisig in EXPR
 				my Str $x = $_.orig.substr(
 					0, $_.hash.<multisig>.from
@@ -2782,6 +2775,12 @@ class Perl6::Parser::Factory {
 				);
 				$y ~~ m{ ^ ( \s* ')' ) };
 				my Int $to = $0.Str.chars;
+				@_child.append(
+					 self._multisig( $_.hash.<multisig> )
+				);
+				@child.append(
+					self._longname( $_.hash.<longname> )
+				);
 				@child.append(
 					Perl6::Operator::Circumfix.from-int(
 						$_.hash.<multisig>.from - $from,
@@ -2854,9 +2853,12 @@ class Perl6::Parser::Factory {
 #	}
 
 	method _modifier_expr( Mu $p ) {
+		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< EXPR >] ) {
-				self._EXPR( $_.hash.<EXPR> );
+				@child.append(
+					self._EXPR( $_.hash.<EXPR> )
+				);
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
@@ -2864,12 +2866,16 @@ class Perl6::Parser::Factory {
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
+		@child;
 	}
 
 	method _module_name( Mu $p ) {
+		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< longname >] ) {
-				self._longname( $_.hash.<longname> );
+				@child.append(
+					self._longname( $_.hash.<longname> )
+				);
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
@@ -2877,6 +2883,7 @@ class Perl6::Parser::Factory {
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
+		@child;
 	}
 
 #	method _morename( Mu $p ) {
@@ -3200,9 +3207,12 @@ class Perl6::Parser::Factory {
 	# numish # ?
 	#
 	method _number( Mu $p ) {
+		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< numish >] ) {
-				self._numish( $_.hash.<numish> );
+				@child.append(
+					self._numish( $_.hash.<numish> )
+				);
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
@@ -3210,6 +3220,7 @@ class Perl6::Parser::Factory {
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
+		@child;
 	}
 
 	method __Inf( Mu $p ) {
@@ -3221,21 +3232,32 @@ class Perl6::Parser::Factory {
 	}
 
 	method _numish( Mu $p ) {
+		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< dec_number >] ) {
-				self._dec_number( $_.hash.<dec_number> );
+				@child.append(
+					self._dec_number( $_.hash.<dec_number> )
+				);
 			}
 			when self.assert-hash( $_, [< rad_number >] ) {
-				self._rad_number( $_.hash.<rad_number> );
+				@child.append(
+					self._rad_number( $_.hash.<rad_number> )
+				);
 			}
 			when self.assert-hash( $_, [< integer >] ) {
-				self._integer( $_.hash.<integer> );
+				@child.append(
+					self._integer( $_.hash.<integer> )
+				);
 			}
 			when $_.Str eq 'Inf' {
-				self.__Inf( $_ );
+				@child.append(
+					self.__Inf( $_ )
+				);
 			}
 			when $_.Str eq 'NaN' {
-				self.__NaN( $_ );
+				@child.append(
+					self.__NaN( $_ )
+				);
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
@@ -3243,6 +3265,7 @@ class Perl6::Parser::Factory {
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
+		@child;
 	}
 
 #	method _O( Mu $p ) {
@@ -3415,7 +3438,6 @@ class Perl6::Parser::Factory {
 	#
 	method _package_declarator( Mu $p ) {
 		my Perl6::Element @child;
-		# $p doesn't contain WS after the block.
 		given $p {
 			when self.assert-hash( $_, [< sym package_def >] ) {
 				@child.append( self._sym( $_.hash.<sym> ) );
