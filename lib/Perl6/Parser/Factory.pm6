@@ -1518,9 +1518,7 @@ class Perl6::Parser::Factory {
 			}
 			when self.assert-hash( $_,
 					[< coercee circumfix sigil >] ) {
-				@child.append(
-					self._sigil( $_.hash.<sigil> )
-				);
+				@child.append( self._sigil( $_.hash.<sigil> ) );
 				# XXX coercee handled inside circumfix
 				@child.append(
 					self._circumfix( $_.hash.<circumfix> )
@@ -1546,9 +1544,7 @@ class Perl6::Parser::Factory {
 					[< deftermnow initializer term_init >],
 					[< trait >] ) {
 				@child.append(
-					self._deftermnow(
-						$_.hash.<deftermnow>
-					)
+					self._deftermnow( $_.hash.<deftermnow> )
 				);
 				@child.append(
 					self._initializer(
@@ -1666,9 +1662,7 @@ class Perl6::Parser::Factory {
 #					[< trait >] ) {
 #				die; # XXX unused? Or just untested?
 #				@child.append(
-#					self._deftermnow(
-#						$_.hash.<deftermnow>
-#					)
+#					self._deftermnow( $_.hash.<deftermnow> )
 #				);
 #				@child.append(
 #					self._initializer(
@@ -1792,19 +1786,13 @@ class Perl6::Parser::Factory {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< int coeff frac >] ) {
-				@child.append(
-					self.__FloatingPoint( $_ )
-				);
+				@child.append( self.__FloatingPoint( $_ ) );
 			}
 			when self.assert-hash( $_, [< int coeff escale >] ) {
-				@child.append(
-					self.__FloatingPoint( $_ )
-				);
+				@child.append( self.__FloatingPoint( $_ ) );
 			}
 			when self.assert-hash( $_, [< coeff frac >] ) {
-				@child.append(
-					self.__FloatingPoint( $_ )
-				);
+				@child.append( self.__FloatingPoint( $_ ) );
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
@@ -1844,9 +1832,7 @@ class Perl6::Parser::Factory {
 		given $p {
 			when self.assert-hash( $_,
 					[< name >], [< colonpair >] ) {
-				@child.append(
-					self._name( $_.hash.<name> )
-				);
+				@child.append( self._name( $_.hash.<name> ) );
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
@@ -2592,9 +2578,7 @@ class Perl6::Parser::Factory {
 					)
 				);
 				@child.append(
-					self._dottyopish(
-						$_.hash.<dottyopish>
-					)
+					self._dottyopish( $_.hash.<dottyopish> )
 				);
 			}
 			when self.assert-hash( $_, [< sym EXPR >] ) {
@@ -2717,9 +2701,7 @@ class Perl6::Parser::Factory {
 		given $p {
 			when self.assert-hash( $_,
 					[< name >], [< colonpair >] ) {
-				@child.append(
-					self._name( $_.hash.<name> )
-				);
+				@child.append( self._name( $_.hash.<name> ) );
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
@@ -2887,9 +2869,7 @@ class Perl6::Parser::Factory {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< EXPR >] ) {
-				@child.append(
-					self._EXPR( $_.hash.<EXPR> )
-				);
+				@child.append( self._EXPR( $_.hash.<EXPR> ) );
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
@@ -2963,16 +2943,12 @@ class Perl6::Parser::Factory {
 			when self.assert-hash( $_, [< sym declarator >] ) {
 				@child.append( self._sym( $_.hash.<sym> ) );
 				@child.append(
-					self._declarator(
-						$_.hash.<declarator>
-					)
+					self._declarator( $_.hash.<declarator> )
 				);
 			}
 			when self.assert-hash( $_, [< declarator >] ) {
 				@child.append(
-					self._declarator(
-						$_.hash.<declarator>
-					)
+					self._declarator( $_.hash.<declarator> )
 				);
 			}
 			default {
@@ -3005,9 +2981,7 @@ class Perl6::Parser::Factory {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< name param_var >] ) {
-				@child.append(
-					self._name( $_.hash.<name> )
-				);
+				@child.append( self._name( $_.hash.<name> ) );
 				@child.append(
 					self._param_var( $_.hash.<param_var> )
 				);
@@ -3284,14 +3258,10 @@ class Perl6::Parser::Factory {
 				);
 			}
 			when $_.Str eq 'Inf' {
-				@child.append(
-					self.__Inf( $_ )
-				);
+				@child.append( self.__Inf( $_ ) );
 			}
 			when $_.Str eq 'NaN' {
-				@child.append(
-					self.__NaN( $_ )
-				);
+				@child.append( self.__NaN( $_ ) );
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
@@ -4190,9 +4160,7 @@ class Perl6::Parser::Factory {
 					[< sym quibble >], [< rx_adverbs >] ) {
 				my Str @rx-adverb;
 				my Perl6::Element @_child;
-				@child.append(
-					self._sym( $_.hash.<sym> )
-				);
+				@child.append( self._sym( $_.hash.<sym> ) );
 				# XXX The first place negative indices are used
 				@_child.append(
 					Perl6::Balanced::Enter.from-int(
@@ -4352,9 +4320,7 @@ class Perl6::Parser::Factory {
 						)
 					);
 					@_child.append(
-						self._nibble(
-							$p.hash.<nibble>
-						)
+						self._nibble( $p.hash.<nibble> )
 					);
 					@_child.append(
 						Perl6::Balanced::Exit.from-int(
@@ -4475,16 +4441,12 @@ class Perl6::Parser::Factory {
 			when self.assert-hash( $_,
 					[< circumfix bracket radix >],
 					[< exp rad_digits base >] ) {
-				@child.append(
-					self.__Radix( $_ )
-				);
+				@child.append( self.__Radix( $_ ) );
 			}
 			when self.assert-hash( $_,
 					[< circumfix radix >],
 					[< exp rad_digits base >] ) {
-				@child.append(
-					self.__Radix( $_ )
-				);
+				@child.append( self.__Radix( $_ ) );
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
@@ -4862,9 +4824,7 @@ class Perl6::Parser::Factory {
 					[< declarator DECL >],
 					[< typename >] ) {
 				@child.append(
-					self._declarator(
-						$_.hash.<declarator>
-					)
+					self._declarator( $_.hash.<declarator> )
 				);
 			}
 			else {
