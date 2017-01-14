@@ -3008,6 +3008,14 @@ class Perl6::Parser::Factory {
 				);
 			}
 			when self.assert-hash( $_, [< param_var >] ) {
+				if $_.Str ~~ m{ ^ ( ':' ) } {
+					@child.append(
+						Perl6::Bareword.from-int(
+							$_.from,
+							$0.Str
+						)
+					);
+				}
 				@child.append(
 					self._param_var( $_.hash.<param_var> )
 				);
@@ -5346,9 +5354,25 @@ class Perl6::Parser::Factory {
 				}
 			}
 			when self.assert-hash( $_,
+					[< type_constraint named_param quant >],
+					[< default_value modifier trait
+					   post_constraint >] ) {
+				@child.append(
+					self._type_constraint(
+						$_.hash.<type_constraint>
+					)
+				);
+				@child.append(
+					self._named_param(
+						$_.hash.<named_param>
+					)
+				);
+			}
+			when self.assert-hash( $_,
 					[< type_constraint named_param >],
 					[< default_value modifier trait
 					   post_constraint quant >] ) {
+say $_.dump;
 				@child.append(
 					self._type_constraint(
 						$_.hash.<type_constraint>
