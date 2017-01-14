@@ -814,40 +814,60 @@ class Perl6::Parser::Factory {
 	constant SLASH = Q'/';
 	constant BACKSLASH = Q'\'; # because the braces confuse vim.
 
-	sub _string-to-tokens( Int $from, Str $str ) {
+	method _string-to-tokens( Int $from, Str $str ) {
 		my Perl6::Element @child;
 
-		given $str {
-			when m{ ^ '#' } {
-				@child.append(
-					Perl6::Comment.from-int( $from, $str )
-				);
-			}
-			when m{ ^ ( \s+ ) ( '#' .+ ) $$ ( \s* ) $ } {
-				my Int $left-margin = $0.Str.chars;
-				my Int $right-margin = $2.Str.chars;
-				@child.append(
-					Perl6::WS.from-int( $from, $0.Str )
-				);
-				@child.append(
-					Perl6::Comment.from-int(
-						$left-margin + $from,
-						$1.Str
-					)
-				);
-				@child.append(
-					Perl6::WS.from-int(
-						$from - $right-margin,
-						$2.Str
-					)
-				);
-			}
-			when $str ~~ m{ \S } {
-			}
-			default {
-				@child.append(
-					Perl6::WS.from-int( $from, $str )
+		if %.here-doc{$from} {
+			@child.append(
+				Perl6::Sir-Not-Appearing-In-This-Statement.new(
+					:factory-line-number(
+						callframe(1).line
+					),
+					:from( $from ),
+					:to( %.here-doc{$from} ),
+					:content( $str )
 				)
+			);
+		}
+		else {
+			given $str {
+				when m{ ^ '#' } {
+					@child.append(
+						Perl6::Comment.from-int(
+							$from, $str
+						)
+					);
+				}
+				when m{ ^ ( \s+ ) ( '#' .+ ) $$ ( \s* ) $ } {
+					my Int $left-margin = $0.Str.chars;
+					my Int $right-margin = $2.Str.chars;
+					@child.append(
+						Perl6::WS.from-int(
+							$from, $0.Str
+						)
+					);
+					@child.append(
+						Perl6::Comment.from-int(
+							$left-margin + $from,
+							$1.Str
+						)
+					);
+					@child.append(
+						Perl6::WS.from-int(
+							$from - $right-margin,
+							$2.Str
+						)
+					);
+				}
+				when $str ~~ m{ \S } {
+				}
+				default {
+					@child.append(
+						Perl6::WS.from-int(
+							$from, $str
+						)
+					)
+				}
 			}
 		}
 
@@ -859,31 +879,14 @@ class Perl6::Parser::Factory {
 		@_child.append(
 			self._statementlist( $p.hash.<statementlist> )
 		);
-		if @_child[*-1] and %.here-doc{@_child[*-1].child[*-1].to} {
-			my Str $content = $p.Str.substr(
-				@_child[*-1].child[*-1].to
-			);
-			@_child[*-1].child.append(
-				Perl6::Sir-Not-Appearing-In-This-Statement.new(
-					:factory-line-number(
-						callframe(1).line
-					),
-					:from(
-						@_child[*-1].child[*-1].to
-					),
-					:to( $p.to ),
-					:content( $content )
-				)
-			);
-		}
 
 		my Perl6::Element $root = Perl6::Document.from-list( @_child );
-		fill-gaps( $p, $root );
+		self.fill-gaps( $p, $root );
 		if $p.from < $root.from {
 			my Str $remainder = $p.orig.Str.substr( 0, $root.from );
 			my Perl6::Element @child;
 			@child.append(
-				_string-to-tokens( $p.from, $remainder )
+				self._string-to-tokens( $p.from, $remainder )
 			);
 			$root.child.splice( 0, 0, @child );
 		}
@@ -891,14 +894,14 @@ class Perl6::Parser::Factory {
 			my Str $remainder = $p.orig.Str.substr( $root.to );
 			my Perl6::Element @child;
 			@child.append(
-				_string-to-tokens( $p.from, $remainder )
+				self._string-to-tokens( $root.to, $remainder )
 			);
 			$root.child.append( @child );
 		}
 		$root;
 	}
 
-	sub _fill-gap( Mu $p, Perl6::Element $root, Int $index ) {
+	method _fill-gap( Mu $p, Perl6::Element $root, Int $index ) {
 		my Int $start = $root.child.[$index].to;
 		my Int $end = $root.child.[$index+1].from;
 
@@ -912,7 +915,7 @@ class Perl6::Parser::Factory {
 		}
 
 		my Str $x = $p.orig.Str.substr( $start, $end - $start );
-		my Perl6::Element @child = _string-to-tokens( $start, $x );
+		my Perl6::Element @child = self._string-to-tokens( $start, $x );
 		$root.child.splice(
 			$index + 1,
 			0,
@@ -920,15 +923,15 @@ class Perl6::Parser::Factory {
 		);
 	}
 
-	sub fill-gaps( Mu $p, Perl6::Element $root, Int $depth = 0 ) {
+	method fill-gaps( Mu $p, Perl6::Element $root, Int $depth = 0 ) {
 		return unless $root.^can( 'child' );
 
 		for reverse( 0 .. $root.child.elems - 1 ) {
-			fill-gaps( $p, $root.child.[$_], $depth + 1 );
+			self.fill-gaps( $p, $root.child.[$_], $depth + 1 );
 			if $_ < $root.child.elems - 1 {
 				if $root.child.[$_].to !=
 				   $root.child.[$_+1].from {
-					_fill-gap( $p, $root, $_ );
+					self._fill-gap( $p, $root, $_ );
 				}
 			}
 		}
