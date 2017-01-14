@@ -491,6 +491,7 @@ class Perl6::String does Branching {
 	also is Perl6::Element;
 
 	has Str @.adverb;
+	has Str $.here-doc;
 }
 class Perl6::String::Body does Token {
 	also is Perl6::String;
@@ -538,6 +539,10 @@ class Perl6::Regex does Branching {
 }
 
 class Perl6::Bareword does Token {
+	also is Perl6::Element;
+	also does Matchable;
+}
+class Perl6::Adverb does Token {
 	also is Perl6::Element;
 	also does Matchable;
 }
@@ -786,6 +791,8 @@ my role Assertions {
 class Perl6::Parser::Factory {
 	also does Assertions;
 
+	has Int %.here-doc;
+
 	constant VERSION-STR = Q{v};
 	constant PAREN-OPEN = Q'(';
 	constant PAREN-CLOSE = Q')';
@@ -852,8 +859,7 @@ class Perl6::Parser::Factory {
 		@_child.append(
 			self._statementlist( $p.hash.<statementlist> )
 		);
-		if $p.hash.<statementlist>.hash.<statement>.list.elems == 1 and
-		   @_child[*-1].child[*-1].to < $p.to {
+		if @_child[*-1] and %.here-doc{@_child[*-1].child[*-1].to} {
 			my Str $content = $p.Str.substr(
 				@_child[*-1].child[*-1].to
 			);
@@ -4202,20 +4208,22 @@ class Perl6::Parser::Factory {
 				$_.Str ~~ m{ ^ ( \w+ ) };
 				my Str $q-map-name = $0.Str;
 				my Str @q-adverb;
+				my Str $here-doc-body = '';
 				@_child.append(
 					Perl6::Bareword.from-int(
 						$p.from,
 						$0.Str
 					)
 				);
-				if $_.hash.<quibble>.hash.<babble> {
+				if $_.hash.<quibble>.hash.<babble>.Str {
 					@_child.append(
-						Perl6::Bareword.from-match(
+						Perl6::Adverb.from-match-trimmed(
 							$_.hash.<quibble>.hash.<babble>
 						)
 					);
-					@q-adverb =
-						$_.hash.<quibble>.hash.<babble>.Str;
+					$_.hash.<quibble>.hash.<babble>.Str ~~
+						m{ ( .+? ) \s* $ };
+					@q-adverb.append( $0.Str );
 				}
 				# XXX The first place negative indices are used
 				@_child.append(
@@ -4241,6 +4249,23 @@ class Perl6::Parser::Factory {
 						)
 					)
 				);
+
+				# We could be in a here-doc.
+				if @q-adverb ~~ ':to' {
+					my $x = $_.orig.Str.substr(
+						$_.hash.<quibble>.to
+					);
+					my $end-marker =
+						$_.hash.<quibble>.hash.<nibble>.Str;
+					$x ~~ m{ ^ ( .+ ) ($end-marker) };
+					$here-doc-body = $0.Str;
+
+					my $left-margin = $_.hash.<quibble>.to;
+					%.here-doc{$left-margin} =
+						$left-margin +
+							$here-doc-body.chars +
+							$end-marker.chars;
+				}
 				@child.append(
 					%q-map{$q-map-name}.new(
 						:factory-line-number(
@@ -4249,7 +4274,8 @@ class Perl6::Parser::Factory {
 						:from( $_.from ),
 						:to( $_.to ),
 						:child( @_child ),
-						:adverb( @q-adverb )
+						:adverb( @q-adverb ),
+						:here-doc( $here-doc-body )
 					)
 				);
 			}
@@ -4264,14 +4290,15 @@ class Perl6::Parser::Factory {
 						$0.Str
 					)
 				);
-				if $_.hash.<quibble>.hash.<babble> {
+				if $_.hash.<quibble>.hash.<babble>.Str {
 					@_child.append(
-						Perl6::Bareword.from-match(
+						Perl6::Adverb.from-match-trimmed(
 							$_.hash.<quibble>.hash.<babble>
 						)
 					);
-					@q-adverb =
-						$_.hash.<quibble>.hash.<babble>.Str;
+					$_.hash.<quibble>.hash.<babble>.Str ~~
+						m{ ( .+? ) \s* $ };
+					@q-adverb.append( $0.Str );
 				}
 				# XXX The first place negative indices are used
 				@_child.append(

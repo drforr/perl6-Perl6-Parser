@@ -249,37 +249,37 @@ my role Debugging {
 	}
 
 	method dump-term( Perl6::Element $term ) {
-		my $str = $term.WHAT.perl;
-		$str ~~ s/'Perl6::'//;
-		if $term ~~ Perl6::Operator::PostCircumfix or
-		      $term ~~ Perl6::Operator::Circumfix {
-		}
-		elsif $term ~~ Perl6::Bareword or
-		      $term ~~ Perl6::Variable or
-		      ( $term ~~ Perl6::Operator and
-			$term !~~ Perl6::Operator::Hyper ) or
-		      $term ~~ Perl6::Balanced or
-		      $term ~~ Perl6::WS or
-		      $term ~~ Perl6::String::Body {
-			$str ~= " ({$term.content.perl})"
-		}
-		elsif $term ~~ Perl6::Number {
-			$str ~= " ({$term.content})"
-		}
-		elsif $term ~~ Perl6::String {
-#			$str ~= " ({$term.content}) ('{$term.bare}')"
-			$str ~= " adv: ({$term.adverb})";
+		my $line = $term.WHAT.perl;
+		$line ~~ s/'Perl6::'//;
+
+		if $term.^can( 'content' ) {
+			if $term ~~ Perl6::Number {
+				$line ~= " ({$term.content})"
+			}
+			# Circumfix operators don't have content.
+			# Their children do.
+			elsif $term ~~ Perl6::Operator::PostCircumfix or
+			      $term ~~ Perl6::Operator::Circumfix {
+			}
+			else {
+				$line ~= " ({$term.content.perl})"
+			}
 		}
 
 		if $term.^can('from') and not (
 				$term ~~ Perl6::Document | Perl6::Statement
 			) {
-			$str ~= " ({$term.from}-{$term.to})";
+			$line ~= " ({$term.from}-{$term.to})";
 		}
 
-		$str ~= " (line {$term.factory-line-number})" if
+		if $term.^can('here-doc') {
+			$line ~= " <{$term.here-doc}>" if
+				$term.here-doc and $term.here-doc ne '';
+		}
+
+		$line ~= " (line {$term.factory-line-number})" if
 			$term.factory-line-number;
-		$str
+		$line;
 	}
 
 	method ruler( Str $source ) {
@@ -412,6 +412,12 @@ class Perl6::Parser {
 	method build-tree( Mu $parsed ) {
 		my $factory = Perl6::Parser::Factory.new;
 		my $tree    = $factory.build( $parsed );
+
+		if $*DEBUG and $factory.here-doc.keys > 0 {
+			for $factory.here-doc.keys.sort -> $k {
+				say "Here-Doc ($k-{$factory.here-doc.{$k}})";
+			}
+		}
 
 		self.check-tree( $tree );
 		$tree
