@@ -4287,6 +4287,7 @@ class Perl6::Parser::Factory {
 				$_.Str ~~ m{ ^ ( \w+ ) };
 				my Str $q-map-name = $0.Str;
 				my Str @q-adverb;
+				my Str $here-doc-body = '';
 				@_child.append(
 					Perl6::Bareword.from-int(
 						$p.from,
@@ -4327,6 +4328,22 @@ class Perl6::Parser::Factory {
 						)
 					)
 				);
+				# We could be in a here-doc.
+				if @q-adverb ~~ ':to' {
+					my $x = $_.orig.Str.substr(
+						$_.hash.<quibble>.to
+					);
+					my $end-marker =
+						$_.hash.<quibble>.hash.<nibble>.Str;
+					$x ~~ m{ ^ ( .+ ) ($end-marker) };
+					$here-doc-body = $0.Str;
+
+					my $left-margin = $_.hash.<quibble>.to;
+					%.here-doc{$left-margin} =
+						$left-margin +
+							$here-doc-body.chars +
+							$end-marker.chars;
+				}
 				@child.append(
 					%q-map.{$q-map-name}.new(
 						:factory-line-number(
@@ -4335,7 +4352,8 @@ class Perl6::Parser::Factory {
 						:from( $p.from ),
 						:to( $p.to ),
 						:child( @_child ),
-						:adverb( @q-adverb )
+						:adverb( @q-adverb ),
+						:here-doc( $here-doc-body )
 					)
 				);
 			}

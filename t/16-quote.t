@@ -2149,7 +2149,6 @@ subtest {
 	}, Q{adverb :q};
 
 	subtest {
-#`(
 		subtest {
 			my $source = Q{Q :to <END>
 pi
@@ -2217,7 +2216,6 @@ END
 
 			done-testing;
 		}, Q{no intervening ws};
-)
 
 		done-testing;
 	}, Q{adverb :to};
@@ -2377,7 +2375,6 @@ subtest {
 	# q:q<> is illegal
 
 	subtest {
-#`(
 		subtest {
 			my $source = Q{q :to <END>
 pi
@@ -2388,7 +2385,8 @@ END
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::HereDoc },
+			# XXX Make sure to check the here-doc contents exist
+			ok (grep { $_ ~~ Perl6::String::Escaping },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -2405,7 +2403,7 @@ END
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::HereDoc },
+			ok (grep { $_ ~~ Perl6::String::Escaping },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -2422,7 +2420,7 @@ END
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::HereDoc },
+			ok (grep { $_ ~~ Perl6::String::Escaping },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -2439,13 +2437,12 @@ END
 			ok $pt.validate( $parsed ), Q{valid};
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::HereDoc },
+			ok (grep { $_ ~~ Perl6::String::Escaping },
 					$tree.child.[0].child),
 				Q{found string};
 
 			done-testing;
 		}, Q{no intervening ws};
-)
 
 		done-testing;
 	}, Q{adverb :to};
