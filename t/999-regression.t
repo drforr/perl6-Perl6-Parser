@@ -338,6 +338,19 @@ _END_
 	is $pt.to-string( $tree ), $source, Q{formatted};
 }, Q{here-doc with text after marker};
 
+subtest {
+	plan 2;
+
+	my $source = Q:to[_END_];
+my ($x,@x);
+$x.push: @x[$x] += @x.shift;
+_END_
+	my $p = $pt.parse( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.to-string( $tree ), $source, Q{formatted};
+}, Q{infix-increment};
+
 done-testing;
 
 # vim: ft=perl6

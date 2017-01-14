@@ -412,7 +412,6 @@ _END_
 }, Q{24 game/Solve};
 
 subtest {
-#`[
 	my $source = Q:to[_END_];
 my @todo = $[1];
 my @sums = 0;
@@ -448,7 +447,6 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 	done-testing;
 }, Q{9 billion names of God};

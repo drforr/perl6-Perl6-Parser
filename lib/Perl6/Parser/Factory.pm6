@@ -2139,6 +2139,18 @@ class Perl6::Parser::Factory {
 			@child.append( self._EXPR( $p.list.[0] ) );
 		}
 		elsif self.assert-hash( $p,
+				[< infix OPER infix_postfix_meta_operator >] ) {
+			@child.append( self._EXPR( $p.list.[0] ) );
+#			@child.append( self._infix( $p.hash.<infix> ) );
+			@child.append(
+				Perl6::Operator::Infix.from-sample(
+					$p, $p.hash.<infix>.Str ~ 
+					$p.hash.<infix_postfix_meta_operator>.Str
+				)
+			);
+			@child.append( self._EXPR( $p.list.[1] ) );
+		}
+		elsif self.assert-hash( $p,
 				[< dotty OPER >],
 				[< postfix_prefix_meta_operator >] ) {
 			# XXX Look into this at some point.
