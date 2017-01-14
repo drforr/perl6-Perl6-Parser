@@ -68,7 +68,6 @@ _END_
 }, Q{100 doors};
 
 subtest {
-#`(
 # The parser also recursively parses use'd classes, so since Term::termios might
 # not be present on all systems, stub it out.
 	my $source = Q:to[_END_];
@@ -191,13 +190,11 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
-)
 
 	done-testing;
 }, Q{15 Puzzle};
 
 subtest {
-#`(
 	my $source = Q:to[_END_];
 class Term::termios { has $fd; method getattr {}; method unset_lflags { }; method unset_iflags { }; method setattr { } }
 #use Term::termios;
@@ -318,7 +315,6 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
-)
 
 	done-testing;
 }, Q{2048};

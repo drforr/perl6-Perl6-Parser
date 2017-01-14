@@ -1335,7 +1335,7 @@ class Perl6::Parser::Factory {
 				}
 				when self.assert-hash( $_, [< nibble >] ) {
 					my Perl6::Element @_child;
-					$_.Str ~~ m{ ^ ( '<' ) .*? ( '>' ) $ };
+					$_.Str ~~ m{ ^ (.) .*? (.) $ };
 					@_child.append(
 						Perl6::Balanced::Enter.from-int(
 							$_.from,
@@ -4333,12 +4333,14 @@ class Perl6::Parser::Factory {
 					my $x = $_.orig.Str.substr(
 						$_.hash.<quibble>.to
 					);
+					$x ~~ s{ ^ ( .*? ) $$ } = '';
+					my $after-here-doc = $0.Str.chars;
 					my $end-marker =
 						$_.hash.<quibble>.hash.<nibble>.Str;
 					$x ~~ m{ ^ ( .+ ) ($end-marker) };
 					$here-doc-body = $0.Str;
 
-					my $left-margin = $_.hash.<quibble>.to;
+					my $left-margin = $_.hash.<quibble>.to + $after-here-doc;
 					%.here-doc{$left-margin} =
 						$left-margin +
 							$here-doc-body.chars +
@@ -5779,13 +5781,17 @@ class Perl6::Parser::Factory {
 			@child.append( Perl6::Statement.from-list( @_child ) );
 		}
 		if $leftover-ws {
-			my Perl6::Element @_child;
-			@_child.append(
-				Perl6::WS.from-int(
-					$leftover-ws-from, $leftover-ws
-				)
-			);
-			@child.append( Perl6::Statement.from-list( @_child ) );
+			if !%.here-doc{$leftover-ws-from} {
+				my Perl6::Element @_child;
+				@_child.append(
+					Perl6::WS.from-int(
+						$leftover-ws-from, $leftover-ws
+					)
+				);
+				@child.append(
+					Perl6::Statement.from-list( @_child )
+				);
+			}
 		}
 		elsif !$p.hash.<statement> and $p.Str ~~ m{ . } {
 			my Perl6::Element @_child;

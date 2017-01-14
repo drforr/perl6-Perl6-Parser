@@ -322,6 +322,22 @@ _END_
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
 }, Q{semicolon in array slice};
+
+subtest {
+	plan 2;
+
+	my $source = Q:to[_END_];
+    print qq:to/END/;
+	Press direction arrows to move.
+	Press q to quit. Press n for a new puzzle.
+END
+_END_
+	my $p = $pt.parse( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.to-string( $tree ), $source, Q{formatted};
+}, Q{here-doc with text after marker};
+
 done-testing;
 
 # vim: ft=perl6
