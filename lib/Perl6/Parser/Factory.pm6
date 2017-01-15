@@ -814,7 +814,7 @@ class Perl6::Parser::Factory {
 	constant SLASH = Q'/';
 	constant BACKSLASH = Q'\'; # because the braces confuse vim.
 
-	method _string-to-tokens( Int $from, Str $str ) {
+	method _string-to-tokens( Int $from, Str $str ) returns Perl6::Element {
 		my Perl6::Element @child;
 
 		if %.here-doc{$from} {
@@ -4275,10 +4275,10 @@ class Perl6::Parser::Factory {
 
 				# We could be in a here-doc.
 				if @q-adverb ~~ ':to' {
-					my $x = $_.orig.Str.substr(
+					my Str $x = $_.orig.Str.substr(
 						$_.hash.<quibble>.to
 					);
-					my $end-marker =
+					my Str $end-marker =
 						$_.hash.<quibble>.hash.<nibble>.Str;
 					$x ~~ m{ ^ ( .+ ) ($end-marker) };
 					$here-doc-body = $0.Str;
@@ -4351,12 +4351,12 @@ class Perl6::Parser::Factory {
 				);
 				# We could be in a here-doc.
 				if @q-adverb ~~ ':to' {
-					my $x = $_.orig.Str.substr(
+					my Str $x = $_.orig.Str.substr(
 						$_.hash.<quibble>.to
 					);
 					$x ~~ s{ ^ ( .*? ) $$ } = '';
 					my Int $after-here-doc = $0.Str.chars;
-					my $end-marker =
+					my Str $end-marker =
 						$_.hash.<quibble>.hash.<nibble>.Str;
 					$x ~~ m{ ^ ( .+ ) ($end-marker) };
 					$here-doc-body = $0.Str;
