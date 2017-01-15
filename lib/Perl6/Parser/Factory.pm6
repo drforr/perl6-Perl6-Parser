@@ -4283,7 +4283,8 @@ class Perl6::Parser::Factory {
 					$x ~~ m{ ^ ( .+ ) ($end-marker) };
 					$here-doc-body = $0.Str;
 
-					my $left-margin = $_.hash.<quibble>.to;
+					my Int $left-margin =
+						$_.hash.<quibble>.to;
 					%.here-doc{$left-margin} =
 						$left-margin +
 							$here-doc-body.chars +
@@ -4354,13 +4355,15 @@ class Perl6::Parser::Factory {
 						$_.hash.<quibble>.to
 					);
 					$x ~~ s{ ^ ( .*? ) $$ } = '';
-					my $after-here-doc = $0.Str.chars;
+					my Int $after-here-doc = $0.Str.chars;
 					my $end-marker =
 						$_.hash.<quibble>.hash.<nibble>.Str;
 					$x ~~ m{ ^ ( .+ ) ($end-marker) };
 					$here-doc-body = $0.Str;
 
-					my $left-margin = $_.hash.<quibble>.to + $after-here-doc;
+					my Int $left-margin =
+						$_.hash.<quibble>.to +
+						$after-here-doc;
 					%.here-doc{$left-margin} =
 						$left-margin +
 							$here-doc-body.chars +
@@ -5441,7 +5444,7 @@ say $_.dump;
 					[< parameter >],
 					[< param_sep >] ) {
 				my Mu $parameter = $_.hash.<parameter>;
-				my $left-edge;
+				my Int $left-edge;
 				for $parameter.list -> $q {
 					if $left-edge and $left-edge < $q.from {
 						@child.append(
@@ -5583,6 +5586,20 @@ say $_.dump;
 				);
 			}
 			elsif self.assert-hash( $_, [< sym xblock >] ) {
+#`( WORK ON THIS
+				for $_.hash.<sym>.list.keys -> $index {
+					@child.append(
+						Perl6::Bareword.from-match(
+							$_.hash.<sym>.list.[$index]
+						)
+					);
+					@child.append(
+						self._xblock(
+							$_.hash.<xblock>.list.[$index]
+						)
+					);
+				}
+)
 				@child.append( self._sym( $_.hash.<sym> ) );
 				@child.append(
 					self._xblock( $_.hash.<xblock> )
