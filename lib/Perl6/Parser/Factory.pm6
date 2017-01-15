@@ -2027,8 +2027,9 @@ class Perl6::Parser::Factory {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< infix OPER >] ) {
-				@child.append( self._infix( $_.hash.<infix> ) );
 				@child.append( self._EXPR( $_.list.[0] ) );
+				@child.append( self._infix( $_.hash.<infix> ) );
+				@child.append( self._EXPR( $_.list.[1] ) );
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
@@ -5521,11 +5522,62 @@ say $_.dump;
 		my Perl6::Element @child;
 		given $p {
 			if self.assert-hash( $_, [< block sym e1 e2 e3 >] ) {
-				@child.append( self._block( $_.hash.<block> ) );
+				my Perl6::Element @_child;
 				@child.append( self._sym( $_.hash.<sym> ) );
-				@child.append( self._e1( $_.hash.<e1> ) );
-				@child.append( self._e2( $_.hash.<e2> ) );
-				@child.append( self._e3( $_.hash.<e3> ) );
+				my $x = $_.orig.Str.substr(
+					$_.hash.<sym>.to,
+					$_.hash.<e1>.from - $_.hash.<sym>.to
+				);
+				$x ~~ m{ ('(') };
+				my $left-margin = $0.from;
+				@_child.append(
+					Perl6::Balanced::Enter.from-int(
+						$_.hash.<sym>.to + $0.from,
+						$0.Str
+					)
+				);
+				@_child.append( self._e1( $_.hash.<e1> ) );
+				$x = $_.orig.Str.substr(
+					$_.hash.<e1>.to,
+					$_.hash.<e2>.from - $_.hash.<e1>.to
+				);
+				$x ~~ m{ (';') };
+				@_child.append(
+					Perl6::Semicolon.from-int(
+						$_.hash.<e1>.to + $0.from,
+						$0.Str
+					)
+				);
+				@_child.append( self._e2( $_.hash.<e2> ) );
+				$x = $_.orig.Str.substr(
+					$_.hash.<e2>.to,
+					$_.hash.<e3>.from - $_.hash.<e2>.to
+				);
+				$x ~~ m{ (';') };
+				@_child.append(
+					Perl6::Semicolon.from-int(
+						$_.hash.<e2>.to + $0.from,
+						$0.Str
+					)
+				);
+				@_child.append( self._e3( $_.hash.<e3> ) );
+				@_child.append(
+					Perl6::Balanced::Exit.from-int(
+						$_.hash.<e3>.to,
+						PAREN-CLOSE
+					)
+				);
+				@child.append(
+					Perl6::Operator::Circumfix.new(
+						:factory-line-number(
+							callframe(1).line 
+						),
+						:from( $_.hash.<sym>.to + $left-margin ),
+						:to( $_.hash.<e3>.to ),
+						:child( @_child ),
+					)
+				);
+				@child.append( self._block( $_.hash.<block> ) );
 			}
 			elsif self.assert-hash( $_,
 					[< pblock sym EXPR wu >] ) {
