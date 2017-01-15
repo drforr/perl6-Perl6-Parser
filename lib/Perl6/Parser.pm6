@@ -423,7 +423,7 @@ class Perl6::Parser {
 		$tree
 	}
 
-	method to-string( $tree ) {
+	method to-string( Perl6::Element $tree ) {
 		my $str = $tree.to-string( );
 
 		$str

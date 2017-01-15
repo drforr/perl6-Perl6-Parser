@@ -5420,6 +5420,7 @@ say $_.dump;
 			when self.assert-hash( $_,
 					[< parameter typename >],
 					[< param_sep >] ) {
+				# XXX Unused?
 				my Mu $parameter = $_.hash.<parameter>;
 				my Int $offset = $_.from;
 				@child.append(
@@ -5440,27 +5441,22 @@ say $_.dump;
 					[< parameter >],
 					[< param_sep >] ) {
 				my Mu $parameter = $_.hash.<parameter>;
-				my Int $offset = $_.from;
-				for $parameter.list.keys {
-					if $_ > 0 {
-						my Str $x = $p.orig.Str.substr(
-							$parameter.list.[$_-1].to,
-							$parameter.list.[$_].from -
-								$parameter.list.[$_-1].to
+				my $left-edge;
+				for $parameter.list -> $q {
+					if $left-edge and $left-edge < $q.from {
+						@child.append(
+							Perl6::Operator::Infix.from-int(
+								$left-edge, ','
+							)
 						);
-						if $x ~~ m{ (',') } {
-							my Int $left-margin = $0.from;
-							@child.append(
-								Perl6::Operator::Infix.from-int(
-									$left-margin + $parameter.list.[$_-1].to,
-									$0.Str
-								)
-							);
-						}
 					}
+					@child.append( self.__Parameter( $q ) );
+					$left-edge = $q.to;
+				}
+				if $left-edge and $left-edge < $_.to {
 					@child.append(
-						self.__Parameter(
-							$parameter.list.[$_]
+						Perl6::Operator::Infix.from-int(
+							$left-edge, ','
 						)
 					);
 				}
