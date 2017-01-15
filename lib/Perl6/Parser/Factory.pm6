@@ -814,7 +814,7 @@ class Perl6::Parser::Factory {
 	constant SLASH = Q'/';
 	constant BACKSLASH = Q'\'; # because the braces confuse vim.
 
-	method _string-to-tokens( Int $from, Str $str ) returns Perl6::Element {
+	method _string-to-tokens( Int $from, Str $str ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 
 		if %.here-doc{$from} {
