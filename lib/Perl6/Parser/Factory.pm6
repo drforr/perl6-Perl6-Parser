@@ -5271,6 +5271,36 @@ class Perl6::Parser::Factory {
 				);
 			}
 			when self.assert-hash( $_,
+					[< type_constraint param_var quant
+					   trait >],
+					[< default_value modifier
+					   post_constraint >] ) {
+				@child.append(
+					self._type_constraint(
+						$_.hash.<type_constraint>
+					)
+				);
+				@child.append(
+					self._param_var( $_.hash.<param_var> )
+				);
+				@child.append(
+					self._trait( $_.hash.<trait> )
+				);
+				if $p.hash.<default_value> {
+					if $_.Str ~~ m{ ( '=' ) } {
+						@child.append(
+							Perl6::Operator::Infix.from-sample(
+								$p,
+								$0.Str
+							)
+						);
+						@child.append(
+							self._EXPR( $p.hash.<default_value>.list.[0].hash.<EXPR> )
+						);
+					}
+				}
+			}
+			when self.assert-hash( $_,
 					[< type_constraint param_var quant >],
 					[< default_value modifier trait
 					   post_constraint >] ) {

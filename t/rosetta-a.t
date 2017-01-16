@@ -496,7 +496,6 @@ _END_
 	}, Q{version 1};
 
 	subtest {
-#`[
 		# 'factor^2' was superscript-2
 		my $source = Q:to[_END_];
 constant @primes = 2, |(3, 5, 7 ... *).grep: *.is-prime;
@@ -527,7 +526,6 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 		done-testing;
 	}, Q[version 2];
