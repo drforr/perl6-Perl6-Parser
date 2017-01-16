@@ -658,7 +658,6 @@ _END_
 }, Q{Bitcoin validation};
 
 subtest {
-#`[
 	# XXX class Digest::SHA exports sub sha256, sub rmd160
 	my $source = Q:to[_END_];
 sub sha256 { }; sub rmd160 { }
@@ -693,7 +692,6 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 	done-testing;
 }, Q{Bitcoin public point to address};
