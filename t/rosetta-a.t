@@ -533,7 +533,6 @@ _END_
 
 subtest {
 	subtest {
-#`[
 		my $source = Q:to[_END_];
 #| an array of four words, that have more possible values. 
 #| Normally we would want `any' to signify we want any of the values, but well negate later and thus we need `all'
@@ -558,7 +557,6 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 		done-testing;
 	}, Q{version 1};
@@ -717,7 +715,6 @@ _END_
 }, Q{Anagrams / Derangements};
 
 subtest {
-#`[
 	my $source = Q:to[_END_];
 sub fib($n) {
     die "Naughty fib" if $n < 0;
@@ -734,7 +731,6 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 	done-testing;
 }, Q{Anonymous recursion};

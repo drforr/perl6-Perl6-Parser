@@ -3946,10 +3946,17 @@ class Perl6::Parser::Factory {
 				}
 			}
 			when self.assert-hash( $_, [< arglist >], [< O >] ) {
+key-bounds $_;
 				if $_.hash.<arglist>.Str {
-					@child.append(
+					my Perl6::Element @_child;
+					@_child.append(
 						self._arglist(
 							$_.hash.<arglist>
+						)
+					);
+					@child.append(
+						Perl6::Operator::Circumfix.from-match(
+							$_, @_child
 						)
 					);
 				}

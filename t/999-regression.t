@@ -388,6 +388,19 @@ _END_
 	is $pt.to-string( $tree ), $source, Q{formatted};
 }, Q{loop};
 
+subtest {
+	plan 2;
+
+	my $source = Q:to[_END_];
+my @a;
+(sub ($w1, $w2, $w3, $w4){ })(|@a);
+_END_
+	my $p = $pt.parse( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.to-string( $tree ), $source, Q{formatted};
+}, Q{loop};
+
 done-testing;
 
 # vim: ft=perl6
