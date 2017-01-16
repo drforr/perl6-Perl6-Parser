@@ -375,6 +375,19 @@ _END_
 	is $pt.to-string( $tree ), $source, Q{formatted};
 }, Q{optional argument w/ trailing comma};
 
+subtest {
+	plan 2;
+
+	my $source = Q:to[_END_];
+my ($n,$k);
+loop (my ($p, $f) = 2, 0; $f < $k && $p*$p <= $n; $p++) { }
+_END_
+	my $p = $pt.parse( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.to-string( $tree ), $source, Q{formatted};
+}, Q{loop};
+
 done-testing;
 
 # vim: ft=perl6

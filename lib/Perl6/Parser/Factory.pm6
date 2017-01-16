@@ -4865,7 +4865,7 @@ class Perl6::Parser::Factory {
 			# XXX DECL seems to be a mirror of declarator.
 			# XXX This probably will turn out to be not true.
 			#
-			if self.assert-hash( $_,
+			when self.assert-hash( $_,
 					[< multi_declarator DECL typename >] ) {
 				@child.append(
 					self._typename( $_.hash.<typename> )
@@ -4876,7 +4876,7 @@ class Perl6::Parser::Factory {
 					)
 				);
 			}
-			elsif self.assert-hash( $_,
+			when self.assert-hash( $_,
 					[< package_declarator DECL >],
 					[< typename >] ) {
 				@child.append(
@@ -4885,7 +4885,7 @@ class Perl6::Parser::Factory {
 					)
 				);
 			}
-			elsif self.assert-hash( $_,
+			when self.assert-hash( $_,
 					[< sym package_declarator >] ) {
 				@child.append( self._sym( $_.hash.<sym> ) );
 				@child.append(
@@ -4894,14 +4894,14 @@ class Perl6::Parser::Factory {
 					)
 				);
 			}
-			elsif self.assert-hash( $_,
+			when self.assert-hash( $_,
 					[< declarator DECL >],
 					[< typename >] ) {
 				@child.append(
 					self._declarator( $_.hash.<declarator> )
 				);
 			}
-			else {
+			default {
 				debug-match( $_ ) if $*DEBUG;
 				die "Unhandled case" if
 					$*FACTORY-FAILURE-FATAL
@@ -5551,7 +5551,7 @@ say $_.dump;
 	method _statement_control( Mu $p ) {
 		my Perl6::Element @child;
 		given $p {
-			if self.assert-hash( $_, [< block sym e1 e2 e3 >] ) {
+			when self.assert-hash( $_, [< block sym e1 e2 e3 >] ) {
 				my Perl6::Element @_child;
 				@child.append( self._sym( $_.hash.<sym> ) );
 				my $x = $_.orig.Str.substr(
@@ -5591,10 +5591,15 @@ say $_.dump;
 					)
 				);
 				@_child.append( self._e3( $_.hash.<e3> ) );
+				$x = $_.orig.Str.substr(
+					$_.hash.<e3>.to,
+					$_.to - $_.hash.<e3>.to
+				);
+				$x ~~ m{ (')') };
 				@_child.append(
 					Perl6::Balanced::Exit.from-int(
-						$_.hash.<e3>.to,
-						PAREN-CLOSE
+						$_.hash.<e3>.to + $0.from,
+						$0.Str
 					)
 				);
 				@child.append(
@@ -5603,13 +5608,13 @@ say $_.dump;
 							callframe(1).line 
 						),
 						:from( $_.hash.<sym>.to + $left-margin ),
-						:to( $_.hash.<e3>.to ),
+						:to( $_.hash.<e3>.to + $0.from + $0.chars ),
 						:child( @_child ),
 					)
 				);
 				@child.append( self._block( $_.hash.<block> ) );
 			}
-			elsif self.assert-hash( $_,
+			when self.assert-hash( $_,
 					[< pblock sym EXPR wu >] ) {
 				@child.append(
 					self._pblock( $_.hash.<pblock> )
@@ -5618,7 +5623,7 @@ say $_.dump;
 				@child.append( self._EXPR( $_.hash.<EXPR> ) );
 				@child.append( self._wu( $_.hash.<wu> ) );
 			}
-			elsif self.assert-hash( $_,
+			when self.assert-hash( $_,
 					[< doc sym module_name >] ) {
 				@child.append( self._sym( $_.hash.<sym> ) );
 				@child.append(
@@ -5627,14 +5632,14 @@ say $_.dump;
 					)
 				);
 			}
-			elsif self.assert-hash( $_, [< doc sym version >] ) {
+			when self.assert-hash( $_, [< doc sym version >] ) {
 				@child.append( self._doc( $_.hash.<doc> ) );
 				@child.append( self._sym( $_.hash.<sym> ) );
 				@child.append(
 					self._version( $_.hash.<version> )
 				);
 			}
-			elsif self.assert-hash( $_, [< sym else xblock >] ) {
+			when self.assert-hash( $_, [< sym else xblock >] ) {
 				for 0 .. ( $_.hash.<sym>.list.elems - 1 ) -> $idx {
 					@child.append(
 						Perl6::Bareword.from-match(
@@ -5660,14 +5665,14 @@ say $_.dump;
 				}
 				@child.append( self._else( $_.hash.<else> ) );
 			}
-			elsif self.assert-hash( $_, [< xblock sym wu >] ) {
+			when self.assert-hash( $_, [< xblock sym wu >] ) {
 				@child.append( self._sym( $_.hash.<sym> ) );
 				@child.append( self._wu( $_.hash.<wu> ) );
 				@child.append(
 					self._xblock( $_.hash.<xblock> )
 				);
 			}
-			elsif self.assert-hash( $_, [< sym xblock >] ) {
+			when self.assert-hash( $_, [< sym xblock >] ) {
 #`( WORK ON THIS
 				for $_.hash.<sym>.list.keys -> $index {
 					@child.append(
@@ -5687,11 +5692,11 @@ say $_.dump;
 					self._xblock( $_.hash.<xblock> )
 				);
 			}
-			elsif self.assert-hash( $_, [< sym block >] ) {
+			when self.assert-hash( $_, [< sym block >] ) {
 				@child.append( self._sym( $_.hash.<sym> ) );
 				@child.append( self._block( $_.hash.<block> ) );
 			}
-			else {
+			default {
 				debug-match( $_ ) if $*DEBUG;
 				die "Unhandled case" if
 					$*FACTORY-FAILURE-FATAL

@@ -472,7 +472,6 @@ _END_
 
 subtest {
 	subtest {
-#`[
 		my $source = Q:to[_END_];
 sub is-k-almost-prime($n is copy, $k) returns Bool {
     loop (my ($p, $f) = 2, 0; $f < $k && $p*$p <= $n; $p++) {
@@ -490,7 +489,6 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 		done-testing;
 	}, Q{version 1};
