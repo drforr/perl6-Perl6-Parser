@@ -1542,9 +1542,9 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-#	method _decint( Mu $p ) returns Perl6::Element {
-#		Perl6::Number::Decimal.from-match( $p );
-#	}
+	method _decint( Mu $p ) returns Perl6::Element {
+		Perl6::Number::Decimal.from-match( $p );
+	}
 
 	method _declarator( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
@@ -2875,17 +2875,22 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-#	method _min( Mu $p ) returns Array[Perl6::Element] {
-#		my Perl6::Element @child;
-#		given $p {
-#			default {
-#				debug-match( $_ ) if $*DEBUG;
-#				die "Unhandled case" if
-#					$*FACTORY-FAILURE-FATAL
-#			}
-#		}
-#		@child;
-#	}
+	method _min( Mu $p ) returns Array[Perl6::Element] {
+		my Perl6::Element @child;
+		given $p {
+			when self.assert-hash( $_, [< decint VALUE >] ) {
+				@child.append(
+					self._decint( $_.hash.<decint> )
+				);
+			}
+			default {
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
+			}
+		}
+		@child;
+	}
 
 	method _modifier_expr( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
@@ -3176,6 +3181,22 @@ class Perl6::Parser::Factory {
 					);
 					@child.append(
 						self._atom( $_.hash.<atom> )
+					);
+				}
+				elsif self.assert-hash( $_,
+					[< atom sigmaybe quantifier >] ) {
+					@child.append(
+						self._atom( $_.hash.<atom> )
+					);
+					@child.append(
+						self._sigmaybe(
+							$_.hash.<sigmaybe>
+						)
+					);
+					@child.append(
+						self._quantifier(
+							$_.hash.<quantifier>
+					 	)
 					);
 				}
 				elsif self.assert-hash( $_,
@@ -4119,6 +4140,12 @@ class Perl6::Parser::Factory {
 	method _quantifier( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
+			when self.assert-hash( $_,
+					[< sym min >],
+					[< backmod >] ) {
+				@child.append( self._sym( $_.hash.<sym> ) );
+				@child.append( self._min( $_.hash.<min> ) );
+			}
 			when self.assert-hash( $_, [< sym backmod >] ) {
 				@child.append( self._sym( $_.hash.<sym> ) );
 #				@child.append(
@@ -5200,10 +5227,13 @@ class Perl6::Parser::Factory {
 				);
 			}
 			when self.assert-hash( $_, [< normspace >] ) {
-				die; # XXX unused? Or just untested?
-				@child.append(
-					self._normspace( $_.hash.<normspace> )
-				);
+				if $_.hash.<normspace>.Str ~~ m{ \S } {
+					@child.append(
+						self._normspace(
+							$_.hash.<normspace>
+						)
+					);
+				}
 			}
 			when self.assert-hash( $_, [ ],
 					[< param_sep parameter >] ) {
