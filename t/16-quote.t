@@ -3,7 +3,7 @@ use v6;
 use Test;
 use Perl6::Parser;
 
-plan 15;
+plan 16;
 
 my $pt = Perl6::Parser.new;
 my $*VALIDATION-FAILURE-FATAL = True;
@@ -2646,6 +2646,45 @@ subtest {
 	ok (grep { $_ ~~ Perl6::String::Escaping },
 			$tree.child.[0].child),
 		Q{found string};
+
+	done-testing;
+}, Q{''};
+
+subtest {
+#`[
+	my $source = Q:to[END];
+say join " ", .lines given q:to/📝/, qq:to/📝/
+Hey,
+📝
+    dawg {
+        [~] q:to/📝/, qq:to/📝/
+        I heard you
+        📝
+            liked heredocs {
+                [~] q:to/📝/, qq:to/📝/
+                so here's
+                📝
+                    a heredoc {
+                        [~] q:to/📝/, q:to/📝/
+                        in a
+                        📝
+                            heredoc
+                            📝
+                    }
+                    📝
+            }
+            📝
+    }
+    📝
+END
+	my $parsed = $pt.parse( $source );
+	my $tree = $pt.build-tree( $parsed );
+	ok $pt.validate( $parsed ), Q{valid};
+	is $pt.to-string( $tree ), $source, Q{formatted};
+	ok (grep { $_ ~~ Perl6::String::Escaping },
+			$tree.child.[0].child),
+		Q{found string};
+]
 
 	done-testing;
 }, Q{''};

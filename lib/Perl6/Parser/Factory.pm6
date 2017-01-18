@@ -185,9 +185,15 @@ Should you brave the internals in search of a missing term, the first thing you 
 
 =end pod
 
+class Perl6::Element {
+	has Int $.from is required;
+	has Int $.to is required;
+	has $.factory-line-number; # Purely a debugging aid.
+}
+
 role Matchable {
 
-	multi method from-match( Mu $p ) {
+	method from-match( Mu $p ) returns Perl6::Element {
 		self.bless(
 			:factory-line-number( callframe(1).line ),
 			:from( $p.from ),
@@ -196,7 +202,7 @@ role Matchable {
 		)
 	}
 
-	multi method from-match-trimmed( Mu $p ) {
+	method from-match-trimmed( Mu $p ) returns Perl6::Element {
 		$p.Str ~~ m{ ^ ( \s* ) ( .+? ) ( \s* ) $ };
 		my Int $left-margin = $0.Str ?? $0.Str.chars !! 0;
 		my Int $right-margin = $2.Str ?? $2.Str.chars !! 0;
@@ -208,7 +214,7 @@ role Matchable {
 		)
 	}
 
-	multi method from-int( Int $from, Str $str ) {
+	method from-int( Int $from, Str $str ) returns Perl6::Element {
 		self.bless(
 			:factory-line-number( callframe(1).line ),
 			:from( $from ),
@@ -218,18 +224,12 @@ role Matchable {
 	}
 }
 
-class Perl6::Element {
-	has Int $.from is required;
-	has Int $.to is required;
-	has $.factory-line-number; # Purely a debugging aid.
-}
-
 role Child {
 	has Perl6::Element @.child;
 }
 
 role Branching does Child {
-	method to-string( ) {
+	method to-string returns Str {
 		join( '', map { .to-string( ) }, @.child )
 	}
 }
@@ -237,7 +237,7 @@ role Branching does Child {
 role Token {
 	has Str $.content is required;
 
-	method to-string( ) {
+	method to-string returns Str {
 		~$.content
 	}
 }
@@ -258,7 +258,7 @@ class Perl6::Semicolon does Token {
 class Perl6::Balanced {
 	also is Perl6::Structural;
 
-	multi method from-int( Int $from, Str $str ) {
+	method from-int( Int $from, Str $str ) returns Perl6::Element {
 		self.bless(
 			:factory-line-number( callframe(1).line ),
 			:from( $from ),
@@ -276,7 +276,7 @@ class Perl6::Balanced::Exit does Token {
 
 role MatchingBalanced {
 
-	method from-match( Mu $p, @child ) {
+	method from-match( Mu $p, @child ) returns Perl6::Element {
 		my Perl6::Element @_child;
 		$p.Str ~~ m{ ^ (.) .* (.) $ };
 		@_child.append(
@@ -297,7 +297,7 @@ role MatchingBalanced {
 		)
 	}
 
-	method from-int( Int $from, Str $str, @child ) {
+	method from-int( Int $from, Str $str, @child ) returns Perl6::Element {
 		my Perl6::Element @_child;
 		$str ~~ m{ ^ (.) .* (.) $ };
 		@_child.append(
@@ -323,7 +323,7 @@ class Perl6::Operator {
 	also is Perl6::Element;
 	also does Matchable;
 
-	multi method from-sample( Mu $p, Str $token ) {
+	method from-sample( Mu $p, Str $token ) returns Perl6::Element {
 		$p.Str ~~ m{ ($token) };
 		my Int $left-margin = $0.from;
 		self.bless(
@@ -350,7 +350,7 @@ class Perl6::Operator::Circumfix does Branching {
 	also is Perl6::Operator;
 	also does MatchingBalanced;
 
-	method from-delims( Mu $p, Str $front, Str $back, @child ) {
+	method from-delims( Mu $p, Str $front, Str $back, @child ) returns Perl6::Element {
 		my Perl6::Element @_child;
 		@_child.append(
 			Perl6::Balanced::Enter.from-int( $p.from, $front )
@@ -374,7 +374,7 @@ class Perl6::Operator::PostCircumfix does Branching {
 	also is Perl6::Operator;
 	also does MatchingBalanced;
 
-	method from-delims( Mu $p, Str $front, Str $back, @child ) {
+	method from-delims( Mu $p, Str $front, Str $back, @child ) returns Perl6::Element {
 		my Perl6::Element @_child;
 		@_child.append(
 			Perl6::Balanced::Enter.from-int( $p.from, $front )
@@ -408,7 +408,7 @@ class Perl6::Comment does Token {
 class Perl6::Document does Branching {
 	also is Perl6::Element;
 
-	method from-list( Perl6::Element @child ) {
+	method from-list( Perl6::Element @child ) returns Perl6::Element {
 		self.bless(
 			# No line number needed.
 			:from( @child ?? @child[0].from !! 0 ),
@@ -426,7 +426,7 @@ class Perl6::Sir-Not-Appearing-In-This-Statement {
 	also is Perl6::Element;
 	has $.content; # XXX because it's not quite a token.
 
-	method to-string( ) {
+	method to-string returns Str {
 		~$.content
 	}
 }
@@ -434,7 +434,7 @@ class Perl6::Sir-Not-Appearing-In-This-Statement {
 class Perl6::Statement does Branching {
 	also is Perl6::Element;
 
-	method from-list( Perl6::Element @child ) {
+	method from-list( Perl6::Element @child ) returns Perl6::Element {
 		self.bless(
 			:factory-line-number( callframe(1).line ),
 			:from( @child[0].from ),
@@ -445,7 +445,7 @@ class Perl6::Statement does Branching {
 }
 
 role Prefixed {
-	method headless() {
+	method headless returns Str {
 		$.content ~~ m{ 0 <[bdox]> (.+) };
 		$0
 	}
@@ -550,7 +550,7 @@ class Perl6::PackageName does Token {
 	also is Perl6::Element;
 	also does Matchable;
 
-	method namespaces() {
+	method namespaces returns Str {
 		$.content.split( '::' )
 	}
 }
@@ -566,7 +566,7 @@ class Perl6::Variable {
 	also is Perl6::Element;
 	also does Matchable;
 
-	method headless() {
+	method headless returns Str {
 		$.content ~~ m{ <[$%@&]> <[*!?<^:=~]>? (.+) };
 		$0
 	}
@@ -738,7 +738,7 @@ class Perl6::Variable::Callable::SubLanguage {
 
 my role Assertions {
 
-	method assert-hash-strict( Mu $p, $required-with, $required-without ) {
+	method assert-hash-strict( Mu $p, $required-with, $required-without ) returns Bool {
 		my %classified = classify {
 			$p.hash.{$_}.Str ?? 'with' !! 'without'
 		}, $p.hash.keys;
@@ -758,7 +758,7 @@ my role Assertions {
 		return False;
 	}
 
-	method assert-hash( Mu $p, $keys, $defined-keys = [] ) {
+	method assert-hash( Mu $p, $keys, $defined-keys = [] ) returns Bool {
 		return False unless $p and $p.hash;
 
 		my Str @keys;
@@ -874,7 +874,7 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-	method build( Mu $p ) {
+	method build( Mu $p ) returns Perl6::Element {
 		my Perl6::Element @_child;
 		@_child.append(
 			self._statementlist( $p.hash.<statementlist> )
@@ -962,7 +962,7 @@ class Perl6::Parser::Factory {
 		$*ERR.say: "Without content: {@keys-without-content.gist}";
 	}
 
-	method _arglist( Mu $p ) {
+	method _arglist( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		if $p.list {
 			for $p.list {
@@ -1003,7 +1003,7 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-	method _args( Mu $p ) {
+	method _args( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< semiarglist >] ) {
@@ -1043,7 +1043,7 @@ class Perl6::Parser::Factory {
 	# name
 	# ~~
 	#
-#	method _assertion( Mu $p ) {
+#	method _assertion( Mu $p ) returns Array[Perl6::Element] {
 #		my Perl6::Element @child;
 #		given $p {
 #			when self.assert-hash( $_, [< var >] ) {
@@ -1070,7 +1070,7 @@ class Perl6::Parser::Factory {
 #		@child;
 #	}
 
-	method _atom( Mu $p ) {
+	method _atom( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		if self.assert-hash( $p, [< quantifier atom >] ) {
 			@child.append(
@@ -1095,7 +1095,7 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-#	method _B( Mu $p ) {
+#	method _B( Mu $p ) returns Array[Perl6::Element] {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
@@ -1107,7 +1107,7 @@ class Perl6::Parser::Factory {
 #		@child;
 #	}
 
-	method _babble( Mu $p ) {
+	method _babble( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [ ], [< quotepair B >] ) {
@@ -1121,10 +1121,10 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-	method _backmod( Mu $p ) {
+#	method _backmod( Mu $p ) {
 #		warn "backmod finally used";
-		( )
-	}
+#		( )
+#	}
 
 	# qq
 	# \\
@@ -1140,7 +1140,7 @@ class Perl6::Parser::Factory {
 	# rn
 	# t
 	#
-#	method _backslash( Mu $p ) {
+#	method _backslash( Mu $p ) returns Array[Perl6::Element] {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
@@ -1152,11 +1152,11 @@ class Perl6::Parser::Factory {
 #		@child;
 #	}
 
-#	method _binint( Mu $p ) {
+#	method _binint( Mu $p ) returns Perl6::Element {
 #		Perl6::Number::Binary.from-match( $p );
 #	}
 
-	method _block( Mu $p ) {
+	method _block( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< blockoid >] ) {
@@ -1173,7 +1173,7 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-	method _blockoid( Mu $p ) {
+	method _blockoid( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			# $_ doesn't contain WS after the block.
@@ -1197,7 +1197,7 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-	method _blorst( Mu $p ) {
+	method _blorst( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< statement >] ) {
@@ -1219,7 +1219,7 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-#	method _bracket( Mu $p ) {
+#	method _bracket( Mu $p ) returns Array[Perl6::Element] {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
@@ -1231,7 +1231,7 @@ class Perl6::Parser::Factory {
 #		@child;
 #	} 
 
-#	method _cclass_elem( Mu $p ) {
+#	method _cclass_elem( Mu $p ) returns Array[Perl6::Element] {
 #		my Perl6::Element @child;
 #		if $p.list {
 #			for $p.list {
@@ -1276,7 +1276,7 @@ class Perl6::Parser::Factory {
 #		@child;
 #	}
 
-#	method _charspec( Mu $p ) {
+#	method _charspec( Mu $p ) returns Array[Perl6::Element] {
 #		my Perl6::Element @child;
 ## XXX work on this, of course.
 #		warn "Caught _charspec";
@@ -1293,7 +1293,7 @@ class Perl6::Parser::Factory {
 	# [ ]
 	# reduce
 	#
-	method _circumfix( Mu $p ) {
+	method _circumfix( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		if $p.list {
 			my Perl6::Element @_child;
@@ -1374,7 +1374,7 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-#	method _codeblock( Mu $p ) {
+#	method _codeblock( Mu $p ) returns Array[Perl6::Element] {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
@@ -1386,7 +1386,7 @@ class Perl6::Parser::Factory {
 #		@child;
 #	}
 
-	method _coercee( Mu $p ) {
+	method _coercee( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< statement >] ) {
@@ -1403,7 +1403,7 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-	method _coloncircumfix( Mu $p ) {
+	method _coloncircumfix( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< circumfix >] ) {
@@ -1420,7 +1420,7 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-	method _colonpair( Mu $p ) {
+	method _colonpair( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_,
@@ -1489,7 +1489,7 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-#	method _colonpairs( Mu $p ) {
+#	method _colonpairs( Mu $p ) returns Array[Perl6::Element] {
 #		my Perl6::Element @child;
 #		given $p {
 #			when $_ ~~ Hash {
@@ -1505,7 +1505,7 @@ class Perl6::Parser::Factory {
 #		@child;
 #	}
 
-	method _contextualizer( Mu $p ) {
+	method _contextualizer( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_,
@@ -1542,11 +1542,11 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-#	method _decint( Mu $p ) {
+#	method _decint( Mu $p ) returns Perl6::Element {
 #		Perl6::Number::Decimal.from-match( $p );
 #	}
 
-	method _declarator( Mu $p ) {
+	method _declarator( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_,
@@ -1663,7 +1663,7 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-#	method _DECL( Mu $p ) {
+#	method _DECL( Mu $p ) returns Array[Perl6::Element] {
 #		my Perl6::Element @child;
 #		given $p {
 #			when self.assert-hash( $_,
@@ -1791,7 +1791,7 @@ class Perl6::Parser::Factory {
 #		@child;
 #	}
 
-	method _dec_number( Mu $p ) {
+	method _dec_number( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< int coeff frac >] ) {
@@ -1812,7 +1812,7 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-	method _default_value( Mu $p ) {
+	method _default_value( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		if $p.list {
 			for $p.list {
@@ -1836,7 +1836,7 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-	method _deflongname( Mu $p ) {
+	method _deflongname( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_,
@@ -1852,7 +1852,7 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-	method _defterm( Mu $p ) {
+	method _defterm( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_,
@@ -1888,7 +1888,7 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-	method _deftermnow( Mu $p ) {
+	method _deftermnow( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< defterm >] ) {
@@ -1905,7 +1905,7 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-#	method _desigilname( Mu $p ) {
+#	method _desigilname( Mu $p ) returns Array[Perl6::Element] {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
@@ -1917,7 +1917,7 @@ class Perl6::Parser::Factory {
 #		@child;
 #	}
 
-#	method _dig( Mu $p ) {
+#	method _dig( Mu $p ) returns Array[Perl6::Element] {
 #		my Perl6::Element @child;
 #		for $p.list {
 #			# UTF-8....
@@ -1932,14 +1932,14 @@ class Perl6::Parser::Factory {
 #		@child;
 #	}
 
-	method _doc( Mu $p ) {
-		( )
-	}
+#	method _doc( Mu $p ) {
+#		( )
+#	}
 
 	# .
 	# .*
 	#
-	method _dotty( Mu $p ) {
+	method _dotty( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< sym dottyop O >] ) {
@@ -1961,7 +1961,7 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-	method _dottyop( Mu $p ) {
+	method _dottyop( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< sym postop >], [< O >] ) {
@@ -1989,7 +1989,7 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-	method _dottyopish( Mu $p ) {
+	method _dottyopish( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $p, [< term >] ) {
@@ -2004,7 +2004,7 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-	method _e1( Mu $p ) {
+	method _e1( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< scope_declarator >] ) {
@@ -2023,7 +2023,7 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-	method _e2( Mu $p ) {
+	method _e2( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< infix OPER >] ) {
@@ -2040,7 +2040,7 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-	method _e3( Mu $p ) {
+	method _e3( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_,
@@ -2058,7 +2058,7 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-	method _else( Mu $p ) {
+	method _else( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< blockoid >] ) {
@@ -2075,7 +2075,7 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-#	method _escale( Mu $p ) {
+#	method _escale( Mu $p ) returns Array[Perl6::Element] {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
@@ -2099,7 +2099,7 @@ class Perl6::Parser::Factory {
 	# “ ”
 	# colonpair
 	#
-#	method _escape( Mu $p ) {
+#	method _escape( Mu $p ) returns Array[Perl6::Element] {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
@@ -2111,7 +2111,7 @@ class Perl6::Parser::Factory {
 #		@child;
 #	}
 
-	method _EXPR( Mu $p ) {
+	method _EXPR( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		if self.assert-hash( $p,
 				[< dotty OPER
@@ -2427,7 +2427,7 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-#	method _fake_infix( Mu $p ) {
+#	method _fake_infix( Mu $p ) returns Array[Perl6::Element] {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
@@ -2439,7 +2439,7 @@ class Perl6::Parser::Factory {
 #		@child;
 #	}
 
-	method _fakesignature( Mu $p ) {
+	method _fakesignature( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< signature >] ) {
@@ -2456,7 +2456,7 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-	method _fatarrow( Mu $p ) {
+	method _fatarrow( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< key val >] ) {
@@ -2477,15 +2477,15 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-	method __FloatingPoint( Mu $p ) {
+	method __FloatingPoint( Mu $p ) returns Perl6::Element {
 		Perl6::Number::FloatingPoint.from-match( $p );
 	}
 
-#	method _hexint( Mu $p ) {
+#	method _hexint( Mu $p ) returns Perl6::Element {
 #		Perl6::Number::Hexadecimal.from-match( $p );
 #	}
 
-	method _identifier( Mu $p ) {
+	method _identifier( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		if $p.Str {
 			@child.append( Perl6::Bareword.from-match( $p ) );
@@ -2509,7 +2509,7 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-	method _infix( Mu $p ) {
+	method _infix( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< sym EXPR >], [< O >] ) {
@@ -2532,7 +2532,7 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-#	method _infixish( Mu $p ) {
+#	method _infixish( Mu $p ) returns Array[Perl6::Element] {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
@@ -2547,7 +2547,7 @@ class Perl6::Parser::Factory {
 	# << >>
 	# « »
 	#
-#	method _infix_circumfix_meta_operator( Mu $p ) {
+#	method _infix_circumfix_meta_operator( Mu $p ) returns Array[Perl6::Element] {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
@@ -2561,7 +2561,7 @@ class Perl6::Parser::Factory {
 
 	# « »
 	#
-	method _infix_prefix_meta_operator( Mu $p ) {
+	method _infix_prefix_meta_operator( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< sym infixish O >] ) {
@@ -2590,7 +2590,7 @@ class Perl6::Parser::Factory {
 	# .=
 	# .
 	#
-	method _initializer( Mu $p ) {
+	method _initializer( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< sym dottyopish >] ) {
@@ -2646,7 +2646,7 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-	method _integer( Mu $p ) {
+	method _integer( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< binint VALUE >] ) {
@@ -2680,7 +2680,7 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-#	method _invocant( Mu $p ) {
+#	method _invocant( Mu $p ) returns Array[Perl6::Element] {
 #		my Perl6::Element @child;
 #		CATCH {
 #			when X::Multi::NoMatch { }
@@ -2692,16 +2692,16 @@ class Perl6::Parser::Factory {
 #return True;
 #	}
 
-	method _key( Mu $p ) {
+	method _key( Mu $p ) returns Perl6::Element {
 		Perl6::Bareword.from-match( $p );
 	}
 
 	# Special value...
-	method _lambda( Mu $p ) {
+	method _lambda( Mu $p ) returns Perl6::Element {
 		Perl6::Operator::Infix.from-match( $p );
 	}
 
-	method _left( Mu $p ) {
+	method _left( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< termseq >] ) {
@@ -2718,7 +2718,7 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-	method _longname( Mu $p ) {
+	method _longname( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_,
@@ -2734,7 +2734,7 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-#	method _max( Mu $p ) {
+#	method _max( Mu $p ) returns Array[Perl6::Element] {
 #		my Perl6::Element @child; 
 #		warn "max finally used";
 #		@child;
@@ -2746,7 +2746,7 @@ class Perl6::Parser::Factory {
 	# qw
 	# '
 	#
-#	method _metachar( Mu $p ) {
+#	method _metachar( Mu $p ) returns Array[Perl6::Element] {
 #		my Perl6::Element @child;
 #		given $p {
 #			when self.assert-hash( $_, [< sym >] ) {
@@ -2790,7 +2790,7 @@ class Perl6::Parser::Factory {
 #		@child;
 #	}
 
-	method _method_def( Mu $p ) {
+	method _method_def( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_,
@@ -2847,7 +2847,7 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-	method _methodop( Mu $p ) {
+	method _methodop( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< longname args >] ) {
@@ -2875,7 +2875,7 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-#	method _min( Mu $p ) {
+#	method _min( Mu $p ) returns Array[Perl6::Element] {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
@@ -2887,7 +2887,7 @@ class Perl6::Parser::Factory {
 #		@child;
 #	}
 
-	method _modifier_expr( Mu $p ) {
+	method _modifier_expr( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< EXPR >] ) {
@@ -2902,7 +2902,7 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-	method _module_name( Mu $p ) {
+	method _module_name( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< longname >] ) {
@@ -2919,7 +2919,7 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-#	method _morename( Mu $p ) {
+#	method _morename( Mu $p ) returns Array[Perl6::Element] {
 #		my Perl6::Element @child;
 #		if $p.list {
 #			for $p.list {
@@ -2951,7 +2951,7 @@ class Perl6::Parser::Factory {
 	# only
 	# null
 	#
-	method _multi_declarator( Mu $p ) {
+	method _multi_declarator( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< sym routine_def >] ) {
@@ -2982,7 +2982,7 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-	method _multisig( Mu $p ) {
+	method _multisig( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< signature >] ) {
@@ -2999,7 +2999,7 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-	method _named_param( Mu $p ) {
+	method _named_param( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< name param_var >] ) {
@@ -3030,7 +3030,7 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-	method _name( Mu $p ) {
+	method _name( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_,
@@ -3065,7 +3065,7 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-	method _nibble( Mu $p ) {
+	method _nibble( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		if self.assert-hash( $p, [< termseq >] ) {
 			@child.append( self._termseq( $p.hash.<termseq> ) );
@@ -3095,7 +3095,7 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-#	method _nibbler( Mu $p ) {
+#	method _nibbler( Mu $p ) returns Array[Perl6::Element] {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
@@ -3107,13 +3107,13 @@ class Perl6::Parser::Factory {
 #		@child;
 #	}
 
-	method _normspace( Mu $p ) {
+	method _normspace( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		warn "normspace finally used";
 		( )
 	}
 
-	method _noun( Mu $p ) {
+	method _noun( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		if $p.list {
 			for $p.list {
@@ -3244,7 +3244,7 @@ class Perl6::Parser::Factory {
 
 	# numish # ?
 	#
-	method _number( Mu $p ) {
+	method _number( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< numish >] ) {
@@ -3261,15 +3261,15 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-	method __Inf( Mu $p ) {
+	method __Inf( Mu $p ) returns Perl6::Element {
 		Perl6::Infinity.from-match( $p );
 	}
 
-	method __NaN( Mu $p ) {
+	method __NaN( Mu $p ) returns Perl6::Element {
 		Perl6::NotANumber.from-match( $p );
 	}
 
-	method _numish( Mu $p ) {
+	method _numish( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< dec_number >] ) {
@@ -3302,7 +3302,7 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-#	method _O( Mu $p ) {
+#	method _O( Mu $p ) returns Array[Perl6::Element] {
 #		my Perl6::Element @child;
 #		return True if $p.<thunky>
 #			and $p.<prec>
@@ -3355,11 +3355,11 @@ class Perl6::Parser::Factory {
 #		@child;
 #	}
 
-#	method _octint( Mu $p ) {
+#	method _octint( Mu $p ) returns Perl6::Element {
 #		Perl6::Number::Octal.from-match( $p );
 #	}
 
-#	method _op( Mu $p ) {
+#	method _op( Mu $p ) returns Array[Perl6::Element] {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
@@ -3371,7 +3371,7 @@ class Perl6::Parser::Factory {
 #		@child;
 #	}
 
-#	method _OPER( Mu $p ) {
+#	method _OPER( Mu $p ) returns Array[Perl6::Element] {
 #		my Perl6::Element @child;
 #		given $p {
 #			when self.assert-hash( $_, [< sym infixish O >] ) {
@@ -3449,7 +3449,7 @@ class Perl6::Parser::Factory {
 	# ??{ }
 	# var
 	#
-#	method _p5metachar( Mu $p ) {
+#	method _p5metachar( Mu $p ) returns Array[Perl6::Element] {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
@@ -3472,7 +3472,7 @@ class Perl6::Parser::Factory {
 	# trusts <name>
 	# also <name>
 	#
-	method _package_declarator( Mu $p ) {
+	method _package_declarator( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< sym package_def >] ) {
@@ -3502,7 +3502,7 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-	method _package_def( Mu $p ) {
+	method _package_def( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_,
@@ -3560,7 +3560,7 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-	method _param_term( Mu $p ) {
+	method _param_term( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< defterm >] ) {
@@ -3577,7 +3577,7 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-	method _parameter( Mu $p ) {
+	method _parameter( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		for $p.list {
 			if self.assert-hash( $_,
@@ -3711,7 +3711,8 @@ class Perl6::Parser::Factory {
 		'&=' => Perl6::Variable::Callable::Pod,
 		'&~' => Perl6::Variable::Callable::SubLanguage;
 
-	method _param_var( Mu $p ) {
+	method _param_var( Mu $p ) returns Array[Perl6::Element] {
+		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< name twigil sigil >] ) {
 				# XXX refactor back to a method
@@ -3725,12 +3726,12 @@ class Perl6::Parser::Factory {
 						      $twigil ~
 						      $desigilname;
 
-				my Perl6::Element $leaf =
+				@child.append(
 					%sigil-map{$sigil ~ $twigil}.from-int(
 						$_.from,
 						$_.Str
-					);
-				$leaf
+					)
+				);
 			}
 			when self.assert-hash( $_, [< name sigil >] ) {
 				# XXX refactor back to a method
@@ -3744,24 +3745,28 @@ class Perl6::Parser::Factory {
 						      $twigil ~
 						      $desigilname;
 
-				my Perl6::Element $leaf =
+				@child.append(
 					%sigil-map{$sigil ~ $twigil}.from-int(
 						$_.from,
 						$content
-					);
-				$leaf
+					)
+				);
 			}
 			when self.assert-hash( $_, [< signature >] ) {
 				my Perl6::Element @_child;
 				@_child.append(
 					self._signature( $_.hash.<signature> )
 				);
-				Perl6::Operator::Circumfix.from-match(
-					$_, @_child
+				@child.append(
+					Perl6::Operator::Circumfix.from-match(
+						$_, @_child
+					)
 				);
 			}
 			when self.assert-hash( $_, [< sigil >] ) {
-				self._sigil( $_.hash.<sigil> );
+				@child.append(
+					self._sigil( $_.hash.<sigil> )
+				);
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
@@ -3769,9 +3774,10 @@ class Perl6::Parser::Factory {
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
+		@child;
 	}
 
-	method _pblock( Mu $p ) {
+	method _pblock( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_,
@@ -3818,7 +3824,7 @@ class Perl6::Parser::Factory {
 	# config
 	# text
 	#
-#	method _pod_block( Mu $p ) {
+#	method _pod_block( Mu $p ) returns Array[Perl6::Element] {
 #		my Perl6::Element @child;
 #		# XXX fix later
 #		self._EXPR( $p.list.[0].hash.<EXPR> );
@@ -3828,7 +3834,7 @@ class Perl6::Parser::Factory {
 	# block
 	# text
 	#
-#	method _pod_content( Mu $p ) {
+#	method _pod_content( Mu $p ) returns Array[Perl6::Element] {
 #		my Perl6::Element @child;
 #		# XXX fix l;ater
 #		self._EXPR( $p.list.[0].hash.<EXPR> );
@@ -3838,14 +3844,14 @@ class Perl6::Parser::Factory {
 	# regular
 	# code
 	#
-#	method _pod_textcontent( Mu $p ) {
+#	method _pod_textcontent( Mu $p ) returns Array[Perl6::Element] {
 #		my Perl6::Element @child;
 #		# XXX fix later
 #		self._EXPR( $p.list.[0].hash.<EXPR> );
 #		@child;
 #	}
 
-	method _postfix_prefix_meta_operator( Mu $p ) {
+	method _postfix_prefix_meta_operator( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		if $p.list {
 			for $p.list {
@@ -3876,7 +3882,7 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-	method _post_constraint( Mu $p ) {
+	method _post_constraint( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		if $p.list {
 			for $p.list {
@@ -3904,7 +3910,7 @@ class Perl6::Parser::Factory {
 	# « »
 	# ( )
 	#
-	method _postcircumfix( Mu $p ) {
+	method _postcircumfix( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< semilist O >] ) {
@@ -3946,7 +3952,6 @@ class Perl6::Parser::Factory {
 				}
 			}
 			when self.assert-hash( $_, [< arglist >], [< O >] ) {
-key-bounds $_;
 				if $_.hash.<arglist>.Str {
 					my Perl6::Element @_child;
 					@_child.append(
@@ -3972,7 +3977,7 @@ key-bounds $_;
 
 	# ⁿ
 	#
-	method _postfix( Mu $p ) {
+	method _postfix( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< sym O >] ) {
@@ -4000,7 +4005,7 @@ key-bounds $_;
 		@child;
 	}
 
-	method _postop( Mu $p ) {
+	method _postop( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_,
@@ -4023,7 +4028,7 @@ key-bounds $_;
 		@child;
 	}
 
-	method _prefix_postfix_meta_operator( Mu $p ) {
+	method _prefix_postfix_meta_operator( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		if $p.list {
 			for $p.list {
@@ -4047,7 +4052,7 @@ key-bounds $_;
 		@child;
 	}
 
-	method _prefix( Mu $p ) {
+	method _prefix( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< sym O >] ) {
@@ -4067,7 +4072,7 @@ key-bounds $_;
 		@child;
 	}
 
-	method _quant( Mu $p ) {
+	method _quant( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		if $p.Str {
 			# XXX Need to propagate this back upwards.
@@ -4090,7 +4095,7 @@ key-bounds $_;
 		@child;
 	}
 
-	method _quantified_atom( Mu $p ) {
+	method _quantified_atom( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< sigfinal atom >] ) {
@@ -4111,14 +4116,14 @@ key-bounds $_;
 	# **
 	# rakvar
 	#
-	method _quantifier( Mu $p ) {
+	method _quantifier( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< sym backmod >] ) {
 				@child.append( self._sym( $_.hash.<sym> ) );
-				@child.append(
-					self._backmod( $_.hash.<backmod> )
-				);
+#				@child.append(
+#					self._backmod( $_.hash.<backmod> )
+#				);
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
@@ -4129,7 +4134,7 @@ key-bounds $_;
 		@child;
 	}
 
-#	method _quibble( Mu $p ) {
+#	method _quibble( Mu $p ) returns Array[Perl6::Element] {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
@@ -4180,7 +4185,7 @@ key-bounds $_;
 	# s
 	# quasi
 	#
-	method _quote( Mu $p ) {
+	method _quote( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_,
@@ -4463,7 +4468,7 @@ key-bounds $_;
 		@child;
 	}
 
-	method _quotepair( Mu $p ) {
+	method _quotepair( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		if $p.list {
 			for $p.list {
@@ -4506,17 +4511,17 @@ key-bounds $_;
 		@child;
 	}
 
-#	method _radix( Mu $p ) {
+#	method _radix( Mu $p ) returns Array[Perl6::Element] {
 #		my Perl6::Element @child;
 #		warn "radix finally used";
 #		( )
 #	}
 
-	method __Radix( Mu $p ) {
+	method __Radix( Mu $p ) returns Perl6::Element {
 		Perl6::Number::Radix.from-match( $p );
 	}
 
-	method _rad_number( Mu $p ) {
+	method _rad_number( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_,
@@ -4542,7 +4547,7 @@ key-bounds $_;
 	# token <name> { },
 	# regex <name> { },
 	#
-	method _regex_declarator( Mu $p ) {
+	method _regex_declarator( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< sym regex_def >] ) {
@@ -4560,7 +4565,7 @@ key-bounds $_;
 		@child;
 	}
 
-	method _regex_def( Mu $p ) {
+	method _regex_def( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 
 		# 'regex Foo { token }'
@@ -4621,7 +4626,7 @@ key-bounds $_;
 		@child;
 	}
 
-	method _right( Mu $p ) {
+	method _right( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			default {
@@ -4638,7 +4643,7 @@ key-bounds $_;
 	# submethod <name> ... { },
 	# macro <name> ... { }, # XXX ?
 	#
-	method _routine_declarator( Mu $p ) {
+	method _routine_declarator( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		if self.assert-hash( $p, [< sym routine_def >] ) {
 			@child.append( self._sym( $p.hash.<sym> ) );
@@ -4660,7 +4665,7 @@ key-bounds $_;
 		@child;
 	}
 
-	method _routine_def( Mu $p ) {
+	method _routine_def( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_,
@@ -4845,7 +4850,7 @@ key-bounds $_;
 		@child;
 	}
 
-	method _rx_adverbs( Mu $p ) {
+	method _rx_adverbs( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< quotepair >] ) {
@@ -4866,7 +4871,7 @@ key-bounds $_;
 		@child;
 	}
 
-	method _scoped( Mu $p ) {
+	method _scoped( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			# XXX DECL seems to be a mirror of declarator.
@@ -4927,7 +4932,7 @@ key-bounds $_;
 	# supsersede <name>
 	# unit {package,module,class...} <name>
 	#
-	method _scope_declarator( Mu $p ) {
+	method _scope_declarator( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< sym scoped >] ) {
@@ -4945,7 +4950,7 @@ key-bounds $_;
 		@child;
 	}
 
-	method _semiarglist( Mu $p ) {
+	method _semiarglist( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< arglist >] ) {
@@ -4999,7 +5004,7 @@ key-bounds $_;
 		@child;
 	}
 
-	method _semilist( Mu $p ) {
+	method _semilist( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		# XXX remove later
 		CATCH {
@@ -5060,7 +5065,7 @@ key-bounds $_;
 		@child;
 	}
 
-	method _separator( Mu $p ) {
+	method _separator( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_,
@@ -5083,11 +5088,11 @@ key-bounds $_;
 		@child;
 	}
 
-	method _septype( Mu $p ) {
+	method _septype( Mu $p ) returns Perl6::Element {
 		Perl6::Bareword.from-match( $p );
 	}
 
-	method _sequence( Mu $p ) {
+	method _sequence( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< statement >] ) {
@@ -5102,7 +5107,7 @@ key-bounds $_;
 		@child;
 	}
 
-	method _shape( Mu $p ) {
+	method _shape( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			default {
@@ -5114,7 +5119,7 @@ key-bounds $_;
 		@child;
 	}
 
-	method _sibble( Mu $p ) {
+	method _sibble( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< left babble right >] ) {
@@ -5159,7 +5164,7 @@ key-bounds $_;
 		@child;
 	}
 
-	method _sigfinal( Mu $p ) {
+	method _sigfinal( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< normspace >] ) {
@@ -5176,11 +5181,11 @@ key-bounds $_;
 		@child;
 	}
 
-	method _sigil( Mu $p ) {
+	method _sigil( Mu $p ) returns Perl6::Element {
 		Perl6::Bareword.from-match( $p );
 	}
 
-	method _sigmaybe( Mu $p ) {
+	method _sigmaybe( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_,
@@ -5214,7 +5219,7 @@ key-bounds $_;
 		@child;
 	}
 
-	method __Parameter( Mu $p ) {
+	method __Parameter( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_,
@@ -5455,7 +5460,7 @@ say $_.dump;
 		@child;
 	}
 
-	method _signature( Mu $p ) {
+	method _signature( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_,
@@ -5514,7 +5519,7 @@ say $_.dump;
 		@child;
 	}
 
-	method _smexpr( Mu $p ) {
+	method _smexpr( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< EXPR >] ) {
@@ -5531,7 +5536,7 @@ say $_.dump;
 		@child;
 	}
 
-#	method _specials( Mu $p ) {
+#	method _specials( Mu $p ) returns Array[Perl6::Element] {
 #		my Perl6::Element @child;
 #		warn "specials finally used";
 #		( )
@@ -5555,7 +5560,7 @@ say $_.dump;
 	# CONTROL
 	# QUIT
 	#
-	method _statement_control( Mu $p ) {
+	method _statement_control( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< block sym e1 e2 e3 >] ) {
@@ -5640,7 +5645,7 @@ say $_.dump;
 				);
 			}
 			when self.assert-hash( $_, [< doc sym version >] ) {
-				@child.append( self._doc( $_.hash.<doc> ) );
+#				@child.append( self._doc( $_.hash.<doc> ) );
 				@child.append( self._sym( $_.hash.<sym> ) );
 				@child.append(
 					self._version( $_.hash.<version> )
@@ -5711,7 +5716,7 @@ say $_.dump;
 		}
 	}
 
-	method _statement( Mu $p ) {
+	method _statement( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		if $p.list {
 			for $p.list {
@@ -5876,7 +5881,7 @@ say $_.dump;
 		@child;
 	}
 
-	method _statementlist( Mu $p ) {
+	method _statementlist( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		my Str $leftover-ws;
 		my Int $leftover-ws-from = 0;
@@ -5956,7 +5961,7 @@ say $_.dump;
 	# for
 	# given
 	#
-	method _statement_mod_cond( Mu $p ) {
+	method _statement_mod_cond( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< sym modifier_expr >] ) {
@@ -5981,7 +5986,7 @@ say $_.dump;
 	# for
 	# given
 	#
-	method _statement_mod_loop( Mu $p ) {
+	method _statement_mod_loop( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< sym smexpr >] ) {
@@ -6029,7 +6034,7 @@ say $_.dump;
 	# try
 	# quietly
 	#
-	method _statement_prefix( Mu $p ) {
+	method _statement_prefix( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< sym blorst >] ) {
@@ -6047,7 +6052,7 @@ say $_.dump;
 		@child;
 	}
 
-#	method _subshortname( Mu $p ) {
+#	method _subshortname( Mu $p ) returns Array[Perl6::Element] {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
@@ -6059,7 +6064,7 @@ say $_.dump;
 #		@child;
 #	}
 
-	method _sym( Mu $p ) {
+	method _sym( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		if $p.list {
 			for $p.list {
@@ -6129,7 +6134,7 @@ say $_.dump;
 	# onlystar
 	# value
 	#
-	method _term( Mu $p ) {
+	method _term( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< circumfix >] ) {
@@ -6151,7 +6156,7 @@ say $_.dump;
 		@child;
 	}
 
-	method _termalt( Mu $p ) {
+	method _termalt( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		if $p.list {
 			for $p.list {
@@ -6177,7 +6182,7 @@ say $_.dump;
 		@child;
 	}
 
-	method _termaltseq( Mu $p ) {
+	method _termaltseq( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< termconjseq >] ) {
@@ -6196,7 +6201,7 @@ say $_.dump;
 		@child;
 	}
 
-	method _termconj( Mu $p ) {
+	method _termconj( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		if $p.list {
 			for $p.list {
@@ -6235,7 +6240,7 @@ say $_.dump;
 		@child;
 	}
 
-	method _termconjseq( Mu $p ) {
+	method _termconjseq( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		if $p.list {
 			for $p.list {
@@ -6272,7 +6277,7 @@ say $_.dump;
 		@child;
 	}
 
-	method _term_init( Mu $p ) {
+	method _term_init( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			default {
@@ -6284,7 +6289,7 @@ say $_.dump;
 		@child;
 	}
 
-	method _termish( Mu $p ) {
+	method _termish( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		if $p.list {
 			for $p.list {
@@ -6315,7 +6320,7 @@ say $_.dump;
 		@child;
 	}
 
-	method _termseq( Mu $p ) {
+	method _termseq( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< termaltseq >] ) {
@@ -6332,7 +6337,7 @@ say $_.dump;
 		@child;
 	}
 
-	method _trait( Mu $p ) {
+	method _trait( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		if $p.list {
 			for $p.list {
@@ -6366,7 +6371,7 @@ say $_.dump;
 	# returns
 	# handles
 	#
-	method _trait_mod( Mu $p ) {
+	method _trait_mod( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_,
@@ -6411,7 +6416,7 @@ say $_.dump;
 #		( )
 #	}
 
-	method _type_constraint( Mu $p ) {
+	method _type_constraint( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		if $p.list {
 			for $p.list {
@@ -6452,7 +6457,7 @@ say $_.dump;
 	# subset
 	# constant
 	#
-	method _type_declarator( Mu $p ) {
+	method _type_declarator( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		if self.assert-hash( $p,
 				[< sym initializer variable >], [< trait >] ) {
@@ -6493,28 +6498,33 @@ say $_.dump;
 		@child;
 	}
 
-	method _typename( Mu $p ) {
+	method _typename( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
-		for $p.list {
-			if self.assert-hash( $_,
-					[< longname colonpairs >],
-					[< colonpair >] ) {
-				# XXX Can probably be narrowed
-				return Perl6::Bareword.from-match( $_ );
-			}
-			elsif self.assert-hash( $_,
-					[< longname >], [< colonpairs >] ) {
-				# XXX Can probably be narrowed
-				return Perl6::Bareword.from-match( $_ );
-			}
-			else {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+		if $p.list {
+			for $p.list {
+				if self.assert-hash( $_,
+						[< longname colonpairs >],
+						[< colonpair >] ) {
+					# XXX Can probably be narrowed
+					@child.append(
+						 Perl6::Bareword.from-match( $_ )
+					);
+				}
+				elsif self.assert-hash( $_,
+						[< longname >], [< colonpairs >] ) {
+					# XXX Can probably be narrowed
+					@child.append(
+						Perl6::Bareword.from-match( $_ )
+					);
+				}
+				else {
+					debug-match( $_ ) if $*DEBUG;
+					die "Unhandled case" if
+						$*FACTORY-FAILURE-FATAL
+				}
 			}
 		}
-
-		if self.assert-hash( $p, [< longname colonpairs >] ) {
+		elsif self.assert-hash( $p, [< longname colonpairs >] ) {
 			@child.append(
 				self._longname( $p.hash.<longname> )
 			);
@@ -6538,7 +6548,7 @@ say $_.dump;
 		@child;
 	}
 
-	method _val( Mu $p ) {
+	method _val( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_,
@@ -6653,7 +6663,7 @@ say $_.dump;
 		@child;
 	}
 
-#	method _VALUE( Mu $p ) {
+#	method _VALUE( Mu $p ) returns Array[Perl6::Element] {
 #		my Perl6::Element @child;
 #		@child;
 #	}
@@ -6662,7 +6672,7 @@ say $_.dump;
 	# number
 	# version
 	#
-	method _value( Mu $p ) {
+	method _value( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< number >] ) {
@@ -6684,7 +6694,7 @@ say $_.dump;
 		@child;
 	}
 
-	method _var( Mu $p ) {
+	method _var( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_,
@@ -6735,7 +6745,7 @@ say $_.dump;
 		@child;
 	}
 
-	method _variable_declarator( Mu $p ) {
+	method _variable_declarator( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_,
@@ -6789,7 +6799,7 @@ say $_.dump;
 		@child;
 	}
 
-	method _variable( Mu $p ) {
+	method _variable( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		if self.assert-hash( $p, [< contextualizer >] ) {
 			@child.append(
@@ -6815,7 +6825,7 @@ say $_.dump;
 		@child;
 	}
 
-	method _version( Mu $p ) {
+	method _version( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< vnum vstr >] ) {
@@ -6830,14 +6840,14 @@ say $_.dump;
 		@child;
 	}
 
-	method _vstr( Mu $p ) {
+	method _vstr( Mu $p ) returns Perl6::Element {
 		Perl6::Bareword.from-int(
 			$p.from - VERSION-STR.chars,
 			VERSION-STR ~ $p.Str
 		)
 	}
 
-#	method _vnum( Mu $p ) {
+#	method _vnum( Mu $p ) returns Array[Perl6::Element] {
 #		my Perl6::Element @child;
 #		if $p.list {
 #			for $p.list {
@@ -6861,11 +6871,11 @@ say $_.dump;
 #		@child;
 #	}
 
-	method _wu( Mu $p ) {
+	method _wu( Mu $p ) returns Perl6::Element {
 		Perl6::Bareword.from-match( $p )
 	}
 
-	method _xblock( Mu $p ) {
+	method _xblock( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		if $p.list {
 			for $p.list {
