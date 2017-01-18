@@ -5745,48 +5745,9 @@ say $_.dump;
 					);
 				}
 				elsif self.assert-hash( $_, [< EXPR >] ) {
-					# XXX Aiyee. Ugly but it does work.
-					my Mu $q = $_.hash.<EXPR>;
-					if $q.list.[0] and
-					   $q.hash.<infix> and
-					   $q.list.[1] and
-					   $q.list.[1].hash.<value> {
-						# XXX Most assuredly repeated elsewhere.
-						my Int $end = $q.list.elems - 1;
-						my Str $infix-str = $q.hash.<infix>.Str;
-						for $q.list.keys {
-							if $q.list.[$_].Str {
-								@child.append(
-									self._EXPR(
-										$q.list.[$_]
-									)
-								);
-							}
-							if $_ < $end {
-								my Str $x = $q.orig.Str.substr(
-									$q.list.[$_].to,
-									$q.list.[$_+1].from -
-										$q.list.[$_].to
-								);
-								if $x ~~ m{ ($infix-str) } {
-									@child.append(
-										Perl6::Operator::Infix.from-int(
-											$q.list.[$_].to +
-												$0.from,
-											$0.Str
-										)
-									);
-								}
-							}
-						}
-					}
-					else {
-						@child.append(
-							self._EXPR(
-								$_.hash.<EXPR>
-							)
-						);
-					}
+					@child.append(
+						self._EXPR( $_.hash.<EXPR> )
+					);
 				}
 				elsif self.assert-hash( $_,
 						[< statement_control >] ) {
@@ -5800,7 +5761,8 @@ say $_.dump;
 				}
 				else {
 					debug-match( $_ ) if $*DEBUG;
-					die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+					die "Unhandled case" if
+						$*FACTORY-FAILURE-FATAL
 				}
 			}
 		}
