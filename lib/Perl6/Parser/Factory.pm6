@@ -3051,35 +3051,42 @@ class Perl6::Parser::Factory {
 
 	method _name( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
-		given $p {
-			when self.assert-hash( $_,
-					[< identifier >],
-					[< morename >] ) {
-				# XXX replace with _identifier(..)
-				@child.append(
-					Perl6::Bareword.from-match( $_ )
-				);
-				# XXX Probably should be Enter(':')..Exit('')
-				if $_.orig.Str.substr( $_.to, 1 ) eq COLON {
+		if $p.hash {
+			given $p {
+				when self.assert-hash( $_,
+						[< identifier >],
+						[< morename >] ) {
+					# XXX replace with _identifier(..)
 					@child.append(
-						Perl6::Bareword.from-int(
-							$_.to,
-							COLON
+						Perl6::Bareword.from-match( $_ )
+					);
+					# XXX Probably should be Enter(':')..Exit('')
+					if $_.orig.Str.substr( $_.to, 1 ) eq COLON {
+						@child.append(
+							Perl6::Bareword.from-int(
+								$_.to,
+								COLON
+							)
 						)
-					)
+					}
+				}
+				when self.assert-hash( $_, [< morename >] ) {
+					# XXX replace with _morename(..)
+					@child.append(
+						Perl6::PackageName.from-match( $_ )
+					);
+				}
+				default {
+					debug-match( $_ ) if $*DEBUG;
+					die "Unhandled case" if
+						$*FACTORY-FAILURE-FATAL
 				}
 			}
-			when self.assert-hash( $_, [< morename >] ) {
-				# XXX replace with _morename(..)
-				@child.append(
-					Perl6::PackageName.from-match( $_ )
-				);
-			}
-			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
-			}
+		}
+		elsif $p.Str {
+			@child.append(
+				Perl6::Bareword.from-match( $p )
+			);
 		}
 		@child;
 	}
