@@ -401,6 +401,18 @@ _END_
 	is $pt.to-string( $tree ), $source, Q{formatted};
 }, Q{loop};
 
+subtest {
+	plan 2;
+
+	my $source = Q:to[_END_];
+("a".comb «~» "a".comb);
+_END_
+	my $p = $pt.parse( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.to-string( $tree ), $source, Q{formatted};
+}, Q{meta-tilde};
+
 done-testing;
 
 # vim: ft=perl6

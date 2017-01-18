@@ -2140,6 +2140,19 @@ class Perl6::Parser::Factory {
 			@child.append( self._EXPR( $p.list.[0] ) );
 		}
 		elsif self.assert-hash( $p,
+				[< OPER infix_circumfix_meta_operator >] ) {
+			@child.append( self._EXPR( $p.list.[0] ) );
+			if $p.hash.<infix_circumfix_meta_operator>.Str {
+				@child.append(
+					Perl6::Operator::Infix.from-sample(
+						$p,
+						$p.hash.<infix_circumfix_meta_operator>.Str
+					)
+				);
+			}
+			@child.append( self._EXPR( $p.list.[1] ) );
+		}
+		elsif self.assert-hash( $p,
 				[< infix OPER infix_postfix_meta_operator >] ) {
 			@child.append( self._EXPR( $p.list.[0] ) );
 #			@child.append( self._infix( $p.hash.<infix> ) );
@@ -2879,8 +2892,9 @@ class Perl6::Parser::Factory {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< decint VALUE >] ) {
+				# XXX The decimal is just a string.
 				@child.append(
-					self._decint( $_.hash.<decint> )
+					Perl6::Number::Decimal.from-match( $_ )
 				);
 			}
 			default {

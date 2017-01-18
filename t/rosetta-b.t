@@ -29,7 +29,6 @@ _END_
 }, Q{Babbage problem};
 
 subtest {
-#`[
 	my $source = Q:to[_END_];
 my $secret = q:to/END/;
     This task is to implement a program for encryption and decryption
@@ -90,7 +89,6 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 	done-testing;
 }, Q{Bacon cipher};
