@@ -763,12 +763,12 @@ my role Assertions {
 
 		my Str @keys;
 		my Str @defined-keys;
-		for $p.hash.keys {
-			if $p.hash.{$_} {
-				@keys.push( $_ );
+		for $p.hash.kv -> $k, $v {
+			if $v {
+				@keys.push( $k );
 			}
-			elsif $p.hash:defined{$_} {
-				@defined-keys.push( $_ );
+			elsif $p.hash:defined{$k} {
+				@defined-keys.push( $k );
 			}
 		}
 
@@ -776,12 +776,12 @@ my role Assertions {
 			return False
 		}
 		
-		for @( $keys ) {
-			next if $p.hash.{$_};
+		for @( $keys ) -> $k {
+			next if $p.hash.{$k};
 			return False
 		}
-		for @( $defined-keys ) {
-			next if $p.hash:defined{$_};
+		for @( $defined-keys ) -> $k {
+			next if $p.hash:defined{$k};
 			return False
 		}
 		return True
@@ -2251,25 +2251,23 @@ class Perl6::Parser::Factory {
 				@child.append( self._EXPR( $p.list.[2] ) );
 			}
 			else {
-				for $p.list.keys {
-					if $p.list.[$_].Str {
+				for $p.list.kv -> $k, $v {
+					if $v.Str {
 						@child.append(
-							self._EXPR(
-								$p.list.[$_]
-							)
+							self._EXPR( $v )
 						);
 					}
-					if $_ < $end {
+					if $k < $end {
 						my Str $x = $p.orig.Str.substr(
-							$p.list.[$_].to,
-							$p.list.[$_+1].from -
-								$p.list.[$_].to
+							$p.list.[$k].to,
+							$p.list.[$k+1].from -
+								$p.list.[$k].to
 						);
 						if $x ~~ m{ ($infix-str) } {
 							my Int $left-margin = $0.from;
 							@child.append(
 								Perl6::Operator::Infix.from-int(
-									$left-margin + $p.list.[$_].to,
+									$left-margin + $v.to,
 									$0.Str
 								)
 							);
@@ -5016,25 +5014,23 @@ class Perl6::Parser::Factory {
 					) ~~ m{ ';' } {
 					my $q = $_.hash.<arglist>;
 					my Int $end = $q.list.elems - 1;
-					for $q.list.keys {
-						if $q.list.[$_].Str {
+					for $q.list.kv -> $k, $v {
+						if $v.Str {
 							@child.append(
-								self._EXPR(
-									$q.list.[$_]
-								)
+								self._EXPR( $v )
 							);
 						}
-						if $_ < $end {
+						if $k < $end {
 							my Str $x = $p.orig.Str.substr(
-								$q.list.[$_].to,
-								$q.list.[$_+1].from -
-									$q.list.[$_].to
+								$q.list.[$k].to,
+								$q.list.[$k+1].from -
+									$q.list.[$k].to
 							);
 							if $x ~~ m{ (';') } {
 								my Int $left-margin = $0.from;
 								@child.append(
 									Perl6::Operator::Infix.from-int(
-										$left-margin + $q.list.[$_].to,
+										$left-margin + $v.to,
 										$0.Str
 									)
 								);
@@ -5074,25 +5070,23 @@ class Perl6::Parser::Factory {
 					) ~~ m{ ';' } {
 					my $q = $_.hash.<statement>;
 					my Int $end = $q.list.elems - 1;
-					for $q.list.keys {
-						if $q.list.[$_].Str {
+					for $q.list.kv -> $k, $v {
+						if $v.Str {
 							@child.append(
-								self._EXPR(
-									$q.list.[$_]
-								)
+								self._EXPR( $v )
 							);
 						}
-						if $_ < $end {
+						if $k < $end {
 							my Str $x = $p.orig.Str.substr(
-								$q.list.[$_].to,
-								$q.list.[$_+1].from -
-									$q.list.[$_].to
+								$q.list.[$k].to,
+								$q.list.[$k+1].from -
+									$q.list.[$k].to
 							);
 							if $x ~~ m{ (';') } {
 								my Int $left-margin = $0.from;
 								@child.append(
 									Perl6::Operator::Infix.from-int(
-										$left-margin + $q.list.[$_].to,
+										$left-margin + $v.to,
 										';'
 									)
 								);
@@ -5526,19 +5520,18 @@ say $_.dump;
 					[< param_sep >] ) {
 				# XXX Unused?
 				my Mu $parameter = $_.hash.<parameter>;
-				my Int $offset = $_.from;
 				@child.append(
 					self._typename( $_.hash.<typename> )
 				);
-				for $parameter.list.kv -> $index, $q {
-					if $index > 0 {
+				for $_.hash.<parameter>.list.kv -> $k, $v {
+					@child.append( self.__Parameter( $v ) );
+					if $k > 1 {
 						@child.append(
 							Perl6::Operator::Infix.from-sample(
 								$p, COMMA
 							)
 						);
 					}
-					@child.append( self.__Parameter( $q ) );
 				}
 			}
 			when self.assert-hash( $_,
@@ -5710,15 +5703,15 @@ say $_.dump;
 				);
 			}
 			when self.assert-hash( $_, [< sym else xblock >] ) {
-				for 0 .. ( $_.hash.<sym>.list.elems - 1 ) -> $idx {
+				for $_.hash.<sym>.list.keys -> $k {
 					@child.append(
 						Perl6::Bareword.from-match(
-							$_.hash.<sym>.list.[$idx]
+							$_.hash.<sym>.list.[$k]
 						)
 					);
 					@child.append(
 						self._xblock(
-							$_.hash.<xblock>.list.[$idx]
+							$_.hash.<xblock>.list.[$k]
 						)
 					);
 				}
@@ -5744,15 +5737,15 @@ say $_.dump;
 			}
 			when self.assert-hash( $_, [< sym xblock >] ) {
 #`( WORK ON THIS
-				for $_.hash.<sym>.list.keys -> $index {
+				for $_.hash.<sym>.list.kv -> $k {
 					@child.append(
 						Perl6::Bareword.from-match(
-							$_.hash.<sym>.list.[$index]
+							$_.hash.<sym>.list.[$k]
 						)
 					);
 					@child.append(
 						self._xblock(
-							$_.hash.<xblock>.list.[$index]
+							$_.hash.<xblock>.list.[$k]
 						)
 					);
 				}
