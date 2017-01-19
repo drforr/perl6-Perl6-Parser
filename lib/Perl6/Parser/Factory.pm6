@@ -4007,6 +4007,13 @@ class Perl6::Parser::Factory {
 						)
 					);
 				}
+				else {
+					@child.append(
+						Perl6::Operator::Postfix.from-match(
+							$_
+						)
+					);
+				}
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
