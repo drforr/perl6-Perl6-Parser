@@ -2234,13 +2234,31 @@ class Perl6::Parser::Factory {
 		}
 		elsif self.assert-hash( $p,
 				[< infix_prefix_meta_operator OPER >] ) {
-			@child.append( self._EXPR( $p.list.[0] ) );
-			@child.append(
-				self._infix_prefix_meta_operator(
-					$p.hash.<infix_prefix_meta_operator>
-				),
-			);
-			@child.append( self._EXPR( $p.list.[1] ) );
+			# XXX Yes, this is a copy from elsewhere... refactor it
+			my $infix-str =
+				$p.hash.<infix_prefix_meta_operator>.Str;
+			my Int $end = $p.list.elems - 1;
+			for $p.list.kv -> $k, $v {
+				if $v.Str {
+					@child.append( self._EXPR( $v ) );
+				}
+				if $k < $end {
+					my Str $x = $p.orig.Str.substr(
+						$p.list.[$k].to,
+						$p.list.[$k+1].from -
+							$p.list.[$k].to
+					);
+					if $x ~~ m{ ($infix-str) } {
+						my Int $left-margin = $0.from;
+						@child.append(
+							Perl6::Operator::Infix.from-int(
+								$left-margin + $v.to,
+								$0.Str
+							)
+						);
+					}
+				}
+			}
 		}
 		elsif self.assert-hash( $p, [< infix OPER >] ) {
 			my Int $end = $p.list.elems - 1;
