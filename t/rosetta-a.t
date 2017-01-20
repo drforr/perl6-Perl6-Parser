@@ -327,7 +327,6 @@ _END_
 
 subtest {
 	subtest {
-#`[
 		my $source = Q:to[_END_];
 #to be called with perl6 columnaligner.pl <orientation>(left, center , right )
 #with left as default
@@ -372,7 +371,6 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 		done-testing;
 	}, Q{version 1};
@@ -806,7 +804,6 @@ _END_
 }, Q{Archimedean spiral};
 
 subtest {
-#`[
 	my $source = Q:to[_END_];
 sub cumulative_freq(%freq) {
     my %cf;
@@ -924,7 +921,6 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 	done-testing;
 }, Q{Arithmetic coding};
