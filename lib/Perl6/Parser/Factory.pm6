@@ -971,9 +971,6 @@ class Perl6::Parser::Factory {
 						self._EXPR( $_.hash.<EXPR> )
 					);
 				}
-				elsif $_.Bool {
-					# XXX Zero-width token
-				}
 				else {
 					debug-match( $_ );
 					die "Unhandled case" if
@@ -1107,23 +1104,28 @@ class Perl6::Parser::Factory {
 #		@child;
 #	}
 
-	method _babble( Mu $p ) returns Array[Perl6::Element] {
-		my Perl6::Element @child;
-		given $p {
-			when self.assert-hash( $_, [ ], [< quotepair B >] ) {
-			}
-			default {
-				debug-match( $_ );
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
-			}
-		}
-		@child;
-	}
+#	method _babble( Mu $p ) returns Array[Perl6::Element] {
+#		my Perl6::Element @child;
+#		given $p {
+#			default {
+#				debug-match( $_ );
+#				die "Unhandled case" if
+#					$*FACTORY-FAILURE-FATAL
+#			}
+#		}
+#		@child;
+#	}
 
 #	method _backmod( Mu $p ) {
-#		warn "backmod finally used";
-#		( )
+#		my Perl6::Element @child;
+#		given $p {
+#			default {
+#				debug-match( $_ );
+#				die "Unhandled case" if
+#					$*FACTORY-FAILURE-FATAL
+#			}
+#		}
+#		@child;
 #	}
 
 	# qq
@@ -1300,7 +1302,9 @@ class Perl6::Parser::Factory {
 			for $p.list {
 				if self.assert-hash( $_, [< semilist >] ) {
 					@_child.append(
-						self._semilist( $_.hash.<semilist> )
+						self._semilist(
+							$_.hash.<semilist>
+						)
 					);
 				}
 				else {
@@ -1325,7 +1329,9 @@ class Perl6::Parser::Factory {
 				when self.assert-hash( $_, [< semilist >] ) {
 					my Perl6::Element @_child;
 					@_child.append(
-						self._semilist( $_.hash.<semilist> )
+						self._semilist(
+							$_.hash.<semilist>
+						)
 					);
 					@child.append(
 						Perl6::Operator::Circumfix.from-match(
@@ -1542,9 +1548,9 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-	method _decint( Mu $p ) returns Perl6::Element {
-		Perl6::Number::Decimal.from-match( $p );
-	}
+#	method _decint( Mu $p ) returns Perl6::Element {
+#		Perl6::Number::Decimal.from-match( $p );
+#	}
 
 	method _declarator( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
@@ -1919,21 +1925,26 @@ class Perl6::Parser::Factory {
 
 #	method _dig( Mu $p ) returns Array[Perl6::Element] {
 #		my Perl6::Element @child;
-#		for $p.list {
-#			# UTF-8....
-#			if $_ {
-#				# XXX
-#				next
-#			}
-#			else {
-#				next
+#		given $p {
+#			default {
+#				debug-match( $_ ) if $*DEBUG;
+#				die "Unhandled case" if
+#					$*FACTORY-FAILURE-FATAL
 #			}
 #		}
 #		@child;
 #	}
 
 #	method _doc( Mu $p ) {
-#		( )
+#		my Perl6::Element @child;
+#		given $p {
+#			default {
+#				debug-match( $_ ) if $*DEBUG;
+#				die "Unhandled case" if
+#					$*FACTORY-FAILURE-FATAL
+#			}
+#		}
+#		@child;
 #	}
 
 	# .
@@ -2047,7 +2058,9 @@ class Perl6::Parser::Factory {
 					[< postfix OPER >],
 					[< postfix_prefix_meta_operator >] ) {
 				@child.append( self._EXPR( $p.list.[0] ) );
-				@child.append( self._postfix( $p.hash.<postfix> ) );
+				@child.append(
+					self._postfix( $p.hash.<postfix> )
+				);
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
@@ -2501,17 +2514,6 @@ class Perl6::Parser::Factory {
 		if $p.Str {
 			@child.append( Perl6::Bareword.from-match( $p ) );
 		}
-		elsif $p.list {
-			for $p.list {
-				if 0 {
-				}
-				else {
-					debug-match( $_ ) if $*DEBUG;
-					die "Unhandled case" if
-						$*FACTORY-FAILURE-FATAL
-				}
-			}
-		}
 		else {
 			debug-match( $p ) if $*DEBUG;
 			die "Unhandled case" if
@@ -2693,9 +2695,6 @@ class Perl6::Parser::Factory {
 
 #	method _invocant( Mu $p ) returns Array[Perl6::Element] {
 #		my Perl6::Element @child;
-#		CATCH {
-#			when X::Multi::NoMatch { }
-#		}
 #		#if $p ~~ QAST::Want;
 #		#if self.assert-hash( $p, [< XXX >] );
 #		warn "called invocant";
@@ -2747,9 +2746,14 @@ class Perl6::Parser::Factory {
 
 #	method _max( Mu $p ) returns Array[Perl6::Element] {
 #		my Perl6::Element @child; 
-#		warn "max finally used";
+#		given $p {
+#			default {
+#				debug-match( $_ ) if $*DEBUG;
+#				die "Unhandled case" if
+#					$*FACTORY-FAILURE-FATAL
+#			}
+#		}
 #		@child;
-#		( )
 #	}
 
 	# :my
@@ -3131,11 +3135,11 @@ class Perl6::Parser::Factory {
 #		@child;
 #	}
 
-	method _normspace( Mu $p ) returns Array[Perl6::Element] {
-		my Perl6::Element @child;
-		warn "normspace finally used";
-		( )
-	}
+#	method _normspace( Mu $p ) returns Array[Perl6::Element] {
+#		my Perl6::Element @child;
+#		warn "normspace finally used";
+#		( )
+#	}
 
 	method _noun( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
@@ -3144,16 +3148,8 @@ class Perl6::Parser::Factory {
 				if self.assert-hash( $_,
 					[< sigmaybe sigfinal
 					   quantifier atom >] ) {
-					@child.append(
-						self._sigmaybe(
-							$_.hash.<sigmaybe>
-						)
-					);
-					@child.append(
-						self._sigfinal(
-							$_.hash.<sigfinal>
-						)
-					);
+					# XXX sigfinal is unused
+					# XXX sigmaybe is unused
 					@child.append(
 						self._quantifier(
 							$_.hash.<quantifier>
@@ -3183,16 +3179,8 @@ class Perl6::Parser::Factory {
 				elsif self.assert-hash( $_,
 					[< sigmaybe sigfinal
 					   separator atom >] ) {
-					@child.append(
-						self._sigmaybe(
-							$_.hash.<sigmaybe>
-						)
-					);
-					@child.append(
-						self._sigfinal(
-							$_.hash.<sigfinal>
-						)
-					);
+					# XXX sigfinal is unused
+					# XXX sigmaybe is unused
 					@child.append(
 						self._separator(
 							$_.hash.<separator>
@@ -3204,13 +3192,9 @@ class Perl6::Parser::Factory {
 				}
 				elsif self.assert-hash( $_,
 					[< atom sigmaybe quantifier >] ) {
+					# XXX sigmaybe is unused
 					@child.append(
 						self._atom( $_.hash.<atom> )
-					);
-					@child.append(
-						self._sigmaybe(
-							$_.hash.<sigmaybe>
-						)
 					);
 					@child.append(
 						self._quantifier(
@@ -3220,13 +3204,9 @@ class Perl6::Parser::Factory {
 				}
 				elsif self.assert-hash( $_,
 					[< atom sigfinal quantifier >] ) {
+					# XXX sigfinal is unused
 					@child.append(
 						self._atom( $_.hash.<atom> )
-					);
-					@child.append(
-						self._sigfinal(
-							$_.hash.<sigfinal>
-						)
 					);
 					@child.append(
 						self._quantifier(
@@ -3247,13 +3227,9 @@ class Perl6::Parser::Factory {
 				}
 				elsif self.assert-hash( $_,
 					[< atom sigfinal >] ) {
+					# XXX sigfinal is unused
 					@child.append(
 						self._atom( $_.hash.<atom> )
-					);
-					@child.append(
-						self._sigfinal(
-							$_.hash.<sigfinal>
-						)
 					);
 				}
 				elsif self.assert-hash( $_,
@@ -3965,31 +3941,22 @@ class Perl6::Parser::Factory {
 					)
 				);
 			}
-			# XXX can probably be rewritten to use utils
 			when self.assert-hash( $_, [< nibble O >] ) {
-				if $_.Str ~~ m{ ^ (.) ( \s+ )? ( .+? ) [ \s* ]? . $ } {
-					my Perl6::Element @_child;
-					@_child.append(
-						Perl6::Bareword.from-int(
-							$_.from +
-							$0.Str.chars +
-							( $1 ?? $1.Str.chars !! 0 ),
-							$2.Str
-						)
-					);
-					@child.append(
-						Perl6::Operator::PostCircumfix.from-match(
-							$_, @_child
-						)
-					);
-				}
-				else {
-					@child.append(
-						Perl6::Bareword.from-match-trimmed(
-							$_.hash.<nibble>
-						)
-					);
-				}
+				my Perl6::Element @_child;
+				$_.Str ~~ m{ ^ (.) ( \s+ )? ( .+? ) [ \s* ]? . $ };
+				@_child.append(
+					Perl6::Bareword.from-int(
+						$_.from +
+						$0.Str.chars +
+						( $1 ?? $1.Str.chars !! 0 ),
+						$2.Str
+					)
+				);
+				@child.append(
+					Perl6::Operator::PostCircumfix.from-match(
+						$_, @_child
+					)
+				);
 			}
 			when self.assert-hash( $_, [< arglist >], [< O >] ) {
 				if $_.hash.<arglist>.Str {
@@ -4146,10 +4113,8 @@ class Perl6::Parser::Factory {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< sigfinal atom >] ) {
+				# XXX sigfinal is unused
 				@child.append( self._atom( $_.hash.<atom> ) );
-				@child.append(
-					self._sigfinal( $_.hash.<sigfinal> )
-				);
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
@@ -4679,17 +4644,17 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-	method _right( Mu $p ) returns Array[Perl6::Element] {
-		my Perl6::Element @child;
-		given $p {
-			default {
-				debug-match( $p ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
-			}
-		}
-		@child;
-	}
+#	method _right( Mu $p ) returns Array[Perl6::Element] {
+#		my Perl6::Element @child;
+#		given $p {
+#			default {
+#				debug-match( $p ) if $*DEBUG;
+#				die "Unhandled case" if
+#					$*FACTORY-FAILURE-FATAL
+#			}
+#		}
+#		@child;
+#	}
 
 	# sub <name> ... { },
 	# method <name> ... { },
@@ -4911,10 +4876,6 @@ class Perl6::Parser::Factory {
 					self._quotepair( $_.hash.<quotepair> )
 				);
 			}
-			when self.assert-hash( $_, [ ], [< quotepair >] ) {
-				die; # XXX unused? Or just untested?
-				die "Not implemented yet"
-			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
 				die "Unhandled case" if
@@ -5126,22 +5087,23 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-	method _shape( Mu $p ) returns Array[Perl6::Element] {
-		my Perl6::Element @child;
-		given $p {
-			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
-			}
-		}
-		@child;
-	}
+#	method _shape( Mu $p ) returns Array[Perl6::Element] {
+#		my Perl6::Element @child;
+#		given $p {
+#			default {
+#				debug-match( $_ ) if $*DEBUG;
+#				die "Unhandled case" if
+#					$*FACTORY-FAILURE-FATAL
+#			}
+#		}
+#		@child;
+#	}
 
 	method _sibble( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< left babble right >] ) {
+				# XXX <right> isn't used
 				# XXX Don't need babble, apparently.
 				@child.append(
 					Perl6::Operator::Prefix.from-int(
@@ -5162,11 +5124,6 @@ class Perl6::Parser::Factory {
 						SLASH
 					)
 				);
-				if $_.hash.<right>.Str {
-					@child.append(
-						self._right( $_.hash.<right> )
-					);
-				}
 				@child.append(
 					Perl6::Operator::Prefix.from-int(
 						$_.hash.<right>.to,
@@ -5183,63 +5140,33 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-	method _sigfinal( Mu $p ) returns Array[Perl6::Element] {
-		my Perl6::Element @child;
-		given $p {
-			when self.assert-hash( $_, [< normspace >] ) {
-				@child.append(
-					( )
-				);
-			}
-			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
-			}
-		}
-		@child;
-	}
+#	method _sigfinal( Mu $p ) returns Array[Perl6::Element] {
+#		my Perl6::Element @child;
+#		given $p {
+#			default {
+#				debug-match( $_ ) if $*DEBUG;
+#				die "Unhandled case" if
+#					$*FACTORY-FAILURE-FATAL
+#			}
+#		}
+#		@child;
+#	}
 
 	method _sigil( Mu $p ) returns Perl6::Element {
 		Perl6::Bareword.from-match( $p );
 	}
 
-	method _sigmaybe( Mu $p ) returns Array[Perl6::Element] {
-		my Perl6::Element @child;
-		given $p {
-			when self.assert-hash( $_,
-					[< parameter typename >],
-					[< param_sep >] ) {
-				die; # XXX unused? Or just untested?
-				@child.append(
-					self._parameter( $_.hash.<parameter> )
-				);
-				@child.append(
-					self._typename( $_.hash.<typename> )
-				);
-			}
-			when self.assert-hash( $_, [< normspace >] ) {
-				if $_.hash.<normspace>.Str ~~ m{ \S } {
-					@child.append(
-						self._normspace(
-							$_.hash.<normspace>
-						)
-					);
-				}
-			}
-			when self.assert-hash( $_, [ ],
-					[< param_sep parameter >] ) {
-				die; # XXX unused? Or just untested?
-				die "Not implemented yet"
-			}
-			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
-			}
-		}
-		@child;
-	}
+#	method _sigmaybe( Mu $p ) returns Array[Perl6::Element] {
+#		my Perl6::Element @child;
+#		given $p {
+#			default {
+#				debug-match( $_ ) if $*DEBUG;
+#				die "Unhandled case" if
+#					$*FACTORY-FAILURE-FATAL
+#			}
+#		}
+#		@child;
+#	}
 
 	method __Parameter( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
@@ -5528,6 +5455,7 @@ say $_.dump;
 					);
 				}
 			}
+			# XXX Actually used...
 			when self.assert-hash( $_, [ ],
 					[< param_sep parameter >] ) {
 			}
@@ -5658,6 +5586,7 @@ say $_.dump;
 			}
 			when self.assert-hash( $_,
 					[< doc sym module_name >] ) {
+				# XXX <doc> unused
 				@child.append( self._sym( $_.hash.<sym> ) );
 				@child.append(
 					self._module_name(
@@ -5666,7 +5595,7 @@ say $_.dump;
 				);
 			}
 			when self.assert-hash( $_, [< doc sym version >] ) {
-#				@child.append( self._doc( $_.hash.<doc> ) );
+				# XXX <doc> unused
 				@child.append( self._sym( $_.hash.<sym> ) );
 				@child.append(
 					self._version( $_.hash.<version> )
