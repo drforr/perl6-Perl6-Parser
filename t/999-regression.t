@@ -425,6 +425,18 @@ _END_
 	is $pt.to-string( $tree ), $source, Q{formatted};
 }, Q{postcircumfix method call};
 
+subtest {
+	plan 2;
+
+	my $source = Q:to[_END_];
+if 1 { } elsif 2 { } elsif 3 { }
+_END_
+	my $p = $pt.parse( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.to-string( $tree ), $source, Q{formatted};
+}, Q{if-elsif};
+
 done-testing;
 
 # vim: ft=perl6

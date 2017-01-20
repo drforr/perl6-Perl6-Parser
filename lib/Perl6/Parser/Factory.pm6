@@ -5653,24 +5653,29 @@ say $_.dump;
 				);
 			}
 			when self.assert-hash( $_, [< sym xblock >] ) {
-#`( WORK ON THIS
-				for $_.hash.<sym>.list.kv -> $k {
+				if $_.hash.<sym>.list and
+					$_.hash.<sym>.[0].Str ~~ m{ if } {
+					for $_.hash.<sym>.list.keys -> $k {
+						@child.append(
+							Perl6::Bareword.from-match( 
+								$_.hash.<sym>.list.[$k]
+							)
+						);
+						@child.append(
+							self._xblock(
+								$_.hash.<xblock>.list.[$k]
+							)
+						);
+					}
+				}
+				else {
 					@child.append(
-						Perl6::Bareword.from-match(
-							$_.hash.<sym>.list.[$k]
-						)
+						self._sym( $_.hash.<sym> )
 					);
 					@child.append(
-						self._xblock(
-							$_.hash.<xblock>.list.[$k]
-						)
+						self._xblock( $_.hash.<xblock> )
 					);
 				}
-)
-				@child.append( self._sym( $_.hash.<sym> ) );
-				@child.append(
-					self._xblock( $_.hash.<xblock> )
-				);
 			}
 			when self.assert-hash( $_, [< sym block >] ) {
 				@child.append( self._sym( $_.hash.<sym> ) );
@@ -5682,6 +5687,7 @@ say $_.dump;
 					$*FACTORY-FAILURE-FATAL
 			}
 		}
+		@child;
 	}
 
 	method _statement( Mu $p ) returns Array[Perl6::Element] {
