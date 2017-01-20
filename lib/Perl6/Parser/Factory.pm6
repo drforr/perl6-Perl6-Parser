@@ -5005,41 +5005,59 @@ class Perl6::Parser::Factory {
 
 	method _semilist( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
-		given $p {
-			when self.assert-hash( $_, [< statement >] ) {
-				my $q = $_.hash.<statement>;
-				my Int $end = $q.list.elems - 1;
-				for $q.list.kv -> $k, $v {
-					if $v.Str {
-						@child.append(
-							self._EXPR( $v )
-						);
-					}
-					if $k < $end {
-						my Str $x = $p.orig.Str.substr(
-							$q.list.[$k].to,
-							$q.list.[$k+1].from -
-								$q.list.[$k].to
-						);
-						if $x ~~ m{ (';') } {
-							my Int $left-margin = $0.from;
+		if $p.list {
+			for $p.list {
+				if self.assert-hash( $_, [< statement >] ) {
+					@child.append(
+						self._statement(
+							$_.hash.<statement>
+						)
+					);
+				}
+				else {
+					debug-match( $_ ) if $*DEBUG;
+					die "Unhandled case" if
+						$*FACTORY-FAILURE-FATAL
+				}
+			}
+		}
+		else {
+			given $p {
+				when self.assert-hash( $_, [< statement >] ) {
+					my $q = $_.hash.<statement>;
+					my Int $end = $q.list.elems - 1;
+					for $q.list.kv -> $k, $v {
+						if $v.Str {
 							@child.append(
-								Perl6::Operator::Infix.from-int(
-									$left-margin + $v.to,
-									';'
-								)
+								self._EXPR( $v )
 							);
+						}
+						if $k < $end {
+							my Str $x = $p.orig.Str.substr(
+								$q.list.[$k].to,
+								$q.list.[$k+1].from -
+									$q.list.[$k].to
+							);
+							if $x ~~ m{ (';') } {
+								my Int $left-margin = $0.from;
+								@child.append(
+									Perl6::Operator::Infix.from-int(
+										$left-margin + $v.to,
+										';'
+									)
+								);
+							}
 						}
 					}
 				}
-			}
-			when self.assert-hash( $_, [ ], [< statement >] ) {
-				( )
-			}
-			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				when self.assert-hash( $_, [ ], [< statement >] ) {
+					( )
+				}
+				default {
+					debug-match( $_ ) if $*DEBUG;
+					die "Unhandled case" if
+						$*FACTORY-FAILURE-FATAL
+				}
 			}
 		}
 		@child;
@@ -6664,6 +6682,7 @@ say $_.dump;
 					[< semilist variable shape >],
 					[< postcircumfix signature trait
 					   post_constraint >] ) {
+say $_.dump;
 				@child.append(
 					self._semilist( $_.hash.<semilist> )
 				);
