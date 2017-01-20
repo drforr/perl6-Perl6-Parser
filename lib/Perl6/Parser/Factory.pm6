@@ -5007,43 +5007,30 @@ class Perl6::Parser::Factory {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< arglist >] ) {
-				if $_.hash.<arglist>.list.elems >= 2 and
-					$_.Str.substr(
-						$_.hash.<arglist>.list.[0].to - $_.hash.<arglist>.from,
-						$_.hash.<arglist>.list.[1].from - $_.hash.<arglist>.list.[0].to
-					) ~~ m{ ';' } {
-					my $q = $_.hash.<arglist>;
-					my Int $end = $q.list.elems - 1;
-					for $q.list.kv -> $k, $v {
-						if $v.Str {
+				my $q = $_.hash.<arglist>;
+				my Int $end = $q.list.elems - 1;
+				for $q.list.kv -> $k, $v {
+					if $v.Str {
+						@child.append(
+							self._EXPR( $v )
+						);
+					}
+					if $k < $end {
+						my Str $x = $p.orig.Str.substr(
+							$q.list.[$k].to,
+							$q.list.[$k+1].from -
+								$q.list.[$k].to
+						);
+						if $x ~~ m{ (';') } {
+							my Int $left-margin = $0.from;
 							@child.append(
-								self._EXPR( $v )
+								Perl6::Operator::Infix.from-int(
+									$left-margin + $v.to,
+									$0.Str
+								)
 							);
-						}
-						if $k < $end {
-							my Str $x = $p.orig.Str.substr(
-								$q.list.[$k].to,
-								$q.list.[$k+1].from -
-									$q.list.[$k].to
-							);
-							if $x ~~ m{ (';') } {
-								my Int $left-margin = $0.from;
-								@child.append(
-									Perl6::Operator::Infix.from-int(
-										$left-margin + $v.to,
-										$0.Str
-									)
-								);
-							}
 						}
 					}
-				}
-				else {
-					@child.append(
-						self._arglist(
-							$_.hash.<arglist>
-						)
-					);
 				}
 			}
 			default {
@@ -5057,49 +5044,32 @@ class Perl6::Parser::Factory {
 
 	method _semilist( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
-		# XXX remove later
-		CATCH {
-			when X::Hash::Store::OddNumber { }
-		}
 		given $p {
 			when self.assert-hash( $_, [< statement >] ) {
-				if $_.hash.<statement>.list.elems >= 2 and
-					$_.Str.substr(
-						$_.hash.<statement>.list.[0].to - $_.hash.<statement>.list.[0].from,
-						$_.hash.<statement>.list.[1].from - $_.hash.<statement>.list.[0].to
-					) ~~ m{ ';' } {
-					my $q = $_.hash.<statement>;
-					my Int $end = $q.list.elems - 1;
-					for $q.list.kv -> $k, $v {
-						if $v.Str {
+				my $q = $_.hash.<statement>;
+				my Int $end = $q.list.elems - 1;
+				for $q.list.kv -> $k, $v {
+					if $v.Str {
+						@child.append(
+							self._EXPR( $v )
+						);
+					}
+					if $k < $end {
+						my Str $x = $p.orig.Str.substr(
+							$q.list.[$k].to,
+							$q.list.[$k+1].from -
+								$q.list.[$k].to
+						);
+						if $x ~~ m{ (';') } {
+							my Int $left-margin = $0.from;
 							@child.append(
-								self._EXPR( $v )
+								Perl6::Operator::Infix.from-int(
+									$left-margin + $v.to,
+									';'
+								)
 							);
-						}
-						if $k < $end {
-							my Str $x = $p.orig.Str.substr(
-								$q.list.[$k].to,
-								$q.list.[$k+1].from -
-									$q.list.[$k].to
-							);
-							if $x ~~ m{ (';') } {
-								my Int $left-margin = $0.from;
-								@child.append(
-									Perl6::Operator::Infix.from-int(
-										$left-margin + $v.to,
-										';'
-									)
-								);
-							}
 						}
 					}
-				}
-				else {
-					@child.append(
-						self._statement(
-							$_.hash.<statement>
-						)
-					);
 				}
 			}
 			when self.assert-hash( $_, [ ], [< statement >] ) {
