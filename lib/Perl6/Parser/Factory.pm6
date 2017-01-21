@@ -1448,7 +1448,8 @@ class Perl6::Parser::Factory {
 		else {
 			given $p {
 				when self.assert-hash( $_,
-						[< identifier coloncircumfix >] ) {
+						[< identifier
+						   coloncircumfix >] ) {
 					# XXX Should be combined with the identifier?
 					@child.append(
 						Perl6::Operator::Prefix.from-sample(
@@ -1456,7 +1457,9 @@ class Perl6::Parser::Factory {
 						)
 					);
 					@child.append(
-						self._identifier( $_.hash.<identifier> )
+						self._identifier(
+							$_.hash.<identifier>
+						)
 					);
 					@child.append(
 						self._coloncircumfix(
@@ -1464,7 +1467,8 @@ class Perl6::Parser::Factory {
 						)
 					);
 				}
-				when self.assert-hash( $_, [< coloncircumfix >] ) {
+				when self.assert-hash( $_,
+						[< coloncircumfix >] ) {
 					# XXX Should be combined with the identifier?
 					@child.append(
 						Perl6::Operator::Prefix.from-sample(
@@ -5426,6 +5430,25 @@ class Perl6::Parser::Factory {
 				);
 			}
 			when self.assert-hash( $_,
+					[< quant named_param >],
+					[< default_value modifier trait
+					   post_constraint quant >] ) {
+				if $_.Str ~~ m{ ^ ( ':' ) } {
+					# XXX join the ':'...
+					@child.append(
+						Perl6::Bareword.from-int(
+							$_.from,
+							$0.Str
+						)
+					);
+				}
+				@child.append(
+					self._named_param(
+						$_.hash.<named_param>
+					)
+				);
+			}
+			when self.assert-hash( $_,
 					[< type_constraint named_param >],
 					[< default_value modifier trait
 					   post_constraint quant >] ) {
@@ -5477,8 +5500,6 @@ say $_.dump;
 			when self.assert-hash( $_,
 					[< parameter typename >],
 					[< param_sep >] ) {
-				# XXX Unused?
-				my Mu $parameter = $_.hash.<parameter>;
 				@child.append(
 					self._typename( $_.hash.<typename> )
 				);
@@ -5496,9 +5517,8 @@ say $_.dump;
 			when self.assert-hash( $_,
 					[< parameter >],
 					[< param_sep >] ) {
-				my Mu $parameter = $_.hash.<parameter>;
 				my Int $left-edge;
-				for $parameter.list -> $q {
+				for $_.hash.<parameter>.list -> $q {
 					if $left-edge and $left-edge < $q.from {
 						@child.append(
 							Perl6::Operator::Infix.from-int(

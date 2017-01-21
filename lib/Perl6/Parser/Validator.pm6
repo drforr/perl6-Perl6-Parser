@@ -841,6 +841,9 @@ class Perl6::Parser::Validator {
 				next if self.assert-hash-keys( $_,
 						[< colonpair >] )
 					and self._ColonPair( $_.hash.<colonpair> );
+				next if self.assert-hash-keys( $_,
+						[< pblock >] )
+					and self._PBlock( $_.hash.<pblock> );
 				next if self.assert-Str( $_ );
 				debug-match( $_ );
 				return self.record-failure( '_EXPR list' );
@@ -946,6 +949,8 @@ class Perl6::Parser::Validator {
 			and self._Dotty( $parsed.hash.<dotty> );
 		return True if self.assert-hash-keys( $parsed, [< sym >] )
 			and self._Sym( $parsed.hash.<sym> );
+		return True if self.assert-hash-keys( $parsed, [< pblock >] )
+			and self._PBlock( $parsed.hash.<pblock> );
 		debug-match( $parsed );
 		return self.record-failure( '_EXPR' ):
 	}
@@ -1307,6 +1312,10 @@ return True;
 	method _NamedParam( Mu $parsed ) {
 		self.trace( '_NamedParam' );
 #return True;
+		return True if self.assert-hash-keys( $parsed,
+				[< name param_var >] )
+			and self._Name( $parsed.hash.<name> )
+			and self._ParamVar( $parsed.hash.<param_var> );
 		return True if self.assert-hash-keys( $parsed,
 				[< param_var >] )
 			and self._ParamVar( $parsed.hash.<param_var> );
