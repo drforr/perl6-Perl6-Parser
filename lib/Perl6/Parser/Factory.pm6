@@ -3072,9 +3072,26 @@ class Perl6::Parser::Factory {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< name param_var >] ) {
+				my Perl6::Element @_child;
+				@_child.append(
+					self._param_var( $_.hash.<param_var> )
+				);
+				if $_.Str ~~ m{ ^ ( ':' ) } {
+					@child.append(
+						Perl6::Bareword.from-int(
+							$_.from,
+							$0.Str
+						)
+					);
+				}
 				@child.append( self._name( $_.hash.<name> ) );
 				@child.append(
-					self._param_var( $_.hash.<param_var> )
+					Perl6::Operator::Circumfix.from-delims(
+						$_,
+						'(',
+						')',
+						@_child
+					)
 				);
 			}
 			when self.assert-hash( $_, [< param_var >] ) {
@@ -3670,6 +3687,24 @@ class Perl6::Parser::Factory {
 					self._post_constraint(
 						$_.hash.<post_constraint>
 					)
+				);
+			}
+			elsif self.assert-hash( $_,
+				[< type_constraint named_param quant >],
+				[< default_value modifier trait
+				   post_constraint >] ) {
+				@child.append(
+					self._named_param(
+						$_.hash.<named_param>
+					)
+				);
+				@child.append(
+					self._type_constraint(
+						$_.hash.<type_constraint>
+					)
+				);
+				@child.append(
+					self._param_var( $_.hash.<param_var> )
 				);
 			}
 			elsif self.assert-hash( $_,
@@ -4793,7 +4828,7 @@ class Perl6::Parser::Factory {
 				$left-edge ~~ m{ ( '(' ) ( \s* ) $ };
 				@_child.append(
 					Perl6::Balanced::Enter.from-int(
-						$p.hash.<multisig>.from -
+						$_.hash.<multisig>.from -
 						$0.Str.chars - $1.Str.chars,
 						$0.Str
 					)
@@ -5260,14 +5295,43 @@ class Perl6::Parser::Factory {
 					[< param_term type_constraint quant >],
 					[< post_constraint default_value
 					   modifier trait >] ) {
+				# XXX quant unused
 				@child.append(
 					self._type_constraint(
 						$_.hash.<type_constraint>
 					)
 				);
-				@child.append( self._quant( $_.hash.<quant> ) );
 				@child.append(
-					self._param_term( $_.hash.<param_term> )
+					self._param_term(
+						$_.hash.<param_term>
+					)
+				);
+			}
+			when self.assert-hash( $_,
+					[< named_param type_constraint quant >],
+					[< post_constraint default_value
+					   modifier trait >] ) {
+				# XXX quant unused
+				@child.append(
+					self._type_constraint(
+						$_.hash.<type_constraint>
+					)
+				);
+				@child.append(
+					self._named_param(
+						$_.hash.<named_param>
+					)
+				);
+			}
+			when self.assert-hash( $_,
+					[< named_param quant >],
+					[< default_value type_constraint
+					   modifier trait post_constraint >] ) {
+				# XXX quant unused
+				@child.append(
+					self._named_param(
+						$_.hash.<named_param>
+					)
 				);
 			}
 			when self.assert-hash( $_,

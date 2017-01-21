@@ -449,6 +449,18 @@ _END_
 	is $pt.to-string( $tree ), $source, Q{formatted};
 }, Q{operation bareword};
 
+subtest {
+	plan 2;
+
+	my $source = Q:to[_END_];
+do -> (:value(@pa)) { };
+_END_
+	my $p = $pt.parse( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.to-string( $tree ), $source, Q{formatted};
+}, Q{param argument};
+
 done-testing;
 
 # vim: ft=perl6
