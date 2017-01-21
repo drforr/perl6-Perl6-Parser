@@ -437,6 +437,18 @@ _END_
 	is $pt.to-string( $tree ), $source, Q{formatted};
 }, Q{if-elsif};
 
+subtest {
+	plan 2;
+
+	my $source = Q:to[_END_];
+sub infix:<lf> ($a,$b) { }
+_END_
+	my $p = $pt.parse( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.to-string( $tree ), $source, Q{formatted};
+}, Q{operation bareword};
+
 done-testing;
 
 # vim: ft=perl6

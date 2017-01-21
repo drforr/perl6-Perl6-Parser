@@ -180,7 +180,6 @@ _END_
 }, Q{Balanced brackets};
 
 subtest {
-#`[
 	my $source = Q:to[_END_];
 class BT {
     has @.coeff;
@@ -250,7 +249,6 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 	done-testing;
 }, Q{Balanced ternary};
@@ -530,7 +528,6 @@ _END_
 }, Q{Binary search};
 
 subtest {
-#`[
 	my $source = Q:to[_END_];
 # Perl 6 is perfectly fine with NUL *characters* in strings:
  
@@ -620,7 +617,6 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 	done-testing;
 }, Q{Binary strings};

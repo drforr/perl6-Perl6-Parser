@@ -1428,68 +1428,87 @@ class Perl6::Parser::Factory {
 
 	method _colonpair( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
-		given $p {
-			when self.assert-hash( $_,
-					[< identifier coloncircumfix >] ) {
-				# XXX Should be combined with the identifier?
-				@child.append(
-					Perl6::Operator::Prefix.from-sample(
-						$_, COLON
-					)
-				);
-				@child.append(
-					self._identifier( $_.hash.<identifier> )
-				);
-				@child.append(
-					self._coloncircumfix(
-						$_.hash.<coloncircumfix>
-					)
-				);
+		if $p.list {
+			for $p.list {
+				if self.assert-hash( $_,
+						[< coloncircumfix >] ) {
+					@child.append(
+						self._coloncircumfix(
+							$_.hash.<coloncircumfix>
+						)
+					);
+				}
+				else {
+					debug-match( $_ ) if $*DEBUG;
+					die "Unhandled case" if
+						$*FACTORY-FAILURE-FATAL
+				}
 			}
-			when self.assert-hash( $_, [< coloncircumfix >] ) {
-				# XXX Should be combined with the identifier?
-				@child.append(
-					Perl6::Operator::Prefix.from-sample(
-						$_, COLON
-					)
-				);
-				@child.append(
-					self._coloncircumfix(
-						$_.hash.<coloncircumfix>
-					)
-				);
-			}
-			when self.assert-hash( $_, [< identifier >] ) {
-				@child.append(
-					Perl6::ColonBareword.from-match( $_ )
-				);
-			}
-			when self.assert-hash( $_, [< fakesignature >] ) {
-				my Perl6::Element @_child;
-				@_child.append(
-					self._fakesignature(
-						$_.hash.<fakesignature>
-					)
-				);
-				@child.append(
-					Perl6::Operator::PostCircumfix.from-delims(
-						$_, ':(', ')', @_child
-					)
-				);
-			}
-			when self.assert-hash( $_, [< var >] ) {
-				# XXX Should be combined with the identifier?
-				@child.append(
-					Perl6::Operator::Prefix.from-sample(
-						$_, COLON
-					)
-				);
-				@child.append( self._var( $_.hash.<var> ) );
-			}
-			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+		}
+		else {
+			given $p {
+				when self.assert-hash( $_,
+						[< identifier coloncircumfix >] ) {
+					# XXX Should be combined with the identifier?
+					@child.append(
+						Perl6::Operator::Prefix.from-sample(
+							$_, COLON
+						)
+					);
+					@child.append(
+						self._identifier( $_.hash.<identifier> )
+					);
+					@child.append(
+						self._coloncircumfix(
+							$_.hash.<coloncircumfix>
+						)
+					);
+				}
+				when self.assert-hash( $_, [< coloncircumfix >] ) {
+					# XXX Should be combined with the identifier?
+					@child.append(
+						Perl6::Operator::Prefix.from-sample(
+							$_, COLON
+						)
+					);
+					@child.append(
+						self._coloncircumfix(
+							$_.hash.<coloncircumfix>
+						)
+					);
+				}
+				when self.assert-hash( $_, [< identifier >] ) {
+					@child.append(
+						Perl6::ColonBareword.from-match( $_ )
+					);
+				}
+				when self.assert-hash( $_, [< fakesignature >] ) {
+					my Perl6::Element @_child;
+					@_child.append(
+						self._fakesignature(
+							$_.hash.<fakesignature>
+						)
+					);
+					@child.append(
+						Perl6::Operator::PostCircumfix.from-delims(
+							$_, ':(', ')', @_child
+						)
+					);
+				}
+				when self.assert-hash( $_, [< var >] ) {
+					# XXX Should be combined with the identifier?
+					@child.append(
+						Perl6::Operator::Prefix.from-sample(
+							$_, COLON
+						)
+					);
+					@child.append( self._var( $_.hash.<var> ) );
+				}
+				default {
+					debug-match( $_ ) if $*DEBUG;
+					die "Unhandled case" if
+						$*FACTORY-FAILURE-FATAL
+				}
 			}
 		}
 		@child;
@@ -1845,6 +1864,13 @@ class Perl6::Parser::Factory {
 	method _deflongname( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
+			when self.assert-hash( $_,
+					[< name colonpair >] ) {
+				@child.append( self._name( $_.hash.<name> ) );
+				@child.append(
+					self._colonpair( $_.hash.<colonpair> )
+				);
+			}
 			when self.assert-hash( $_,
 					[< name >], [< colonpair >] ) {
 				@child.append( self._name( $_.hash.<name> ) );
