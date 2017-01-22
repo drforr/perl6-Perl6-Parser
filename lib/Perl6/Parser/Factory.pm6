@@ -2379,7 +2379,9 @@ class Perl6::Parser::Factory {
 			@child.append(
 				self._identifier( $p.hash.<identifier> )
 			);
-			@child.append( self._args( $p.hash.<args> ) );
+			if $p.hash.<args>.Str {
+				@child.append( self._args( $p.hash.<args> ) );
+			}
 		}
 		elsif self.assert-hash( $p, [< sym args >] ) {
 			# XXX _sym(...) falls back to Bareword because it's used
