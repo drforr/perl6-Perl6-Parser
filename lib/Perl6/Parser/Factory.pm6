@@ -5620,9 +5620,22 @@ say $_.dump;
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< EXPR >] ) {
+key-bounds $_;
 				@child.append(
 					self._EXPR( $_.hash.<EXPR> )
 				);
+				my Str $right-edge = $_.Str.substr(
+					$_.hash.<EXPR>.to - $_.from
+				);
+				if $right-edge ~~ m{ ( '\\' ) ( \s* ) $ } {
+					@child.append(
+						Perl6::Bareword.from-int(
+							$_.hash.<EXPR>.to -
+							$0.Str.chars - $1.Str.chars,
+							$0.Str
+						)
+					);
+				}
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
