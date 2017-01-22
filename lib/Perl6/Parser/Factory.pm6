@@ -5620,7 +5620,6 @@ say $_.dump;
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< EXPR >] ) {
-key-bounds $_;
 				@child.append(
 					self._EXPR( $_.hash.<EXPR> )
 				);
