@@ -1250,7 +1250,6 @@ _END_
 	}, Q{version 1};
 
 	subtest {
-#`[
 		my $source = Q:to[_END_];
 my @a = 1..5;
 my @b = 'a'..'e';
@@ -1260,7 +1259,6 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 		done-testing;
 	}, Q{version 2};
@@ -1354,7 +1352,6 @@ _END_
 }, Q{Associative array/iteration};
 
 subtest {
-#`[
 	my $source = Q:to[_END_];
 constant MAX_N  = 20;
 constant TRIALS = 100;
@@ -1379,7 +1376,6 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 	done-testing;
 }, Q{Average loop length};
