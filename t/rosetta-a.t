@@ -1280,7 +1280,6 @@ _END_
 	}, Q{version 3};
 
 	subtest {
-#`[
 		my $source = Q:to[_END_];
 my $h = {key1 => 'val1', 'key-2' => 2, three => -238.83, 4 => 'val3'};
 say $h<key1>;
@@ -1289,7 +1288,6 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 		done-testing;
 	}, Q{version 4};
