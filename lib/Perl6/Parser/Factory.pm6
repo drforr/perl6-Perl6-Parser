@@ -5849,14 +5849,17 @@ class Perl6::Parser::Factory {
 					);
 				}
 				elsif self.assert-hash( $_,
+						[< statement label >] ) {
+					self._label(
+						$_.hash.<label>
+					);
+					self._statement( $_.hash.<statement> );
+				}
+				elsif self.assert-hash( $_,
 						[< statement_control >] ) {
 					self._statement_control(
 						$_.hash.<statement_control>
 					);
-				}
-				elsif self.assert-hash( $_, [< >],
-						[< statement_control >] ) {
-					die "Not implemented yet"
 				}
 				else {
 					debug-match( $_ ) if $*DEBUG;
@@ -5889,40 +5892,7 @@ class Perl6::Parser::Factory {
 		# This *should* be handled in _statementlist
 		#
 		elsif self.assert-hash( $p, [< EXPR >] ) {
-			if $p.hash.<EXPR>.hash.<infix> {
-				if $p.hash.<EXPR>.list.elems == 3 and
-					$p.hash.<EXPR>.hash.<infix> and
-					$p.hash.<EXPR>.hash.<OPER> {
-					@child.append(
-						self._EXPR( $p.hash.<EXPR> )
-					);
-				}
-				else {
-					my Mu $q = $p.hash.<EXPR>;
-					@child.append(
-						self._EXPR( $q.list.[0] )
-					);
-					# XXX Sigh.
-					if $p.hash.<EXPR>.Str.chars > 1 {
-						@child.append(
-							Perl6::Operator::Infix.from-match(
-								$p.hash.<EXPR>
-							)
-						);
-					}
-					else {
-						@child.append(
-							self._infix( $q.hash.<infix> )
-						);
-					}
-					@child.append(
-						self._EXPR( $q.list.[1] )
-					);
-				}
-			}
-			else {
-				@child.append( self._EXPR( $p.hash.<EXPR> ) );
-			}
+			@child.append( self._EXPR( $p.hash.<EXPR> ) );
 		}
 		elsif self.assert-hash( $p, [< statement_control >] ) {
 			@child.append(
