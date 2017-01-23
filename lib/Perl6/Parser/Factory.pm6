@@ -2192,10 +2192,8 @@ class Perl6::Parser::Factory {
 		elsif self.assert-hash( $p,
 				[< dotty OPER >],
 				[< postfix_prefix_meta_operator >] ) {
-			# XXX Look into this at some point.
-			my Str $x = $p.Str.substr( 0, HYPER.chars );
-			if $x eq HYPER {
-				@child.append( self._EXPR( $p.list.[0] ) );
+			@child.append( self._EXPR( $p.list.[0] ) );
+			if $p.Str.substr( 0, HYPER.chars ) eq HYPER {
 				my Str $str = $p.orig.substr(
 					$p.from, HYPER.chars
 				);
@@ -2204,9 +2202,6 @@ class Perl6::Parser::Factory {
 						$p.from, $str
 					)
 				);
-			}
-			else {
-				@child.append( self._EXPR( $p.list.[0] ) );
 			}
 			@child.append( self._dotty( $p.hash.<dotty> ) );
 		}
@@ -3095,7 +3090,8 @@ class Perl6::Parser::Factory {
 						Perl6::Bareword.from-match( $_ )
 					);
 					# XXX Probably should be Enter(':')..Exit('')
-					if $_.orig.Str.substr( $_.to, 1 ) eq COLON {
+					if $_.orig.Str.substr( $_.to, 1 ) eq
+							COLON {
 						@child.append(
 							Perl6::Bareword.from-int(
 								$_.to,
@@ -3823,9 +3819,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			when self.assert-hash( $_, [< sigil >] ) {
-				@child.append(
-					self._sigil( $_.hash.<sigil> )
-				);
+				@child.append( self._sigil( $_.hash.<sigil> ) );
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
@@ -4471,15 +4465,15 @@ class Perl6::Parser::Factory {
 				);
 			}
 			when self.assert-hash( $p, [< nibble >] ) {
+				my Perl6::Element @_child;
  				$p.Str ~~ m{ ^ (.) .*? (.) $ };
+				@_child.append(
+					Perl6::Balanced::Enter.from-int(
+						$p.from,
+						$0.Str
+					)
+				);
 				if $0.Str eq Q{/} {
-					my Perl6::Element @_child;
-					@_child.append(
-						Perl6::Balanced::Enter.from-int(
-							$p.from,
-							$0.Str
-						)
-					);
 					@_child.append(
 						self._nibble( $p.hash.<nibble> )
 					);
@@ -4501,13 +4495,6 @@ class Perl6::Parser::Factory {
 					);
 				}
 				else {
-					my Perl6::Element @_child;
-					@_child.append(
-						Perl6::Balanced::Enter.from-int(
-							$p.from,
-							$0.Str
-						)
-					);
 					if $p.hash.<nibble>.Str {
 						@_child.append(
 							self._nibble(
