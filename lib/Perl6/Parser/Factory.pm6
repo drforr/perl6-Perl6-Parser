@@ -1273,10 +1273,14 @@ class Perl6::Parser::Factory {
 
 #	method _charspec( Mu $p ) returns Array[Perl6::Element] {
 #		my Perl6::Element @child;
-## XXX work on this, of course.
-#		warn "Caught _charspec";
+#		given $p {
+#			default {
+#				debug-match( $_ );
+#				die "Unhandled case" if
+#					$*FACTORY-FAILURE-FATAL
+#			}
+#		}
 #		@child;
-#		return True if $p.list;
 #	}
 
 	# ( )
@@ -2193,13 +2197,11 @@ class Perl6::Parser::Factory {
 				[< dotty OPER >],
 				[< postfix_prefix_meta_operator >] ) {
 			@child.append( self._EXPR( $p.list.[0] ) );
-			if $p.Str.substr( 0, HYPER.chars ) eq HYPER {
-				my Str $str = $p.orig.substr(
-					$p.from, HYPER.chars
-				);
+			if $p.Str ~~ m{ ^ ( '>>' ) } {
 				@child.append(
 					Perl6::Operator::Prefix.from-int(
-						$p.from, $str
+#						$p.from,
+						$0.str
 					)
 				);
 			}
@@ -2270,12 +2272,12 @@ class Perl6::Parser::Factory {
 		elsif self.assert-hash( $p, [< infix OPER >] ) {
 			my Int $end = $p.list.elems - 1;
 			my Str $infix-str = $p.hash.<infix>.Str;
-			if $infix-str ~~ m{ '??' } {
+			if $infix-str ~~ m{ ( '??' ) } {
 				@child.append( self._EXPR( $p.list.[0] ) );
 				@child.append(
 					Perl6::Operator::Infix.from-sample(
 						$p,
-						QUES-QUES
+						$0.Str
 					)
 				);
 				
@@ -2375,8 +2377,7 @@ class Perl6::Parser::Factory {
 			   $p.hash.<args>.hash.<semiarglist> {
 				@child.append( self._args( $p.hash.<args> ) );
 			}
-			elsif $p.hash.<args>.hash.keys and
-			      $p.hash.<args>.Str ~~ m{ \S } {
+			elsif $p.hash.<args>.Str ~~ m{ \S } {
 				@child.append( self._args( $p.hash.<args> ) );
 			}
 			else {
