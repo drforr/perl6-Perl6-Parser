@@ -738,7 +738,8 @@ class Perl6::Variable::Callable::SubLanguage {
 
 my role Assertions {
 
-	method assert-hash-strict( Mu $p, $required-with, $required-without ) returns Bool {
+	method assert-hash-strict( Mu $p, $required-with, $required-without )
+			returns Bool {
 		my %classified = classify {
 			$p.hash.{$_}.Str ?? 'with' !! 'without'
 		}, $p.hash.keys;
@@ -927,7 +928,7 @@ class Perl6::Parser::Factory {
 	method fill-gaps( Mu $p, Perl6::Element $root, Int $depth = 0 ) {
 		return unless $root.^can( 'child' );
 
-		for reverse( 0 .. $root.child.elems - 1 ) {
+		for reverse $root.child.keys {
 			self.fill-gaps( $p, $root.child.[$_], $depth + 1 );
 			if $_ < $root.child.elems - 1 {
 				if $root.child.[$_].to !=
@@ -1939,17 +1940,9 @@ class Perl6::Parser::Factory {
 #		@child;
 #	}
 
-#	method _dig( Mu $p ) returns Array[Perl6::Element] {
-#		my Perl6::Element @child;
-#		given $p {
-#			default {
-#				debug-match( $_ ) if $*DEBUG;
-#				die "Unhandled case" if
-#					$*FACTORY-FAILURE-FATAL
-#			}
-#		}
-#		@child;
-#	}
+	method _dig( Mu $p ) returns Perl6::Element {
+		Perl6::Operator::Postfix.from-match( $p );
+	}
 
 #	method _doc( Mu $p ) {
 #		my Perl6::Element @child;
@@ -2197,7 +2190,7 @@ class Perl6::Parser::Factory {
 				[< dotty OPER >],
 				[< postfix_prefix_meta_operator >] ) {
 			@child.append( self._EXPR( $p.list.[0] ) );
-			if $p.Str ~~ m{ ^ ( '>>' ) } {
+			if $p.Str ~~ m{ ^ ('>>') } {
 				@child.append(
 					Perl6::Operator::Prefix.from-int(
 #						$p.from,
@@ -2223,7 +2216,7 @@ class Perl6::Parser::Factory {
 				[< postcircumfix OPER >],
 				[< postfix_prefix_meta_operator >] ) {
 			@child.append( self._EXPR( $p.list.[0] ) );
-			if $p.Str ~~ m{ ^ ( '.' ) } {
+			if $p.Str ~~ m{ ^ ('.') } {
 				@child.append(
 					Perl6::Operator::Infix.from-int(
 						$p.from,
@@ -2272,7 +2265,7 @@ class Perl6::Parser::Factory {
 		elsif self.assert-hash( $p, [< infix OPER >] ) {
 			my Int $end = $p.list.elems - 1;
 			my Str $infix-str = $p.hash.<infix>.Str;
-			if $infix-str ~~ m{ ( '??' ) } {
+			if $infix-str ~~ m{ ('??') } {
 				@child.append( self._EXPR( $p.list.[0] ) );
 				@child.append(
 					Perl6::Operator::Infix.from-sample(
@@ -3039,7 +3032,7 @@ class Perl6::Parser::Factory {
 				@_child.append(
 					self._param_var( $_.hash.<param_var> )
 				);
-				if $_.Str ~~ m{ ^ ( ':' ) } {
+				if $_.Str ~~ m{ ^ (':') } {
 					@child.append(
 						Perl6::Bareword.from-int(
 							$_.from,
@@ -3058,7 +3051,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			when self.assert-hash( $_, [< param_var >] ) {
-				if $_.Str ~~ m{ ^ ( ':' ) } {
+				if $_.Str ~~ m{ ^ (':') } {
 					@child.append(
 						Perl6::Bareword.from-int(
 							$_.from,
@@ -3552,7 +3545,7 @@ class Perl6::Parser::Factory {
 				my Str $temp = $_.Str.substr(
 					$_.hash.<longname>.to - $_.from
 				);
-				if $temp ~~ m{ ^ ( \s+ ) ( ';' ) } {
+				if $temp ~~ m{ ^ ( \s+ ) (';') } {
 					my Int $left-margin = $0.Str.chars;
 					@child.append(
 						Perl6::Semicolon.from-int(
@@ -3771,40 +3764,16 @@ class Perl6::Parser::Factory {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< name twigil sigil >] ) {
-				# XXX refactor back to a method
-				my Str $sigil       = $_.hash.<sigil>.Str;
-				my Str $twigil      = $_.hash.<twigil> ??
-						      $_.hash.<twigil>.Str !!
-						      '';
-				my Str $desigilname = $_.hash.<name> ??
-						      $_.hash.<name>.Str !! '';
-				my Str $content     = $_.hash.<sigil> ~
-						      $twigil ~
-						      $desigilname;
-
 				@child.append(
-					%sigil-map{$sigil ~ $twigil}.from-int(
-						$_.from,
-						$_.Str
+					self.__Variable(
+						$_, $_.hash.<name>
 					)
 				);
 			}
 			when self.assert-hash( $_, [< name sigil >] ) {
-				# XXX refactor back to a method
-				my Str $sigil       = $_.hash.<sigil>.Str;
-				my Str $twigil      = $_.hash.<twigil> ??
-						      $_.hash.<twigil>.Str !!
-						      '';
-				my Str $desigilname = $_.hash.<name> ??
-						      $_.hash.<name>.Str !! '';
-				my Str $content     = $_.hash.<sigil> ~
-						      $twigil ~
-						      $desigilname;
-
 				@child.append(
-					%sigil-map{$sigil ~ $twigil}.from-int(
-						$_.from,
-						$content
+					self.__Variable(
+						$_, $_.hash.<name>
 					)
 				);
 			}
@@ -3920,7 +3889,8 @@ class Perl6::Parser::Factory {
 #		@child;
 #	}
 
-	method _postfix_prefix_meta_operator( Mu $p ) returns Array[Perl6::Element] {
+	method _postfix_prefix_meta_operator( Mu $p )
+			returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		if $p.list {
 			for $p.list {
@@ -3996,12 +3966,11 @@ class Perl6::Parser::Factory {
 			}
 			when self.assert-hash( $_, [< nibble O >] ) {
 				my Perl6::Element @_child;
-				$_.Str ~~ m{ ^ (.) ( \s+ )? ( .+? ) [ \s* ]? . $ };
+				$_.Str ~~ m{ ^ (.) ( \s* ) ( .+? ) \s* . $ };
 				@_child.append(
 					Perl6::Bareword.from-int(
-						$_.from +
-						$0.Str.chars +
-						( $1 ?? $1.Str.chars !! 0 ),
+						$_.from + $0.Str.chars +
+						$1.Str.chars,
 						$2.Str
 					)
 				);
@@ -4056,12 +4025,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			when self.assert-hash( $_, [< dig O >] ) {
-				# XXX replace with _dig(..)
-				@child.append(
-					Perl6::Operator::Postfix.from-match(
-						$_.hash.<dig>
-					)
-				);
+				@child.append( self._dig( $_.hash.<dig> ) );
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
@@ -4147,11 +4111,6 @@ class Perl6::Parser::Factory {
 			if $p.Str ne BACKSLASH {
 				@child.append(
 					Perl6::Bareword.from-match( $p )
-				);
-			}
-			else {
-				@child.append(
-					( )
 				);
 			}
 		}
@@ -4327,9 +4286,9 @@ class Perl6::Parser::Factory {
 							$_.hash.<quibble>.hash.<babble>
 						)
 					);
-					$_.hash.<quibble>.hash.<babble>.Str ~~
-						m{ ( .+? ) \s* $ };
-					@q-adverb.append( $0.Str );
+					if $_.hash.<quibble>.hash.<babble>.Str ~~ m{ ( .+? ) \s* $ } {
+						@q-adverb.append( $0.Str );
+					}
 				}
 				# XXX The first place negative indices are used
 				@_child.append(
@@ -4474,6 +4433,8 @@ class Perl6::Parser::Factory {
 						$0.Str
 					)
 				);
+				# XXX Probably not the right way to disambiguate
+				# XXX whether $p is a regex or not.
 				if $0.Str eq Q{/} {
 					@_child.append(
 						self._nibble( $p.hash.<nibble> )
@@ -4744,7 +4705,7 @@ class Perl6::Parser::Factory {
 				my Str $left-edge = $_.Str.substr(
 					0, $_.hash.<multisig>.from - $_.from
 				);
-				$left-edge ~~ m{ ( '(' ) ( \s* ) $ };
+				$left-edge ~~ m{ ('(') ( \s* ) $ };
 				@_child.append(
 					Perl6::Balanced::Enter.from-int(
 						$p.hash.<multisig>.from -
@@ -4793,7 +4754,7 @@ class Perl6::Parser::Factory {
 				my Str $left-edge = $_.Str.substr(
 					0, $_.hash.<multisig>.from - $_.from
 				);
-				$left-edge ~~ m{ ( '(' ) ( \s* ) $ };
+				$left-edge ~~ m{ ('(') ( \s* ) $ };
 				@_child.append(
 					Perl6::Balanced::Enter.from-int(
 						$_.hash.<multisig>.from -
@@ -4842,7 +4803,7 @@ class Perl6::Parser::Factory {
 						$_.hash.<deflongname>
 					)
 				);
-				if $_.Str ~~ m{ ( ';' ) ( \s* ) $ } {
+				if $_.Str ~~ m{ (';') ( \s* ) $ } {
 					@child.append(
 						Perl6::Semicolon.from-int(
 							$_.to - $1.chars -
@@ -5342,11 +5303,9 @@ class Perl6::Parser::Factory {
 				@child.append(
 					self._param_var( $_.hash.<param_var> )
 				);
-				@child.append(
-					self._trait( $_.hash.<trait> )
-				);
+				@child.append( self._trait( $_.hash.<trait> ) );
 				if $p.hash.<default_value> {
-					if $_.Str ~~ m{ ( '=' ) } {
+					if $_.Str ~~ m{ ('=') } {
 						@child.append(
 							Perl6::Operator::Infix.from-sample(
 								$p,
@@ -5372,7 +5331,7 @@ class Perl6::Parser::Factory {
 					self._param_var( $_.hash.<param_var> )
 				);
 				if $p.hash.<default_value> {
-					if $_.Str ~~ m{ ( '=' ) } {
+					if $_.Str ~~ m{ ('=') } {
 						@child.append(
 							Perl6::Operator::Infix.from-sample(
 								$p,
@@ -5399,7 +5358,9 @@ class Perl6::Parser::Factory {
 					)
 				);
 				@child.append(
-					self._default_value( $_.hash.<default_value> )
+					self._default_value(
+						$_.hash.<default_value>
+					)
 				);
 			}
 			when self.assert-hash( $_,
@@ -5465,7 +5426,7 @@ class Perl6::Parser::Factory {
 					[< quant named_param >],
 					[< default_value modifier trait
 					   post_constraint quant >] ) {
-				if $_.Str ~~ m{ ^ ( ':' ) } {
+				if $_.Str ~~ m{ ^ (':') } {
 					# XXX join the ':'...
 					@child.append(
 						Perl6::Bareword.from-int(
@@ -5591,7 +5552,7 @@ class Perl6::Parser::Factory {
 				my Str $right-edge = $_.Str.substr(
 					$_.hash.<EXPR>.to - $_.from
 				);
-				if $right-edge ~~ m{ ( '\\' ) ( \s* ) $ } {
+				if $right-edge ~~ m{ ('\\') ( \s* ) $ } {
 					@child.append(
 						Perl6::Bareword.from-int(
 							$_.hash.<EXPR>.to -
@@ -5933,7 +5894,7 @@ class Perl6::Parser::Factory {
 			my Str $temp = $p.Str.substr(
 				@_child[*-1].to - $p.from
 			);
-			if $temp ~~ m{ ^ ( ';' ) ( \s* ) } {
+			if $temp ~~ m{ ^ (';') ( \s* ) } {
 				$leftover-ws = $1.Str if $1.Str.chars;
 				$leftover-ws-from = 
 					@_child[*-1].to +
@@ -6100,14 +6061,9 @@ class Perl6::Parser::Factory {
 			}
 		}
 		elsif $p.Str {
-			@child.append(
-				Perl6::Bareword.from-match( $p )
-			);
-		}
-		elsif $p.Bool and $p.Str eq '+' {
 			@child.append( Perl6::Bareword.from-match( $p ) );
 		}
-		elsif $p.Bool and $p.Str eq '' {
+		elsif $p.Bool {
 			@child.append( Perl6::Bareword.from-match( $p ) );
 		}
 		else {
@@ -6233,7 +6189,7 @@ class Perl6::Parser::Factory {
 					my Str $x = $_.orig.Str.substr(
 						$_.hash.<termish>.to
 					);
-					if $x ~~ m{ ^ \s* ( '|' ) } {
+					if $x ~~ m{ ^ \s* ('|') } {
 						my Int $left-margin = $0.from;
 						@child.append(
 							Perl6::Operator::Infix.from-int(
@@ -6576,7 +6532,7 @@ class Perl6::Parser::Factory {
 					[< postcircumfix OPER >],
 					[< postfix_prefix_meta_operator >] ) {
 				@child.append( self._EXPR( $_.list.[0] ) );
-				if $_.Str ~~ m{ ^ ( '.' ) } {
+				if $_.Str ~~ m{ ^ ('.') } {
 					@child.append(
 						Perl6::Operator::Infix.from-int(
 							$_.from,
@@ -6599,7 +6555,7 @@ class Perl6::Parser::Factory {
 				@child.append( self._EXPR( $_.list.[0] ) );
 			}
 			when self.assert-hash( $_, [< infix OPER >] ) {
-				if $_.hash.<infix>.Str ~~ m{ '??' } {
+				if $_.hash.<infix>.Str ~~ m{ ('??') } {
 					@child.append(
 						self._value(
 							$_.list.[0].hash.<value>
@@ -6608,7 +6564,7 @@ class Perl6::Parser::Factory {
 					@child.append(
 						Perl6::Operator::Infix.from-sample(
 							$_.hash.<infix>,
-							QUES-QUES
+							$0.Str
 						)
 					);
 					@child.append(
@@ -6722,45 +6678,31 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
+	method __Variable( Mu $p, Mu $name ) returns Perl6::Element {
+		my Str $sigil	= $p.hash.<sigil>.Str;
+		my Str $twigil	= $p.hash.<twigil> ??
+				  $p.hash.<twigil>.Str !! '';
+		my Str $desigilname = $name ??  $name.Str !! '';
+		my Str $content = $p.hash.<sigil> ~ $twigil ~ $desigilname;
+
+		%sigil-map{$sigil ~ $twigil}.from-int( $p.from, $content );
+	}
+
 	method _var( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_,
 					[< twigil sigil desigilname >] ) {
-				# XXX For heavens' sake refactor.
-				my Str $sigil	= $_.hash.<sigil>.Str;
-				my Str $twigil	= $_.hash.<twigil> ??
-						  $_.hash.<twigil>.Str !! '';
-				my Str $desigilname =
-					$_.hash.<desigilname> ??
-					$_.hash.<desigilname>.Str !! '';
-				my Str $content =
-					$_.hash.<sigil> ~
-					$twigil ~
-					$desigilname;
 				@child.append(
-					%sigil-map{$sigil ~ $twigil}.from-int(
-						$_.from,
-						$content
+					self.__Variable(
+						$_, $_.hash.<desigilname>
 					)
 				);
 			}
 			when self.assert-hash( $_, [< sigil desigilname >] ) {
-				# XXX For heavens' sake refactor.
-				my Str $sigil	= $_.hash.<sigil>.Str;
-				my Str $twigil	= $_.hash.<twigil> ??
-						  $_.hash.<twigil>.Str !! '';
-				my Str $desigilname =
-					$_.hash.<desigilname> ??
-					$_.hash.<desigilname>.Str !! '';
-				my Str $content =
-					$_.hash.<sigil> ~
-					$twigil ~
-					$desigilname;
 				@child.append(
-					%sigil-map{$sigil ~ $twigil}.from-int(
-						$_.from,
-						$content
+					self.__Variable(
+						$_, $_.hash.<desigilname>
 					)
 				);
 			}
@@ -6835,18 +6777,9 @@ class Perl6::Parser::Factory {
 			);
 		}
 		else {
-			my Str $sigil	= $p.hash.<sigil>.Str;
-			my Str $twigil	= $p.hash.<twigil> ??
-					  $p.hash.<twigil>.Str !! '';
-			my Str $desigilname =
-				$p.hash.<desigilname> ??
-				$p.hash.<desigilname>.Str !! '';
-			my Str $content =
-				$p.hash.<sigil> ~ $twigil ~ $desigilname;
 			@child.append(
-				%sigil-map{$sigil ~ $twigil}.from-int(
-					$p.from,
-					$content
+				self.__Variable(
+					$p, $p.hash.<desigilname>
 				)
 			);
 		}
