@@ -1876,6 +1876,7 @@ class Perl6::Parser::Factory {
 			when self.assert-hash( $_,
 					[< identifier >],
 					[< colonpair >] ) {
+				# XXX maybe move this up a level?
 				if $_.orig.substr( $_.from - 1, 1 ) eq
 						BACKSLASH {
 					my Str $content = $_.orig.substr(
@@ -2166,21 +2167,14 @@ class Perl6::Parser::Factory {
 		}
 		elsif self.assert-hash( $p,
 				[< OPER infix_circumfix_meta_operator >] ) {
+			# XXXinfix_circumfix_meta_operator unused?
 			@child.append( self._EXPR( $p.list.[0] ) );
-			if $p.hash.<infix_circumfix_meta_operator>.Str {
-				@child.append(
-					Perl6::Operator::Infix.from-sample(
-						$p,
-						$p.hash.<infix_circumfix_meta_operator>.Str
-					)
-				);
-			}
 			@child.append( self._EXPR( $p.list.[1] ) );
 		}
 		elsif self.assert-hash( $p,
 				[< infix OPER infix_postfix_meta_operator >] ) {
+			# XXX Infix is used, just in combination.
 			@child.append( self._EXPR( $p.list.[0] ) );
-#			@child.append( self._infix( $p.hash.<infix> ) );
 			@child.append(
 				Perl6::Operator::Infix.from-sample(
 					$p, $p.hash.<infix>.Str ~ 
@@ -2193,13 +2187,10 @@ class Perl6::Parser::Factory {
 				[< dotty OPER >],
 				[< postfix_prefix_meta_operator >] ) {
 			@child.append( self._EXPR( $p.list.[0] ) );
-			if $p.Str.substr( 0, HYPER.chars ) eq HYPER {
-				my Str $str = $p.orig.substr(
-					$p.from, HYPER.chars
-				);
+			if $p.Str ~~ m{ ( '>>' ) } {
 				@child.append(
 					Perl6::Operator::Prefix.from-int(
-						$p.from, $str
+						$p.from, $0.Str
 					)
 				);
 			}
@@ -2246,9 +2237,7 @@ class Perl6::Parser::Factory {
 				$p.hash.<infix_prefix_meta_operator>.Str;
 			my Int $end = $p.list.elems - 1;
 			for $p.list.kv -> $k, $v {
-				if $v.Str {
-					@child.append( self._EXPR( $v ) );
-				}
+				@child.append( self._EXPR( $v ) );
 				if $k < $end {
 					my Str $x = $p.orig.Str.substr(
 						$p.list.[$k].to,
@@ -2270,12 +2259,12 @@ class Perl6::Parser::Factory {
 		elsif self.assert-hash( $p, [< infix OPER >] ) {
 			my Int $end = $p.list.elems - 1;
 			my Str $infix-str = $p.hash.<infix>.Str;
-			if $infix-str ~~ m{ '??' } {
+			if $infix-str ~~ m{ ( '??' ) } {
 				@child.append( self._EXPR( $p.list.[0] ) );
 				@child.append(
 					Perl6::Operator::Infix.from-sample(
 						$p,
-						QUES-QUES
+						$0.Str
 					)
 				);
 				
@@ -2290,11 +2279,7 @@ class Perl6::Parser::Factory {
 			}
 			else {
 				for $p.list.kv -> $k, $v {
-					if $v.Str {
-						@child.append(
-							self._EXPR( $v )
-						);
-					}
+					@child.append( self._EXPR( $v ) );
 					if $k < $end {
 						my Str $x = $p.orig.Str.substr(
 							$p.list.[$k].to,
@@ -3919,7 +3904,8 @@ class Perl6::Parser::Factory {
 #		@child;
 #	}
 
-	method _postfix_prefix_meta_operator( Mu $p ) returns Array[Perl6::Element] {
+	method _postfix_prefix_meta_operator( Mu $p )
+			returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		if $p.list {
 			for $p.list {
@@ -4821,7 +4807,9 @@ class Perl6::Parser::Factory {
 						),
 						:from(
 							$_.hash.<multisig>.from -
-							$0.Str.chars - $1.Str.chars ),
+							$0.Str.chars -
+							$1.Str.chars
+						),
 						:to(
 							$_.hash.<multisig>.to +
 							PAREN-CLOSE.chars
