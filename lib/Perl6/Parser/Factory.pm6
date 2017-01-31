@@ -499,7 +499,7 @@ class Perl6::String::Body does Token {
 }
 class Perl6::String::WordQuoting {
 	also is Perl6::String;
-	also does Matchable;
+	also does MatchingBalanced;
 }
 class Perl6::String::WordQuoting::QuoteProtection {
 	also is Perl6::String::WordQuoting;
@@ -789,6 +789,39 @@ my role Assertions {
 	}
 }
 
+my role Iteration {
+	method pull-one( Iterator:D $i ) returns Mu {
+	}
+
+	method push-exactly( Iterator:D $target, int $count ) returns Mu {
+	}
+
+	method push-at-least( Iterator:D $target, int $count ) returns Mu {
+	}
+
+	method push-all( Iterator:D $i ) {
+	}
+
+	method push-until-lazy( Iterator:D $i ) returns Mu {
+	}
+
+	method is-lazy( Iterator:D $i ) returns Bool:D {
+	}
+
+	method sink-all( Iterator:D $i ) {
+	}
+
+	method skip-one( Iterator:D $i ) returns Mu {
+	}
+
+	method skip-at-least( Iterator:D $target, int $to-skip ) returns Mu {
+	}
+
+	method skip-at-least-pull-one( Iterator:D $target, int $to-skip )
+		returns Mu {
+	}
+}
+
 class Perl6::Parser::Factory {
 	also does Assertions;
 
@@ -941,8 +974,9 @@ class Perl6::Parser::Factory {
 
 	sub key-bounds( Mu $p ) {
 		my Str $from-to = "{$p.from} {$p.to}";
+		my $text = substr( $p.orig,$p.from, $p.to-$p.from );
 		if $p.orig {
-			$*ERR.say: "$from-to [{substr($p.orig,$p.from,$p.to-$p.from)}]"
+			$*ERR.say: "$from-to [$text]";
 		}
 		else {
 			$*ERR.say: "-1 -1 NIL"
@@ -970,7 +1004,7 @@ class Perl6::Parser::Factory {
 					);
 				}
 				else {
-					debug-match( $_ );
+					debug-match( $_ ) if $*DEBUG;
 					die "Unhandled case" if
 						$*FACTORY-FAILURE-FATAL
 				}
@@ -991,7 +1025,7 @@ class Perl6::Parser::Factory {
 			@child.append( self._EXPR( $p.hash.<EXPR> ) );
 		}
 		else {
-			debug-match( $p );
+			debug-match( $_ ) if $*DEBUG;
 			die "Unhandled case" if
 				$*FACTORY-FAILURE-FATAL
 		}
@@ -1023,7 +1057,7 @@ class Perl6::Parser::Factory {
 				@child.append( self._EXPR( $_.hash.<EXPR> ) );
 			}
 			default {
-				debug-match( $_ );
+				debug-match( $_ ) if $*DEBUG;
 				die "Unhandled case" if
 					$*FACTORY-FAILURE-FATAL
 			}
@@ -1042,24 +1076,21 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			when self.assert-hash( $_, [< var >] ) {
-#				die; # XXX unused? Or just untested?
 #				self._var( $_.hash.<var> );
 #			}
 #			when self.assert-hash( $_, [< longname >] ) {
-#				die; # XXX unused? Or just untested?
 #				self._longname( $_.hash.<longname> );
 #			}
 #			when self.assert-hash( $_, [< cclass_elem >] ) {
-#				die; # XXX unused? Or just untested?
 #				self._cclass_elem( $_.hash.<cclass_elem> );
 #			}
 #			when self.assert-hash( $_, [< codeblock >] ) {
-#				die; # XXX unused? Or just untested?
 #				self._codeblock( $_.hash.<codeblock> );
 #			}
 #			default {
-#				debug-match( $_ );
-#				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+#				debug-match( $_ ) if $*DEBUG;
+#				die "Unhandled case" if
+#					$*FACTORY-FAILURE-FATAL
 #			}
 #		}
 #		@child;
@@ -1079,7 +1110,7 @@ class Perl6::Parser::Factory {
 		else {
 			given $p {
 				default {
-					debug-match( $_ );
+					debug-match( $_ ) if $*DEBUG;
 					die "Unhandled case" if
 						$*FACTORY-FAILURE-FATAL
 				}
@@ -1092,7 +1123,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ );
+#				debug-match( $_ ) if $*DEBUG;
 #				die "Unhandled case" if
 #					$*FACTORY-FAILURE-FATAL
 #			}
@@ -1104,7 +1135,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ );
+#				debug-match( $_ ) if $*DEBUG;
 #				die "Unhandled case" if
 #					$*FACTORY-FAILURE-FATAL
 #			}
@@ -1116,7 +1147,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ );
+#				debug-match( $_ ) if $*DEBUG;
 #				die "Unhandled case" if
 #					$*FACTORY-FAILURE-FATAL
 #			}
@@ -1142,7 +1173,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ );
+#				debug-match( $_ ) if $*DEBUG;
 #				die "Unhandled case" if
 #					$*FACTORY-FAILURE-FATAL
 #			}
@@ -1163,7 +1194,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ );
+				debug-match( $_ ) if $*DEBUG;
 				die "Unhandled case" if
 					$*FACTORY-FAILURE-FATAL
 			}
@@ -1187,7 +1218,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ );
+				debug-match( $_ ) if $*DEBUG;
 				die "Unhandled case" if
 					$*FACTORY-FAILURE-FATAL
 			}
@@ -1207,7 +1238,7 @@ class Perl6::Parser::Factory {
 				@child.append( self._block( $_.hash.<block> ) );
 			}
 			default {
-				debug-match( $_ );
+				debug-match( $_ ) if $*DEBUG;
 				die "Unhandled case" if
 					$*FACTORY-FAILURE-FATAL
 			}
@@ -1219,7 +1250,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ );
+#				debug-match( $_ ) if $*DEBUG;
 #				die "Unhandled case" if
 #					$*FACTORY-FAILURE-FATAL
 #			}
@@ -1258,14 +1289,14 @@ class Perl6::Parser::Factory {
 #					);
 #				}
 #				else {
-#					debug-match( $_ );
+#					debug-match( $_ ) if $*DEBUG;
 #					die "Unhandled case" if
 #						$*FACTORY-FAILURE-FATAL
 #				}
 #			}
 #		}
 #		else {
-#			debug-match( $p );
+#			debug-match( $_ ) if $*DEBUG;
 #			die "Unhandled case" if
 #				$*FACTORY-FAILURE-FATAL
 #		}
@@ -1276,7 +1307,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ );
+#				debug-match( $_ ) if $*DEBUG;
 #				die "Unhandled case" if
 #					$*FACTORY-FAILURE-FATAL
 #			}
@@ -1306,7 +1337,7 @@ class Perl6::Parser::Factory {
 					);
 				}
 				else {
-					debug-match( $_ );
+					debug-match( $_ ) if $*DEBUG;
 					die "Unhandled case" if
 						$*FACTORY-FAILURE-FATAL
 				}
@@ -1369,7 +1400,7 @@ class Perl6::Parser::Factory {
 					);
 				}
 				default {
-					debug-match( $_ );
+					debug-match( $_ ) if $*DEBUG;
 					die "Unhandled case" if
 						$*FACTORY-FAILURE-FATAL
 				}
@@ -1382,7 +1413,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ );
+#				debug-match( $_ ) if $*DEBUG;
 #				die "Unhandled case" if
 #					$*FACTORY-FAILURE-FATAL
 #			}
@@ -1399,7 +1430,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ );
+				debug-match( $_ ) if $*DEBUG;
 				die "Unhandled case" if
 					$*FACTORY-FAILURE-FATAL
 			}
@@ -2699,7 +2730,7 @@ class Perl6::Parser::Factory {
 #		#if $p ~~ QAST::Want;
 #		given $p {
 #			default {
-#				debug-match( $_ );
+#				debug-match( $_ ) if $*DEBUG;
 #				die "Unhandled case" if
 #					$*FACTORY-FAILURE-FATAL
 #			}
@@ -3851,7 +3882,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ );
+#				debug-match( $_ ) if $*DEBUG;
 #				die "Unhandled case" if
 #					$*FACTORY-FAILURE-FATAL
 #			}
@@ -3866,7 +3897,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ );
+#				debug-match( $_ ) if $*DEBUG;
 #				die "Unhandled case" if
 #					$*FACTORY-FAILURE-FATAL
 #			}
@@ -3881,7 +3912,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ );
+#				debug-match( $_ ) if $*DEBUG;
 #				die "Unhandled case" if
 #					$*FACTORY-FAILURE-FATAL
 #			}
@@ -4539,7 +4570,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ );
+#				debug-match( $_ ) if $*DEBUG;
 #				die "Unhandled case" if
 #					$*FACTORY-FAILURE-FATAL
 #			}
@@ -5575,7 +5606,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ );
+#				debug-match( $_ ) if $*DEBUG;
 #				die "Unhandled case" if
 #					$*FACTORY-FAILURE-FATAL
 #			}
@@ -5849,9 +5880,6 @@ class Perl6::Parser::Factory {
 					$p.hash.<statement_control>
 				)
 			);
-		}
-		elsif !$p.hash.keys {
-			note "Fix null case"
 		}
 		else {
 			debug-match( $p ) if $*DEBUG;
@@ -6324,7 +6352,7 @@ class Perl6::Parser::Factory {
 					);
 				}
 				else {
-					debug-match( $_ );
+					debug-match( $_ ) if $*DEBUG;
 					die "Unhandled case" if
 						$*FACTORY-FAILURE-FATAL
 				}
@@ -6390,7 +6418,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ );
+#				debug-match( $_ ) if $*DEBUG;
 #				die "Unhandled case" if
 #					$*FACTORY-FAILURE-FATAL
 #			}
@@ -6644,7 +6672,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ );
+#				debug-match( $_ ) if $*DEBUG;
 #				die "Unhandled case" if
 #					$*FACTORY-FAILURE-FATAL
 #			}
