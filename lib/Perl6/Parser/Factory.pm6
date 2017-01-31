@@ -894,7 +894,7 @@ class Perl6::Parser::Factory {
 						)
 					);
 				}
-				when $str ~~ m{ \S } {
+				when m{ \S } {
 				}
 				default {
 					@child.append(
@@ -1096,27 +1096,8 @@ class Perl6::Parser::Factory {
 #		@child;
 #	}
 
-	method _atom( Mu $p ) returns Array[Perl6::Element] {
-		my Perl6::Element @child;
-		if self.assert-hash( $p, [< quantifier atom >] ) {
-			@child.append(
-				self._quantifier( $p.hash.<quantifier> )
-			);
-			@child.append( self._atom( $p.hash.<atom> ) );
-		}
-		elsif $p.Str {
-			@child.append( Perl6::Bareword.from-match( $p ) );
-		}
-		else {
-			given $p {
-				default {
-					debug-match( $_ ) if $*DEBUG;
-					die "Unhandled case" if
-						$*FACTORY-FAILURE-FATAL
-				}
-			}
-		}
-		@child;
+	method _atom( Mu $p ) returns Perl6::Element {
+		Perl6::Bareword.from-match( $p );
 	}
 
 #	method _B( Mu $p ) returns Array[Perl6::Element] {
@@ -3925,12 +3906,7 @@ class Perl6::Parser::Factory {
 		my Perl6::Element @child;
 		if $p.list {
 			for $p.list {
-				if self.assert-hash( $_, [< sym >] ) {
-					@child.append(
-						self._sym( $_.hash.<sym> )
-					);
-				}
-				elsif $_.Str {
+				if $_.Str {
 					@child.append(
 						Perl6::Operator::Infix.from-match(
 							$_
@@ -5891,24 +5867,15 @@ class Perl6::Parser::Factory {
 
 	method _statementlist( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
-		my Str $leftover-ws;
-		my Int $leftover-ws-from = 0;
 
 		for $p.hash.<statement>.list {
 			my Perl6::Element @_child;
-			if $leftover-ws {
-				$leftover-ws = Nil;
-				$leftover-ws-from = 0
-			}
 			@_child.append( self._statement( $_ ) );
 			# Do *NOT* remove this, use it to replace whatever
 			# WS trailing terms the grammar below might add
 			# redundantly.
 			#
 			if $_.Str ~~ m{ ';' ( \s+ ) $ } {
-				my Int $right-margin = $0.Str.chars;
-				$leftover-ws = $0.Str;
-				$leftover-ws-from = $_.to - $right-margin;
 			}
 			elsif $_.Str ~~ m{ ( \s+ ) $ } {
 				my Int $right-margin = $0.Str.chars;
@@ -5923,10 +5890,6 @@ class Perl6::Parser::Factory {
 				@_child[*-1].to - $p.from
 			);
 			if $temp ~~ m{ ^ (';') ( \s* ) } {
-				$leftover-ws = $1.Str if $1.Str.chars;
-				$leftover-ws-from = 
-					@_child[*-1].to +
-					$0.Str.chars;
 				@_child.append(
 					Perl6::Semicolon.from-int(
 						@_child[*-1].to,
@@ -5936,20 +5899,7 @@ class Perl6::Parser::Factory {
 			}
 			@child.append( Perl6::Statement.from-list( @_child ) );
 		}
-		if $leftover-ws {
-			if !%.here-doc{$leftover-ws-from} {
-				my Perl6::Element @_child;
-				@_child.append(
-					Perl6::WS.from-int(
-						$leftover-ws-from, $leftover-ws
-					)
-				);
-				@child.append(
-					Perl6::Statement.from-list( @_child )
-				);
-			}
-		}
-		elsif !$p.hash.<statement> and $p.Str ~~ m{ . } {
+		if !$p.hash.<statement> and $p.Str ~~ m{ . } {
 			my Perl6::Element @_child;
 			if $p.from < $p.to {
 				@_child.append( Perl6::WS.from-match( $p ) );
