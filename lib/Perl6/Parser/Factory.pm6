@@ -789,6 +789,7 @@ my role Assertions {
 	}
 }
 
+#`( This is just a reminder of what Iteration objects use for later.
 my role Iteration {
 	method pull-one( Iterator:D $i ) returns Mu {
 	}
@@ -821,6 +822,7 @@ my role Iteration {
 		returns Mu {
 	}
 }
+)
 
 class Perl6::Parser::Factory {
 	also does Assertions;
@@ -937,6 +939,7 @@ class Perl6::Parser::Factory {
 	}
 
 	method _fill-gap( Mu $p, Perl6::Element $root, Int $index ) {
+		my Perl6::Element @child;
 		my Int $start = $root.child.[$index].to;
 		my Int $end = $root.child.[$index+1].from;
 
@@ -950,12 +953,8 @@ class Perl6::Parser::Factory {
 		}
 
 		my Str $x = $p.orig.Str.substr( $start, $end - $start );
-		my Perl6::Element @child = self._string-to-tokens( $start, $x );
-		$root.child.splice(
-			$index + 1,
-			0,
-			@child
-		);
+		@child.append( self._string-to-tokens( $start, $x ) );
+		$root.child.splice( $index + 1, 0, @child );
 	}
 
 	method fill-gaps( Mu $p, Perl6::Element $root, Int $depth = 0 ) {
@@ -1351,32 +1350,14 @@ class Perl6::Parser::Factory {
 				}
 				when self.assert-hash( $_, [< nibble >] ) {
 					my Perl6::Element @_child;
-					$_.Str ~~ m{ ^ (.) .*? (.) $ };
-					@_child.append(
-						Perl6::Balanced::Enter.from-int(
-							$_.from,
-							$0.Str
-						)
-					);
 					@_child.append(
 						Perl6::String::Body.from-match(
 							$_.hash.<nibble>
 						)
 					);
-					@_child.append(
-						Perl6::Balanced::Exit.from-int(
-							$_.to - $1.Str.chars,
-							$1.Str
-						)
-					);
 					@child.append(
-						Perl6::String::WordQuoting.new(
-							:factory-line-number(
-								callframe(1).line
-							),
-							:from( $_.from ),
-							:to( $_.to ),
-							:child( @_child )
+						Perl6::String::WordQuoting.from-match(
+							$_, @_child
 						)
 					);
 				}
@@ -4635,9 +4616,7 @@ class Perl6::Parser::Factory {
 					BRACE-OPEN
 				)
 			);
-			$x = $p.Str.substr( $left-margin + 1 - $p.from );
 			@_child.append( self._nibble( $p.hash.<nibble> ) );
-			$x = $p.Str.substr( $p.hash.<nibble>.to - $p.from );
 			@_child.append(
 				Perl6::Balanced::Exit.from-int(
 					$right-margin - 1,
@@ -5884,7 +5863,7 @@ class Perl6::Parser::Factory {
 						$_.to - $right-margin,
 						$0.Str
 					)
-				)
+				);
 			}
 			my Str $temp = $p.Str.substr(
 				@_child[*-1].to - $p.from
@@ -5901,9 +5880,7 @@ class Perl6::Parser::Factory {
 		}
 		if !$p.hash.<statement> and $p.Str ~~ m{ . } {
 			my Perl6::Element @_child;
-			if $p.from < $p.to {
-				@_child.append( Perl6::WS.from-match( $p ) );
-			}
+			@_child.append( Perl6::WS.from-match( $p ) );
 			@child.append( Perl6::Statement.from-list( @_child ) );
 		}
 		@child;
