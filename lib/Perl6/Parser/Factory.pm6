@@ -204,8 +204,8 @@ role Matchable {
 
 	method from-match-trimmed( Mu $p ) returns Perl6::Element {
 		$p.Str ~~ m{ ^ ( \s* ) ( .+? ) ( \s* ) $ };
-		my Int $left-margin = $0.Str ?? $0.Str.chars !! 0;
-		my Int $right-margin = $2.Str ?? $2.Str.chars !! 0;
+		my Int $left-margin = $0.Str.chars;
+		my Int $right-margin = $2.Str.chars;
 		self.bless(
 			:factory-line-number( callframe(1).line ),
 			:from( $left-margin + $p.from  ),
@@ -409,12 +409,20 @@ class Perl6::Document does Branching {
 	also is Perl6::Element;
 
 	method from-list( Perl6::Element @child ) returns Perl6::Element {
-		self.bless(
-			# No line number needed.
-			:from( @child ?? @child[0].from !! 0 ),
-			:to( @child ?? @child[*-1].to !! 0 ),
-			:child( @child )
-		)
+		if @child {
+			self.bless(
+				:from( @child[0].from ),
+				:to( @child[*-1].to ),
+				:child( @child )
+			);
+		}
+		else {
+			self.bless(
+				:from( 0 ),
+				:to( 0 ),
+				:child( @child )
+			);
+		}
 	}
 }
 
@@ -841,14 +849,9 @@ class Perl6::Parser::Factory {
 
 	constant COLON = Q{:};
 	constant COMMA = Q{,};
-	constant PERIOD = Q{.};
-	constant SEMICOLON = Q{;};
 	constant EQUAL = Q{=};
-	constant WHERE = Q{where};
-	constant QUES-QUES = Q{??};
 	constant BANG-BANG = Q{!!};
 	constant FAT-ARROW = Q{=>};
-	constant HYPER = Q{>>};
 	constant SLASH = Q'/';
 	constant BACKSLASH = Q'\'; # because the braces confuse vim.
 
@@ -2188,7 +2191,6 @@ class Perl6::Parser::Factory {
 			if $p.Str ~~ m{ ^ ('>>') } {
 				@child.append(
 					Perl6::Operator::Prefix.from-int(
-#						$p.from,
 						$0.str
 					)
 				);
@@ -6598,7 +6600,7 @@ class Perl6::Parser::Factory {
 		my Str $sigil	= $p.hash.<sigil>.Str;
 		my Str $twigil	= $p.hash.<twigil> ??
 				  $p.hash.<twigil>.Str !! '';
-		my Str $desigilname = $name ??  $name.Str !! '';
+		my Str $desigilname = $name ?? $name.Str !! '';
 		my Str $content = $p.hash.<sigil> ~ $twigil ~ $desigilname;
 
 		%sigil-map{$sigil ~ $twigil}.from-int( $p.from, $content );
@@ -6694,9 +6696,7 @@ class Perl6::Parser::Factory {
 		}
 		else {
 			@child.append(
-				self.__Variable(
-					$p, $p.hash.<desigilname>
-				)
+				self.__Variable( $p, $p.hash.<desigilname> )
 			);
 		}
 		@child;
