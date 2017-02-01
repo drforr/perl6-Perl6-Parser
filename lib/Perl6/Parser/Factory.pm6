@@ -489,6 +489,7 @@ class Perl6::Number::FloatingPoint {
 
 class Perl6::String does Branching {
 	also is Perl6::Element;
+	also does MatchingBalanced;
 
 	has Str @.adverb;
 	has Str $.here-doc;
@@ -534,6 +535,7 @@ class Perl6::String::Literal::Shell {
 
 class Perl6::Regex does Branching {
 	also is Perl6::Element;
+	also does MatchingBalanced;
 
 	has Str @.adverb;
 }
@@ -4164,6 +4166,7 @@ class Perl6::Parser::Factory {
 #	}
 
 	my %delimiter-map =
+		Q{/} => Perl6::Regex,
 		Q{'} => Perl6::String::Escaping,
 		Q{"} => Perl6::String::Interpolation,
 		Q{｢} => Perl6::String::Literal;
@@ -4414,62 +4417,20 @@ class Perl6::Parser::Factory {
 			}
 			when self.assert-hash( $p, [< nibble >] ) {
 				my Perl6::Element @_child;
- 				$p.Str ~~ m{ ^ (.) .*? (.) $ };
-				@_child.append(
-					Perl6::Balanced::Enter.from-int(
-						$p.from,
-						$0.Str
+				$p.Str ~~ m{ ^ (.) };
+				if $p.hash.<nibble>.Str {
+					@_child.append(
+						self._nibble(
+							$p.hash.<nibble>
+							
+						)
+					);
+				}
+				@child.append(
+					%delimiter-map{$0.Str}.from-match(
+						$p, @_child
 					)
 				);
-				# XXX Probably not the right way to disambiguate
-				# XXX whether $p is a regex or not.
-				if $0.Str eq Q{/} {
-					@_child.append(
-						self._nibble( $p.hash.<nibble> )
-					);
-					@_child.append(
-						Perl6::Balanced::Exit.from-int(
-							$p.to - $1.Str.chars,
-							$1.Str
-						)
-					);
-					@child.append(
-						Perl6::Regex.new(
-							:factory-line-number(
-								callframe(1).line
-							),
-							:from( $p.from ),
-							:to( $p.to ),
-							:child( @_child )
-						)
-					);
-				}
-				else {
-					if $p.hash.<nibble>.Str {
-						@_child.append(
-							self._nibble(
-								$p.hash.<nibble>
-								
-							)
-						);
-					}
-					@_child.append(
-						Perl6::Balanced::Exit.from-int(
-							$p.to - $1.Str.chars,
-							$1.Str
-						)
-					);
-					@child.append(
-						%delimiter-map{$0.Str}.new(
-							:factory-line-number(
-								callframe(1).line
-							),
-							:from( $p.from ),
-							:to( $p.to ),
-							:child( @_child )
-						)
-					);
-				}
 			}
 			default {
 				debug-match( $p ) if $*DEBUG;
