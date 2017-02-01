@@ -204,8 +204,8 @@ role Matchable {
 
 	method from-match-trimmed( Mu $p ) returns Perl6::Element {
 		$p.Str ~~ m{ ^ ( \s* ) ( .+? ) ( \s* ) $ };
-		my Int $left-margin = $0.Str ?? $0.Str.chars !! 0;
-		my Int $right-margin = $2.Str ?? $2.Str.chars !! 0;
+		my Int $left-margin = $0.Str.chars;
+		my Int $right-margin = $2.Str.chars;
 		self.bless(
 			:factory-line-number( callframe(1).line ),
 			:from( $left-margin + $p.from  ),
@@ -297,6 +297,37 @@ role MatchingBalanced {
 		)
 	}
 
+	method from-outer-match( Mu $p, @child ) returns Perl6::Element {
+		my Perl6::Element @_child;
+		my $x = $p.orig.substr( 0, $p.from );
+		$x ~~ m{ (.) ( \s* ) $ };
+		my $left-edge = $0.Str;
+		my $left-margin = $1.Str.chars;
+		$x = $p.orig.substr( $p.to );
+		$x ~~ m{ ^ ( \s* ) (.) };
+		my $right-edge = $1.Str;
+		my $right-margin = $0.Str.chars;
+		@_child.append(
+			Perl6::Balanced::Enter.from-int(
+				$p.from - $left-margin - $left-edge.chars,
+				$left-edge
+			)
+		);
+		@_child.append( @child );
+		@_child.append(
+			Perl6::Balanced::Exit.from-int(
+				$p.to + $right-margin,
+				$right-edge
+			)
+		);
+		self.bless(
+			:factory-line-number( callframe(1).line ),
+			:from( $p.from - $left-margin - $left-edge.chars ),
+			:to( $p.to + $right-margin + $right-edge.chars ),
+			:child( @_child )
+		)
+	}
+
 	method from-int( Int $from, Str $str, @child ) returns Perl6::Element {
 		my Perl6::Element @_child;
 		$str ~~ m{ ^ (.) .* (.) $ };
@@ -336,6 +367,7 @@ class Perl6::Operator {
 }
 class Perl6::Operator::Hyper does Branching {
 	also is Perl6::Operator;
+	also does MatchingBalanced;
 }
 class Perl6::Operator::Prefix does Token {
 	also is Perl6::Operator;
@@ -409,12 +441,20 @@ class Perl6::Document does Branching {
 	also is Perl6::Element;
 
 	method from-list( Perl6::Element @child ) returns Perl6::Element {
-		self.bless(
-			# No line number needed.
-			:from( @child ?? @child[0].from !! 0 ),
-			:to( @child ?? @child[*-1].to !! 0 ),
-			:child( @child )
-		)
+		if @child {
+			self.bless(
+				:from( @child[0].from ),
+				:to( @child[*-1].to ),
+				:child( @child )
+			);
+		}
+		else {
+			self.bless(
+				:from( 0 ),
+				:to( 0 ),
+				:child( @child )
+			);
+		}
 	}
 }
 
@@ -489,6 +529,7 @@ class Perl6::Number::FloatingPoint {
 
 class Perl6::String does Branching {
 	also is Perl6::Element;
+	also does MatchingBalanced;
 
 	has Str @.adverb;
 	has Str $.here-doc;
@@ -499,7 +540,7 @@ class Perl6::String::Body does Token {
 }
 class Perl6::String::WordQuoting {
 	also is Perl6::String;
-	also does Matchable;
+	also does MatchingBalanced;
 }
 class Perl6::String::WordQuoting::QuoteProtection {
 	also is Perl6::String::WordQuoting;
@@ -534,6 +575,7 @@ class Perl6::String::Literal::Shell {
 
 class Perl6::Regex does Branching {
 	also is Perl6::Element;
+	also does MatchingBalanced;
 
 	has Str @.adverb;
 }
@@ -738,7 +780,8 @@ class Perl6::Variable::Callable::SubLanguage {
 
 my role Assertions {
 
-	method assert-hash-strict( Mu $p, $required-with, $required-without ) returns Bool {
+	method assert-hash-strict( Mu $p, $required-with, $required-without )
+			returns Bool {
 		my %classified = classify {
 			$p.hash.{$_}.Str ?? 'with' !! 'without'
 		}, $p.hash.keys;
@@ -788,6 +831,41 @@ my role Assertions {
 	}
 }
 
+#`( This is just a reminder of what Iteration objects use for later.
+my role Iteration {
+	method pull-one( Iterator:D $i ) returns Mu {
+	}
+
+	method push-exactly( Iterator:D $target, int $count ) returns Mu {
+	}
+
+	method push-at-least( Iterator:D $target, int $count ) returns Mu {
+	}
+
+	method push-all( Iterator:D $i ) {
+	}
+
+	method push-until-lazy( Iterator:D $i ) returns Mu {
+	}
+
+	method is-lazy( Iterator:D $i ) returns Bool:D {
+	}
+
+	method sink-all( Iterator:D $i ) {
+	}
+
+	method skip-one( Iterator:D $i ) returns Mu {
+	}
+
+	method skip-at-least( Iterator:D $target, int $to-skip ) returns Mu {
+	}
+
+	method skip-at-least-pull-one( Iterator:D $target, int $to-skip )
+		returns Mu {
+	}
+}
+)
+
 class Perl6::Parser::Factory {
 	also does Assertions;
 
@@ -803,14 +881,9 @@ class Perl6::Parser::Factory {
 
 	constant COLON = Q{:};
 	constant COMMA = Q{,};
-	constant PERIOD = Q{.};
-	constant SEMICOLON = Q{;};
 	constant EQUAL = Q{=};
-	constant WHERE = Q{where};
-	constant QUES-QUES = Q{??};
 	constant BANG-BANG = Q{!!};
 	constant FAT-ARROW = Q{=>};
-	constant HYPER = Q{>>};
 	constant SLASH = Q'/';
 	constant BACKSLASH = Q'\'; # because the braces confuse vim.
 
@@ -860,7 +933,7 @@ class Perl6::Parser::Factory {
 						)
 					);
 				}
-				when $str ~~ m{ \S } {
+				when m{ \S } {
 				}
 				default {
 					@child.append(
@@ -903,6 +976,7 @@ class Perl6::Parser::Factory {
 	}
 
 	method _fill-gap( Mu $p, Perl6::Element $root, Int $index ) {
+		my Perl6::Element @child;
 		my Int $start = $root.child.[$index].to;
 		my Int $end = $root.child.[$index+1].from;
 
@@ -916,18 +990,14 @@ class Perl6::Parser::Factory {
 		}
 
 		my Str $x = $p.orig.Str.substr( $start, $end - $start );
-		my Perl6::Element @child = self._string-to-tokens( $start, $x );
-		$root.child.splice(
-			$index + 1,
-			0,
-			@child
-		);
+		@child.append( self._string-to-tokens( $start, $x ) );
+		$root.child.splice( $index + 1, 0, @child );
 	}
 
 	method fill-gaps( Mu $p, Perl6::Element $root, Int $depth = 0 ) {
 		return unless $root.^can( 'child' );
 
-		for reverse( 0 .. $root.child.elems - 1 ) {
+		for reverse $root.child.keys {
 			self.fill-gaps( $p, $root.child.[$_], $depth + 1 );
 			if $_ < $root.child.elems - 1 {
 				if $root.child.[$_].to !=
@@ -940,8 +1010,9 @@ class Perl6::Parser::Factory {
 
 	sub key-bounds( Mu $p ) {
 		my Str $from-to = "{$p.from} {$p.to}";
+		my $text = substr( $p.orig,$p.from, $p.to-$p.from );
 		if $p.orig {
-			$*ERR.say: "$from-to [{substr($p.orig,$p.from,$p.to-$p.from)}]"
+			$*ERR.say: "$from-to [$text]";
 		}
 		else {
 			$*ERR.say: "-1 -1 NIL"
@@ -969,7 +1040,7 @@ class Perl6::Parser::Factory {
 					);
 				}
 				else {
-					debug-match( $_ );
+					debug-match( $_ ) if $*DEBUG;
 					die "Unhandled case" if
 						$*FACTORY-FAILURE-FATAL
 				}
@@ -990,7 +1061,7 @@ class Perl6::Parser::Factory {
 			@child.append( self._EXPR( $p.hash.<EXPR> ) );
 		}
 		else {
-			debug-match( $p );
+			debug-match( $_ ) if $*DEBUG;
 			die "Unhandled case" if
 				$*FACTORY-FAILURE-FATAL
 		}
@@ -1022,7 +1093,7 @@ class Perl6::Parser::Factory {
 				@child.append( self._EXPR( $_.hash.<EXPR> ) );
 			}
 			default {
-				debug-match( $_ );
+				debug-match( $_ ) if $*DEBUG;
 				die "Unhandled case" if
 					$*FACTORY-FAILURE-FATAL
 			}
@@ -1041,57 +1112,35 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			when self.assert-hash( $_, [< var >] ) {
-#				die; # XXX unused? Or just untested?
 #				self._var( $_.hash.<var> );
 #			}
 #			when self.assert-hash( $_, [< longname >] ) {
-#				die; # XXX unused? Or just untested?
 #				self._longname( $_.hash.<longname> );
 #			}
 #			when self.assert-hash( $_, [< cclass_elem >] ) {
-#				die; # XXX unused? Or just untested?
 #				self._cclass_elem( $_.hash.<cclass_elem> );
 #			}
 #			when self.assert-hash( $_, [< codeblock >] ) {
-#				die; # XXX unused? Or just untested?
 #				self._codeblock( $_.hash.<codeblock> );
 #			}
 #			default {
-#				debug-match( $_ );
-#				die "Unhandled case" if $*FACTORY-FAILURE-FATAL
+#				debug-match( $_ ) if $*DEBUG;
+#				die "Unhandled case" if
+#					$*FACTORY-FAILURE-FATAL
 #			}
 #		}
 #		@child;
 #	}
 
-	method _atom( Mu $p ) returns Array[Perl6::Element] {
-		my Perl6::Element @child;
-		if self.assert-hash( $p, [< quantifier atom >] ) {
-			@child.append(
-				self._quantifier( $p.hash.<quantifier> )
-			);
-			@child.append( self._atom( $p.hash.<atom> ) );
-		}
-		elsif $p.Str {
-			@child.append( Perl6::Bareword.from-match( $p ) );
-		}
-		else {
-			given $p {
-				default {
-					debug-match( $_ );
-					die "Unhandled case" if
-						$*FACTORY-FAILURE-FATAL
-				}
-			}
-		}
-		@child;
+	method _atom( Mu $p ) returns Perl6::Element {
+		Perl6::Bareword.from-match( $p );
 	}
 
 #	method _B( Mu $p ) returns Array[Perl6::Element] {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ );
+#				debug-match( $_ ) if $*DEBUG;
 #				die "Unhandled case" if
 #					$*FACTORY-FAILURE-FATAL
 #			}
@@ -1103,7 +1152,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ );
+#				debug-match( $_ ) if $*DEBUG;
 #				die "Unhandled case" if
 #					$*FACTORY-FAILURE-FATAL
 #			}
@@ -1115,7 +1164,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ );
+#				debug-match( $_ ) if $*DEBUG;
 #				die "Unhandled case" if
 #					$*FACTORY-FAILURE-FATAL
 #			}
@@ -1141,7 +1190,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ );
+#				debug-match( $_ ) if $*DEBUG;
 #				die "Unhandled case" if
 #					$*FACTORY-FAILURE-FATAL
 #			}
@@ -1162,7 +1211,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ );
+				debug-match( $_ ) if $*DEBUG;
 				die "Unhandled case" if
 					$*FACTORY-FAILURE-FATAL
 			}
@@ -1186,7 +1235,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ );
+				debug-match( $_ ) if $*DEBUG;
 				die "Unhandled case" if
 					$*FACTORY-FAILURE-FATAL
 			}
@@ -1206,7 +1255,7 @@ class Perl6::Parser::Factory {
 				@child.append( self._block( $_.hash.<block> ) );
 			}
 			default {
-				debug-match( $_ );
+				debug-match( $_ ) if $*DEBUG;
 				die "Unhandled case" if
 					$*FACTORY-FAILURE-FATAL
 			}
@@ -1218,7 +1267,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ );
+#				debug-match( $_ ) if $*DEBUG;
 #				die "Unhandled case" if
 #					$*FACTORY-FAILURE-FATAL
 #			}
@@ -1257,14 +1306,14 @@ class Perl6::Parser::Factory {
 #					);
 #				}
 #				else {
-#					debug-match( $_ );
+#					debug-match( $_ ) if $*DEBUG;
 #					die "Unhandled case" if
 #						$*FACTORY-FAILURE-FATAL
 #				}
 #			}
 #		}
 #		else {
-#			debug-match( $p );
+#			debug-match( $_ ) if $*DEBUG;
 #			die "Unhandled case" if
 #				$*FACTORY-FAILURE-FATAL
 #		}
@@ -1273,10 +1322,14 @@ class Perl6::Parser::Factory {
 
 #	method _charspec( Mu $p ) returns Array[Perl6::Element] {
 #		my Perl6::Element @child;
-## XXX work on this, of course.
-#		warn "Caught _charspec";
+#		given $p {
+#			default {
+#				debug-match( $_ ) if $*DEBUG;
+#				die "Unhandled case" if
+#					$*FACTORY-FAILURE-FATAL
+#			}
+#		}
 #		@child;
-#		return True if $p.list;
 #	}
 
 	# ( )
@@ -1301,7 +1354,7 @@ class Perl6::Parser::Factory {
 					);
 				}
 				else {
-					debug-match( $_ );
+					debug-match( $_ ) if $*DEBUG;
 					die "Unhandled case" if
 						$*FACTORY-FAILURE-FATAL
 				}
@@ -1334,37 +1387,19 @@ class Perl6::Parser::Factory {
 				}
 				when self.assert-hash( $_, [< nibble >] ) {
 					my Perl6::Element @_child;
-					$_.Str ~~ m{ ^ (.) .*? (.) $ };
-					@_child.append(
-						Perl6::Balanced::Enter.from-int(
-							$_.from,
-							$0.Str
-						)
-					);
 					@_child.append(
 						Perl6::String::Body.from-match(
 							$_.hash.<nibble>
 						)
 					);
-					@_child.append(
-						Perl6::Balanced::Exit.from-int(
-							$_.to - $1.Str.chars,
-							$1.Str
-						)
-					);
 					@child.append(
-						Perl6::String::WordQuoting.new(
-							:factory-line-number(
-								callframe(1).line
-							),
-							:from( $_.from ),
-							:to( $_.to ),
-							:child( @_child )
+						Perl6::String::WordQuoting.from-match(
+							$_, @_child
 						)
 					);
 				}
 				default {
-					debug-match( $_ );
+					debug-match( $_ ) if $*DEBUG;
 					die "Unhandled case" if
 						$*FACTORY-FAILURE-FATAL
 				}
@@ -1377,7 +1412,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ );
+#				debug-match( $_ ) if $*DEBUG;
 #				die "Unhandled case" if
 #					$*FACTORY-FAILURE-FATAL
 #			}
@@ -1394,7 +1429,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ );
+				debug-match( $_ ) if $*DEBUG;
 				die "Unhandled case" if
 					$*FACTORY-FAILURE-FATAL
 			}
@@ -1588,26 +1623,12 @@ class Perl6::Parser::Factory {
 					[< trait >] ) {
 				my Perl6::Element @_child;
 				@_child.append(
-					Perl6::Balanced::Enter.from-int(
-						$_.hash.<signature>.from -
-						PAREN-OPEN.chars,
-						PAREN-OPEN
-					)
-				);
-				@_child.append(
 					self._signature( $_.hash.<signature> )
 				);
-				@_child.append(
-					Perl6::Balanced::Exit.from-int(
-						$_.hash.<signature>.to,
-						PAREN-CLOSE
-					)
-				);
 				@child.append(
-					Perl6::Operator::Circumfix.new(
-						:from( @_child[0].from ),
-						:to( @_child[*-1].to ),
-						:child( @_child )
+					Perl6::Operator::Circumfix.from-outer-match(
+						$_.hash.<signature>,
+						@_child
 					)
 				);
 				@child.append(
@@ -1936,17 +1957,9 @@ class Perl6::Parser::Factory {
 #		@child;
 #	}
 
-#	method _dig( Mu $p ) returns Array[Perl6::Element] {
-#		my Perl6::Element @child;
-#		given $p {
-#			default {
-#				debug-match( $_ ) if $*DEBUG;
-#				die "Unhandled case" if
-#					$*FACTORY-FAILURE-FATAL
-#			}
-#		}
-#		@child;
-#	}
+	method _dig( Mu $p ) returns Perl6::Element {
+		Perl6::Operator::Postfix.from-match( $p );
+	}
 
 #	method _doc( Mu $p ) {
 #		my Perl6::Element @child;
@@ -2212,7 +2225,7 @@ class Perl6::Parser::Factory {
 				[< postcircumfix OPER >],
 				[< postfix_prefix_meta_operator >] ) {
 			@child.append( self._EXPR( $p.list.[0] ) );
-			if $p.Str ~~ m{ ^ ( '.' ) } {
+			if $p.Str ~~ m{ ^ ('.') } {
 				@child.append(
 					Perl6::Operator::Infix.from-int(
 						$p.from,
@@ -2259,7 +2272,7 @@ class Perl6::Parser::Factory {
 		elsif self.assert-hash( $p, [< infix OPER >] ) {
 			my Int $end = $p.list.elems - 1;
 			my Str $infix-str = $p.hash.<infix>.Str;
-			if $infix-str ~~ m{ ( '??' ) } {
+			if $infix-str ~~ m{ ('??') } {
 				@child.append( self._EXPR( $p.list.[0] ) );
 				@child.append(
 					Perl6::Operator::Infix.from-sample(
@@ -2302,37 +2315,14 @@ class Perl6::Parser::Factory {
 		elsif self.assert-hash( $p, [< args op >] ) {
 			my Perl6::Element @_child;
 			@_child.append(
-				Perl6::Balanced::Enter.from-int(
-					$p.hash.<op>.from - REDUCE-OPEN.chars,
-					REDUCE-OPEN
-				)
-			);
-			# XXX Should be derived from self._op?
-			@_child.append(
 				Perl6::Operator::Prefix.from-match(
 					$p.hash.<op>
 				)
 			);
-			@_child.append(
-				Perl6::Balanced::Exit.from-int(
-					$p.hash.<op>.to,
-					REDUCE-CLOSE
-				)
-			);
 			@child.append(
-				Perl6::Operator::Hyper.new(
-					:factory-line-number(
-						callframe(1).line
-					),
-					:from(
-						$p.hash.<op>.from -
-						REDUCE-OPEN.chars
-					),
-					:to(
-						$p.hash.<op>.to +
-						 REDUCE-CLOSE.chars
-					),
-					:child( @_child )
+				Perl6::Operator::Hyper.from-outer-match(
+					$p.hash.<op>,
+					@_child
 				)
 			);
 			@child.append( self._args( $p.hash.<args> ) );
@@ -2360,8 +2350,7 @@ class Perl6::Parser::Factory {
 			   $p.hash.<args>.hash.<semiarglist> {
 				@child.append( self._args( $p.hash.<args> ) );
 			}
-			elsif $p.hash.<args>.hash.keys and
-			      $p.hash.<args>.Str ~~ m{ \S } {
+			elsif $p.hash.<args>.Str ~~ m{ \S } {
 				@child.append( self._args( $p.hash.<args> ) );
 			}
 			else {
@@ -2690,7 +2679,7 @@ class Perl6::Parser::Factory {
 #		#if $p ~~ QAST::Want;
 #		given $p {
 #			default {
-#				debug-match( $_ );
+#				debug-match( $_ ) if $*DEBUG;
 #				die "Unhandled case" if
 #					$*FACTORY-FAILURE-FATAL
 #			}
@@ -3023,7 +3012,7 @@ class Perl6::Parser::Factory {
 				@_child.append(
 					self._param_var( $_.hash.<param_var> )
 				);
-				if $_.Str ~~ m{ ^ ( ':' ) } {
+				if $_.Str ~~ m{ ^ (':') } {
 					@child.append(
 						Perl6::Bareword.from-int(
 							$_.from,
@@ -3042,7 +3031,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			when self.assert-hash( $_, [< param_var >] ) {
-				if $_.Str ~~ m{ ^ ( ':' ) } {
+				if $_.Str ~~ m{ ^ (':') } {
 					@child.append(
 						Perl6::Bareword.from-int(
 							$_.from,
@@ -3536,7 +3525,7 @@ class Perl6::Parser::Factory {
 				my Str $temp = $_.Str.substr(
 					$_.hash.<longname>.to - $_.from
 				);
-				if $temp ~~ m{ ^ ( \s+ ) ( ';' ) } {
+				if $temp ~~ m{ ^ ( \s+ ) (';') } {
 					my Int $left-margin = $0.Str.chars;
 					@child.append(
 						Perl6::Semicolon.from-int(
@@ -3755,40 +3744,16 @@ class Perl6::Parser::Factory {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< name twigil sigil >] ) {
-				# XXX refactor back to a method
-				my Str $sigil       = $_.hash.<sigil>.Str;
-				my Str $twigil      = $_.hash.<twigil> ??
-						      $_.hash.<twigil>.Str !!
-						      '';
-				my Str $desigilname = $_.hash.<name> ??
-						      $_.hash.<name>.Str !! '';
-				my Str $content     = $_.hash.<sigil> ~
-						      $twigil ~
-						      $desigilname;
-
 				@child.append(
-					%sigil-map{$sigil ~ $twigil}.from-int(
-						$_.from,
-						$_.Str
+					self.__Variable(
+						$_, $_.hash.<name>
 					)
 				);
 			}
 			when self.assert-hash( $_, [< name sigil >] ) {
-				# XXX refactor back to a method
-				my Str $sigil       = $_.hash.<sigil>.Str;
-				my Str $twigil      = $_.hash.<twigil> ??
-						      $_.hash.<twigil>.Str !!
-						      '';
-				my Str $desigilname = $_.hash.<name> ??
-						      $_.hash.<name>.Str !! '';
-				my Str $content     = $_.hash.<sigil> ~
-						      $twigil ~
-						      $desigilname;
-
 				@child.append(
-					%sigil-map{$sigil ~ $twigil}.from-int(
-						$_.from,
-						$content
+					self.__Variable(
+						$_, $_.hash.<name>
 					)
 				);
 			}
@@ -3866,7 +3831,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ );
+#				debug-match( $_ ) if $*DEBUG;
 #				die "Unhandled case" if
 #					$*FACTORY-FAILURE-FATAL
 #			}
@@ -3881,7 +3846,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ );
+#				debug-match( $_ ) if $*DEBUG;
 #				die "Unhandled case" if
 #					$*FACTORY-FAILURE-FATAL
 #			}
@@ -3896,7 +3861,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ );
+#				debug-match( $_ ) if $*DEBUG;
 #				die "Unhandled case" if
 #					$*FACTORY-FAILURE-FATAL
 #			}
@@ -3909,12 +3874,7 @@ class Perl6::Parser::Factory {
 		my Perl6::Element @child;
 		if $p.list {
 			for $p.list {
-				if self.assert-hash( $_, [< sym >] ) {
-					@child.append(
-						self._sym( $_.hash.<sym> )
-					);
-				}
-				elsif $_.Str {
+				if $_.Str {
 					@child.append(
 						Perl6::Operator::Infix.from-match(
 							$_
@@ -3981,12 +3941,11 @@ class Perl6::Parser::Factory {
 			}
 			when self.assert-hash( $_, [< nibble O >] ) {
 				my Perl6::Element @_child;
-				$_.Str ~~ m{ ^ (.) ( \s+ )? ( .+? ) [ \s* ]? . $ };
+				$_.Str ~~ m{ ^ (.) ( \s* ) ( .+? ) \s* . $ };
 				@_child.append(
 					Perl6::Bareword.from-int(
-						$_.from +
-						$0.Str.chars +
-						( $1 ?? $1.Str.chars !! 0 ),
+						$_.from + $0.Str.chars +
+						$1.Str.chars,
 						$2.Str
 					)
 				);
@@ -4041,12 +4000,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			when self.assert-hash( $_, [< dig O >] ) {
-				# XXX replace with _dig(..)
-				@child.append(
-					Perl6::Operator::Postfix.from-match(
-						$_.hash.<dig>
-					)
-				);
+				@child.append( self._dig( $_.hash.<dig> ) );
 			}
 			default {
 				debug-match( $_ ) if $*DEBUG;
@@ -4134,11 +4088,6 @@ class Perl6::Parser::Factory {
 					Perl6::Bareword.from-match( $p )
 				);
 			}
-			else {
-				@child.append(
-					( )
-				);
-			}
 		}
 		else {
 			debug-match( $p ) if $*DEBUG;
@@ -4202,6 +4151,7 @@ class Perl6::Parser::Factory {
 #	}
 
 	my %delimiter-map =
+		Q{/} => Perl6::Regex,
 		Q{'} => Perl6::String::Escaping,
 		Q{"} => Perl6::String::Interpolation,
 		Q{｢} => Perl6::String::Literal;
@@ -4312,9 +4262,9 @@ class Perl6::Parser::Factory {
 							$_.hash.<quibble>.hash.<babble>
 						)
 					);
-					$_.hash.<quibble>.hash.<babble>.Str ~~
-						m{ ( .+? ) \s* $ };
-					@q-adverb.append( $0.Str );
+					if $_.hash.<quibble>.hash.<babble>.Str ~~ m{ ( .+? ) \s* $ } {
+						@q-adverb.append( $0.Str );
+					}
 				}
 				# XXX The first place negative indices are used
 				@_child.append(
@@ -4452,60 +4402,20 @@ class Perl6::Parser::Factory {
 			}
 			when self.assert-hash( $p, [< nibble >] ) {
 				my Perl6::Element @_child;
- 				$p.Str ~~ m{ ^ (.) .*? (.) $ };
-				@_child.append(
-					Perl6::Balanced::Enter.from-int(
-						$p.from,
-						$0.Str
+				$p.Str ~~ m{ ^ (.) };
+				if $p.hash.<nibble>.Str {
+					@_child.append(
+						self._nibble(
+							$p.hash.<nibble>
+							
+						)
+					);
+				}
+				@child.append(
+					%delimiter-map{$0.Str}.from-match(
+						$p, @_child
 					)
 				);
-				if $0.Str eq Q{/} {
-					@_child.append(
-						self._nibble( $p.hash.<nibble> )
-					);
-					@_child.append(
-						Perl6::Balanced::Exit.from-int(
-							$p.to - $1.Str.chars,
-							$1.Str
-						)
-					);
-					@child.append(
-						Perl6::Regex.new(
-							:factory-line-number(
-								callframe(1).line
-							),
-							:from( $p.from ),
-							:to( $p.to ),
-							:child( @_child )
-						)
-					);
-				}
-				else {
-					if $p.hash.<nibble>.Str {
-						@_child.append(
-							self._nibble(
-								$p.hash.<nibble>
-								
-							)
-						);
-					}
-					@_child.append(
-						Perl6::Balanced::Exit.from-int(
-							$p.to - $1.Str.chars,
-							$1.Str
-						)
-					);
-					@child.append(
-						%delimiter-map{$0.Str}.new(
-							:factory-line-number(
-								callframe(1).line
-							),
-							:from( $p.from ),
-							:to( $p.to ),
-							:child( @_child )
-						)
-					);
-				}
 			}
 			default {
 				debug-match( $p ) if $*DEBUG;
@@ -4563,7 +4473,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ );
+#				debug-match( $_ ) if $*DEBUG;
 #				die "Unhandled case" if
 #					$*FACTORY-FAILURE-FATAL
 #			}
@@ -4630,45 +4540,14 @@ class Perl6::Parser::Factory {
 				[< deflongname nibble >],
 				[< signature trait >] ) {
 			my Perl6::Element @_child;
+			@_child.append( self._nibble( $p.hash.<nibble> ) );
 			@child.append(
 				self._deflongname( $p.hash.<deflongname> )
 			);
-			my Int $left-margin = $p.from;
-			my Int $right-margin = $p.to;
-			$left-margin += $p.hash.<deflongname>.Str.chars;
-			my Str $x = $p.Str.substr(
-				$p.hash.<deflongname>.to - $p.from
-			);
-			if $x ~~ m{ ^ ( \s+ ) } {
-				$left-margin += $0.Str.chars;
-			}
-			if $p.Str ~~ m{ ( \s+ ) $ } {
-				$right-margin -= $0.Str.chars;
-			}
-
-			@_child.append(
-				Perl6::Balanced::Enter.from-int(
-					$left-margin,
-					BRACE-OPEN
-				)
-			);
-			$x = $p.Str.substr( $left-margin + 1 - $p.from );
-			@_child.append( self._nibble( $p.hash.<nibble> ) );
-			$x = $p.Str.substr( $p.hash.<nibble>.to - $p.from );
-			@_child.append(
-				Perl6::Balanced::Exit.from-int(
-					$right-margin - 1,
-					BRACE-CLOSE
-				)
-			);
 			@child.append(
-				Perl6::Block.new(
-					:factory-line-number(
-						callframe(1).line
-					),
-					:from( @_child[0].from ),
-					:to( @_child[*-1].to ),
-					:child( @_child )
+				Perl6::Block.from-outer-match(
+					$p.hash.<nibble>,
+					@_child
 				)
 			);
 		}
@@ -4729,7 +4608,7 @@ class Perl6::Parser::Factory {
 				my Str $left-edge = $_.Str.substr(
 					0, $_.hash.<multisig>.from - $_.from
 				);
-				$left-edge ~~ m{ ( '(' ) ( \s* ) $ };
+				$left-edge ~~ m{ ('(') ( \s* ) $ };
 				@_child.append(
 					Perl6::Balanced::Enter.from-int(
 						$p.hash.<multisig>.from -
@@ -4778,7 +4657,7 @@ class Perl6::Parser::Factory {
 				my Str $left-edge = $_.Str.substr(
 					0, $_.hash.<multisig>.from - $_.from
 				);
-				$left-edge ~~ m{ ( '(' ) ( \s* ) $ };
+				$left-edge ~~ m{ ('(') ( \s* ) $ };
 				@_child.append(
 					Perl6::Balanced::Enter.from-int(
 						$_.hash.<multisig>.from -
@@ -4829,7 +4708,7 @@ class Perl6::Parser::Factory {
 						$_.hash.<deflongname>
 					)
 				);
-				if $_.Str ~~ m{ ( ';' ) ( \s* ) $ } {
+				if $_.Str ~~ m{ (';') ( \s* ) $ } {
 					@child.append(
 						Perl6::Semicolon.from-int(
 							$_.to - $1.chars -
@@ -5329,11 +5208,9 @@ class Perl6::Parser::Factory {
 				@child.append(
 					self._param_var( $_.hash.<param_var> )
 				);
-				@child.append(
-					self._trait( $_.hash.<trait> )
-				);
+				@child.append( self._trait( $_.hash.<trait> ) );
 				if $p.hash.<default_value> {
-					if $_.Str ~~ m{ ( '=' ) } {
+					if $_.Str ~~ m{ ('=') } {
 						@child.append(
 							Perl6::Operator::Infix.from-sample(
 								$p,
@@ -5359,7 +5236,7 @@ class Perl6::Parser::Factory {
 					self._param_var( $_.hash.<param_var> )
 				);
 				if $p.hash.<default_value> {
-					if $_.Str ~~ m{ ( '=' ) } {
+					if $_.Str ~~ m{ ('=') } {
 						@child.append(
 							Perl6::Operator::Infix.from-sample(
 								$p,
@@ -5386,7 +5263,9 @@ class Perl6::Parser::Factory {
 					)
 				);
 				@child.append(
-					self._default_value( $_.hash.<default_value> )
+					self._default_value(
+						$_.hash.<default_value>
+					)
 				);
 			}
 			when self.assert-hash( $_,
@@ -5452,7 +5331,7 @@ class Perl6::Parser::Factory {
 					[< quant named_param >],
 					[< default_value modifier trait
 					   post_constraint quant >] ) {
-				if $_.Str ~~ m{ ^ ( ':' ) } {
+				if $_.Str ~~ m{ ^ (':') } {
 					# XXX join the ':'...
 					@child.append(
 						Perl6::Bareword.from-int(
@@ -5578,7 +5457,7 @@ class Perl6::Parser::Factory {
 				my Str $right-edge = $_.Str.substr(
 					$_.hash.<EXPR>.to - $_.from
 				);
-				if $right-edge ~~ m{ ( '\\' ) ( \s* ) $ } {
+				if $right-edge ~~ m{ ('\\') ( \s* ) $ } {
 					@child.append(
 						Perl6::Bareword.from-int(
 							$_.hash.<EXPR>.to -
@@ -5601,7 +5480,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ );
+#				debug-match( $_ ) if $*DEBUG;
 #				die "Unhandled case" if
 #					$*FACTORY-FAILURE-FATAL
 #			}
@@ -5876,9 +5755,6 @@ class Perl6::Parser::Factory {
 				)
 			);
 		}
-		elsif !$p.hash.keys {
-			note "Fix null case"
-		}
 		else {
 			debug-match( $p ) if $*DEBUG;
 			die "Unhandled case" if
@@ -5889,24 +5765,15 @@ class Perl6::Parser::Factory {
 
 	method _statementlist( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
-		my Str $leftover-ws;
-		my Int $leftover-ws-from = 0;
 
 		for $p.hash.<statement>.list {
 			my Perl6::Element @_child;
-			if $leftover-ws {
-				$leftover-ws = Nil;
-				$leftover-ws-from = 0
-			}
 			@_child.append( self._statement( $_ ) );
 			# Do *NOT* remove this, use it to replace whatever
 			# WS trailing terms the grammar below might add
 			# redundantly.
 			#
 			if $_.Str ~~ m{ ';' ( \s+ ) $ } {
-				my Int $right-margin = $0.Str.chars;
-				$leftover-ws = $0.Str;
-				$leftover-ws-from = $_.to - $right-margin;
 			}
 			elsif $_.Str ~~ m{ ( \s+ ) $ } {
 				my Int $right-margin = $0.Str.chars;
@@ -5915,16 +5782,12 @@ class Perl6::Parser::Factory {
 						$_.to - $right-margin,
 						$0.Str
 					)
-				)
+				);
 			}
 			my Str $temp = $p.Str.substr(
 				@_child[*-1].to - $p.from
 			);
-			if $temp ~~ m{ ^ ( ';' ) ( \s* ) } {
-				$leftover-ws = $1.Str if $1.Str.chars;
-				$leftover-ws-from = 
-					@_child[*-1].to +
-					$0.Str.chars;
+			if $temp ~~ m{ ^ (';') ( \s* ) } {
 				@_child.append(
 					Perl6::Semicolon.from-int(
 						@_child[*-1].to,
@@ -5934,24 +5797,9 @@ class Perl6::Parser::Factory {
 			}
 			@child.append( Perl6::Statement.from-list( @_child ) );
 		}
-		if $leftover-ws {
-			if !%.here-doc{$leftover-ws-from} {
-				my Perl6::Element @_child;
-				@_child.append(
-					Perl6::WS.from-int(
-						$leftover-ws-from, $leftover-ws
-					)
-				);
-				@child.append(
-					Perl6::Statement.from-list( @_child )
-				);
-			}
-		}
-		elsif !$p.hash.<statement> and $p.Str ~~ m{ . } {
+		if !$p.hash.<statement> and $p.Str ~~ m{ . } {
 			my Perl6::Element @_child;
-			if $p.from < $p.to {
-				@_child.append( Perl6::WS.from-match( $p ) );
-			}
+			@_child.append( Perl6::WS.from-match( $p ) );
 			@child.append( Perl6::Statement.from-list( @_child ) );
 		}
 		@child;
@@ -6087,14 +5935,9 @@ class Perl6::Parser::Factory {
 			}
 		}
 		elsif $p.Str {
-			@child.append(
-				Perl6::Bareword.from-match( $p )
-			);
-		}
-		elsif $p.Bool and $p.Str eq '+' {
 			@child.append( Perl6::Bareword.from-match( $p ) );
 		}
-		elsif $p.Bool and $p.Str eq '' {
+		elsif $p.Bool {
 			@child.append( Perl6::Bareword.from-match( $p ) );
 		}
 		else {
@@ -6220,7 +6063,7 @@ class Perl6::Parser::Factory {
 					my Str $x = $_.orig.Str.substr(
 						$_.hash.<termish>.to
 					);
-					if $x ~~ m{ ^ \s* ( '|' ) } {
+					if $x ~~ m{ ^ \s* ('|') } {
 						my Int $left-margin = $0.from;
 						@child.append(
 							Perl6::Operator::Infix.from-int(
@@ -6355,7 +6198,7 @@ class Perl6::Parser::Factory {
 					);
 				}
 				else {
-					debug-match( $_ );
+					debug-match( $_ ) if $*DEBUG;
 					die "Unhandled case" if
 						$*FACTORY-FAILURE-FATAL
 				}
@@ -6421,7 +6264,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ );
+#				debug-match( $_ ) if $*DEBUG;
 #				die "Unhandled case" if
 #					$*FACTORY-FAILURE-FATAL
 #			}
@@ -6563,7 +6406,7 @@ class Perl6::Parser::Factory {
 					[< postcircumfix OPER >],
 					[< postfix_prefix_meta_operator >] ) {
 				@child.append( self._EXPR( $_.list.[0] ) );
-				if $_.Str ~~ m{ ^ ( '.' ) } {
+				if $_.Str ~~ m{ ^ ('.') } {
 					@child.append(
 						Perl6::Operator::Infix.from-int(
 							$_.from,
@@ -6586,7 +6429,7 @@ class Perl6::Parser::Factory {
 				@child.append( self._EXPR( $_.list.[0] ) );
 			}
 			when self.assert-hash( $_, [< infix OPER >] ) {
-				if $_.hash.<infix>.Str ~~ m{ '??' } {
+				if $_.hash.<infix>.Str ~~ m{ ('??') } {
 					@child.append(
 						self._value(
 							$_.list.[0].hash.<value>
@@ -6595,7 +6438,7 @@ class Perl6::Parser::Factory {
 					@child.append(
 						Perl6::Operator::Infix.from-sample(
 							$_.hash.<infix>,
-							QUES-QUES
+							$0.Str
 						)
 					);
 					@child.append(
@@ -6675,7 +6518,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ );
+#				debug-match( $_ ) if $*DEBUG;
 #				die "Unhandled case" if
 #					$*FACTORY-FAILURE-FATAL
 #			}
@@ -6709,45 +6552,31 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
+	method __Variable( Mu $p, Mu $name ) returns Perl6::Element {
+		my Str $sigil	= $p.hash.<sigil>.Str;
+		my Str $twigil	= $p.hash.<twigil> ??
+				  $p.hash.<twigil>.Str !! '';
+		my Str $desigilname = $name ?? $name.Str !! '';
+		my Str $content = $p.hash.<sigil> ~ $twigil ~ $desigilname;
+
+		%sigil-map{$sigil ~ $twigil}.from-int( $p.from, $content );
+	}
+
 	method _var( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_,
 					[< twigil sigil desigilname >] ) {
-				# XXX For heavens' sake refactor.
-				my Str $sigil	= $_.hash.<sigil>.Str;
-				my Str $twigil	= $_.hash.<twigil> ??
-						  $_.hash.<twigil>.Str !! '';
-				my Str $desigilname =
-					$_.hash.<desigilname> ??
-					$_.hash.<desigilname>.Str !! '';
-				my Str $content =
-					$_.hash.<sigil> ~
-					$twigil ~
-					$desigilname;
 				@child.append(
-					%sigil-map{$sigil ~ $twigil}.from-int(
-						$_.from,
-						$content
+					self.__Variable(
+						$_, $_.hash.<desigilname>
 					)
 				);
 			}
 			when self.assert-hash( $_, [< sigil desigilname >] ) {
-				# XXX For heavens' sake refactor.
-				my Str $sigil	= $_.hash.<sigil>.Str;
-				my Str $twigil	= $_.hash.<twigil> ??
-						  $_.hash.<twigil>.Str !! '';
-				my Str $desigilname =
-					$_.hash.<desigilname> ??
-					$_.hash.<desigilname>.Str !! '';
-				my Str $content =
-					$_.hash.<sigil> ~
-					$twigil ~
-					$desigilname;
 				@child.append(
-					%sigil-map{$sigil ~ $twigil}.from-int(
-						$_.from,
-						$content
+					self.__Variable(
+						$_, $_.hash.<desigilname>
 					)
 				);
 			}
@@ -6822,19 +6651,8 @@ class Perl6::Parser::Factory {
 			);
 		}
 		else {
-			my Str $sigil	= $p.hash.<sigil>.Str;
-			my Str $twigil	= $p.hash.<twigil> ??
-					  $p.hash.<twigil>.Str !! '';
-			my Str $desigilname =
-				$p.hash.<desigilname> ??
-				$p.hash.<desigilname>.Str !! '';
-			my Str $content =
-				$p.hash.<sigil> ~ $twigil ~ $desigilname;
 			@child.append(
-				%sigil-map{$sigil ~ $twigil}.from-int(
-					$p.from,
-					$content
-				)
+				self.__Variable( $p, $p.hash.<desigilname> )
 			);
 		}
 		@child;
