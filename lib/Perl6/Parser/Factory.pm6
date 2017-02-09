@@ -931,7 +931,7 @@ class Perl6::Parser::Factory {
 							$from - $right-margin,
 							$2.Str
 						)
-					);
+					) if $2.Str;
 				}
 				when m{ \S } {
 				}
