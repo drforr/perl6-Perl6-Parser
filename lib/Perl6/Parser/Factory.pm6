@@ -208,7 +208,7 @@ role Matchable {
 		my Int $right-margin = $2.Str.chars;
 		self.bless(
 			:factory-line-number( callframe(1).line ),
-			:from( $left-margin + $p.from  ),
+			:from( $left-margin + $p.from ),
 			:to( $p.to - $right-margin ),
 			:content( $1.Str )
 		)
@@ -878,13 +878,12 @@ class Perl6::Parser::Factory {
 						)
 					);
 				}
-				when m{ ^ ( \s+ ) ( '#' .+ ) $$ ( \s* ) $ } {
+				when m{ ^ ( \s+ ) ( '#' .+ ) $ } {
 					my Int $left-margin = $0.Str.chars;
-					my Int $right-margin = $2.Str.chars;
-
 					@child.append(
 						Perl6::WS.from-int(
-							$from, $0.Str
+							$from,
+							$0.Str
 						)
 					);
 					@child.append(
@@ -893,14 +892,6 @@ class Perl6::Parser::Factory {
 							$1.Str
 						)
 					);
-					if $2.Str {
-						@child.append(
-							Perl6::WS.from-int(
-								$to - $right-margin,
-								$2.Str
-							)
-						);
-					}
 				}
 				when m{ \S } {
 				}
@@ -2123,7 +2114,7 @@ class Perl6::Parser::Factory {
 		my Perl6::Element @child;
 		if self.assert-hash( $p,
 				[< dotty OPER
-				  postfix_prefix_meta_operator >] ) {
+				   postfix_prefix_meta_operator >] ) {
 			@child.append( self._EXPR( $p.list.[0] ) );
 			@child.append(
 				self._postfix_prefix_meta_operator(
@@ -3628,8 +3619,7 @@ class Perl6::Parser::Factory {
 			}
 			elsif self.assert-hash( $_,
 				[< param_var quant default_value >],
-				[< modifier trait
-				   type_constraint
+				[< modifier trait type_constraint
 				   post_constraint >] ) {
 				@child.append(
 					self._param_var( $_.hash.<param_var> )
@@ -3649,8 +3639,7 @@ class Perl6::Parser::Factory {
 			elsif self.assert-hash( $_,
 				[< param_var quant >],
 				[< default_value modifier trait
-				   type_constraint
-				   post_constraint >] ) {
+				   type_constraint post_constraint >] ) {
 				@child.append(
 					self._param_var( $_.hash.<param_var> )
 				);
@@ -5373,6 +5362,9 @@ class Perl6::Parser::Factory {
 			when self.assert-hash( $_,
 					[< parameter typename >],
 					[< param_sep >] ) {
+#key-bounds $_.hash.<parameter>;
+key-bounds $_.hash.<typename>;
+key-bounds $_;
 				@child.append(
 					self._typename( $_.hash.<typename> )
 				);
