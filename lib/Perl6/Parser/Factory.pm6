@@ -890,6 +890,7 @@ class Perl6::Parser::Factory {
 	method _string-to-tokens( Int $from, Str $str )
 			returns Array[Perl6::Element] {
 		my Perl6::Element @child;
+		my $to = $from + $str.chars;
 
 		if %.here-doc{$from} {
 			@child.append(
@@ -913,27 +914,28 @@ class Perl6::Parser::Factory {
 					);
 				}
 				when m{ ^ ( \s+ ) ( '#' .+ ) $$ ( \s* ) $ } {
-					my Int:D $left = $from;
-					my Int:D $center = $left + $0.Str.chars;
-					my Int:D $right = $center + $1.Str.chars;
+					my Int $left-margin = $0.Str.chars;
+					my Int $right-margin = $2.Str.chars;
 
 					@child.append(
 						Perl6::WS.from-int(
-							$left, $0.Str
+							$from, $0.Str
 						)
 					);
 					@child.append(
 						Perl6::Comment.from-int(
-							$center,
+							$left-margin + $from,
 							$1.Str
 						)
 					);
-					@child.append(
-						Perl6::WS.from-int(
-							$right,
-							$2.Str
-						)
-					) if $2.Str;
+					if $2.Str {
+						@child.append(
+							Perl6::WS.from-int(
+								$to - $right-margin,
+								$2.Str
+							)
+						);
+					}
 				}
 				when m{ \S } {
 				}
