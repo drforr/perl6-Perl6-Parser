@@ -913,25 +913,27 @@ class Perl6::Parser::Factory {
 					);
 				}
 				when m{ ^ ( \s+ ) ( '#' .+ ) $$ ( \s* ) $ } {
-					my Int $left-margin = $0.Str.chars;
-					my Int $right-margin = $2.Str.chars;
+					my Int:D $left = $from;
+					my Int:D $center = $left + $0.Str.chars;
+					my Int:D $right = $center + $1.Str.chars;
+
 					@child.append(
 						Perl6::WS.from-int(
-							$from, $0.Str
+							$left, $0.Str
 						)
 					);
 					@child.append(
 						Perl6::Comment.from-int(
-							$left-margin + $from,
+							$center,
 							$1.Str
 						)
 					);
 					@child.append(
 						Perl6::WS.from-int(
-							$from - $right-margin,
+							$right,
 							$2.Str
 						)
-					);
+					) if $2.Str;
 				}
 				when m{ \S } {
 				}
