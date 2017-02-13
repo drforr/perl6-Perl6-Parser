@@ -831,41 +831,6 @@ my role Assertions {
 	}
 }
 
-#`( This is just a reminder of what Iteration objects use for later.
-my role Iteration {
-	method pull-one( Iterator:D $i ) returns Mu {
-	}
-
-	method push-exactly( Iterator:D $target, int $count ) returns Mu {
-	}
-
-	method push-at-least( Iterator:D $target, int $count ) returns Mu {
-	}
-
-	method push-all( Iterator:D $i ) {
-	}
-
-	method push-until-lazy( Iterator:D $i ) returns Mu {
-	}
-
-	method is-lazy( Iterator:D $i ) returns Bool:D {
-	}
-
-	method sink-all( Iterator:D $i ) {
-	}
-
-	method skip-one( Iterator:D $i ) returns Mu {
-	}
-
-	method skip-at-least( Iterator:D $target, int $to-skip ) returns Mu {
-	}
-
-	method skip-at-least-pull-one( Iterator:D $target, int $to-skip )
-		returns Mu {
-	}
-}
-)
-
 class Perl6::Parser::Factory {
 	also does Assertions;
 
@@ -2276,6 +2241,9 @@ class Perl6::Parser::Factory {
 		elsif self.assert-hash( $p, [< infix OPER >] ) {
 			my Int $end = $p.list.elems - 1;
 			my Str $infix-str = $p.hash.<infix>.Str;
+			# XXX It's probably possible to unify these if-clauses
+			# XXX since the loop relies on the children now.
+			#
 			if $infix-str ~~ m{ ('??') } {
 				@child.append( self._EXPR( $p.list.[0] ) );
 				@child.append(
@@ -2295,19 +2263,22 @@ class Perl6::Parser::Factory {
 				@child.append( self._EXPR( $p.list.[2] ) );
 			}
 			else {
+				# XXX Another loop where we have to refer to
+				# XXX what's been parsed beforehand.
+				#
 				for $p.list.kv -> $k, $v {
 					@child.append( self._EXPR( $v ) );
 					if $k < $end {
 						my Str $x = $p.orig.Str.substr(
-							$p.list.[$k].to,
+							@child[*-1].to,
 							$p.list.[$k+1].from -
-								$p.list.[$k].to
+								@child[*-1].to,
 						);
 						if $x ~~ m{ ($infix-str) } {
 							my Int $left-margin = $0.from;
 							@child.append(
 								Perl6::Operator::Infix.from-int(
-									$left-margin + $v.to,
+									@child[*-1].to + $0.from,
 									$0.Str
 								)
 							);
@@ -2797,8 +2768,9 @@ class Perl6::Parser::Factory {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_,
-				     [< specials longname blockoid multisig >],
-				     [< trait >] ) {
+					[< specials longname blockoid
+					   multisig >],
+					[< trait >] ) {
 				my Perl6::Element @_child;
 				# XXX has a twin at <blockoid multisig> in EXPR
 				my Str $x = $_.orig.substr(
@@ -2832,8 +2804,8 @@ class Perl6::Parser::Factory {
 				);
 			}
 			when self.assert-hash( $_,
-				     [< specials longname blockoid >],
-				     [< trait >] ) {
+					[< specials longname blockoid >],
+					[< trait >] ) {
 				@child.append(
 					self._longname( $_.hash.<longname> )
 				);

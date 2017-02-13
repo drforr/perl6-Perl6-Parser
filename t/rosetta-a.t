@@ -776,7 +776,6 @@ _END_
 }, Q{Arbitrary-precision integers};
 
 subtest {
-#`[
 	# XXX Make up a 'Image::PNG::Portable' class
 	my $source = Q:to[_END_];
 class Image::PNG::Portable { has ( $.width, $.height ); method set { }; method write { } }
@@ -796,7 +795,6 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 	done-testing;
 }, Q{Archimedean spiral};

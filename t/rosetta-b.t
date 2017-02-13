@@ -404,7 +404,6 @@ _END_
 	}, Q{version 2};
 
 	subtest {
-#`[
 		my $source = Q:to[_END_];
 my sub infix:<bop>(\prev,\this) { this.key => this.key * (this.value - prev.value) }
  
@@ -418,7 +417,6 @@ _END_
 		my $tree = $pt.build-tree( $p );
 		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 		done-testing;
 	}, Q{version 3};
