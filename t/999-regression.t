@@ -546,6 +546,18 @@ _END_
 	is $pt.to-string( $tree ), $source, Q{formatted};
 }, Q{repeat block};
 
+subtest {
+	plan 2;
+
+	my $source = Q:to[_END_];
+$<bulls>
+_END_
+	my $p = $pt.parse( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.to-string( $tree ), $source, Q{formatted};
+}, Q{postcircumfix operator};
+
 done-testing;
 
 # vim: ft=perl6

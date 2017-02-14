@@ -6531,14 +6531,78 @@ class Perl6::Parser::Factory {
 		@child;
 	}
 
-	method __Variable( Mu $p, Mu $name ) returns Perl6::Element {
+	method ___Variable_Name( Mu $p, Mu $name ) {
 		my Str $sigil	= $p.hash.<sigil>.Str;
 		my Str $twigil	= $p.hash.<twigil> ??
 				  $p.hash.<twigil>.Str !! '';
 		my Str $desigilname = $name ?? $name.Str !! '';
 		my Str $content = $p.hash.<sigil> ~ $twigil ~ $desigilname;
+		%sigil-map{$sigil ~ $twigil}.from-int(
+			$p.from, $content
+		);
+	}
 
-		%sigil-map{$sigil ~ $twigil}.from-int( $p.from, $content );
+	method __Variable( Mu $p, Mu $name ) returns Array[Perl6::Element] {
+		my Perl6::Element @child;
+		given $p {
+			when self.assert-hash( $_,
+					[< sigil desigilname
+					   postcircumfix >] ) {
+				@child.append(
+					self.___Variable_Name( $_, $name )
+				);
+				@child.append(
+					self._postcircumfix(
+						$_.hash.<postcircumfix>
+					)
+				);
+			}
+			when self.assert-hash( $_,
+					[< twigil sigil desigilname >] ) {
+				@child.append(
+					self.___Variable_Name( $_, $name )
+				);
+			}
+			when self.assert-hash( $_,
+					[< twigil sigil name >] ) {
+				@child.append(
+					self.___Variable_Name( $_, $name )
+				);
+			}
+			when self.assert-hash( $_,
+					[< sigil desigilname >] ) {
+				@child.append(
+					self.___Variable_Name( $_, $name )
+				);
+			}
+			when self.assert-hash( $_,
+					[< sigil postcircumfix >] ) {
+				@child.append(
+					self.___Variable_Name( $_, $name )
+				);
+				@child.append(
+					self._postcircumfix(
+						$_.hash.<postcircumfix>
+					)
+				);
+			}
+			when self.assert-hash( $_, [< sigil name >] ) {
+				@child.append(
+					self.___Variable_Name( $_, $name )
+				);
+			}
+			when self.assert-hash( $_, [< sigil >] ) {
+				@child.append(
+					self.___Variable_Name( $_, '' )
+				);
+			}
+			default {
+				debug-match( $_ ) if $*DEBUG;
+				die "Unhandled case" if
+					$*FACTORY-FAILURE-FATAL
+			}
+		}
+		@child;
 	}
 
 	method _var( Mu $p ) returns Array[Perl6::Element] {

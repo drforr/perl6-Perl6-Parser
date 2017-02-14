@@ -2767,6 +2767,10 @@ return True;
 		return True if self.assert-hash-keys( $parsed, [< sigil >] )
 			and self._Sigil( $parsed.hash.<sigil> );
 		return True if self.assert-hash-keys( $parsed,
+				[< postcircumfix sigil >] )
+			and self._PostCircumfix( $parsed.hash.<postcircumfix> )
+			and self._Sigil( $parsed.hash.<sigil> );
+		return True if self.assert-hash-keys( $parsed,
 				[< contextualizer >] )
 			and self._Contextualizer( $parsed.hash.<contextualizer> );
 		debug-match( $parsed );
