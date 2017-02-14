@@ -1961,10 +1961,20 @@ class Perl6::Parser::Factory {
 	method _dottyop( Mu $p ) returns Array[Perl6::Element] {
 		my Perl6::Element @child;
 		given $p {
-			when self.assert-hash( $_, [< sym postop >], [< O >] ) {
-				@child.append( self._sym( $p.hash.<sym> ) );
+			when self.assert-hash( $_, [< sym postop O >] ) {
+				if $_.hash.<sym>.Str {
+					@child.append(
+						self._sym( $_.hash.<sym> )
+					);
+				}
 				@child.append(
-					self._postop( $p.hash.<postop> )
+					self._postop( $_.hash.<postop> )
+				);
+			}
+			when self.assert-hash( $_, [< sym postop >], [< O >] ) {
+				@child.append( self._sym( $_.hash.<sym> ) );
+				@child.append(
+					self._postop( $_.hash.<postop> )
 				);
 			}
 			when self.assert-hash( $_, [< colonpair >] ) {
@@ -2160,7 +2170,7 @@ class Perl6::Parser::Factory {
 				[< dotty OPER >],
 				[< postfix_prefix_meta_operator >] ) {
 			@child.append( self._EXPR( $p.list.[0] ) );
-			if $p.Str ~~ m{ ( '>>' ) } {
+			if $p.Str ~~ m{ ('>>') } {
 				@child.append(
 					Perl6::Operator::Prefix.from-int(
 						$p.from, $0.Str
@@ -3981,7 +3991,11 @@ class Perl6::Parser::Factory {
 		given $p {
 			when self.assert-hash( $_,
 					[< sym postcircumfix O >] ) {
-				@child.append( self._sym( $_.hash.<sym> ) );
+				if $_.hash.<sym>.Str {
+					@child.append(
+						self._sym( $_.hash.<sym> )
+					);
+				}
 				@child.append(
 					self._postcircumfix(
 						$_.hash.<postcircumfix>
@@ -5960,9 +5974,6 @@ class Perl6::Parser::Factory {
 			}
 		}
 		elsif $p.Str {
-			@child.append( Perl6::Bareword.from-match( $p ) );
-		}
-		elsif $p.Bool {
 			@child.append( Perl6::Bareword.from-match( $p ) );
 		}
 		else {
