@@ -6576,6 +6576,12 @@ class Perl6::Parser::Factory {
 				);
 			}
 			when self.assert-hash( $_,
+					[< sigil index >] ) {
+				@child.append(
+					self.___Variable_Name( $_, $name )
+				);
+			}
+			when self.assert-hash( $_,
 					[< sigil postcircumfix >] ) {
 				@child.append(
 					self.___Variable_Name( $_, $name )

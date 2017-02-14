@@ -1056,7 +1056,6 @@ _END_
 }, Q{Break OO privacy};
 
 subtest {
-#`[
 	my $source = Q:to[_END_];
 constant size = 100;
 constant particlenum = 1_000;
@@ -1135,7 +1134,6 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 	done-testing;
 }, Q{Brownian tree};
