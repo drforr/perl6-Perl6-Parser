@@ -510,6 +510,18 @@ _END_
 	is $pt.to-string( $tree ), $source, Q{formatted};
 }, Q{postfix 'or'};
 
+subtest {
+	plan 2;
+
+	my $source = Q:to[_END_];
+sub ev (Str $s --> Num) { }
+_END_
+	my $p = $pt.parse( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.to-string( $tree ), $source, Q{formatted};
+}, Q{implicit return type};
+
 done-testing;
 
 # vim: ft=perl6

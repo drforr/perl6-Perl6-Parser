@@ -5362,12 +5362,6 @@ class Perl6::Parser::Factory {
 			when self.assert-hash( $_,
 					[< parameter typename >],
 					[< param_sep >] ) {
-#key-bounds $_.hash.<parameter>;
-key-bounds $_.hash.<typename>;
-key-bounds $_;
-				@child.append(
-					self._typename( $_.hash.<typename> )
-				);
 				for $_.hash.<parameter>.list.kv -> $k, $v {
 					@child.append( self.__Parameter( $v ) );
 					if $k > 1 {
@@ -5378,6 +5372,23 @@ key-bounds $_;
 						);
 					}
 				}
+				my Str $x = $p.orig.Str.substr(
+					$_.hash.<parameter>.to,
+					$_.hash.<typename>.from -
+						$_.hash.<parameter>.to
+				);
+				if $x ~~ m{ ('-->') } {
+					@child.append(
+						Perl6::Operator::Infix.from-int(
+							$_.hash.<parameter>.to +
+								$0.from,
+							'-->'
+						)
+					)
+				}
+				@child.append(
+					self._typename( $_.hash.<typename> )
+				);
 			}
 			when self.assert-hash( $_,
 					[< parameter >],
