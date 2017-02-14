@@ -534,6 +534,18 @@ _END_
 	is $pt.to-string( $tree ), $source, Q{formatted};
 }, Q{ordered alternation};
 
+subtest {
+	plan 2;
+
+	my $source = Q:to[_END_];
+repeat { } while 1;
+_END_
+	my $p = $pt.parse( $source );
+	my $tree = $pt.build-tree( $p );
+	ok $pt.validate( $p ), Q{valid};
+	is $pt.to-string( $tree ), $source, Q{formatted};
+}, Q{repeat block};
+
 done-testing;
 
 # vim: ft=perl6

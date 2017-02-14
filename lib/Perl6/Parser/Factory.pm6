@@ -5553,12 +5553,12 @@ class Perl6::Parser::Factory {
 			}
 			when self.assert-hash( $_,
 					[< pblock sym EXPR wu >] ) {
+				@child.append( self._sym( $_.hash.<sym> ) );
 				@child.append(
 					self._pblock( $_.hash.<pblock> )
 				);
-				@child.append( self._sym( $_.hash.<sym> ) );
-				@child.append( self._EXPR( $_.hash.<EXPR> ) );
 				@child.append( self._wu( $_.hash.<wu> ) );
+				@child.append( self._EXPR( $_.hash.<EXPR> ) );
 			}
 			when self.assert-hash( $_,
 					[< doc sym module_name >] ) {
