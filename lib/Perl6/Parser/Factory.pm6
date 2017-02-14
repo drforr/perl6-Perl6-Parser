@@ -6042,7 +6042,7 @@ class Perl6::Parser::Factory {
 					my Str $x = $_.orig.Str.substr(
 						$_.hash.<termish>.to
 					);
-					if $x ~~ m{ ^ \s* ('|') } {
+					if $x ~~ m{ ^ \s* ('|'+) } {
 						my Int $left-margin = $0.from;
 						@child.append(
 							Perl6::Operator::Infix.from-int(

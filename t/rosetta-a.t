@@ -922,7 +922,6 @@ _END_
 }, Q{Arithmetic coding};
 
 subtest {
-#`[
 	my $source = Q:to[_END_];
 sub ev (Str $s --> Num) {
  
@@ -971,7 +970,6 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 	done-testing;
 }, Q{Arithmetic evaluation};
@@ -1018,7 +1016,6 @@ _END_
 }, Q{Arithmetic-geometric mean};
 
 subtest {
-#`[
 	my $source = Q:to[_END_];
 constant number-of-decimals = 100;
  
@@ -1049,7 +1046,6 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 	done-testing;
 }, Q{Arithmetic-geometric mean/Calculate pi};
