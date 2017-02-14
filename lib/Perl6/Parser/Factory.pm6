@@ -4169,6 +4169,52 @@ class Perl6::Parser::Factory {
 				);
 			}
 			when self.assert-hash( $_,
+					[< sym quibble rx_adverbs >] ) {
+				my Perl6::Element @_child;
+				@child.append( self._sym( $_.hash.<sym> ) );
+				if $_.hash.<rx_adverbs>.Str {
+					@child.append(
+						self._rx_adverbs(
+							$_.hash.<rx_adverbs>
+						)
+					);
+				}
+				# XXX The first place negative indices are used
+				@_child.append(
+					Perl6::Balanced::Enter.from-int(
+						$_.hash.<quibble>.hash.<nibble>.from - 1,
+						$_.hash.<quibble>.Str.substr(
+							*-($_.hash.<quibble>.hash.<nibble>.chars + 2),
+							1
+						)
+					)
+				);
+				@_child.append(
+					Perl6::String::Body.from-match(
+						$_.hash.<quibble>.hash.<nibble>
+					)
+				);
+				@_child.append(
+					Perl6::Balanced::Exit.from-int(
+						$_.hash.<quibble>.hash.<nibble>.to,
+						$_.hash.<quibble>.Str.substr(
+							$_.hash.<quibble>.chars - 1,
+							1
+						)
+					)
+				);
+				@child.append(
+					Perl6::Regex.new(
+						:factory-line-number(
+							callframe(1).line
+						),
+						:from( $_.hash.<quibble>.from ),
+						:to( $_.hash.<quibble>.to ),
+						:child( @_child )
+					)
+				);
+			}
+			when self.assert-hash( $_,
 					[< sym quibble >], [< rx_adverbs >] ) {
 				my Str @rx-adverb;
 				my Perl6::Element @_child;

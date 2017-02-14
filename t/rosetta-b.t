@@ -1171,7 +1171,6 @@ _END_
 }, Q{Bulls and cows};
 
 subtest {
-#`[
 	my $source = Q:to[_END_];
 # we use the [] reduction meta operator along with the Cartesian Product
 # operator X to create the Cartesian Product of four times [1..9] and then get
@@ -1223,7 +1222,6 @@ _END_
 	my $tree = $pt.build-tree( $p );
 	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 	done-testing;
 }, Q{Bulls and cows / player};

@@ -1180,6 +1180,10 @@ return True;
 	method _MetaChar( Mu $parsed ) {
 		self.trace( '_MetaChar' );
 #return True;
+		return True if self.assert-hash-keys( $parsed,
+				[< name quantified_atom >] )
+			and self._Sym( $parsed.hash.<name> )
+			and self._Sym( $parsed.hash.<quantified_atom> );
 		return True if self.assert-hash-keys( $parsed, [< sym >] )
 			and self._Sym( $parsed.hash.<sym> );
 		return True if self.assert-hash-keys( $parsed, [< codeblock >] )
