@@ -24,92 +24,85 @@ use Perl6::Parser;
 plan 4;
 
 my $pt = Perl6::Parser.new;
-my $*VALIDATION-FAILURE-FATAL = True;
-my $*FACTORY-FAILURE-FATAL = True;
-my $*DEBUG = True;
+my $*CONSISTENCY-CHECK = True;
+my $*GRAMMAR-CHECK = True;
 
 subtest {
-	plan 2;
-
 	subtest {
-		plan 2;
-
 		my $source = Q:to[_END_];
 my$x
 _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
+
+		done-testing;
 	}, Q{no ws};
 
 	subtest {
-		plan 2;
-
 		my $source = Q:to[_END_];
 my     $x
 _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
+
+		done-testing;
 	}, Q{leading ws};
+
+	done-testing;
 }, Q{my};
 
 subtest {
-	plan 2;
-
 	subtest {
-		plan 2;
-
 		my $source = Q:to[_END_];
 our$x
 _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
+
+		done-testing;
 	}, Q{no ws};
 
 	subtest {
-		plan 2;
-
 		my $source = Q:to[_END_];
 our     $x
 _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
+
+		done-testing;
 	}, Q{leading ws};
+
+	done-testing;
 }, Q{our};
 
 subtest {
-	plan 2;
-
 	subtest {
-		plan 2;
-
 		my $source = Q:to[_END_];
 class Foo{has$x}
 _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
+
+		done-testing;
 	}, Q{no ws};
 
 	subtest {
-		plan 2;
-
 		my $source = Q:to[_END_];
 class Foo{has     $x}
 _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
+
+		done-testing;
 	}, Q{leading ws};
+
+	done-testing;
 }, Q{has};
 
 # HAS requires another class definition.
@@ -118,25 +111,23 @@ _END_
 #	plan 2;
 #
 #	subtest {
-#		plan 2;
-#
 #		my $source = Q{class Foo is repr('CStruct'){HAS int $x}};
 #		my $p = $pt.parse( $source );
 #		my $tree = $pt.build-tree( $p );
-#		ok $pt.validate( $p ), Q{valid};
 #		is $pt.to-string( $tree ), $source, Q{formatted};
+#
+#		done-testing;
 #	}, Q{no ws};
 #
 #	subtest {
-#		plan 2;
-#
 #		my $source = Q:to[_END_];
 #class Foo is repr( 'CStruct' ) { HAS int $x }
 #_END_
 #		my $p = $pt.parse( $source );
 #		my $tree = $pt.build-tree( $p );
-#		ok $pt.validate( $p ), Q{valid};
 #		is $pt.to-string( $tree ), $source, Q{formatted};
+#
+#		done-testing;
 #	}, Q{leading ws};
 #}, Q{HAS};
 
@@ -148,25 +139,23 @@ subtest {
 	plan 2;
 
 	subtest {
-		plan 2;
-
 		my $source = Q{state$x};
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
+
+		done-testing;
 	}, Q{no ws};
 
 	subtest {
-		plan 2;
-
 		my $source = Q:to[_END_];
 state     $x
 _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
+
+		done-testing;
 	}, Q{leading ws};
 }, Q{state};
 

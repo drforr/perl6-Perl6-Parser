@@ -941,11 +941,13 @@ class Perl6::Parser::Factory {
 		my Int $end = $root.child.[$index+1].from;
 
 		if $start < 0 or $end < 0 {
-			say "Negative match index!";
+			$*ERR.say( "Negative match index!" ) if
+				%*ENV<AUTHOR>;
 			return;
 		}
 		elsif $start > $end {
-			say "Crossing streams";
+			$*ERR.say( "Crossing streams" ) if
+				%*ENV<AUTHOR>;
 			return;
 		}
 
@@ -972,22 +974,23 @@ class Perl6::Parser::Factory {
 		my Str $from-to = "{$p.from} {$p.to}";
 		my $text = substr( $p.orig,$p.from, $p.to-$p.from );
 		if $p.orig {
-			$*ERR.say: "$from-to [$text]";
+			$*ERR.say( "$from-to [$text]" );
 		}
 		else {
-			$*ERR.say: "-1 -1 NIL"
+			$*ERR.say( "-1 -1 NIL" );
 		}
 	}
 
-	sub debug-match( Mu $p ) {
+	sub display-unhandled-match( Mu $p ) {
 		my %classified = classify {
 			$p.hash.{$_}.Str ?? 'with' !! 'without'
 		}, $p.hash.keys;
 		my Str @keys-with-content = @( %classified<with> );
 		my Str @keys-without-content = @( %classified<without> );
 
-		$*ERR.say: "With content: {@keys-with-content.gist}";
-		$*ERR.say: "Without content: {@keys-without-content.gist}";
+		$*ERR.say( "With content: {@keys-with-content.gist}" );
+		$*ERR.say( "Without content: {@keys-without-content.gist}" );
+		die;
 	}
 
 	method _arglist( Mu $p ) returns Array[Perl6::Element] {
@@ -1000,9 +1003,7 @@ class Perl6::Parser::Factory {
 					);
 				}
 				else {
-					debug-match( $_ ) if $*DEBUG;
-					die "Unhandled case" if
-						$*FACTORY-FAILURE-FATAL
+					display-unhandled-match( $_ );
 				}
 			}
 		}
@@ -1021,9 +1022,7 @@ class Perl6::Parser::Factory {
 			@child.append( self._EXPR( $p.hash.<EXPR> ) );
 		}
 		else {
-			debug-match( $_ ) if $*DEBUG;
-			die "Unhandled case" if
-				$*FACTORY-FAILURE-FATAL
+			display-unhandled-match( $_ );
 		}
 		@child;
 	}
@@ -1053,9 +1052,7 @@ class Perl6::Parser::Factory {
 				@child.append( self._EXPR( $_.hash.<EXPR> ) );
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -1084,9 +1081,7 @@ class Perl6::Parser::Factory {
 #				self._codeblock( $_.hash.<codeblock> );
 #			}
 #			default {
-#				debug-match( $_ ) if $*DEBUG;
-#				die "Unhandled case" if
-#					$*FACTORY-FAILURE-FATAL
+#				display-unhandled-match( $_ );
 #			}
 #		}
 #		@child;
@@ -1100,9 +1095,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ ) if $*DEBUG;
-#				die "Unhandled case" if
-#					$*FACTORY-FAILURE-FATAL
+#				display-unhandled-match( $_ );
 #			}
 #		}
 #		@child;
@@ -1112,9 +1105,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ ) if $*DEBUG;
-#				die "Unhandled case" if
-#					$*FACTORY-FAILURE-FATAL
+#				display-unhandled-match( $_ );
 #			}
 #		}
 #		@child;
@@ -1124,9 +1115,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ ) if $*DEBUG;
-#				die "Unhandled case" if
-#					$*FACTORY-FAILURE-FATAL
+#				display-unhandled-match( $_ );
 #			}
 #		}
 #		@child;
@@ -1150,9 +1139,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ ) if $*DEBUG;
-#				die "Unhandled case" if
-#					$*FACTORY-FAILURE-FATAL
+#				display-unhandled-match( $_ );
 #			}
 #		}
 #		@child;
@@ -1171,9 +1158,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -1195,9 +1180,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -1215,9 +1198,7 @@ class Perl6::Parser::Factory {
 				@child.append( self._block( $_.hash.<block> ) );
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -1227,9 +1208,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ ) if $*DEBUG;
-#				die "Unhandled case" if
-#					$*FACTORY-FAILURE-FATAL
+#				display-unhandled-match( $_ );
 #			}
 #		}
 #		@child;
@@ -1266,16 +1245,12 @@ class Perl6::Parser::Factory {
 #					);
 #				}
 #				else {
-#					debug-match( $_ ) if $*DEBUG;
-#					die "Unhandled case" if
-#						$*FACTORY-FAILURE-FATAL
+#					display-unhandled-match( $_ );
 #				}
 #			}
 #		}
 #		else {
-#			debug-match( $_ ) if $*DEBUG;
-#			die "Unhandled case" if
-#				$*FACTORY-FAILURE-FATAL
+#			display-unhandled-match( $_ );
 #		}
 #		@child;
 #	}
@@ -1284,9 +1259,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ ) if $*DEBUG;
-#				die "Unhandled case" if
-#					$*FACTORY-FAILURE-FATAL
+#				display-unhandled-match( $_ );
 #			}
 #		}
 #		@child;
@@ -1314,9 +1287,7 @@ class Perl6::Parser::Factory {
 					);
 				}
 				else {
-					debug-match( $_ ) if $*DEBUG;
-					die "Unhandled case" if
-						$*FACTORY-FAILURE-FATAL
+					display-unhandled-match( $_ );
 				}
 			}
 			@child.append(
@@ -1359,9 +1330,7 @@ class Perl6::Parser::Factory {
 					);
 				}
 				default {
-					debug-match( $_ ) if $*DEBUG;
-					die "Unhandled case" if
-						$*FACTORY-FAILURE-FATAL
+					display-unhandled-match( $_ );
 				}
 			}
 		}
@@ -1372,9 +1341,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ ) if $*DEBUG;
-#				die "Unhandled case" if
-#					$*FACTORY-FAILURE-FATAL
+#				display-unhandled-match( $_ );
 #			}
 #		}
 #		@child;
@@ -1389,9 +1356,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -1406,9 +1371,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -1427,9 +1390,7 @@ class Perl6::Parser::Factory {
 					);
 				}
 				else {
-					debug-match( $_ ) if $*DEBUG;
-					die "Unhandled case" if
-						$*FACTORY-FAILURE-FATAL
+					display-unhandled-match( $_ );
 				}
 			}
 		}
@@ -1497,9 +1458,7 @@ class Perl6::Parser::Factory {
 					@child.append( self._var( $_.hash.<var> ) );
 				}
 				default {
-					debug-match( $_ ) if $*DEBUG;
-					die "Unhandled case" if
-						$*FACTORY-FAILURE-FATAL
+					display-unhandled-match( $_ );
 				}
 			}
 		}
@@ -1514,9 +1473,7 @@ class Perl6::Parser::Factory {
 #				return True if $_.<U>;
 #			}
 #			default {
-#				debug-match( $_ ) if $*DEBUG;
-#				die "Unhandled case" if
-#					$*FACTORY-FAILURE-FATAL
+#				display-unhandled-match( $_ );
 #			}
 #		}
 #		@child;
@@ -1551,9 +1508,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -1658,9 +1613,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -1776,9 +1729,7 @@ class Perl6::Parser::Factory {
 #				);
 #			}
 #			default {
-#				debug-match( $_ ) if $*DEBUG;
-#				die "Unhandled case" if
-#					$*FACTORY-FAILURE-FATAL
+#				display-unhandled-match( $_ );
 #			}
 #		}
 #		@child;
@@ -1797,9 +1748,7 @@ class Perl6::Parser::Factory {
 				@child.append( self.__FloatingPoint( $_ ) );
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -1815,16 +1764,12 @@ class Perl6::Parser::Factory {
 					);
 				}
 				else {
-					debug-match( $_ ) if $*DEBUG;
-					die "Unhandled case" if
-						$*FACTORY-FAILURE-FATAL
+					display-unhandled-match( $_ );
 				}
 			}
 		}
 		else {
-			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if
-				$*FACTORY-FAILURE-FATAL
+			display-unhandled-match( $p );
 		}
 		@child;
 	}
@@ -1843,9 +1788,7 @@ class Perl6::Parser::Factory {
 				@child.append( self._name( $_.hash.<name> ) );
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -1880,9 +1823,7 @@ class Perl6::Parser::Factory {
 				}
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -1897,9 +1838,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -1909,9 +1848,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ ) if $*DEBUG;
-#				die "Unhandled case" if
-#					$*FACTORY-FAILURE-FATAL
+#				display-unhandled-match( $_ );
 #			}
 #		}
 #		@child;
@@ -1925,9 +1862,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ ) if $*DEBUG;
-#				die "Unhandled case" if
-#					$*FACTORY-FAILURE-FATAL
+#				display-unhandled-match( $_ );
 #			}
 #		}
 #		@child;
@@ -1950,9 +1885,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -1988,9 +1921,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -2003,9 +1934,7 @@ class Perl6::Parser::Factory {
 				@child.append( self._term( $_.hash.<term> ) );
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -2022,9 +1951,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -2039,9 +1966,7 @@ class Perl6::Parser::Factory {
 				@child.append( self._EXPR( $_.list.[1] ) );
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -2059,9 +1984,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -2076,9 +1999,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -2088,9 +2009,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ ) if $*DEBUG;
-#				die "Unhandled case" if
-#					$*FACTORY-FAILURE-FATAL
+#				display-unhandled-match( $_ );
 #			}
 #		}
 #		@child;
@@ -2112,9 +2031,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ ) if $*DEBUG;
-#				die "Unhandled case" if
-#					$*FACTORY-FAILURE-FATAL
+#				display-unhandled-match( $_ );
 #			}
 #		}
 #		@child;
@@ -2331,9 +2248,7 @@ class Perl6::Parser::Factory {
 			}
 			else {
 # XXX needs to be filled in
-#				debug-match( $p ) if $*DEBUG;
-#				die "Unhandled case" if
-#					$*FACTORY-FAILURE-FATAL
+#				display-unhandled-match( $p );
 			}
 		}
 		elsif self.assert-hash( $p, [< circumfix >] ) {
@@ -2421,9 +2336,7 @@ class Perl6::Parser::Factory {
 			@child.append( Perl6::Bareword.from-match( $p ) );
 		}
 		else {
-			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if
-				$*FACTORY-FAILURE-FATAL
+			display-unhandled-match( $p );
 		}
 		@child;
 	}
@@ -2432,9 +2345,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ ) if $*DEBUG;
-#				die "Unhandled case" if
-#					$*FACTORY-FAILURE-FATAL
+#				display-unhandled-match( $_ );
 #			}
 #		}
 #		@child;
@@ -2449,9 +2360,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -2470,9 +2379,7 @@ class Perl6::Parser::Factory {
 				@child.append( self._val( $_.hash.<val> ) );
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -2492,9 +2399,7 @@ class Perl6::Parser::Factory {
 			@child.append( Perl6::Bareword.from-match( $p ) );
 		}
 		else {
-			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if
-				$*FACTORY-FAILURE-FATAL
+			display-unhandled-match( $p );
 		}
 		@child;
 	}
@@ -2514,9 +2419,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -2526,9 +2429,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ ) if $*DEBUG;
-#				die "Unhandled case" if
-#					$*FACTORY-FAILURE-FATAL
+#				display-unhandled-match( $_ );
 #			}
 #		}
 #		@child;
@@ -2542,9 +2443,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ ) if $*DEBUG;
-#				die "Unhandled case" if
-#					$*FACTORY-FAILURE-FATAL
+#				display-unhandled-match( $_ );
 #			}
 #		}
 #		@child;
@@ -2568,9 +2467,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -2608,9 +2505,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -2642,9 +2537,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -2655,9 +2548,7 @@ class Perl6::Parser::Factory {
 #		#if $p ~~ QAST::Want;
 #		given $p {
 #			default {
-#				debug-match( $_ ) if $*DEBUG;
-#				die "Unhandled case" if
-#					$*FACTORY-FAILURE-FATAL
+#				display-unhandled-match( $_ );
 #			}
 #		}
 #		@child;
@@ -2680,9 +2571,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -2696,9 +2585,7 @@ class Perl6::Parser::Factory {
 				@child.append( self._name( $_.hash.<name> ) );
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -2708,9 +2595,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child; 
 #		given $p {
 #			default {
-#				debug-match( $_ ) if $*DEBUG;
-#				die "Unhandled case" if
-#					$*FACTORY-FAILURE-FATAL
+#				display-unhandled-match( $_ );
 #			}
 #		}
 #		@child;
@@ -2725,41 +2610,31 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			when self.assert-hash( $_, [< sym >] ) {
-#				die; # XXX unused? Or just untested?
 #				self._sym( $_.hash.<sym> );
 #			}
 #			when self.assert-hash( $_, [< codeblock >] ) {
-#				die; # XXX unused? Or just untested?
 #				self._codeblock( $_.hash.<codeblock> );
 #			}
 #			when self.assert-hash( $_, [< backslash >] ) {
-#				die; # XXX unused? Or just untested?
 #				self._backslash( $_.hash.<backslash> );
 #			}
 #			when self.assert-hash( $_, [< assertion >] ) {
-#				die; # XXX unused? Or just untested?
 #				self._assertion( $_.hash.<assertion> );
 #			}
 #			when self.assert-hash( $_, [< nibble >] ) {
-#				die; # XXX unused? Or just untested?
 #				self._nibble( $_.hash.<nibble> );
 #			}
 #			when self.assert-hash( $_, [< quote >] ) {
-#				die; # XXX unused? Or just untested?
 #				self._quote( $_.hash.<quote> );
 #			}
 #			when self.assert-hash( $_, [< nibbler >] ) {
-#				die; # XXX unused? Or just untested?
 #				self._nibbler( $_.hash.<nibbler> );
 #			}
 #			when self.assert-hash( $_, [< statement >] ) {
-#				die; # XXX unused? Or just untested?
 #				self._statement( $_.hash.<statement> );
 #			}
 #			default {
-#				debug-match( $_ ) if $*DEBUG;
-#				die "Unhandled case" if
-#					$*FACTORY-FAILURE-FATAL
+#				display-unhandled-match( $_ );
 #			}
 #		}
 #		@child;
@@ -2815,9 +2690,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -2843,9 +2716,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -2861,9 +2732,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -2876,9 +2745,7 @@ class Perl6::Parser::Factory {
 				@child.append( self._EXPR( $_.hash.<EXPR> ) );
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -2893,9 +2760,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -2914,16 +2779,12 @@ class Perl6::Parser::Factory {
 #					);
 #				}
 #				else {
-#					debug-match( $_ ) if $*DEBUG;
-#					die "Unhandled case" if
-#						$*FACTORY-FAILURE-FATAL
+#					display-unhandled-match( $_ );
 #				}
 #			}
 #		}
 #		else {
-#			debug-match( $p ) if $*DEBUG;
-#			die "Unhandled case" if
-#				$*FACTORY-FAILURE-FATAL
+#			display-unhandled-match( $p );
 #		}
 #		@child;
 #	}
@@ -2956,9 +2817,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -2973,9 +2832,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -3021,9 +2878,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -3058,9 +2913,7 @@ class Perl6::Parser::Factory {
 					);
 				}
 				default {
-					debug-match( $_ ) if $*DEBUG;
-					die "Unhandled case" if
-						$*FACTORY-FAILURE-FATAL
+					display-unhandled-match( $_ );
 				}
 			}
 		}
@@ -3091,9 +2944,7 @@ class Perl6::Parser::Factory {
 			}
 		}
 		else {
-			debug-match( $_ ) if $*DEBUG;
-			die "Unhandled case" if
-				$*FACTORY-FAILURE-FATAL
+			display-unhandled-match( $_ );
 		}
 		@child;
 	}
@@ -3102,9 +2953,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ ) if $*DEBUG;
-#				die "Unhandled case" if
-#					$*FACTORY-FAILURE-FATAL
+#				display-unhandled-match( $_ );
 #			}
 #		}
 #		@child;
@@ -3114,9 +2963,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ );
-#				die "Unhandled case" if
-#					$*FACTORY-FAILURE-FATAL
+#				display-unhandled-match( $_ );
 #			}
 #		}
 #		@child;
@@ -3225,16 +3072,12 @@ class Perl6::Parser::Factory {
 					);
 				}
 				else {
-					debug-match( $_ ) if $*DEBUG;
-					die "Unhandled case" if
-						$*FACTORY-FAILURE-FATAL
+					display-unhandled-match( $_ );
 				}
 			}
 		}
 		else {
-			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if
-				$*FACTORY-FAILURE-FATAL
+			display-unhandled-match( $p );
 		}
 		@child;
 	}
@@ -3250,9 +3093,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -3291,9 +3132,7 @@ class Perl6::Parser::Factory {
 				@child.append( self.__NaN( $_ ) );
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -3360,9 +3199,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ ) if $*DEBUG;
-#				die "Unhandled case" if
-#					$*FACTORY-FAILURE-FATAL
+#				display-unhandled-match( $_ );
 #			}
 #		}
 #		@child;
@@ -3425,9 +3262,7 @@ class Perl6::Parser::Factory {
 #				@child.append( self._O( $_.hash.<O> ) );
 #			}
 #			default {
-#				debug-match( $_ ) if $*DEBUG;
-#				die "Unhandled case" if
-#					$*FACTORY-FAILURE-FATAL
+#				display-unhandled-match( $_ );
 #			}
 #		}
 #		@child;
@@ -3441,9 +3276,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ ) if $*DEBUG;
-#				die "Unhandled case" if
-#					$*FACTORY-FAILURE-FATAL
+#				display-unhandled-match( $_ );
 #			}
 #		}
 #		@child;
@@ -3482,9 +3315,7 @@ class Perl6::Parser::Factory {
 				@child.append( self._trait( $_.hash.<trait> ) );
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -3540,9 +3371,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -3557,9 +3386,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -3665,9 +3492,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			else {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -3747,9 +3572,7 @@ class Perl6::Parser::Factory {
 				@child.append( self._sigil( $_.hash.<sigil> ) );
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -3776,9 +3599,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -3806,9 +3627,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ ) if $*DEBUG;
-#				die "Unhandled case" if
-#					$*FACTORY-FAILURE-FATAL
+#				display-unhandled-match( $_ );
 #			}
 #		}
 #		@child;
@@ -3821,9 +3640,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ ) if $*DEBUG;
-#				die "Unhandled case" if
-#					$*FACTORY-FAILURE-FATAL
+#				display-unhandled-match( $_ );
 #			}
 #		}
 #		@child;
@@ -3836,9 +3653,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ ) if $*DEBUG;
-#				die "Unhandled case" if
-#					$*FACTORY-FAILURE-FATAL
+#				display-unhandled-match( $_ );
 #			}
 #		}
 #		@child;
@@ -3857,16 +3672,12 @@ class Perl6::Parser::Factory {
 					);
 				}
 				else {
-					debug-match( $_ ) if $*DEBUG;
-					die "Unhandled case" if
-						$*FACTORY-FAILURE-FATAL
+					display-unhandled-match( $_ );
 				}
 			}
 		}
 		else {
-			debug-match( $_ ) if $*DEBUG;
-			die "Unhandled case" if
-				$*FACTORY-FAILURE-FATAL
+			display-unhandled-match( $_ );
 		}
 		@child;
 	}
@@ -3879,16 +3690,12 @@ class Perl6::Parser::Factory {
 					@child.append( self._EXPR( $_ ) );
 				}
 				else {
-					debug-match( $_ ) if $*DEBUG;
-					die "Unhandled case" if
-						$*FACTORY-FAILURE-FATAL
+					display-unhandled-match( $_ );
 				}
 			}
 		}
 		else {
-			debug-match( $_ ) if $*DEBUG;
-			die "Unhandled case" if
-				$*FACTORY-FAILURE-FATAL
+			display-unhandled-match( $_ );
 		}
 		@child;
 	}
@@ -3953,9 +3760,7 @@ class Perl6::Parser::Factory {
 				}
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -3978,9 +3783,7 @@ class Perl6::Parser::Factory {
 				@child.append( self._dig( $_.hash.<dig> ) );
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -4005,9 +3808,7 @@ class Perl6::Parser::Factory {
 #				@child.append( self._O( $_.hash.<O> ) );
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -4024,16 +3825,12 @@ class Perl6::Parser::Factory {
 					);
 				}
 				else {
-					debug-match( $_ ) if $*DEBUG;
-					die "Unhandled case" if
-						$*FACTORY-FAILURE-FATAL
+					display-unhandled-match( $_ );
 				}
 			}
 		}
 		else {
-			debug-match( $_ ) if $*DEBUG;
-			die "Unhandled case" if
-				$*FACTORY-FAILURE-FATAL
+			display-unhandled-match( $_ );
 		}
 		@child;
 	}
@@ -4050,9 +3847,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -4069,9 +3864,7 @@ class Perl6::Parser::Factory {
 			}
 		}
 		else {
-			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if
-				$*FACTORY-FAILURE-FATAL
+			display-unhandled-match( $p );
 		}
 		@child;
 	}
@@ -4084,9 +3877,7 @@ class Perl6::Parser::Factory {
 				@child.append( self._atom( $_.hash.<atom> ) );
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -4109,9 +3900,7 @@ class Perl6::Parser::Factory {
 				@child.append( self._sym( $_.hash.<sym> ) );
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -4121,9 +3910,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ ) if $*DEBUG;
-#				die "Unhandled case" if
-#					$*FACTORY-FAILURE-FATAL
+#				display-unhandled-match( $_ );
 #			}
 #		}
 #		@child;
@@ -4443,9 +4230,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $p ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $p );
 			}
 		}
 		@child;
@@ -4468,9 +4253,7 @@ class Perl6::Parser::Factory {
 					);
 				}
 				else {
-					debug-match( $_ ) if $*DEBUG;
-					die "Unhandled case" if
-						$*FACTORY-FAILURE-FATAL
+					display-unhandled-match( $_ );
 				}
 			}
 		}
@@ -4487,9 +4270,7 @@ class Perl6::Parser::Factory {
 			);
 		}
 		else {
-			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if
-				$*FACTORY-FAILURE-FATAL
+			display-unhandled-match( $p );
 		}
 		@child;
 	}
@@ -4498,9 +4279,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ ) if $*DEBUG;
-#				die "Unhandled case" if
-#					$*FACTORY-FAILURE-FATAL
+#				display-unhandled-match( $_ );
 #			}
 #		}
 #		@child;
@@ -4524,9 +4303,7 @@ class Perl6::Parser::Factory {
 				@child.append( self.__Radix( $_ ) );
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -4546,9 +4323,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -4577,9 +4352,7 @@ class Perl6::Parser::Factory {
 			);
 		}
 		else {
-			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if
-				$*FACTORY-FAILURE-FATAL
+			display-unhandled-match( $p );
 		}
 		@child;
 	}
@@ -4588,9 +4361,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $p ) if $*DEBUG;
-#				die "Unhandled case" if
-#					$*FACTORY-FAILURE-FATAL
+#				display-unhandled-match( $p );
 #			}
 #		}
 #		@child;
@@ -4616,9 +4387,7 @@ class Perl6::Parser::Factory {
 			);
 		}
 		else {
-			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if
-				$*FACTORY-FAILURE-FATAL
+			display-unhandled-match( $p );
 		}
 		@child;
 	}
@@ -4802,9 +4571,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -4819,9 +4586,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -4870,9 +4635,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -4898,9 +4661,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -4937,9 +4698,7 @@ class Perl6::Parser::Factory {
 				}
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -4957,9 +4716,7 @@ class Perl6::Parser::Factory {
 					);
 				}
 				else {
-					debug-match( $_ ) if $*DEBUG;
-					die "Unhandled case" if
-						$*FACTORY-FAILURE-FATAL
+					display-unhandled-match( $_ );
 				}
 			}
 		}
@@ -4996,9 +4753,7 @@ class Perl6::Parser::Factory {
 					( )
 				}
 				default {
-					debug-match( $_ ) if $*DEBUG;
-					die "Unhandled case" if
-						$*FACTORY-FAILURE-FATAL
+					display-unhandled-match( $_ );
 				}
 			}
 		}
@@ -5020,9 +4775,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -5039,9 +4792,7 @@ class Perl6::Parser::Factory {
 				self._statement( $_.hash.<statement> );
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -5051,9 +4802,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ ) if $*DEBUG;
-#				die "Unhandled case" if
-#					$*FACTORY-FAILURE-FATAL
+#				display-unhandled-match( $_ );
 #			}
 #		}
 #		@child;
@@ -5092,9 +4841,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -5104,9 +4851,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ ) if $*DEBUG;
-#				die "Unhandled case" if
-#					$*FACTORY-FAILURE-FATAL
+#				display-unhandled-match( $_ );
 #			}
 #		}
 #		@child;
@@ -5120,9 +4865,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ ) if $*DEBUG;
-#				die "Unhandled case" if
-#					$*FACTORY-FAILURE-FATAL
+#				display-unhandled-match( $_ );
 #			}
 #		}
 #		@child;
@@ -5408,9 +5151,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -5478,9 +5219,7 @@ class Perl6::Parser::Factory {
 					[< param_sep parameter >] ) {
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -5507,9 +5246,7 @@ class Perl6::Parser::Factory {
 				}
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -5519,9 +5256,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ ) if $*DEBUG;
-#				die "Unhandled case" if
-#					$*FACTORY-FAILURE-FATAL
+#				display-unhandled-match( $_ );
 #			}
 #		}
 #		@child;
@@ -5700,9 +5435,7 @@ class Perl6::Parser::Factory {
 				@child.append( self._block( $_.hash.<block> ) );
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -5755,9 +5488,7 @@ class Perl6::Parser::Factory {
 					);
 				}
 				else {
-					debug-match( $_ ) if $*DEBUG;
-					die "Unhandled case" if
-						$*FACTORY-FAILURE-FATAL
+					display-unhandled-match( $_ );
 				}
 			}
 		}
@@ -5795,9 +5526,7 @@ class Perl6::Parser::Factory {
 			);
 		}
 		else {
-			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if
-				$*FACTORY-FAILURE-FATAL
+			display-unhandled-match( $p );
 		}
 		@child;
 	}
@@ -5866,9 +5595,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -5889,9 +5616,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -5937,9 +5662,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -5949,9 +5672,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ ) if $*DEBUG;
-#				die "Unhandled case" if
-#					$*FACTORY-FAILURE-FATAL
+#				display-unhandled-match( $_ );
 #			}
 #		}
 #		@child;
@@ -5967,9 +5688,7 @@ class Perl6::Parser::Factory {
 					);
 				}
 				else {
-					debug-match( $_ ) if $*DEBUG;
-					die "Unhandled case" if
-						$*FACTORY-FAILURE-FATAL
+					display-unhandled-match( $_ );
 				}
 			}
 		}
@@ -5977,9 +5696,7 @@ class Perl6::Parser::Factory {
 			@child.append( Perl6::Bareword.from-match( $p ) );
 		}
 		else {
-			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if
-				$*FACTORY-FAILURE-FATAL
+			display-unhandled-match( $p );
 		}
 		@child;
 	}
@@ -6033,9 +5750,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -6053,16 +5768,12 @@ class Perl6::Parser::Factory {
 					);
 				}
 				else {
-					debug-match( $_ ) if $*DEBUG;
-					die "Unhandled case" if
-						$*FACTORY-FAILURE-FATAL
+					display-unhandled-match( $_ );
 				}
 			}
 		}
 		else {
-			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if
-				$*FACTORY-FAILURE-FATAL
+			display-unhandled-match( $p );
 		}
 		@child;
 	}
@@ -6078,9 +5789,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -6111,16 +5820,12 @@ class Perl6::Parser::Factory {
 					}
 				}
 				else {
-					debug-match( $_ ) if $*DEBUG;
-					die "Unhandled case" if
-						$*FACTORY-FAILURE-FATAL
+					display-unhandled-match( $_ );
 				}
 			}
 		}
 		else {
-			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if
-				$*FACTORY-FAILURE-FATAL
+			display-unhandled-match( $p );
 		}
 		@child;
 	}
@@ -6137,9 +5842,7 @@ class Perl6::Parser::Factory {
 					);
 				}
 				else {
-					debug-match( $_ ) if $*DEBUG;
-					die "Unhandled case" if
-						$*FACTORY-FAILURE-FATAL
+					display-unhandled-match( $_ );
 				}
 			}
 		}
@@ -6155,9 +5858,7 @@ class Perl6::Parser::Factory {
 			);
 		}
 		else {
-			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if
-				$*FACTORY-FAILURE-FATAL
+			display-unhandled-match( $p );
 		}
 		@child;
 	}
@@ -6166,9 +5867,7 @@ class Perl6::Parser::Factory {
 		my Perl6::Element @child;
 		given $p {
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -6184,9 +5883,7 @@ class Perl6::Parser::Factory {
 					);
 				}
 				else {
-					debug-match( $_ ) if $*DEBUG;
-					die "Unhandled case" if
-						$*FACTORY-FAILURE-FATAL
+					display-unhandled-match( $_ );
 				}
 			}
 		}
@@ -6198,9 +5895,7 @@ class Perl6::Parser::Factory {
 			@child.append( self._noun( $p.hash.<noun> ) );
 		}
 		else {
-			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if
-				$*FACTORY-FAILURE-FATAL
+			display-unhandled-match( $p );
 		}
 		@child;
 	}
@@ -6214,9 +5909,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -6234,16 +5927,12 @@ class Perl6::Parser::Factory {
 					);
 				}
 				else {
-					debug-match( $_ ) if $*DEBUG;
-					die "Unhandled case" if
-						$*FACTORY-FAILURE-FATAL
+					display-unhandled-match( $_ );
 				}
 			}
 		}
 		else {
-			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if
-				$*FACTORY-FAILURE-FATAL
+			display-unhandled-match( $p );
 		}
 		@child;
 	}
@@ -6288,9 +5977,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -6300,9 +5987,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ ) if $*DEBUG;
-#				die "Unhandled case" if
-#					$*FACTORY-FAILURE-FATAL
+#				display-unhandled-match( $_ );
 #			}
 #		}
 #		@child;
@@ -6325,9 +6010,7 @@ class Perl6::Parser::Factory {
 					);
 				}
 				else {
-					debug-match( $_ ) if $*DEBUG;
-					die "Unhandled case" if
-						$*FACTORY-FAILURE-FATAL
+					display-unhandled-match( $_ );
 				}
 			}
 		}
@@ -6338,9 +6021,7 @@ class Perl6::Parser::Factory {
 			self._typename( $p.hash.<typename> );
 		}
 		else {
-			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if
-				$*FACTORY-FAILURE-FATAL
+			display-unhandled-match( $p );
 		}
 		@child;
 	}
@@ -6383,9 +6064,7 @@ class Perl6::Parser::Factory {
 			@child.append( self._longname( $p.hash.<longname> ) );
 		}
 		else {
-			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if
-				$*FACTORY-FAILURE-FATAL
+			display-unhandled-match( $p );
 		}
 		@child;
 	}
@@ -6411,9 +6090,7 @@ class Perl6::Parser::Factory {
 					);
 				}
 				else {
-					debug-match( $_ ) if $*DEBUG;
-					die "Unhandled case" if
-						$*FACTORY-FAILURE-FATAL
+					display-unhandled-match( $_ );
 				}
 			}
 		}
@@ -6428,9 +6105,7 @@ class Perl6::Parser::Factory {
 			@child.append( self._longname( $p.hash.<longname> ) );
 		}
 		else {
-			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if
-				$*FACTORY-FAILURE-FATAL
+			display-unhandled-match( $p );
 		}
 		@child;
 	}
@@ -6542,9 +6217,7 @@ class Perl6::Parser::Factory {
 				@child.append( self._value( $_.hash.<value> ) );
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -6554,9 +6227,7 @@ class Perl6::Parser::Factory {
 #		my Perl6::Element @child;
 #		given $p {
 #			default {
-#				debug-match( $_ ) if $*DEBUG;
-#				die "Unhandled case" if
-#					$*FACTORY-FAILURE-FATAL
+#				display-unhandled-match( $_ );
 #			}
 #		}
 #		@child;
@@ -6580,9 +6251,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			};
 		}
 		@child;
@@ -6660,9 +6329,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -6687,9 +6354,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -6741,9 +6406,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -6771,9 +6434,7 @@ class Perl6::Parser::Factory {
 				@child.append( self._vstr( $_.hash.<vstr> ) );
 			}
 			default {
-				debug-match( $_ ) if $*DEBUG;
-				die "Unhandled case" if
-					$*FACTORY-FAILURE-FATAL
+				display-unhandled-match( $_ );
 			}
 		}
 		@child;
@@ -6796,16 +6457,12 @@ class Perl6::Parser::Factory {
 #					)
 #				}
 #				else {
-#					debug-match( $_ ) if $*DEBUG;
-#					die "Unhandled case" if
-#						$*FACTORY-FAILURE-FATAL
+#					display-unhandled-match( $_ );
 #				}
 #			}
 #		}
 #		else {
-#			debug-match( $p ) if $*DEBUG;
-#			die "Unhandled case" if
-#				$*FACTORY-FAILURE-FATAL
+#			display-unhandled-match( $p );
 #		}
 #		@child;
 #	}
@@ -6841,9 +6498,7 @@ class Perl6::Parser::Factory {
 					);
 				}
 				else {
-					debug-match( $_ ) if $*DEBUG;
-					die "Unhandled case" if
-						$*FACTORY-FAILURE-FATAL
+					display-unhandled-match( $_ );
 				}
 			}
 		}
@@ -6855,9 +6510,7 @@ class Perl6::Parser::Factory {
 			@child.append( self._blockoid( $p.hash.<blockoid> ) );
 		}
 		else {
-			debug-match( $p ) if $*DEBUG;
-			die "Unhandled case" if
-				$*FACTORY-FAILURE-FATAL
+			display-unhandled-match( $p );
 		}
 		@child;
 	}

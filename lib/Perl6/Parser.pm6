@@ -57,7 +57,6 @@ The first thing is to break the offending bit of code out so it's easier to debu
     say $p.dump;
     my $tree = $pt.build-tree( $p );
     say $pt.dump-tree($tree);
-    ok $pt.validate( $p ), Q{valid};
     is $pt.to-string( $tree ), $source, Q{formatted};
 
 Already a few things might stand out. First, the code inside the here-doc doesn't actually do anything, it'll never print anything to the screen or do anything interesting. That's not the point at this stage in the game. At this point all I need is a syntactically valid bit of Perl 6 that has the constructs that reproduce the bug. I don't care what the code actually does in the real world.
@@ -160,7 +159,7 @@ Makes certain that the NQPMatch object looks like a valid NQPMatch object to the
 
 Build the Perl6::Element tree from the NQPMatch object. This is the core, and runs the factory which silly-walks the match tree and returns one or more tokens for every single match entry it finds, and B<more>.
 
-=item check-tree( Perl6::Element $root )
+=item consistency-check( Perl6::Element $root )
 
 Check the integrity of the data structure. The Factory at its core puts together the structure very sloppily, to give the tree every possible chance to create actual quasi-valid text. This method makes sure that the factory returned valid tokens, which often doesn't happen. But since you really want to see the data round-tripped, most users don't care what the tree loos like internally.
 
@@ -193,7 +192,7 @@ my role Debugging {
 
 	#constant indent = "\t";
 	my constant indent = ' ';
-	method dump-tree( Perl6::Element $root,
+	method _dump-tree( Perl6::Element $root,
 			  Bool $display-ws = True,
 			  Int $depth = 0 ) {
 		return '' if $root ~~ Perl6::WS and !$display-ws;
@@ -239,12 +238,24 @@ my role Debugging {
 					}
 				}
 				$str ~= @problem.join( ' ' ) if @problem;
-				$str ~= self.dump-tree(
+				$str ~= self._dump-tree(
 					$root.child.[$_],
 					$display-ws, $depth + 1
 				)
 			}
 		}
+		$str
+	}
+
+	method dump-tree( Perl6::Element $root,
+			  Bool $display-ws = True,
+			  Int $depth = 0 ) {
+		my $str;
+
+		for $.factory.here-doc.keys.sort -> $k {
+			$str ~= "Here-Doc ($k-{$.factory.here-doc.{$k}})";
+		}
+		$str ~= self._dump-tree( $root, $display-ws, $depth );
 		$str
 	}
 
@@ -313,23 +324,20 @@ my role Testing {
 
 my role Validating {
 
-	method check-tree( Perl6::Element $root ) {
+	method _consistency-check( Perl6::Element $root ) {
 		if $root ~~ Perl6::Block {
 			unless $root.child.[0] ~~ Perl6::Structural {
-				say $root.perl;
-				die "First element of block not structural"
+				$*ERR.say( "First element not structural: " ~ $root.perl );
 			}
 			unless $root.child.[*-1] ~~ Perl6::Structural {
-				say $root.perl;
-				die "Last element of block not structural"
+				$*ERR.say( "Last element not structural: " ~ $root.perl );
 			}
 		}
 		if $root.^can('child') {
 			for $root.child {
-				self.check-tree( $_ );
+				self._consistency-check( $_ );
 				unless $_.^can('from') {
-					say $_.perl;
-					note "Element in list does not have 'from' accessor"
+					$*ERR.say( "Missing 'from': " ~ $_.perl );
 				}
 			}
 			if $root.child.elems > 1 {
@@ -339,47 +347,46 @@ my role Validating {
 					next unless $root.child.[$index].^can('from');
 					if $root.child.[$index-1] ~~ Perl6::WS and
 					   $root.child.[$index] ~~ Perl6::WS {
-						say "Two WS entries in a row"
+						$*ERR.say( "Two WS entries in a row" );
 					}
 					if $root.child.[$index-1].to !=
 						$root.child.[$index].from {
-						say "Gap between two items"
+						$*ERR.say( "Gap between two items" );
 					}
 				}
 			}
 		}
 		if $root.^can('content') {
 			if $root.content.chars < $root.to - $root.from {
-				say $root.perl;
-				#warn "Content '{$root.content}' too short for element ({$root.from} - {$root.to}) ({$root.to - $root.from} chars)"
+				$*ERR.say( "Not enough chars: " ~ $root.perl );
 			}
 			if $root.content.chars > $root.to - $root.from {
-				say $root.perl;
-				#warn "Content '{$root.content}' too long for element ({$root.from} - {$root.to}) ({$root.to - $root.from} glyphs}"
+				$*ERR.say( "Too many chars: " ~ $root.perl );
 			}
 			if $root !~~ Perl6::WS and
 					$root !~~ Perl6::String::Body and
 					$root !~~ Perl6::Sir-Not-Appearing-In-This-Statement and
 					$root.content ~~ m{ ^ (\s+) } {
-				say $root.perl;
-				#warn "Content '{$root.content}' has leading whitespace"
+				$*ERR.say( "Leading whitespace: " ~ $root.perl );
 			}
 			if $root !~~ Perl6::WS and
 					$root !~~ Perl6::Comment and
 					$root !~~ Perl6::String::Body and
 					$root.content ~~ m{ (\s+) $ } {
-				say $root.perl;
-				#warn "Content '{$root.content}' has trailing whitespace"
+				$*ERR.say( "Trailing whitespace: " ~ $root.perl );
 			}
 		}
+	}
+
+	method consistency-check( Perl6::Element $root ) {
+		self._consistency-check( $root );
 	}
 
 	method validate( Mu $parsed ) {
 		my $validator = Perl6::Parser::Validator.new;
 		my $res       = $validator.validate( $parsed );
 
-		die "Validation failed!" if !$res and %*ENV<AUTHOR_TESTS>;
-
+		$*ERR.say( "Validation failed!" ) if !$res;
 		$res
 	}
 }
@@ -389,6 +396,8 @@ class Perl6::Parser {
 	also does Testing;
 	also does Validating;
 	use nqp;
+
+	has $.factory = Perl6::Parser::Factory.new;
 
 	# These could easily be a single method, but I'll separate them for
 	# testing purposes.
@@ -410,21 +419,17 @@ class Perl6::Parser {
 	}
 
 	method build-tree( Mu $parsed ) {
-		my $factory = Perl6::Parser::Factory.new;
-		my $tree    = $factory.build( $parsed );
+		self.validate( $parsed ) if
+			$*GRAMMAR-CHECK and %*ENV<AUTHOR>;
 
-		if $*DEBUG and $factory.here-doc.keys > 0 {
-			for $factory.here-doc.keys.sort -> $k {
-				say "Here-Doc ($k-{$factory.here-doc.{$k}})";
-			}
-		}
-
-		self.check-tree( $tree );
+		my $tree = $.factory.build( $parsed );
+		self.consistency-check( $tree ) if
+			$*CONSISTENCY-CHECK and %*ENV<AUTHOR>;
 		$tree
 	}
 
 	method to-string( Perl6::Element $tree ) {
-		my $str = $tree.to-string( );
+		my $str = $tree.to-string;
 
 		$str
 	}

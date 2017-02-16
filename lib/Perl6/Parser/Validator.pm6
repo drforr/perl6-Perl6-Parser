@@ -8,8 +8,7 @@ my role Assertion {
 
 		return True if $parsed.Bool;
 
-		die "Uncaught Bool" if $*VALIDATION-FAILURE-FATAL;
-		warn "Uncaught type";
+		$*ERR.say( "Uncaught type" );
 		return False
 	}
 
@@ -22,8 +21,7 @@ my role Assertion {
 		return True if $parsed.Int;
 		return True if $parsed.Bool;
 
-		die "Uncaught Int" if $*VALIDATION-FAILURE-FATAL;
-		warn "Uncaught type";
+		$*ERR.say( "Uncaught type" );
 		return False
 	}
 
@@ -35,8 +33,7 @@ my role Assertion {
 
 		return True if $parsed.Num;
 
-		die "Uncaught Num" if $*VALIDATION-FAILURE-FATAL;
-		warn "Uncaught type";
+		$*ERR.say( "Uncaught Num" );
 		return False
 	}
 
@@ -50,8 +47,7 @@ my role Assertion {
 
 		return True if $parsed.Str;
 
-		die "Uncaught Str" if $*VALIDATION-FAILURE-FATAL;
-		warn "Uncaught type";
+		$*ERR.say( "Uncaught Str" );
 		return False
 	}
 
@@ -71,13 +67,13 @@ my role Assertion {
 
 		if $parsed.hash.keys.elems !=
 			$keys.elems + $defined-keys.elems {
-#				warn "Test " ~
+#				$*ERR.say( "Test " ~
 #					$keys.gist ~
 #					", " ~
 #					$defined-keys.gist ~
 #					" against parser " ~
-#					$parsed.hash.keys.gist;
-#				CONTROL { when CX::Warn { warn .message ~ "\n" ~ .backtrace.Str } }
+#					$parsed.hash.keys.gist );
+#				CONTROL { when CX::Warn { $*ERR.say( .message ~ "\n" ~ .backtrace.Str ) } }
 
 			return False
 		}
@@ -102,9 +98,7 @@ class Perl6::Parser::Validator {
 	}
 
 	method record-failure( Str $term ) returns Bool {
-		note "Validation failed for term '$term'" if $*DEBUG;
-		die "Validation failed for term '$term'" if
-			$*VALIDATION-FAILURE-FATAL;
+		$*ERR.say( "Validation failed for term '$term'" );
 		return False
 	}
 
@@ -115,8 +109,8 @@ class Perl6::Parser::Validator {
 		my @keys-with-content = @( %classified<with> );
 		my @keys-without-content = @( %classified<without> );
 
-		say "With content: {@keys-with-content.gist}";
-		say "Without content: {@keys-without-content.gist}";
+		$*ERR.say( "With content: {@keys-with-content.gist}" );
+		$*ERR.say( "Without content: {@keys-without-content.gist}" );
 	}
 
 	method validate( Mu $parsed ) {
@@ -417,12 +411,12 @@ class Perl6::Parser::Validator {
 	}
 
 	method _ColonPairs( Mu $parsed ) {
-#say $parsed.orig.Str;#.dump; # 'my Int:U $a'
-#say $parsed.from;
-#say $parsed.to;
-#say $parsed.made; # '{U => 1}'
-#say $parsed.dump_str; # '{U => 1}'
-#say $parsed.keys;
+# $*ERR.say( $parsed.orig.Str );#.dump; # 'my Int:U $a'
+# $*ERR.say( $parsed.from );
+# $*ERR.say( $parsed.to );
+# $*ERR.say( $parsed.made ); # '{U => 1}'
+# $*ERR.say( $parsed.dump_str ); # '{U => 1}'
+# $*ERR.say( $parsed.keys );
 #return;
 		CATCH {
 			when X::Multi::NoMatch { }
@@ -1125,9 +1119,9 @@ class Perl6::Parser::Validator {
 		#return True if self.assert-hash-keys( $parsed, [< XXX >] )
 		#	and self._VALUE( $parsed.hash.<XXX> );
 # XXX Fixme
-#say $parsed.dump;
-#say $parsed.dump_annotations;
-#say "############## " ~$parsed.<annotations>.gist;#<BY>;
+# $*ERR.say( $parsed.dump );
+# $*ERR.say( $parsed.dump_annotations );
+# $*ERR.say( "############## " ~$parsed.<annotations>.gist );#<BY>;
 return True;
 		debug-match( $parsed );
 		return self.record-failure( '_Invocant' );

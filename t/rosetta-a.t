@@ -6,9 +6,8 @@ use Perl6::Parser;
 plan 42;
 
 my $pt = Perl6::Parser.new;
-my $*VALIDATION-FAILURE-FATAL = True;
-my $*FACTORY-FAILURE-FATAL = True;
-my $*DEBUG = True;
+my $*CONSISTENCY-CHECK = True;
+my $*GRAMMAR-CHECK = True;
 
 subtest {
 	subtest {
@@ -17,7 +16,6 @@ get.words.sum.say;
 _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -29,7 +27,6 @@ say [+] get.words;
 _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -42,7 +39,6 @@ say $a + $b;
 _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -77,7 +73,6 @@ for <A BaRK BOoK tREaT COmMOn SqUAD CoNfuSE> {
 _END_
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
-	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
 
 	done-testing;
@@ -107,7 +102,6 @@ $obj.concrete();
 _END_
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
-	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
 
 	done-testing;
@@ -126,7 +120,6 @@ say bag map { propdivsum($_) <=> $_ }, 1..20000
 _END_
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
-	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
 
 	done-testing;
@@ -138,7 +131,6 @@ sub accum ($n is copy) { sub { $n += $^x } }
 _END_
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
-	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
 
 	done-testing;
@@ -155,7 +147,6 @@ sub A(Int $m, Int $n) {
 _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -169,7 +160,6 @@ multi sub A(Int $m, Int $n) { A($m - 1, A($m, $n - 1)) }
 _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -192,7 +182,6 @@ say .chars, " digits starting with ", .substr(0,50), "..." given A(4,2);
 _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -229,7 +218,6 @@ say $that.foo;            # 5 - value from the cloned object
 _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -244,7 +232,6 @@ say $lue.answer;   # Life, the Universe, and Everything
 _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -260,7 +247,6 @@ say 42.answer;     # Life, the Universe, and Everything
 _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -283,7 +269,6 @@ say $y;  # 42
 _END_
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
-	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
 
 	done-testing;
@@ -319,7 +304,6 @@ for ^13 -> $d {
 _END_
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
-	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
 
 	done-testing;
@@ -369,7 +353,6 @@ for @filelines -> $line {
 _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -395,7 +378,6 @@ sub align($column_width, $word, $aligment = @*ARGS[0]) {
 _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -413,7 +395,6 @@ sub MAIN ($alignment where 'left'|'right', $file) {
 _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -462,7 +443,6 @@ aliquotidian($_).say for flat
 _END_
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
-	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
 
 	done-testing;
@@ -485,7 +465,6 @@ for 1 .. 5 -> $k {
 _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -520,7 +499,6 @@ put almost($_)[^10] for 1..5;
 _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -553,7 +531,6 @@ sub test (Str $l, Str $r) {
 _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -582,7 +559,6 @@ say first *, do
 _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -615,7 +591,6 @@ sub joins ($word1, $word2) {
 _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -641,7 +616,6 @@ for 1..20000 -> $i {
 _END_
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
-	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
 
 	done-testing;
@@ -658,7 +632,6 @@ my $max = [max] map { +@($_) }, %anagram.values;
 _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -677,7 +650,6 @@ slurp('unixdict.txt')\               # load file in memory
 _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
 ]
 
@@ -704,7 +676,6 @@ for %anagram.values.sort({ -@($_[0]) }) -> @aset {
 _END_
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
-	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
 
 	done-testing;
@@ -725,7 +696,6 @@ say fib(10);
 _END_
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
-	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
 
 	done-testing;
@@ -755,7 +725,6 @@ say [1,2,3]>>.&({ $^x + 1});
 _END_
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
-	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
 
 	done-testing;
@@ -769,7 +738,6 @@ given ~[**] 5, 4, 3, 2 {
 _END_
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
-	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
 
 	done-testing;
@@ -793,7 +761,6 @@ $png.write: 'Archimedean-spiral-perl6.png';
 _END_
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
-	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
 
 	done-testing;
@@ -915,7 +882,6 @@ for <DABDDB DABDDBBDDBA ABRACADABRA TOBEORNOTTOBEORTOBEORNOT> -> $str {
 _END_
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
-	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
 
 	done-testing;
@@ -968,7 +934,6 @@ say ev '((11+15)*15)* 2 + (3) * -4 *1';        # 768
 _END_
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
-	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
 
 	done-testing;
@@ -988,7 +953,6 @@ say agm 1, 1/sqrt 2;
 _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -1006,7 +970,6 @@ say agm 1, 1/sqrt 2;
 _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -1044,7 +1007,6 @@ for ^10 {
 _END_
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
-	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
 
 	done-testing;
@@ -1060,7 +1022,6 @@ my $b = pi + 1.25i;
 _END_
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
-	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
 
 	done-testing;
@@ -1080,7 +1041,6 @@ say 'exponentiation:   ', $a**$b;
 _END_
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
-	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
 
 	done-testing;
@@ -1103,7 +1063,6 @@ for 2..2**19 -> $candidate {
 _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -1115,7 +1074,6 @@ for 1.0, 1.1, 1.2 ... 10 { .say }
 _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -1137,7 +1095,6 @@ cat-arrays(@a1,@a2).join(", ").say;
 _END_
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
-	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
 
 	done-testing;
@@ -1155,7 +1112,6 @@ say @array + 1;    # 4
 _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -1170,7 +1126,6 @@ say @infinite.elems;  # Throws exception "Cannot .elems a lazy list"
 _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -1203,7 +1158,6 @@ say join ', ', sort grep( {$_<name>.lc ~~ /'m'/}, @$cities )»<name>; # Dar Es S
 _END_
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
-	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
 ]
 
@@ -1223,7 +1177,6 @@ say @arr[0];
 _END_
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
-	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
 
 	done-testing;
@@ -1237,7 +1190,6 @@ my %h2 = 'key1', 'val1', 'key-2', 2, 'three', -238.83, 4, 'val3';
 _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -1251,7 +1203,6 @@ my %h = @a Z=> @b;
 _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -1267,7 +1218,6 @@ say %h1<key1>;
 _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -1280,7 +1230,6 @@ say $h<key1>;
 _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -1296,7 +1245,6 @@ my %cash{C};
 _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
 ]
 
@@ -1312,7 +1260,6 @@ say @infinite.elems;  # Throws exception "Cannot .elems a lazy list"
 _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -1337,7 +1284,6 @@ say "value = $_" for %pairs.values;
 _END_
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
-	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
 
 	done-testing;
@@ -1366,7 +1312,6 @@ sub find-loop { 0, %^mapping{*} ...^ { (state %){$_}++ } }
 _END_
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
-	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
 
 	done-testing;
@@ -1379,7 +1324,6 @@ multi mean (@a) { ([+] @a) / @a }
 _END_
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
-	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
 
 	done-testing;
@@ -1406,7 +1350,6 @@ say meanAngle($_).fmt("%.2f\tis the mean angle of "), $_ for
 _END_
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
-	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
 
 	done-testing;
@@ -1431,7 +1374,6 @@ say "{ mean-time(@times) } is the mean time of @times[]";
 _END_
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
-	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
 
 	done-testing;
@@ -1446,7 +1388,6 @@ sub median {
 _END_
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
-	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
 
 	done-testing;
@@ -1463,7 +1404,6 @@ sub mode (*@a) {
 _END_
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
-	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
 
 	done-testing;
@@ -1481,7 +1421,6 @@ say "H(1,...,10) = ", H(1..10);
 _END_
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
-	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
 
 	done-testing;
@@ -1496,7 +1435,6 @@ say rms 1..10;
 _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -1508,7 +1446,6 @@ sub rms { sqrt @_ R/ [+] @_ X** 2 }
 _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -1529,7 +1466,6 @@ sub sma(Int \P where * > 0) returns Sub {
 _END_
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
-	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
 
 	done-testing;

@@ -1,6 +1,6 @@
 {
 	"perl"         : "6.*",
-	"name"         : "Perl6-Parser",
+	"name"         : "Perl6::Parser",
 	"version"      : "*",
 	"description"  : "Perl 6 parsing",
 	"test-depends" : [

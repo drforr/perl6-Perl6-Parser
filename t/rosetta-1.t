@@ -6,9 +6,8 @@ use Perl6::Parser;
 plan 7;
 
 my $pt = Perl6::Parser.new;
-my $*VALIDATION-FAILURE-FATAL = True;
-my $*FACTORY-FAILURE-FATAL = True;
-my $*DEBUG = True;
+my $*CONSISTENCY-CHECK = True;
+my $*GRAMMAR-CHECK = True;
 
 subtest {
 	subtest {
@@ -21,7 +20,6 @@ say "Door $_ is ", <closed open>[ @doors[$_] ] for 1..100;
 _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -34,7 +32,6 @@ _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
 #say $pt.dump-tree( $tree );
-		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -46,7 +43,6 @@ say "Door $_ is open" for 1..10 X** 2;
 _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -58,7 +54,6 @@ say "Door $_ is ", <closed open>[.sqrt == .sqrt.floor] for 1..100;
 _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -188,7 +183,6 @@ loop {
 _END_
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
-	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
 
 	done-testing;
@@ -313,7 +307,6 @@ loop {
 _END_
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
-	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
 
 	done-testing;
@@ -350,7 +343,6 @@ while my $exp = prompt "\n24? " {
 _END_
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
-	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
 
 	done-testing;
@@ -405,7 +397,6 @@ sub unique (@array) {
 _END_
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
-	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
 
 	done-testing;
@@ -445,7 +436,6 @@ for 23, 123, 1234, 10000 {
 _END_
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
-	ok $pt.validate( $p ), Q{valid};
 	is $pt.to-string( $tree ), $source, Q{formatted};
 
 	done-testing;
@@ -470,7 +460,6 @@ sub b($b) {
 _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 	done-testing;
@@ -499,7 +488,6 @@ sub sing(
 _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -523,7 +511,6 @@ for @quantities Z @bottles Z @actions Z
 _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
-		ok $pt.validate( $p ), Q{valid};
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;

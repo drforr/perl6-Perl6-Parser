@@ -19,9 +19,8 @@ use Perl6::Parser;
 plan 3;
 
 my $pt = Perl6::Parser.new;
-my $*VALIDATION-FAILURE-FATAL = True;
-my $*FACTORY-FAILURE-FATAL = True;
-my $*DEBUG = True;
+my $*CONSISTENCY-CHECK = True;
+my $*GRAMMAR-CHECK = True;
 
 subtest {
 	plan 3;
@@ -30,47 +29,43 @@ subtest {
 		plan 4;
 
 		subtest {
-			plan 2;
-
 			my $source = Q:to[_END_];
 sub Foo{}
 _END_
 			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
-			ok $pt.validate( $p ), Q{valid};
 			is $pt.to-string( $tree ), $source, Q{formatted};
+
+			done-testing;
 		}, Q{no ws};
 
 		subtest {
-			plan 2;
-
 			my $source = Q:to[_END_];
 sub Foo     {}
 _END_
 			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
-			ok $pt.validate( $p ), Q{valid};
 			is $pt.to-string( $tree ), $source, Q{formatted};
+
+			done-testing;
 		}, Q{leading ws};
 
 		subtest {
-			plan 2;
-
 			my $source = Q{sub Foo{}  };
 			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
-			ok $pt.validate( $p ), Q{valid};
 			is $pt.to-string( $tree ), $source, Q{formatted};
+
+			done-testing;
 		}, Q{trailing ws};
 
 		subtest {
-			plan 2;
-
 			my $source = Q{sub Foo     {}  };
 			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
-			ok $pt.validate( $p ), Q{valid};
 			is $pt.to-string( $tree ), $source, Q{formatted};
+
+			done-testing;
 		}, Q{leading, trailing ws};
 	}, Q{no intrabrace spacing};
 
@@ -78,47 +73,43 @@ _END_
 		plan 4;
 
 		subtest {
-			plan 2;
-
 			my $source = Q:to[_END_];
 sub Foo{   }
 _END_
 			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
-			ok $pt.validate( $p ), Q{valid};
 			is $pt.to-string( $tree ), $source, Q{formatted};
+
+			done-testing;
 		}, Q{no ws};
 
 		subtest {
-			plan 2;
-
 			my $source = Q:to[_END_];
 sub Foo     {   }
 _END_
 			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
-			ok $pt.validate( $p ), Q{valid};
 			is $pt.to-string( $tree ), $source, Q{formatted};
+
+			done-testing;
 		}, Q{leading ws};
 
 		subtest {
-			plan 2;
-
 			my $source = Q{sub Foo{   }  };
 			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
-			ok $pt.validate( $p ), Q{valid};
 			is $pt.to-string( $tree ), $source, Q{formatted};
+
+			done-testing;
 		}, Q{trailing ws};
 
 		subtest {
-			plan 2;
-
 			my $source = Q{sub Foo     {   }  };
 			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
-			ok $pt.validate( $p ), Q{valid};
 			is $pt.to-string( $tree ), $source, Q{formatted};
+
+			done-testing;
 		}, Q{leading, trailing ws};
 	}, Q{intrabrace spacing};
 
@@ -126,25 +117,23 @@ _END_
 		plan 2;
 
 		subtest {
-			plan 2;
-
 			my $source = Q{unit sub MAIN;};
 			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
-			ok $pt.validate( $p ), Q{valid};
 			is $pt.to-string( $tree ), $source, Q{formatted};
+
+			done-testing;
 		}, Q{no ws};
 
 		subtest {
-			plan 2;
-
 			my $source = Q:to[_END_];
 unit sub MAIN  ;
 _END_
 			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
-			ok $pt.validate( $p ), Q{valid};
 			is $pt.to-string( $tree ), $source, Q{formatted};
+
+			done-testing;
 		}, Q{ws before semi};
 	}, Q{unit form};
 }, Q{sub};
@@ -156,47 +145,43 @@ subtest {
 		plan 4;
 
 		subtest {
-			plan 2;
-
 			my $source = Q:to[_END_];
 class Foo{method Bar{}}
 _END_
 			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
-			ok $pt.validate( $p ), Q{valid};
 			is $pt.to-string( $tree ), $source, Q{formatted};
+
+			done-testing;
 		}, Q{no ws};
 
 		subtest {
-			plan 2;
-
 			my $source = Q:to[_END_];
 class Foo{method Bar     {}}
 _END_
 			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
-			ok $pt.validate( $p ), Q{valid};
 			is $pt.to-string( $tree ), $source, Q{formatted};
+
+			done-testing;
 		}, Q{leading ws};
 
 		subtest {
-			plan 2;
-
 			my $source = Q{class Foo{method Foo{}  }};
 			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
-			ok $pt.validate( $p ), Q{valid};
 			is $pt.to-string( $tree ), $source, Q{formatted};
+
+			done-testing;
 		}, Q{trailing ws};
 
 		subtest {
-			plan 2;
-
 			my $source = Q{class Foo{method Bar     {}  }};
 			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
-			ok $pt.validate( $p ), Q{valid};
 			is $pt.to-string( $tree ), $source, Q{formatted};
+
+			done-testing;
 		}, Q{leading, trailing ws};
 	}, Q{no intrabrace spacing};
 
@@ -204,47 +189,43 @@ _END_
 		plan 4;
 
 		subtest {
-			plan 2;
-
 			my $source = Q:to[_END_];
 class Foo{method Bar   {}}
 _END_
 			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
-			ok $pt.validate( $p ), Q{valid};
 			is $pt.to-string( $tree ), $source, Q{formatted};
+
+			done-testing;
 		}, Q{no ws};
 
 		subtest {
-			plan 2;
-
 			my $source = Q:to[_END_];
 class Foo{method Bar     {   }}
 _END_
 			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
-			ok $pt.validate( $p ), Q{valid};
 			is $pt.to-string( $tree ), $source, Q{formatted};
+
+			done-testing;
 		}, Q{leading ws};
 
 		subtest {
-			plan 2;
-
 			my $source = Q{class Foo{method Foo{   }  }};
 			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
-			ok $pt.validate( $p ), Q{valid};
 			is $pt.to-string( $tree ), $source, Q{formatted};
+
+			done-testing;
 		}, Q{trailing ws};
 
 		subtest {
-			plan 2;
-
 			my $source = Q{class Foo{method Bar     {   }  }};
 			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
-			ok $pt.validate( $p ), Q{valid};
 			is $pt.to-string( $tree ), $source, Q{formatted};
+
+			done-testing;
 		}, Q{leading, trailing ws};
 	}, Q{with intrabrace spacing};
 }, Q{method};
@@ -256,47 +237,43 @@ subtest {
 		plan 4;
 
 		subtest {
-			plan 2;
-
 			my $source = Q:to[_END_];
 class Foo{submethod Bar{}}
 _END_
 			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
-			ok $pt.validate( $p ), Q{valid};
 			is $pt.to-string( $tree ), $source, Q{formatted};
+
+			done-testing;
 		}, Q{no ws};
 
 		subtest {
-			plan 2;
-
 			my $source = Q:to[_END_];
 class Foo{submethod Bar     {}}
 _END_
 			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
-			ok $pt.validate( $p ), Q{valid};
 			is $pt.to-string( $tree ), $source, Q{formatted};
+
+			done-testing;
 		}, Q{leading ws};
 
 		subtest {
-			plan 2;
-
 			my $source = Q{class Foo{submethod Foo{}  }};
 			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
-			ok $pt.validate( $p ), Q{valid};
 			is $pt.to-string( $tree ), $source, Q{formatted};
+
+			done-testing;
 		}, Q{trailing ws};
 
 		subtest {
-			plan 2;
-
 			my $source = Q{class Foo{submethod Bar     {}  }};
 			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
-			ok $pt.validate( $p ), Q{valid};
 			is $pt.to-string( $tree ), $source, Q{formatted};
+
+			done-testing;
 		}, Q{leading, trailing ws};
 	}, Q{no intrabrace spacing};
 
@@ -304,47 +281,43 @@ _END_
 		plan 4;
 
 		subtest {
-			plan 2;
-
 			my $source = Q:to[_END_];
 class Foo{submethod Bar   {}}
 _END_
 			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
-			ok $pt.validate( $p ), Q{valid};
 			is $pt.to-string( $tree ), $source, Q{formatted};
+
+			done-testing;
 		}, Q{no ws};
 
 		subtest {
-			plan 2;
-
 			my $source = Q:to[_END_];
 class Foo{submethod Bar     {   }}
 _END_
 			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
-			ok $pt.validate( $p ), Q{valid};
 			is $pt.to-string( $tree ), $source, Q{formatted};
+
+			done-testing;
 		}, Q{leading ws};
 
 		subtest {
-			plan 2;
-
 			my $source = Q{class Foo{submethod Foo{   }  }};
 			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
-			ok $pt.validate( $p ), Q{valid};
 			is $pt.to-string( $tree ), $source, Q{formatted};
+
+			done-testing;
 		}, Q{trailing ws};
 
 		subtest {
-			plan 2;
-
 			my $source = Q{class Foo{submethod Bar     {   }  }};
 			my $p = $pt.parse( $source );
 			my $tree = $pt.build-tree( $p );
-			ok $pt.validate( $p ), Q{valid};
 			is $pt.to-string( $tree ), $source, Q{formatted};
+
+			done-testing;
 		}, Q{leading, trailing ws};
 	}, Q{with intrabrace spacing};
 }, Q{submethod};
