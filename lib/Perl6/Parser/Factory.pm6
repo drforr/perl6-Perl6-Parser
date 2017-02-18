@@ -2920,6 +2920,9 @@ class Perl6::Parser::Factory {
 		elsif $p.Str {
 			@child.append( Perl6::Bareword.from-match( $p ) );
 		}
+		else {
+			display-unhandled-match( $_ );
+		}
 		@child;
 	}
 
@@ -3664,7 +3667,14 @@ class Perl6::Parser::Factory {
 		my Perl6::Element @child;
 		if $p.list {
 			for $p.list {
-				if $_.Str {
+				if self.assert-hash( $_, [< sym >] ) {
+					@child.append(
+						Perl6::Operator::Prefix.from-match(
+							$_.hash.<sym>
+						)
+					);
+				}
+				elsif $_.Str {
 					@child.append(
 						Perl6::Operator::Infix.from-match(
 							$_
