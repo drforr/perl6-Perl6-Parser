@@ -1895,11 +1895,6 @@ class Perl6::Parser::Factory {
 		my Perl6::Element @child;
 		given $p {
 			when self.assert-hash( $_, [< sym postop O >] ) {
-				if $_.hash.<sym>.Str {
-					@child.append(
-						self._sym( $_.hash.<sym> )
-					);
-				}
 				@child.append(
 					self._postop( $_.hash.<postop> )
 				);
@@ -3804,11 +3799,7 @@ class Perl6::Parser::Factory {
 		given $p {
 			when self.assert-hash( $_,
 					[< sym postcircumfix O >] ) {
-				if $_.hash.<sym>.Str {
-					@child.append(
-						self._sym( $_.hash.<sym> )
-					);
-				}
+				# XXX sym is apparently never used
 				@child.append(
 					self._postcircumfix(
 						$_.hash.<postcircumfix>
@@ -4838,11 +4829,9 @@ class Perl6::Parser::Factory {
 						SLASH
 					)
 				);
-				if $_.hash.<left>.Str {
-					@child.append(
-						self._left( $_.hash.<left> )
-					);
-				}
+				@child.append(
+					self._left( $_.hash.<left> )
+				);
 				@child.append(
 					Perl6::Operator::Prefix.from-int(
 						$_.hash.<left>.to -
@@ -5060,11 +5049,6 @@ class Perl6::Parser::Factory {
 				@child.append(
 					self._param_var( $_.hash.<param_var> )
 				);
-				if $_.hash.<quant>.Str {
-					@child.append(
-						self._quant( $_.hash.<quant> )
-					);
-				}
 				@child.append(
 					self._post_constraint(
 						$_.hash.<post_constraint>
@@ -5699,14 +5683,8 @@ class Perl6::Parser::Factory {
 		my Perl6::Element @child;
 		if $p.list {
 			for $p.list {
-				if $_.Str {
-					@child.append(
-						Perl6::Bareword.from-match( $_ )
-					);
-				}
-				else {
-					display-unhandled-match( $_ );
-				}
+				# XXX probably redundant - seems unused now
+				display-unhandled-match( $_ );
 			}
 		}
 		elsif $p.Str {
@@ -5865,14 +5843,6 @@ class Perl6::Parser::Factory {
 		}
 		elsif self.assert-hash( $p, [< termalt >] ) {
 			@child.append( self._termalt( $p.hash.<termalt> ) );
-		}
-		elsif $p.Str {
-			# XXX
-			my Str $str = $p.Str;
-			$str ~~ s{ \s+ $ } = '';
-			@child.append(
-				Perl6::Bareword.from-int( $p.from, $str )
-			);
 		}
 		else {
 			display-unhandled-match( $p );
