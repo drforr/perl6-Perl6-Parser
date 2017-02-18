@@ -4684,7 +4684,14 @@ class Perl6::Parser::Factory {
 				my $q = $_.hash.<arglist>;
 				my Int $end = $q.list.elems - 1;
 				for $q.list.kv -> $k, $v {
-					if $v.Str {
+					if self.assert-hash( $v, [< EXPR >] ) {
+						@child.append(
+							self._EXPR(
+								$v.hash.<EXPR>
+							)
+						);
+					}
+					elsif $v.Str {
 						@child.append(
 							self._EXPR( $v )
 						);
