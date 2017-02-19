@@ -276,7 +276,8 @@ class Perl6::Balanced::Exit does Token {
 
 role MatchingBalanced {
 
-	method from-match( Mu $p, @child ) returns Perl6::Element {
+	method from-match( Mu $p, Perl6::Element @child )
+			returns Perl6::Element {
 		my Perl6::Element @_child;
 		$p.Str ~~ m{ ^ (.) .* (.) $ };
 		@_child.append(
@@ -297,7 +298,8 @@ role MatchingBalanced {
 		)
 	}
 
-	method from-outer-match( Mu $p, @child ) returns Perl6::Element {
+	method from-outer-match( Mu $p, Perl6::Element @child )
+			returns Perl6::Element {
 		my Perl6::Element @_child;
 		my $x = $p.orig.substr( 0, $p.from );
 		$x ~~ m{ (.) ( \s* ) $ };
@@ -328,7 +330,8 @@ role MatchingBalanced {
 		)
 	}
 
-	method from-int( Int $from, Str $str, @child ) returns Perl6::Element {
+	method from-int( Int $from, Str $str, Perl6::Element @child )
+			returns Perl6::Element {
 		my Perl6::Element @_child;
 		$str ~~ m{ ^ (.) .* (.) $ };
 		@_child.append(
@@ -382,7 +385,9 @@ class Perl6::Operator::Circumfix does Branching {
 	also is Perl6::Operator;
 	also does MatchingBalanced;
 
-	method from-delims( Mu $p, Str $front, Str $back, @child ) returns Perl6::Element {
+	method from-delims(
+		Mu $p, Str $front, Str $back, Perl6::Element @child )
+			returns Perl6::Element {
 		my Perl6::Element @_child;
 		@_child.append(
 			Perl6::Balanced::Enter.from-int( $p.from, $front )
@@ -406,7 +411,9 @@ class Perl6::Operator::PostCircumfix does Branching {
 	also is Perl6::Operator;
 	also does MatchingBalanced;
 
-	method from-delims( Mu $p, Str $front, Str $back, @child ) returns Perl6::Element {
+	method from-delims(
+		Mu $p, Str $front, Str $back, Perl6::Element @child )
+			returns Perl6::Element {
 		my Perl6::Element @_child;
 		@_child.append(
 			Perl6::Balanced::Enter.from-int( $p.from, $front )
@@ -780,7 +787,8 @@ class Perl6::Variable::Callable::SubLanguage {
 
 my role Assertions {
 
-	method assert-hash-strict( Mu $p, $required-with, $required-without )
+	method assert-hash-strict(
+		Mu $p, Array $required-with, Array $required-without )
 			returns Bool {
 		my %classified = classify {
 			$p.hash.{$_}.Str ?? 'with' !! 'without'
@@ -801,7 +809,8 @@ my role Assertions {
 		return False;
 	}
 
-	method assert-hash( Mu $p, $keys, $defined-keys = [] ) returns Bool {
+	method assert-hash( Mu $p, Array $keys, Array $defined-keys = [] )
+			returns Bool {
 		return False unless $p and $p.hash;
 
 		my Str @keys;
