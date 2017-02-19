@@ -289,13 +289,13 @@ role MatchingBalanced {
 
 	method from-match( Mu $p, Perl6::Element @child )
 			returns Perl6::Element {
-		my Perl6::Element @_child;
+		my $_child = Perl6::Element-List.new;
 		$p.Str ~~ m{ ^ (.) .* (.) $ };
-		@_child.append(
+		$_child.append(
 			Perl6::Balanced::Enter.from-int( $p.from, $0.Str )
 		);
-		@_child.append( @child );
-		@_child.append(
+		$_child.append( @child );
+		$_child.append(
 			Perl6::Balanced::Exit.from-int(
 				$p.to - $1.Str.chars,
 				$1.Str
@@ -305,13 +305,13 @@ role MatchingBalanced {
 			:factory-line-number( callframe(1).line ),
 			:from( $p.from ),
 			:to( $p.to ),
-			:child( @_child )
+			:child( $_child.child )
 		)
 	}
 
 	method from-outer-match( Mu $p, Perl6::Element @child )
 			returns Perl6::Element {
-		my Perl6::Element @_child;
+		my $_child = Perl6::Element-List.new;
 		my $x = $p.orig.substr( 0, $p.from );
 		$x ~~ m{ (.) ( \s* ) $ };
 		my $left-edge = $0.Str;
@@ -320,14 +320,14 @@ role MatchingBalanced {
 		$x ~~ m{ ^ ( \s* ) (.) };
 		my $right-edge = $1.Str;
 		my $right-margin = $0.Str.chars;
-		@_child.append(
+		$_child.append(
 			Perl6::Balanced::Enter.from-int(
 				$p.from - $left-margin - $left-edge.chars,
 				$left-edge
 			)
 		);
-		@_child.append( @child );
-		@_child.append(
+		$_child.append( @child );
+		$_child.append(
 			Perl6::Balanced::Exit.from-int(
 				$p.to + $right-margin,
 				$right-edge
@@ -337,19 +337,19 @@ role MatchingBalanced {
 			:factory-line-number( callframe(1).line ),
 			:from( $p.from - $left-margin - $left-edge.chars ),
 			:to( $p.to + $right-margin + $right-edge.chars ),
-			:child( @_child )
+			:child( $_child.child )
 		)
 	}
 
 	method from-int( Int $from, Str $str, Perl6::Element @child )
 			returns Perl6::Element {
-		my Perl6::Element @_child;
+		my $_child = Perl6::Element-List.new;
 		$str ~~ m{ ^ (.) .* (.) $ };
-		@_child.append(
+		$_child.append(
 			Perl6::Balanced::Enter.from-int( $from, $0.Str )
 		);
-		@_child.append( @child );
-		@_child.append(
+		$_child.append( @child );
+		$_child.append(
 			Perl6::Balanced::Exit.from-int(
 				$from + $str.chars - 1,
 				$1.Str
@@ -359,7 +359,7 @@ role MatchingBalanced {
 			:factory-line-number( callframe(1).line ),
 			:from( $from ),
 			:to( $from + $str.chars ),
-			:child( @_child )
+			:child( $_child.child )
 		)
 	}
 }
@@ -399,12 +399,12 @@ class Perl6::Operator::Circumfix does Branching {
 	method from-delims(
 		Mu $p, Str $front, Str $back, Perl6::Element @child )
 			returns Perl6::Element {
-		my Perl6::Element @_child;
-		@_child.append(
+		my $_child = Perl6::Element-List.new;
+		$_child.append(
 			Perl6::Balanced::Enter.from-int( $p.from, $front )
 		);
-		@_child.append( @child );
-		@_child.append(
+		$_child.append( @child );
+		$_child.append(
 			Perl6::Balanced::Exit.from-int(
 				$p.to - $back.chars,
 				$back
@@ -414,7 +414,7 @@ class Perl6::Operator::Circumfix does Branching {
 			:factory-line-number( callframe(1).line ),
 			:from( $p.from ),
 			:to( $p.to ),
-			:child( @_child )
+			:child( $_child.child )
 		)
 	}
 }
@@ -425,12 +425,12 @@ class Perl6::Operator::PostCircumfix does Branching {
 	method from-delims(
 		Mu $p, Str $front, Str $back, Perl6::Element @child )
 			returns Perl6::Element {
-		my Perl6::Element @_child;
-		@_child.append(
+		my $_child = Perl6::Element-List.new;
+		$_child.append(
 			Perl6::Balanced::Enter.from-int( $p.from, $front )
 		);
-		@_child.append( @child );
-		@_child.append(
+		$_child.append( @child );
+		$_child.append(
 			Perl6::Balanced::Exit.from-int(
 				$p.to - $back.chars,
 				$back
@@ -440,7 +440,7 @@ class Perl6::Operator::PostCircumfix does Branching {
 			:factory-line-number( callframe(1).line ),
 			:from( $p.from ),
 			:to( $p.to ),
-			:child( @_child )
+			:child( $_child.child )
 		)
 	}
 }
@@ -929,12 +929,12 @@ class Perl6::Parser::Factory {
 	}
 
 	method build( Mu $p ) returns Perl6::Element {
-		my Perl6::Element @_child;
-		@_child.append(
+		my $_child = Perl6::Element-List.new;
+		$_child.append(
 			self._statementlist( $p.hash.<statementlist> )
 		);
 
-		my Perl6::Element $root = Perl6::Document.from-list( @_child );
+		my Perl6::Element $root = Perl6::Document.from-list( $_child.child );
 		self.fill-gaps( $p, $root );
 		if $p.from < $root.from {
 			my Str $remainder = $p.orig.Str.substr( 0, $root.from );
