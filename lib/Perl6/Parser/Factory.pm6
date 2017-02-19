@@ -2053,97 +2053,97 @@ class Perl6::Parser::Factory {
 #	}
 
 	method _EXPR( Mu $p ) returns Array[Perl6::Element] {
-		my Perl6::Element @child;
+		my $child = Perl6::Element-List.new;
 		if self.assert-hash( $p,
 				[< dotty OPER
 				   postfix_prefix_meta_operator >] ) {
-			@child.append( self._EXPR( $p.list.[0] ) );
-			@child.append(
+			$child.append( self._EXPR( $p.list.[0] ) );
+			$child.append(
 				self._postfix_prefix_meta_operator(
 					$p.hash.<postfix_prefix_meta_operator>
 				)
 			);
-			@child.append( self._dotty( $p.hash.<dotty> ) );
+			$child.append( self._dotty( $p.hash.<dotty> ) );
 		}
 		elsif self.assert-hash( $p, [< fake_infix OPER colonpair >] ) {
-			@child.append( self._EXPR( $p.list.[0] ) );
-			@child.append( self._colonpair( $p.hash.<colonpair> ) );
+			$child.append( self._EXPR( $p.list.[0] ) );
+			$child.append( self._colonpair( $p.hash.<colonpair> ) );
 		}
 		elsif self.assert-hash( $p,
 				[< prefix OPER
 				   prefix_postfix_meta_operator >] ) {
-			@child.append( self._prefix( $p.hash.<prefix> ) );
-			@child.append(
+			$child.append( self._prefix( $p.hash.<prefix> ) );
+			$child.append(
 				self._prefix_postfix_meta_operator(
 					$p.hash.<prefix_postfix_meta_operator>
 				)
 			);
-			@child.append( self._EXPR( $p.list.[0] ) );
+			$child.append( self._EXPR( $p.list.[0] ) );
 		}
 		elsif self.assert-hash( $p,
 				[< OPER infix_circumfix_meta_operator >] ) {
 			# XXXinfix_circumfix_meta_operator unused?
-			@child.append( self._EXPR( $p.list.[0] ) );
-			@child.append( self._EXPR( $p.list.[1] ) );
+			$child.append( self._EXPR( $p.list.[0] ) );
+			$child.append( self._EXPR( $p.list.[1] ) );
 		}
 		elsif self.assert-hash( $p,
 				[< infix OPER infix_postfix_meta_operator >] ) {
 			# XXX Infix is used, just in combination.
-			@child.append( self._EXPR( $p.list.[0] ) );
-			@child.append(
+			$child.append( self._EXPR( $p.list.[0] ) );
+			$child.append(
 				Perl6::Operator::Infix.from-sample(
 					$p, $p.hash.<infix>.Str ~ 
 					$p.hash.<infix_postfix_meta_operator>.Str
 				)
 			);
-			@child.append( self._EXPR( $p.list.[1] ) );
+			$child.append( self._EXPR( $p.list.[1] ) );
 		}
 		elsif self.assert-hash( $p,
 				[< dotty OPER >],
 				[< postfix_prefix_meta_operator >] ) {
-			@child.append( self._EXPR( $p.list.[0] ) );
+			$child.append( self._EXPR( $p.list.[0] ) );
 			if $p.Str ~~ m{ ('>>') } {
-				@child.append(
+				$child.append(
 					Perl6::Operator::Prefix.from-int(
 						$p.from, $0.Str
 					)
 				);
 			}
-			@child.append( self._dotty( $p.hash.<dotty> ) );
+			$child.append( self._dotty( $p.hash.<dotty> ) );
 		}
 		elsif self.assert-hash( $p,
 				[< infix OPER >],
 				[< infix_postfix_meta_operator >] ) {
-			@child.append( self._infix( $p.hash.<infix> ) );
-			@child.append( self._EXPR( $p.list.[0] ) );
+			$child.append( self._infix( $p.hash.<infix> ) );
+			$child.append( self._EXPR( $p.list.[0] ) );
 		}
 		elsif self.assert-hash( $p,
 				[< prefix OPER >],
 				[< prefix_postfix_meta_operator >] ) {
-			@child.append( self._prefix( $p.hash.<prefix> ) );
-			@child.append( self._EXPR( $p.list.[0] ) );
+			$child.append( self._prefix( $p.hash.<prefix> ) );
+			$child.append( self._EXPR( $p.list.[0] ) );
 		}
 		elsif self.assert-hash( $p,
 				[< postcircumfix OPER >],
 				[< postfix_prefix_meta_operator >] ) {
-			@child.append( self._EXPR( $p.list.[0] ) );
+			$child.append( self._EXPR( $p.list.[0] ) );
 			if $p.Str ~~ m{ ^ ('.') } {
-				@child.append(
+				$child.append(
 					Perl6::Operator::Infix.from-int(
 						$p.from,
 						$0.Str
 					)
 				);
 			}
-			@child.append(
+			$child.append(
 				self._postcircumfix( $p.hash.<postcircumfix> )
 			);
 		}
 		elsif self.assert-hash( $p,
 				[< postfix OPER >],
 				[< postfix_prefix_meta_operator >] ) {
-			@child.append( self._EXPR( $p.list.[0] ) );
-			@child.append( self._postfix( $p.hash.<postfix> ) );
+			$child.append( self._EXPR( $p.list.[0] ) );
+			$child.append( self._postfix( $p.hash.<postfix> ) );
 		}
 		elsif self.assert-hash( $p,
 				[< infix_prefix_meta_operator OPER >] ) {
@@ -2152,7 +2152,7 @@ class Perl6::Parser::Factory {
 				$p.hash.<infix_prefix_meta_operator>.Str;
 			my Int $end = $p.list.elems - 1;
 			for $p.list.kv -> $k, $v {
-				@child.append( self._EXPR( $v ) );
+				$child.append( self._EXPR( $v ) );
 				if $k < $end {
 					my Str $x = $p.orig.Str.substr(
 						$p.list.[$k].to,
@@ -2161,7 +2161,7 @@ class Perl6::Parser::Factory {
 					);
 					if $x ~~ m{ ($infix-str) } {
 						my Int $left-margin = $0.from;
-						@child.append(
+						$child.append(
 							Perl6::Operator::Infix.from-int(
 								$left-margin + $v.to,
 								$0.Str
@@ -2178,40 +2178,40 @@ class Perl6::Parser::Factory {
 			# XXX since the loop relies on the children now.
 			#
 			if $infix-str ~~ m{ ('??') } {
-				@child.append( self._EXPR( $p.list.[0] ) );
-				@child.append(
+				$child.append( self._EXPR( $p.list.[0] ) );
+				$child.append(
 					Perl6::Operator::Infix.from-sample(
 						$p,
 						$0.Str
 					)
 				);
 				
-				@child.append( self._EXPR( $p.list.[1] ) );
-				@child.append(
+				$child.append( self._EXPR( $p.list.[1] ) );
+				$child.append(
 					Perl6::Operator::Infix.from-sample(
 						$p,
 						BANG-BANG
 					)
 				);
-				@child.append( self._EXPR( $p.list.[2] ) );
+				$child.append( self._EXPR( $p.list.[2] ) );
 			}
 			else {
 				# XXX Another loop where we have to refer to
 				# XXX what's been parsed beforehand.
 				#
 				for $p.list.kv -> $k, $v {
-					@child.append( self._EXPR( $v ) );
+					$child.append( self._EXPR( $v ) );
 					if $k < $end {
 						my Str $x = $p.orig.Str.substr(
-							@child[*-1].to,
+							$child.child.[*-1].to,
 							$p.list.[$k+1].from -
-								@child[*-1].to,
+								$child.child.[*-1].to,
 						);
 						if $x ~~ m{ ($infix-str) } {
 							my Int $left-margin = $0.from;
-							@child.append(
+							$child.append(
 								Perl6::Operator::Infix.from-int(
-									@child[*-1].to + $0.from,
+									$child.child.[*-1].to + $0.from,
 									$0.Str
 								)
 							);
@@ -2227,39 +2227,39 @@ class Perl6::Parser::Factory {
 					$p.hash.<op>
 				)
 			);
-			@child.append(
+			$child.append(
 				Perl6::Operator::Hyper.from-outer-match(
 					$p.hash.<op>,
 					@_child
 				)
 			);
-			@child.append( self._args( $p.hash.<args> ) );
+			$child.append( self._args( $p.hash.<args> ) );
 		}
 		elsif self.assert-hash( $p, [< identifier args >] ) {
-			@child.append(
+			$child.append(
 				self._identifier( $p.hash.<identifier> )
 			);
 			if $p.hash.<args>.Str {
-				@child.append( self._args( $p.hash.<args> ) );
+				$child.append( self._args( $p.hash.<args> ) );
 			}
 		}
 		elsif self.assert-hash( $p, [< sym args >] ) {
 			# XXX _sym(...) falls back to Bareword because it's used
 			# XXX for 'my' among other things.
-			@child.append(
+			$child.append(
 				Perl6::Operator::Infix.from-match(
 					$p.hash.<sym>
 				)
 			);
 		}
 		elsif self.assert-hash( $p, [< longname args >] ) {
-			@child.append( self._longname( $p.hash.<longname> ) );
+			$child.append( self._longname( $p.hash.<longname> ) );
 			if $p.hash.<args> and
 			   $p.hash.<args>.hash.<semiarglist> {
-				@child.append( self._args( $p.hash.<args> ) );
+				$child.append( self._args( $p.hash.<args> ) );
 			}
 			elsif $p.hash.<args>.Str ~~ m{ \S } {
-				@child.append( self._args( $p.hash.<args> ) );
+				$child.append( self._args( $p.hash.<args> ) );
 			}
 			else {
 # XXX needs to be filled in
@@ -2267,44 +2267,44 @@ class Perl6::Parser::Factory {
 			}
 		}
 		elsif self.assert-hash( $p, [< circumfix >] ) {
-			@child.append( self._circumfix( $p.hash.<circumfix> ) );
+			$child.append( self._circumfix( $p.hash.<circumfix> ) );
 		}
 		elsif self.assert-hash( $p, [< dotty >] ) {
-			@child.append( self._dotty( $p.hash.<dotty> ) );
+			$child.append( self._dotty( $p.hash.<dotty> ) );
 		}
 		elsif self.assert-hash( $p, [< fatarrow >] ) {
-			@child.append( self._fatarrow( $p.hash.<fatarrow> ) );
+			$child.append( self._fatarrow( $p.hash.<fatarrow> ) );
 		}
 		elsif self.assert-hash( $p, [< multi_declarator >] ) {
-			@child.append(
+			$child.append(
 				self._multi_declarator(
 					$p.hash.<multi_declarator>
 				)
 			);
 		}
 		elsif self.assert-hash( $p, [< regex_declarator >] ) {
-			@child.append(
+			$child.append(
 				self._regex_declarator(
 					$p.hash.<regex_declarator>
 				)
 			);
 		}
 		elsif self.assert-hash( $p, [< routine_declarator >] ) {
-			@child.append(
+			$child.append(
 				self._routine_declarator(
 					$p.hash.<routine_declarator>
 				)
 			);
 		}
 		elsif self.assert-hash( $p, [< scope_declarator >] ) {
-			@child.append(
+			$child.append(
 				self._scope_declarator(
 					$p.hash.<scope_declarator>
 				)
 			);
 		}
 		elsif self.assert-hash( $p, [< type_declarator >] ) {
-			@child.append(
+			$child.append(
 				self._type_declarator(
 					$p.hash.<type_declarator>
 				)
@@ -2313,47 +2313,47 @@ class Perl6::Parser::Factory {
 
 		# $p doesn't contain WS after the block.
 		elsif self.assert-hash( $p, [< package_declarator >] ) {
-			@child.append(
+			$child.append(
 				self._package_declarator(
 					$p.hash.<package_declarator>
 				)
 			);
 		}
 		elsif self.assert-hash( $p, [< value >] ) {
-			@child.append( self._value( $p.hash.<value> ) );
+			$child.append( self._value( $p.hash.<value> ) );
 		}
 		elsif self.assert-hash( $p, [< variable >] ) {
-			@child.append( self._variable( $p.hash.<variable> ) );
+			$child.append( self._variable( $p.hash.<variable> ) );
 		}
 		elsif self.assert-hash( $p, [< colonpair >] ) {
-			@child.append( self._colonpair( $p.hash.<colonpair> ) );
+			$child.append( self._colonpair( $p.hash.<colonpair> ) );
 		}
 		elsif self.assert-hash( $p, [< longname >] ) {
-			@child.append( self._longname( $p.hash.<longname> ) );
+			$child.append( self._longname( $p.hash.<longname> ) );
 		}
 		elsif self.assert-hash( $p, [< sym >] ) {
-			@child.append( self._sym( $p.hash.<sym> ) );
+			$child.append( self._sym( $p.hash.<sym> ) );
 		}
 		elsif self.assert-hash( $p, [< statement_prefix >] ) {
-			@child.append(
+			$child.append(
 				self._statement_prefix(
 					$p.hash.<statement_prefix>
 				)
 			);
 		}
 		elsif self.assert-hash( $p, [< methodop >] ) {
-			@child.append( self._methodop( $p.hash.<methodop> ) );
+			$child.append( self._methodop( $p.hash.<methodop> ) );
 		}
 		elsif self.assert-hash( $p, [< pblock >] ) {
-			@child.append( self._pblock( $p.hash.<pblock> ) );
+			$child.append( self._pblock( $p.hash.<pblock> ) );
 		}
 		elsif $p.Str {
-			@child.append( Perl6::Bareword.from-match( $p ) );
+			$child.append( Perl6::Bareword.from-match( $p ) );
 		}
 		else {
 			display-unhandled-match( $p );
 		}
-		@child;
+		$child.child;
 	}
 
 #	method _fake_infix( Mu $p ) returns Array[Perl6::Element] {
@@ -4894,7 +4894,7 @@ class Perl6::Parser::Factory {
 #				display-unhandled-match( $_ );
 #			}
 #		}
-#		@child.child;
+#		$child.child;
 #	}
 
 	method __Parameter( Mu $p ) returns Array[Perl6::Element] {
@@ -5772,11 +5772,11 @@ class Perl6::Parser::Factory {
 	}
 
 	method _termalt( Mu $p ) returns Array[Perl6::Element] {
-		my Perl6::Element @child;
+		my $child = Perl6::Element-List.new;
 		if $p.list {
 			for $p.list {
 				if self.assert-hash( $_, [< termconj >] ) {
-					@child.append(
+					$child.append(
 						self._termconj(
 							$_.hash.<termconj>
 						)
@@ -5790,14 +5790,14 @@ class Perl6::Parser::Factory {
 		else {
 			display-unhandled-match( $p );
 		}
-		@child;
+		$child.child;
 	}
 
 	method _termaltseq( Mu $p ) returns Array[Perl6::Element] {
-		my Perl6::Element @child;
+		my $child = Perl6::Element-List.new;
 		given $p {
 			when self.assert-hash( $_, [< termconjseq >] ) {
-				@child.append(
+				$child.append(
 					self._termconjseq(
 						$_.hash.<termconjseq>
 					)
@@ -5807,15 +5807,15 @@ class Perl6::Parser::Factory {
 				display-unhandled-match( $_ );
 			}
 		}
-		@child;
+		$child.child;
 	}
 
 	method _termconj( Mu $p ) returns Array[Perl6::Element] {
-		my Perl6::Element @child;
+		my $child = Perl6::Element-List.new;
 		if $p.list {
 			for $p.list {
 				if self.assert-hash( $_, [< termish >] ) {
-					@child.append(
+					$child.append(
 						self._termish(
 							$_.hash.<termish>
 						)
@@ -5825,7 +5825,7 @@ class Perl6::Parser::Factory {
 					);
 					if $x ~~ m{ ^ \s* ('|'+) } {
 						my Int $left-margin = $0.from;
-						@child.append(
+						$child.append(
 							Perl6::Operator::Infix.from-int(
 								$left-margin + $_.hash.<termish>.to,
 								$0.Str
@@ -5842,15 +5842,15 @@ class Perl6::Parser::Factory {
 		else {
 			display-unhandled-match( $p );
 		}
-		@child;
+		$child.child;
 	}
 
 	method _termconjseq( Mu $p ) returns Array[Perl6::Element] {
-		my Perl6::Element @child;
+		my $child = Perl6::Element-List.new;
 		if $p.list {
 			for $p.list {
 				if self.assert-hash( $_, [< termalt >] ) {
-					@child.append(
+					$child.append(
 						self._termalt(
 							$_.hash.<termalt>
 						)
@@ -5862,30 +5862,30 @@ class Perl6::Parser::Factory {
 			}
 		}
 		elsif self.assert-hash( $p, [< termalt >] ) {
-			@child.append( self._termalt( $p.hash.<termalt> ) );
+			$child.append( self._termalt( $p.hash.<termalt> ) );
 		}
 		else {
 			display-unhandled-match( $p );
 		}
-		@child;
+		$child.child;
 	}
 
 	method _term_init( Mu $p ) returns Array[Perl6::Element] {
-		my Perl6::Element @child;
+		my $child = Perl6::Element-List.new;
 		given $p {
 			default {
 				display-unhandled-match( $_ );
 			}
 		}
-		@child;
+		$child.child;
 	}
 
 	method _termish( Mu $p ) returns Array[Perl6::Element] {
-		my Perl6::Element @child;
+		my $child = Perl6::Element-List.new;
 		if $p.list {
 			for $p.list {
 				if self.assert-hash( $_, [< noun >] ) {
-					@child.append(
+					$child.append(
 						self._noun( $_.hash.<noun> )
 					);
 				}
@@ -5895,23 +5895,23 @@ class Perl6::Parser::Factory {
 			}
 		}
 		elsif self.assert-hash( $p, [< sym term >] ) {
-			@child.append( self._sym( $p.hash.<sym> ) );
-			@child.append( self._term( $p.hash.<term> ) );
+			$child.append( self._sym( $p.hash.<sym> ) );
+			$child.append( self._term( $p.hash.<term> ) );
 		}
 		elsif self.assert-hash( $p, [< noun >] ) {
-			@child.append( self._noun( $p.hash.<noun> ) );
+			$child.append( self._noun( $p.hash.<noun> ) );
 		}
 		else {
 			display-unhandled-match( $p );
 		}
-		@child;
+		$child.child;
 	}
 
 	method _termseq( Mu $p ) returns Array[Perl6::Element] {
-		my Perl6::Element @child;
+		my $child = Perl6::Element-List.new;
 		given $p {
 			when self.assert-hash( $_, [< termaltseq >] ) {
-				@child.append(
+				$child.append(
 					self._termaltseq( $_.hash.<termaltseq> )
 				);
 			}
@@ -5919,15 +5919,15 @@ class Perl6::Parser::Factory {
 				display-unhandled-match( $_ );
 			}
 		}
-		@child;
+		$child.child;
 	}
 
 	method _trait( Mu $p ) returns Array[Perl6::Element] {
-		my Perl6::Element @child;
+		my $child = Perl6::Element-List.new;
 		if $p.list {
 			for $p.list {
 				if self.assert-hash( $_, [< trait_mod >] ) {
-					@child.append(
+					$child.append(
 						self._trait_mod(
 							$_.hash.<trait_mod>
 						)
@@ -5941,7 +5941,7 @@ class Perl6::Parser::Factory {
 		else {
 			display-unhandled-match( $p );
 		}
-		@child;
+		$child.child;
 	}
 
 	# is
@@ -5953,33 +5953,33 @@ class Perl6::Parser::Factory {
 	# handles
 	#
 	method _trait_mod( Mu $p ) returns Array[Perl6::Element] {
-		my Perl6::Element @child;
+		my $child = Perl6::Element-List.new;
 		given $p {
 			when self.assert-hash( $_,
 					[< sym longname circumfix >] ) {
-				@child.append( self._sym( $_.hash.<sym> ) );
-				@child.append(
+				$child.append( self._sym( $_.hash.<sym> ) );
+				$child.append(
 					self._longname( $_.hash.<longname> )
 				);
-				@child.append(
+				$child.append(
 					self._circumfix( $_.hash.<circumfix> )
 				);
 			}
 			when self.assert-hash( $_,
 					[< sym longname >],
 					[< circumfix >] ) {
-				@child.append( self._sym( $_.hash.<sym> ) );
-				@child.append(
+				$child.append( self._sym( $_.hash.<sym> ) );
+				$child.append(
 					self._longname( $_.hash.<longname> )
 				);
 			}
 			when self.assert-hash( $_, [< sym term >] ) {
-				@child.append( self._sym( $_.hash.<sym> ) );
-				@child.append( self._term( $_.hash.<term> ) );
+				$child.append( self._sym( $_.hash.<sym> ) );
+				$child.append( self._term( $_.hash.<term> ) );
 			}
 			when self.assert-hash( $_, [< sym typename >] ) {
-				@child.append( self._sym( $_.hash.<sym> ) );
-				@child.append(
+				$child.append( self._sym( $_.hash.<sym> ) );
+				$child.append(
 					self._typename( $_.hash.<typename> )
 				);
 			}
@@ -5987,32 +5987,32 @@ class Perl6::Parser::Factory {
 				display-unhandled-match( $_ );
 			}
 		}
-		@child;
+		$child.child;
 	}
 
 #	method _twigil( Mu $p ) {
-#		my Perl6::Element @child;
+#		my $child = Perl6::Element-List.new;
 #		given $p {
 #			default {
 #				display-unhandled-match( $_ );
 #			}
 #		}
-#		@child;
+#		$child.child;
 #	}
 
 	method _type_constraint( Mu $p ) returns Array[Perl6::Element] {
-		my Perl6::Element @child;
+		my $child = Perl6::Element-List.new;
 		if $p.list {
 			for $p.list {
 				if self.assert-hash( $_, [< typename >] ) {
-					@child.append(
+					$child.append(
 						self._typename(
 							$_.hash.<typename>
 						)
 					);
 				}
 				elsif self.assert-hash( $_, [< value >] ) {
-					@child.append(
+					$child.append(
 						self._value( $_.hash.<value> )
 					);
 				}
@@ -6030,7 +6030,7 @@ class Perl6::Parser::Factory {
 		else {
 			display-unhandled-match( $p );
 		}
-		@child;
+		$child.child;
 	}
 
 	# enum
@@ -6038,53 +6038,53 @@ class Perl6::Parser::Factory {
 	# constant
 	#
 	method _type_declarator( Mu $p ) returns Array[Perl6::Element] {
-		my Perl6::Element @child;
+		my $child = Perl6::Element-List.new;
 		if self.assert-hash( $p,
 				[< sym initializer variable >], [< trait >] ) {
-			@child.append( self._sym( $p.hash.<sym> ) );
-			@child.append( self._variable( $p.hash.<variable> ) );
-			@child.append(
+			$child.append( self._sym( $p.hash.<sym> ) );
+			$child.append( self._variable( $p.hash.<variable> ) );
+			$child.append(
 				self._initializer( $p.hash.<initializer> )
 			);
 		}
 		elsif self.assert-hash( $p,
 				[< sym defterm initializer >], [< trait >] ) {
-			@child.append( self._sym( $p.hash.<sym> ) );
-			@child.append( self._defterm( $p.hash.<defterm> ) );
-			@child.append(
+			$child.append( self._sym( $p.hash.<sym> ) );
+			$child.append( self._defterm( $p.hash.<defterm> ) );
+			$child.append(
 				self._initializer( $p.hash.<initializer> )
 			);
 		}
 		elsif self.assert-hash( $p,
 				[< sym longname term >], [< trait >] ) {
-			@child.append( self._sym( $p.hash.<sym> ) );
-			@child.append( self._longname( $p.hash.<longname> ) );
-			@child.append( self._term( $p.hash.<term> ) );
+			$child.append( self._sym( $p.hash.<sym> ) );
+			$child.append( self._longname( $p.hash.<longname> ) );
+			$child.append( self._term( $p.hash.<term> ) );
 		}
 		elsif self.assert-hash( $p, [< sym longname trait >] ) {
-			@child.append( self._sym( $p.hash.<sym> ) );
-			@child.append( self._longname( $p.hash.<longname> ) );
-			@child.append( self._trait( $p.hash.<trait> ) );
+			$child.append( self._sym( $p.hash.<sym> ) );
+			$child.append( self._longname( $p.hash.<longname> ) );
+			$child.append( self._trait( $p.hash.<trait> ) );
 		}
 		elsif self.assert-hash( $p, [< sym longname >], [< trait >] ) {
-			@child.append( self._sym( $p.hash.<sym> ) );
-			@child.append( self._longname( $p.hash.<longname> ) );
+			$child.append( self._sym( $p.hash.<sym> ) );
+			$child.append( self._longname( $p.hash.<longname> ) );
 		}
 		else {
 			display-unhandled-match( $p );
 		}
-		@child;
+		$child.child;
 	}
 
 	method _typename( Mu $p ) returns Array[Perl6::Element] {
-		my Perl6::Element @child;
+		my $child = Perl6::Element-List.new;
 		if $p.list {
 			for $p.list {
 				if self.assert-hash( $_,
 						[< longname colonpairs >],
 						[< colonpair >] ) {
 					# XXX Can probably be narrowed
-					@child.append(
+					$child.append(
 						Perl6::Bareword.from-match( $_ )
 					);
 				}
@@ -6092,7 +6092,7 @@ class Perl6::Parser::Factory {
 						[< longname >],
 						[< colonpairs >] ) {
 					# XXX Can probably be narrowed
-					@child.append(
+					$child.append(
 						Perl6::Bareword.from-match( $_ )
 					);
 				}
@@ -6102,37 +6102,37 @@ class Perl6::Parser::Factory {
 			}
 		}
 		elsif self.assert-hash( $p, [< longname colonpairs >] ) {
-			@child.append( self._longname( $p.hash.<longname> ) );
+			$child.append( self._longname( $p.hash.<longname> ) );
 		}
 		elsif self.assert-hash( $p, [< longname >],
 				[< colonpairs colonpair >] ) {
-			@child.append( self._longname( $p.hash.<longname> ) );
+			$child.append( self._longname( $p.hash.<longname> ) );
 		}
 		elsif self.assert-hash( $p, [< longname >], [< colonpair >] ) {
-			@child.append( self._longname( $p.hash.<longname> ) );
+			$child.append( self._longname( $p.hash.<longname> ) );
 		}
 		else {
 			display-unhandled-match( $p );
 		}
-		@child;
+		$child.child;
 	}
 
 	method _val( Mu $p ) returns Array[Perl6::Element] {
-		my Perl6::Element @child;
+		my $child = Perl6::Element-List.new;
 		given $p {
 			when self.assert-hash( $_,
 					[< postcircumfix OPER >],
 					[< postfix_prefix_meta_operator >] ) {
-				@child.append( self._EXPR( $_.list.[0] ) );
+				$child.append( self._EXPR( $_.list.[0] ) );
 				if $_.Str ~~ m{ ^ ('.') } {
-					@child.append(
+					$child.append(
 						Perl6::Operator::Infix.from-int(
 							$_.from,
 							$0.Str
 						)
 					);
 				}
-				@child.append(
+				$child.append(
 					self._postcircumfix(
 						$_.hash.<postcircumfix>
 					)
@@ -6141,51 +6141,51 @@ class Perl6::Parser::Factory {
 			when self.assert-hash( $p,
 					[< prefix OPER >],
 					[< prefix_postfix_meta_operator >] ) {
-				@child.append(
+				$child.append(
 					self._prefix( $_.hash.<prefix> )
 				);
-				@child.append( self._EXPR( $_.list.[0] ) );
+				$child.append( self._EXPR( $_.list.[0] ) );
 			}
 			when self.assert-hash( $_, [< infix OPER >] ) {
 				if $_.hash.<infix>.Str ~~ m{ ('??') } {
-					@child.append(
+					$child.append(
 						self._value(
 							$_.list.[0].hash.<value>
 						)
 					);
-					@child.append(
+					$child.append(
 						Perl6::Operator::Infix.from-sample(
 							$_.hash.<infix>,
 							$0.Str
 						)
 					);
-					@child.append(
+					$child.append(
 						self._value(
 							$_.list.[1].hash.<value>
 						)
 					);
-					@child.append(
+					$child.append(
 						Perl6::Operator::Infix.from-sample(
 							$_.hash.<infix>,
 							BANG-BANG
 						)
 					);
-					@child.append(
+					$child.append(
 						self._value(
 							$_.list.[2].hash.<value>
 						)
 					);
 				}
 				else {
-					@child.append(
+					$child.append(
 						self._value(
 							$_.list.[0].hash.<value>
 						)
 					);
-					@child.append(
+					$child.append(
 						self._infix( $_.hash.<infix> )
 					);
-					@child.append(
+					$child.append(
 						self._value(
 							$_.list.[1].hash.<value>
 						)
@@ -6195,24 +6195,24 @@ class Perl6::Parser::Factory {
 			when self.assert-hash( $_, [< longname args >] ) {
 				if $_.hash.<args> and
 				   $_.hash.<args>.hash.<semiarglist> {
-					@child.append(
+					$child.append(
 						self._longname(
 							$_.hash.<longname>
 						)
 					);
-					@child.append(
+					$child.append(
 						self._args( $_.hash.<args> )
 					);
 				}
 				else {
-					@child.append(
+					$child.append(
 						self._longname(
 							$_.hash.<longname>
 						)
 					);
 					if $_.hash.<args>.hash.keys and
 					   $_.hash.<args>.Str ~~ m{ \S } {
-						@child.append(
+						$child.append(
 							self._args(
 								$_.hash.<args>
 							)
@@ -6221,23 +6221,23 @@ class Perl6::Parser::Factory {
 				}
 			}
 			when self.assert-hash( $_, [< value >] ) {
-				@child.append( self._value( $_.hash.<value> ) );
+				$child.append( self._value( $_.hash.<value> ) );
 			}
 			default {
 				display-unhandled-match( $_ );
 			}
 		}
-		@child;
+		$child.child;
 	}
 
 #	method _VALUE( Mu $p ) returns Array[Perl6::Element] {
-#		my Perl6::Element @child;
+#		my $child = Perl6::Element-List.new;
 #		given $p {
 #			default {
 #				display-unhandled-match( $_ );
 #			}
 #		}
-#		@child;
+#		$child.child;
 #	}
 
 	# quote
@@ -6245,15 +6245,15 @@ class Perl6::Parser::Factory {
 	# version
 	#
 	method _value( Mu $p ) returns Array[Perl6::Element] {
-		my Perl6::Element @child;
+		my $child = Perl6::Element-List.new;
 		given $p {
 			when self.assert-hash( $_, [< number >] ) {
-				@child.append(
+				$child.append(
 					self._number( $_.hash.<number> )
 				);
 			}
 			when self.assert-hash( $_, [< quote >] ) {
-				@child.append(
+				$child.append(
 					self._quote( $_.hash.<quote> )
 				);
 			}
@@ -6261,7 +6261,7 @@ class Perl6::Parser::Factory {
 				display-unhandled-match( $_ );
 			};
 		}
-		@child;
+		$child.child;
 	}
 
 	method ___Variable_Name( Mu $p, Mu $name ) {
@@ -6276,15 +6276,15 @@ class Perl6::Parser::Factory {
 	}
 
 	method __Variable( Mu $p, Mu $name ) returns Array[Perl6::Element] {
-		my Perl6::Element @child;
+		my $child = Perl6::Element-List.new;
 		given $p {
 			when self.assert-hash( $_,
 					[< sigil desigilname
 					   postcircumfix >] ) {
-				@child.append(
+				$child.append(
 					self.___Variable_Name( $_, $name )
 				);
-				@child.append(
+				$child.append(
 					self._postcircumfix(
 						$_.hash.<postcircumfix>
 					)
@@ -6292,46 +6292,46 @@ class Perl6::Parser::Factory {
 			}
 			when self.assert-hash( $_,
 					[< twigil sigil desigilname >] ) {
-				@child.append(
+				$child.append(
 					self.___Variable_Name( $_, $name )
 				);
 			}
 			when self.assert-hash( $_,
 					[< twigil sigil name >] ) {
-				@child.append(
+				$child.append(
 					self.___Variable_Name( $_, $name )
 				);
 			}
 			when self.assert-hash( $_,
 					[< sigil desigilname >] ) {
-				@child.append(
+				$child.append(
 					self.___Variable_Name( $_, $name )
 				);
 			}
 			when self.assert-hash( $_,
 					[< sigil index >] ) {
-				@child.append(
+				$child.append(
 					self.___Variable_Name( $_, $name )
 				);
 			}
 			when self.assert-hash( $_,
 					[< sigil postcircumfix >] ) {
-				@child.append(
+				$child.append(
 					self.___Variable_Name( $_, $name )
 				);
-				@child.append(
+				$child.append(
 					self._postcircumfix(
 						$_.hash.<postcircumfix>
 					)
 				);
 			}
 			when self.assert-hash( $_, [< sigil name >] ) {
-				@child.append(
+				$child.append(
 					self.___Variable_Name( $_, $name )
 				);
 			}
 			when self.assert-hash( $_, [< sigil >] ) {
-				@child.append(
+				$child.append(
 					self.___Variable_Name( $_, '' )
 				);
 			}
@@ -6339,22 +6339,22 @@ class Perl6::Parser::Factory {
 				display-unhandled-match( $_ );
 			}
 		}
-		@child;
+		$child.child;
 	}
 
 	method _var( Mu $p ) returns Array[Perl6::Element] {
-		my Perl6::Element @child;
+		my $child = Perl6::Element-List.new;
 		given $p {
 			when self.assert-hash( $_,
 					[< twigil sigil desigilname >] ) {
-				@child.append(
+				$child.append(
 					self.__Variable(
 						$_, $_.hash.<desigilname>
 					)
 				);
 			}
 			when self.assert-hash( $_, [< sigil desigilname >] ) {
-				@child.append(
+				$child.append(
 					self.__Variable(
 						$_, $_.hash.<desigilname>
 					)
@@ -6364,20 +6364,20 @@ class Perl6::Parser::Factory {
 				display-unhandled-match( $_ );
 			}
 		}
-		@child;
+		$child.child;
 	}
 
 	method _variable_declarator( Mu $p ) returns Array[Perl6::Element] {
-		my Perl6::Element @child;
+		my $child = Perl6::Element-List.new;
 		given $p {
 			when self.assert-hash( $_,
 					[< semilist variable shape >],
 					[< postcircumfix signature trait
 					   post_constraint >] ) {
-				@child.append(
+				$child.append(
 					self._semilist( $_.hash.<semilist> )
 				);
-				@child.append(
+				$child.append(
 					self._variable( $_.hash.<variable> )
 				);
 				# XXX Need to restore shape?
@@ -6386,10 +6386,10 @@ class Perl6::Parser::Factory {
 					[< variable post_constraint >],
 					[< semilist postcircumfix
 					   signature trait >] ) {
-				@child.append(
+				$child.append(
 					self._variable( $_.hash.<variable> )
 				);
-				@child.append(
+				$child.append(
 					self._post_constraint(
 						$_.hash.<post_constraint>
 					)
@@ -6399,16 +6399,16 @@ class Perl6::Parser::Factory {
 					[< variable trait >],
 					[< semilist postcircumfix signature
 					   post_constraint >] ) {
-				@child.append(
+				$child.append(
 					self._variable( $_.hash.<variable> )
 				);
-				@child.append( self._trait( $_.hash.<trait> ) );
+				$child.append( self._trait( $_.hash.<trait> ) );
 			}
 			when self.assert-hash( $_,
 					[< variable >],
 					[< semilist postcircumfix signature
 					   trait post_constraint >] ) {
-				@child.append(
+				$child.append(
 					self._variable( $_.hash.<variable> )
 				);
 			}
@@ -6416,35 +6416,35 @@ class Perl6::Parser::Factory {
 				display-unhandled-match( $_ );
 			}
 		}
-		@child;
+		$child.child;
 	}
 
 	method _variable( Mu $p ) returns Array[Perl6::Element] {
-		my Perl6::Element @child;
+		my $child = Perl6::Element-List.new;
 		if self.assert-hash( $p, [< contextualizer >] ) {
-			@child.append(
+			$child.append(
 				self._contextualizer( $p.hash.<contextualizer> )
 			);
 		}
 		else {
-			@child.append(
+			$child.append(
 				self.__Variable( $p, $p.hash.<desigilname> )
 			);
 		}
-		@child;
+		$child.child;
 	}
 
 	method _version( Mu $p ) returns Array[Perl6::Element] {
-		my Perl6::Element @child;
+		my $child = Perl6::Element-List.new;
 		given $p {
 			when self.assert-hash( $_, [< vnum vstr >] ) {
-				@child.append( self._vstr( $_.hash.<vstr> ) );
+				$child.append( self._vstr( $_.hash.<vstr> ) );
 			}
 			default {
 				display-unhandled-match( $_ );
 			}
 		}
-		@child;
+		$child.child;
 	}
 
 	method _vstr( Mu $p ) returns Perl6::Element {
@@ -6455,11 +6455,11 @@ class Perl6::Parser::Factory {
 	}
 
 #	method _vnum( Mu $p ) returns Array[Perl6::Element] {
-#		my Perl6::Element @child;
+#		my $child = Perl6::Element-List.new;
 #		if $p.list {
 #			for $p.list {
 #				if $p.Int {
-#					@child.append(
+#					$child.append(
 #						Perl6::Number.from-match( $p )
 #					)
 #				}
@@ -6471,7 +6471,7 @@ class Perl6::Parser::Factory {
 #		else {
 #			display-unhandled-match( $p );
 #		}
-#		@child;
+#		$child.child;
 #	}
 
 	method _wu( Mu $p ) returns Perl6::Element {
@@ -6479,7 +6479,7 @@ class Perl6::Parser::Factory {
 	}
 
 	method _xblock( Mu $p ) returns Array[Perl6::Element] {
-		my Perl6::Element @child;
+		my $child = Perl6::Element-List.new;
 		if $p.list {
 			for $p.list {
 				if self.assert-hash( $_, [< EXPR pblock >] ) {
@@ -6487,7 +6487,7 @@ class Perl6::Parser::Factory {
 						0, $_.hash.<EXPR>.from
 					);
 					if $x ~~ m{ << (elsif) >> } {
-						@child.append(
+						$child.append(
 							Perl6::Bareword.from-int(
 								$_.from +
 									$0.from,
@@ -6495,10 +6495,10 @@ class Perl6::Parser::Factory {
 							)
 						);
 					}
-					@child.append(
+					$child.append(
 						self._EXPR( $_.hash.<EXPR> )
 					);
-					@child.append(
+					$child.append(
 						self._pblock(
 							$_.hash.<pblock>
 						)
@@ -6510,15 +6510,15 @@ class Perl6::Parser::Factory {
 			}
 		}
 		elsif self.assert-hash( $p, [< EXPR pblock >] ) {
-			@child.append( self._EXPR( $p.hash.<EXPR> ) );
-			@child.append( self._pblock( $p.hash.<pblock> ) );
+			$child.append( self._EXPR( $p.hash.<EXPR> ) );
+			$child.append( self._pblock( $p.hash.<pblock> ) );
 		}
 		elsif self.assert-hash( $p, [< blockoid >] ) {
-			@child.append( self._blockoid( $p.hash.<blockoid> ) );
+			$child.append( self._blockoid( $p.hash.<blockoid> ) );
 		}
 		else {
 			display-unhandled-match( $p );
 		}
-		@child;
+		$child.child;
 	}
 }
