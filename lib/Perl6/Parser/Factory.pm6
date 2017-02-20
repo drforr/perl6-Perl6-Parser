@@ -290,14 +290,14 @@ class Perl6::Balanced::Exit does Token {
 
 role MatchingBalanced {
 
-	method from-match( Mu $p, Perl6::Element @child )
+	method from-match( Mu $p, Perl6::Element-List $child )
 			returns Perl6::Element {
 		my $_child = Perl6::Element-List.new;
 		$p.Str ~~ m{ ^ (.) .* (.) $ };
 		$_child.append(
 			Perl6::Balanced::Enter.from-int( $p.from, $0.Str )
 		);
-		$_child.append( @child );
+		$_child.append( $child );
 		$_child.append(
 			Perl6::Balanced::Exit.from-int(
 				$p.to - $1.Str.chars,
@@ -312,7 +312,7 @@ role MatchingBalanced {
 		)
 	}
 
-	method from-outer-match( Mu $p, Perl6::Element @child )
+	method from-outer-match( Mu $p, Perl6::Element-List $child )
 			returns Perl6::Element {
 		my $_child = Perl6::Element-List.new;
 		my $x = $p.orig.substr( 0, $p.from );
@@ -329,7 +329,7 @@ role MatchingBalanced {
 				$left-edge
 			)
 		);
-		$_child.append( @child );
+		$_child.append( $child );
 		$_child.append(
 			Perl6::Balanced::Exit.from-int(
 				$p.to + $right-margin,
@@ -344,14 +344,14 @@ role MatchingBalanced {
 		)
 	}
 
-	method from-int( Int $from, Str $str, Perl6::Element @child )
+	method from-int( Int $from, Str $str, Perl6::Element-List $child )
 			returns Perl6::Element {
 		my $_child = Perl6::Element-List.new;
 		$str ~~ m{ ^ (.) .* (.) $ };
 		$_child.append(
 			Perl6::Balanced::Enter.from-int( $from, $0.Str )
 		);
-		$_child.append( @child );
+		$_child.append( $child );
 		$_child.append(
 			Perl6::Balanced::Exit.from-int(
 				$from + $str.chars - 1,
@@ -400,13 +400,13 @@ class Perl6::Operator::Circumfix does Branching {
 	also does MatchingBalanced;
 
 	method from-delims(
-		Mu $p, Str $front, Str $back, Perl6::Element @child )
+		Mu $p, Str $front, Str $back, Perl6::Element-List $child )
 			returns Perl6::Element {
 		my $_child = Perl6::Element-List.new;
 		$_child.append(
 			Perl6::Balanced::Enter.from-int( $p.from, $front )
 		);
-		$_child.append( @child );
+		$_child.append( $child );
 		$_child.append(
 			Perl6::Balanced::Exit.from-int(
 				$p.to - $back.chars,
@@ -426,13 +426,13 @@ class Perl6::Operator::PostCircumfix does Branching {
 	also does MatchingBalanced;
 
 	method from-delims(
-		Mu $p, Str $front, Str $back, Perl6::Element @child )
+		Mu $p, Str $front, Str $back, Perl6::Element-List $child )
 			returns Perl6::Element {
 		my $_child = Perl6::Element-List.new;
 		$_child.append(
 			Perl6::Balanced::Enter.from-int( $p.from, $front )
 		);
-		$_child.append( @child );
+		$_child.append( $child );
 		$_child.append(
 			Perl6::Balanced::Exit.from-int(
 				$p.to - $back.chars,
@@ -461,19 +461,19 @@ class Perl6::Comment does Token {
 class Perl6::Document does Branching {
 	also is Perl6::Element;
 
-	method from-list( Perl6::Element @child ) returns Perl6::Element {
-		if @child {
+	method from-list( Perl6::Element-List $child ) returns Perl6::Element {
+		if $child.child {
 			self.bless(
-				:from( @child[0].from ),
-				:to( @child[*-1].to ),
-				:child( @child )
+				:from( $child.child.[0].from ),
+				:to( $child.child.[*-1].to ),
+				:child( $child.child )
 			);
 		}
 		else {
 			self.bless(
 				:from( 0 ),
 				:to( 0 ),
-				:child( @child )
+				:child( $child.child )
 			);
 		}
 	}
@@ -495,12 +495,12 @@ class Perl6::Sir-Not-Appearing-In-This-Statement {
 class Perl6::Statement does Branching {
 	also is Perl6::Element;
 
-	method from-list( Perl6::Element @child ) returns Perl6::Element {
+	method from-list( Perl6::Element-List $child ) returns Perl6::Element {
 		self.bless(
 			:factory-line-number( callframe(1).line ),
-			:from( @child[0].from ),
-			:to( @child[*-1].to ),
-			:child( @child )
+			:from( $child.child[0].from ),
+			:to( $child.child[*-1].to ),
+			:child( $child.child )
 		)
 	}
 }
@@ -876,7 +876,7 @@ class Perl6::Parser::Factory {
 	constant BACKSLASH = Q'\'; # because the braces confuse vim.
 
 	method _string-to-tokens( Int $from, Str $str )
-			returns Array[Perl6::Element] {
+			returns Perl6::Element-List {
 		my $child = Perl6::Element-List.new;
 		my $to = $from + $str.chars;
 
@@ -928,7 +928,7 @@ class Perl6::Parser::Factory {
 			}
 		}
 
-		$child.child;
+		$child;
 	}
 
 	method build( Mu $p ) returns Perl6::Element {
@@ -938,7 +938,7 @@ class Perl6::Parser::Factory {
 		);
 
 		my Perl6::Element $root = Perl6::Document.from-list(
-			$_child.child
+			$_child
 		);
 		self.fill-gaps( $p, $root );
 		if $p.from < $root.from {
@@ -1064,7 +1064,7 @@ class Perl6::Parser::Factory {
 				);
 				$child.append(
 					Perl6::Operator::Circumfix.from-match(
-						$_, $_child.child
+						$_, $_child
 					)
 				);
 			}
@@ -1202,7 +1202,7 @@ class Perl6::Parser::Factory {
 				);
 				$child.append(
 					Perl6::Block.from-match(
-						$_, $_child.child
+						$_, $_child
 					)
 				);
 			}
@@ -1319,7 +1319,7 @@ class Perl6::Parser::Factory {
 			}
 			$child.append(
 				Perl6::Operator::Circumfix.from-match(
-					$p, $_child.child
+					$p, $_child
 				)
 			);
 		}
@@ -1339,7 +1339,7 @@ class Perl6::Parser::Factory {
 					);
 					$child.append(
 						Perl6::Operator::Circumfix.from-match(
-							$_, $_child.child
+							$_, $_child
 						)
 					);
 				}
@@ -1352,7 +1352,7 @@ class Perl6::Parser::Factory {
 					);
 					$child.append(
 						Perl6::String::WordQuoting.from-match(
-							$_, $_child.child
+							$_, $_child
 						)
 					);
 				}
@@ -1471,7 +1471,7 @@ class Perl6::Parser::Factory {
 					);
 					$child.append(
 						Perl6::Operator::PostCircumfix.from-delims(
-							$_, ':(', ')', $_child.child
+							$_, ':(', ')', $_child
 						)
 					);
 				}
@@ -1522,7 +1522,7 @@ class Perl6::Parser::Factory {
 						$_,
 						$_.hash.<sigil>.Str ~ '(',
 						')',
-						$_child.child
+						$_child
 					)
 				);
 			}
@@ -1570,7 +1570,7 @@ class Perl6::Parser::Factory {
 				$child.append(
 					Perl6::Operator::Circumfix.from-outer-match(
 						$_.hash.<signature>,
-						$_child.child
+						$_child
 					)
 				);
 				$child.append(
@@ -1635,7 +1635,7 @@ class Perl6::Parser::Factory {
 				);
 				$child.append(
 					Perl6::Operator::Circumfix.from-match(
-						$_, $_child.child
+						$_, $_child
 					)
 				);
 			}
@@ -1892,7 +1892,7 @@ class Perl6::Parser::Factory {
 #				display-unhandled-match( $_ );
 #			}
 #		}
-#		$child.child;
+#		$child;
 #	}
 
 	# .
@@ -2237,7 +2237,7 @@ class Perl6::Parser::Factory {
 			$child.append(
 				Perl6::Operator::Hyper.from-outer-match(
 					$p.hash.<op>,
-					$_child.child
+					$_child
 				)
 			);
 			$child.append( self._args( $p.hash.<args> ) );
@@ -2689,7 +2689,7 @@ class Perl6::Parser::Factory {
 							$_.hash.<multisig>.from - $from,
 							$_.hash.<multisig>.chars + $from + $to
 						),
-						$_child.child
+						$_child
 					)
 				);
 				$child.append(
@@ -2877,7 +2877,7 @@ class Perl6::Parser::Factory {
 						$_,
 						'(',
 						')',
-						$_child.child
+						$_child
 					)
 				);
 			}
@@ -3584,7 +3584,7 @@ class Perl6::Parser::Factory {
 				);
 				$child.append(
 					Perl6::Operator::Circumfix.from-match(
-						$_, $_child.child
+						$_, $_child
 					)
 				);
 			}
@@ -3744,7 +3744,7 @@ class Perl6::Parser::Factory {
 				$child.append(
 					Perl6::Operator::PostCircumfix.from-match(
 						$_,
-						$_child.child
+						$_child
 					)
 				);
 			}
@@ -3760,7 +3760,7 @@ class Perl6::Parser::Factory {
 				);
 				$child.append(
 					Perl6::Operator::PostCircumfix.from-match(
-						$_, $_child.child
+						$_, $_child
 					)
 				);
 			}
@@ -3774,7 +3774,7 @@ class Perl6::Parser::Factory {
 					);
 					$child.append(
 						Perl6::Operator::Circumfix.from-match(
-							$_, $_child.child
+							$_, $_child
 						)
 					);
 				}
@@ -4011,7 +4011,7 @@ class Perl6::Parser::Factory {
 				$child.append(
 					Perl6::Regex.from-match(
 						$_.hash.<quibble>,
-						$_child.child
+						$_child
 					)
 				);
 			}
@@ -4225,7 +4225,7 @@ class Perl6::Parser::Factory {
 				}
 				$child.append(
 					%delimiter-map{$0.Str}.from-match(
-						$p, $_child.child
+						$p, $_child
 					)
 				);
 			}
@@ -4347,7 +4347,7 @@ class Perl6::Parser::Factory {
 			$child.append(
 				Perl6::Block.from-outer-match(
 					$p.hash.<nibble>,
-					$_child.child
+					$_child
 				)
 			);
 		}
@@ -4547,7 +4547,7 @@ class Perl6::Parser::Factory {
 							$_.hash.<multisig>.from - $from,
 							$_.hash.<multisig>.chars + $from + $to
 						),
-						$_child.child
+						$_child
 					)
 				);
 				$child.append( self._blockoid( $_.hash.<blockoid> ) );
@@ -4812,7 +4812,7 @@ class Perl6::Parser::Factory {
 #				display-unhandled-match( $_ );
 #			}
 #		}
-#		$child.child;
+#		$child;
 #	}
 
 	method _sibble( Mu $p ) returns Perl6::Element-List {
@@ -4828,9 +4828,7 @@ class Perl6::Parser::Factory {
 						SLASH
 					)
 				);
-				$child.append(
-					self._left( $_.hash.<left> )
-				);
+				$child.append( self._left( $_.hash.<left> ) );
 				$child.append(
 					Perl6::Operator::Prefix.from-int(
 						$_.hash.<left>.to -
@@ -5229,9 +5227,7 @@ class Perl6::Parser::Factory {
 		my $child = Perl6::Element-List.new;
 		given $p {
 			when self.assert-hash( $_, [< EXPR >] ) {
-				$child.append(
-					self._EXPR( $_.hash.<EXPR> )
-				);
+				$child.append( self._EXPR( $_.hash.<EXPR> ) );
 				my Str $right-edge = $_.Str.substr(
 					$_.hash.<EXPR>.to - $_.from
 				);
@@ -5564,14 +5560,14 @@ class Perl6::Parser::Factory {
 				);
 			}
 			$child.append(
-				Perl6::Statement.from-list( $_child.child )
+				Perl6::Statement.from-list( $_child )
 			);
 		}
 		if !$p.hash.<statement> and $p.Str ~~ m{ . } {
 			my $_child = Perl6::Element-List.new;
 			$_child.append( Perl6::WS.from-match( $p ) );
 			$child.append(
-				Perl6::Statement.from-list( $_child.child )
+				Perl6::Statement.from-list( $_child )
 			);
 		}
 		$child;
