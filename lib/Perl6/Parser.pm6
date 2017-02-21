@@ -290,6 +290,16 @@ my role Debugging {
 
 		$line ~= " (line {$term.factory-line-number})" if
 			$term.factory-line-number;
+		if $term.next {
+			my $next = $term.next;
+			my $name = $next.WHAT.perl;
+			$name ~~ s/'Perl6::'//;
+			my $next-bounds = "{$next.from}-{$next.to}";
+			$line ~= " -> $name ($next-bounds)";
+		}
+		else {
+			$line ~= " -> END";
+		}
 		$line;
 	}
 

@@ -189,6 +189,8 @@ class Perl6::Element {
 	has Int $.from is required;
 	has Int $.to is required;
 	has $.factory-line-number; # Purely a debugging aid.
+
+	has Perl6::Element $.next is rw;
 }
 
 class Perl6::Element-List {
@@ -931,6 +933,37 @@ class Perl6::Parser::Factory {
 		$child;
 	}
 
+	method thread( Perl6::Element $root, Perl6::Element $next? ) {
+		if $root.^can('content') {
+			if $next {
+				$root.next = $next;
+			}
+		}
+		elsif $root.^can('child') {
+			if $root.child.elems {
+				$root.next = $root.child[0];
+				for $root.child.keys {
+					if $_ < $root.child.elems {
+						self.thread(
+							$root.child[$_],
+							$root.child[$_+1]
+						);
+					}
+					else {
+						self.thread( $root.child[$_] );
+					}
+				}
+				$root.child[*-1].next = $next;
+			}
+			else {
+				$root.next = $next;
+			}
+		}
+		else {
+			die "Can't happen";
+		}
+	}
+
 	method build( Mu $p ) returns Perl6::Element {
 		my $_child = Perl6::Element-List.new;
 		$_child.append(
@@ -957,6 +990,7 @@ class Perl6::Parser::Factory {
 			);
 			$root.child.append( $child.child );
 		}
+		self.thread( $root );
 		$root;
 	}
 
