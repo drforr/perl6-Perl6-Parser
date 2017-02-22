@@ -142,13 +142,13 @@ Whew. If you're doing manipulation of statements, B<now> hopefully you'll see wh
 
 =begin ROLES
 
-=item L<Perl6::Node>
+=item L<Twig>
 
-Purely a virtual role. Client-facing classes use this to require the C<Str()> functionality of the rest of the classes in the system.
+Lets the tree walking utilities know this node is a decision point.
 
 =cut
 
-=item Perl6::Leaf
+=item Leaf
 
 Represents things such as numbers that are a token unto themselves.
 
@@ -199,12 +199,18 @@ class Perl6::Element-List {
 	multi method append( Perl6::Element $element ) {
 		@.child.append( $element );
 	}
-	multi method append( Perl6::Element @element ) {
-		@.child.append( @element );
-	}
 	multi method append( Perl6::Element-List $element-list ) {
 		@.child.append( $element-list.child )
 	}
+}
+
+role Leaf {
+	method is-leaf returns Bool { True }
+	method is-twig returns Bool { False }
+}
+role Twig {
+	method is-leaf returns Bool { False }
+	method is-twig returns Bool { True }
 }
 
 role Matchable {
@@ -238,6 +244,17 @@ role Matchable {
 			:content( $str )
 		)
 	}
+
+	method from-sample( Mu $p, Str $token ) returns Perl6::Element {
+		$p.Str ~~ m{ ($token) };
+		my Int $left-margin = $0.from;
+		self.bless(
+			:factory-line-number( callframe(1).line ),
+			:from( $left-margin + $p.from ),
+			:to( $left-margin + $p.from + $token.chars ),
+			:content( $token )
+		)
+	}
 }
 
 role Child {
@@ -266,6 +283,7 @@ class Perl6::Structural {
 # So they're only generated in the _statement handler.
 #
 class Perl6::Semicolon does Token {
+	also does Leaf;
 	also is Perl6::Structural;
 	also does Matchable;
 }
@@ -284,9 +302,11 @@ class Perl6::Balanced {
 	}
 }
 class Perl6::Balanced::Enter does Token {
+	also does Leaf;
 	also is Perl6::Balanced;
 }
 class Perl6::Balanced::Exit does Token {
+	also does Leaf;
 	also is Perl6::Balanced;
 }
 
@@ -367,100 +387,78 @@ role MatchingBalanced {
 			:child( $_child.child )
 		)
 	}
+
+	method from-delims(
+		Mu $p, Str $front, Str $back, Perl6::Element-List $child )
+			returns Perl6::Element {
+		my $_child = Perl6::Element-List.new;
+		$_child.append(
+			Perl6::Balanced::Enter.from-int( $p.from, $front )
+		);
+		$_child.append( $child );
+		$_child.append(
+			Perl6::Balanced::Exit.from-int(
+				$p.to - $back.chars,
+				$back
+			)
+		);
+		self.bless(
+			:factory-line-number( callframe(1).line ),
+			:from( $p.from ),
+			:to( $p.to ),
+			:child( $_child.child )
+		)
+	}
 }
 
 class Perl6::Operator {
 	also is Perl6::Element;
-	also does Matchable;
-
-	method from-sample( Mu $p, Str $token ) returns Perl6::Element {
-		$p.Str ~~ m{ ($token) };
-		my Int $left-margin = $0.from;
-		self.bless(
-			:factory-line-number( callframe(1).line ),
-			:from( $left-margin + $p.from ),
-			:to( $left-margin + $p.from + $token.chars ),
-			:content( $token )
-		)
-	}
 }
 class Perl6::Operator::Hyper does Branching {
+	also does Twig;
 	also is Perl6::Operator;
 	also does MatchingBalanced;
 }
 class Perl6::Operator::Prefix does Token {
+	also does Leaf;
 	also is Perl6::Operator;
+	also does Matchable;
 }
 class Perl6::Operator::Infix does Token {
+	also does Leaf;
 	also is Perl6::Operator;
+	also does Matchable;
 }
 class Perl6::Operator::Postfix does Token {
+	also does Leaf;
 	also is Perl6::Operator;
+	also does Matchable;
 }
 class Perl6::Operator::Circumfix does Branching {
+	also does Twig;
 	also is Perl6::Operator;
 	also does MatchingBalanced;
-
-	method from-delims(
-		Mu $p, Str $front, Str $back, Perl6::Element-List $child )
-			returns Perl6::Element {
-		my $_child = Perl6::Element-List.new;
-		$_child.append(
-			Perl6::Balanced::Enter.from-int( $p.from, $front )
-		);
-		$_child.append( $child );
-		$_child.append(
-			Perl6::Balanced::Exit.from-int(
-				$p.to - $back.chars,
-				$back
-			)
-		);
-		self.bless(
-			:factory-line-number( callframe(1).line ),
-			:from( $p.from ),
-			:to( $p.to ),
-			:child( $_child.child )
-		)
-	}
 }
 class Perl6::Operator::PostCircumfix does Branching {
+	also does Twig;
 	also is Perl6::Operator;
 	also does MatchingBalanced;
-
-	method from-delims(
-		Mu $p, Str $front, Str $back, Perl6::Element-List $child )
-			returns Perl6::Element {
-		my $_child = Perl6::Element-List.new;
-		$_child.append(
-			Perl6::Balanced::Enter.from-int( $p.from, $front )
-		);
-		$_child.append( $child );
-		$_child.append(
-			Perl6::Balanced::Exit.from-int(
-				$p.to - $back.chars,
-				$back
-			)
-		);
-		self.bless(
-			:factory-line-number( callframe(1).line ),
-			:from( $p.from ),
-			:to( $p.to ),
-			:child( $_child.child )
-		)
-	}
 }
 
 class Perl6::WS does Token {
+	also does Leaf;
 	also is Perl6::Element;
 	also does Matchable;
 }
 
 class Perl6::Comment does Token {
+	also does Leaf;
 	also is Perl6::Element;
 	also does Matchable;
 }
 
 class Perl6::Document does Branching {
+	also does Twig;
 	also is Perl6::Element;
 
 	method from-list( Perl6::Element-List $child ) returns Perl6::Element {
@@ -486,6 +484,7 @@ class Perl6::Document does Branching {
 # and if so, I'm glad.
 #
 class Perl6::Sir-Not-Appearing-In-This-Statement {
+	also does Leaf;
 	also is Perl6::Element;
 	has $.content; # XXX because it's not quite a token.
 
@@ -495,6 +494,7 @@ class Perl6::Sir-Not-Appearing-In-This-Statement {
 }
 
 class Perl6::Statement does Branching {
+	also does Twig;
 	also is Perl6::Element;
 
 	method from-list( Perl6::Element-List $child ) returns Perl6::Element {
@@ -507,47 +507,30 @@ class Perl6::Statement does Branching {
 	}
 }
 
-role Prefixed {
-	method headless returns Str {
-		$.content ~~ m{ 0 <[bdox]> (.+) };
-		$0
-	}
-}
-
 # And now for the most basic tokens...
 #
 class Perl6::Number does Token {
+	also does Leaf;
 	also is Perl6::Element;
 	also does Matchable;
 }
-class Perl6::Number::Binary does Prefixed {
-	also is Perl6::Number;
-}
-class Perl6::Number::Octal does Prefixed {
-	also is Perl6::Number;
-}
-class Perl6::Number::Decimal {
-	also is Perl6::Number;
-}
-class Perl6::Number::Decimal::Explicit does Prefixed {
-	also is Perl6::Number::Decimal;
-}
-class Perl6::Number::Hexadecimal does Prefixed {
-	also is Perl6::Number;
-}
+class Perl6::Number::Binary is Perl6::Number { }
+class Perl6::Number::Octal is Perl6::Number { }
+class Perl6::Number::Decimal is Perl6::Number { }
+class Perl6::Number::Decimal::Explicit is Perl6::Number::Decimal { }
+class Perl6::Number::Hexadecimal is Perl6::Number { }
+class Perl6::Number::Radix is Perl6::Number { }
+class Perl6::Number::FloatingPoint is Perl6::Number { }
+
 class Perl6::NotANumber is Token {
+	also does Leaf;
 	also is Perl6::Element;
 	also does Matchable;
 }
 class Perl6::Infinity is Token {
+	also does Leaf;
 	also is Perl6::Element;
 	also does Matchable;
-}
-class Perl6::Number::Radix {
-	also is Perl6::Number;
-}
-class Perl6::Number::FloatingPoint {
-	also is Perl6::Number;
 }
 
 class Perl6::String does Branching {
@@ -558,10 +541,12 @@ class Perl6::String does Branching {
 	has Str $.here-doc;
 }
 class Perl6::String::Body does Token {
+	also does Leaf;
 	also is Perl6::String;
 	also does Matchable;
 }
 class Perl6::String::WordQuoting {
+	also does Twig;
 	also is Perl6::String;
 	also does MatchingBalanced;
 }
@@ -569,6 +554,7 @@ class Perl6::String::WordQuoting::QuoteProtection {
 	also is Perl6::String::WordQuoting;
 }
 class Perl6::String::Interpolation {
+	also does Twig;
 	also is Perl6::String;
 }
 class Perl6::String::Interpolation::Shell {
@@ -581,12 +567,15 @@ class Perl6::String::Interpolation::WordQuoting::QuoteProtection {
 	also is Perl6::String::Interpolation::WordQuoting;
 }
 class Perl6::String::Shell {
+	also does Twig;
 	also is Perl6::String;
 }
 class Perl6::String::Escaping {
+	also does Twig;
 	also is Perl6::String;
 }
 class Perl6::String::Literal {
+	also does Twig;
 	also is Perl6::String;
 }
 class Perl6::String::Literal::WordQuoting {
@@ -597,6 +586,7 @@ class Perl6::String::Literal::Shell {
 }
 
 class Perl6::Regex does Branching {
+	also does Twig;
 	also is Perl6::Element;
 	also does MatchingBalanced;
 
@@ -604,25 +594,25 @@ class Perl6::Regex does Branching {
 }
 
 class Perl6::Bareword does Token {
+	also does Leaf;
 	also is Perl6::Element;
 	also does Matchable;
 }
 class Perl6::Adverb does Token {
+	also does Leaf;
 	also is Perl6::Element;
 	also does Matchable;
 }
 class Perl6::PackageName does Token {
+	also does Leaf;
 	also is Perl6::Element;
 	also does Matchable;
-
-	method namespaces returns Str {
-		$.content.split( '::' )
-	}
 }
 class Perl6::ColonBareword does Token {
 	also is Perl6::Bareword;
 }
 class Perl6::Block does Branching {
+	also does Twig;
 	also is Perl6::Element;
 	also does MatchingBalanced;
 }
@@ -630,13 +620,9 @@ class Perl6::Block does Branching {
 class Perl6::Variable {
 	also is Perl6::Element;
 	also does Matchable;
-
-	method headless returns Str {
-		$.content ~~ m{ <[$%@&]> <[*!?<^:=~]>? (.+) };
-		$0
-	}
 }
 class Perl6::Variable::Scalar does Token {
+	also does Leaf;
 	also is Perl6::Variable;
 	has Str $.sigil = Q{$};
 }
@@ -681,6 +667,7 @@ class Perl6::Variable::Scalar::SubLanguage {
 	has Str $.twigil = Q{~};
 }
 class Perl6::Variable::Array does Token {
+	also does Leaf;
 	also is Perl6::Variable;
 	has Str $.sigil = Q{@};
 }
@@ -721,6 +708,7 @@ class Perl6::Variable::Array::SubLanguage {
 	has Str $.twigil = Q{~};
 }
 class Perl6::Variable::Hash does Token {
+	also does Leaf;
 	also is Perl6::Variable;
 	has Str $.sigil = Q{%};
 }
@@ -761,6 +749,7 @@ class Perl6::Variable::Hash::SubLanguage {
 	has Str $.twigil = Q{~};
 }
 class Perl6::Variable::Callable does Token {
+	also does Leaf;
 	also is Perl6::Variable;
 	has Str $.sigil = Q{&};
 }
@@ -934,12 +923,12 @@ class Perl6::Parser::Factory {
 	}
 
 	method thread( Perl6::Element $root, Perl6::Element $next? ) {
-		if $root.^can('content') {
+		if $root.is-leaf {
 			if $next {
 				$root.next = $next;
 			}
 		}
-		elsif $root.^can('child') {
+		elsif $root.is-twig {
 			if $root.child.elems {
 				$root.next = $root.child[0];
 				for $root.child.keys {
@@ -1016,7 +1005,7 @@ class Perl6::Parser::Factory {
 	}
 
 	method fill-gaps( Mu $p, Perl6::Element $root, Int $depth = 0 ) {
-		return unless $root.^can( 'child' );
+		return unless $root.is-twig;
 
 		for reverse $root.child.keys {
 			self.fill-gaps( $p, $root.child.[$_], $depth + 1 );

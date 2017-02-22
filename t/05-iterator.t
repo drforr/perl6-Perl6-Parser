@@ -155,7 +155,7 @@ subtest {
 	my $source = Q{'a';2;1};
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
-#say $pt.dump-tree( $tree );
+say $pt.dump-tree( $tree );
 	is $pt.to-string( $tree ), $source, Q{formatted};
 
 	is $tree.next,

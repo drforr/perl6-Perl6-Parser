@@ -197,7 +197,7 @@ my role Debugging {
 			  Int $depth = 0 ) {
 		return '' if $root ~~ Perl6::WS and !$display-ws;
 		my $str = ( indent xx $depth ) ~ self.dump-term( $root ) ~ "\n";
-		if $root.^can('child') {
+		if $root.is-twig {
 			for ^$root.child {
 				my @problem;
 				if $root.child.[$_].from < 0 {
@@ -213,7 +213,7 @@ my role Debugging {
 					$root.child.[$_+1].from {
 					@problem.push( 'G' )
 				}
-				if $root.child.[$_].^can( 'content' ) {
+				if $root.child.[$_].is-leaf {
 					if $root.child.[$_].from ==
 					   $root.child.[$_].to {
 						@problem.push( Q{''} )
@@ -232,7 +232,7 @@ my role Debugging {
 					   $root.child.[$_].content ~~ / \s / {
 						@problem.push( 'WS' )
 					}
-					if $root.child.[$_].^can( 'content' ) and
+					if $root.child.[$_].is-leaf and
 					   $root.child.[$_].content eq '' {
 						@problem.push( 'WS' )
 					}
@@ -263,7 +263,7 @@ my role Debugging {
 		my $line = $term.WHAT.perl;
 		$line ~~ s/'Perl6::'//;
 
-		if $term.^can( 'content' ) {
+		if $term.is-leaf {
 			if $term ~~ Perl6::Number {
 				$line ~= " ({$term.content})"
 			}
@@ -343,7 +343,7 @@ my role Validating {
 				$*ERR.say( "Last element not structural: " ~ $root.perl );
 			}
 		}
-		if $root.^can('child') {
+		if $root.is-twig {
 			for $root.child {
 				self._consistency-check( $_ );
 				unless $_.^can('from') {
@@ -366,7 +366,7 @@ my role Validating {
 				}
 			}
 		}
-		if $root.^can('content') {
+		if $root.is-leaf {
 			if $root.content.chars < $root.to - $root.from {
 				$*ERR.say( "Not enough chars: " ~ $root.perl );
 			}
