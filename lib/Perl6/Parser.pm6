@@ -335,17 +335,38 @@ my role Testing {
 my role Validating {
 
 	method _consistency-check( Perl6::Element $root ) {
+		if !$root.^can('is-leaf') {
+			$*ERR.say(
+				"Element is missing is-leaf: " ~ $root.perl
+			);
+		}
+		if !$root.^can('is-twig') {
+			$*ERR.say(
+				"Element is missing is-twig: " ~ $root.perl
+			);
+		}
+
+
 		if $root ~~ Perl6::Block {
 			unless $root.child.[0] ~~ Perl6::Structural {
-				$*ERR.say( "First element not structural: " ~ $root.perl );
+				$*ERR.say(
+					"First element not structural: " ~
+					$root.perl
+				);
 			}
 			unless $root.child.[*-1] ~~ Perl6::Structural {
-				$*ERR.say( "Last element not structural: " ~ $root.perl );
+				$*ERR.say(
+					"Last element not structural: " ~
+					$root.perl
+				);
 			}
 		}
 		if $root.is-twig {
 			for $root.child {
 				self._consistency-check( $_ );
+				if $_.WHAT.perl eq 'Perl6::Element' {
+					$*ERR.say( "Raw Perl6::Element in: " ~ $root.perl );
+				}
 				unless $_.^can('from') {
 					$*ERR.say( "Missing 'from': " ~ $_.perl );
 				}

@@ -190,7 +190,8 @@ class Perl6::Element {
 	has Int $.to is required;
 	has $.factory-line-number; # Purely a debugging aid.
 
-	has Perl6::Element $.next is rw;
+#	has Perl6::Element $.next is rw;
+	has $.next is rw;
 }
 
 class Perl6::Element-List {
@@ -211,6 +212,10 @@ role Leaf {
 role Twig {
 	method is-leaf returns Bool { False }
 	method is-twig returns Bool { True }
+
+	method is-empty returns Bool { @.child.elems == 0 }
+	method first returns Perl6::Element { @.child[0] }
+	method last returns Perl6::Element { @.child[*-1] }
 }
 
 role Matchable {
@@ -922,35 +927,53 @@ class Perl6::Parser::Factory {
 		$child;
 	}
 
-	method thread( Perl6::Element $root, Perl6::Element $next? ) {
-		if $root.is-leaf {
+	sub dump-element( Perl6::Element $node ) {
+		if $node {
+			my $str = $node.WHAT.perl;
+			if $node.is-leaf {
+				$str ~= qq[ "{$node.content.Str}"];
+			}
+			$str ~= " ({$node.from}-{$node.to})";
+			$str
+		}
+		else {
+			'(Any)'
+		}
+	}
+
+	# Keep the recursive method "private" so we can have a place for
+	# a debugging hook when needed.
+	#
+	method _thread( Perl6::Element $node, $next ) {
+		if $node.is-leaf {
 			if $next {
-				$root.next = $next;
+				$node.next = $next;
 			}
 		}
-		elsif $root.is-twig {
-			if $root.child.elems {
-				$root.next = $root.child[0];
-				for $root.child.keys {
-					if $_ < $root.child.elems {
-						self.thread(
-							$root.child[$_],
-							$root.child[$_+1]
-						);
-					}
-					else {
-						self.thread( $root.child[$_] );
-					}
-				}
-				$root.child[*-1].next = $next;
+		elsif $node.is-twig {
+			if $node.is-empty {
+				$node.next = $next;
 			}
 			else {
-				$root.next = $next;
+				$node.next = $node.first;
+				my $index = 0;
+				while $index < $node.child.elems - 1 {
+					self._thread(
+						$node.child[$index],
+						$node.child[$index+1]
+					);
+					$index++;
+				}
+				self._thread( $node.last, $next );
 			}
 		}
 		else {
 			die "Can't happen";
 		}
+	}
+
+	method thread( Perl6::Element $node ) {
+		self._thread( $node, Any );
 	}
 
 	method build( Mu $p ) returns Perl6::Element {

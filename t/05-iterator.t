@@ -107,14 +107,12 @@ subtest {
 
 	is $tree.next, $tree.child[0];
 	is $tree.child[0].next, $tree.child[1];
-	is $tree.child[1].next, $tree.child[2];
-	ok !$tree.child[2];
+	ok !$tree.child[1].next;
 }
 
 # '((a)b)'
 subtest {
-	my $tree =
-		# $tree -> $tree.child[0]
+	my $tree = # $tree -> $tree.child[0]
 		Perl6::Operator::Circumfix.new(
 			:from(0),
 			:to(2),
@@ -147,15 +145,14 @@ subtest {
 	is $tree.next, $tree.child[0];
 	is $tree.child[0].next, $tree.child[0].child[0];
 	is $tree.child[0].child[0].next, $tree.child[1];
-	is $tree.child[1].next, $tree.child[2];
-	ok !$tree.child[2];
+	ok !$tree.child[1].next;
 }
 
 subtest {
 	my $source = Q{'a';2;1};
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
-say $pt.dump-tree( $tree );
+#say $pt.dump-tree( $tree );
 	is $pt.to-string( $tree ), $source, Q{formatted};
 
 	is $tree.next,
@@ -178,11 +175,8 @@ say $pt.dump-tree( $tree );
 		$tree.child[1].child[1];
 	is $tree.child[1].child[1].next,
 		$tree.child[2];
-# XXX Wonder why this edge case has gone missing
-#`(
 	is $tree.child[2].next,
 		$tree.child[2].child[0];
-)
 
 	done-testing;
 }, Q{leading, trailing ws};
