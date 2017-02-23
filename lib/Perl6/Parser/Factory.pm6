@@ -194,6 +194,30 @@ class Perl6::Element {
 	has Perl6::Element $.previous is rw;
 
 	has Perl6::Element $.parent is rw;
+
+	# Should only be run only flattened element lists.
+	# This is because it does nothing WRT .child.
+	# And by design, it has no access to that anyway.
+	#
+
+	# Remove just this node.
+	#
+	method remove-node {
+		if self.is-start {
+		}
+		elsif self.is-end {
+		}
+		else {
+			my $next = $.next;
+			my $previous = $.previous;
+			$.next.previous = $previous;
+			$.previous.next = $next;
+			$.next = self;
+			$.previous = self;
+		}
+	}
+	method remove {
+	}
 }
 
 class Perl6::Element-List {
