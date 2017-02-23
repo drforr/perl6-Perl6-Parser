@@ -191,6 +191,7 @@ class Perl6::Element {
 	has $.factory-line-number; # Purely a debugging aid.
 
 	has Perl6::Element $.next is rw;
+	has Perl6::Element $.previous is rw;
 }
 
 class Perl6::Element-List {
@@ -207,6 +208,9 @@ class Perl6::Element-List {
 role Ordered-Tree {
 	method is-end returns Bool {
 		self.next === self;
+	}
+	method is-start returns Bool {
+		self.previous === self;
 	}
 }
 
@@ -955,6 +959,7 @@ class Perl6::Parser::Factory {
 
 		method add-link( Perl6::Element $node ) {
 			return if $node ~~ Sentinel;
+			$node.previous = $.tail;
 			$.tail.next = $node;
 			$!tail = $node;
 			$.tail.next = $.tail;
@@ -990,6 +995,8 @@ class Perl6::Parser::Factory {
 		}
 
 		method thread( Perl6::Element $node ) {
+			$node.next = $node;
+			$node.previous = $node;
 			$!tail = $node;
 			self._thread( $node, Sentinel.new(:from(0),:to(0)) );
 		}

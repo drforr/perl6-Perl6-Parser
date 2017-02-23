@@ -17,7 +17,13 @@ subtest {
 	$ppf.thread( $tree );
 #say $pt.dump-tree( $tree );
 
-	ok !$tree.next.defined;
+	is $tree.next,
+		$tree;
+	ok $tree.is-end;
+
+	is $tree.previous,
+		$tree;
+	ok $tree.is-start;
 }
 
 # '()'
@@ -31,7 +37,13 @@ subtest {
 	$ppf.thread( $tree );
 #say $pt.dump-tree( $tree );
 
-	ok !$tree.next.defined;
+	is $tree.next,
+		$tree;
+	ok $tree.is-end;
+
+	is $tree.previous,
+		$tree;
+	ok $tree.is-start;
 }
 
 # '(a)'
@@ -51,7 +63,17 @@ subtest {
 	$ppf.thread( $tree );
 #say $pt.dump-tree( $tree );
 
-	is $tree.next, $tree.child[0];
+	is $tree.next,
+		$tree.child[0];
+	is $tree.child[0].next,
+		$tree.child[0];
+	ok $tree.child[0].is-end;
+
+	is $tree.child[0].previous,
+		$tree;
+	is $tree.previous,
+		$tree;
+	ok $tree.is-start;
 }
 
 # '(ab)'
@@ -76,8 +98,21 @@ subtest {
 	$ppf.thread( $tree );
 #say $pt.dump-tree( $tree );
 
-	is $tree.next, $tree.child[0];
-	is $tree.child[0].next, $tree.child[1];
+	is $tree.next,
+		$tree.child[0];
+	is $tree.child[0].next,
+		$tree.child[1];
+	is $tree.child[1].next,
+		$tree.child[1];
+	ok $tree.child[1].is-end;
+
+	is $tree.child[1].previous,
+		$tree.child[0];
+	is $tree.child[0].previous,
+		$tree;
+	is $tree.previous,
+		$tree;
+	ok $tree.is-start;
 }
 
 # '(()b)'
@@ -105,9 +140,21 @@ subtest {
 	$ppf.thread( $tree );
 #say $pt.dump-tree( $tree );
 
-	is $tree.next, $tree.child[0];
-	is $tree.child[0].next, $tree.child[1];
-	is $tree.child[1].next, $tree.child[1];
+	is $tree.next,
+		$tree.child[0];
+	is $tree.child[0].next,
+		$tree.child[1];
+	is $tree.child[1].next,
+		$tree.child[1];
+	ok $tree.child[1].is-end;
+
+	is $tree.child[1].previous,
+		$tree.child[0];
+	is $tree.child[0].previous,
+		$tree;
+	is $tree.previous,
+		$tree;
+	ok $tree.is-start;
 }
 
 # '((a)b)'
@@ -142,10 +189,25 @@ subtest {
 	$ppf.thread( $tree );
 #say $pt.dump-tree( $tree );
 
-	is $tree.next, $tree.child[0];
-	is $tree.child[0].next, $tree.child[0].child[0];
-	is $tree.child[0].child[0].next, $tree.child[1];
-	is $tree.child[1].next, $tree.child[1];
+	is $tree.next,
+		$tree.child[0];
+	is $tree.child[0].next,
+		$tree.child[0].child[0];
+	is $tree.child[0].child[0].next,
+		$tree.child[1];
+	is $tree.child[1].next,
+		$tree.child[1];
+	ok $tree.child[1].is-end;
+
+	is $tree.child[1].previous,
+		$tree.child[0].child[0];
+	is $tree.child[0].child[0].previous,
+		$tree.child[0];
+	is $tree.child[0].previous,
+		$tree;
+	is $tree.previous,
+		$tree;
+	ok $tree.is-start;
 }
 
 subtest {
@@ -179,12 +241,40 @@ subtest {
 		$tree.child[2].child[0];
 	is $tree.child[2].child[0].next,
 		$tree.child[2].child[0];
+	ok $tree.child[2].child[0].is-end;
+
+	is $tree.child[2].child[0].previous,
+		$tree.child[2];
+	is $tree.child[2].previous,
+		$tree.child[1].child[1];
+	is $tree.child[1].child[1].previous,
+		$tree.child[1].child[0];
+	is $tree.child[1].child[0].previous,
+		$tree.child[1];
+	is $tree.child[1].previous,
+		$tree.child[0].child[1];
+	is $tree.child[0].child[1].previous,
+		$tree.child[0].child[0].child[2];
+	is $tree.child[0].child[0].child[2].previous,
+		$tree.child[0].child[0].child[1];
+	is $tree.child[0].child[0].child[1].previous,
+		$tree.child[0].child[0].child[0];
+	is $tree.child[0].child[0].child[0].previous,
+		$tree.child[0].child[0];
+	is $tree.child[0].child[0].previous,
+		$tree.child[0];
+	is $tree.child[0].previous,
+		$tree;
+	is $tree.previous,
+		$tree;
+	ok $tree.is-start;
 
 	done-testing;
 }, Q{leading, trailing ws};
 
 subtest {
 	my $source = Q{'a';2;1};
+	my $ecruos = Q{1;2;'a'};
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
 #say $pt.dump-tree( $tree );
@@ -196,7 +286,15 @@ subtest {
 		last if $head.is-end;
 		$head = $head.next;
 	}
-	is $iterated, $source, Q{formatted};
+	is $iterated, $source, Q{iterated forward};
+
+	my $detareti = '';
+	while $head {
+		$detareti ~= $head.content if $head.is-leaf;
+		last if $head.is-start;
+		$head = $head.previous;
+	}
+	is $detareti, $ecruos, Q{iterated backwards};
 
 	done-testing;
 }, Q{simple iteration};
