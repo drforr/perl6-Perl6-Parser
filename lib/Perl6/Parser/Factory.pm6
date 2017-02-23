@@ -190,8 +190,7 @@ class Perl6::Element {
 	has Int $.to is required;
 	has $.factory-line-number; # Purely a debugging aid.
 
-#	has Perl6::Element $.next is rw;
-	has $.next is rw;
+	has Perl6::Element $.next is rw;
 }
 
 class Perl6::Element-List {
@@ -205,11 +204,19 @@ class Perl6::Element-List {
 	}
 }
 
+role Ordered-Tree {
+	method is-end returns Bool {
+		self.next === self;
+	}
+}
+
 role Leaf {
+	also does Ordered-Tree;
 	method is-leaf returns Bool { True }
 	method is-twig returns Bool { False }
 }
 role Twig {
+	also does Ordered-Tree;
 	method is-leaf returns Bool { False }
 	method is-twig returns Bool { True }
 
@@ -941,40 +948,56 @@ class Perl6::Parser::Factory {
 		}
 	}
 
-	# Keep the recursive method "private" so we can have a place for
-	# a debugging hook when needed.
-	#
-	method _thread( Perl6::Element $node, $next ) {
-		if $node.is-leaf {
-			if $next {
-				$node.next = $next;
-			}
+	my class Thread-Tree {
+		has Perl6::Element $.tail is rw;
+
+		my class Sentinel is Perl6::Element { }
+
+		method add-link( Perl6::Element $node ) {
+			return if $node ~~ Sentinel;
+			$.tail.next = $node;
+			$!tail = $node;
+			$.tail.next = $.tail;
 		}
-		elsif $node.is-twig {
-			if $node.is-empty {
-				$node.next = $next;
+
+		# Keep the recursive method "private" so we can have a place for
+		# a debugging hook when needed.
+		#
+		method _thread( Perl6::Element $node, Perl6::Element $next ) {
+			if $node.is-leaf {
+				self.add-link( $next );
+			}
+			elsif $node.is-twig {
+				if $node.is-empty {
+					self.add-link( $next );
+				}
+				else {
+					self.add-link( $node.first );
+					my $index = 0;
+					while $index < $node.child.elems - 1 {
+						self._thread(
+							$node.child[$index],
+							$node.child[$index+1]
+						);
+						$index++;
+					}
+					self._thread( $node.last, $next );
+				}
 			}
 			else {
-				$node.next = $node.first;
-				my $index = 0;
-				while $index < $node.child.elems - 1 {
-					self._thread(
-						$node.child[$index],
-						$node.child[$index+1]
-					);
-					$index++;
-				}
-				self._thread( $node.last, $next );
+				die "Can't happen";
 			}
 		}
-		else {
-			die "Can't happen";
+
+		method thread( Perl6::Element $node ) {
+			$!tail = $node;
+			self._thread( $node, Sentinel.new(:from(0),:to(0)) );
 		}
-	}
+	} 
 
 	method thread( Perl6::Element $node ) {
-		self._thread( $node, Any );
-	}
+		Thread-Tree.new.thread( $node );
+	}	
 
 	method build( Mu $p ) returns Perl6::Element {
 		my $_child = Perl6::Element-List.new;

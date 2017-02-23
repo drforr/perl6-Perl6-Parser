@@ -4,7 +4,7 @@ use Test;
 use Perl6::Parser;
 use Perl6::Parser::Factory;
 
-plan 7;
+plan 8;
 
 my $pt = Perl6::Parser.new;
 my $ppf = Perl6::Parser::Factory.new;
@@ -107,7 +107,7 @@ subtest {
 
 	is $tree.next, $tree.child[0];
 	is $tree.child[0].next, $tree.child[1];
-	ok !$tree.child[1].next;
+	is $tree.child[1].next, $tree.child[1];
 }
 
 # '((a)b)'
@@ -145,7 +145,7 @@ subtest {
 	is $tree.next, $tree.child[0];
 	is $tree.child[0].next, $tree.child[0].child[0];
 	is $tree.child[0].child[0].next, $tree.child[1];
-	ok !$tree.child[1].next;
+	is $tree.child[1].next, $tree.child[1];
 }
 
 subtest {
@@ -177,8 +177,28 @@ subtest {
 		$tree.child[2];
 	is $tree.child[2].next,
 		$tree.child[2].child[0];
+	is $tree.child[2].child[0].next,
+		$tree.child[2].child[0];
 
 	done-testing;
 }, Q{leading, trailing ws};
+
+subtest {
+	my $source = Q{'a';2;1};
+	my $p = $pt.parse( $source );
+	my $tree = $pt.build-tree( $p );
+#say $pt.dump-tree( $tree );
+
+	my $head = $tree;
+	my $iterated = '';
+	while $head {
+		$iterated ~= $head.content if $head.is-leaf;
+		last if $head.is-end;
+		$head = $head.next;
+	}
+	is $iterated, $source, Q{formatted};
+
+	done-testing;
+}, Q{simple iteration};
 
 # vim: ft=perl6
