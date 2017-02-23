@@ -192,6 +192,8 @@ class Perl6::Element {
 
 	has Perl6::Element $.next is rw;
 	has Perl6::Element $.previous is rw;
+
+	has Perl6::Element $.parent is rw;
 }
 
 class Perl6::Element-List {
@@ -206,6 +208,9 @@ class Perl6::Element-List {
 }
 
 role Ordered-Tree {
+	method is-root returns Bool {
+		self.parent === self;
+	}
 	method is-end returns Bool {
 		self.next === self;
 	}
@@ -977,6 +982,10 @@ class Perl6::Parser::Factory {
 					self.add-link( $next );
 				}
 				else {
+					for $node.child {
+						$_.parent = $node;
+					}
+
 					self.add-link( $node.first );
 					my $index = 0;
 					while $index < $node.child.elems - 1 {
@@ -994,17 +1003,45 @@ class Perl6::Parser::Factory {
 			}
 		}
 
-		method thread( Perl6::Element $node ) {
-			$node.next = $node;
-			$node.previous = $node;
-			$!tail = $node;
-			self._thread( $node, Sentinel.new(:from(0),:to(0)) );
+		method thread {
+			$.tail.parent = $.tail;
+			$.tail.next = $.tail;
+			$.tail.previous = $.tail;
+			self._thread( $.tail, Sentinel.new(:from(0),:to(0)) );
 		}
-	} 
+	}
 
 	method thread( Perl6::Element $node ) {
-		Thread-Tree.new.thread( $node );
-	}	
+		Thread-Tree.new( tail => $node ).thread;
+	}
+
+	method _flatten( Perl6::Element $node ) {
+		my $clone = $node.clone;
+		$clone.child = ( ) if $node.is-twig;
+		$clone;
+	}
+
+	method flatten( Perl6::Element $node ) {
+		my $tree = $node;
+		my $head = self._flatten( $tree );
+		$head.next = $head;
+		$head.previous = $head;
+
+		my $tail = $head;
+
+		while $tree {
+			last if $tree.is-end;
+			$tree = $tree.next;
+
+			my $next = self._flatten( $tree );
+			$next.previous = $tail;
+			$next.next = $next;
+			$tail.next = $next;
+			$tail = $tail.next;
+		}
+
+		$head;
+	}
 
 	method build( Mu $p ) returns Perl6::Element {
 		my $_child = Perl6::Element-List.new;
@@ -1032,7 +1069,6 @@ class Perl6::Parser::Factory {
 			);
 			$root.child.append( $child.child );
 		}
-		self.thread( $root );
 		$root;
 	}
 

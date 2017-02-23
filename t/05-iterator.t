@@ -4,7 +4,7 @@ use Test;
 use Perl6::Parser;
 use Perl6::Parser::Factory;
 
-plan 8;
+plan 9;
 
 my $pt = Perl6::Parser.new;
 my $ppf = Perl6::Parser::Factory.new;
@@ -16,6 +16,10 @@ subtest {
 	my $tree = Perl6::String::Body.new(:from(0),:to(1),:content('a'));
 	$ppf.thread( $tree );
 #say $pt.dump-tree( $tree );
+
+	is $tree.parent,
+		$tree;
+	ok $tree.is-root;
 
 	is $tree.next,
 		$tree;
@@ -36,6 +40,10 @@ subtest {
 		);
 	$ppf.thread( $tree );
 #say $pt.dump-tree( $tree );
+
+	is $tree.parent,
+		$tree;
+	ok $tree.is-root;
 
 	is $tree.next,
 		$tree;
@@ -62,6 +70,12 @@ subtest {
 		);
 	$ppf.thread( $tree );
 #say $pt.dump-tree( $tree );
+
+	is $tree.parent,
+		$tree;
+	is $tree.child[0].parent,
+		$tree;
+	ok $tree.is-root;
 
 	is $tree.next,
 		$tree.child[0];
@@ -97,6 +111,14 @@ subtest {
 		);
 	$ppf.thread( $tree );
 #say $pt.dump-tree( $tree );
+
+	is $tree.parent,
+		$tree;
+	is $tree.child[0].parent,
+		$tree;
+	is $tree.child[1].parent,
+		$tree;
+	ok $tree.is-root;
 
 	is $tree.next,
 		$tree.child[0];
@@ -139,6 +161,14 @@ subtest {
 		);
 	$ppf.thread( $tree );
 #say $pt.dump-tree( $tree );
+
+	is $tree.parent,
+		$tree;
+	is $tree.child[0].parent,
+		$tree;
+	is $tree.child[1].parent,
+		$tree;
+	ok $tree.is-root;
 
 	is $tree.next,
 		$tree.child[0];
@@ -189,6 +219,16 @@ subtest {
 	$ppf.thread( $tree );
 #say $pt.dump-tree( $tree );
 
+	is $tree.parent,
+		$tree;
+	is $tree.child[0].parent,
+		$tree;
+	is $tree.child[0].child[0].parent,
+		$tree.child[0];
+	is $tree.child[1].parent,
+		$tree;
+	ok $tree.is-root;
+
 	is $tree.next,
 		$tree.child[0];
 	is $tree.child[0].next,
@@ -214,8 +254,35 @@ subtest {
 	my $source = Q{'a';2;1};
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
+	$ppf.thread( $tree );
 #say $pt.dump-tree( $tree );
 	is $pt.to-string( $tree ), $source, Q{formatted};
+
+	is $tree.parent,
+		$tree;
+	is $tree.child[0].parent,
+		$tree;
+	is $tree.child[0].child[0].parent,
+		$tree.child[0];
+	is $tree.child[0].child[0].child[0].parent,
+		$tree.child[0].child[0];
+	is $tree.child[0].child[0].child[1].parent,
+		$tree.child[0].child[0];
+	is $tree.child[0].child[0].child[2].parent,
+		$tree.child[0].child[0];
+	is $tree.child[0].child[1].parent,
+		$tree.child[0];
+	is $tree.child[1].parent,
+		$tree;
+	is $tree.child[1].child[0].parent,
+		$tree.child[1];
+	is $tree.child[1].child[1].parent,
+		$tree.child[1];
+	is $tree.child[2].parent,
+		$tree;
+	is $tree.child[2].child[0].parent,
+		$tree.child[2];
+	ok $tree.is-root;
 
 	is $tree.next,
 		$tree.child[0];
@@ -277,6 +344,7 @@ subtest {
 	my $ecruos = Q{1;2;'a'};
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
+	$ppf.thread( $tree );
 #say $pt.dump-tree( $tree );
 
 	my $head = $tree;
@@ -298,5 +366,31 @@ subtest {
 
 	done-testing;
 }, Q{simple iteration};
+
+subtest {
+	my $source = Q{'a';2;1};
+	my $ecruos = Q{1;2;'a'};
+	my $p = $pt.parse( $source );
+	my $tree = $pt.build-tree( $p );
+	$ppf.thread( $tree );
+#say $pt.dump-tree( $tree );
+	my $head = $ppf.flatten( $tree );
+
+	ok $head ~~ Perl6::Document; $head = $head.next;
+	ok $head ~~ Perl6::Statement; $head = $head.next;
+	ok $head ~~ Perl6::String::Escaping; $head = $head.next;
+	ok $head ~~ Perl6::Balanced::Enter; $head = $head.next;
+	ok $head ~~ Perl6::String::Body; $head = $head.next;
+	ok $head ~~ Perl6::Balanced::Exit; $head = $head.next;
+	ok $head ~~ Perl6::Semicolon; $head = $head.next;
+	ok $head ~~ Perl6::Statement; $head = $head.next;
+	ok $head ~~ Perl6::Number::Decimal; $head = $head.next;
+	ok $head ~~ Perl6::Semicolon; $head = $head.next;
+	ok $head ~~ Perl6::Statement; $head = $head.next;
+	ok $head ~~ Perl6::Number::Decimal; $head = $head.next;
+	ok $head.is-end;
+
+	done-testing;
+}, Q{check flattened data};
 
 # vim: ft=perl6
