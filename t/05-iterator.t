@@ -11,9 +11,16 @@ my $ppf = Perl6::Parser::Factory.new;
 my $*CONSISTENCY-CHECK = True;
 my $*GRAMMAR-CHECK = True;
 
-# 'a'
+sub make-decimal( Str $value ) {
+	Perl6::Number::Decimal.new( :from(0), :to(2), :content($value) );
+}
+sub make-list {
+	Perl6::Operator::Circumfix.new( :from(0), :to(1), :child( ) );
+}
+
+# 27
 subtest {
-	my $tree = Perl6::String::Body.new(:from(0),:to(1),:content('a'));
+	my $tree = make-decimal( '27' );
 	$ppf.thread( $tree );
 #say $pt.dump-tree( $tree );
 
@@ -32,12 +39,7 @@ subtest {
 
 # '()'
 subtest {
-	my $tree =
-		Perl6::Operator::Circumfix.new(
-			:from(0),
-			:to(1),
-			:child()
-		);
+	my $tree = make-list();
 	$ppf.thread( $tree );
 #say $pt.dump-tree( $tree );
 
@@ -54,20 +56,15 @@ subtest {
 	ok $tree.is-start;
 }
 
-# '(a)'
+# '(27)'
 subtest {
-	my $tree =
-		Perl6::Operator::Circumfix.new(
-			:from(0),
-			:to(1),
-			:child(
-				Perl6::String::Body.new(
-					:from(0),
-					:to(1),
-					:content('a')
-				),
-			)
-		);
+	my $tree = Perl6::Operator::Circumfix.new(
+		:from(0),
+		:to(1),
+		:child(
+			make-decimal( '27' )
+		)
+	);
 	$ppf.thread( $tree );
 #say $pt.dump-tree( $tree );
 
@@ -97,16 +94,8 @@ subtest {
 			:from(0),
 			:to(2),
 			:child(
-				Perl6::String::Body.new(
-					:from(0),
-					:to(1),
-					:content('a')
-				),
-				Perl6::String::Body.new(
-					:from(1),
-					:to(2),
-					:content('b')
-				)
+				make-decimal( '27' ),
+				make-decimal( '64' )
 			)
 		);
 	$ppf.thread( $tree );
@@ -152,11 +141,7 @@ subtest {
 					:child()
 				),
 				# $tree.child[1] -> Any
-				Perl6::String::Body.new(
-					:from(1),
-					:to(2),
-					:content('b')
-				)
+				make-decimal( '27' )
 			)
 		);
 	$ppf.thread( $tree );
@@ -201,19 +186,11 @@ subtest {
 					:child(
 						# $tree.child[0].child[0]
 						# -> $tree.child[1]
-						Perl6::String::Body.new(
-							:from(1),
-							:to(2),
-							:content('a')
-						)
+						make-decimal( '27' )
 					)
 				),
 				# $tree.child[1] -> Any
-				Perl6::String::Body.new(
-					:from(1),
-					:to(2),
-					:content('b')
-				)
+				make-decimal( '64' )
 			)
 		);
 	$ppf.thread( $tree );
@@ -251,7 +228,7 @@ subtest {
 }
 
 subtest {
-	my $source = Q{'a';2;1};
+	my $source = Q{(1);2;1};
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
 	$ppf.thread( $tree );
@@ -340,8 +317,8 @@ subtest {
 }, Q{leading, trailing ws};
 
 subtest {
-	my $source = Q{'a';2;1};
-	my $ecruos = Q{1;2;'a'};
+	my $source = Q{(1);2;1};
+	my $ecruos = Q{1;2;)1(};
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
 	$ppf.thread( $tree );
@@ -368,24 +345,32 @@ subtest {
 }, Q{simple iteration};
 
 subtest {
-	my $source = Q{'a';2;1};
-	my $ecruos = Q{1;2;'a'};
+	my $source = Q{(3);2;1};
+	my $ecruos = Q{1;2;(3)};
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
 	$ppf.thread( $tree );
 #say $pt.dump-tree( $tree );
 	my $head = $ppf.flatten( $tree );
 
+	ok $head.parent ~~ Perl6::Document;
 	ok $head ~~ Perl6::Document; $head = $head.next;
+	ok $head.parent ~~ Perl6::Document;
 	ok $head ~~ Perl6::Statement; $head = $head.next;
-	ok $head ~~ Perl6::String::Escaping; $head = $head.next;
+	ok $head.parent ~~ Perl6::Statement;
+	ok $head ~~ Perl6::Operator::Circumfix; $head = $head.next;
+	ok $head.parent ~~ Perl6::Operator::Circumfix;
 	ok $head ~~ Perl6::Balanced::Enter; $head = $head.next;
-	ok $head ~~ Perl6::String::Body; $head = $head.next;
+	ok $head.parent ~~ Perl6::Operator::Circumfix;
+	ok $head ~~ Perl6::Bareword; $head = $head.next; # XXX Should not be bw
+	ok $head.parent ~~ Perl6::Operator::Circumfix;
 	ok $head ~~ Perl6::Balanced::Exit; $head = $head.next;
 	ok $head ~~ Perl6::Semicolon; $head = $head.next;
+	ok $head.parent ~~ Perl6::Document;
 	ok $head ~~ Perl6::Statement; $head = $head.next;
 	ok $head ~~ Perl6::Number::Decimal; $head = $head.next;
 	ok $head ~~ Perl6::Semicolon; $head = $head.next;
+	ok $head.parent ~~ Perl6::Document;
 	ok $head ~~ Perl6::Statement; $head = $head.next;
 	ok $head ~~ Perl6::Number::Decimal; $head = $head.next;
 	ok $head.is-end;

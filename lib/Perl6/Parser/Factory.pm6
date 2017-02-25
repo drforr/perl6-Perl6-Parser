@@ -67,7 +67,7 @@ Go from one element to the next in sequence. There are no "end of stream" or "be
 
 =cut
 
-=item C<remove>, C<insert-before>, C<insert-after>
+=item C<remove-node>, C<insert-node-before>, C<insert-node-after>
 
 Remove the node and children, insert a node before the element, or after.
 
@@ -213,8 +213,8 @@ Should you brave the internals in search of a missing term, the first thing you 
 =end pod
 
 class Perl6::Element {
-	has Int $.from is required;
-	has Int $.to is required;
+	has Int $.from is required is rw;
+	has Int $.to is required is rw;
 	has $.factory-line-number; # Purely a debugging aid.
 
 	has Perl6::Element $.next is rw;
@@ -222,14 +222,34 @@ class Perl6::Element {
 
 	has Perl6::Element $.parent is rw;
 
+	method _dump returns Str {
+		my $node = self;
+		$node.child = () if self.is-twig;
+		$node.next = $node;
+		$node.previous = $node;
+		$node.parent = $node;
+		$node.perl
+	}
+
 	# Should only be run only flattened element lists.
 	# This is because it does nothing WRT .child.
 	# And by design, it has no access to that anyway.
 	#
 
+	method _add-offset( Perl6::Element $node, Int $delta ) {
+		my $head = $node;
+		while !$head.is-end {
+			$head.to += $delta;
+			$head.from += $delta;
+			$head = $head.next;
+		}
+	}
+
 	# Remove just this node.
 	#
 	method remove-node {
+		self._add-offset( self.next, -( $.to - $.from ) ) if
+			$*UPDATE-RANGES;
 		if self.is-end {
 			my $previous = $.previous;
 			$.previous.next = $previous;
@@ -246,16 +266,33 @@ class Perl6::Element {
 	}
 
 	method insert-node-before( Perl6::Element $node ) {
+		self._add-offset( self, $.to - $.from ) if
+			$*UPDATE-RANGES;
 		if self.is-start {
+			$node.next = self;
+			$node.previous = $node;
+			$node.parent = $node;
+			$.previous = $node;
 		}
 		else {
 		}
 	}
 
 	method insert-node-after( Perl6::Element $node ) {
+		self._add-offset( self.next, $.to - $.from ) if
+			$*UPDATE-RANGES;
 		if self.is-end {
+			$node.next = $node;
+			$node.parent = $.parent;
+			$node.previous = self;
+			$.next = $node;
 		}
 		else {
+			$node.next = $.next;
+			$node.parent = $.parent;
+			$node.previous = self;
+			$.next.previous = $node;
+			$.next = $node;
 		}
 	}
 }
