@@ -4,7 +4,7 @@ use Test;
 use Perl6::Parser;
 use Perl6::Parser::Factory;
 
-plan 1;
+plan 2;
 
 my $pt = Perl6::Parser.new;
 my $ppf = Perl6::Parser::Factory.new;
@@ -29,18 +29,91 @@ subtest {
 	#
 	$body.remove-node;
 
+	# Check links going forward and upward.
+	#
+	ok $head ~~ Perl6::Document;         $head = $head.next;
+	ok $head.parent ~~ Perl6::Document;
+	ok $head ~~ Perl6::Statement;        $head = $head.next;
+	ok $head.parent ~~ Perl6::Statement;
+	ok $head ~~ Perl6::String::Escaping; $head = $head.next;
+	ok $head.parent ~~ Perl6::String::Escaping;
+	ok $head ~~ Perl6::Balanced::Enter;  $head = $head.next;
+	ok $head.parent ~~ Perl6::String::Escaping;
+#	ok $head ~~ Perl6::String::Body;     $head = $head.next;
+#	ok $head.parent ~~ Perl6::String::Escaping;
+	ok $head ~~ Perl6::Balanced::Exit;   $head = $head.next;
+	ok $head.parent ~~ Perl6::Statement;
+	ok $head ~~ Perl6::Semicolon;        $head = $head.next;
+	ok $head.parent ~~ Perl6::Document;
+	ok $head ~~ Perl6::Statement;        $head = $head.next;
+	ok $head.parent ~~ Perl6::Statement;
+	ok $head ~~ Perl6::Number::Decimal;  $head = $head.next;
+	ok $head.parent ~~ Perl6::Statement;
+	ok $head ~~ Perl6::Semicolon;        $head = $head.next;
+	ok $head.parent ~~ Perl6::Document;
+	ok $head ~~ Perl6::Statement;        $head = $head.next;
+	ok $head.parent ~~ Perl6::Statement;
+	ok $head ~~ Perl6::Number::Decimal;  $head = $head.next;
+	ok $head.is-end;
+
+	# Now that we're at the end, throw this baby into reverse.
+	#
+	ok $head ~~ Perl6::Number::Decimal;  $head = $head.previous;
+	ok $head ~~ Perl6::Statement;        $head = $head.previous;
+	ok $head ~~ Perl6::Semicolon;        $head = $head.previous;
+	ok $head ~~ Perl6::Number;           $head = $head.previous;
+	ok $head ~~ Perl6::Statement;        $head = $head.previous;
+	ok $head ~~ Perl6::Semicolon;        $head = $head.previous;
+	ok $head ~~ Perl6::Balanced::Exit;   $head = $head.previous;
+#	ok $head ~~ Perl6::String::Body;     $head = $head.previous;
+	ok $head ~~ Perl6::Balanced::Enter;  $head = $head.previous;
+	ok $head ~~ Perl6::String::Escaping; $head = $head.previous;;
+	ok $head ~~ Perl6::Statement;        $head = $head.previous;
+	ok $head ~~ Perl6::Document;         $head = $head.previous;
+	ok $head.is-start;
+
+	my $iterated = '';
+	while $walk-me {
+		$iterated ~= $walk-me.content if $walk-me.is-leaf;
+		last if $walk-me.is-end;
+		$walk-me = $walk-me.next;
+	}
+	is $iterated, $edited, Q{edited document};
+
+	done-testing;
+}, Q{Remove internal node};
+
+subtest {
+	my $source = Q{'a';2;1};
+	my $edited = Q{'a';2;};
+	my $p = $pt.parse( $source );
+	my $tree = $pt.build-tree( $p );
+	$ppf.thread( $tree );
+#say $pt.dump-tree( $tree );
+	my $head = $ppf.flatten( $tree );
+
+	my $walk-me = $head;
+	my $one = $head;
+	$one = $one.next while !$one.is-end;
+
+	# Remove the current element, and do so non-recursively.
+	# That is, if there are elements "under" it in the tree, they'll
+	# still be attached somehow.
+	#
+	$one.remove-node;
+
 	ok $head ~~ Perl6::Document; $head = $head.next;
 	ok $head ~~ Perl6::Statement; $head = $head.next;
 	ok $head ~~ Perl6::String::Escaping; $head = $head.next;
 	ok $head ~~ Perl6::Balanced::Enter; $head = $head.next;
-#	ok $head ~~ Perl6::String::Body; $head = $head.next;
+	ok $head ~~ Perl6::String::Body; $head = $head.next;
 	ok $head ~~ Perl6::Balanced::Exit; $head = $head.next;
 	ok $head ~~ Perl6::Semicolon; $head = $head.next;
 	ok $head ~~ Perl6::Statement; $head = $head.next;
 	ok $head ~~ Perl6::Number::Decimal; $head = $head.next;
 	ok $head ~~ Perl6::Semicolon; $head = $head.next;
 	ok $head ~~ Perl6::Statement; $head = $head.next;
-	ok $head ~~ Perl6::Number::Decimal; $head = $head.next;
+#	ok $head ~~ Perl6::Number::Decimal; $head = $head.next;
 	ok $head.is-end;
 
 	my $iterated = '';
@@ -52,6 +125,6 @@ subtest {
 	is $iterated, $edited, Q{edited document};
 
 	done-testing;
-}, Q{check flattened data};
+}, Q{Remove final node};
 
 # vim: ft=perl6

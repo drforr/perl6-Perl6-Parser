@@ -32,17 +32,44 @@ L<Perl6::Element>
 	    L<Perl6::Variable::Array>
 	    L<Perl6::Variable::Callable>
 
+
 =end DESCRIPTION
 
 =begin CLASSES
 
 =item L<Perl6::Element>
 
-The root of the object hierarchy.
+Please see the module's documentation for the full scoop, but here's a terse summary of what's available.
 
-This hierarchy is mostly for the clients' convenience, so that they can safely ignore the fact that an object is actually a L<Perl6::Number::Complex::Radix::FloatingPoint> when all they really want to know is that it's a L<Perl6::Number>.
+=item C<is-root>
 
-It'll eventually have a bunch of useful methods attached to it, but for the moment ... well, it doesn't actually exist.
+Is the element the root? Usually this is a L<Perl6::Document>.
+
+=cut
+
+=item C<is-start>, C<is-end>
+
+Are we at the start or end of the stream?
+
+=cut
+
+=item C<is-leaf>, C<is-twig>
+
+Is the element a leaf (a single token) or a composite of multiple tokens? (a twig)
+
+Tokens are things like C<12,3>, C<'foo'> or C<+>. Everything else is a C<twig>, which is a list of multiple tokens surrounded by some sort of delimiter, whether it be a statement boundary or a here-doc.
+
+=cut
+
+=item C<next>, C<previous>, C<parent>, C<child($n)>
+
+Go from one element to the next in sequence. There are no "end of stream" or "beginning of stream" markers, for that please use the C<is-end> and C<is-start> methods. This is mainly so that I can keep the guts statically-typed to help catch developer errors. Otherwise I'd have to use a compound type or constraints, and I want to keep the guts as simple as possible.
+
+=cut
+
+=item C<remove>, C<insert-before>, C<insert-after>
+
+Remove the node and children, insert a node before the element, or after.
 
 =cut
 
@@ -203,20 +230,33 @@ class Perl6::Element {
 	# Remove just this node.
 	#
 	method remove-node {
-		if self.is-start {
-		}
-		elsif self.is-end {
+		if self.is-end {
+			my $previous = $.previous;
+			$.previous.next = $previous;
 		}
 		else {
 			my $next = $.next;
 			my $previous = $.previous;
 			$.next.previous = $previous;
 			$.previous.next = $next;
-			$.next = self;
-			$.previous = self;
+		}
+		$.next = self;
+		$.previous = self;
+		return self;
+	}
+
+	method insert-node-before( Perl6::Element $node ) {
+		if self.is-start {
+		}
+		else {
 		}
 	}
-	method remove {
+
+	method insert-node-after( Perl6::Element $node ) {
+		if self.is-end {
+		}
+		else {
+		}
 	}
 }
 

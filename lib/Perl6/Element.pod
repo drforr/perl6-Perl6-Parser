@@ -1,0 +1,17 @@
+=begin pod
+
+=begin NAME
+
+Perl6::Element - Root of the token hierarchy
+
+=end NAME
+
+=begin DESCRIPTION
+
+=end DESCRIPTION
+
+=begin METHODS
+
+=end
+
+=end pod
