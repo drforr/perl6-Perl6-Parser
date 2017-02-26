@@ -395,14 +395,14 @@ my role Validating {
 				$*ERR.say( "Too many chars: " ~ $root.perl );
 			}
 			if $root !~~ Perl6::WS and
-					$root !~~ Perl6::String::Body and
+					$root !~~ Perl6::StringList::Body and
 					$root !~~ Perl6::Sir-Not-Appearing-In-This-Statement and
 					$root.content ~~ m{ ^ (\s+) } {
 				$*ERR.say( "Leading whitespace: " ~ $root.perl );
 			}
 			if $root !~~ Perl6::WS and
 					$root !~~ Perl6::Comment and
-					$root !~~ Perl6::String::Body and
+					$root !~~ Perl6::StringList::Body and
 					$root.content ~~ m{ (\s+) $ } {
 				$*ERR.say( "Trailing whitespace: " ~ $root.perl );
 			}

@@ -661,50 +661,89 @@ class Perl6::String does Branching {
 
 	has Str @.adverb;
 	has Str $.here-doc;
+	has Str $.delimiter-start;
+	has Str $.delimiter-end;
 }
-class Perl6::String::Body does Token {
+class Perl6::StringList::Body does Token {
 	also does Leaf;
 	also is Perl6::String;
 	also does Matchable;
 }
-class Perl6::String::WordQuoting {
+class Perl6::StringList::WordQuoting {
 	also does Twig;
 	also is Perl6::String;
 	also does MatchingBalanced;
 }
-class Perl6::String::WordQuoting::QuoteProtection {
-	also is Perl6::String::WordQuoting;
+class Perl6::StringList::WordQuoting::QuoteProtection {
+	also is Perl6::StringList::WordQuoting;
 }
-class Perl6::String::Interpolation {
+class Perl6::StringList::Interpolation {
 	also does Twig;
 	also is Perl6::String;
 }
-class Perl6::String::Interpolation::Shell {
-	also is Perl6::String::Interpolation;
+class Perl6::String::Interpolation is Token {
+	also does Leaf;
+	also is Perl6::Element;
+	also does Matchable;
+
+	has Str $.quote;
+	has Str $.delimiter-start;
+	has Str $.delimiter-end;
+	has Str @.adverb;
+	has Str $.here-doc;
 }
-class Perl6::String::Interpolation::WordQuoting {
-	also is Perl6::String::Interpolation;
+class Perl6::StringList::Interpolation::Shell {
+	also is Perl6::StringList::Interpolation;
 }
-class Perl6::String::Interpolation::WordQuoting::QuoteProtection {
-	also is Perl6::String::Interpolation::WordQuoting;
+class Perl6::StringList::Interpolation::WordQuoting {
+	also is Perl6::StringList::Interpolation;
 }
-class Perl6::String::Shell {
+class Perl6::StringList::Interpolation::WordQuoting::QuoteProtection {
+	also is Perl6::StringList::Interpolation::WordQuoting;
+}
+class Perl6::StringList::Shell {
 	also does Twig;
 	also is Perl6::String;
 }
-class Perl6::String::Escaping {
+class Perl6::StringList::Escaping {
 	also does Twig;
 	also is Perl6::String;
 }
-class Perl6::String::Literal {
+class Perl6::String::Escaping is Token {
+	also does Leaf;
+	also is Perl6::Element;
+	also does Matchable;
+
+	has Bool $.is-here-doc = False;
+
+	has Str $.quote;
+	has Str $.delimiter-start;
+	has Str $.delimiter-end;
+	has Str @.adverb;
+	has Str $.here-doc;
+}
+class Perl6::StringList::Literal {
 	also does Twig;
 	also is Perl6::String;
 }
-class Perl6::String::Literal::WordQuoting {
-	also is Perl6::String::Literal;
+class Perl6::String::Literal is Token {
+	also does Leaf;
+	also is Perl6::Element;
+	also does Matchable;
+
+	has Bool $.is-here-doc = False;
+
+	has Str $.quote;
+	has Str $.delimiter-start;
+	has Str $.delimiter-end;
+	has Str @.adverb;
+	has Str $.here-doc;
 }
-class Perl6::String::Literal::Shell {
-	also is Perl6::String::Literal;
+class Perl6::StringList::Literal::WordQuoting {
+	also is Perl6::StringList::Literal;
+}
+class Perl6::StringList::Literal::Shell {
+	also is Perl6::StringList::Literal;
 }
 
 class Perl6::Regex does Branching {
@@ -1559,12 +1598,12 @@ class Perl6::Parser::Factory {
 				when self.assert-hash( $_, [< nibble >] ) {
 					my $_child = Perl6::Element-List.new;
 					$_child.append(
-						Perl6::String::Body.from-match(
+						Perl6::StringList::Body.from-match(
 							$_.hash.<nibble>
 						)
 					);
 					$child.append(
-						Perl6::String::WordQuoting.from-match(
+						Perl6::StringList::WordQuoting.from-match(
 							$_, $_child
 						)
 					);
@@ -3164,7 +3203,7 @@ class Perl6::Parser::Factory {
 		elsif $p.Str {
 			if $p.Str ~~ m{ ^ ( .+? ) \s+ $ } {
 				$child.append(
-					Perl6::String::Body.from-int(
+					Perl6::StringList::Body.from-int(
 						$p.from,
 						$0.Str
 					)
@@ -3172,7 +3211,7 @@ class Perl6::Parser::Factory {
 			}
 			else {
 				$child.append(
-					Perl6::String::Body.from-match( $p )
+					Perl6::StringList::Body.from-match( $p )
 				);
 			}
 		}
@@ -4153,24 +4192,23 @@ class Perl6::Parser::Factory {
 #	}
 
 	my %delimiter-map =
-		Q{/} => Perl6::Regex,
 		Q{'} => Perl6::String::Escaping,
 		Q{"} => Perl6::String::Interpolation,
 		Q{｢} => Perl6::String::Literal;
 
 	my %q-map =
-		Q{qqww} => Perl6::String::Interpolation::WordQuoting::QuoteProtection,
-		Q{qqw} => Perl6::String::Interpolation::WordQuoting,
-		Q{qqx} => Perl6::String::Interpolation::Shell,
-		Q{qww} => Perl6::String::WordQuoting::QuoteProtection,
-		Q{Qx} => Perl6::String::Literal::Shell,
-		Q{qw} => Perl6::String::WordQuoting,
-		Q{Qw} => Perl6::String::Literal::WordQuoting,
-		Q{qx} => Perl6::String::Shell,
+		Q{qqww} => Perl6::StringList::Interpolation::WordQuoting::QuoteProtection,
+		Q{qqw} => Perl6::StringList::Interpolation::WordQuoting,
+		Q{qqx} => Perl6::StringList::Interpolation::Shell,
+		Q{qww} => Perl6::StringList::WordQuoting::QuoteProtection,
+		Q{Qx} => Perl6::StringList::Literal::Shell,
+		Q{qw} => Perl6::StringList::WordQuoting,
+		Q{Qw} => Perl6::StringList::Literal::WordQuoting,
+		Q{qx} => Perl6::StringList::Shell,
 
-		Q{qq} => Perl6::String::Interpolation,
-		Q{Q} => Perl6::String::Literal,
-		Q{q} => Perl6::String::Escaping;
+		Q{qq} => Perl6::StringList::Interpolation,
+		Q{Q} => Perl6::StringList::Literal,
+		Q{q} => Perl6::StringList::Escaping;
 		
 
 	# apos # ' .. '
@@ -4217,7 +4255,7 @@ class Perl6::Parser::Factory {
 					);
 				}
 				$_child.append(
-					Perl6::String::Body.from-match(
+					Perl6::StringList::Body.from-match(
 						$_.hash.<quibble>.hash.<nibble>
 					)
 				);
@@ -4244,7 +4282,7 @@ class Perl6::Parser::Factory {
 					)
 				);
 				$_child.append(
-					Perl6::String::Body.from-match(
+					Perl6::StringList::Body.from-match(
 						$_.hash.<quibble>.hash.<nibble>
 					)
 				);
@@ -4302,7 +4340,7 @@ class Perl6::Parser::Factory {
 					)
 				);
 				$_child.append(
-					Perl6::String::Body.from-match(
+					Perl6::StringList::Body.from-match(
 						$_.hash.<quibble>.hash.<nibble>
 					)
 				);
@@ -4342,7 +4380,19 @@ class Perl6::Parser::Factory {
 						:to( $_.to ),
 						:child( $_child.child ),
 						:adverb( @q-adverb ),
-						:here-doc( $here-doc-body )
+						:here-doc( $here-doc-body ),
+						:delimiter-start(
+							$_.hash.<quibble>.Str.substr(
+								*-($_.hash.<quibble>.hash.<nibble>.chars + 2),
+								1
+							)
+						),
+						:delimiter-end(
+							$p.hash.<quibble>.Str.substr(
+								$p.hash.<quibble>.chars - 1,
+								1
+							)
+						),
 					)
 				);
 			}
@@ -4379,7 +4429,7 @@ class Perl6::Parser::Factory {
 					)
 				);
 				$_child.append(
-					Perl6::String::Body.from-match(
+					Perl6::StringList::Body.from-match(
 						$p.hash.<quibble>.hash.<nibble>
 					)
 				);
@@ -4421,26 +4471,58 @@ class Perl6::Parser::Factory {
 						:to( $p.to ),
 						:child( $_child.child ),
 						:adverb( @q-adverb ),
-						:here-doc( $here-doc-body )
+						:here-doc( $here-doc-body ),
+						:delimiter-start(
+							$_.hash.<quibble>.Str.substr(
+								*-($_.hash.<quibble>.hash.<nibble>.chars + 2),
+								1
+							)
+						),
+						:delimiter-end(
+							$p.hash.<quibble>.Str.substr(
+								$p.hash.<quibble>.chars - 1,
+								1
+							)
+						),
 					)
 				);
 			}
 			when self.assert-hash( $p, [< nibble >] ) {
-				my $_child = Perl6::Element-List.new;
-				$p.Str ~~ m{ ^ (.) };
-				if $p.hash.<nibble>.Str {
-					$_child.append(
-						self._nibble(
-							$p.hash.<nibble>
-							
+				$p.Str ~~ m{ ^ (.) .* (.) $ };
+				if $0.Str eq Q{/} {
+					my $_child = Perl6::Element-List.new;
+					if $p.hash.<nibble>.Str {
+						$_child.append(
+							self._nibble(
+								$p.hash.<nibble>
+								
+							)
+						);
+					}
+					$child.append(
+						Perl6::Regex.from-match(
+							$p, $_child
 						)
 					);
 				}
-				$child.append(
-					%delimiter-map{$0.Str}.from-match(
-						$p, $_child
-					)
-				);
+				else {
+					$child.append(
+						%delimiter-map{$0.Str}.new(
+							:factory-line-number(
+								callframe(1).line
+							),
+							:from( $p.from ),
+							:to( $p.to ),
+							:content( $p.Str ),
+							:delimiter-start(
+								$0.Str
+							),
+							:delimiter-end(
+								$1.Str
+							)
+						)
+					);
+				}
 			}
 			default {
 				display-unhandled-match( $p );

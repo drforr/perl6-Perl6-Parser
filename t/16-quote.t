@@ -48,7 +48,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting::QuoteProtection },
+			ok (grep { $_ ~~ Perl6::StringList::Interpolation::WordQuoting::QuoteProtection },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -63,7 +63,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting::QuoteProtection },
+			ok (grep { $_ ~~ Perl6::StringList::Interpolation::WordQuoting::QuoteProtection },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -78,7 +78,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting::QuoteProtection },
+			ok (grep { $_ ~~ Perl6::StringList::Interpolation::WordQuoting::QuoteProtection },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -93,7 +93,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting::QuoteProtection },
+			ok (grep { $_ ~~ Perl6::StringList::Interpolation::WordQuoting::QuoteProtection },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -110,7 +110,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting::QuoteProtection },
+			ok (grep { $_ ~~ Perl6::StringList::Interpolation::WordQuoting::QuoteProtection },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -123,7 +123,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting::QuoteProtection },
+			ok (grep { $_ ~~ Perl6::StringList::Interpolation::WordQuoting::QuoteProtection },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -136,7 +136,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting::QuoteProtection },
+			ok (grep { $_ ~~ Perl6::StringList::Interpolation::WordQuoting::QuoteProtection },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -149,7 +149,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting::QuoteProtection },
+			ok (grep { $_ ~~ Perl6::StringList::Interpolation::WordQuoting::QuoteProtection },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -166,7 +166,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting::QuoteProtection },
+			ok (grep { $_ ~~ Perl6::StringList::Interpolation::WordQuoting::QuoteProtection },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -179,7 +179,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting::QuoteProtection },
+			ok (grep { $_ ~~ Perl6::StringList::Interpolation::WordQuoting::QuoteProtection },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -192,7 +192,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting::QuoteProtection },
+			ok (grep { $_ ~~ Perl6::StringList::Interpolation::WordQuoting::QuoteProtection },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -205,7 +205,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting::QuoteProtection },
+			ok (grep { $_ ~~ Perl6::StringList::Interpolation::WordQuoting::QuoteProtection },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -221,7 +221,7 @@ END};
 		my $tree = $pt.build-tree( $parsed );
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
-		ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting::QuoteProtection },
+		ok (grep { $_ ~~ Perl6::StringList::Interpolation::WordQuoting::QuoteProtection },
 				$tree.child.[0].child),
 			Q{found string};
 
@@ -234,7 +234,7 @@ END};
 		my $tree = $pt.build-tree( $parsed );
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
-		ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting::QuoteProtection },
+		ok (grep { $_ ~~ Perl6::StringList::Interpolation::WordQuoting::QuoteProtection },
 				$tree.child.[0].child),
 			Q{found string};
 
@@ -260,7 +260,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting },
+			ok (grep { $_ ~~ Perl6::StringList::Interpolation::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -275,7 +275,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting },
+			ok (grep { $_ ~~ Perl6::StringList::Interpolation::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -290,7 +290,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting },
+			ok (grep { $_ ~~ Perl6::StringList::Interpolation::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -305,7 +305,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting },
+			ok (grep { $_ ~~ Perl6::StringList::Interpolation::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -322,7 +322,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting },
+			ok (grep { $_ ~~ Perl6::StringList::Interpolation::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -335,7 +335,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting },
+			ok (grep { $_ ~~ Perl6::StringList::Interpolation::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -348,7 +348,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting },
+			ok (grep { $_ ~~ Perl6::StringList::Interpolation::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -361,7 +361,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting },
+			ok (grep { $_ ~~ Perl6::StringList::Interpolation::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -378,7 +378,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting },
+			ok (grep { $_ ~~ Perl6::StringList::Interpolation::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -391,7 +391,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting },
+			ok (grep { $_ ~~ Perl6::StringList::Interpolation::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -404,7 +404,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting },
+			ok (grep { $_ ~~ Perl6::StringList::Interpolation::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -417,7 +417,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting },
+			ok (grep { $_ ~~ Perl6::StringList::Interpolation::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -433,7 +433,7 @@ END};
 		my $tree = $pt.build-tree( $parsed );
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
-		ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting },
+		ok (grep { $_ ~~ Perl6::StringList::Interpolation::WordQuoting },
 				$tree.child.[0].child),
 			Q{found string};
 
@@ -446,7 +446,7 @@ END};
 		my $tree = $pt.build-tree( $parsed );
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
-		ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting },
+		ok (grep { $_ ~~ Perl6::StringList::Interpolation::WordQuoting },
 				$tree.child.[0].child),
 			Q{found string};
 
@@ -468,7 +468,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Interpolation::Shell },
+			ok (grep { $_ ~~ Perl6::StringList::Interpolation::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -483,7 +483,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Interpolation::Shell },
+			ok (grep { $_ ~~ Perl6::StringList::Interpolation::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -498,7 +498,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Interpolation::Shell },
+			ok (grep { $_ ~~ Perl6::StringList::Interpolation::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -513,7 +513,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Interpolation::Shell },
+			ok (grep { $_ ~~ Perl6::StringList::Interpolation::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -530,7 +530,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Interpolation::Shell },
+			ok (grep { $_ ~~ Perl6::StringList::Interpolation::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -543,7 +543,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Interpolation::Shell },
+			ok (grep { $_ ~~ Perl6::StringList::Interpolation::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -556,7 +556,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Interpolation::Shell },
+			ok (grep { $_ ~~ Perl6::StringList::Interpolation::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -569,7 +569,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Interpolation::Shell },
+			ok (grep { $_ ~~ Perl6::StringList::Interpolation::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -586,7 +586,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Interpolation::Shell },
+			ok (grep { $_ ~~ Perl6::StringList::Interpolation::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -599,7 +599,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Interpolation::Shell },
+			ok (grep { $_ ~~ Perl6::StringList::Interpolation::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -612,7 +612,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Interpolation::Shell },
+			ok (grep { $_ ~~ Perl6::StringList::Interpolation::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -625,7 +625,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Interpolation::Shell },
+			ok (grep { $_ ~~ Perl6::StringList::Interpolation::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -641,7 +641,7 @@ END};
 		my $tree = $pt.build-tree( $parsed );
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
-		ok (grep { $_ ~~ Perl6::String::Interpolation::Shell },
+		ok (grep { $_ ~~ Perl6::StringList::Interpolation::Shell },
 				$tree.child.[0].child),
 			Q{found string};
 
@@ -654,7 +654,7 @@ END};
 		my $tree = $pt.build-tree( $parsed );
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
-		ok (grep { $_ ~~ Perl6::String::Interpolation::Shell },
+		ok (grep { $_ ~~ Perl6::StringList::Interpolation::Shell },
 				$tree.child.[0].child),
 			Q{found string};
 
@@ -676,7 +676,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::WordQuoting::QuoteProtection },
+			ok (grep { $_ ~~ Perl6::StringList::WordQuoting::QuoteProtection },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -691,7 +691,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::WordQuoting::QuoteProtection },
+			ok (grep { $_ ~~ Perl6::StringList::WordQuoting::QuoteProtection },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -706,7 +706,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::WordQuoting::QuoteProtection },
+			ok (grep { $_ ~~ Perl6::StringList::WordQuoting::QuoteProtection },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -721,7 +721,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::WordQuoting::QuoteProtection },
+			ok (grep { $_ ~~ Perl6::StringList::WordQuoting::QuoteProtection },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -738,7 +738,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::WordQuoting::QuoteProtection },
+			ok (grep { $_ ~~ Perl6::StringList::WordQuoting::QuoteProtection },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -751,7 +751,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::WordQuoting::QuoteProtection },
+			ok (grep { $_ ~~ Perl6::StringList::WordQuoting::QuoteProtection },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -764,7 +764,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::WordQuoting::QuoteProtection },
+			ok (grep { $_ ~~ Perl6::StringList::WordQuoting::QuoteProtection },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -777,7 +777,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::WordQuoting::QuoteProtection },
+			ok (grep { $_ ~~ Perl6::StringList::WordQuoting::QuoteProtection },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -794,7 +794,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::WordQuoting::QuoteProtection },
+			ok (grep { $_ ~~ Perl6::StringList::WordQuoting::QuoteProtection },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -807,7 +807,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::WordQuoting::QuoteProtection },
+			ok (grep { $_ ~~ Perl6::StringList::WordQuoting::QuoteProtection },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -820,7 +820,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::WordQuoting::QuoteProtection },
+			ok (grep { $_ ~~ Perl6::StringList::WordQuoting::QuoteProtection },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -833,7 +833,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::WordQuoting::QuoteProtection },
+			ok (grep { $_ ~~ Perl6::StringList::WordQuoting::QuoteProtection },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -849,7 +849,7 @@ END};
 		my $tree = $pt.build-tree( $parsed );
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
-		ok (grep { $_ ~~ Perl6::String::WordQuoting::QuoteProtection },
+		ok (grep { $_ ~~ Perl6::StringList::WordQuoting::QuoteProtection },
 				$tree.child.[0].child),
 			Q{found string};
 
@@ -862,7 +862,7 @@ END};
 		my $tree = $pt.build-tree( $parsed );
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
-		ok (grep { $_ ~~ Perl6::String::WordQuoting::QuoteProtection },
+		ok (grep { $_ ~~ Perl6::StringList::WordQuoting::QuoteProtection },
 				$tree.child.[0].child),
 			Q{found string};
 
@@ -882,7 +882,7 @@ subtest {
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting },
+			ok (grep { $_ ~~ Perl6::StringList::Literal::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -895,7 +895,7 @@ subtest {
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting },
+			ok (grep { $_ ~~ Perl6::StringList::Literal::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -908,7 +908,7 @@ subtest {
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting },
+			ok (grep { $_ ~~ Perl6::StringList::Literal::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -921,7 +921,7 @@ subtest {
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting },
+			ok (grep { $_ ~~ Perl6::StringList::Literal::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -940,7 +940,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting },
+			ok (grep { $_ ~~ Perl6::StringList::Literal::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -955,7 +955,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting },
+			ok (grep { $_ ~~ Perl6::StringList::Literal::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -970,7 +970,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting },
+			ok (grep { $_ ~~ Perl6::StringList::Literal::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -985,7 +985,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting },
+			ok (grep { $_ ~~ Perl6::StringList::Literal::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1002,7 +1002,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting },
+			ok (grep { $_ ~~ Perl6::StringList::Literal::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1015,7 +1015,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting },
+			ok (grep { $_ ~~ Perl6::StringList::Literal::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1028,7 +1028,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting },
+			ok (grep { $_ ~~ Perl6::StringList::Literal::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1041,7 +1041,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting },
+			ok (grep { $_ ~~ Perl6::StringList::Literal::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1058,7 +1058,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting },
+			ok (grep { $_ ~~ Perl6::StringList::Literal::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1071,7 +1071,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting },
+			ok (grep { $_ ~~ Perl6::StringList::Literal::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1084,7 +1084,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting },
+			ok (grep { $_ ~~ Perl6::StringList::Literal::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1097,7 +1097,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting },
+			ok (grep { $_ ~~ Perl6::StringList::Literal::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1113,7 +1113,7 @@ END};
 		my $tree = $pt.build-tree( $parsed );
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
-		ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting },
+		ok (grep { $_ ~~ Perl6::StringList::Literal::WordQuoting },
 				$tree.child.[0].child),
 			Q{found string};
 
@@ -1126,7 +1126,7 @@ END};
 		my $tree = $pt.build-tree( $parsed );
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
-		ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting },
+		ok (grep { $_ ~~ Perl6::StringList::Literal::WordQuoting },
 				$tree.child.[0].child),
 			Q{found string};
 
@@ -1144,7 +1144,7 @@ subtest {
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal::Shell },
+			ok (grep { $_ ~~ Perl6::StringList::Literal::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1157,7 +1157,7 @@ subtest {
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal::Shell },
+			ok (grep { $_ ~~ Perl6::StringList::Literal::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1170,7 +1170,7 @@ subtest {
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal::Shell },
+			ok (grep { $_ ~~ Perl6::StringList::Literal::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1183,7 +1183,7 @@ subtest {
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal::Shell },
+			ok (grep { $_ ~~ Perl6::StringList::Literal::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1202,7 +1202,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal::Shell },
+			ok (grep { $_ ~~ Perl6::StringList::Literal::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1217,7 +1217,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal::Shell },
+			ok (grep { $_ ~~ Perl6::StringList::Literal::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1232,7 +1232,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal::Shell },
+			ok (grep { $_ ~~ Perl6::StringList::Literal::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1247,7 +1247,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal::Shell },
+			ok (grep { $_ ~~ Perl6::StringList::Literal::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1264,7 +1264,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal::Shell },
+			ok (grep { $_ ~~ Perl6::StringList::Literal::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1277,7 +1277,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal::Shell },
+			ok (grep { $_ ~~ Perl6::StringList::Literal::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1290,7 +1290,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal::Shell },
+			ok (grep { $_ ~~ Perl6::StringList::Literal::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1303,7 +1303,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal::Shell },
+			ok (grep { $_ ~~ Perl6::StringList::Literal::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1320,7 +1320,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal::Shell },
+			ok (grep { $_ ~~ Perl6::StringList::Literal::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1333,7 +1333,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal::Shell },
+			ok (grep { $_ ~~ Perl6::StringList::Literal::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1346,7 +1346,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal::Shell },
+			ok (grep { $_ ~~ Perl6::StringList::Literal::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1359,7 +1359,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal::Shell },
+			ok (grep { $_ ~~ Perl6::StringList::Literal::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1375,7 +1375,7 @@ END};
 		my $tree = $pt.build-tree( $parsed );
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
-		ok (grep { $_ ~~ Perl6::String::Literal::Shell },
+		ok (grep { $_ ~~ Perl6::StringList::Literal::Shell },
 				$tree.child.[0].child),
 			Q{found string};
 
@@ -1388,7 +1388,7 @@ END};
 		my $tree = $pt.build-tree( $parsed );
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
-		ok (grep { $_ ~~ Perl6::String::Literal::Shell },
+		ok (grep { $_ ~~ Perl6::StringList::Literal::Shell },
 				$tree.child.[0].child),
 			Q{found string};
 
@@ -1406,7 +1406,7 @@ subtest {
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Interpolation },
+			ok (grep { $_ ~~ Perl6::StringList::Interpolation },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1419,7 +1419,7 @@ subtest {
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Interpolation },
+			ok (grep { $_ ~~ Perl6::StringList::Interpolation },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1432,7 +1432,7 @@ subtest {
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Interpolation },
+			ok (grep { $_ ~~ Perl6::StringList::Interpolation },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1445,7 +1445,7 @@ subtest {
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Interpolation },
+			ok (grep { $_ ~~ Perl6::StringList::Interpolation },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1462,7 +1462,7 @@ subtest {
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Interpolation },
+			ok (grep { $_ ~~ Perl6::StringList::Interpolation },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1475,7 +1475,7 @@ subtest {
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Interpolation },
+			ok (grep { $_ ~~ Perl6::StringList::Interpolation },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1488,7 +1488,7 @@ subtest {
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Interpolation },
+			ok (grep { $_ ~~ Perl6::StringList::Interpolation },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1501,7 +1501,7 @@ subtest {
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Interpolation },
+			ok (grep { $_ ~~ Perl6::StringList::Interpolation },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1517,7 +1517,7 @@ subtest {
 		my $tree = $pt.build-tree( $parsed );
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
-		ok (grep { $_ ~~ Perl6::String::Interpolation },
+		ok (grep { $_ ~~ Perl6::StringList::Interpolation },
 				$tree.child.[0].child),
 			Q{found string};
 
@@ -1530,7 +1530,7 @@ subtest {
 		my $tree = $pt.build-tree( $parsed );
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
-		ok (grep { $_ ~~ Perl6::String::Interpolation },
+		ok (grep { $_ ~~ Perl6::StringList::Interpolation },
 				$tree.child.[0].child),
 			Q{found string};
 
@@ -1552,7 +1552,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::WordQuoting },
+			ok (grep { $_ ~~ Perl6::StringList::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1567,7 +1567,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::WordQuoting },
+			ok (grep { $_ ~~ Perl6::StringList::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1582,7 +1582,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::WordQuoting },
+			ok (grep { $_ ~~ Perl6::StringList::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1597,7 +1597,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::WordQuoting },
+			ok (grep { $_ ~~ Perl6::StringList::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1614,7 +1614,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::WordQuoting },
+			ok (grep { $_ ~~ Perl6::StringList::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1627,7 +1627,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::WordQuoting },
+			ok (grep { $_ ~~ Perl6::StringList::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1640,7 +1640,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::WordQuoting },
+			ok (grep { $_ ~~ Perl6::StringList::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1653,7 +1653,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::WordQuoting },
+			ok (grep { $_ ~~ Perl6::StringList::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1670,7 +1670,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::WordQuoting },
+			ok (grep { $_ ~~ Perl6::StringList::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1683,7 +1683,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::WordQuoting },
+			ok (grep { $_ ~~ Perl6::StringList::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1696,7 +1696,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::WordQuoting },
+			ok (grep { $_ ~~ Perl6::StringList::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1709,7 +1709,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::WordQuoting },
+			ok (grep { $_ ~~ Perl6::StringList::WordQuoting },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1725,7 +1725,7 @@ END};
 		my $tree = $pt.build-tree( $parsed );
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
-		ok (grep { $_ ~~ Perl6::String::WordQuoting },
+		ok (grep { $_ ~~ Perl6::StringList::WordQuoting },
 				$tree.child.[0].child),
 			Q{found string};
 
@@ -1738,7 +1738,7 @@ END};
 		my $tree = $pt.build-tree( $parsed );
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
-		ok (grep { $_ ~~ Perl6::String::WordQuoting },
+		ok (grep { $_ ~~ Perl6::StringList::WordQuoting },
 				$tree.child.[0].child),
 			Q{found string};
 
@@ -1760,7 +1760,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Shell },
+			ok (grep { $_ ~~ Perl6::StringList::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1775,7 +1775,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Shell },
+			ok (grep { $_ ~~ Perl6::StringList::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1790,7 +1790,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Shell },
+			ok (grep { $_ ~~ Perl6::StringList::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1805,7 +1805,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Shell },
+			ok (grep { $_ ~~ Perl6::StringList::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1822,7 +1822,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Shell },
+			ok (grep { $_ ~~ Perl6::StringList::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1835,7 +1835,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Shell },
+			ok (grep { $_ ~~ Perl6::StringList::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1848,7 +1848,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Shell },
+			ok (grep { $_ ~~ Perl6::StringList::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1861,7 +1861,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Shell },
+			ok (grep { $_ ~~ Perl6::StringList::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1878,7 +1878,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Shell },
+			ok (grep { $_ ~~ Perl6::StringList::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1891,7 +1891,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Shell },
+			ok (grep { $_ ~~ Perl6::StringList::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1904,7 +1904,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Shell },
+			ok (grep { $_ ~~ Perl6::StringList::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1917,7 +1917,7 @@ END};
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Shell },
+			ok (grep { $_ ~~ Perl6::StringList::Shell },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1933,7 +1933,7 @@ END};
 		my $tree = $pt.build-tree( $parsed );
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
-		ok (grep { $_ ~~ Perl6::String::Shell },
+		ok (grep { $_ ~~ Perl6::StringList::Shell },
 				$tree.child.[0].child),
 			Q{found string};
 
@@ -1946,7 +1946,7 @@ END};
 		my $tree = $pt.build-tree( $parsed );
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
-		ok (grep { $_ ~~ Perl6::String::Shell },
+		ok (grep { $_ ~~ Perl6::StringList::Shell },
 				$tree.child.[0].child),
 			Q{found string};
 
@@ -1964,7 +1964,7 @@ subtest {
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal },
+			ok (grep { $_ ~~ Perl6::StringList::Literal },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1977,7 +1977,7 @@ subtest {
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal },
+			ok (grep { $_ ~~ Perl6::StringList::Literal },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -1990,7 +1990,7 @@ subtest {
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal },
+			ok (grep { $_ ~~ Perl6::StringList::Literal },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -2003,7 +2003,7 @@ subtest {
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal },
+			ok (grep { $_ ~~ Perl6::StringList::Literal },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -2023,7 +2023,7 @@ END
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal },
+			ok (grep { $_ ~~ Perl6::StringList::Literal },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -2039,7 +2039,7 @@ END
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal },
+			ok (grep { $_ ~~ Perl6::StringList::Literal },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -2055,7 +2055,7 @@ END
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal },
+			ok (grep { $_ ~~ Perl6::StringList::Literal },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -2071,7 +2071,7 @@ END
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal },
+			ok (grep { $_ ~~ Perl6::StringList::Literal },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -2088,7 +2088,7 @@ END
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal },
+			ok (grep { $_ ~~ Perl6::StringList::Literal },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -2101,7 +2101,7 @@ END
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal },
+			ok (grep { $_ ~~ Perl6::StringList::Literal },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -2114,7 +2114,7 @@ END
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal },
+			ok (grep { $_ ~~ Perl6::StringList::Literal },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -2127,7 +2127,7 @@ END
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal },
+			ok (grep { $_ ~~ Perl6::StringList::Literal },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -2144,7 +2144,7 @@ END
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal },
+			ok (grep { $_ ~~ Perl6::StringList::Literal },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -2157,7 +2157,7 @@ END
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal },
+			ok (grep { $_ ~~ Perl6::StringList::Literal },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -2170,7 +2170,7 @@ END
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal },
+			ok (grep { $_ ~~ Perl6::StringList::Literal },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -2183,7 +2183,7 @@ END
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Literal },
+			ok (grep { $_ ~~ Perl6::StringList::Literal },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -2199,7 +2199,7 @@ END
 		my $tree = $pt.build-tree( $parsed );
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
-		ok (grep { $_ ~~ Perl6::String::Literal },
+		ok (grep { $_ ~~ Perl6::StringList::Literal },
 				$tree.child.[0].child),
 			Q{found string};
 
@@ -2212,7 +2212,7 @@ END
 		my $tree = $pt.build-tree( $parsed );
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
-		ok (grep { $_ ~~ Perl6::String::Literal },
+		ok (grep { $_ ~~ Perl6::StringList::Literal },
 				$tree.child.[0].child),
 			Q{found string};
 
@@ -2236,7 +2236,7 @@ END
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			# XXX Make sure to check the here-doc contents exist
-			ok (grep { $_ ~~ Perl6::String::Escaping },
+			ok (grep { $_ ~~ Perl6::StringList::Escaping },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -2252,7 +2252,7 @@ END
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Escaping },
+			ok (grep { $_ ~~ Perl6::StringList::Escaping },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -2268,7 +2268,7 @@ END
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Escaping },
+			ok (grep { $_ ~~ Perl6::StringList::Escaping },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -2284,7 +2284,7 @@ END
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Escaping },
+			ok (grep { $_ ~~ Perl6::StringList::Escaping },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -2301,7 +2301,7 @@ END
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Escaping },
+			ok (grep { $_ ~~ Perl6::StringList::Escaping },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -2314,7 +2314,7 @@ END
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Escaping },
+			ok (grep { $_ ~~ Perl6::StringList::Escaping },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -2327,7 +2327,7 @@ END
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Escaping },
+			ok (grep { $_ ~~ Perl6::StringList::Escaping },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -2340,7 +2340,7 @@ END
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Escaping },
+			ok (grep { $_ ~~ Perl6::StringList::Escaping },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -2357,7 +2357,7 @@ END
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Escaping },
+			ok (grep { $_ ~~ Perl6::StringList::Escaping },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -2370,7 +2370,7 @@ END
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Escaping },
+			ok (grep { $_ ~~ Perl6::StringList::Escaping },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -2383,7 +2383,7 @@ END
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Escaping },
+			ok (grep { $_ ~~ Perl6::StringList::Escaping },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -2396,7 +2396,7 @@ END
 			my $tree = $pt.build-tree( $parsed );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Escaping },
+			ok (grep { $_ ~~ Perl6::StringList::Escaping },
 					$tree.child.[0].child),
 				Q{found string};
 
@@ -2412,7 +2412,7 @@ END
 		my $tree = $pt.build-tree( $parsed );
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
-		ok (grep { $_ ~~ Perl6::String::Escaping },
+		ok (grep { $_ ~~ Perl6::StringList::Escaping },
 				$tree.child.[0].child),
 			Q{found string};
 
@@ -2425,7 +2425,7 @@ END
 		my $tree = $pt.build-tree( $parsed );
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
-		ok (grep { $_ ~~ Perl6::String::Escaping },
+		ok (grep { $_ ~~ Perl6::StringList::Escaping },
 				$tree.child.[0].child),
 			Q{found string};
 
@@ -2440,7 +2440,7 @@ subtest {
 	my $parsed = $pt.parse( $source );
 	my $tree = $pt.build-tree( $parsed );
 	is $pt.to-string( $tree ), $source, Q{formatted};
-	ok (grep { $_ ~~ Perl6::String::WordQuoting },
+	ok (grep { $_ ~~ Perl6::StringList::WordQuoting },
 			$tree.child.[0].child),
 		Q{found string};
 
@@ -2452,9 +2452,9 @@ subtest {
 	my $parsed = $pt.parse( $source );
 	my $tree = $pt.build-tree( $parsed );
 	is $pt.to-string( $tree ), $source, Q{formatted};
-	ok (grep { $_ ~~ Perl6::String::Literal },
-			$tree.child.[0].child),
-		Q{found string};
+	ok $tree.child.[0].child.[0] ~~ Perl6::String::Literal;
+	is $tree.child.[0].child.[0].delimiter-start, Q{｢}, Q{start delimiter};
+	is $tree.child.[0].child.[0].delimiter-end, Q{｣}, Q{end delimiter};
 
 	done-testing;
 }, Q{｢｣};
@@ -2464,9 +2464,9 @@ subtest {
 	my $parsed = $pt.parse( $source );
 	my $tree = $pt.build-tree( $parsed );
 	is $pt.to-string( $tree ), $source, Q{formatted};
-	ok (grep { $_ ~~ Perl6::String::Interpolation },
-			$tree.child.[0].child),
-		Q{found string};
+	ok $tree.child.[0].child.[0] ~~ Perl6::String::Interpolation;
+	is $tree.child.[0].child.[0].delimiter-start, Q{"}, Q{start delimiter};
+	is $tree.child.[0].child.[0].delimiter-end, Q{"}, Q{end delimiter};
 
 	done-testing;
 }, Q{""};
@@ -2476,9 +2476,9 @@ subtest {
 	my $parsed = $pt.parse( $source );
 	my $tree = $pt.build-tree( $parsed );
 	is $pt.to-string( $tree ), $source, Q{formatted};
-	ok (grep { $_ ~~ Perl6::String::Escaping },
-			$tree.child.[0].child),
-		Q{found string};
+	ok $tree.child.[0].child.[0] ~~ Perl6::String::Escaping;
+	is $tree.child.[0].child.[0].delimiter-start, Q{'}, Q{start delimiter};
+	is $tree.child.[0].child.[0].delimiter-end, Q{'}, Q{end delimiter};
 
 	done-testing;
 }, Q{''};
@@ -2513,7 +2513,7 @@ END
 	my $parsed = $pt.parse( $source );
 	my $tree = $pt.build-tree( $parsed );
 	is $pt.to-string( $tree ), $source, Q{formatted};
-	ok (grep { $_ ~~ Perl6::String::Escaping },
+	ok (grep { $_ ~~ Perl6::StringList::Escaping },
 			$tree.child.[0].child),
 		Q{found string};
 ]
