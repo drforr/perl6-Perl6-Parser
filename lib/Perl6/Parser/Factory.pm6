@@ -35,6 +35,14 @@ L<Perl6::Element>
 
 =end DESCRIPTION
 
+=begin GENERAL_NOTES
+
+The L<Perl6::Variable> classes all have a required C<.sigil> method which returns the sigil associated with that variable (and an C<.twigil> method should that be needed.) These are methods rather than attributes to keep the clutter down when using C<.dump> or C<.perl> debugging methods.
+
+Keeping in mind that clients of the L<Perl6::Element> hierarchy may want to create or edit these subclasses, I'm restricting constant methods to just those things that users shouldn't need to change, for instance you shouldn't need to create a L<Perl6::Number::Binary> with a base of 3.
+
+=end GENERAL_NOTES
+
 =begin CLASSES
 
 =item L<Perl6::Element>
@@ -100,7 +108,7 @@ There likely won't be a L<Perl6::Number::Complex>. While it's relatively easy to
 
 The catch-all for Perl 6 variable types.
 
-Scalar, Hash, Array and Callable subtypes have C<$.headless> attributes with the variable's name minus the sigil and optional twigil. They also all have C<$.sigil> which keeps the sigil C<$> etc., and C<$.twigil> optionally for the classes that have twigils.
+Scalar, Hash, Array and Callable subtypes have C<$.headless> attributes with the variable's name minus the sigil and optional twigil. They also have the C<.sigil> method, and C<.twigil> optional method for classes that have them.
 
 L<Perl6::Variable>
     L<Perl6::Variable::Scalar>
@@ -405,8 +413,9 @@ class Perl6::Structural {
 # So they're only generated in the _statement handler.
 #
 class Perl6::Semicolon does Token {
-	also does Leaf;
 	also is Perl6::Structural;
+
+	also does Leaf;
 	also does Matchable;
 }
 
@@ -424,12 +433,14 @@ class Perl6::Balanced {
 	}
 }
 class Perl6::Balanced::Enter does Token {
-	also does Leaf;
 	also is Perl6::Balanced;
+
+	also does Leaf;
 }
 class Perl6::Balanced::Exit does Token {
-	also does Leaf;
 	also is Perl6::Balanced;
+
+	also does Leaf;
 }
 
 role MatchingBalanced {
@@ -537,51 +548,60 @@ class Perl6::Operator {
 	also is Perl6::Element;
 }
 class Perl6::Operator::Hyper does Branching {
-	also does Twig;
 	also is Perl6::Operator;
+
+	also does Twig;
 	also does MatchingBalanced;
 }
 class Perl6::Operator::Prefix does Token {
-	also does Leaf;
 	also is Perl6::Operator;
+
+	also does Leaf;
 	also does Matchable;
 }
 class Perl6::Operator::Infix does Token {
-	also does Leaf;
 	also is Perl6::Operator;
+
+	also does Leaf;
 	also does Matchable;
 }
 class Perl6::Operator::Postfix does Token {
-	also does Leaf;
 	also is Perl6::Operator;
+
+	also does Leaf;
 	also does Matchable;
 }
 class Perl6::Operator::Circumfix does Branching {
-	also does Twig;
 	also is Perl6::Operator;
+
+	also does Twig;
 	also does MatchingBalanced;
 }
 class Perl6::Operator::PostCircumfix does Branching {
-	also does Twig;
 	also is Perl6::Operator;
+
+	also does Twig;
 	also does MatchingBalanced;
 }
 
 class Perl6::WS does Token {
-	also does Leaf;
 	also is Perl6::Element;
+
+	also does Leaf;
 	also does Matchable;
 }
 
 class Perl6::Comment does Token {
-	also does Leaf;
 	also is Perl6::Element;
+
+	also does Leaf;
 	also does Matchable;
 }
 
 class Perl6::Document does Branching {
-	also does Twig;
 	also is Perl6::Element;
+
+	also does Twig;
 
 	method from-list( Perl6::Element-List $child ) returns Perl6::Element {
 		if $child.child {
@@ -606,8 +626,9 @@ class Perl6::Document does Branching {
 # and if so, I'm glad.
 #
 class Perl6::Sir-Not-Appearing-In-This-Statement {
-	also does Leaf;
 	also is Perl6::Element;
+
+	also does Leaf;
 	has $.content; # XXX because it's not quite a token.
 
 	method to-string returns Str {
@@ -616,8 +637,9 @@ class Perl6::Sir-Not-Appearing-In-This-Statement {
 }
 
 class Perl6::Statement does Branching {
-	also does Twig;
 	also is Perl6::Element;
+
+	also does Twig;
 
 	method from-list( Perl6::Element-List $child ) returns Perl6::Element {
 		self.bless(
@@ -632,58 +654,57 @@ class Perl6::Statement does Branching {
 # And now for the most basic tokens...
 #
 class Perl6::Number does Token {
-	also does Leaf;
 	also is Perl6::Element;
+
+	also does Leaf;
 	also does Matchable;
+
+	method base { ... }
 }
-class Perl6::Number::Binary is Perl6::Number { }
-class Perl6::Number::Octal is Perl6::Number { }
-class Perl6::Number::Decimal is Perl6::Number { }
+class Perl6::Number::Binary is Perl6::Number {
+	method base { 2 }
+}
+class Perl6::Number::Octal is Perl6::Number {
+	method base { 8 }
+}
+class Perl6::Number::Decimal is Perl6::Number {
+	method base { 10 }
+}
 class Perl6::Number::Decimal::Explicit is Perl6::Number::Decimal { }
-class Perl6::Number::Hexadecimal is Perl6::Number { }
+class Perl6::Number::Hexadecimal is Perl6::Number {
+	method base { 16 }
+}
 class Perl6::Number::Radix is Perl6::Number { }
-class Perl6::Number::FloatingPoint is Perl6::Number { }
-
-class Perl6::NotANumber is Token {
-	also does Leaf;
-	also is Perl6::Element;
-	also does Matchable;
-}
-class Perl6::Infinity is Token {
-	also does Leaf;
-	also is Perl6::Element;
-	also does Matchable;
+class Perl6::Number::FloatingPoint is Perl6::Number {
+	method base { 10 }
 }
 
-class Perl6::String does Branching {
+class Perl6::NotANumber does Token {
 	also is Perl6::Element;
-	also does MatchingBalanced;
 
-	has Str @.adverb;
-	has Str $.here-doc;
-	has Str $.delimiter-start;
-	has Str $.delimiter-end;
+	also does Leaf;
+	also does Matchable;
+}
+class Perl6::Infinity does Token {
+	also is Perl6::Element;
+
+	also does Leaf;
+	also does Matchable;
+}
+
+class Perl6::String {
+	also is Perl6::Element;
 }
 class Perl6::StringList::Body does Token {
-	also does Leaf;
 	also is Perl6::String;
+
+	also does Leaf;
 	also does Matchable;
 }
-class Perl6::StringList::WordQuoting {
-	also does Twig;
+class Perl6::String::WordQuoting does Token {
 	also is Perl6::String;
-	also does MatchingBalanced;
-}
-class Perl6::StringList::WordQuoting::QuoteProtection {
-	also is Perl6::StringList::WordQuoting;
-}
-class Perl6::StringList::Interpolation {
-	also does Twig;
-	also is Perl6::String;
-}
-class Perl6::String::Interpolation is Token {
+
 	also does Leaf;
-	also is Perl6::Element;
 	also does Matchable;
 
 	has Str $.quote;
@@ -692,26 +713,34 @@ class Perl6::String::Interpolation is Token {
 	has Str @.adverb;
 	has Str $.here-doc;
 }
-class Perl6::StringList::Interpolation::Shell {
-	also is Perl6::StringList::Interpolation;
+class Perl6::String::WordQuoting::QuoteProtection does Token {
+	also is Perl6::String::WordQuoting;
 }
-class Perl6::StringList::Interpolation::WordQuoting {
-	also is Perl6::StringList::Interpolation;
-}
-class Perl6::StringList::Interpolation::WordQuoting::QuoteProtection {
-	also is Perl6::StringList::Interpolation::WordQuoting;
-}
-class Perl6::StringList::Shell {
-	also does Twig;
+class Perl6::String::Interpolation does Token {
 	also is Perl6::String;
-}
-class Perl6::StringList::Escaping {
-	also does Twig;
-	also is Perl6::String;
-}
-class Perl6::String::Escaping is Token {
+
 	also does Leaf;
-	also is Perl6::Element;
+	also does Matchable;
+
+	has Str $.quote;
+	has Str $.delimiter-start;
+	has Str $.delimiter-end;
+	has Str @.adverb;
+	has Str $.here-doc;
+}
+class Perl6::String::Interpolation::Shell {
+	also is Perl6::String::Interpolation;
+}
+class Perl6::String::Interpolation::WordQuoting {
+	also is Perl6::String::Interpolation;
+}
+class Perl6::String::Interpolation::WordQuoting::QuoteProtection {
+	also is Perl6::String::Interpolation::WordQuoting;
+}
+class Perl6::String::Shell does Token {
+	also is Perl6::String;
+
+	also does Leaf;
 	also does Matchable;
 
 	has Bool $.is-here-doc = False;
@@ -722,13 +751,10 @@ class Perl6::String::Escaping is Token {
 	has Str @.adverb;
 	has Str $.here-doc;
 }
-class Perl6::StringList::Literal {
-	also does Twig;
+class Perl6::String::Escaping does Token {
 	also is Perl6::String;
-}
-class Perl6::String::Literal is Token {
+
 	also does Leaf;
-	also is Perl6::Element;
 	also does Matchable;
 
 	has Bool $.is-here-doc = False;
@@ -739,216 +765,295 @@ class Perl6::String::Literal is Token {
 	has Str @.adverb;
 	has Str $.here-doc;
 }
-class Perl6::StringList::Literal::WordQuoting {
-	also is Perl6::StringList::Literal;
+class Perl6::StringList::Literal does Token {
+	also is Perl6::String;
+
+	also does Leaf;
+	also does Matchable;
+
+	has Bool $.is-here-doc = False;
+
+	has Str $.quote;
+	has Str $.delimiter-start;
+	has Str $.delimiter-end;
+	has Str @.adverb;
+	has Str $.here-doc;
 }
-class Perl6::StringList::Literal::Shell {
-	also is Perl6::StringList::Literal;
+class Perl6::String::Literal does Token {
+	also is Perl6::String;
+
+	also does Leaf;
+	also does Matchable;
+
+	has Bool $.is-here-doc = False;
+
+	has Str $.quote;
+	has Str $.delimiter-start;
+	has Str $.delimiter-end;
+	has Str @.adverb;
+	has Str $.here-doc;
+}
+class Perl6::String::Literal::WordQuoting does Token {
+	also is Perl6::String::Literal;
+}
+class Perl6::String::Literal::Shell does Token {
+	also is Perl6::String::Literal;
 }
 
 class Perl6::Regex does Branching {
-	also does Twig;
 	also is Perl6::Element;
+
+	also does Twig;
 	also does MatchingBalanced;
 
 	has Str @.adverb;
 }
 
 class Perl6::Bareword does Token {
-	also does Leaf;
 	also is Perl6::Element;
+
+	also does Leaf;
 	also does Matchable;
 }
 class Perl6::Adverb does Token {
-	also does Leaf;
 	also is Perl6::Element;
+
+	also does Leaf;
 	also does Matchable;
 }
 class Perl6::PackageName does Token {
-	also does Leaf;
 	also is Perl6::Element;
+
+	also does Leaf;
 	also does Matchable;
 }
 class Perl6::ColonBareword does Token {
 	also is Perl6::Bareword;
 }
 class Perl6::Block does Branching {
-	also does Twig;
 	also is Perl6::Element;
+
+	also does Twig;
 	also does MatchingBalanced;
 }
 
 class Perl6::Variable {
 	also is Perl6::Element;
+
 	also does Matchable;
 }
 class Perl6::Variable::Scalar does Token {
-	also does Leaf;
 	also is Perl6::Variable;
-	has Str $.sigil = Q{$};
+
+	also does Leaf;
+
+	method sigil { Q{$} }
 }
 class Perl6::Variable::Scalar::Contextualizer does Token does Child {
 	also is Perl6::Variable;
-	has Str $.sigil = Q{$};
+
+	method sigil { Q{$} }
 }
 class Perl6::Variable::Scalar::Dynamic {
 	also is Perl6::Variable::Scalar;
-	has Str $.twigil = Q{*};
+
+	method twigil { Q{*} }
 }
 class Perl6::Variable::Scalar::Attribute {
 	also is Perl6::Variable::Scalar;
-	has Str $.twigil = Q{!};
+
+	method twigil { Q{!} }
 }
 class Perl6::Variable::Scalar::Accessor {
 	also is Perl6::Variable::Scalar;
-	has Str $.twigil = Q{.};
+
+	method twigil { Q{.} }
 }
 class Perl6::Variable::Scalar::CompileTime {
 	also is Perl6::Variable::Scalar;
-	has Str $.twigil = Q{?};
+
+	method twigil { Q{?} }
 }
 class Perl6::Variable::Scalar::MatchIndex {
 	also is Perl6::Variable::Scalar;
-	has Str $.twigil = Q{<};
+
+	method twigil { Q{<} }
 }
 class Perl6::Variable::Scalar::Positional {
 	also is Perl6::Variable::Scalar;
-	has Str $.twigil = Q{^};
+
+	method twigil { Q{^} }
 }
 class Perl6::Variable::Scalar::Named {
 	also is Perl6::Variable::Scalar;
-	has Str $.twigil = Q{:};
+
+	method twigil { Q{:} }
 }
 class Perl6::Variable::Scalar::Pod {
 	also is Perl6::Variable::Scalar;
-	has Str $.twigil = Q{=};
+
+	method twigil { Q{=} }
 }
 class Perl6::Variable::Scalar::SubLanguage {
 	also is Perl6::Variable::Scalar;
-	has Str $.twigil = Q{~};
+
+	method twigil { Q{~} }
 }
 class Perl6::Variable::Array does Token {
-	also does Leaf;
 	also is Perl6::Variable;
-	has Str $.sigil = Q{@};
+
+	also does Leaf;
+
+	method sigil { Q{@} }
 }
 class Perl6::Variable::Array::Dynamic {
 	also is Perl6::Variable::Array;
-	has Str $.twigil = Q{*};
+
+	method twigil { Q{*} }
 }
 class Perl6::Variable::Array::Attribute {
 	also is Perl6::Variable::Array;
-	has Str $.twigil = Q{!};
+
+	method twigil { Q{!} }
 }
 class Perl6::Variable::Array::Accessor {
 	also is Perl6::Variable::Array;
-	has Str $.twigil = Q{.};
+
+	method twigil { Q{.} }
 }
 class Perl6::Variable::Array::CompileTime {
 	also is Perl6::Variable::Array;
-	has Str $.twigil = Q{?};
+
+	method twigil { Q{?} }
 }
 class Perl6::Variable::Array::MatchIndex {
 	also is Perl6::Variable::Array;
-	has Str $.twigil = Q{<};
+
+	method twigil { Q{<} }
 }
 class Perl6::Variable::Array::Positional {
 	also is Perl6::Variable::Array;
-	has Str $.twigil = Q{^};
+
+	method twigil { Q{^} }
 }
 class Perl6::Variable::Array::Named {
 	also is Perl6::Variable::Array;
-	has Str $.twigil = Q{:};
+
+	method twigil { Q{:} }
 }
 class Perl6::Variable::Array::Pod {
 	also is Perl6::Variable::Array;
-	has Str $.twigil = Q{=};
+
+	method twigil { Q{=} }
 }
 class Perl6::Variable::Array::SubLanguage {
 	also is Perl6::Variable::Array;
-	has Str $.twigil = Q{~};
+
+	method twigil { Q{~} }
 }
 class Perl6::Variable::Hash does Token {
-	also does Leaf;
 	also is Perl6::Variable;
-	has Str $.sigil = Q{%};
+
+	also does Leaf;
+
+	method sigil { Q{%} }
 }
 class Perl6::Variable::Hash::Dynamic {
 	also is Perl6::Variable::Hash;
-	has Str $.twigil = Q{*};
+
+	method twigil { Q{*} }
 }
 class Perl6::Variable::Hash::Attribute {
 	also is Perl6::Variable::Hash;
-	has Str $.twigil = Q{!};
+
+	method twigil { Q{!} }
 }
 class Perl6::Variable::Hash::Accessor {
 	also is Perl6::Variable::Hash;
-	has Str $.twigil = Q{.};
+
+	method twigil { Q{.} }
 }
 class Perl6::Variable::Hash::CompileTime {
 	also is Perl6::Variable::Hash;
-	has Str $.twigil = Q{?};
+
+	method twigil { Q{?} }
 }
 class Perl6::Variable::Hash::MatchIndex {
 	also is Perl6::Variable::Hash;
-	has Str $.twigil = Q{<};
+
+	method twigil { Q{<} }
 }
 class Perl6::Variable::Hash::Positional {
 	also is Perl6::Variable::Hash;
-	has Str $.twigil = Q{^};
+
+	method twigil { Q{^} }
 }
 class Perl6::Variable::Hash::Named {
 	also is Perl6::Variable::Hash;
-	has Str $.twigil = Q{:};
+
+	method twigil { Q{:} }
 }
 class Perl6::Variable::Hash::Pod {
 	also is Perl6::Variable::Hash;
-	has Str $.twigil = Q{=};
+
+	method twigil { Q{=} }
 }
 class Perl6::Variable::Hash::SubLanguage {
 	also is Perl6::Variable::Hash;
-	has Str $.twigil = Q{~};
+
+	method twigil { Q{~} }
 }
 class Perl6::Variable::Callable does Token {
-	also does Leaf;
 	also is Perl6::Variable;
-	has Str $.sigil = Q{&};
+
+	also does Leaf;
+
+	method sigil { Q{&} }
 }
 class Perl6::Variable::Callable::Dynamic {
 	also is Perl6::Variable::Callable;
-	has Str $.twigil = Q{*};
+
+	method twigil { Q{*} }
 }
 class Perl6::Variable::Callable::Attribute {
 	also is Perl6::Variable::Callable;
-	has Str $.twigil = Q{!};
+
+	method twigil { Q{!} }
 }
 class Perl6::Variable::Callable::Accessor {
 	also is Perl6::Variable::Callable;
-	has Str $.twigil = Q{.};
+
+	method twigil { Q{.} }
 }
 class Perl6::Variable::Callable::CompileTime {
 	also is Perl6::Variable::Callable;
-	has Str $.twigil = Q{?};
+
+	method twigil { Q{?} }
 }
 class Perl6::Variable::Callable::MatchIndex {
 	also is Perl6::Variable::Callable;
-	has Str $.twigil = Q{<};
+
+	method twigil { Q{<} }
 }
 class Perl6::Variable::Callable::Positional {
 	also is Perl6::Variable::Callable;
-	has Str $.twigil = Q{^};
+
+	method twigil { Q{^} }
 }
 class Perl6::Variable::Callable::Named {
 	also is Perl6::Variable::Callable;
-	has Str $.twigil = Q{:};
+
+	method twigil { Q{:} }
 }
 class Perl6::Variable::Callable::Pod {
 	also is Perl6::Variable::Callable;
-	has Str $.twigil = Q{=};
+
+	method twigil { Q{=} }
 }
 class Perl6::Variable::Callable::SubLanguage {
 	also is Perl6::Variable::Callable;
-	has Str $.twigil = Q{~};
+
+	method twigil { Q{~} }
 }
 
 my role Assertions {
@@ -1012,12 +1117,7 @@ class Perl6::Parser::Factory {
 	has Int %.here-doc;
 
 	constant VERSION-STR = Q{v};
-	constant PAREN-OPEN = Q'(';
 	constant PAREN-CLOSE = Q')';
-	constant BRACE-OPEN = Q'{';
-	constant BRACE-CLOSE = Q'}';
-	constant REDUCE-OPEN = Q'[';
-	constant REDUCE-CLOSE = Q']';
 
 	constant COLON = Q{:};
 	constant COMMA = Q{,};
@@ -1602,9 +1702,10 @@ class Perl6::Parser::Factory {
 							$_.hash.<nibble>
 						)
 					);
+					# XXX probably needs work.
 					$child.append(
-						Perl6::StringList::WordQuoting.from-match(
-							$_, $_child
+						Perl6::String::WordQuoting.from-match(
+							$_
 						)
 					);
 				}
@@ -2204,7 +2305,7 @@ class Perl6::Parser::Factory {
 	method _dottyopish( Mu $p ) returns Perl6::Element-List {
 		my $child = Perl6::Element-List.new;
 		given $p {
-			when self.assert-hash( $p, [< term >] ) {
+			when self.assert-hash( $_, [< term >] ) {
 				$child.append( self._term( $_.hash.<term> ) );
 			}
 			default {
@@ -2252,9 +2353,9 @@ class Perl6::Parser::Factory {
 			when self.assert-hash( $_,
 					[< postfix OPER >],
 					[< postfix_prefix_meta_operator >] ) {
-				$child.append( self._EXPR( $p.list.[0] ) );
+				$child.append( self._EXPR( $_.list.[0] ) );
 				$child.append(
-					self._postfix( $p.hash.<postfix> )
+					self._postfix( $_.hash.<postfix> )
 				);
 			}
 			default {
@@ -3867,7 +3968,7 @@ class Perl6::Parser::Factory {
 			}
 			when self.assert-hash( $_, [< blockoid >] ) {
 				$child.append(
-					self._blockoid( $p.hash.<blockoid> )
+					self._blockoid( $_.hash.<blockoid> )
 				);
 			}
 			default {
@@ -4196,19 +4297,21 @@ class Perl6::Parser::Factory {
 		Q{"} => Perl6::String::Interpolation,
 		Q{｢} => Perl6::String::Literal;
 
+	# XXX Any word-quoting should probably be broken into barewords
+	# XXX for later.
 	my %q-map =
-		Q{qqww} => Perl6::StringList::Interpolation::WordQuoting::QuoteProtection,
-		Q{qqw} => Perl6::StringList::Interpolation::WordQuoting,
-		Q{qqx} => Perl6::StringList::Interpolation::Shell,
-		Q{qww} => Perl6::StringList::WordQuoting::QuoteProtection,
-		Q{Qx} => Perl6::StringList::Literal::Shell,
-		Q{qw} => Perl6::StringList::WordQuoting,
-		Q{Qw} => Perl6::StringList::Literal::WordQuoting,
-		Q{qx} => Perl6::StringList::Shell,
+		Q{qqww} => Perl6::String::Interpolation::WordQuoting::QuoteProtection,
+		Q{qqw} => Perl6::String::Interpolation::WordQuoting,
+		Q{qqx} => Perl6::String::Interpolation::Shell,
+		Q{qww} => Perl6::String::WordQuoting::QuoteProtection,
+		Q{Qx} => Perl6::String::Literal::Shell,
+		Q{qw} => Perl6::String::WordQuoting,
+		Q{Qw} => Perl6::String::Literal::WordQuoting,
+		Q{qx} => Perl6::String::Shell,
 
-		Q{qq} => Perl6::StringList::Interpolation,
-		Q{Q} => Perl6::StringList::Literal,
-		Q{q} => Perl6::StringList::Escaping;
+		Q{qq} => Perl6::String::Interpolation,
+		Q{Q} => Perl6::String::Literal,
+		Q{q} => Perl6::String::Escaping;
 		
 
 	# apos # ' .. '
@@ -4235,12 +4338,12 @@ class Perl6::Parser::Factory {
 		given $p {
 			when self.assert-hash( $_,
 					[< sym rx_adverbs sibble >] ) {
-				$child.append( self._sym( $p.hash.<sym> ) );
+				$child.append( self._sym( $_.hash.<sym> ) );
 				$child.append(
-					self._rx_adverbs( $p.hash.<rx_adverbs> )
+					self._rx_adverbs( $_.hash.<rx_adverbs> )
 				);
 				$child.append(
-					self._sibble( $p.hash.<sibble> )
+					self._sibble( $_.hash.<sibble> )
 				);
 			}
 			when self.assert-hash( $_,
@@ -4308,51 +4411,16 @@ class Perl6::Parser::Factory {
 				);
 			}
 			when self.assert-hash( $_, [< quibble quote_mod >] ) {
-				my $_child = Perl6::Element-List.new;
 				$_.Str ~~ m{ ^ ( \w+ ) };
 				my Str $q-map-name = $0.Str;
 				my Str @q-adverb;
 				my Str $here-doc-body = '';
-				$_child.append(
-					Perl6::Bareword.from-int(
-						$p.from,
-						$0.Str
-					)
-				);
+
 				if $_.hash.<quibble>.hash.<babble>.Str {
-					$_child.append(
-						Perl6::Adverb.from-match-trimmed(
-							$_.hash.<quibble>.hash.<babble>
-						)
-					);
 					if $_.hash.<quibble>.hash.<babble>.Str ~~ m{ ( .+? ) \s* $ } {
 						@q-adverb.append( $0.Str );
 					}
 				}
-				# XXX The first place negative indices are used
-				$_child.append(
-					Perl6::Balanced::Enter.from-int(
-						$_.hash.<quibble>.hash.<nibble>.from - 1,
-						$_.hash.<quibble>.Str.substr(
-							*-($_.hash.<quibble>.hash.<nibble>.chars + 2),
-							1
-						)
-					)
-				);
-				$_child.append(
-					Perl6::StringList::Body.from-match(
-						$_.hash.<quibble>.hash.<nibble>
-					)
-				);
-				$_child.append(
-					Perl6::Balanced::Exit.from-int(
-						$p.hash.<quibble>.hash.<nibble>.to,
-						$p.hash.<quibble>.Str.substr(
-							$p.hash.<quibble>.chars - 1,
-							1
-						)
-					)
-				);
 
 				# We could be in a here-doc.
 				if @q-adverb ~~ ':to' {
@@ -4378,7 +4446,8 @@ class Perl6::Parser::Factory {
 						),
 						:from( $_.from ),
 						:to( $_.to ),
-						:child( $_child.child ),
+						:quote( $q-map-name ),
+						:content( $_.Str ),
 						:adverb( @q-adverb ),
 						:here-doc( $here-doc-body ),
 						:delimiter-start(
@@ -4388,8 +4457,8 @@ class Perl6::Parser::Factory {
 							)
 						),
 						:delimiter-end(
-							$p.hash.<quibble>.Str.substr(
-								$p.hash.<quibble>.chars - 1,
+							$_.hash.<quibble>.Str.substr(
+								$_.hash.<quibble>.chars - 1,
 								1
 							)
 						),
@@ -4397,51 +4466,17 @@ class Perl6::Parser::Factory {
 				);
 			}
 			when self.assert-hash( $_, [< quibble >] ) {
-				my $_child = Perl6::Element-List.new;
 				$_.Str ~~ m{ ^ ( \w+ ) };
 				my Str $q-map-name = $0.Str;
 				my Str @q-adverb;
 				my Str $here-doc-body = '';
-				$_child.append(
-					Perl6::Bareword.from-int(
-						$p.from,
-						$0.Str
-					)
-				);
+
 				if $_.hash.<quibble>.hash.<babble>.Str {
-					$_child.append(
-						Perl6::Adverb.from-match-trimmed(
-							$_.hash.<quibble>.hash.<babble>
-						)
-					);
 					$_.hash.<quibble>.hash.<babble>.Str ~~
 						m{ ( .+? ) \s* $ };
 					@q-adverb.append( $0.Str );
 				}
-				# XXX The first place negative indices are used
-				$_child.append(
-					Perl6::Balanced::Enter.from-int(
-						$_.hash.<quibble>.hash.<nibble>.from - 1,
-						$_.hash.<quibble>.Str.substr(
-							*-($_.hash.<quibble>.hash.<nibble>.chars + 2),
-							1
-						)
-					)
-				);
-				$_child.append(
-					Perl6::StringList::Body.from-match(
-						$p.hash.<quibble>.hash.<nibble>
-					)
-				);
-				$_child.append(
-					Perl6::Balanced::Exit.from-int(
-						$p.hash.<quibble>.hash.<nibble>.to,
-						$p.hash.<quibble>.Str.substr(
-							$p.hash.<quibble>.chars - 1,
-							1
-						)
-					)
-				);
+
 				# We could be in a here-doc.
 				if @q-adverb ~~ ':to' {
 					my Str $x = $_.orig.Str.substr(
@@ -4467,9 +4502,9 @@ class Perl6::Parser::Factory {
 						:factory-line-number(
 							callframe(1).line
 						),
-						:from( $p.from ),
-						:to( $p.to ),
-						:child( $_child.child ),
+						:from( $_.from ),
+						:to( $_.to ),
+						:content( $_.Str ),
 						:adverb( @q-adverb ),
 						:here-doc( $here-doc-body ),
 						:delimiter-start(
@@ -4479,29 +4514,29 @@ class Perl6::Parser::Factory {
 							)
 						),
 						:delimiter-end(
-							$p.hash.<quibble>.Str.substr(
-								$p.hash.<quibble>.chars - 1,
+							$_.hash.<quibble>.Str.substr(
+								$_.hash.<quibble>.chars - 1,
 								1
 							)
 						),
 					)
 				);
 			}
-			when self.assert-hash( $p, [< nibble >] ) {
-				$p.Str ~~ m{ ^ (.) .* (.) $ };
+			when self.assert-hash( $_, [< nibble >] ) {
+				$_.Str ~~ m{ ^ (.) .* (.) $ };
 				if $0.Str eq Q{/} {
 					my $_child = Perl6::Element-List.new;
-					if $p.hash.<nibble>.Str {
+					if $_.hash.<nibble>.Str {
 						$_child.append(
 							self._nibble(
-								$p.hash.<nibble>
+								$_.hash.<nibble>
 								
 							)
 						);
 					}
 					$child.append(
 						Perl6::Regex.from-match(
-							$p, $_child
+							$_, $_child
 						)
 					);
 				}
@@ -4511,9 +4546,9 @@ class Perl6::Parser::Factory {
 							:factory-line-number(
 								callframe(1).line
 							),
-							:from( $p.from ),
-							:to( $p.to ),
-							:content( $p.Str ),
+							:from( $_.from ),
+							:to( $_.to ),
+							:content( $_.Str ),
 							:delimiter-start(
 								$0.Str
 							),
@@ -4525,7 +4560,7 @@ class Perl6::Parser::Factory {
 				}
 			}
 			default {
-				display-unhandled-match( $p );
+				display-unhandled-match( $_ );
 			}
 		}
 		$child;
@@ -4631,23 +4666,29 @@ class Perl6::Parser::Factory {
 		#	deflongname = 'Foo'
 		#	nibble = 'token '
 		#
-		if self.assert-hash( $p,
-				[< deflongname nibble >],
-				[< signature trait >] ) {
-			my $_child = Perl6::Element-List.new;
-			$_child.append( self._nibble( $p.hash.<nibble> ) );
-			$child.append(
-				self._deflongname( $p.hash.<deflongname> )
-			);
-			$child.append(
-				Perl6::Block.from-outer-match(
-					$p.hash.<nibble>,
-					$_child
-				)
-			);
-		}
-		else {
-			display-unhandled-match( $p );
+		given $p {
+			when self.assert-hash( $_,
+					[< deflongname nibble >],
+					[< signature trait >] ) {
+				my $_child = Perl6::Element-List.new;
+				$_child.append(
+					self._nibble( $_.hash.<nibble> )
+				);
+				$child.append(
+					self._deflongname(
+						$_.hash.<deflongname>
+					)
+				);
+				$child.append(
+					Perl6::Block.from-outer-match(
+						$_.hash.<nibble>,
+						$_child
+					)
+				);
+			}
+			default {
+				display-unhandled-match( $_ );
+			}
 		}
 		$child;
 	}
@@ -4656,7 +4697,7 @@ class Perl6::Parser::Factory {
 #		my $child = Perl6::Element-List.new;
 #		given $p {
 #			default {
-#				display-unhandled-match( $p );
+#				display-unhandled-match( $_ );
 #			}
 #		}
 #		$child;
@@ -4700,7 +4741,7 @@ class Perl6::Parser::Factory {
 				$left-edge ~~ m{ ('(') ( \s* ) $ };
 				$_child.append(
 					Perl6::Balanced::Enter.from-int(
-						$p.hash.<multisig>.from -
+						$_.hash.<multisig>.from -
 						$0.Str.chars - $1.Str.chars,
 						$0.Str
 					)
@@ -4982,7 +5023,7 @@ class Perl6::Parser::Factory {
 						);
 					}
 					if $k < $end {
-						my Str $x = $p.orig.Str.substr(
+						my Str $x = $_.orig.Str.substr(
 							$q.list.[$k].to,
 							$q.list.[$k+1].from -
 								$q.list.[$k].to
@@ -5275,16 +5316,16 @@ class Perl6::Parser::Factory {
 					self._param_var( $_.hash.<param_var> )
 				);
 				$child.append( self._trait( $_.hash.<trait> ) );
-				if $p.hash.<default_value> {
+				if $_.hash.<default_value> {
 					if $_.Str ~~ m{ ('=') } {
 						$child.append(
 							Perl6::Operator::Infix.from-sample(
-								$p,
+								$_,
 								$0.Str
 							)
 						);
 						$child.append(
-							self._EXPR( $p.hash.<default_value>.list.[0].hash.<EXPR> )
+							self._EXPR( $_.hash.<default_value>.list.[0].hash.<EXPR> )
 						);
 					}
 				}
@@ -5301,16 +5342,16 @@ class Perl6::Parser::Factory {
 				$child.append(
 					self._param_var( $_.hash.<param_var> )
 				);
-				if $p.hash.<default_value> {
+				if $_.hash.<default_value> {
 					if $_.Str ~~ m{ ('=') } {
 						$child.append(
 							Perl6::Operator::Infix.from-sample(
-								$p,
+								$_,
 								$0.Str
 							)
 						);
 						$child.append(
-							self._EXPR( $p.hash.<default_value>.list.[0].hash.<EXPR> )
+							self._EXPR( $_.hash.<default_value>.list.[0].hash.<EXPR> )
 						);
 					}
 				}
@@ -5360,7 +5401,7 @@ class Perl6::Parser::Factory {
 				$child.append(
 					self._param_var( $_.hash.<param_var> )
 				);
-				if $p.hash.<trait> {
+				if $_.hash.<trait> {
 					$child.append(
 						self._trait( $_.hash.<trait> )
 					);
@@ -5461,12 +5502,12 @@ class Perl6::Parser::Factory {
 					if $k > 1 {
 						$child.append(
 							Perl6::Operator::Infix.from-sample(
-								$p, COMMA
+								$_, COMMA
 							)
 						);
 					}
 				}
-				my Str $x = $p.orig.Str.substr(
+				my Str $x = $_.orig.Str.substr(
 					$_.hash.<parameter>.to,
 					$_.hash.<typename>.from -
 						$_.hash.<parameter>.to
@@ -5682,7 +5723,7 @@ class Perl6::Parser::Factory {
 				if $x ~~ m{ << (else) >> } {
 					$child.append(
 						Perl6::Bareword.from-int(
-							$p.from + $0.from,
+							$_.from + $0.from,
 							$0.Str
 						)
 					);
@@ -6412,7 +6453,7 @@ class Perl6::Parser::Factory {
 					)
 				);
 			}
-			when self.assert-hash( $p,
+			when self.assert-hash( $_,
 					[< prefix OPER >],
 					[< prefix_postfix_meta_operator >] ) {
 				$child.append(

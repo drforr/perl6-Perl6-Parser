@@ -253,7 +253,8 @@ my role Debugging {
 		my $str;
 
 		for $.factory.here-doc.keys.sort -> $k {
-			$str ~= "Here-Doc ($k-{$.factory.here-doc.{$k}})";
+			$str ~= "Here-Doc ($k-{$.factory.here-doc.{$k}})" ~
+				"\n";
 		}
 		$str ~= self._dump-tree( $root, $display-ws, $depth );
 		$str
