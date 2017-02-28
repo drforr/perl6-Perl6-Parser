@@ -2707,28 +2707,31 @@ class Perl6::Parser::Factory {
 		elsif self.assert-hash( $p, [< pblock >] ) {
 			$child.append( self._pblock( $p.hash.<pblock> ) );
 		}
-		elsif $p.Str {
-			if $p.Str ~~ m{ << (where) >> } {
-				my Int $left-margin = $0.from;
+		elsif $p.Str ~~ m{ << (where) >> } {
+			my Int $left-margin = $0.from;
+			$child.append(
+				Perl6::Bareword.from-int(
+					$left-margin + $p.from,
+					$0.Str
+				)
+			);
+			if $p.hash.<EXPR>.Str {
 				$child.append(
-					Perl6::Bareword.from-int(
-						$left-margin + $p.from,
-						$0.Str
+					self._EXPR(
+						$p.hash.<EXPR>
 					)
 				);
-				if $p.hash.<EXPR>.Str {
-					$child.append(
-						self._EXPR(
-							$p.hash.<EXPR>
-						)
-					);
-				}
 			}
-			else {
-				$child.append(
-					Perl6::Bareword.from-match( $p )
-				);
-			}
+		}
+		elsif $p.Str and $p.Str ~~ /\s/ {
+			$child.append(
+				Perl6::Bareword.from-match( $p )
+			);
+		}
+		elsif $p.Str {
+			$child.append(
+				Perl6::Bareword.from-match( $p )
+			);
 		}
 		else {
 			display-unhandled-match( $p );
@@ -3307,6 +3310,9 @@ class Perl6::Parser::Factory {
 				}
 			}
 		}
+		elsif $p.Str and $p.Str ~~ /\s/ {
+			$child.append( Perl6::Bareword.from-match( $p ) );
+		}
 		elsif $p.Str {
 			$child.append( Perl6::Bareword.from-match( $p ) );
 		}
@@ -3321,20 +3327,23 @@ class Perl6::Parser::Factory {
 		if self.assert-hash( $p, [< termseq >] ) {
 			$child.append( self._termseq( $p.hash.<termseq> ) );
 		}
+		elsif $p.Str and $p.Str ~~ m{ ^ ( .+? ) \s+ $ } {
+			$child.append(
+				Perl6::StringList::Body.from-int(
+					$p.from,
+					$0.Str
+				)
+			);
+		}
+		elsif $p.Str and $p.Str ~~ /\s/ {
+			$child.append(
+				Perl6::StringList::Body.from-match( $p )
+			);
+		}
 		elsif $p.Str {
-			if $p.Str ~~ m{ ^ ( .+? ) \s+ $ } {
-				$child.append(
-					Perl6::StringList::Body.from-int(
-						$p.from,
-						$0.Str
-					)
-				);
-			}
-			else {
-				$child.append(
-					Perl6::StringList::Body.from-match( $p )
-				);
-			}
+			$child.append(
+				Perl6::StringList::Body.from-match( $p )
+			);
 		}
 		else {
 			display-unhandled-match( $_ );
@@ -4251,7 +4260,12 @@ class Perl6::Parser::Factory {
 
 	method _quant( Mu $p ) returns Perl6::Element-List {
 		my $child = Perl6::Element-List.new;
-		if $p.Str {
+		if $p.Str and $p.Str ~~ /\s/ {
+			$child.append(
+				Perl6::Bareword.from-match( $p )
+			);
+		}
+		elsif $p.Str {
 			# XXX Need to propagate this back upwards.
 			if $p.Str ne BACKSLASH {
 				$child.append(
@@ -6041,6 +6055,9 @@ class Perl6::Parser::Factory {
 				# XXX probably redundant - seems unused now
 				display-unhandled-match( $_ );
 			}
+		}
+		elsif $p.Str and $p.Str ~~ /\s/ {
+			$child.append( Perl6::Bareword.from-match( $p ) );
 		}
 		elsif $p.Str {
 			$child.append( Perl6::Bareword.from-match( $p ) );
