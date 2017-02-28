@@ -2560,7 +2560,11 @@ class Perl6::Parser::Factory {
 				# XXX what's been parsed beforehand.
 				#
 				for $p.list.kv -> $k, $v {
-					$child.append( self._EXPR( $v ) );
+					if $v.Str {
+						$child.append(
+							self._EXPR( $v )
+						);
+					}
 					if $k < $end {
 						my Str $x = $p.orig.Str.substr(
 							$child.child.[*-1].to,
@@ -2732,10 +2736,11 @@ class Perl6::Parser::Factory {
 				)
 			);
 		}
+		# XXX _infix is a bit broken, apparently.
 		elsif self.assert-hash( $p, [< EXPR >] ) and
-			self.assert-hash( $p.hash.<EXPR>, [< infix >] ) {
+			self.assert-hash( $p.hash.<EXPR>, [< infix OPER >] ) {
 			$child.append(
-				self._infix( $p.hash.<EXPR>.hash.<infix> )
+				self._EXPR( $p.hash.<EXPR> )
 			);
 		}
 		elsif $p.Str and $p.Str ~~ /\s/ {
