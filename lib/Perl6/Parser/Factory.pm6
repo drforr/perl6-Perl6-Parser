@@ -2721,9 +2721,21 @@ class Perl6::Parser::Factory {
 		elsif self.assert-hash( $p, [< EXPR >] ) and
 			self.assert-hash( $p.hash.<EXPR>, [< value >] ) {
 			$child.append(
-				self._value(
-					$p.hash.<EXPR>.hash.<value>
+				self._value( $p.hash.<EXPR>.hash.<value> )
+			);
+		}
+		elsif self.assert-hash( $p, [< EXPR >] ) and
+			self.assert-hash( $p.hash.<EXPR>, [< variable >] ) {
+			$child.append(
+				self._variable(
+					$p.hash.<EXPR>.hash.<variable>
 				)
+			);
+		}
+		elsif self.assert-hash( $p, [< EXPR >] ) and
+			self.assert-hash( $p.hash.<EXPR>, [< infix >] ) {
+			$child.append(
+				self._infix( $p.hash.<EXPR>.hash.<infix> )
 			);
 		}
 		elsif $p.Str and $p.Str ~~ /\s/ {
