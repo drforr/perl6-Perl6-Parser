@@ -362,7 +362,7 @@ subtest {
 	ok $head.parent ~~ Perl6::Operator::Circumfix;
 	ok $head ~~ Perl6::Balanced::Enter; $head = $head.next;
 	ok $head.parent ~~ Perl6::Operator::Circumfix;
-	ok $head ~~ Perl6::Bareword; $head = $head.next; # XXX Should not be bw
+	ok $head ~~ Perl6::Number::Decimal; $head = $head.next;
 	ok $head.parent ~~ Perl6::Operator::Circumfix;
 	ok $head ~~ Perl6::Balanced::Exit; $head = $head.next;
 	ok $head ~~ Perl6::Semicolon; $head = $head.next;

@@ -107,7 +107,7 @@ subtest {
 	ok $head ~~ Perl6::Statement;           $head = $head.next;
 	ok $head ~~ Perl6::Operator::Circumfix; $head = $head.next;
 	ok $head ~~ Perl6::Balanced::Enter;     $head = $head.next;
-	ok $head ~~ Perl6::Bareword;            $head = $head.next;
+	ok $head ~~ Perl6::Number::Decimal;     $head = $head.next;
 	ok $head ~~ Perl6::Balanced::Exit;      $head = $head.next;
 	ok $head ~~ Perl6::Semicolon;           $head = $head.next;
 	ok $head ~~ Perl6::Statement;           $head = $head.next;
@@ -124,7 +124,7 @@ subtest {
 	ok $head ~~ Perl6::Statement;           $head = $head.previous;
 	ok $head ~~ Perl6::Semicolon;           $head = $head.previous;
 	ok $head ~~ Perl6::Balanced::Exit;      $head = $head.previous;
-	ok $head ~~ Perl6::Bareword;            $head = $head.previous;
+	ok $head ~~ Perl6::Number::Decimal;     $head = $head.previous;
 	ok $head ~~ Perl6::Balanced::Enter;     $head = $head.previous;
 	ok $head ~~ Perl6::Operator::Circumfix; $head = $head.previous;
 	ok $head ~~ Perl6::Statement;           $head = $head.previous;

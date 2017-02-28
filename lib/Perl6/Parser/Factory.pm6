@@ -2715,23 +2715,22 @@ class Perl6::Parser::Factory {
 					$0.Str
 				)
 			);
-			if $p.hash.<EXPR>.Str {
-				$child.append(
-					self._EXPR(
-						$p.hash.<EXPR>
-					)
-				);
-			}
+			$child.append( self._EXPR( $p.hash.<EXPR> ) );
+		}
+		# XXX Here begin some more ugly hacks.
+		elsif self.assert-hash( $p, [< EXPR >] ) and
+			self.assert-hash( $p.hash.<EXPR>, [< value >] ) {
+			$child.append(
+				self._value(
+					$p.hash.<EXPR>.hash.<value>
+				)
+			);
 		}
 		elsif $p.Str and $p.Str ~~ /\s/ {
-			$child.append(
-				Perl6::Bareword.from-match( $p )
-			);
+			$child.append( Perl6::Bareword.from-match( $p ) );
 		}
 		elsif $p.Str {
-			$child.append(
-				Perl6::Bareword.from-match( $p )
-			);
+			$child.append( Perl6::Bareword.from-match( $p ) );
 		}
 		else {
 			display-unhandled-match( $p );
@@ -3333,16 +3332,6 @@ class Perl6::Parser::Factory {
 					$p.from,
 					$0.Str
 				)
-			);
-		}
-		elsif $p.Str and $p.Str ~~ /\s/ {
-			$child.append(
-				Perl6::StringList::Body.from-match( $p )
-			);
-		}
-		elsif $p.Str {
-			$child.append(
-				Perl6::StringList::Body.from-match( $p )
 			);
 		}
 		else {
