@@ -2708,7 +2708,27 @@ class Perl6::Parser::Factory {
 			$child.append( self._pblock( $p.hash.<pblock> ) );
 		}
 		elsif $p.Str {
-			$child.append( Perl6::Bareword.from-match( $p ) );
+			if $p.Str ~~ m{ << (where) >> } {
+				my Int $left-margin = $0.from;
+				$child.append(
+					Perl6::Bareword.from-int(
+						$left-margin + $p.from,
+						$0.Str
+					)
+				);
+				if $p.hash.<EXPR>.Str {
+					$child.append(
+						self._EXPR(
+							$p.hash.<EXPR>
+						)
+					);
+				}
+			}
+			else {
+				$child.append(
+					Perl6::Bareword.from-match( $p )
+				);
+			}
 		}
 		else {
 			display-unhandled-match( $p );
