@@ -2743,6 +2743,32 @@ class Perl6::Parser::Factory {
 				self._EXPR( $p.hash.<EXPR> )
 			);
 		}
+		elsif self.assert-hash( $p, [< EXPR >] ) and
+			self.assert-hash( $p.hash.<EXPR>,
+				[< prefix OPER >],
+				[< prefix_postfix_meta_operator >] ) {
+			$child.append(
+				self._EXPR( $p.hash.<EXPR> )
+			);
+		}
+		elsif self.assert-hash( $p, [< EXPR >] ) and
+			self.assert-hash( $p.hash.<EXPR>, [< sym >] ) {
+			$child.append(
+				self._sym( $p.hash.<EXPR>.hash.<sym> )
+			);
+		}
+		elsif self.assert-hash( $p, [< EXPR >] ) and
+			self.assert-hash( $p.hash.<EXPR>, [< longname >] ) {
+			$child.append(
+				self._longname( $p.hash.<EXPR>.hash.<longname> )
+			);
+		}
+		elsif self.assert-hash( $p, [< EXPR >] ) and
+			self.assert-hash( $p.hash.<EXPR>, [< dotty >] ) {
+			$child.append(
+				self._dotty( $p.hash.<EXPR>.hash.<dotty> )
+			);
+		}
 		elsif $p.Str and $p.Str ~~ /\s/ {
 			$child.append( Perl6::Bareword.from-match( $p ) );
 		}
