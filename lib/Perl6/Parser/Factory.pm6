@@ -2769,6 +2769,20 @@ class Perl6::Parser::Factory {
 				self._dotty( $p.hash.<EXPR>.hash.<dotty> )
 			);
 		}
+		elsif self.assert-hash( $p, [< EXPR >] ) and
+			self.assert-hash( $p.hash.<EXPR>,
+				[< dotty OPER >],
+				[< postfix_prefix_meta_operator >] ) {
+			$child.append(
+				self._EXPR( $p.hash.<EXPR> )
+			);
+		}
+		elsif self.assert-hash( $p, [< EXPR >] ) and
+			 self.assert-hash( $p.hash.<EXPR>,
+				[< fake_infix OPER colonpair >] ) {
+			$child.append( self._EXPR( $p.hash.<EXPR>.list.[0] ) );
+			$child.append( self._colonpair( $p.hash.<EXPR>.hash.<colonpair> ) );
+		}
 		elsif $p.Str and $p.Str ~~ /\s/ {
 			$child.append( Perl6::Bareword.from-match( $p ) );
 		}
