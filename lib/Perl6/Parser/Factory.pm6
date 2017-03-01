@@ -2782,6 +2782,13 @@ class Perl6::Parser::Factory {
 			);
 		}
 		elsif self.assert-hash( $p, [< EXPR >] ) and
+			self.assert-hash( $p.hash.<EXPR>,
+				[< infix_circumfix_meta_operator OPER >] ) {
+			$child.append(
+				self._EXPR( $p.hash.<EXPR> )
+			);
+		}
+		elsif self.assert-hash( $p, [< EXPR >] ) and
 			 self.assert-hash( $p.hash.<EXPR>,
 				[< fake_infix OPER colonpair >] ) {
 			$child.append( self._EXPR( $p.hash.<EXPR> ) );
@@ -2890,16 +2897,22 @@ class Perl6::Parser::Factory {
 	# << >>
 	# « »
 	#
-#	method _infix_circumfix_meta_operator( Mu $p )
-#			returns Perl6::Element-List {
-#		my $child = Perl6::Element-List.new;
-#		given $p {
-#			default {
-#				display-unhandled-match( $_ );
-#			}
-#		}
-#		$child;
-#	}
+	method _infix_circumfix_meta_operator( Mu $p )
+			returns Perl6::Element-List {
+		my $child = Perl6::Element-List.new;
+		given $p {
+			when self.assert-hash( $_,
+				[< closing infixish opening >], [< O >] ) {
+				$child.append(
+					Perl6::Operator::Infix.from-match( $_ )
+				);
+			}
+			default {
+				display-unhandled-match( $_ );
+			}
+		}
+		$child;
+	}
 
 	# « »
 	#
