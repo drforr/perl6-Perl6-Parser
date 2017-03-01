@@ -2442,8 +2442,12 @@ class Perl6::Parser::Factory {
 		}
 		elsif self.assert-hash( $p,
 				[< OPER infix_circumfix_meta_operator >] ) {
-			# XXXinfix_circumfix_meta_operator unused?
 			$child.append( self._EXPR( $p.list.[0] ) );
+			$child.append(
+				self._infix_circumfix_meta_operator(
+					$p.hash.<infix_circumfix_meta_operator>
+				)
+			);
 			$child.append( self._EXPR( $p.list.[1] ) );
 		}
 		elsif self.assert-hash( $p,
@@ -2780,8 +2784,7 @@ class Perl6::Parser::Factory {
 		elsif self.assert-hash( $p, [< EXPR >] ) and
 			 self.assert-hash( $p.hash.<EXPR>,
 				[< fake_infix OPER colonpair >] ) {
-			$child.append( self._EXPR( $p.hash.<EXPR>.list.[0] ) );
-			$child.append( self._colonpair( $p.hash.<EXPR>.hash.<colonpair> ) );
+			$child.append( self._EXPR( $p.hash.<EXPR> ) );
 		}
 		elsif $p.Str and $p.Str ~~ /\s/ {
 			$child.append( Perl6::Bareword.from-match( $p ) );
@@ -2949,9 +2952,7 @@ class Perl6::Parser::Factory {
 						$_.hash.<sym>
 					)
 				);
-				$child.append(
-					self._EXPR( $_.hash.<EXPR> )
-				);
+				$child.append( self._EXPR( $_.hash.<EXPR> ) );
 			}
 			default {
 				display-unhandled-match( $_ );
@@ -5416,7 +5417,7 @@ class Perl6::Parser::Factory {
 							)
 						);
 						$child.append(
-							self._EXPR( $_.hash.<default_value>.list.[0].hash.<EXPR> )
+							self._default_value( $_.hash.<default_value> )
 						);
 					}
 				}
@@ -5442,7 +5443,7 @@ class Perl6::Parser::Factory {
 							)
 						);
 						$child.append(
-							self._EXPR( $_.hash.<default_value>.list.[0].hash.<EXPR> )
+							self._default_value( $_.hash.<default_value> )
 						);
 					}
 				}
