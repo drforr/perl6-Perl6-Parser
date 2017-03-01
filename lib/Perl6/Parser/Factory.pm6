@@ -4142,7 +4142,18 @@ class Perl6::Parser::Factory {
 		if $p.list {
 			for $p.list {
 				if self.assert-hash( $_, [< EXPR >] ) {
-					$child.append( self._EXPR( $_ ) );
+					if $_.Str ~~ m{ << (where) >> } {
+						my Int $left-margin = $0.from;
+						$child.append(
+							Perl6::Bareword.from-int(
+								$left-margin + $_.from,
+								$0.Str
+							)
+						);
+					}
+					$child.append(
+						self._EXPR( $_.hash.<EXPR> )
+					);
 				}
 				else {
 					display-unhandled-match( $_ );
