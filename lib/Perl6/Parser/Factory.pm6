@@ -1111,8 +1111,22 @@ my role Assertions {
 	}
 }
 
+my role Options {
+	method __Optional_where( Mu $p ) {
+		if $p.Str ~~ m{ << (where) >> } {
+			my Int $left-margin = $0.from;
+			return
+				Perl6::Bareword.from-int(
+					$left-margin + $p.from,
+					$0.Str
+				)
+		}
+	}
+}
+
 class Perl6::Parser::Factory {
 	also does Assertions;
+	also does Options;
 
 	has Int %.here-doc;
 
@@ -2716,13 +2730,7 @@ class Perl6::Parser::Factory {
 			$child.append( self._pblock( $p.hash.<pblock> ) );
 		}
 		elsif $p.Str ~~ m{ << (where) >> } {
-			my Int $left-margin = $0.from;
-			$child.append(
-				Perl6::Bareword.from-int(
-					$left-margin + $p.from,
-					$0.Str
-				)
-			);
+			$child.append( self.__Optional_where( $p ) );
 			$child.append( self._EXPR( $p.hash.<EXPR> ) );
 		}
 		# XXX Here begin some more ugly hacks.
@@ -3863,8 +3871,6 @@ class Perl6::Parser::Factory {
 				[< default_value modifier trait >] ) {
 				# Synthesize the 'from' and 'to' markers for
 				# 'where'
-				$p.Str ~~ m{ << (where) >> };
-				my Int $left-margin = $0.from;
 				$child.append(
 					self._type_constraint(
 						$_.hash.<type_constraint>
@@ -3874,10 +3880,7 @@ class Perl6::Parser::Factory {
 					self._param_var( $_.hash.<param_var> )
 				);
 				$child.append(
-					Perl6::Bareword.from-int(
-						$left-margin + $p.from,
-						$0.Str
-					)
+					self.__Optional_where( $p )
 				);
 				$child.append(
 					self._post_constraint(
@@ -4156,15 +4159,9 @@ class Perl6::Parser::Factory {
 		if $p.list {
 			for $p.list {
 				if self.assert-hash( $_, [< EXPR >] ) {
-					if $_.Str ~~ m{ << (where) >> } {
-						my Int $left-margin = $0.from;
-						$child.append(
-							Perl6::Bareword.from-int(
-								$left-margin + $_.from,
-								$0.Str
-							)
-						);
-					}
+					$child.append(
+						self.__Optional_where( $_ )
+					);
 					$child.append(
 						self._EXPR( $_.hash.<EXPR> )
 					);
