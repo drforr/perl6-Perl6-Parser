@@ -2913,6 +2913,14 @@ class Perl6::Parser::Factory {
 			$child.append( self._EXPR( $p.hash.<EXPR> ) );
 		}
 		elsif self.assert-hash( $p, [< EXPR >] ) and
+			 self.assert-hash( $p.hash.<EXPR>, [< circumfix >] ) {
+			$child.append(
+				self._circumfix(
+					$p.hash.<EXPR>.hash.<circumfix>
+				)
+			);
+		}
+		elsif self.assert-hash( $p, [< EXPR >] ) and
 			 self.assert-hash( $p.hash.<EXPR>,
 				[< scope_declarator >] ) {
 			$child.append(
@@ -2929,10 +2937,14 @@ class Perl6::Parser::Factory {
 				)
 			);
 		}
-		elsif $p.Str and $p.Str ~~ / ^ \s+ $ / {
+		elsif self.assert-hash( $p, [< statement_control >] ) {
+			$child.append(
+				self._statement_control(
+					$p.hash.<statement_control>
+				)
+			);
 		}
-		elsif $p.Str and $p.Str ~~ /\s/ {
-			$child.append( Perl6::Bareword.from-match( $p ) );
+		elsif $p.Str and $p.Str ~~ / ^ \s+ $ / {
 		}
 		elsif $p.Str {
 			$child.append( Perl6::Bareword.from-match( $p ) );
