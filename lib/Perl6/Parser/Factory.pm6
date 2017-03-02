@@ -2853,9 +2853,38 @@ class Perl6::Parser::Factory {
 			);
 		}
 		elsif self.assert-hash( $p, [< EXPR >] ) and
+			self.assert-hash( $p.hash.<EXPR>, [< args op >] ) {
+			$child.append(
+				self._EXPR( $p.hash.<EXPR> )
+			);
+		}
+		elsif self.assert-hash( $p, [< EXPR >] ) and
+			self.assert-hash( $p.hash.<EXPR>,
+				[< routine_declarator >] ) {
+			$child.append(
+				self._routine_declarator(
+					$p.hash.<EXPR>.hash.<routine_declarator>
+				)
+			);
+		}
+		elsif self.assert-hash( $p, [< EXPR >] ) and
 			self.assert-hash( $p.hash.<EXPR>,
 				[< dotty OPER >],
 				[< postfix_prefix_meta_operator >] ) {
+			$child.append(
+				self._EXPR( $p.hash.<EXPR> )
+			);
+		}
+		elsif self.assert-hash( $p, [< EXPR >] ) and
+			self.assert-hash( $p.hash.<EXPR>,
+				[< infix_prefix_meta_operator OPER >] ) {
+			$child.append(
+				self._EXPR( $p.hash.<EXPR> )
+			);
+		}
+		elsif self.assert-hash( $p, [< EXPR >] ) and
+			self.assert-hash( $p.hash.<EXPR>,
+				[< infix_postfix_meta_operator infix OPER >] ) {
 			$child.append(
 				self._EXPR( $p.hash.<EXPR> )
 			);
@@ -2882,6 +2911,15 @@ class Perl6::Parser::Factory {
 				[< postcircumfix OPER >],
 				[< postfix_prefix_meta_operator >] ) {
 			$child.append( self._EXPR( $p.hash.<EXPR> ) );
+		}
+		elsif self.assert-hash( $p, [< EXPR >] ) and
+			 self.assert-hash( $p.hash.<EXPR>,
+				[< scope_declarator >] ) {
+			$child.append(
+				self._scope_declarator(
+					$p.hash.<EXPR>.hash.<scope_declarator>
+				)
+			);
 		}
 		elsif self.assert-hash( $p, [< EXPR statement_mod_loop >] ) {
 			$child.append( self._EXPR( $p.hash.<EXPR> ) );
