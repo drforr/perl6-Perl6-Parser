@@ -5243,7 +5243,7 @@ class Perl6::Parser::Factory {
 		$child;
 	}
 
-#	method _shape( Mu $p ) returns Perl6::Element-LIst {
+#	method _shape( Mu $p ) returns Perl6::Element-List {
 #		my $child = Perl6::Element-List.new;
 #		given $p {
 #			default {
@@ -6794,13 +6794,21 @@ class Perl6::Parser::Factory {
 					[< semilist variable shape >],
 					[< postcircumfix signature trait
 					   post_constraint >] ) {
-				$child.append(
-					self._semilist( $_.hash.<semilist> )
-				);
+				# XXX shape is redundant
 				$child.append(
 					self._variable( $_.hash.<variable> )
 				);
-				# XXX Need to restore shape?
+				my $_child = Perl6::Element-List.new;
+				$_child.append(
+					self._semilist( $_.hash.<semilist> )
+				);
+				if $_.hash.<shape>.Str {
+					$child.append(
+						Perl6::Block.from-match(
+							$_.hash.<shape>, $_child
+						)
+					);
+				}
 			}
 			when self.assert-hash( $_,
 					[< variable post_constraint >],

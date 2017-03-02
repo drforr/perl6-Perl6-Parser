@@ -1236,7 +1236,6 @@ _END_
 	}, Q{version 4};
 
 	subtest {
-#`[
 		my $source = Q:to[_END_];
 my %hash{Any}; # same as %hash{*}
 class C {};
@@ -1246,7 +1245,6 @@ _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
 		is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 		done-testing;
 	}, Q{version 5};
