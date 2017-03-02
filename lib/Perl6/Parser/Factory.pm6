@@ -3530,9 +3530,6 @@ class Perl6::Parser::Factory {
 				}
 			}
 		}
-		elsif $p.Str and $p.Str ~~ /\s/ {
-			$child.append( Perl6::Bareword.from-match( $p ) );
-		}
 		elsif $p.Str {
 			$child.append( Perl6::Bareword.from-match( $p ) );
 		}
