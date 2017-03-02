@@ -2834,6 +2834,13 @@ class Perl6::Parser::Factory {
 			);
 		}
 		elsif self.assert-hash( $p, [< EXPR >] ) and
+			self.assert-hash( $p.hash.<EXPR>,
+				[< longname args >] ) {
+			$child.append(
+				self._EXPR( $p.hash.<EXPR> )
+			);
+		}
+		elsif self.assert-hash( $p, [< EXPR >] ) and
 			self.assert-hash( $p.hash.<EXPR>, [< longname >] ) {
 			$child.append(
 				self._longname( $p.hash.<EXPR>.hash.<longname> )
@@ -2869,6 +2876,20 @@ class Perl6::Parser::Factory {
 			 self.assert-hash( $p.hash.<EXPR>,
 				[< fake_infix OPER colonpair >] ) {
 			$child.append( self._EXPR( $p.hash.<EXPR> ) );
+		}
+		elsif self.assert-hash( $p, [< EXPR >] ) and
+			 self.assert-hash( $p.hash.<EXPR>,
+				[< postcircumfix OPER >],
+				[< postfix_prefix_meta_operator >] ) {
+			$child.append( self._EXPR( $p.hash.<EXPR> ) );
+		}
+		elsif self.assert-hash( $p, [< EXPR statement_mod_loop >] ) {
+			$child.append( self._EXPR( $p.hash.<EXPR> ) );
+			$child.append(
+				self._statement_mod_loop(
+					$p.hash.<statement_mod_loop>
+				)
+			);
 		}
 		elsif $p.Str and $p.Str ~~ / ^ \s+ $ / {
 		}
