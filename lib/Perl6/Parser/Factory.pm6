@@ -499,6 +499,40 @@ role MatchingBalanced {
 		)
 	}
 
+	method from-outer-int( Mu $p, Int $from, Str $str,
+			Perl6::Element-List $child )
+			returns Perl6::Element {
+		my $to = $from + $str.chars;
+		my $_child = Perl6::Element-List.new;
+		my $x = $p.orig.substr( 0, $from );
+		$x ~~ m{ (.) ( \s* ) $ };
+		my $left-edge = $0.Str;
+		my $left-margin = $1.Str.chars;
+		$x = $p.orig.substr( $to );
+		$x ~~ m{ ^ ( \s* ) (.) };
+		my $right-edge = $1.Str;
+		my $right-margin = $0.Str.chars;
+		$_child.append(
+			Perl6::Balanced::Enter.from-int(
+				$from - $left-margin - $left-edge.chars,
+				$left-edge
+			)
+		);
+		$_child.append( $child );
+		$_child.append(
+			Perl6::Balanced::Exit.from-int(
+				$to + $right-margin,
+				$right-edge
+			)
+		);
+		self.bless(
+			:factory-line-number( callframe(1).line ),
+			:from( $from - $left-margin - $left-edge.chars ),
+			:to( $to + $right-margin + $right-edge.chars ),
+			:child( $_child.child )
+		)
+	}
+
 	method from-int( Int $from, Str $str, Perl6::Element-List $child )
 			returns Perl6::Element {
 		my $_child = Perl6::Element-List.new;
@@ -2748,6 +2782,36 @@ class Perl6::Parser::Factory {
 				)
 			);
 		}
+		elsif self.assert-hash( $p, [< args op triangle >] ) {
+			my $_child = Perl6::Element-List.new;
+			# XXX Merge triangle and op?
+			if $p.hash.<triangle>.Str {
+				$_child.append(
+					Perl6::Operator::Prefix.from-int(
+						$p.hash.<triangle>.from,
+						$p.hash.<triangle>.Str ~
+						$p.hash.<op>,
+					)
+				);
+			}
+			else {
+				$_child.append(
+					Perl6::Operator::Prefix.from-match(
+						$p.hash.<op>
+					)
+				);
+			}
+			$child.append(
+				Perl6::Operator::Hyper.from-outer-int(
+					$p,
+					$p.hash.<triangle>.from,
+					$p.hash.<triangle>.Str ~
+					$p.hash.<op>.Str,
+					$_child
+				)
+			);
+			$child.append( self._args( $p.hash.<args> ) );
+		}
 		# XXX _infix is a bit broken, apparently.
 		elsif self.assert-hash( $p, [< EXPR >] ) and
 			self.assert-hash( $p.hash.<EXPR>, [< infix OPER >] ) {
@@ -2800,6 +2864,13 @@ class Perl6::Parser::Factory {
 			 self.assert-hash( $p.hash.<EXPR>,
 				[< fake_infix OPER colonpair >] ) {
 			$child.append( self._EXPR( $p.hash.<EXPR> ) );
+		}
+		elsif self.assert-hash( $p, [< EXPR >] ) and
+			 self.assert-hash( $p.hash.<EXPR>,
+				[< fake_infix OPER colonpair >] ) {
+			$child.append( self._EXPR( $p.hash.<EXPR> ) );
+		}
+		elsif $p.Str and $p.Str ~~ / ^ \s+ $ / {
 		}
 		elsif $p.Str and $p.Str ~~ /\s/ {
 			$child.append( Perl6::Bareword.from-match( $p ) );
@@ -6406,6 +6477,28 @@ class Perl6::Parser::Factory {
 			default {
 				display-unhandled-match( $_ );
 			}
+		}
+		$child;
+	}
+
+	method _triangle( Mu $p ) returns Perl6::Element-List {
+		my $child = Perl6::Element-List.new;
+		if $p.list {
+			for $p.list {
+				if self.assert-hash( $_, [< trait_mod >] ) {
+					$child.append(
+						self._trait_mod(
+							$_.hash.<trait_mod>
+						)
+					);
+				}
+				else {
+					display-unhandled-match( $_ );
+				}
+			}
+		}
+		else {
+			display-unhandled-match( $p );
 		}
 		$child;
 	}
