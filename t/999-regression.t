@@ -544,6 +544,28 @@ _END_
 	done-testing;
 }, Q{hyper triangle};
 
+subtest {
+	my $source = Q:to[_END_];
+proto A { {*} }
+_END_
+	my $p = $pt.parse( $source );
+	my $tree = $pt.build-tree( $p );
+	is $pt.to-string( $tree ), $source, Q{formatted};
+
+	done-testing;
+}, Q{whateverable prototype};
+
+subtest {
+	my $source = Q:to[_END_];
+sub find-loop { %^mapping{*} }
+_END_
+	my $p = $pt.parse( $source );
+	my $tree = $pt.build-tree( $p );
+	is $pt.to-string( $tree ), $source, Q{formatted};
+
+	done-testing;
+}, Q{whateverable placeholder};
+
 done-testing;
 
 # vim: ft=perl6

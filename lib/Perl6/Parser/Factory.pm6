@@ -405,6 +405,13 @@ role Token {
 	}
 }
 
+class Perl6::Whatever is Token {
+	also is Perl6::Element;
+
+	also does Leaf;
+	also does Matchable;
+}
+
 class Perl6::Structural {
 	also is Perl6::Element;
 }
@@ -2462,7 +2469,26 @@ class Perl6::Parser::Factory {
 
 	method _EXPR( Mu $p ) returns Perl6::Element-List {
 		my $child = Perl6::Element-List.new;
-		if self.assert-hash( $p,
+		if $p.Str ~~ m/ ^ \{ \s* ( \* ) \s* \} $ / and not $p.list {
+			# XXX shape is redundant
+			my $_child = Perl6::Element-List.new;
+			$_child.append(
+				Perl6::Whatever.new(
+					:factory-line-number(
+						callframe(1).line
+					),
+					:from( $p.from + $0.from ),
+					:to( $p.from + $0.from + $0.chars ),
+					:content( $0.Str ),
+				)
+			);
+			$child.append(
+				Perl6::Block.from-match(
+					$p, $_child
+				)
+			);
+		}
+		elsif self.assert-hash( $p,
 				[< dotty OPER
 				   postfix_prefix_meta_operator >] ) {
 			$child.append( self._EXPR( $p.list.[0] ) );
@@ -2928,10 +2954,8 @@ class Perl6::Parser::Factory {
 				)
 			);
 		}
+		# XXX Should eradicate this term later.
 		elsif $p.Str and $p.Str ~~ / ^ \s+ $ / {
-		}
-		elsif $p.Str {
-			$child.append( Perl6::Bareword.from-match( $p ) );
 		}
 		else {
 			display-unhandled-match( $p );
