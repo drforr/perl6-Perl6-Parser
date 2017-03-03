@@ -2767,21 +2767,121 @@ class Perl6::Parser::Factory {
 			$child.append( self.__Optional_where( $p ) );
 			$child.append( self._EXPR( $p.hash.<EXPR> ) );
 		}
+
+		elsif self.assert-hash( $p, [< EXPR >] ) {
+			if self.assert-hash( $p.hash.<EXPR>, [< value >] ) {
+				$child.append(
+					self._value( $p.hash.<EXPR>.hash.<value> )
+				);
+			}
+			elsif self.assert-hash( $p.hash.<EXPR>, [< variable >] ) {
+				$child.append(
+					self._variable(
+						$p.hash.<EXPR>.hash.<variable>
+					)
+				);
+			}
+			elsif self.assert-hash( $p.hash.<EXPR>, [< infix OPER >] ) {
+				$child.append(
+					self._EXPR( $p.hash.<EXPR> )
+				);
+			}
+			elsif self.assert-hash( $p.hash.<EXPR>,
+					[< prefix OPER >],
+					[< prefix_postfix_meta_operator >] ) {
+				$child.append(
+					self._EXPR( $p.hash.<EXPR> )
+				);
+			}
+			elsif self.assert-hash( $p.hash.<EXPR>, [< sym >] ) {
+				$child.append(
+					self._sym( $p.hash.<EXPR>.hash.<sym> )
+				);
+			}
+			elsif self.assert-hash( $p.hash.<EXPR>,
+					[< longname args >] ) {
+				$child.append(
+					self._EXPR( $p.hash.<EXPR> )
+				);
+			}
+			elsif self.assert-hash( $p.hash.<EXPR>, [< longname >] ) {
+				$child.append(
+					self._longname( $p.hash.<EXPR>.hash.<longname> )
+				);
+			}
+			elsif self.assert-hash( $p.hash.<EXPR>, [< dotty >] ) {
+				$child.append(
+					self._dotty( $p.hash.<EXPR>.hash.<dotty> )
+				);
+			}
+			elsif self.assert-hash( $p.hash.<EXPR>, [< args op >] ) {
+				$child.append(
+					self._EXPR( $p.hash.<EXPR> )
+				);
+			}
+			elsif self.assert-hash( $p.hash.<EXPR>,
+					[< routine_declarator >] ) {
+				$child.append(
+					self._routine_declarator(
+						$p.hash.<EXPR>.hash.<routine_declarator>
+					)
+				);
+			}
+			elsif self.assert-hash( $p.hash.<EXPR>,
+					[< dotty OPER >],
+					[< postfix_prefix_meta_operator >] ) {
+				$child.append(
+					self._EXPR( $p.hash.<EXPR> )
+				);
+			}
+			elsif self.assert-hash( $p.hash.<EXPR>,
+					[< infix_prefix_meta_operator OPER >] ) {
+				$child.append(
+					self._EXPR( $p.hash.<EXPR> )
+				);
+			}
+			elsif self.assert-hash( $p.hash.<EXPR>,
+					[< infix_postfix_meta_operator infix OPER >] ) {
+				$child.append(
+					self._EXPR( $p.hash.<EXPR> )
+				);
+			}
+			elsif self.assert-hash( $p.hash.<EXPR>,
+					[< infix_circumfix_meta_operator OPER >] ) {
+				$child.append(
+					self._EXPR( $p.hash.<EXPR> )
+				);
+			}
+			elsif self.assert-hash( $p.hash.<EXPR>,
+					[< fake_infix OPER colonpair >] ) {
+				$child.append( self._EXPR( $p.hash.<EXPR> ) );
+			}
+			elsif self.assert-hash( $p.hash.<EXPR>,
+					[< fake_infix OPER colonpair >] ) {
+				$child.append( self._EXPR( $p.hash.<EXPR> ) );
+			}
+			elsif self.assert-hash( $p.hash.<EXPR>,
+					[< postcircumfix OPER >],
+					[< postfix_prefix_meta_operator >] ) {
+				$child.append( self._EXPR( $p.hash.<EXPR> ) );
+			}
+			elsif self.assert-hash( $p.hash.<EXPR>, [< circumfix >] ) {
+				$child.append(
+					self._circumfix(
+						$p.hash.<EXPR>.hash.<circumfix>
+					)
+				);
+			}
+			elsif self.assert-hash( $p.hash.<EXPR>,
+					[< scope_declarator >] ) {
+				$child.append(
+					self._scope_declarator(
+						$p.hash.<EXPR>.hash.<scope_declarator>
+					)
+				);
+			}
+		}
 		# XXX Here begin some more ugly hacks.
-		elsif self.assert-hash( $p, [< EXPR >] ) and
-			self.assert-hash( $p.hash.<EXPR>, [< value >] ) {
-			$child.append(
-				self._value( $p.hash.<EXPR>.hash.<value> )
-			);
-		}
-		elsif self.assert-hash( $p, [< EXPR >] ) and
-			self.assert-hash( $p.hash.<EXPR>, [< variable >] ) {
-			$child.append(
-				self._variable(
-					$p.hash.<EXPR>.hash.<variable>
-				)
-			);
-		}
 		elsif self.assert-hash( $p, [< args op triangle >] ) {
 			my $_child = Perl6::Element-List.new;
 			# XXX Merge triangle and op?
@@ -2813,122 +2913,6 @@ class Perl6::Parser::Factory {
 			$child.append( self._args( $p.hash.<args> ) );
 		}
 		# XXX _infix is a bit broken, apparently.
-		elsif self.assert-hash( $p, [< EXPR >] ) and
-			self.assert-hash( $p.hash.<EXPR>, [< infix OPER >] ) {
-			$child.append(
-				self._EXPR( $p.hash.<EXPR> )
-			);
-		}
-		elsif self.assert-hash( $p, [< EXPR >] ) and
-			self.assert-hash( $p.hash.<EXPR>,
-				[< prefix OPER >],
-				[< prefix_postfix_meta_operator >] ) {
-			$child.append(
-				self._EXPR( $p.hash.<EXPR> )
-			);
-		}
-		elsif self.assert-hash( $p, [< EXPR >] ) and
-			self.assert-hash( $p.hash.<EXPR>, [< sym >] ) {
-			$child.append(
-				self._sym( $p.hash.<EXPR>.hash.<sym> )
-			);
-		}
-		elsif self.assert-hash( $p, [< EXPR >] ) and
-			self.assert-hash( $p.hash.<EXPR>,
-				[< longname args >] ) {
-			$child.append(
-				self._EXPR( $p.hash.<EXPR> )
-			);
-		}
-		elsif self.assert-hash( $p, [< EXPR >] ) and
-			self.assert-hash( $p.hash.<EXPR>, [< longname >] ) {
-			$child.append(
-				self._longname( $p.hash.<EXPR>.hash.<longname> )
-			);
-		}
-		elsif self.assert-hash( $p, [< EXPR >] ) and
-			self.assert-hash( $p.hash.<EXPR>, [< dotty >] ) {
-			$child.append(
-				self._dotty( $p.hash.<EXPR>.hash.<dotty> )
-			);
-		}
-		elsif self.assert-hash( $p, [< EXPR >] ) and
-			self.assert-hash( $p.hash.<EXPR>, [< args op >] ) {
-			$child.append(
-				self._EXPR( $p.hash.<EXPR> )
-			);
-		}
-		elsif self.assert-hash( $p, [< EXPR >] ) and
-			self.assert-hash( $p.hash.<EXPR>,
-				[< routine_declarator >] ) {
-			$child.append(
-				self._routine_declarator(
-					$p.hash.<EXPR>.hash.<routine_declarator>
-				)
-			);
-		}
-		elsif self.assert-hash( $p, [< EXPR >] ) and
-			self.assert-hash( $p.hash.<EXPR>,
-				[< dotty OPER >],
-				[< postfix_prefix_meta_operator >] ) {
-			$child.append(
-				self._EXPR( $p.hash.<EXPR> )
-			);
-		}
-		elsif self.assert-hash( $p, [< EXPR >] ) and
-			self.assert-hash( $p.hash.<EXPR>,
-				[< infix_prefix_meta_operator OPER >] ) {
-			$child.append(
-				self._EXPR( $p.hash.<EXPR> )
-			);
-		}
-		elsif self.assert-hash( $p, [< EXPR >] ) and
-			self.assert-hash( $p.hash.<EXPR>,
-				[< infix_postfix_meta_operator infix OPER >] ) {
-			$child.append(
-				self._EXPR( $p.hash.<EXPR> )
-			);
-		}
-		elsif self.assert-hash( $p, [< EXPR >] ) and
-			self.assert-hash( $p.hash.<EXPR>,
-				[< infix_circumfix_meta_operator OPER >] ) {
-			$child.append(
-				self._EXPR( $p.hash.<EXPR> )
-			);
-		}
-		elsif self.assert-hash( $p, [< EXPR >] ) and
-			 self.assert-hash( $p.hash.<EXPR>,
-				[< fake_infix OPER colonpair >] ) {
-			$child.append( self._EXPR( $p.hash.<EXPR> ) );
-		}
-		elsif self.assert-hash( $p, [< EXPR >] ) and
-			 self.assert-hash( $p.hash.<EXPR>,
-				[< fake_infix OPER colonpair >] ) {
-			$child.append( self._EXPR( $p.hash.<EXPR> ) );
-		}
-		elsif self.assert-hash( $p, [< EXPR >] ) and
-			 self.assert-hash( $p.hash.<EXPR>,
-				[< postcircumfix OPER >],
-				[< postfix_prefix_meta_operator >] ) {
-			$child.append( self._EXPR( $p.hash.<EXPR> ) );
-		}
-		elsif self.assert-hash( $p, [< EXPR >] ) and
-			 self.assert-hash( $p.hash.<EXPR>, [< circumfix >] ) {
-			$child.append(
-				self._circumfix(
-					$p.hash.<EXPR>.hash.<circumfix>
-				)
-			);
-		}
-		elsif self.assert-hash( $p, [< EXPR >] ) and
-			 self.assert-hash( $p.hash.<EXPR>,
-				[< scope_declarator >] ) {
-			$child.append(
-				self._scope_declarator(
-					$p.hash.<EXPR>.hash.<scope_declarator>
-				)
-			);
-		}
 		elsif self.assert-hash( $p, [< EXPR statement_mod_loop >] ) {
 			$child.append( self._EXPR( $p.hash.<EXPR> ) );
 			$child.append(
