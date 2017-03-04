@@ -2938,15 +2938,6 @@ class Perl6::Parser::Factory {
 			);
 			$child.append( self._args( $p.hash.<args> ) );
 		}
-		# XXX _infix is a bit broken, apparently.
-		elsif self.assert-hash( $p, [< EXPR statement_mod_loop >] ) {
-			$child.append( self._EXPR( $p.hash.<EXPR> ) );
-			$child.append(
-				self._statement_mod_loop(
-					$p.hash.<statement_mod_loop>
-				)
-			);
-		}
 		elsif self.assert-hash( $p, [< statement_control >] ) {
 			$child.append(
 				self._statement_control(
@@ -5319,9 +5310,31 @@ class Perl6::Parser::Factory {
 					my Int $end = $q.list.elems - 1;
 					for $q.list.kv -> $k, $v {
 						if $v.Str {
-							$child.append(
-								self._EXPR( $v )
-							);
+							if self.assert-hash( $v,
+									[< EXPR statement_mod_loop >] ) {
+								$child.append(
+									self._EXPR(
+										$v.hash.<EXPR>
+									)
+								);
+								$child.append(
+									self._statement_mod_loop(
+										$v.hash.<statement_mod_loop>
+									)
+								);
+							}
+							elsif self.assert-hash( $v, [< statement_control >] ) {
+								$child.append(
+									self._statement_control(
+										$v.hash.<statement_control>
+									)
+								);
+							}
+							else {
+								$child.append(
+									self._EXPR( $v.hash.<EXPR> )
+								);
+							}
 						}
 						if $k < $end {
 							my Str $x = $p.orig.Str.substr(
