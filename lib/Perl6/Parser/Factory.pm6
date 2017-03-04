@@ -1182,6 +1182,26 @@ class Perl6::Parser::Factory {
 	constant SLASH = Q'/';
 	constant BACKSLASH = Q'\'; # because the braces confuse vim.
 
+	method _Operator_Circumfix-from-match( Mu $p, Mu $_p ) {
+		my $child = Perl6::Element-List.new;
+		my $_child = Perl6::Element-List.new;
+		$_child.append( $_p );
+		$child.append(
+			Perl6::Operator::Circumfix.from-match( $p, $_child )
+		);
+		$child;
+	}
+
+	method _Block-from-match( Mu $p, Mu $_p ) {
+		my $child = Perl6::Element-List.new;
+		my $_child = Perl6::Element-List.new;
+		$_child.append( $_p );
+		$child.append(
+			Perl6::Block.from-match( $p, $_child )
+		);
+		$child;
+	}
+
 	method _string-to-tokens( Int $from, Str $str )
 			returns Perl6::Element-List {
 		my $child = Perl6::Element-List.new;
@@ -1463,15 +1483,12 @@ class Perl6::Parser::Factory {
 		my $child = Perl6::Element-List.new;
 		given $p {
 			when self.assert-hash( $_, [< semiarglist >] ) {
-				my $_child = Perl6::Element-List.new;
-				$_child.append(
-					self._semiarglist(
-						$_.hash.<semiarglist>
-					)
-				);
 				$child.append(
-					Perl6::Operator::Circumfix.from-match(
-						$_, $_child
+					self._Operator_Circumfix-from-match(
+						$p,
+						self._semiarglist(
+							$_.hash.<semiarglist>
+						)
 					)
 				);
 			}
@@ -1601,15 +1618,12 @@ class Perl6::Parser::Factory {
 		given $p {
 			# $_ doesn't contain WS after the block.
 			when self.assert-hash( $_, [< statementlist >] ) {
-				my $_child = Perl6::Element-List.new;
-				$_child.append(
-					self._statementlist(
-						$_.hash.<statementlist>
-					)
-				);
 				$child.append(
-					Perl6::Block.from-match(
-						$_, $_child
+					self._Block-from-match(
+						$_,
+						self._statementlist(
+							$_.hash.<statementlist>
+						)
 					)
 				);
 			}
@@ -1725,9 +1739,7 @@ class Perl6::Parser::Factory {
 				}
 			}
 			$child.append(
-				Perl6::Operator::Circumfix.from-match(
-					$p, $_child
-				)
+				self._Operator_Circumfix-from-match( $p, $_child )
 			);
 		}
 		else {
@@ -1738,15 +1750,12 @@ class Perl6::Parser::Factory {
 					);
 				}
 				when self.assert-hash( $_, [< semilist >] ) {
-					my $_child = Perl6::Element-List.new;
-					$_child.append(
-						self._semilist(
-							$_.hash.<semilist>
-						)
-					);
 					$child.append(
-						Perl6::Operator::Circumfix.from-match(
-							$_, $_child
+						self._Operator_Circumfix-from-match(
+							$p,
+							self._semilist(
+								$_.hash.<semilist>
+							)
 						)
 					);
 				}
@@ -2037,13 +2046,12 @@ class Perl6::Parser::Factory {
 			}
 			when self.assert-hash( $_,
 					[< signature >], [< trait >] ) {
-				my $_child = Perl6::Element-List.new;
-				$_child.append(
-					self._signature( $_.hash.<signature> )
-				);
 				$child.append(
-					Perl6::Operator::Circumfix.from-match(
-						$_, $_child
+					self._Operator_Circumfix-from-match(
+						$p,
+						self._signature(
+							$_.hash.<signature>
+						)
 					)
 				);
 			}
@@ -2471,20 +2479,13 @@ class Perl6::Parser::Factory {
 		my $child = Perl6::Element-List.new;
 		if $p.Str ~~ m/ ^ \{ \s* ( \* ) \s* \} $ / and not $p.list {
 			# XXX shape is redundant
-			my $_child = Perl6::Element-List.new;
-			$_child.append(
-				Perl6::Whatever.new(
-					:factory-line-number(
-						callframe(1).line
-					),
-					:from( $p.from + $0.from ),
-					:to( $p.from + $0.from + $0.chars ),
-					:content( $0.Str ),
-				)
-			);
 			$child.append(
-				Perl6::Block.from-match(
-					$p, $_child
+				self._Block-from-match(
+					$p,
+					Perl6::Whatever.from-int(
+						$p.from + $0.from,
+						$0.Str
+					)
 				)
 			);
 		}
@@ -4169,13 +4170,12 @@ class Perl6::Parser::Factory {
 				);
 			}
 			when self.assert-hash( $_, [< signature >] ) {
-				my $_child = Perl6::Element-List.new;
-				$_child.append(
-					self._signature( $_.hash.<signature> )
-				);
 				$child.append(
-					Perl6::Operator::Circumfix.from-match(
-						$_, $_child
+					self._Operator_Circumfix-from-match(
+						$p,
+						self._signature(
+							$_.hash.<signature>
+						)
 					)
 				);
 			}
@@ -4362,15 +4362,12 @@ class Perl6::Parser::Factory {
 			}
 			when self.assert-hash( $_, [< arglist >], [< O >] ) {
 				if $_.hash.<arglist>.Str {
-					my $_child = Perl6::Element-List.new;
-					$_child.append(
-						self._arglist(
-							$_.hash.<arglist>
-						)
-					);
 					$child.append(
-						Perl6::Operator::Circumfix.from-match(
-							$_, $_child
+						self._Operator_Circumfix-from-match(
+							$p,
+							self._arglist(
+								$_.hash.<arglist>
+							)
 						)
 					);
 				}
@@ -6988,14 +6985,13 @@ class Perl6::Parser::Factory {
 				$child.append(
 					self._variable( $_.hash.<variable> )
 				);
-				my $_child = Perl6::Element-List.new;
-				$_child.append(
-					self._semilist( $_.hash.<semilist> )
-				);
 				if $_.hash.<shape>.Str {
 					$child.append(
-						Perl6::Block.from-match(
-							$_.hash.<shape>, $_child
+						self._Block-from-match(
+							$_.hash.<shape>,
+							self._semilist(
+								$_.hash.<semilist>
+							)
 						)
 					);
 				}
