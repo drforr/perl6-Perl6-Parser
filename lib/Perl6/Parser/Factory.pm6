@@ -2590,7 +2590,105 @@ class Perl6::Parser::Factory {
 				$p.hash.<infix_prefix_meta_operator>.Str;
 			my Int $end = $p.list.elems - 1;
 			for $p.list.kv -> $k, $v {
-				$child.append( self._EXPR( $v ) );
+				if self.assert-hash( $v,
+						[< dotty OPER >],
+						[< postfix_prefix_meta_operator >] ) {
+					$child.append( self._EXPR( $v.list.[0] ) );
+					if $v.Str ~~ m{ ('>>') } {
+						$child.append(
+							Perl6::Operator::Prefix.from-int(
+								$v.from, $0.Str
+							)
+						);
+					}
+					$child.append(
+						self._dotty( $v.hash.<dotty> )
+					);
+				}
+elsif self.assert-hash( $v,
+		[< prefix OPER >],
+		[< prefix_postfix_meta_operator >] ) {
+	$child.append( self._prefix( $v.hash.<prefix> ) );
+	$child.append( self._EXPR( $v.list.[0] ) );
+}
+elsif self.assert-hash( $v, [< identifier args >] ) {
+	$child.append(
+		self._identifier( $v.hash.<identifier> )
+	);
+	if $v.hash.<args>.Str {
+		$child.append( self._args( $v.hash.<args> ) );
+	}
+}
+elsif self.assert-hash( $v, [< longname args >] ) {
+	$child.append( self._longname( $v.hash.<longname> ) );
+	if $v.hash.<args> and
+	   $v.hash.<args>.hash.<semiarglist> {
+		$child.append( self._args( $v.hash.<args> ) );
+	}
+	elsif $v.hash.<args>.Str ~~ m{ \S } {
+		$child.append( self._args( $v.hash.<args> ) );
+	}
+	else {
+# XXX needs to be filled in
+#		display-unhandled-match( $p );
+	}
+}
+				elsif self.assert-hash( $v, [< sym >] ) {
+					$child.append(
+						self._sym( $v.hash.<sym> )
+					)
+				}
+				elsif self.assert-hash( $v, [< value >] ) {
+					$child.append(
+						self._value( $v.hash.<value> )
+					)
+				}
+				elsif self.assert-hash( $v, [< variable >] ) {
+					$child.append(
+						self._variable(
+							$v.hash.<variable>
+						)
+					)
+				}
+				elsif self.assert-hash( $v, [< longname >] ) {
+					$child.append(
+						self._longname(
+							$v.hash.<longname>
+						)
+					)
+				}
+				elsif self.assert-hash( $v, [< circumfix >] ) {
+					$child.append(
+						self._circumfix(
+							$v.hash.<circumfix>
+						)
+					)
+				}
+				elsif self.assert-hash( $v, [< dotty >] ) {
+					$child.append(
+						self._dotty( $v.hash.<dotty> )
+					)
+				}
+				elsif self.assert-hash( $v, [< args op >] ) {
+					my $_child = Perl6::Element-List.new;
+					$_child.append(
+						Perl6::Operator::Prefix.from-match(
+							$v.hash.<op>
+						)
+					);
+					$child.append(
+						Perl6::Operator::Hyper.from-outer-match(
+							$v.hash.<op>,
+							$_child
+						)
+					);
+					$child.append( self._args( $v.hash.<args> ) );
+				}
+				elsif self.assert-hash( $v, [< infix OPER >] ) {
+					$child.append(
+						self._EXPR( $v )
+					); # XXX fix this later
+				}
 				if $k < $end {
 					my Str $x = $p.orig.Str.substr(
 						$p.list.[$k].to,
@@ -2792,120 +2890,6 @@ class Perl6::Parser::Factory {
 		elsif $p.Str ~~ m{ << (where) >> } {
 			$child.append( self.__Optional_where( $p ) );
 			$child.append( self._EXPR( $p.hash.<EXPR> ) );
-		}
-
-		elsif self.assert-hash( $p, [< EXPR >] ) {
-			if self.assert-hash( $p.hash.<EXPR>, [< value >] ) {
-				$child.append(
-					self._value( $p.hash.<EXPR>.hash.<value> )
-				);
-			}
-			elsif self.assert-hash( $p.hash.<EXPR>, [< variable >] ) {
-				$child.append(
-					self._variable(
-						$p.hash.<EXPR>.hash.<variable>
-					)
-				);
-			}
-			elsif self.assert-hash( $p.hash.<EXPR>, [< infix OPER >] ) {
-				$child.append(
-					self._EXPR( $p.hash.<EXPR> )
-				);
-			}
-			elsif self.assert-hash( $p.hash.<EXPR>,
-					[< prefix OPER >],
-					[< prefix_postfix_meta_operator >] ) {
-				$child.append(
-					self._EXPR( $p.hash.<EXPR> )
-				);
-			}
-			elsif self.assert-hash( $p.hash.<EXPR>, [< sym >] ) {
-				$child.append(
-					self._sym( $p.hash.<EXPR>.hash.<sym> )
-				);
-			}
-			elsif self.assert-hash( $p.hash.<EXPR>,
-					[< longname args >] ) {
-				$child.append(
-					self._EXPR( $p.hash.<EXPR> )
-				);
-			}
-			elsif self.assert-hash( $p.hash.<EXPR>, [< longname >] ) {
-				$child.append(
-					self._longname( $p.hash.<EXPR>.hash.<longname> )
-				);
-			}
-			elsif self.assert-hash( $p.hash.<EXPR>, [< dotty >] ) {
-				$child.append(
-					self._dotty( $p.hash.<EXPR>.hash.<dotty> )
-				);
-			}
-			elsif self.assert-hash( $p.hash.<EXPR>, [< args op >] ) {
-				$child.append(
-					self._EXPR( $p.hash.<EXPR> )
-				);
-			}
-			elsif self.assert-hash( $p.hash.<EXPR>,
-					[< routine_declarator >] ) {
-				$child.append(
-					self._routine_declarator(
-						$p.hash.<EXPR>.hash.<routine_declarator>
-					)
-				);
-			}
-			elsif self.assert-hash( $p.hash.<EXPR>,
-					[< dotty OPER >],
-					[< postfix_prefix_meta_operator >] ) {
-				$child.append(
-					self._EXPR( $p.hash.<EXPR> )
-				);
-			}
-			elsif self.assert-hash( $p.hash.<EXPR>,
-					[< infix_prefix_meta_operator OPER >] ) {
-				$child.append(
-					self._EXPR( $p.hash.<EXPR> )
-				);
-			}
-			elsif self.assert-hash( $p.hash.<EXPR>,
-					[< infix_postfix_meta_operator infix OPER >] ) {
-				$child.append(
-					self._EXPR( $p.hash.<EXPR> )
-				);
-			}
-			elsif self.assert-hash( $p.hash.<EXPR>,
-					[< infix_circumfix_meta_operator OPER >] ) {
-				$child.append(
-					self._EXPR( $p.hash.<EXPR> )
-				);
-			}
-			elsif self.assert-hash( $p.hash.<EXPR>,
-					[< fake_infix OPER colonpair >] ) {
-				$child.append( self._EXPR( $p.hash.<EXPR> ) );
-			}
-			elsif self.assert-hash( $p.hash.<EXPR>,
-					[< fake_infix OPER colonpair >] ) {
-				$child.append( self._EXPR( $p.hash.<EXPR> ) );
-			}
-			elsif self.assert-hash( $p.hash.<EXPR>,
-					[< postcircumfix OPER >],
-					[< postfix_prefix_meta_operator >] ) {
-				$child.append( self._EXPR( $p.hash.<EXPR> ) );
-			}
-			elsif self.assert-hash( $p.hash.<EXPR>, [< circumfix >] ) {
-				$child.append(
-					self._circumfix(
-						$p.hash.<EXPR>.hash.<circumfix>
-					)
-				);
-			}
-			elsif self.assert-hash( $p.hash.<EXPR>,
-					[< scope_declarator >] ) {
-				$child.append(
-					self._scope_declarator(
-						$p.hash.<EXPR>.hash.<scope_declarator>
-					)
-				);
-			}
 		}
 		# XXX Here begin some more ugly hacks.
 		elsif self.assert-hash( $p, [< args op triangle >] ) {
