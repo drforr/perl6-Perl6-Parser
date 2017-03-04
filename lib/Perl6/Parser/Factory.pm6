@@ -2605,34 +2605,58 @@ class Perl6::Parser::Factory {
 						self._dotty( $v.hash.<dotty> )
 					);
 				}
-elsif self.assert-hash( $v,
-		[< prefix OPER >],
-		[< prefix_postfix_meta_operator >] ) {
-	$child.append( self._prefix( $v.hash.<prefix> ) );
-	$child.append( self._EXPR( $v.list.[0] ) );
-}
-elsif self.assert-hash( $v, [< identifier args >] ) {
-	$child.append(
-		self._identifier( $v.hash.<identifier> )
-	);
-	if $v.hash.<args>.Str {
-		$child.append( self._args( $v.hash.<args> ) );
-	}
-}
-elsif self.assert-hash( $v, [< longname args >] ) {
-	$child.append( self._longname( $v.hash.<longname> ) );
-	if $v.hash.<args> and
-	   $v.hash.<args>.hash.<semiarglist> {
-		$child.append( self._args( $v.hash.<args> ) );
-	}
-	elsif $v.hash.<args>.Str ~~ m{ \S } {
-		$child.append( self._args( $v.hash.<args> ) );
-	}
-	else {
-# XXX needs to be filled in
-#		display-unhandled-match( $p );
-	}
-}
+				elsif self.assert-hash( $v,
+						[< prefix OPER >],
+						[< prefix_postfix_meta_operator >] ) {
+					$child.append(
+						self._prefix( $v.hash.<prefix> )
+					);
+					$child.append(
+						self._EXPR( $v.list.[0] )
+					);
+				}
+				elsif self.assert-hash( $v,
+						[< identifier args >] ) {
+					$child.append(
+						self._identifier(
+							$v.hash.<identifier>
+						)
+					);
+					if $v.hash.<args>.Str {
+						$child.append(
+							self._args(
+								$v.hash.<args>
+							)
+						);
+					}
+				}
+				elsif self.assert-hash( $v,
+						[< longname args >] ) {
+					$child.append(
+						self._longname(
+							$v.hash.<longname>
+						)
+					);
+					if $v.hash.<args> and
+					   $v.hash.<args>.hash.<semiarglist> {
+						$child.append(
+							self._args(
+								$v.hash.<args>
+							)
+						);
+					}
+					elsif $v.hash.<args>.Str ~~ m{ \S } {
+						$child.append(
+							self._args(
+								$v.hash.<args>
+							)
+						);
+					}
+					else {
+				# XXX needs to be filled in
+				#		display-unhandled-match( $p );
+					}
+				}
 				elsif self.assert-hash( $v, [< sym >] ) {
 					$child.append(
 						self._sym( $v.hash.<sym> )
