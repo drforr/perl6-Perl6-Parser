@@ -32,7 +32,6 @@ L<Perl6::Element>
 	    L<Perl6::Variable::Array>
 	    L<Perl6::Variable::Callable>
 
-
 =end DESCRIPTION
 
 =begin GENERAL_NOTES
@@ -230,20 +229,10 @@ class Perl6::Element {
 
 	has Perl6::Element $.parent is rw;
 
-	method _dump returns Str {
-		my $node = self;
-		$node.child = () if self.is-twig;
-		$node.next = $node;
-		$node.previous = $node;
-		$node.parent = $node;
-		$node.perl
-	}
-
 	# Should only be run only flattened element lists.
 	# This is because it does nothing WRT .child.
 	# And by design, it has no access to that anyway.
 	#
-
 	method _add-offset( Perl6::Element $node, Int $delta ) {
 		my $head = $node;
 		while !$head.is-end {
@@ -259,14 +248,11 @@ class Perl6::Element {
 		self._add-offset( self.next, -( $.to - $.from ) ) if
 			$*UPDATE-RANGES;
 		if self.is-end {
-			my $previous = $.previous;
-			$.previous.next = $previous;
+			$.previous.next = $.previous;
 		}
 		else {
-			my $next = $.next;
-			my $previous = $.previous;
-			$.next.previous = $previous;
-			$.previous.next = $next;
+			$.next.previous = $.previous;
+			$.previous.next = $.next;
 		}
 		$.next = self;
 		$.previous = self;
@@ -276,32 +262,32 @@ class Perl6::Element {
 	method insert-node-before( Perl6::Element $node ) {
 		self._add-offset( self, $.to - $.from ) if
 			$*UPDATE-RANGES;
+		$node.next = self;
 		if self.is-start {
-			$node.next = self;
 			$node.previous = $node;
 			$node.parent = $node;
-			$.previous = $node;
 		}
 		else {
+			$node.previous = $.previous;
+			$node.parent = self.parent;
+			$.previous.next = $node;
 		}
+		$.previous = $node;
 	}
 
 	method insert-node-after( Perl6::Element $node ) {
 		self._add-offset( self.next, $.to - $.from ) if
 			$*UPDATE-RANGES;
+		$node.parent = $.parent;
+		$node.previous = self;
 		if self.is-end {
 			$node.next = $node;
-			$node.parent = $.parent;
-			$node.previous = self;
-			$.next = $node;
 		}
 		else {
 			$node.next = $.next;
-			$node.parent = $.parent;
-			$node.previous = self;
 			$.next.previous = $node;
-			$.next = $node;
 		}
+		$.next = $node;
 	}
 }
 
@@ -351,18 +337,6 @@ role Matchable {
 			:from( $p.from ),
 			:to( $p.to ),
 			:content( $p.Str )
-		)
-	}
-
-	method from-match-trimmed( Mu $p ) returns Perl6::Element {
-		$p.Str ~~ m{ ^ ( \s* ) ( .+? ) ( \s* ) $ };
-		my Int $left-margin = $0.Str.chars;
-		my Int $right-margin = $2.Str.chars;
-		self.bless(
-			:factory-line-number( callframe(1).line ),
-			:from( $left-margin + $p.from ),
-			:to( $p.to - $right-margin ),
-			:content( $1.Str )
 		)
 	}
 
