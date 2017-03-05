@@ -566,6 +566,17 @@ _END_
 	done-testing;
 }, Q{whateverable placeholder};
 
+subtest {
+	my $source = Q:to[_END_];
+2 for 1\ # foo
+_END_
+	my $p = $pt.parse( $source );
+	my $tree = $pt.build-tree( $p );
+	is $pt.to-string( $tree ), $source, Q{formatted};
+
+	done-testing;
+}, Q{Another backslash};
+
 done-testing;
 
 # vim: ft=perl6

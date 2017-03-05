@@ -433,6 +433,12 @@ class Perl6::Semicolon does Token {
 	also does Leaf;
 	also does Matchable;
 }
+class Perl6::Backslash does Token {
+	also is Perl6::Structural;
+
+	also does Leaf;
+	also does Matchable;
+}
 
 # Generic balanced character
 class Perl6::Balanced {
@@ -5838,11 +5844,11 @@ class Perl6::Parser::Factory {
 				my Str $right-edge = $_.Str.substr(
 					$_.hash.<EXPR>.to - $_.from
 				);
-				if $right-edge ~~ m{ ('\\') ( \s* ) $ } {
+				if $right-edge ~~ m{ (\\) } {
 					$child.append(
-						Perl6::Bareword.from-int(
-							$_.hash.<EXPR>.to -
-							$0.Str.chars - $1.Str.chars,
+						Perl6::Backslash.from-int(
+							$_.hash.<EXPR>.to +
+							$0.from,
 							$0.Str
 						)
 					);
