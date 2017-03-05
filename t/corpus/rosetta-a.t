@@ -1135,7 +1135,6 @@ _END_
 }, Q{Array length};
 
 subtest {
-#`[
 	# XXX Synthesize JSON::Tiny
 	my $source = Q:to[_END_];
 class JSON::Tiny { sub from-json is export { } }
@@ -1159,7 +1158,6 @@ _END_
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
 	is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 	done-testing;
 }, Q{Array search};

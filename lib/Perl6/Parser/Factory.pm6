@@ -2582,6 +2582,13 @@ class Perl6::Parser::Factory {
 					)
 				);
 			}
+			if $p.hash.<postfix_prefix_meta_operator>.Str {
+				$child.append(
+					self._postfix_prefix_meta_operator(
+						$p.hash.<postfix_prefix_meta_operator>
+					)
+				);
+			}
 			$child.append(
 				self._postcircumfix( $p.hash.<postcircumfix> )
 			);
