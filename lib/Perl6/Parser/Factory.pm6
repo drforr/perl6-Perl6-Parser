@@ -1855,15 +1855,11 @@ class Perl6::Parser::Factory {
 				when self.assert-hash( $_,
 						[< identifier
 						   coloncircumfix >] ) {
-					# XXX Should combine with identifier?
 					$child.append(
-						Perl6::Operator::Prefix.from-sample(
-							$_, COLON
-						)
-					);
-					$child.append(
-						self._identifier(
-							$_.hash.<identifier>
+						Perl6::ColonBareword.from-int(
+							$_.hash.<identifier>.from - 1,
+							COLON ~
+							$_.hash.<identifier>.Str
 						)
 					);
 					$child.append(
