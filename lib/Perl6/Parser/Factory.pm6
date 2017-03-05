@@ -1364,9 +1364,7 @@ class Perl6::Parser::Factory {
 			self._statementlist( $p.hash.<statementlist> )
 		);
 
-		my Perl6::Element $root = Perl6::Document.from-list(
-			$_child
-		);
+		my Perl6::Element $root = Perl6::Document.from-list( $_child );
 		self.fill-gaps( $p, $root );
 		if $p.from < $root.from {
 			my Str $remainder = $p.orig.Str.substr( 0, $root.from );
@@ -3477,10 +3475,8 @@ class Perl6::Parser::Factory {
 				}
 				$child.append( self._name( $_.hash.<name> ) );
 				$child.append(
-					Perl6::Operator::Circumfix.from-delims(
-						$_,
-						'(',
-						')',
+					Perl6::Operator::Circumfix.from-outer-match(
+						$_.hash.<param_var>,
 						$_child
 					)
 				);
