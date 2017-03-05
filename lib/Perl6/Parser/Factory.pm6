@@ -80,6 +80,12 @@ Remove the node and children, insert a node before the element, or after.
 
 =cut
 
+=item C<replace-node-with>
+
+Replace the current node with the contents.
+
+=cut
+
 =item L<Perl6::Number>
 
 All numbers, whether decimal, rational, radix-32 or complex, fall under this class. You should be able to compare C<$x> to L<Perl6::Number> to do a quick check. Under this lies the teeming complexity of the full Perl 6 numeric lattice.
@@ -257,6 +263,34 @@ class Perl6::Element {
 		$.next = self;
 		$.previous = self;
 		return self;
+	}
+
+	method replace-node-with( Perl6::Element $node ) {
+		my $cur-length = $.to - $.from;
+		my $new-length = $node.to - $node.from;
+
+		self._add-offset( self.next, $new-length - $cur-length ) if
+			$*UPDATE-RANGES;
+		if self.is-start {
+			$node.previous = $node;
+			$node.parent = $.parent;
+			$node.next = $.next;
+			$.next.previous = $node;
+		}
+		elsif self.is-end {
+			$node.previous = $.previous;
+			$node.parent = $.parent;
+			$node.next = $node;
+			$.previous.next = $node;
+		}
+		else {
+			$node.previous = $.previous;
+			$node.parent = $.parent;
+			$node.next = $.next;
+			$.previous.next = $node;
+			$.next.previous = $node;
+		}
+		return $node;
 	}
 
 	method insert-node-before( Perl6::Element $node ) {

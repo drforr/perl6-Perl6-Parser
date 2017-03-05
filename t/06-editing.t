@@ -4,7 +4,7 @@ use Test;
 use Perl6::Parser;
 use Perl6::Parser::Factory;
 
-plan 4;
+plan 5;
 
 my $pt = Perl6::Parser.new;
 my $ppf = Perl6::Parser::Factory.new;
@@ -130,6 +130,106 @@ subtest {
 
 	done-testing;
 }, Q{Remove internal node};
+
+subtest {
+	my $source = Q{(3);2;1};
+	my $edited = Q{(42);2;1};
+	my $p = $pt.parse( $source );
+	my $tree = $pt.build-tree( $p );
+	$ppf.thread( $tree );
+#say $pt.dump-tree( $tree );
+	my $head = $ppf.flatten( $tree );
+
+	my $walk-me = $head;
+	my $integer = $head.next.next.next.next;
+
+	$integer.replace-node-with(
+		Perl6::Number::Decimal.new(
+			:from( 1 ),
+			:to( 2 ),
+			:content( '42' )
+		)
+	);
+
+	# Check links going forward and upward.
+	#
+	ok check-node( $head, Perl6::Document, Perl6::Document, 0, 7 );
+	$head = $head.next;
+
+	ok check-node( $head, Perl6::Statement, Perl6::Document, 0, 4 );
+	$head = $head.next;
+
+	ok check-node( $head,
+		Perl6::Operator::Circumfix, Perl6::Statement, 0, 3 );
+	$head = $head.next;
+
+	ok check-node( $head,
+		Perl6::Balanced::Enter, Perl6::Operator::Circumfix, 0, 1 );
+	$head = $head.next;
+
+	ok check-node( $head,
+		Perl6::Number::Decimal,
+		Perl6::Operator::Circumfix, 1, 2 );
+	$head = $head.next;
+
+	ok check-node( $head,
+		Perl6::Balanced::Exit, Perl6::Operator::Circumfix, 2, 3 );
+	$head = $head.next;
+
+	ok check-node( $head,
+		Perl6::Semicolon, Perl6::Statement, 3, 4 );
+	$head = $head.next;
+
+	ok check-node( $head,
+		Perl6::Statement, Perl6::Document, 4, 6 );
+	$head = $head.next;
+
+	ok check-node( $head,
+		Perl6::Number::Decimal, Perl6::Statement, 4, 5 );
+	$head = $head.next;
+
+	ok check-node( $head,
+		Perl6::Semicolon, Perl6::Statement, 5, 6 );
+	$head = $head.next;
+
+	ok check-node( $head,
+		Perl6::Statement, Perl6::Document, 6, 7 );
+	$head = $head.next;
+
+	ok check-node( $head,
+		Perl6::Number::Decimal, Perl6::Statement, 6, 7 );
+	$head = $head.next;
+
+	ok check-node( $head,
+		Perl6::Number::Decimal, Perl6::Statement, 6, 7 );
+	ok $head.is-end;
+
+	# Now that we're at the end, throw this baby into reverse.
+	#
+	ok $head ~~ Perl6::Number::Decimal;     $head = $head.previous;
+	ok $head ~~ Perl6::Statement;           $head = $head.previous;
+	ok $head ~~ Perl6::Semicolon;           $head = $head.previous;
+	ok $head ~~ Perl6::Number;              $head = $head.previous;
+	ok $head ~~ Perl6::Statement;           $head = $head.previous;
+	ok $head ~~ Perl6::Semicolon;           $head = $head.previous;
+	ok $head ~~ Perl6::Balanced::Exit;      $head = $head.previous;
+	ok $head ~~ Perl6::Number::Decimal;     $head = $head.previous;
+	ok $head ~~ Perl6::Balanced::Enter;     $head = $head.previous;
+	ok $head ~~ Perl6::Operator::Circumfix; $head = $head.previous;;
+	ok $head ~~ Perl6::Statement;           $head = $head.previous;
+	ok $head ~~ Perl6::Document;            $head = $head.previous;
+	ok $head.is-start;
+
+	my $iterated = '';
+	while $walk-me {
+		$iterated ~= $walk-me.content if $walk-me.is-leaf;
+		last if $walk-me.is-end;
+		$walk-me = $walk-me.next;
+	}
+	is $iterated, $edited, Q{edited document};
+
+	done-testing;
+}, Q{Replace internal node};
 
 subtest {
 	my $source = Q{(3);2;1};
