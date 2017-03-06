@@ -1216,6 +1216,36 @@ class Perl6::Parser::Factory {
 		$child;
 	}
 
+	method __Prefix( Mu $p, Perl6::Element-List $prefix ) {
+		my $child = Perl6::Element-List.new;
+		$child.append( $prefix );
+		$child.append( self._EXPR( $p.list.[0] ) );
+		$child;
+	}
+
+	method __Postfix( Mu $p, Perl6::Element-List $postfix ) {
+		my $child = Perl6::Element-List.new;
+		$child.append( self._EXPR( $p.list.[0] ) );
+		$child.append( $postfix );
+		$child;
+	}
+
+	multi method __Infix( Mu $p, Perl6::Element-List $infix ) {
+		my $child = Perl6::Element-List.new;
+		$child.append( self._EXPR( $p.list.[0] ) );
+		$child.append( $infix );
+		$child.append( self._EXPR( $p.list.[1] ) );
+		$child;
+	}
+
+	multi method __Infix( Mu $p, Perl6::Element $infix ) {
+		my $child = Perl6::Element-List.new;
+		$child.append( self._EXPR( $p.list.[0] ) );
+		$child.append( $infix );
+		$child.append( self._EXPR( $p.list.[1] ) );
+		$child;
+	}
+
 	method _string-to-tokens( Int $from, Str $str )
 			returns Perl6::Element-List {
 		my $child = Perl6::Element-List.new;
@@ -2407,9 +2437,12 @@ class Perl6::Parser::Factory {
 		my $child = Perl6::Element-List.new;
 		given $p {
 			when self.assert-hash( $_, [< infix OPER >] ) {
-				$child.append( self._EXPR( $_.list.[0] ) );
-				$child.append( self._infix( $_.hash.<infix> ) );
-				$child.append( self._EXPR( $_.list.[1] ) );
+				$child.append(
+					self.__Infix(
+						$_,
+						self._infix( $_.hash.<infix> )
+					)
+				);
 			}
 			default {
 				display-unhandled-match( $_ );
@@ -2424,9 +2457,13 @@ class Perl6::Parser::Factory {
 			when self.assert-hash( $_,
 					[< postfix OPER >],
 					[< postfix_prefix_meta_operator >] ) {
-				$child.append( self._EXPR( $_.list.[0] ) );
 				$child.append(
-					self._postfix( $_.hash.<postfix> )
+					self.__Postfix(
+						$_,
+						self._postfix(
+							$_.hash.<postfix>
+						)
+					)
 				);
 			}
 			default {
@@ -2500,17 +2537,23 @@ class Perl6::Parser::Factory {
 		elsif self.assert-hash( $p,
 				[< dotty OPER
 				   postfix_prefix_meta_operator >] ) {
-			$child.append( self._EXPR( $p.list.[0] ) );
 			$child.append(
-				self._postfix_prefix_meta_operator(
-					$p.hash.<postfix_prefix_meta_operator>
+				self.__Postfix(
+					$p,
+					self._postfix_prefix_meta_operator(
+						$p.hash.<postfix_prefix_meta_operator>
+					)
 				)
 			);
 			$child.append( self._dotty( $p.hash.<dotty> ) );
 		}
 		elsif self.assert-hash( $p, [< fake_infix OPER colonpair >] ) {
-			$child.append( self._EXPR( $p.list.[0] ) );
-			$child.append( self._colonpair( $p.hash.<colonpair> ) );
+			$child.append(
+				self.__Postfix(
+					$p,
+					self._colonpair( $p.hash.<colonpair> )
+				)
+			);
 		}
 		elsif self.assert-hash( $p,
 				[< prefix OPER
@@ -2525,25 +2568,26 @@ class Perl6::Parser::Factory {
 		}
 		elsif self.assert-hash( $p,
 				[< OPER infix_circumfix_meta_operator >] ) {
-			$child.append( self._EXPR( $p.list.[0] ) );
 			$child.append(
-				self._infix_circumfix_meta_operator(
-					$p.hash.<infix_circumfix_meta_operator>
+				self.__Infix(
+					$p,
+					self._infix_circumfix_meta_operator(
+						$p.hash.<infix_circumfix_meta_operator>
+					)
 				)
 			);
-			$child.append( self._EXPR( $p.list.[1] ) );
 		}
 		elsif self.assert-hash( $p,
 				[< infix OPER infix_postfix_meta_operator >] ) {
-			# XXX Infix is used, just in combination.
-			$child.append( self._EXPR( $p.list.[0] ) );
 			$child.append(
-				Perl6::Operator::Infix.from-sample(
-					$p, $p.hash.<infix>.Str ~ 
-					$p.hash.<infix_postfix_meta_operator>.Str
+				self.__Infix(
+					$p,
+					Perl6::Operator::Infix.from-sample(
+						$p, $p.hash.<infix>.Str ~ 
+						$p.hash.<infix_postfix_meta_operator>.Str
+					)
 				)
 			);
-			$child.append( self._EXPR( $p.list.[1] ) );
 		}
 		elsif self.assert-hash( $p,
 				[< dotty OPER >],
@@ -2551,18 +2595,12 @@ class Perl6::Parser::Factory {
 			$child.append( self._EXPR( $p.list.[0] ) );
 			if $p.Str ~~ m{ ('>>') } {
 				$child.append(
-					Perl6::Operator::Prefix.from-int(
+					Perl6::Operator::Infix.from-int(
 						$p.from, $0.Str
 					)
 				);
 			}
 			$child.append( self._dotty( $p.hash.<dotty> ) );
-		}
-		elsif self.assert-hash( $p,
-				[< infix OPER >],
-				[< infix_postfix_meta_operator >] ) {
-			$child.append( self._infix( $p.hash.<infix> ) );
-			$child.append( self._EXPR( $p.list.[0] ) );
 		}
 		elsif self.assert-hash( $p,
 				[< prefix OPER >],
@@ -2596,8 +2634,14 @@ class Perl6::Parser::Factory {
 		elsif self.assert-hash( $p,
 				[< postfix OPER >],
 				[< postfix_prefix_meta_operator >] ) {
-			$child.append( self._EXPR( $p.list.[0] ) );
-			$child.append( self._postfix( $p.hash.<postfix> ) );
+			$child.append(
+				self.__Postfix(
+					$p,
+					self._postfix(
+						$p.hash.<postfix>
+					)
+				)
+			);
 		}
 		elsif self.assert-hash( $p,
 				[< infix_prefix_meta_operator OPER >] ) {
@@ -2625,10 +2669,12 @@ class Perl6::Parser::Factory {
 						[< prefix OPER >],
 						[< prefix_postfix_meta_operator >] ) {
 					$child.append(
-						self._prefix( $v.hash.<prefix> )
-					);
-					$child.append(
-						self._EXPR( $v.list.[0] )
+						self.__Prefix(
+							$v,
+							self._prefix(
+								$v.hash.<prefix>
+							)
+						)
 					);
 				}
 				elsif self.assert-hash( $v,
@@ -2729,7 +2775,7 @@ class Perl6::Parser::Factory {
 						$v.hash.<infix>.Str;
 					my Int $_end = $v.list.elems - 1;
 					for $v.list.kv -> $_k, $_v {
-						$child.append( self._EXPR( $_v ) );
+						$child.append( self._EXPR( $v.list.[$_k] ) );
 						if $_k < $_end {
 							my Str $x = $p.orig.Str.substr(
 								$v.list.[$_k].to,
@@ -2797,7 +2843,7 @@ class Perl6::Parser::Factory {
 				for $p.list.kv -> $k, $v {
 					if $v.Str {
 						$child.append(
-							self._EXPR( $v )
+							self._EXPR( $p.list.[$k] )
 						);
 					}
 					if $k < $end {
@@ -5296,7 +5342,7 @@ class Perl6::Parser::Factory {
 					}
 					elsif $v.Str {
 						$child.append(
-							self._EXPR( $v )
+							self._EXPR( $q.list.[$k] )
 						);
 					}
 					if $k < $end {
@@ -6783,9 +6829,11 @@ class Perl6::Parser::Factory {
 					[< prefix OPER >],
 					[< prefix_postfix_meta_operator >] ) {
 				$child.append(
-					self._prefix( $_.hash.<prefix> )
+					self.__Prefix(
+						$_,
+						self._prefix( $_.hash.<prefix> )
+					)
 				);
-				$child.append( self._EXPR( $_.list.[0] ) );
 			}
 			when self.assert-hash( $_, [< infix OPER >] ) {
 				if $_.hash.<infix>.Str ~~ m{ ('??') } {
