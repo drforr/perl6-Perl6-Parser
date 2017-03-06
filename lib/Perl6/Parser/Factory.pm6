@@ -2725,9 +2725,28 @@ class Perl6::Parser::Factory {
 					$child.append( self._args( $v.hash.<args> ) );
 				}
 				elsif self.assert-hash( $v, [< infix OPER >] ) {
-					$child.append(
-						self._EXPR( $v )
-					); # XXX fix this later
+					my $_infix-str =
+						$v.hash.<infix>.Str;
+					my Int $_end = $v.list.elems - 1;
+					for $v.list.kv -> $_k, $_v {
+						$child.append( self._EXPR( $_v ) );
+						if $_k < $_end {
+							my Str $x = $p.orig.Str.substr(
+								$v.list.[$_k].to,
+								$v.list.[$_k+1].from -
+									$v.list.[$_k].to
+							);
+							if $x ~~ m{ ($_infix-str) } {
+								my Int $left-margin = $0.from;
+								$child.append(
+									Perl6::Operator::Infix.from-int(
+										$left-margin + $_v.to,
+										$0.Str
+									)
+								);
+							}
+						}
+					}
 				}
 				if $k < $end {
 					my Str $x = $p.orig.Str.substr(
