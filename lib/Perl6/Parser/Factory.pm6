@@ -1527,7 +1527,7 @@ class Perl6::Parser::Factory {
 			when self.assert-hash( $_, [< semiarglist >] ) {
 				$child.append(
 					self._Operator_Circumfix-from-match(
-						$p,
+						$_,
 						self._semiarglist(
 							$_.hash.<semiarglist>
 						)
@@ -4549,12 +4549,7 @@ class Perl6::Parser::Factory {
 
 	method _quant( Mu $p ) returns Perl6::Element-List {
 		my $child = Perl6::Element-List.new;
-		if $p.Str and $p.Str ~~ /\s/ {
-			$child.append(
-				Perl6::Bareword.from-match( $p )
-			);
-		}
-		elsif $p.Str {
+		if $p.Str {
 			# XXX Need to propagate this back upwards.
 			if $p.Str ne BACKSLASH {
 				$child.append(
@@ -6368,9 +6363,6 @@ class Perl6::Parser::Factory {
 				# XXX probably redundant - seems unused now
 				display-unhandled-match( $_ );
 			}
-		}
-		elsif $p.Str and $p.Str ~~ /\s/ {
-			$child.append( Perl6::Bareword.from-match( $p ) );
 		}
 		elsif $p.Str {
 			$child.append( Perl6::Bareword.from-match( $p ) );
