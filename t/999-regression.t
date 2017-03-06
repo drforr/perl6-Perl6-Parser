@@ -588,6 +588,18 @@ _END_
 	done-testing;
 }, Q{Another backslash};
 
+subtest {
+	my $source = Q:to[_END_];
+sub binary_search (&p, Int $lo, Int $hi --> Int) {
+}
+_END_
+	my $p = $pt.parse( $source );
+	my $tree = $pt.build-tree( $p );
+	is $pt.to-string( $tree ), $source, Q{formatted};
+
+	done-testing;
+}, Q{More comma-separated lists};
+
 done-testing;
 
 # vim: ft=perl6

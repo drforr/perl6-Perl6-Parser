@@ -5777,15 +5777,17 @@ class Perl6::Parser::Factory {
 			when self.assert-hash( $_,
 					[< parameter typename >],
 					[< param_sep >] ) {
+				my Int $left-edge;
 				for $_.hash.<parameter>.list.kv -> $k, $v {
-					$child.append( self.__Parameter( $v ) );
-					if $k > 1 {
+					if $left-edge and $left-edge < $v.from {
 						$child.append(
-							Perl6::Operator::Infix.from-sample(
-								$_, COMMA
+							Perl6::Operator::Infix.from-int(
+								$left-edge, ','
 							)
 						);
 					}
+					$child.append( self.__Parameter( $v ) );
+					$left-edge = $v.to;
 				}
 				my Str $x = $_.orig.Str.substr(
 					$_.hash.<parameter>.to,

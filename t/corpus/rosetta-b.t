@@ -457,7 +457,6 @@ _END_
 
 subtest {
 	subtest {
-#`[
 		my $source = Q:to[_END_];
 sub search (@a, $x --> Int) {
     binary_search { $x cmp @a[$^i] }, 0, @a.end
@@ -478,13 +477,11 @@ _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
 		is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 		done-testing;
 	}, Q{version 1};
 
 	subtest {
-#`[
 		my $source = Q:to[_END_];
 sub binary_search (&p, Int $lo, Int $hi --> Int) {
     $lo <= $hi or fail;
@@ -499,7 +496,6 @@ _END_
 		my $p = $pt.parse( $source );
 		my $tree = $pt.build-tree( $p );
 		is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 		done-testing;
 	}, Q{version 2};
@@ -752,7 +748,6 @@ _END_
 }, Q{Bitmap / Bresenham's line algorithm};
 
 subtest {
-#`[
 	# XXX Create a shell 'Bitmap' class.. yes, just above but separation...
 	my $source = Q:to[_END_];
 use MONKEY-TYPING;
@@ -797,7 +792,6 @@ _END_
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
 	is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 	done-testing;
 }, Q{Bitmap / midpoint circle algorithm};
