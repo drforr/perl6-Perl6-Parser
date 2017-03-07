@@ -1219,22 +1219,22 @@ class Perl6::Parser::Factory {
 	method __Prefix( Mu $p, Perl6::Element-List $prefix ) {
 		my $child = Perl6::Element-List.new;
 		$child.append( $prefix );
-		$child.append( self._EXPR( $p.list.[0] ) );
+		$child.append( self._EXPR( $p.list[0] ) );
 		$child;
 	}
 
 	method __Postfix( Mu $p, Perl6::Element-List $postfix ) {
 		my $child = Perl6::Element-List.new;
-		$child.append( self._EXPR( $p.list.[0] ) );
+		$child.append( self._EXPR( $p.list[0] ) );
 		$child.append( $postfix );
 		$child;
 	}
 
 	multi method __Infix( Mu $p, Perl6::Element-List $infix ) {
 		my $child = Perl6::Element-List.new;
-		$child.append( self._EXPR( $p.list.[0] ) );
+		$child.append( self._EXPR( $p.list[0] ) );
 		$child.append( $infix );
-		$child.append( self._EXPR( $p.list.[1] ) );
+		$child.append( self._EXPR( $p.list[1] ) );
 		$child;
 	}
 
@@ -2380,12 +2380,6 @@ class Perl6::Parser::Factory {
 					self._postop( $_.hash.<postop> )
 				);
 			}
-			when self.assert-hash( $_, [< sym postop >], [< O >] ) {
-				$child.append( self._sym( $_.hash.<sym> ) );
-				$child.append(
-					self._postop( $_.hash.<postop> )
-				);
-			}
 			when self.assert-hash( $_, [< colonpair >] ) {
 				$child.append(
 					self._colonpair( $_.hash.<colonpair> )
@@ -3104,10 +3098,6 @@ class Perl6::Parser::Factory {
 	method _infix( Mu $p ) returns Perl6::Element-List {
 		my $child = Perl6::Element-List.new;
 		given $p {
-			when self.assert-hash( $_, [< sym EXPR >], [< O >] ) {
-				$child.append( self._sym( $_.hash.<sym> ) );
-				$child.append( self._EXPR( $_.hash.<EXPR> ) );
-			}
 			when self.assert-hash( $_, [< sym O >] ) {
 				$child.append(
 					Perl6::Operator::Infix.from-match(
@@ -3158,17 +3148,6 @@ class Perl6::Parser::Factory {
 			returns Perl6::Element-List {
 		my $child = Perl6::Element-List.new;
 		given $p {
-			when self.assert-hash( $_, [< sym infixish O >] ) {
-				# XXX have to distinguish _sym(...) bareword
-				# XXX from operator
-				$child.append(
-					Perl6::Operator::Infix.from-int(
-						$_.hash.<sym>.from,
-						$_.hash.<sym>.Str ~
-							$_.hash.<infixish>
-					)
-				);
-			}
 			default {
 				display-unhandled-match( $_ );
 			}
@@ -4941,11 +4920,6 @@ class Perl6::Parser::Factory {
 		my $child = Perl6::Element-List.new;
 		given $p {
 			when self.assert-hash( $_,
-					[< circumfix bracket radix >],
-					[< exp rad_digits base >] ) {
-				$child.append( self.__Radix( $_ ) );
-			}
-			when self.assert-hash( $_,
 					[< circumfix radix >],
 					[< exp rad_digits base >] ) {
 				$child.append( self.__Radix( $_ ) );
@@ -5471,9 +5445,10 @@ class Perl6::Parser::Factory {
 	method _sequence( Mu $p ) returns Perl6::Element-List {
 		my $child = Perl6::Element-List.new;
 		given $p {
-			when self.assert-hash( $_, [< statement >] ) {
-				self._statement( $_.hash.<statement> );
-			}
+# XXX
+#			when self.assert-hash( $_, [< statement >] ) {
+#				self._statement( $_.hash.<statement> );
+#			}
 			default {
 				display-unhandled-match( $_ );
 			}
@@ -5755,72 +5730,12 @@ class Perl6::Parser::Factory {
 				}
 			}
 			when self.assert-hash( $_,
-					[< type_constraint named_param quant >],
-					[< default_value modifier trait
-					   post_constraint >] ) {
-				$child.append(
-					self._type_constraint(
-						$_.hash.<type_constraint>
-					)
-				);
-				$child.append(
-					self._named_param(
-						$_.hash.<named_param>
-					)
-				);
-			}
-			when self.assert-hash( $_,
-					[< quant named_param >],
-					[< default_value modifier trait
-					   post_constraint quant >] ) {
-				if $_.Str ~~ m{ ^ (':') } {
-					# XXX join the ':'...
-					$child.append(
-						Perl6::Bareword.from-int(
-							$_.from,
-							$0.Str
-						)
-					);
-				}
-				$child.append(
-					self._named_param(
-						$_.hash.<named_param>
-					)
-				);
-			}
-			when self.assert-hash( $_,
-					[< type_constraint named_param >],
-					[< default_value modifier trait
-					   post_constraint quant >] ) {
-				$child.append(
-					self._type_constraint(
-						$_.hash.<type_constraint>
-					)
-				);
-				$child.append(
-					self._named_param(
-						$_.hash.<named_param>
-					)
-				);
-			}
-			when self.assert-hash( $_,
 					[< type_constraint >],
 					[< default_value modifier trait
 					   post_constraint >] ) {
 				$child.append(
 					self._type_constraint(
 						$_.hash.<type_constraint>
-					)
-				);
-			}
-			when self.assert-hash( $_,
-					[< named_param >],
-					[< default_value type_constraint
-					   modifier trait quant
-					   post_constraint >] ) {
-				$child.append(
-					self._named_param(
-						$_.hash.<named_param>
 					)
 				);
 			}
@@ -6827,52 +6742,6 @@ class Perl6::Parser::Factory {
 					)
 				);
 			}
-			when self.assert-hash( $_, [< infix OPER >] ) {
-				if $_.hash.<infix>.Str ~~ m{ ('??') } {
-					$child.append(
-						self._value(
-							$_.list.[0].hash.<value>
-						)
-					);
-					$child.append(
-						Perl6::Operator::Infix.from-sample(
-							$_.hash.<infix>,
-							$0.Str
-						)
-					);
-					$child.append(
-						self._value(
-							$_.list.[1].hash.<value>
-						)
-					);
-					$child.append(
-						Perl6::Operator::Infix.from-sample(
-							$_.hash.<infix>,
-							BANG-BANG
-						)
-					);
-					$child.append(
-						self._value(
-							$_.list.[2].hash.<value>
-						)
-					);
-				}
-				else {
-					$child.append(
-						self._value(
-							$_.list.[0].hash.<value>
-						)
-					);
-					$child.append(
-						self._infix( $_.hash.<infix> )
-					);
-					$child.append(
-						self._value(
-							$_.list.[1].hash.<value>
-						)
-					);
-				}
-			}
 			when self.assert-hash( $_, [< longname args >] ) {
 				if $_.hash.<args> and
 				   $_.hash.<args>.hash.<semiarglist> {
@@ -6960,18 +6829,6 @@ class Perl6::Parser::Factory {
 		my $child = Perl6::Element-List.new;
 		given $p {
 			when self.assert-hash( $_,
-					[< sigil desigilname
-					   postcircumfix >] ) {
-				$child.append(
-					self.___Variable_Name( $_, $name )
-				);
-				$child.append(
-					self._postcircumfix(
-						$_.hash.<postcircumfix>
-					)
-				);
-			}
-			when self.assert-hash( $_,
 					[< twigil sigil desigilname >] ) {
 				$child.append(
 					self.___Variable_Name( $_, $name )
@@ -6985,12 +6842,6 @@ class Perl6::Parser::Factory {
 			}
 			when self.assert-hash( $_,
 					[< sigil desigilname >] ) {
-				$child.append(
-					self.___Variable_Name( $_, $name )
-				);
-			}
-			when self.assert-hash( $_,
-					[< sigil index >] ) {
 				$child.append(
 					self.___Variable_Name( $_, $name )
 				);
