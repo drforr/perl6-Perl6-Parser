@@ -600,6 +600,19 @@ _END_
 	done-testing;
 }, Q{More comma-separated lists};
 
+subtest {
+	my $source = Q:to[_END_];
+class Bitmap {
+    method pixel( $i, $j --> Int ) is rw { }
+}
+_END_
+	my $p = $pt.parse( $source );
+	my $tree = $pt.build-tree( $p );
+	is $pt.to-string( $tree ), $source, Q{formatted};
+
+	done-testing;
+}, Q{More comma-separated lists};
+
 done-testing;
 
 # vim: ft=perl6

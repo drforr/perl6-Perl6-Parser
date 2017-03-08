@@ -664,7 +664,6 @@ _END_
 }, Q{Bitcoin public point to address};
 
 subtest {
-#`[
 	my $source = Q:to[_END_];
 class Pixel { has UInt ($.R, $.G, $.B) }
 class Bitmap {
@@ -699,7 +698,6 @@ _END_
 	my $p = $pt.parse( $source );
 	my $tree = $pt.build-tree( $p );
 	is $pt.to-string( $tree ), $source, Q{formatted};
-]
 
 	done-testing;
 }, Q{Bitmap};

@@ -3299,6 +3299,44 @@ class Perl6::Parser::Factory {
 		given $p {
 			when self.assert-hash( $_,
 					[< specials longname blockoid
+					   multisig trait >] ) {
+				my $_child = Perl6::Element-List.new;
+				# XXX has a twin at <blockoid multisig> in EXPR
+				my Str $x = $_.orig.substr(
+					0, $_.hash.<multisig>.from
+				);
+				$x ~~ m{ ( '(' \s* ) $ };
+				my Int $from = $0.Str.chars;
+				my Str $y = $_.orig.substr(
+					$_.hash.<multisig>.to
+				);
+				$y ~~ m{ ^ ( \s* ')' ) };
+				my Int $to = $0.Str.chars;
+				$_child.append(
+					 self._multisig( $_.hash.<multisig> )
+				);
+				$child.append(
+					self._longname( $_.hash.<longname> )
+				);
+				$child.append(
+					Perl6::Operator::Circumfix.from-int(
+						$_.hash.<multisig>.from - $from,
+						$_.orig.substr(
+							$_.hash.<multisig>.from - $from,
+							$_.hash.<multisig>.chars + $from + $to
+						),
+						$_child
+					)
+				);
+				$child.append(
+					self._trait( $_.hash.<trait> )
+				);
+				$child.append(
+					self._blockoid( $_.hash.<blockoid> )
+				);
+			}
+			when self.assert-hash( $_,
+					[< specials longname blockoid
 					   multisig >],
 					[< trait >] ) {
 				my $_child = Perl6::Element-List.new;
@@ -5713,7 +5751,7 @@ class Perl6::Parser::Factory {
 						Perl6::Operator::Infix.from-int(
 							$_.hash.<parameter>.to +
 								$0.from,
-							'-->'
+							$0.Str
 						)
 					)
 				}
