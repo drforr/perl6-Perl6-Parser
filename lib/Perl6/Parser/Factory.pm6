@@ -3118,16 +3118,16 @@ class Perl6::Parser::Factory {
 
 	# « »
 	#
-	method _infix_prefix_meta_operator( Mu $p )
-			returns Perl6::Element-List {
-		my $child = Perl6::Element-List.new;
-		given $p {
-			default {
-				display-unhandled-match( $_ );
-			}
-		}
-		$child;
-	}
+#	method _infix_prefix_meta_operator( Mu $p )
+#			returns Perl6::Element-List {
+#		my $child = Perl6::Element-List.new;
+#		given $p {
+#			default {
+#				display-unhandled-match( $_ );
+#			}
+#		}
+#		$child;
+#	}
 
 	# =
 	# :=
@@ -5381,19 +5381,19 @@ class Perl6::Parser::Factory {
 		Perl6::Bareword.from-match( $p );
 	}
 
-	method _sequence( Mu $p ) returns Perl6::Element-List {
-		my $child = Perl6::Element-List.new;
-		given $p {
-# XXX
-#			when self.assert-hash( $_, [< statement >] ) {
-#				self._statement( $_.hash.<statement> );
+#	method _sequence( Mu $p ) returns Perl6::Element-List {
+#		my $child = Perl6::Element-List.new;
+#		given $p {
+## XXX
+##			when self.assert-hash( $_, [< statement >] ) {
+##				self._statement( $_.hash.<statement> );
+##			}
+#			default {
+#				display-unhandled-match( $_ );
 #			}
-			default {
-				display-unhandled-match( $_ );
-			}
-		}
-		$child;
-	}
+#		}
+#		$child;
+#	}
 
 #	method _shape( Mu $p ) returns Perl6::Element-List {
 #		my $child = Perl6::Element-List.new;
@@ -6160,7 +6160,7 @@ class Perl6::Parser::Factory {
 	}
 
 #	method _subshortname( Mu $p ) returns Perl6::Element-List {
-		my $child = Perl6::Element-List.new;
+#		my $child = Perl6::Element-List.new;
 #		given $p {
 #			default {
 #				display-unhandled-match( $_ );
@@ -6337,15 +6337,15 @@ class Perl6::Parser::Factory {
 		$child;
 	}
 
-	method _term_init( Mu $p ) returns Perl6::Element-List {
-		my $child = Perl6::Element-List.new;
-		given $p {
-			default {
-				display-unhandled-match( $_ );
-			}
-		}
-		$child;
-	}
+#	method _term_init( Mu $p ) returns Perl6::Element-List {
+#		my $child = Perl6::Element-List.new;
+#		given $p {
+#			default {
+#				display-unhandled-match( $_ );
+#			}
+#		}
+#		$child;
+#	}
 
 	method _termish( Mu $p ) returns Perl6::Element-List {
 		my $child = Perl6::Element-List.new;
