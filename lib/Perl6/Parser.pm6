@@ -465,4 +465,46 @@ class Perl6::Parser {
 
 		$str
 	}
+
+	class ElementIterator {
+		also does Iterator;
+
+		has Perl6::Element $.head;
+		has Bool $.is-done = False;
+
+		method pull-one {
+			if $.head.is-end {
+				if $.is-done {
+					return IterationEnd;
+				}
+				else {
+					$!is-done = True;
+					return $.head;
+				}
+			}
+			else {
+				my $elem = $.head;
+				$!head = $.head.next;
+				$elem;
+			}
+		}
+
+		method push-exactly( Iterator:D $target, int $count ) {
+			my $_count = $count;
+			while $_count-- >= 0 {
+				$target.push( self.pull-one );
+			}
+		}
+
+		method is-lazy { False }
+	}
+
+	method iterator( Str $source ) {
+		my $p = self.parse( $source );
+		my $tree = self.build-tree( $p );
+		$.factory.thread( $tree );
+		my $head = $.factory.flatten( $tree );
+
+		ElementIterator.new( :head( $head ) );
+	}
 }
