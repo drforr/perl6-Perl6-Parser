@@ -6967,9 +6967,10 @@ class Perl6::Parser::Factory {
 				self.___Variable_Name( $p, '' )
 			);
 		}
-		elsif $p.Str {
+		elsif self.assert-hash( $p,
+				[< sigil postcircumfix >] ) {
 			$child.append(
-				self.__Variable( $p, $p.hash.<desigilname> )
+				self.__Variable( $p, '' )
 			);
 		}
 		else {
