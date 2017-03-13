@@ -1415,24 +1415,9 @@ class Perl6::Parser::Factory {
 			self._statementlist( $p.hash.<statementlist> )
 		);
 
-		my Perl6::Element $root = Perl6::Document.from-list( $_child );
+		my Perl6::Element $root =
+			Perl6::Document.from-list( $_child );
 		self.fill-gaps( $p, $root );
-		if $p.from < $root.from {
-			my Str $remainder = $p.orig.Str.substr( 0, $root.from );
-			my $child = Perl6::Element-List.new;
-			$child.append(
-				self._string-to-tokens( $p.from, $remainder )
-			);
-			$root.child.splice( 0, 0, $child.child );
-		}
-		if $root.to < $p.to {
-			my Str $remainder = $p.orig.Str.substr( $root.to );
-			my $child = Perl6::Element-List.new;
-			$child.append(
-				self._string-to-tokens( $root.to, $remainder )
-			);
-			$root.child.append( $child.child );
-		}
 		$root;
 	}
 
@@ -1458,10 +1443,31 @@ class Perl6::Parser::Factory {
 	}
 
 	method fill-gaps( Mu $p, Perl6::Element $root, Int $depth = 0 ) {
+		self._fill-gaps( $p, $root, $depth );
+		if $p.from < $root.from {
+			my Str $remainder =
+				$p.orig.Str.substr( 0, $root.from );
+			my $child = Perl6::Element-List.new;
+			$child.append(
+				self._string-to-tokens( $p.from, $remainder )
+			);
+			$root.child.splice( 0, 0, $child.child );
+		}
+		if $root.to < $p.to {
+			my Str $remainder = $p.orig.Str.substr( $root.to );
+			my $child = Perl6::Element-List.new;
+			$child.append(
+				self._string-to-tokens( $root.to, $remainder )
+			);
+			$root.child.append( $child.child );
+		}
+	}
+
+	method _fill-gaps( Mu $p, Perl6::Element $root, Int $depth = 0 ) {
 		return unless $root.is-twig;
 
 		for reverse $root.child.keys {
-			self.fill-gaps( $p, $root.child.[$_], $depth + 1 );
+			self._fill-gaps( $p, $root.child.[$_], $depth + 1 );
 			if $_ < $root.child.elems - 1 {
 				if $root.child.[$_].to !=
 				   $root.child.[$_+1].from {
