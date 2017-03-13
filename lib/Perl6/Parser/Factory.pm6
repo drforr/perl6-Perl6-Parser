@@ -328,6 +328,26 @@ class Perl6::Element {
 class Perl6::Element-List {
 	has Perl6::Element @.child;
 
+	method fall-through( Mu $p ) {
+		if $*FALL-THROUGH {
+			my %classified = classify {
+				$p.hash.{$_}.Str ?? 'with' !! 'without'
+			}, $p.hash.keys;
+			my Str @keys-with-content = @( %classified<with> );
+			my Str @keys-without-content =
+				@( %classified<without> );
+
+			$*ERR.say( "With content: {@keys-with-content.gist}" );
+			$*ERR.say(
+				"Without content: {@keys-without-content.gist}"
+			);
+			die;
+		}
+		else {
+			Perl6::Catch-All.from-match( $p );
+		}
+	}
+
 	multi method append( Perl6::Element $element ) {
 		@.child.append( $element );
 	}
@@ -1515,7 +1535,7 @@ class Perl6::Parser::Factory {
 				$child.append( self._EXPR( $_.hash.<EXPR> ) );
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -1543,7 +1563,7 @@ class Perl6::Parser::Factory {
 				$child.append( self._EXPR( $_.hash.<EXPR> ) );
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -1572,7 +1592,7 @@ class Perl6::Parser::Factory {
 #				self._codeblock( $_.hash.<codeblock> );
 #			}
 #			default {
-#				$child.append( self.fall-through( $_ ) );
+#				$child.fall-through( $_ );
 #			}
 #		}
 #		$child;
@@ -1586,7 +1606,7 @@ class Perl6::Parser::Factory {
 #		my $child = Perl6::Element-List.new;
 #		given $p {
 #			default {
-#				$child.append( self.fall-through( $_ ) );
+#				$child.fall-through( $_ );
 #			}
 #		}
 #		$child;
@@ -1596,7 +1616,7 @@ class Perl6::Parser::Factory {
 #		my $child = Perl6::Element-List.new;
 #		given $p {
 #			default {
-#				$child.append( self.fall-through( $_ ) );
+#				$child.fall-through( $_ );
 #			}
 #		}
 #		$child;
@@ -1606,7 +1626,7 @@ class Perl6::Parser::Factory {
 #		my $child = Perl6::Element-List.new;
 #		given $p {
 #			default {
-#				$child.append( self.fall-through( $_ ) );
+#				$child.fall-through( $_ );
 #			}
 #		}
 #		$child;
@@ -1630,7 +1650,7 @@ class Perl6::Parser::Factory {
 #		my $child = Perl6::Element-List.new;
 #		given $p {
 #			default {
-#				$child.append( self.fall-through( $_ ) );
+#				$child.fall-through( $_ );
 #			}
 #		}
 #		$child;
@@ -1649,7 +1669,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -1670,7 +1690,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -1688,7 +1708,7 @@ class Perl6::Parser::Factory {
 				$child.append( self._block( $_.hash.<block> ) );
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -1698,7 +1718,7 @@ class Perl6::Parser::Factory {
 #		my $child = Perl6::Element-List.new;
 #		given $p {
 #			default {
-#				$child.append( self.fall-through( $_ ) );
+#				$child.fall-through( $_ );
 #			}
 #		}
 #		$child;
@@ -1735,14 +1755,12 @@ class Perl6::Parser::Factory {
 #					);
 #				}
 #				else {
-#					$child.append(
-#						self.fall-through( $_ )
-#					);
+#					$child.fall-through( $_ );
 #				}
 #			}
 #		}
 #		else {
-#			$child.append( self.fall-through( $_ ) );
+#			$child.fall-through( $_ );
 #		}
 #		$child;
 #	}
@@ -1751,7 +1769,7 @@ class Perl6::Parser::Factory {
 #		my $child = Perl6::Element-List.new;
 #		given $p {
 #			default {
-#				$child.append( self.fall-through( $_ ) );
+#				$child.fall-through( $_ );
 #			}
 #		}
 #		$child;
@@ -1779,9 +1797,7 @@ class Perl6::Parser::Factory {
 					);
 				}
 				else {
-					$child.append(
-						self.fall-through( $_ )
-					);
+					$child.fall-through( $_ );
 				}
 			}
 			$child.append(
@@ -1820,9 +1836,7 @@ class Perl6::Parser::Factory {
 					);
 				}
 				default {
-					$child.append(
-						self.fall-through( $_ )
-					);
+					$child.fall-through( $_ );
 				}
 			}
 		}
@@ -1833,7 +1847,7 @@ class Perl6::Parser::Factory {
 #		my $child = Perl6::Element-List.new;
 #		given $p {
 #			default {
-#				$child.append( self.fall-through( $_ ) );
+#				$child.fall-through( $_ );
 #			}
 #		}
 #		$child;
@@ -1848,7 +1862,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -1863,7 +1877,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -1882,9 +1896,7 @@ class Perl6::Parser::Factory {
 					);
 				}
 				else {
-					$child.append(
-						self.fall-through( $_ )
-					);
+					$child.fall-through( $_ );
 				}
 			}
 		}
@@ -1948,9 +1960,7 @@ class Perl6::Parser::Factory {
 					$child.append( self._var( $_.hash.<var> ) );
 				}
 				default {
-					$child.append(
-						self.fall-through( $_ )
-					);
+					$child.fall-through( $_ );
 				}
 			}
 		}
@@ -1965,7 +1975,7 @@ class Perl6::Parser::Factory {
 #				return True if $_.<U>;
 #			}
 #			default {
-#				$child.append( self.fall-through( $_ ) );
+#				$child.fall-through( $_ );
 #			}
 #		}
 #		$child;
@@ -2000,7 +2010,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -2104,7 +2114,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -2220,7 +2230,7 @@ class Perl6::Parser::Factory {
 #				);
 #			}
 #			default {
-#				$child.append( self.fall-through( $_ ) );
+#				$child.fall-through( $_ );
 #			}
 #		}
 #		$child;
@@ -2239,7 +2249,7 @@ class Perl6::Parser::Factory {
 				$child.append( self.__FloatingPoint( $_ ) );
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -2255,14 +2265,12 @@ class Perl6::Parser::Factory {
 					);
 				}
 				else {
-					$child.append(
-						self.fall-through( $_ )
-					);
+					$child.fall-through( $_ );
 				}
 			}
 		}
 		else {
-			$child.append( self.fall-through( $p ) );
+			$child.fall-through( $p );
 		}
 		$child;
 	}
@@ -2281,7 +2289,7 @@ class Perl6::Parser::Factory {
 				$child.append( self._name( $_.hash.<name> ) );
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -2316,7 +2324,7 @@ class Perl6::Parser::Factory {
 				}
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -2331,7 +2339,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -2341,7 +2349,7 @@ class Perl6::Parser::Factory {
 #		my $child = Perl6::Element-List.new;
 #		given $p {
 #			default {
-#				$child.append( self.fall-through( $_ ) );
+#				$child.fall-through( $_ );
 #			}
 #		}
 #		$child;
@@ -2355,7 +2363,7 @@ class Perl6::Parser::Factory {
 #		my $child = Perl6::Element-List.new;
 #		given $p {
 #			default {
-#				$child.append( self.fall-through( $_ ) );
+#				$child.fall-through( $_ );
 #			}
 #		}
 #		$child;
@@ -2378,7 +2386,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -2403,7 +2411,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -2416,7 +2424,7 @@ class Perl6::Parser::Factory {
 				$child.append( self._term( $_.hash.<term> ) );
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -2433,7 +2441,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -2451,7 +2459,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -2473,7 +2481,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -2488,7 +2496,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -2498,7 +2506,7 @@ class Perl6::Parser::Factory {
 #		my $child = Perl6::Element-List.new;
 #		given $p {
 #			default {
-#				$child.append( self.fall-through( $_ ) );
+#				$child.fall-through( $_ );
 #			}
 #		}
 #		$child;
@@ -2520,7 +2528,7 @@ class Perl6::Parser::Factory {
 #		my $child = Perl6::Element-List.new;
 #		given $p {
 #			default {
-#				$child.append( self.fall-through( $_ ) );
+#				$child.fall-through( $_ );
 #			}
 #		}
 #		$child;
@@ -2724,9 +2732,7 @@ class Perl6::Parser::Factory {
 					}
 					else {
 				# XXX needs to be filled in
-				#		$child.append(
-				#			self.fall-through( $p )
-				#		);
+				#		$child.fall-through( $_ );
 					}
 				}
 				elsif self.assert-hash( $v, [< sym >] ) {
@@ -2918,9 +2924,7 @@ class Perl6::Parser::Factory {
 			}
 			else {
 # XXX needs to be filled in
-#				$child.append(
-#					self.fall-through( $p )
-#				);
+#				$child.fall-through( $_ );
 			}
 		}
 		elsif self.assert-hash( $p, [< circumfix >] ) {
@@ -3043,7 +3047,7 @@ class Perl6::Parser::Factory {
 		elsif $p.Str and $p.Str ~~ / ^ \s+ $ / {
 		}
 		else {
-			$child.append( self.fall-through( $p ) );
+			$child.fall-through( $p );
 		}
 		$child;
 	}
@@ -3052,7 +3056,7 @@ class Perl6::Parser::Factory {
 #		my $child = Perl6::Element-List.new;
 #		given $p {
 #			default {
-#				$child.append( self.fall-through( $_ ) );
+#				$child.fall-through( $_ );
 #			}
 #		}
 #		$child;
@@ -3067,7 +3071,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -3086,7 +3090,7 @@ class Perl6::Parser::Factory {
 				$child.append( self._val( $_.hash.<val> ) );
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -3117,7 +3121,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -3127,7 +3131,7 @@ class Perl6::Parser::Factory {
 #		my $child = Perl6::Element-List.new;
 #		given $p {
 #			default {
-#				$child.append( self.fall-through( $_ ) );
+#				$child.fall-through( $_ );
 #			}
 #		}
 #		$child;
@@ -3147,7 +3151,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -3160,7 +3164,7 @@ class Perl6::Parser::Factory {
 #		my $child = Perl6::Element-List.new;
 #		given $p {
 #			default {
-#				$child.append( self.fall-through( $_ ) );
+#				$child.fall-through( $_ );
 #			}
 #		}
 #		$child;
@@ -3196,7 +3200,7 @@ class Perl6::Parser::Factory {
 				$child.append( self._EXPR( $_.hash.<EXPR> ) );
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -3228,7 +3232,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -3239,7 +3243,7 @@ class Perl6::Parser::Factory {
 #		#if $p ~~ QAST::Want;
 #		given $p {
 #			default {
-#				$child.append( self.fall-through( $_ ) );
+#				$child.fall-through( $_ );
 #			}
 #		}
 #		$child;
@@ -3262,7 +3266,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -3276,7 +3280,7 @@ class Perl6::Parser::Factory {
 				$child.append( self._name( $_.hash.<name> ) );
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -3286,7 +3290,7 @@ class Perl6::Parser::Factory {
 #		my $child = Perl6::Element-List.new;
 #		given $p {
 #			default {
-#				$child.append( self.fall-through( $_ ) );
+#				$child.fall-through( $_ );
 #			}
 #		}
 #		$child;
@@ -3325,7 +3329,7 @@ class Perl6::Parser::Factory {
 #				self._statement( $_.hash.<statement> );
 #			}
 #			default {
-#				$child.append( self.fall-through( $_ ) );
+#				$child.fall-through( $_ );
 #			}
 #		}
 #		$child;
@@ -3419,7 +3423,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -3445,7 +3449,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -3461,7 +3465,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -3474,7 +3478,7 @@ class Perl6::Parser::Factory {
 				$child.append( self._EXPR( $_.hash.<EXPR> ) );
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -3489,7 +3493,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -3508,14 +3512,12 @@ class Perl6::Parser::Factory {
 #					);
 #				}
 #				else {
-#					$child.append(
-#						self.fall-through( $_ )
-#					);
+#					$child.fall-through( $_ );
 #				}
 #			}
 #		}
 #		else {
-#			$child.append( self.fall-through( $p ) );
+#			$child.fall-through( $p );
 #		}
 #		$child;
 #	}
@@ -3548,7 +3550,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -3563,7 +3565,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -3607,7 +3609,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -3642,9 +3644,7 @@ class Perl6::Parser::Factory {
 					);
 				}
 				default {
-					$child.append(
-						self.fall-through( $_ )
-					);
+					$child.fall-through( $_ );
 				}
 			}
 		}
@@ -3652,7 +3652,7 @@ class Perl6::Parser::Factory {
 			$child.append( Perl6::Bareword.from-match( $p ) );
 		}
 		else {
-			$child.append( self.fall-through( $p ) );
+			$child.fall-through( $p );
 		}
 		$child;
 	}
@@ -3671,7 +3671,7 @@ class Perl6::Parser::Factory {
 			);
 		}
 		else {
-			$child.append( self.fall-through( $_ ) );
+			$child.fall-through( $_ );
 		}
 		$child;
 	}
@@ -3680,7 +3680,7 @@ class Perl6::Parser::Factory {
 #		my $child = Perl6::Element-List.new;
 #		given $p {
 #			default {
-#				$child.append( self.fall-through( $_ ) );
+#				$child.fall-through( $_ );
 #			}
 #		}
 #		$child;
@@ -3690,7 +3690,7 @@ class Perl6::Parser::Factory {
 #		my $child = Perl6::Element-List.new;
 #		given $p {
 #			default {
-#				$child.append( self.fall-through( $_ ) );
+#				$child.fall-through( $_ );
 #			}
 #		}
 #		$child;
@@ -3765,14 +3765,12 @@ class Perl6::Parser::Factory {
 					);
 				}
 				else {
-					$child.append(
-						self.fall-through( $_ )
-					);
+					$child.fall-through( $_ );
 				}
 			}
 		}
 		else {
-			$child.append( self.fall-through( $p ) );
+			$child.fall-through( $p );
 		}
 		$child;
 	}
@@ -3788,7 +3786,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -3827,7 +3825,7 @@ class Perl6::Parser::Factory {
 				$child.append( self.__NaN( $_ ) );
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -3894,7 +3892,7 @@ class Perl6::Parser::Factory {
 #		my $child = Perl6::Element-List.new;
 #		given $p {
 #			default {
-#				$child.append( self.fall-through( $_ ) );
+#				$child.fall-through( $_ );
 #			}
 #		}
 #		$child;
@@ -3957,7 +3955,7 @@ class Perl6::Parser::Factory {
 #				$child.append( self._O( $_.hash.<O> ) );
 #			}
 #			default {
-#				$child.append( self.fall-through( $_ ) );
+#				$child.fall-through( $_ );
 #			}
 #		}
 #		$child;
@@ -3971,7 +3969,7 @@ class Perl6::Parser::Factory {
 #		my $child = Perl6::Element-List.new;
 #		given $p {
 #			default {
-#				$child.append( self.fall-through( $_ ) );
+#				$child.fall-through( $_ );
 #			}
 #		}
 #		$child;
@@ -4010,7 +4008,7 @@ class Perl6::Parser::Factory {
 				$child.append( self._trait( $_.hash.<trait> ) );
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -4066,7 +4064,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -4081,7 +4079,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -4188,7 +4186,7 @@ class Perl6::Parser::Factory {
 #				);
 #			}
 #			else {
-#				$child.append( self.fall-through( $_ ) );
+#				$child.fall-through( $_ );
 #			}
 #		}
 #		$child;
@@ -4267,7 +4265,7 @@ class Perl6::Parser::Factory {
 				$child.append( self._sigil( $_.hash.<sigil> ) );
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -4294,7 +4292,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -4322,7 +4320,7 @@ class Perl6::Parser::Factory {
 #		my $child = Perl6::Element-List.new;
 #		given $p {
 #			default {
-#				$child.append( self.fall-through( $_ ) );
+#				$child.fall-through( $_ );
 #			}
 #		}
 #		$child;
@@ -4335,7 +4333,7 @@ class Perl6::Parser::Factory {
 #		my $child = Perl6::Element-List.new;
 #		given $p {
 #			default {
-#				$child.append( self.fall-through( $_ ) );
+#				$child.fall-through( $_ );
 #			}
 #		}
 #		$child;
@@ -4348,7 +4346,7 @@ class Perl6::Parser::Factory {
 #		my $child = Perl6::Element-List.new;
 #		given $p {
 #			default {
-#				$child.append( self.fall-through( $_ ) );
+#				$child.fall-through( $_ );
 #			}
 #		}
 #		$child;
@@ -4374,14 +4372,12 @@ class Perl6::Parser::Factory {
 					);
 				}
 				else {
-					$child.append(
-						self.fall-through( $_ )
-					);
+					$child.fall-through( $_ );
 				}
 			}
 		}
 		else {
-			$child.append( self.fall-through( $p ) );
+			$child.fall-through( $p );
 		}
 		$child;
 	}
@@ -4399,14 +4395,12 @@ class Perl6::Parser::Factory {
 					);
 				}
 				else {
-					$child.append(
-						self.fall-through( $_ )
-					);
+					$child.fall-through( $_ );
 				}
 			}
 		}
 		else {
-			$child.append( self.fall-through( $p ) );
+			$child.fall-through( $p );
 		}
 		$child;
 	}
@@ -4468,7 +4462,7 @@ class Perl6::Parser::Factory {
 				}
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -4491,7 +4485,7 @@ class Perl6::Parser::Factory {
 				$child.append( self._dig( $_.hash.<dig> ) );
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -4512,7 +4506,7 @@ class Perl6::Parser::Factory {
 #				$child.append( self._O( $_.hash.<O> ) );
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -4529,14 +4523,12 @@ class Perl6::Parser::Factory {
 					);
 				}
 				else {
-					$child.append(
-						self.fall-through( $_ )
-					);
+					$child.fall-through( $_ );
 				}
 			}
 		}
 		else {
-			$child.append( self.fall-through( $p ) );
+			$child.fall-through( $p );
 		}
 		$child;
 	}
@@ -4553,7 +4545,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -4570,7 +4562,7 @@ class Perl6::Parser::Factory {
 			}
 		}
 		else {
-			$child.append( self.fall-through( $p ) );
+			$child.fall-through( $p );
 		}
 		$child;
 	}
@@ -4583,7 +4575,7 @@ class Perl6::Parser::Factory {
 				$child.append( self._atom( $_.hash.<atom> ) );
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -4606,7 +4598,7 @@ class Perl6::Parser::Factory {
 				$child.append( self._sym( $_.hash.<sym> ) );
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -4616,7 +4608,7 @@ class Perl6::Parser::Factory {
 #		my $child = Perl6::Element-List.new;
 #		given $p {
 #			default {
-#				$child.append( self.fall-through( $_ ) );
+#				$child.fall-through( $_ );
 #			}
 #		}
 #		$child;
@@ -4890,7 +4882,7 @@ class Perl6::Parser::Factory {
 				}
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -4914,14 +4906,12 @@ class Perl6::Parser::Factory {
 					);
 				}
 				else {
-					$child.append(
-						self.fall-through( $_ )
-					);
+					$child.fall-through( $_ );
 				}
 			}
 		}
 		else {
-			$child.append( self.fall-through( $p ) );
+			$child.fall-through( $p );
 		}
 		$child;
 	}
@@ -4930,7 +4920,7 @@ class Perl6::Parser::Factory {
 #		my $child = Perl6::Element-List.new;
 #		given $p {
 #			default {
-#				$child.append( self.fall-through( $_ ) );
+#				$child.fall-through( $_ );
 #			}
 #		}
 #		$child;
@@ -4949,7 +4939,7 @@ class Perl6::Parser::Factory {
 				$child.append( self.__Radix( $_ ) );
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -4969,7 +4959,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -5003,7 +4993,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -5013,7 +5003,7 @@ class Perl6::Parser::Factory {
 #		my $child = Perl6::Element-List.new;
 #		given $p {
 #			default {
-#				$child.append( self.fall-through( $_ ) );
+#				$child.fall-through( $_ );
 #			}
 #		}
 #		$child;
@@ -5042,7 +5032,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -5227,7 +5217,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -5242,7 +5232,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -5291,7 +5281,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -5317,7 +5307,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -5361,7 +5351,7 @@ class Perl6::Parser::Factory {
 				}
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -5379,9 +5369,7 @@ class Perl6::Parser::Factory {
 					);
 				}
 				else {
-					$child.append(
-						self.fall-through( $_ )
-					);
+					$child.fall-through( $_ );
 				}
 			}
 		}
@@ -5440,9 +5428,7 @@ class Perl6::Parser::Factory {
 					( )
 				}
 				default {
-					$child.append(
-						self.fall-through( $_ )
-					);
+					$child.fall-through( $_ );
 				}
 			}
 		}
@@ -5464,7 +5450,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -5482,7 +5468,7 @@ class Perl6::Parser::Factory {
 ##				self._statement( $_.hash.<statement> );
 ##			}
 #			default {
-#				$child.append( self.fall-through( $_ ) );
+#				$child.fall-through( $_ );
 #			}
 #		}
 #		$child;
@@ -5492,7 +5478,7 @@ class Perl6::Parser::Factory {
 #		my $child = Perl6::Element-List.new;
 #		given $p {
 #			default {
-#				$child.append( self.fall-through( $_ ) );
+#				$child.fall-through( $_ );
 #			}
 #		}
 #		$child;
@@ -5527,7 +5513,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -5537,7 +5523,7 @@ class Perl6::Parser::Factory {
 #		my $child = Perl6::Element-List.new;
 #		given $p {
 #			default {
-#				$child.append( self.fall-through( $_ ) );
+#				$child.fall-through( $_ );
 #			}
 #		}
 #		$child;
@@ -5551,7 +5537,7 @@ class Perl6::Parser::Factory {
 #		my $child = Perl6::Element-List.new;
 #		given $p {
 #			default {
-#				$child.append( self.fall-through( $_ ) );
+#				$child.fall-through( $_ );
 #			}
 #		}
 #		$child;
@@ -5772,7 +5758,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -5842,7 +5828,7 @@ class Perl6::Parser::Factory {
 					[< param_sep parameter >] ) {
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -5867,7 +5853,7 @@ class Perl6::Parser::Factory {
 				}
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -5877,7 +5863,7 @@ class Perl6::Parser::Factory {
 #		my $child = Perl6::Element-List.new;
 #		given $p {
 #			default {
-#				$child.append( self.fall-through( $_ ) );
+#				$child.fall-through( $_ );
 #			}
 #		}
 #		$child;
@@ -6056,7 +6042,7 @@ class Perl6::Parser::Factory {
 				$child.append( self._block( $_.hash.<block> ) );
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -6072,9 +6058,7 @@ class Perl6::Parser::Factory {
 					);
 				}
 				else {
-					$child.append(
-						self.fall-through( $_ )
-					);
+					$child.fall-through( $_ );
 				}
 			}
 		}
@@ -6108,7 +6092,7 @@ class Perl6::Parser::Factory {
 			);
 		}
 		else {
-			$child.append( self.fall-through( $p ) );
+			$child.fall-through( $p );
 		}
 		$child;
 	}
@@ -6181,7 +6165,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -6202,7 +6186,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -6248,7 +6232,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -6258,7 +6242,7 @@ class Perl6::Parser::Factory {
 #		my $child = Perl6::Element-List.new;
 #		given $p {
 #			default {
-#				$child.append( self.fall-through( $_ ) );
+#				$child.fall-through( $_ );
 #			}
 #		}
 #		$child;
@@ -6269,14 +6253,14 @@ class Perl6::Parser::Factory {
 		if $p.list {
 			for $p.list {
 				# XXX probably redundant - seems unused now
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		elsif $p.Str {
 			$child.append( Perl6::Bareword.from-match( $p ) );
 		}
 		else {
-			$child.append( self.fall-through( $p ) );
+			$child.fall-through( $p );
 		}
 		$child;
 	}
@@ -6330,7 +6314,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -6348,14 +6332,12 @@ class Perl6::Parser::Factory {
 					);
 				}
 				else {
-					$child.append(
-						self.fall-through( $_ )
-					);
+					$child.fall-through( $_ );
 				}
 			}
 		}
 		else {
-			$child.append( self.fall-through( $p ) );
+			$child.fall-through( $p );
 		}
 		$child;
 	}
@@ -6371,7 +6353,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -6402,14 +6384,12 @@ class Perl6::Parser::Factory {
 					}
 				}
 				else {
-					$child.append(
-						self.fall-through( $_ )
-					);
+					$child.fall-through( $_ );
 				}
 			}
 		}
 		else {
-			$child.append( self.fall-through( $p ) );
+			$child.fall-through( $p );
 		}
 		$child;
 	}
@@ -6426,14 +6406,12 @@ class Perl6::Parser::Factory {
 					);
 				}
 				else {
-					$child.append(
-						self.fall-through( $_ )
-					);
+					$child.fall-through( $_ );
 				}
 			}
 		}
 		else {
-			$child.append( self.fall-through( $p ) );
+			$child.fall-through( $p );
 		}
 		$child;
 	}
@@ -6442,7 +6420,7 @@ class Perl6::Parser::Factory {
 #		my $child = Perl6::Element-List.new;
 #		given $p {
 #			default {
-#				$child.append( self.fall-through( $_ ) );
+#				$child.fall-through( $_ );
 #			}
 #		}
 #		$child;
@@ -6458,14 +6436,12 @@ class Perl6::Parser::Factory {
 					);
 				}
 				else {
-					$child.append(
-						self.fall-through( $_ )
-					);
+					$child.fall-through( $_ );
 				}
 			}
 		}
 		else {
-			$child.append( self.fall-through( $p ) );
+			$child.fall-through( $p );
 		}
 		$child;
 	}
@@ -6479,7 +6455,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -6497,14 +6473,12 @@ class Perl6::Parser::Factory {
 					);
 				}
 				else {
-					$child.append(
-						self.fall-through( $_ )
-					);
+					$child.fall-through( $_ );
 				}
 			}
 		}
 		else {
-			$child.append( self.fall-through( $p ) );
+			$child.fall-through( $p );
 		}
 		$child;
 	}
@@ -6549,7 +6523,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -6568,14 +6542,12 @@ class Perl6::Parser::Factory {
 #					);
 #				}
 #				else {
-#					$child.append(
-#						self.fall-through( $_ )
-#					);
+#					$child.fall-through( $_ );
 #				}
 #			}
 #		}
 #		else {
-#			$child.append( self.fall-through( $p ) );
+#			$child.fall-through( $p );
 #		}
 #		$child;
 #	}
@@ -6584,7 +6556,7 @@ class Perl6::Parser::Factory {
 #		my $child = Perl6::Element-List.new;
 #		given $p {
 #			default {
-#				$child.append( self.fall-through( $_ ) );
+#				$child.fall-through( $_ );
 #			}
 #		}
 #		$child;
@@ -6607,14 +6579,12 @@ class Perl6::Parser::Factory {
 					);
 				}
 				else {
-					$child.append(
-						self.fall-through( $_ )
-					);
+					$child.fall-through( $_ );
 				}
 			}
 		}
 		else {
-			$child.append( self.fall-through( $p ) );
+			$child.fall-through( $p );
 		}
 		$child;
 	}
@@ -6657,7 +6627,7 @@ class Perl6::Parser::Factory {
 			$child.append( self._longname( $p.hash.<longname> ) );
 		}
 		else {
-			$child.append( self.fall-through( $p ) );
+			$child.fall-through( $p );
 		}
 		$child;
 	}
@@ -6683,9 +6653,7 @@ class Perl6::Parser::Factory {
 					);
 				}
 				else {
-					$child.append(
-						self.fall-through( $_ )
-					);
+					$child.fall-through( $_ );
 				}
 			}
 		}
@@ -6693,7 +6661,7 @@ class Perl6::Parser::Factory {
 			$child.append( self._longname( $p.hash.<longname> ) );
 		}
 		else {
-			$child.append( self.fall-through( $p ) );
+			$child.fall-through( $p );
 		}
 		$child;
 	}
@@ -6730,23 +6698,18 @@ class Perl6::Parser::Factory {
 				);
 			}
 			when self.assert-hash( $_, [< longname args >] ) {
+				$child.append(
+					self._longname(
+						$_.hash.<longname>
+					)
+				);
 				if $_.hash.<args> and
 				   $_.hash.<args>.hash.<semiarglist> {
-					$child.append(
-						self._longname(
-							$_.hash.<longname>
-						)
-					);
 					$child.append(
 						self._args( $_.hash.<args> )
 					);
 				}
 				else {
-					$child.append(
-						self._longname(
-							$_.hash.<longname>
-						)
-					);
 					if $_.hash.<args>.hash.keys and
 					   $_.hash.<args>.Str ~~ m{ \S } {
 						$child.append(
@@ -6761,7 +6724,7 @@ class Perl6::Parser::Factory {
 				$child.append( self._value( $_.hash.<value> ) );
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -6771,7 +6734,7 @@ class Perl6::Parser::Factory {
 #		my $child = Perl6::Element-List.new;
 #		given $p {
 #			default {
-#				$child.append( self.fall-through( $_ ) );
+#				$child.fall-through( $_ );
 #			}
 #		}
 #		$child;
@@ -6795,7 +6758,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			};
 		}
 		$child;
@@ -6855,7 +6818,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -6880,7 +6843,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -6897,16 +6860,23 @@ class Perl6::Parser::Factory {
 				$child.append(
 					self._variable( $_.hash.<variable> )
 				);
-				if $_.hash.<shape>.Str {
-					$child.append(
-						self._Block-from-match(
-							$_.hash.<shape>,
-							self._semilist(
-								$_.hash.<semilist>
-							)
+				$child.append(
+					self._Block-from-match(
+						$_.hash.<shape>,
+						self._semilist(
+							$_.hash.<semilist>
 						)
-					);
-				}
+					)
+				);
+			}
+			when self.assert-hash( $_,
+					[< semilist variable >],
+					[< postcircumfix signature trait
+					   post_constraint shape >] ) {
+				# XXX shape is redundant
+				$child.append(
+					self._variable( $_.hash.<variable> )
+				);
 			}
 			when self.assert-hash( $_,
 					[< variable post_constraint >],
@@ -6939,7 +6909,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -6947,34 +6917,41 @@ class Perl6::Parser::Factory {
 
 	method _variable( Mu $p ) returns Perl6::Element-List {
 		my $child = Perl6::Element-List.new;
-		if self.assert-hash( $p, [< contextualizer >] ) {
-			$child.append(
-				self._contextualizer( $p.hash.<contextualizer> )
-			);
-		}
-		elsif self.assert-hash( $p, [< twigil sigil desigilname >] ) {
-			$child.append(
-				self.__Variable( $p, $p.hash.<desigilname> )
-			);
-		}
-		elsif self.assert-hash( $p, [< sigil desigilname >] ) {
-			$child.append(
-				self.__Variable( $p, $p.hash.<desigilname> )
-			);
-		}
-		elsif self.assert-hash( $p, [< sigil >] ) {
-			$child.append(
-				self.___Variable_Name( $p, '' )
-			);
-		}
-		elsif self.assert-hash( $p,
-				[< sigil postcircumfix >] ) {
-			$child.append(
-				self.__Variable( $p, '' )
-			);
-		}
-		else {
-			$child.append( self.fall-through( $p ) );
+		given $p {
+			when self.assert-hash( $p,
+					[< twigil sigil desigilname >] ) {
+				$child.append(
+					self.__Variable(
+						$p, $p.hash.<desigilname>
+					)
+				);
+			}
+			when self.assert-hash( $p, [< sigil desigilname >] ) {
+				$child.append(
+					self.__Variable(
+						$p, $p.hash.<desigilname>
+					)
+				);
+			}
+			when self.assert-hash( $p,
+					[< sigil postcircumfix >] ) {
+				$child.append( self.__Variable( $p, '' ) );
+			}
+			when self.assert-hash( $p, [< contextualizer >] ) {
+				$child.append(
+					self._contextualizer(
+						$p.hash.<contextualizer>
+					)
+				);
+			}
+			when self.assert-hash( $p, [< sigil >] ) {
+				$child.append(
+					self.___Variable_Name( $p, '' )
+				);
+			}
+			default {
+				$child.fall-through( $_ );
+			}
 		}
 		$child;
 	}
@@ -6986,7 +6963,7 @@ class Perl6::Parser::Factory {
 				$child.append( self._vstr( $_.hash.<vstr> ) );
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
@@ -7009,14 +6986,12 @@ class Perl6::Parser::Factory {
 #					)
 #				}
 #				else {
-#					$child.append(
-#						self.fall-through( $_ )
-#					);
+#					$child.fall-through( $_ );
 #				}
 #			}
 #		}
 #		else {
-#			$child.append( self.fall-through( $p ) );
+#			$child.fall-through( $p );
 #		}
 #		$child;
 #	}
@@ -7035,7 +7010,7 @@ class Perl6::Parser::Factory {
 				);
 			}
 			default {
-				$child.append( self.fall-through( $_ ) );
+				$child.fall-through( $_ );
 			}
 		}
 		$child;
