@@ -6,6 +6,7 @@ use Perl6::Parser;
 my $pt = Perl6::Parser.new;
 my $*CONSISTENCY-CHECK = True;
 my $*GRAMMAR-CHECK = True;
+my $*FALL-THROUGH = True;
 
 subtest {
 	my $source = Q:to[_END_];

@@ -11,6 +11,7 @@ my $ppf = Perl6::Parser::Factory.new;
 my $*CONSISTENCY-CHECK = True;
 my $*GRAMMAR-CHECK = True;
 my $*UPDATE-RANGES = True;
+my $*FALL-THROUGH = True;
 
 sub check-node(
 	Perl6::Element $element, Mu $type, Mu $parent, Int $from, Int $to ) {

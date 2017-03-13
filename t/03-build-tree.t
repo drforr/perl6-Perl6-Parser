@@ -8,6 +8,7 @@ plan 9;
 my $pt = Perl6::Parser.new;
 my $*CONSISTENCY-CHECK = True;
 my $*GRAMMAR-CHECK = True;
+my $*FALL-THROUGH = True;
 
 # $pt.build-tree verifies that the tokens are contiguous, along with a bunch
 # of other things.

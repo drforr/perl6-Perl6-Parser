@@ -10,6 +10,7 @@ my $pt = Perl6::Parser.new;
 my $ppf = Perl6::Parser::Factory.new;
 my $*CONSISTENCY-CHECK = True;
 my $*GRAMMAR-CHECK = True;
+my $*FALL-THROUGH = True;
 
 sub make-decimal( Str $value ) {
 	Perl6::Number::Decimal.new( :from(0), :to(2), :content($value) );
