@@ -6595,39 +6595,59 @@ class Perl6::Parser::Factory {
 	#
 	method _type_declarator( Mu $p ) returns Perl6::Element-List {
 		my $child = Perl6::Element-List.new;
-		if self.assert-hash( $p,
-				[< sym initializer variable >], [< trait >] ) {
-			$child.append( self._sym( $p.hash.<sym> ) );
-			$child.append( self._variable( $p.hash.<variable> ) );
-			$child.append(
-				self._initializer( $p.hash.<initializer> )
-			);
-		}
-		elsif self.assert-hash( $p,
-				[< sym defterm initializer >], [< trait >] ) {
-			$child.append( self._sym( $p.hash.<sym> ) );
-			$child.append( self._defterm( $p.hash.<defterm> ) );
-			$child.append(
-				self._initializer( $p.hash.<initializer> )
-			);
-		}
-		elsif self.assert-hash( $p,
-				[< sym longname term >], [< trait >] ) {
-			$child.append( self._sym( $p.hash.<sym> ) );
-			$child.append( self._longname( $p.hash.<longname> ) );
-			$child.append( self._term( $p.hash.<term> ) );
-		}
-		elsif self.assert-hash( $p, [< sym longname trait >] ) {
-			$child.append( self._sym( $p.hash.<sym> ) );
-			$child.append( self._longname( $p.hash.<longname> ) );
-			$child.append( self._trait( $p.hash.<trait> ) );
-		}
-		elsif self.assert-hash( $p, [< sym longname >], [< trait >] ) {
-			$child.append( self._sym( $p.hash.<sym> ) );
-			$child.append( self._longname( $p.hash.<longname> ) );
-		}
-		else {
-			$child.fall-through( $p );
+		given $p {
+			when self.assert-hash( $p,
+					[< sym initializer variable >],
+					[< trait >] ) {
+				$child.append( self._sym( $p.hash.<sym> ) );
+				$child.append(
+					self._variable( $p.hash.<variable> )
+				);
+				$child.append(
+					self._initializer(
+						$p.hash.<initializer>
+					)
+				);
+			}
+			when self.assert-hash( $p,
+					[< sym defterm initializer >],
+					[< trait >] ) {
+				$child.append( self._sym( $p.hash.<sym> ) );
+				$child.append(
+					self._defterm( $p.hash.<defterm> )
+				);
+				$child.append(
+					self._initializer(
+						$p.hash.<initializer>
+					)
+				);
+			}
+			when self.assert-hash( $p,
+					[< sym longname term >], [< trait >] ) {
+				$child.append( self._sym( $p.hash.<sym> ) );
+				$child.append(
+					self._longname( $p.hash.<longname> )
+				);
+				$child.append( self._term( $p.hash.<term> ) );
+			}
+			when self.assert-hash( $p, [< sym longname trait >] ) {
+				$child.append( self._sym( $p.hash.<sym> ) );
+				$child.append(
+					self._longname( $p.hash.<longname> )
+				);
+				$child.append( self._trait( $p.hash.<trait> ) );
+			}
+			when self.assert-hash( $p,
+					[< sym longname >],
+					[< trait >] ) {
+				$child.append( self._sym( $p.hash.<sym> ) );
+				$child.append(
+					self._longname( $p.hash.<longname> )
+				);
+			}
+			default {
+				$child.fall-through( $p );
+			}
 		}
 		$child;
 	}
@@ -6699,26 +6719,9 @@ class Perl6::Parser::Factory {
 			}
 			when self.assert-hash( $_, [< longname args >] ) {
 				$child.append(
-					self._longname(
-						$_.hash.<longname>
-					)
+					self._longname( $_.hash.<longname> )
 				);
-				if $_.hash.<args> and
-				   $_.hash.<args>.hash.<semiarglist> {
-					$child.append(
-						self._args( $_.hash.<args> )
-					);
-				}
-				else {
-					if $_.hash.<args>.hash.keys and
-					   $_.hash.<args>.Str ~~ m{ \S } {
-						$child.append(
-							self._args(
-								$_.hash.<args>
-							)
-						);
-					}
-				}
+				$child.append( self._args( $_.hash.<args> ) );
 			}
 			when self.assert-hash( $_, [< value >] ) {
 				$child.append( self._value( $_.hash.<value> ) );
