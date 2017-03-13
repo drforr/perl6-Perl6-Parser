@@ -5722,6 +5722,38 @@ class Perl6::Parser::Factory {
 				);
 			}
 			when self.assert-hash( $_,
+					[< param_var quant post_constraint
+					   trait >],
+					[< default_value modifier trait
+					   type_constraint
+					   post_constraint >] ) {
+				$child.append( self._quant( $_.hash.<quant> ) );
+				$child.append(
+					self._param_var( $_.hash.<param_var> )
+				);
+				$child.append( self._trait( $_.hash.<trait> ) );
+				$child.append(
+					self._post_constraint(
+						$_.hash.<post_constraint>
+					)
+				);
+			}
+			when self.assert-hash( $_,
+					[< param_var quant post_constraint >],
+					[< default_value modifier trait
+					   type_constraint
+					   post_constraint >] ) {
+				$child.append( self._quant( $_.hash.<quant> ));
+				$child.append(
+					self._param_var( $_.hash.<param_var> )
+				);
+				$child.append(
+					self._post_constraint(
+						$_.hash.<post_constraint>
+					)
+				);
+			}
+			when self.assert-hash( $_,
 					[< param_var quant >],
 					[< default_value modifier trait
 					   type_constraint
@@ -5737,13 +5769,6 @@ class Perl6::Parser::Factory {
 				if $_.hash.<trait> {
 					$child.append(
 						self._trait( $_.hash.<trait> )
-					);
-				}
-				if $_.hash.<post_constraint> {
-					$child.append(
-						self._post_constraint(
-							$_.hash.<post_constraint>
-						)
 					);
 				}
 			}
@@ -6250,13 +6275,7 @@ class Perl6::Parser::Factory {
 
 	method _sym( Mu $p ) returns Perl6::Element-List {
 		my $child = Perl6::Element-List.new;
-		if $p.list {
-			for $p.list {
-				# XXX probably redundant - seems unused now
-				$child.fall-through( $_ );
-			}
-		}
-		elsif $p.Str {
+		if $p.Str {
 			$child.append( Perl6::Bareword.from-match( $p ) );
 		}
 		else {
