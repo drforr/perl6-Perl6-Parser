@@ -6952,6 +6952,21 @@ class Perl6::Parser::Factory {
 				self._contextualizer( $p.hash.<contextualizer> )
 			);
 		}
+		elsif self.assert-hash( $p, [< twigil sigil desigilname >] ) {
+			$child.append(
+				self.__Variable( $p, $p.hash.<desigilname> )
+			);
+		}
+		elsif self.assert-hash( $p, [< sigil desigilname >] ) {
+			$child.append(
+				self.__Variable( $p, $p.hash.<desigilname> )
+			);
+		}
+		elsif self.assert-hash( $p, [< sigil >] ) {
+			$child.append(
+				self.___Variable_Name( $p, '' )
+			);
+		}
 		elsif $p.Str {
 			$child.append(
 				self.__Variable( $p, $p.hash.<desigilname> )
@@ -7014,7 +7029,9 @@ class Perl6::Parser::Factory {
 		given $p {
 			when self.assert-hash( $_, [< EXPR pblock >] ) {
 				$child.append( self._EXPR( $_.hash.<EXPR> ) );
-				$child.append( self._pblock( $_.hash.<pblock> ) );
+				$child.append(
+					self._pblock( $_.hash.<pblock> )
+				);
 			}
 			default {
 				$child.append( self.fall-through( $_ ) );
