@@ -460,6 +460,11 @@ class Perl6::Parser {
 		$tree
 	}
 
+	method to-tree( Str $source ) {
+		my $parsed = self.parse( $source );
+		self.build-tree( $parsed );
+	}
+
 	method to-string( Perl6::Element $tree ) {
 		my $str = $tree.to-string;
 

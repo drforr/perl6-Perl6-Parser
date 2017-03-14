@@ -15,8 +15,7 @@ subtest {
 =begin EMPTY
 =end EMPTY
 _END_
-	my $parsed = $pt.parse( $source );
-	my $tree = $pt.build-tree( $parsed );
+	my $tree = $pt.to-tree( $source );
 	is $pt.to-string( $tree ), $source, Q{formatted};
 
 	done-testing;

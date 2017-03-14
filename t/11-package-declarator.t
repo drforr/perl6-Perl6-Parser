@@ -38,8 +38,7 @@ subtest {
 
 		subtest {
 			my $source = Q{package Foo{}};
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -49,8 +48,7 @@ subtest {
 			my $source = Q:to[_END_];
 package Foo     {}
 _END_
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -58,8 +56,7 @@ _END_
 
 		subtest {
 			my $source = Q{package Foo{}  };
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -67,8 +64,7 @@ _END_
 
 		subtest {
 			my $source = Q{package Foo     {}  };
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -80,8 +76,7 @@ _END_
 
 		subtest {
 			my $source = Q{package Foo{   }};
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -91,8 +86,7 @@ _END_
 			my $source = Q:to[_END_];
 package Foo     {   }
 _END_
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -100,8 +94,7 @@ _END_
 
 		subtest {
 			my $source = Q{package Foo{   }  };
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -109,8 +102,7 @@ _END_
 
 		subtest {
 			my $source = Q{package Foo     {   }  };
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -122,8 +114,7 @@ _END_
 
 		subtest {
 			my $source = Q{unit package Foo;};
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -133,8 +124,7 @@ _END_
 			my $source = Q:to[_END_];
 unit package Foo  ;
 _END_
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -150,8 +140,7 @@ subtest {
 
 		subtest {
 			my $source = Q{module Foo{}};
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -161,8 +150,7 @@ subtest {
 			my $source = Q:to[_END_];
 module Foo     {}
 _END_
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -170,8 +158,7 @@ _END_
 
 		subtest {
 			my $source = Q{module Foo{}  };
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -179,8 +166,7 @@ _END_
 
 		subtest {
 			my $source = Q{module Foo     {}  };
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -192,8 +178,7 @@ _END_
 
 		subtest {
 			my $source = Q{module Foo{   }};
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -203,8 +188,7 @@ _END_
 			my $source = Q:to[_END_];
 module Foo     {   }
 _END_
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -212,8 +196,7 @@ _END_
 
 		subtest {
 			my $source = Q{module Foo{   }  };
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -221,8 +204,7 @@ _END_
 
 		subtest {
 			my $source = Q{module Foo     {   }  };
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -234,8 +216,7 @@ _END_
 
 		subtest {
 			my $source = Q{unit module Foo;};
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -245,8 +226,7 @@ _END_
 			my $source = Q:to[_END_];
 unit module Foo;
 _END_
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -262,8 +242,7 @@ subtest {
 
 		subtest {
 			my $source = Q{class Foo{}};
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -273,8 +252,7 @@ subtest {
 			my $source = Q:to[_END_];
 class Foo     {}
 _END_
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -282,8 +260,7 @@ _END_
 
 		subtest {
 			my $source = Q{class Foo{}  };
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -291,8 +268,7 @@ _END_
 
 		subtest {
 			my $source = Q{class Foo     {}  };
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -304,8 +280,7 @@ _END_
 
 		subtest {
 			my $source = Q{class Foo{   }};
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -315,8 +290,7 @@ _END_
 			my $source = Q:to[_END_];
 class Foo     {   }
 _END_
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -324,8 +298,7 @@ _END_
 
 		subtest {
 			my $source = Q{class Foo{   }  };
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -333,8 +306,7 @@ _END_
 
 		subtest {
 			my $source = Q{class Foo     {   }  };
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -346,8 +318,7 @@ _END_
 
 		subtest {
 			my $source = Q{unit class Foo;};
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -357,8 +328,7 @@ _END_
 			my $source = Q:to[_END_];
 unit class Foo;
 _END_
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -371,8 +341,7 @@ subtest {
 
 	subtest {
 		my $source = Q{class Foo{also is Int}};
-		my $p = $pt.parse( $source );
-		my $tree = $pt.build-tree( $p );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -382,8 +351,7 @@ subtest {
 		my $source = Q:to[_END_];
 class Foo{also     is   Int}
 _END_
-		my $p = $pt.parse( $source );
-		my $tree = $pt.build-tree( $p );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -396,8 +364,7 @@ subtest {
 	subtest {
 		# space between 'Int' and {} is required
 		my $source = Q{class Foo is Int {}};
-		my $p = $pt.parse( $source );
-		my $tree = $pt.build-tree( $p );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -407,8 +374,7 @@ subtest {
 		my $source = Q:to[_END_];
 class Foo is Int {}
 _END_
-		my $p = $pt.parse( $source );
-		my $tree = $pt.build-tree( $p );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -420,8 +386,7 @@ subtest {
 
 	subtest {
 		my $source = Q{class Foo is repr('CStruct'){has int8$i}};
-		my $p = $pt.parse( $source );
-		my $tree = $pt.build-tree( $p );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -431,8 +396,7 @@ subtest {
 		my $source = Q:to[_END_];
 class Foo is repr('CStruct'){has int8$i}
 _END_
-		my $p = $pt.parse( $source );
-		my $tree = $pt.build-tree( $p );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -442,8 +406,7 @@ _END_
 		my $source = Q:to[_END_];
 class Foo is repr('CStruct') { has int8 $i }
 _END_
-		my $p = $pt.parse( $source );
-		my $tree = $pt.build-tree( $p );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -453,8 +416,7 @@ _END_
 		my $source = Q:to[_END_];
 class Foo is repr( 'CStruct' ) { has int8 $i }
 _END_
-		my $p = $pt.parse( $source );
-		my $tree = $pt.build-tree( $p );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -467,8 +429,7 @@ subtest {
 	subtest {
 		# space between 'Int' and {} is required
 		my $source = Q{class Foo{trusts Int}};
-		my $p = $pt.parse( $source );
-		my $tree = $pt.build-tree( $p );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -478,8 +439,7 @@ subtest {
 		my $source = Q:to[_END_];
 class Foo { trusts Int }
 _END_
-		my $p = $pt.parse( $source );
-		my $tree = $pt.build-tree( $p );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -494,8 +454,7 @@ subtest {
 
 		subtest {
 			my $source = Q{grammar Foo{}};
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -505,8 +464,7 @@ subtest {
 			my $source = Q:to[_END_];
 grammar Foo     {}
 _END_
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -514,8 +472,7 @@ _END_
 
 		subtest {
 			my $source = Q{grammar Foo{}  };
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -523,8 +480,7 @@ _END_
 
 		subtest {
 			my $source = Q{grammar Foo     {}  };
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -536,8 +492,7 @@ _END_
 
 		subtest {
 			my $source = Q{grammar Foo{   }};
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -547,8 +502,7 @@ _END_
 			my $source = Q:to[_END_];
 grammar Foo     {   }
 _END_
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -556,8 +510,7 @@ _END_
 
 		subtest {
 			my $source = Q{grammar Foo{   }  };
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -565,8 +518,7 @@ _END_
 
 		subtest {
 			my $source = Q{grammar Foo     {   }  };
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -578,8 +530,7 @@ _END_
 
 		subtest {
 			my $source = Q{unit grammar Foo;};
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -589,8 +540,7 @@ _END_
 			my $source = Q:to[_END_];
 unit grammar Foo;
 _END_
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -606,8 +556,7 @@ subtest {
 
 		subtest {
 			my $source = Q{role Foo{}};
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -617,8 +566,7 @@ subtest {
 			my $source = Q:to[_END_];
 role Foo     {}
 _END_
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -626,8 +574,7 @@ _END_
 
 		subtest {
 			my $source = Q{role Foo{}  };
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -635,8 +582,7 @@ _END_
 
 		subtest {
 			my $source = Q{role Foo     {}  };
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -648,8 +594,7 @@ _END_
 
 		subtest {
 			my $source = Q{role Foo{   }};
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -659,8 +604,7 @@ _END_
 			my $source = Q:to[_END_];
 role Foo     {   }
 _END_
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -668,8 +612,7 @@ _END_
 
 		subtest {
 			my $source = Q{role Foo{   }  };
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -677,8 +620,7 @@ _END_
 
 		subtest {
 			my $source = Q{role Foo     {   }  };
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -690,8 +632,7 @@ _END_
 
 		subtest {
 			my $source = Q{unit role Foo;};
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -701,8 +642,7 @@ _END_
 			my $source = Q:to[_END_];
 unit role Foo;
 _END_
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -718,8 +658,7 @@ subtest {
 
 		subtest {
 			my $source = Q{knowhow Foo{}};
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -729,8 +668,7 @@ subtest {
 			my $source = Q:to[_END_];
 knowhow Foo     {}
 _END_
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -738,8 +676,7 @@ _END_
 
 		subtest {
 			my $source = Q{knowhow Foo{}  };
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -747,8 +684,7 @@ _END_
 
 		subtest {
 			my $source = Q{knowhow Foo     {}  };
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -760,8 +696,7 @@ _END_
 
 		subtest {
 			my $source = Q{knowhow Foo{   }};
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -771,8 +706,7 @@ _END_
 			my $source = Q:to[_END_];
 knowhow Foo     {   }
 _END_
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -780,8 +714,7 @@ _END_
 
 		subtest {
 			my $source = Q{knowhow Foo{   }  };
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -789,8 +722,7 @@ _END_
 
 		subtest {
 			my $source = Q{knowhow Foo     {   }  };
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -802,8 +734,7 @@ _END_
 
 		subtest {
 			my $source = Q{unit knowhow Foo;};
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -813,8 +744,7 @@ _END_
 			my $source = Q:to[_END_];
 unit knowhow Foo;
 _END_
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -830,8 +760,7 @@ subtest {
 
 		subtest {
 			my $source = Q{native Foo{}};
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -841,8 +770,7 @@ subtest {
 			my $source = Q:to[_END_];
 native Foo     {}
 _END_
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -850,8 +778,7 @@ _END_
 
 		subtest {
 			my $source = Q{native Foo{}  };
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -859,8 +786,7 @@ _END_
 
 		subtest {
 			my $source = Q{native Foo     {}  };
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -872,8 +798,7 @@ _END_
 
 		subtest {
 			my $source = Q{native Foo{   }};
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -883,8 +808,7 @@ _END_
 			my $source = Q:to[_END_];
 native Foo     {   }
 _END_
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -892,8 +816,7 @@ _END_
 
 		subtest {
 			my $source = Q{native Foo{   }  };
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -901,8 +824,7 @@ _END_
 
 		subtest {
 			my $source = Q{native Foo     {   }  };
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 		}, Q{leading, trailing ws};
 	}, Q{intrabrace spacing};
@@ -912,8 +834,7 @@ _END_
 
 		subtest {
 			my $source = Q{unit native Foo;};
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -923,8 +844,7 @@ _END_
 			my $source = Q:to[_END_];
 unit native Foo;
 _END_
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;

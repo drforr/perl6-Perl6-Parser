@@ -19,8 +19,7 @@ my @doors = False xx 101;
  
 say "Door $_ is ", <closed open>[ @doors[$_] ] for 1..100;
 _END_
-		my $p = $pt.parse( $source );
-		my $tree = $pt.build-tree( $p );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -30,9 +29,7 @@ _END_
 		my $source = Q:to[_END_];
 say "Door $_ is open" for map {$^n ** 2}, 1..10;
 _END_
-		my $p = $pt.parse( $source );
-		my $tree = $pt.build-tree( $p );
-#say $pt.dump-tree( $tree );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -42,8 +39,7 @@ _END_
 		my $source = Q:to[_END_];
 say "Door $_ is open" for 1..10 X** 2;
 _END_
-		my $p = $pt.parse( $source );
-		my $tree = $pt.build-tree( $p );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -53,8 +49,7 @@ _END_
 		my $source = Q:to[_END_];
 say "Door $_ is ", <closed open>[.sqrt == .sqrt.floor] for 1..100;
 _END_
-		my $p = $pt.parse( $source );
-		my $tree = $pt.build-tree( $p );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -182,8 +177,7 @@ loop {
     new() if $key eq 'n';
 }
 _END_
-	my $p = $pt.parse( $source );
-	my $tree = $pt.build-tree( $p );
+	my $tree = $pt.to-tree( $source );
 	is $pt.to-string( $tree ), $source, Q{formatted};
 
 	done-testing;
@@ -306,8 +300,7 @@ loop {
     last if $key eq 'q'; # (q)uit
 }
 _END_
-	my $p = $pt.parse( $source );
-	my $tree = $pt.build-tree( $p );
+	my $tree = $pt.to-tree( $source );
 	is $pt.to-string( $tree ), $source, Q{formatted};
 
 	done-testing;
@@ -342,8 +335,7 @@ while my $exp = prompt "\n24? " {
     }
 }
 _END_
-	my $p = $pt.parse( $source );
-	my $tree = $pt.build-tree( $p );
+	my $tree = $pt.to-tree( $source );
 	is $pt.to-string( $tree ), $source, Q{formatted};
 
 	done-testing;
@@ -396,8 +388,7 @@ sub unique (@array) {
     %h.values;
 }
 _END_
-	my $p = $pt.parse( $source );
-	my $tree = $pt.build-tree( $p );
+	my $tree = $pt.to-tree( $source );
 	is $pt.to-string( $tree ), $source, Q{formatted};
 
 	done-testing;
@@ -435,8 +426,7 @@ for 23, 123, 1234, 10000 {
     say $_, "\t", [+] nextrow($_)[];
 }
 _END_
-	my $p = $pt.parse( $source );
-	my $tree = $pt.build-tree( $p );
+	my $tree = $pt.to-tree( $source );
 	is $pt.to-string( $tree ), $source, Q{formatted};
 
 	done-testing;
@@ -459,8 +449,7 @@ sub b($b) {
     "$b bottle{'s' if $b != 1} of beer";
 }
 _END_
-		my $p = $pt.parse( $source );
-		my $tree = $pt.build-tree( $p );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 	done-testing;
@@ -487,8 +476,7 @@ sub sing(
     say "$quantity bottle$plural of beer$location"
 }
 _END_
-		my $p = $pt.parse( $source );
-		my $tree = $pt.build-tree( $p );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -510,8 +498,7 @@ for @quantities Z @bottles Z @actions Z
     say "$d $e of beer on the wall\n";
 }
 _END_
-		my $p = $pt.parse( $source );
-		my $tree = $pt.build-tree( $p );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;

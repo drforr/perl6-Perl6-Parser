@@ -15,8 +15,7 @@ subtest {
 
 	subtest {
 		my $source = Q{/pi/};
-		my $parsed = $pt.parse( $source );
-		my $tree = $pt.build-tree( $parsed );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -26,8 +25,7 @@ subtest {
 		my $source = Q:to[_END_];
 /pi/
 _END_
-		my $parsed = $pt.parse( $source );
-		my $tree = $pt.build-tree( $parsed );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -39,8 +37,7 @@ subtest {
 
 	subtest {
 		my $source = Q{/<[ p i ]>/};
-		my $parsed = $pt.parse( $source );
-		my $tree = $pt.build-tree( $parsed );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -50,8 +47,7 @@ subtest {
 		my $source = Q:to[_END_];
 / <[ p i ]> /
 _END_
-		my $parsed = $pt.parse( $source );
-		my $tree = $pt.build-tree( $parsed );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -63,8 +59,7 @@ subtest {
 
 	subtest {
 		my $source = Q{/\d/};
-		my $parsed = $pt.parse( $source );
-		my $tree = $pt.build-tree( $parsed );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -74,8 +69,7 @@ subtest {
 		my $source = Q:to[_END_];
 / \d /
 _END_
-		my $parsed = $pt.parse( $source );
-		my $tree = $pt.build-tree( $parsed );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -87,8 +81,7 @@ subtest {
 
 	subtest {
 		my $source = Q{/./};
-		my $parsed = $pt.parse( $source );
-		my $tree = $pt.build-tree( $parsed );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -98,8 +91,7 @@ subtest {
 		my $source = Q:to[_END_];
 / . /
 _END_
-		my $parsed = $pt.parse( $source );
-		my $tree = $pt.build-tree( $parsed );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;

@@ -17,8 +17,8 @@ subtest {
 		plan 3;
 
 		subtest {
-			my $p = $pt.parse( Q{my Int $a} );
-			my $tree = $pt.build-tree( $p );
+			my $source = Q{my Int $a};
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ),
 				Q{my Int $a}, Q{formatted};
 
@@ -26,8 +26,8 @@ subtest {
 		}, Q{regular};
 
 		subtest {
-			my $p = $pt.parse( Q{my Int:U $a} );
-			my $tree = $pt.build-tree( $p );
+			my $source = Q{my Int:U $a};
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ),
 				Q{my Int:U $a}, Q{formatted};
 
@@ -35,8 +35,8 @@ subtest {
 		}, Q{undefined};
 
 		subtest {
-			my $p = $pt.parse( Q{my Int:D $a = 0} );
-			my $tree = $pt.build-tree( $p );
+			my $source = Q{my Int:D $a = 0};
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ),
 				Q{my Int:D $a = 0},
 				Q{formatted};
@@ -49,8 +49,8 @@ subtest {
 		plan 1;
 
 		subtest {
-			my $p = $pt.parse( Q{my $a where 1} );
-			my $tree = $pt.build-tree( $p );
+			my $source = Q{my $a where 1};
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ),
 				Q{my $a where 1}, Q{formatted};
 
@@ -67,8 +67,7 @@ subtest {
 
 		subtest {
 			my $source = Q{sub foo returns Int {}};
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -77,8 +76,7 @@ subtest {
 			my $source = Q:to[_END_];
 sub foo returns Int {}
 _END_
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;

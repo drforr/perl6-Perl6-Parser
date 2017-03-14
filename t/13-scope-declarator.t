@@ -33,8 +33,7 @@ subtest {
 		my $source = Q:to[_END_];
 my$x
 _END_
-		my $p = $pt.parse( $source );
-		my $tree = $pt.build-tree( $p );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -44,8 +43,7 @@ _END_
 		my $source = Q:to[_END_];
 my     $x
 _END_
-		my $p = $pt.parse( $source );
-		my $tree = $pt.build-tree( $p );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -59,8 +57,7 @@ subtest {
 		my $source = Q:to[_END_];
 our$x
 _END_
-		my $p = $pt.parse( $source );
-		my $tree = $pt.build-tree( $p );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -70,8 +67,7 @@ _END_
 		my $source = Q:to[_END_];
 our     $x
 _END_
-		my $p = $pt.parse( $source );
-		my $tree = $pt.build-tree( $p );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -85,8 +81,7 @@ subtest {
 		my $source = Q:to[_END_];
 class Foo{has$x}
 _END_
-		my $p = $pt.parse( $source );
-		my $tree = $pt.build-tree( $p );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -96,8 +91,7 @@ _END_
 		my $source = Q:to[_END_];
 class Foo{has     $x}
 _END_
-		my $p = $pt.parse( $source );
-		my $tree = $pt.build-tree( $p );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -113,8 +107,7 @@ _END_
 #
 #	subtest {
 #		my $source = Q{class Foo is repr('CStruct'){HAS int $x}};
-#		my $p = $pt.parse( $source );
-#		my $tree = $pt.build-tree( $p );
+#		my $tree = $pt.to-tree( $source );
 #		is $pt.to-string( $tree ), $source, Q{formatted};
 #
 #		done-testing;
@@ -124,8 +117,7 @@ _END_
 #		my $source = Q:to[_END_];
 #class Foo is repr( 'CStruct' ) { HAS int $x }
 #_END_
-#		my $p = $pt.parse( $source );
-#		my $tree = $pt.build-tree( $p );
+#		my $tree = $pt.to-tree( $source );
 #		is $pt.to-string( $tree ), $source, Q{formatted};
 #
 #		done-testing;
@@ -141,8 +133,7 @@ subtest {
 
 	subtest {
 		my $source = Q{state$x};
-		my $p = $pt.parse( $source );
-		my $tree = $pt.build-tree( $p );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
@@ -152,8 +143,7 @@ subtest {
 		my $source = Q:to[_END_];
 state     $x
 _END_
-		my $p = $pt.parse( $source );
-		my $tree = $pt.build-tree( $p );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;

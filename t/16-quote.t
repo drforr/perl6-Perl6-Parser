@@ -45,8 +45,7 @@ subtest {
 			my $source = Q{qqww :to <END>
 pi
 END};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
@@ -65,8 +64,7 @@ END};
 			my $source = Q{qqww :to<END>
 pi
 END};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting::QuoteProtection },
@@ -80,8 +78,7 @@ END};
 			my $source = Q{qqww:to <END>
 pi
 END};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting::QuoteProtection },
@@ -95,8 +92,7 @@ END};
 			my $source = Q{qqww:to<END>
 pi
 END};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting::QuoteProtection },
@@ -112,8 +108,7 @@ END};
 	subtest {
 		subtest {
 			my $source = Q{qqww :w <pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting::QuoteProtection },
@@ -125,8 +120,7 @@ END};
 
 		subtest {
 			my $source = Q{qqww :w<pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting::QuoteProtection },
@@ -138,8 +132,7 @@ END};
 
 		subtest {
 			my $source = Q{qqww:w <pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting::QuoteProtection },
@@ -151,8 +144,7 @@ END};
 
 		subtest {
 			my $source = Q{qqww:w<pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting::QuoteProtection },
@@ -168,8 +160,7 @@ END};
 	subtest {
 		subtest {
 			my $source = Q{qqww :x <pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting::QuoteProtection },
@@ -181,8 +172,7 @@ END};
 
 		subtest {
 			my $source = Q{qqww :x<pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting::QuoteProtection },
@@ -194,8 +184,7 @@ END};
 
 		subtest {
 			my $source = Q{qqww:x <pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting::QuoteProtection },
@@ -207,8 +196,7 @@ END};
 
 		subtest {
 			my $source = Q{qqww:x<pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting::QuoteProtection },
@@ -223,8 +211,7 @@ END};
 
 	subtest {
 		my $source = Q{qqww <pi>};
-		my $parsed = $pt.parse( $source );
-		my $tree = $pt.build-tree( $parsed );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
 		ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting::QuoteProtection },
@@ -236,8 +223,7 @@ END};
 
 	subtest {
 		my $source = Q{qqww<pi>};
-		my $parsed = $pt.parse( $source );
-		my $tree = $pt.build-tree( $parsed );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
 		ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting::QuoteProtection },
@@ -262,8 +248,7 @@ subtest {
 			my $source = Q{qqw :to <END>
 pi
 END};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting },
@@ -277,8 +262,7 @@ END};
 			my $source = Q{qqw :to<END>
 pi
 END};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting },
@@ -292,8 +276,7 @@ END};
 			my $source = Q{qqw:to <END>
 pi
 END};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting },
@@ -307,8 +290,7 @@ END};
 			my $source = Q{qqw:to<END>
 pi
 END};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting },
@@ -324,8 +306,7 @@ END};
 	subtest {
 		subtest {
 			my $source = Q{qqw :w <pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting },
@@ -337,8 +318,7 @@ END};
 
 		subtest {
 			my $source = Q{qqw :w<pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting },
@@ -350,8 +330,7 @@ END};
 
 		subtest {
 			my $source = Q{qqw:w <pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting },
@@ -363,8 +342,7 @@ END};
 
 		subtest {
 			my $source = Q{qqw:w<pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting },
@@ -380,8 +358,7 @@ END};
 	subtest {
 		subtest {
 			my $source = Q{qqw :x <pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting },
@@ -393,8 +370,7 @@ END};
 
 		subtest {
 			my $source = Q{qqw :x<pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting },
@@ -406,8 +382,7 @@ END};
 
 		subtest {
 			my $source = Q{qqw:x <pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting },
@@ -419,8 +394,7 @@ END};
 
 		subtest {
 			my $source = Q{qqw:x<pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting },
@@ -435,8 +409,7 @@ END};
 
 	subtest {
 		my $source = Q{qqw <pi>};
-		my $parsed = $pt.parse( $source );
-		my $tree = $pt.build-tree( $parsed );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
 		ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting },
@@ -448,8 +421,7 @@ END};
 
 	subtest {
 		my $source = Q{qqw<pi>};
-		my $parsed = $pt.parse( $source );
-		my $tree = $pt.build-tree( $parsed );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
 		ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting },
@@ -470,8 +442,7 @@ subtest {
 			my $source = Q{qqx :to <END>
 pi
 END};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Interpolation::Shell },
@@ -485,8 +456,7 @@ END};
 			my $source = Q{qqx :to<END>
 pi
 END};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Interpolation::Shell },
@@ -500,8 +470,7 @@ END};
 			my $source = Q{qqx:to <END>
 pi
 END};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Interpolation::Shell },
@@ -515,8 +484,7 @@ END};
 			my $source = Q{qqx:to<END>
 pi
 END};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Interpolation::Shell },
@@ -532,8 +500,7 @@ END};
 	subtest {
 		subtest {
 			my $source = Q{qqx :w <pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Interpolation::Shell },
@@ -545,8 +512,7 @@ END};
 
 		subtest {
 			my $source = Q{qqx :w<pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Interpolation::Shell },
@@ -558,8 +524,7 @@ END};
 
 		subtest {
 			my $source = Q{qqx:w <pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Interpolation::Shell },
@@ -571,8 +536,7 @@ END};
 
 		subtest {
 			my $source = Q{qqx:w<pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Interpolation::Shell },
@@ -588,8 +552,7 @@ END};
 	subtest {
 		subtest {
 			my $source = Q{qqx :x <pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Interpolation::Shell },
@@ -601,8 +564,7 @@ END};
 
 		subtest {
 			my $source = Q{qqx :x<pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Interpolation::Shell },
@@ -614,8 +576,7 @@ END};
 
 		subtest {
 			my $source = Q{qqx:x <pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Interpolation::Shell },
@@ -627,8 +588,7 @@ END};
 
 		subtest {
 			my $source = Q{qqx:x<pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Interpolation::Shell },
@@ -643,8 +603,7 @@ END};
 
 	subtest {
 		my $source = Q{qqx <pi>};
-		my $parsed = $pt.parse( $source );
-		my $tree = $pt.build-tree( $parsed );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
 		ok (grep { $_ ~~ Perl6::String::Interpolation::Shell },
@@ -656,8 +615,7 @@ END};
 
 	subtest {
 		my $source = Q{qqx<pi>};
-		my $parsed = $pt.parse( $source );
-		my $tree = $pt.build-tree( $parsed );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
 		ok (grep { $_ ~~ Perl6::String::Interpolation::Shell },
@@ -678,8 +636,7 @@ subtest {
 			my $source = Q{qww :to <END>
 pi
 END};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::WordQuoting::QuoteProtection },
@@ -693,8 +650,7 @@ END};
 			my $source = Q{qww :to<END>
 pi
 END};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::WordQuoting::QuoteProtection },
@@ -708,8 +664,7 @@ END};
 			my $source = Q{qww:to <END>
 pi
 END};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::WordQuoting::QuoteProtection },
@@ -723,8 +678,7 @@ END};
 			my $source = Q{qww:to<END>
 pi
 END};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::WordQuoting::QuoteProtection },
@@ -740,8 +694,7 @@ END};
 	subtest {
 		subtest {
 			my $source = Q{qww :w <pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::WordQuoting::QuoteProtection },
@@ -753,8 +706,7 @@ END};
 
 		subtest {
 			my $source = Q{qww :w<pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::WordQuoting::QuoteProtection },
@@ -766,8 +718,7 @@ END};
 
 		subtest {
 			my $source = Q{qww:w <pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::WordQuoting::QuoteProtection },
@@ -779,8 +730,7 @@ END};
 
 		subtest {
 			my $source = Q{qww:w<pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::WordQuoting::QuoteProtection },
@@ -796,8 +746,7 @@ END};
 	subtest {
 		subtest {
 			my $source = Q{qww :x <pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::WordQuoting::QuoteProtection },
@@ -809,8 +758,7 @@ END};
 
 		subtest {
 			my $source = Q{qww :x<pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::WordQuoting::QuoteProtection },
@@ -822,8 +770,7 @@ END};
 
 		subtest {
 			my $source = Q{qww:x <pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::WordQuoting::QuoteProtection },
@@ -835,8 +782,7 @@ END};
 
 		subtest {
 			my $source = Q{qww:x<pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::WordQuoting::QuoteProtection },
@@ -851,8 +797,7 @@ END};
 
 	subtest {
 		my $source = Q{qww <pi>};
-		my $parsed = $pt.parse( $source );
-		my $tree = $pt.build-tree( $parsed );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
 		ok (grep { $_ ~~ Perl6::String::WordQuoting::QuoteProtection },
@@ -864,8 +809,7 @@ END};
 
 	subtest {
 		my $source = Q{qww<pi>};
-		my $parsed = $pt.parse( $source );
-		my $tree = $pt.build-tree( $parsed );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
 		ok (grep { $_ ~~ Perl6::String::WordQuoting::QuoteProtection },
@@ -884,8 +828,7 @@ subtest {
 	subtest {
 		subtest {
 			my $source = Q{Qw :q <pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting },
@@ -897,8 +840,7 @@ subtest {
 
 		subtest {
 			my $source = Q{Qw :q<pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting },
@@ -910,8 +852,7 @@ subtest {
 
 		subtest {
 			my $source = Q{Qw:q <pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting },
@@ -923,8 +864,7 @@ subtest {
 
 		subtest {
 			my $source = Q{Qw:q<pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting },
@@ -942,8 +882,7 @@ subtest {
 			my $source = Q{Qw :to <END>
 pi
 END};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting },
@@ -957,8 +896,7 @@ END};
 			my $source = Q{Qw :to<END>
 pi
 END};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting },
@@ -972,8 +910,7 @@ END};
 			my $source = Q{Qw:to <END>
 pi
 END};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting },
@@ -987,8 +924,7 @@ END};
 			my $source = Q{Qw:to<END>
 pi
 END};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting },
@@ -1004,8 +940,7 @@ END};
 	subtest {
 		subtest {
 			my $source = Q{Qw :w <pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting },
@@ -1017,8 +952,7 @@ END};
 
 		subtest {
 			my $source = Q{Qw :w<pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting },
@@ -1030,8 +964,7 @@ END};
 
 		subtest {
 			my $source = Q{Qw:w <pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting },
@@ -1043,8 +976,7 @@ END};
 
 		subtest {
 			my $source = Q{Qw:w<pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting },
@@ -1060,8 +992,7 @@ END};
 	subtest {
 		subtest {
 			my $source = Q{Qw :x <pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting },
@@ -1073,8 +1004,7 @@ END};
 
 		subtest {
 			my $source = Q{Qw :x<pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting },
@@ -1086,8 +1016,7 @@ END};
 
 		subtest {
 			my $source = Q{Qw:x <pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting },
@@ -1099,8 +1028,7 @@ END};
 
 		subtest {
 			my $source = Q{Qw:x<pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting },
@@ -1115,8 +1043,7 @@ END};
 
 	subtest {
 		my $source = Q{Qw <pi>};
-		my $parsed = $pt.parse( $source );
-		my $tree = $pt.build-tree( $parsed );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
 		ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting },
@@ -1128,8 +1055,7 @@ END};
 
 	subtest {
 		my $source = Q{Qw<pi>};
-		my $parsed = $pt.parse( $source );
-		my $tree = $pt.build-tree( $parsed );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
 		ok (grep { $_ ~~ Perl6::String::Literal::WordQuoting },
@@ -1146,8 +1072,7 @@ subtest {
 	subtest {
 		subtest {
 			my $source = Q{Qx :q <pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Literal::Shell },
@@ -1159,8 +1084,7 @@ subtest {
 
 		subtest {
 			my $source = Q{Qx :q<pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Literal::Shell },
@@ -1172,8 +1096,7 @@ subtest {
 
 		subtest {
 			my $source = Q{Qx:q <pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Literal::Shell },
@@ -1185,8 +1108,7 @@ subtest {
 
 		subtest {
 			my $source = Q{Qx:q<pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Literal::Shell },
@@ -1204,8 +1126,7 @@ subtest {
 			my $source = Q{Qx :to <END>
 pi
 END};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Literal::Shell },
@@ -1219,8 +1140,7 @@ END};
 			my $source = Q{Qx :to<END>
 pi
 END};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Literal::Shell },
@@ -1234,8 +1154,7 @@ END};
 			my $source = Q{Qx:to <END>
 pi
 END};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Literal::Shell },
@@ -1249,8 +1168,7 @@ END};
 			my $source = Q{Qx:to<END>
 pi
 END};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Literal::Shell },
@@ -1266,8 +1184,7 @@ END};
 	subtest {
 		subtest {
 			my $source = Q{Qx :w <pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Literal::Shell },
@@ -1279,8 +1196,7 @@ END};
 
 		subtest {
 			my $source = Q{Qx :w<pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Literal::Shell },
@@ -1292,8 +1208,7 @@ END};
 
 		subtest {
 			my $source = Q{Qx:w <pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Literal::Shell },
@@ -1305,8 +1220,7 @@ END};
 
 		subtest {
 			my $source = Q{Qx:w<pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Literal::Shell },
@@ -1322,8 +1236,7 @@ END};
 	subtest {
 		subtest {
 			my $source = Q{Qx :x <pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Literal::Shell },
@@ -1335,8 +1248,7 @@ END};
 
 		subtest {
 			my $source = Q{Qx :x<pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Literal::Shell },
@@ -1348,8 +1260,7 @@ END};
 
 		subtest {
 			my $source = Q{Qx:x <pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Literal::Shell },
@@ -1361,8 +1272,7 @@ END};
 
 		subtest {
 			my $source = Q{Qx:x<pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Literal::Shell },
@@ -1377,8 +1287,7 @@ END};
 
 	subtest {
 		my $source = Q{Qx <pi>};
-		my $parsed = $pt.parse( $source );
-		my $tree = $pt.build-tree( $parsed );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
 		ok (grep { $_ ~~ Perl6::String::Literal::Shell },
@@ -1390,8 +1299,7 @@ END};
 
 	subtest {
 		my $source = Q{Qx<pi>};
-		my $parsed = $pt.parse( $source );
-		my $tree = $pt.build-tree( $parsed );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
 		ok (grep { $_ ~~ Perl6::String::Literal::Shell },
@@ -1408,8 +1316,7 @@ subtest {
 	subtest {
 		subtest {
 			my $source = Q{qq :w <pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Interpolation },
@@ -1421,8 +1328,7 @@ subtest {
 
 		subtest {
 			my $source = Q{qq :w<pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Interpolation },
@@ -1434,8 +1340,7 @@ subtest {
 
 		subtest {
 			my $source = Q{qq:w <pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Interpolation },
@@ -1447,8 +1352,7 @@ subtest {
 
 		subtest {
 			my $source = Q{qq:w<pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Interpolation },
@@ -1464,8 +1368,7 @@ subtest {
 	subtest {
 		subtest {
 			my $source = Q{qq :x <pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Interpolation },
@@ -1477,8 +1380,7 @@ subtest {
 
 		subtest {
 			my $source = Q{qq :x<pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Interpolation },
@@ -1490,8 +1392,7 @@ subtest {
 
 		subtest {
 			my $source = Q{qq:x <pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Interpolation },
@@ -1503,8 +1404,7 @@ subtest {
 
 		subtest {
 			my $source = Q{qq:x<pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Interpolation },
@@ -1519,8 +1419,7 @@ subtest {
 
 	subtest {
 		my $source = Q{qq <pi>};
-		my $parsed = $pt.parse( $source );
-		my $tree = $pt.build-tree( $parsed );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
 		ok (grep { $_ ~~ Perl6::String::Interpolation },
@@ -1532,8 +1431,7 @@ subtest {
 
 	subtest {
 		my $source = Q{qq<pi>};
-		my $parsed = $pt.parse( $source );
-		my $tree = $pt.build-tree( $parsed );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
 		ok (grep { $_ ~~ Perl6::String::Interpolation },
@@ -1554,8 +1452,7 @@ subtest {
 			my $source = Q{qw :to <END>
 pi
 END};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::WordQuoting },
@@ -1569,8 +1466,7 @@ END};
 			my $source = Q{qw :to<END>
 pi
 END};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::WordQuoting },
@@ -1584,8 +1480,7 @@ END};
 			my $source = Q{qw:to <END>
 pi
 END};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::WordQuoting },
@@ -1599,8 +1494,7 @@ END};
 			my $source = Q{qw:to<END>
 pi
 END};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::WordQuoting },
@@ -1616,8 +1510,7 @@ END};
 	subtest {
 		subtest {
 			my $source = Q{qw :w <pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::WordQuoting },
@@ -1629,8 +1522,7 @@ END};
 
 		subtest {
 			my $source = Q{qw :w<pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::WordQuoting },
@@ -1642,8 +1534,7 @@ END};
 
 		subtest {
 			my $source = Q{qw:w <pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::WordQuoting },
@@ -1655,8 +1546,7 @@ END};
 
 		subtest {
 			my $source = Q{qw:w<pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::WordQuoting },
@@ -1672,8 +1562,7 @@ END};
 	subtest {
 		subtest {
 			my $source = Q{qw :x <pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::WordQuoting },
@@ -1685,8 +1574,7 @@ END};
 
 		subtest {
 			my $source = Q{qw :x<pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::WordQuoting },
@@ -1698,8 +1586,7 @@ END};
 
 		subtest {
 			my $source = Q{qw:x <pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::WordQuoting },
@@ -1711,8 +1598,7 @@ END};
 
 		subtest {
 			my $source = Q{qw:x<pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::WordQuoting },
@@ -1727,8 +1613,7 @@ END};
 
 	subtest {
 		my $source = Q{qw <pi>};
-		my $parsed = $pt.parse( $source );
-		my $tree = $pt.build-tree( $parsed );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
 		ok (grep { $_ ~~ Perl6::String::WordQuoting },
@@ -1740,8 +1625,7 @@ END};
 
 	subtest {
 		my $source = Q{qw<pi>};
-		my $parsed = $pt.parse( $source );
-		my $tree = $pt.build-tree( $parsed );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
 		ok (grep { $_ ~~ Perl6::String::WordQuoting },
@@ -1762,8 +1646,7 @@ subtest {
 			my $source = Q{qx :to <END>
 pi
 END};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Shell },
@@ -1777,8 +1660,7 @@ END};
 			my $source = Q{qx :to<END>
 pi
 END};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Shell },
@@ -1792,8 +1674,7 @@ END};
 			my $source = Q{qx:to <END>
 pi
 END};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Shell },
@@ -1807,8 +1688,7 @@ END};
 			my $source = Q{qx:to<END>
 pi
 END};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Shell },
@@ -1824,8 +1704,7 @@ END};
 	subtest {
 		subtest {
 			my $source = Q{qx :w <pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Shell },
@@ -1837,8 +1716,7 @@ END};
 
 		subtest {
 			my $source = Q{qx :w<pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Shell },
@@ -1850,8 +1728,7 @@ END};
 
 		subtest {
 			my $source = Q{qx:w <pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Shell },
@@ -1863,8 +1740,7 @@ END};
 
 		subtest {
 			my $source = Q{qx:w<pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Shell },
@@ -1880,8 +1756,7 @@ END};
 	subtest {
 		subtest {
 			my $source = Q{qx :x <pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Shell },
@@ -1893,8 +1768,7 @@ END};
 
 		subtest {
 			my $source = Q{qx :x<pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Shell },
@@ -1906,8 +1780,7 @@ END};
 
 		subtest {
 			my $source = Q{qx:x <pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Shell },
@@ -1919,8 +1792,7 @@ END};
 
 		subtest {
 			my $source = Q{qx:x<pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Shell },
@@ -1935,8 +1807,7 @@ END};
 
 	subtest {
 		my $source = Q{qx <pi>};
-		my $parsed = $pt.parse( $source );
-		my $tree = $pt.build-tree( $parsed );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
 		ok (grep { $_ ~~ Perl6::String::Shell },
@@ -1948,8 +1819,7 @@ END};
 
 	subtest {
 		my $source = Q{qx<pi>};
-		my $parsed = $pt.parse( $source );
-		my $tree = $pt.build-tree( $parsed );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
 		ok (grep { $_ ~~ Perl6::String::Shell },
@@ -1966,8 +1836,7 @@ subtest {
 	subtest {
 		subtest {
 			my $source = Q{Q :q <pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Literal },
@@ -1979,8 +1848,7 @@ subtest {
 
 		subtest {
 			my $source = Q{Q :q<pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Literal },
@@ -1992,8 +1860,7 @@ subtest {
 
 		subtest {
 			my $source = Q{Q:q <pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Literal },
@@ -2005,8 +1872,7 @@ subtest {
 
 		subtest {
 			my $source = Q{Q:q<pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Literal },
@@ -2025,8 +1891,7 @@ subtest {
 pi
 END
 };
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Literal },
@@ -2041,8 +1906,7 @@ END
 pi
 END
 };
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Literal },
@@ -2057,8 +1921,7 @@ END
 pi
 END
 };
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Literal },
@@ -2073,8 +1936,7 @@ END
 pi
 END
 };
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Literal },
@@ -2090,8 +1952,7 @@ END
 	subtest {
 		subtest {
 			my $source = Q{Q :w <pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Literal },
@@ -2103,8 +1964,7 @@ END
 
 		subtest {
 			my $source = Q{Q :w<pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Literal },
@@ -2116,8 +1976,7 @@ END
 
 		subtest {
 			my $source = Q{Q:w <pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Literal },
@@ -2129,8 +1988,7 @@ END
 
 		subtest {
 			my $source = Q{Q:w<pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Literal },
@@ -2146,8 +2004,7 @@ END
 	subtest {
 		subtest {
 			my $source = Q{Q :x <pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Literal },
@@ -2159,8 +2016,7 @@ END
 
 		subtest {
 			my $source = Q{Q :x<pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Literal },
@@ -2172,8 +2028,7 @@ END
 
 		subtest {
 			my $source = Q{Q:x <pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Literal },
@@ -2185,8 +2040,7 @@ END
 
 		subtest {
 			my $source = Q{Q:x<pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Literal },
@@ -2201,8 +2055,7 @@ END
 
 	subtest {
 		my $source = Q{Q <pi>};
-		my $parsed = $pt.parse( $source );
-		my $tree = $pt.build-tree( $parsed );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
 		ok (grep { $_ ~~ Perl6::String::Literal },
@@ -2214,8 +2067,7 @@ END
 
 	subtest {
 		my $source = Q{Q<pi>};
-		my $parsed = $pt.parse( $source );
-		my $tree = $pt.build-tree( $parsed );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
 		ok (grep { $_ ~~ Perl6::String::Literal },
@@ -2237,8 +2089,7 @@ subtest {
 pi
 END
 };
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			# XXX Make sure to check the here-doc contents exist
@@ -2254,8 +2105,7 @@ END
 pi
 END
 };
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Escaping },
@@ -2270,8 +2120,7 @@ END
 pi
 END
 };
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Escaping },
@@ -2286,8 +2135,7 @@ END
 pi
 END
 };
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Escaping },
@@ -2303,8 +2151,7 @@ END
 	subtest {
 		subtest {
 			my $source = Q{q :w <pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Escaping },
@@ -2316,8 +2163,7 @@ END
 
 		subtest {
 			my $source = Q{q :w<pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Escaping },
@@ -2329,8 +2175,7 @@ END
 
 		subtest {
 			my $source = Q{q:w <pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Escaping },
@@ -2342,8 +2187,7 @@ END
 
 		subtest {
 			my $source = Q{q:w<pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Escaping },
@@ -2359,8 +2203,7 @@ END
 	subtest {
 		subtest {
 			my $source = Q{q :x <pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Escaping },
@@ -2372,8 +2215,7 @@ END
 
 		subtest {
 			my $source = Q{q :x<pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Escaping },
@@ -2385,8 +2227,7 @@ END
 
 		subtest {
 			my $source = Q{q:x <pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Escaping },
@@ -2398,8 +2239,7 @@ END
 
 		subtest {
 			my $source = Q{q:x<pi>};
-			my $parsed = $pt.parse( $source );
-			my $tree = $pt.build-tree( $parsed );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::Escaping },
@@ -2414,8 +2254,7 @@ END
 
 	subtest {
 		my $source = Q{q <pi>};
-		my $parsed = $pt.parse( $source );
-		my $tree = $pt.build-tree( $parsed );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
 		ok (grep { $_ ~~ Perl6::String::Escaping },
@@ -2427,8 +2266,7 @@ END
 
 	subtest {
 		my $source = Q{q<pi>};
-		my $parsed = $pt.parse( $source );
-		my $tree = $pt.build-tree( $parsed );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
 		ok (grep { $_ ~~ Perl6::String::Escaping },
@@ -2443,8 +2281,7 @@ END
 
 subtest {
 	my $source = Q{<pi>};
-	my $parsed = $pt.parse( $source );
-	my $tree = $pt.build-tree( $parsed );
+	my $tree = $pt.to-tree( $source );
 	is $pt.to-string( $tree ), $source, Q{formatted};
 	ok (grep { $_ ~~ Perl6::String::WordQuoting },
 			$tree.child.[0].child),
@@ -2455,8 +2292,7 @@ subtest {
 
 subtest {
 	my $source = Q{｢pi｣};
-	my $parsed = $pt.parse( $source );
-	my $tree = $pt.build-tree( $parsed );
+	my $tree = $pt.to-tree( $source );
 	is $pt.to-string( $tree ), $source, Q{formatted};
 	ok $tree.child.[0].child.[0] ~~ Perl6::String::Literal;
 	is $tree.child.[0].child.[0].delimiter-start, Q{｢}, Q{start delimiter};
@@ -2467,8 +2303,7 @@ subtest {
 
 subtest {
 	my $source = Q{"pi"};
-	my $parsed = $pt.parse( $source );
-	my $tree = $pt.build-tree( $parsed );
+	my $tree = $pt.to-tree( $source );
 	is $pt.to-string( $tree ), $source, Q{formatted};
 	ok $tree.child.[0].child.[0] ~~ Perl6::String::Interpolation;
 	is $tree.child.[0].child.[0].delimiter-start, Q{"}, Q{start delimiter};
@@ -2479,8 +2314,7 @@ subtest {
 
 subtest {
 	my $source = Q{'pi'};
-	my $parsed = $pt.parse( $source );
-	my $tree = $pt.build-tree( $parsed );
+	my $tree = $pt.to-tree( $source );
 	is $pt.to-string( $tree ), $source, Q{formatted};
 	ok $tree.child.[0].child.[0] ~~ Perl6::String::Escaping;
 	is $tree.child.[0].child.[0].delimiter-start, Q{'}, Q{start delimiter};
@@ -2516,8 +2350,7 @@ Hey,
     }
     📝
 END
-	my $parsed = $pt.parse( $source );
-	my $tree = $pt.build-tree( $parsed );
+	my $tree = $pt.to-tree( $source );
 	is $pt.to-string( $tree ), $source, Q{formatted};
 	ok (grep { $_ ~~ Perl6::String::Escaping },
 			$tree.child.[0].child),
