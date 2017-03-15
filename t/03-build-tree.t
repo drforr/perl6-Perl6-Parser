@@ -18,16 +18,16 @@ my $*FALL-THROUGH = True;
 subtest {
 	plan 1;
 	
-	my $p = $pt.parse( Q{} );
-	my $t = $pt.build-tree( $p );
+	my $source = Q{};
+	my $t = $pt.to-tree( $source );
 	isa-ok $t, Perl6::Document;
 }, Q{no ws};
 
 subtest {
 	plan 3;
 	
-	my $p = $pt.parse( Q{ } );
-	my $t = $pt.build-tree( $p );
+	my $source = Q{ };
+	my $t = $pt.to-tree( $source );
 	isa-ok $t, Perl6::Document;
 	isa-ok $t.child.[0], Perl6::Statement;
 	isa-ok $t.child.[0].child.[0], Perl6::WS;
@@ -36,8 +36,8 @@ subtest {
 subtest {
 	plan 4;
 
-	my $p = $pt.parse( Q{my$a} );
-	my $t = $pt.build-tree( $p );
+	my $source = Q{my$a};
+	my $t = $pt.to-tree( $source );
 
 	isa-ok $t, Perl6::Document;
 	isa-ok $t.child.[0], Perl6::Statement;
@@ -48,8 +48,8 @@ subtest {
 subtest {
 	plan 5;
 
-	my $p = $pt.parse( Q{ my$a} );
-	my $t = $pt.build-tree( $p );
+	my $source = Q{ my$a};
+	my $t = $pt.to-tree( $source );
 
 	isa-ok $t, Perl6::Document;
 	isa-ok $t.child.[0], Perl6::WS;
@@ -61,8 +61,8 @@ subtest {
 subtest {
 	plan 5;
 
-	my $p = $pt.parse( Q{my $a} );
-	my $t = $pt.build-tree( $p );
+	my $source = Q{my $a};
+	my $t = $pt.to-tree( $source );
 
 	isa-ok $t, Perl6::Document;
 	isa-ok $t.child.[0], Perl6::Statement;
@@ -74,8 +74,8 @@ subtest {
 subtest {
 	plan 5;
 
-	my $p = $pt.parse( Q{my$a;} );
-	my $t = $pt.build-tree( $p );
+	my $source = Q{my$a;};
+	my $t = $pt.to-tree( $source );
 
 	isa-ok $t, Perl6::Document;
 	isa-ok $t.child.[0], Perl6::Statement;
@@ -87,8 +87,8 @@ subtest {
 subtest {
 	plan 6;
 
-	my $p = $pt.parse( Q{my $a;} );
-	my $t = $pt.build-tree( $p );
+	my $source = Q{my $a;};
+	my $t = $pt.to-tree( $source );
 
 	isa-ok $t, Perl6::Document;
 	isa-ok $t.child.[0], Perl6::Statement;
@@ -101,8 +101,8 @@ subtest {
 subtest {
 	plan 9;
 
-	my $p = $pt.parse( Q{my $a = 1} );
-	my $t = $pt.build-tree( $p );
+	my $source = Q{my $a = 1};
+	my $t = $pt.to-tree( $source );
 
 	isa-ok $t, Perl6::Document;
 	isa-ok $t.child.[0], Perl6::Statement;
@@ -118,8 +118,8 @@ subtest {
 subtest {
 	plan 13;
 
-	my $p = $pt.parse( Q{my $a = 1 + 2} );
-	my $t = $pt.build-tree( $p );
+	my $source = Q{my $a = 1 + 2};
+	my $t = $pt.to-tree( $source );
 
 	isa-ok $t, Perl6::Document;
 	isa-ok $t.child.[0], Perl6::Statement;

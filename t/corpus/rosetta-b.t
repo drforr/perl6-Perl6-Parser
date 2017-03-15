@@ -1152,6 +1152,4 @@ _END_
 	done-testing;
 }, Q{Bulls and cows / player};
 
-done-testing;
-
 # vim: ft=perl6

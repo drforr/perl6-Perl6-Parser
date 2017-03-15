@@ -38,10 +38,8 @@ sub check-node(
 subtest {
 	my $source = Q{(3);2;1};
 	my $edited = Q{();2;1};
-	my $p = $pt.parse( $source );
-	my $tree = $pt.build-tree( $p );
+	my $tree = $pt.to-tree( $source );
 	$ppf.thread( $tree );
-#say $pt.dump-tree( $tree );
 	my $head = $ppf.flatten( $tree );
 
 	my $walk-me = $head;
@@ -135,10 +133,8 @@ subtest {
 subtest {
 	my $source = Q{(3);2;1};
 	my $edited = Q{(42);2;1};
-	my $p = $pt.parse( $source );
-	my $tree = $pt.build-tree( $p );
+	my $tree = $pt.to-tree( $source );
 	$ppf.thread( $tree );
-#say $pt.dump-tree( $tree );
 	my $head = $ppf.flatten( $tree );
 
 	my $walk-me = $head;
@@ -235,10 +231,8 @@ subtest {
 subtest {
 	my $source = Q{(3);2;1};
 	my $edited = Q{(3);2;};
-	my $p = $pt.parse( $source );
-	my $tree = $pt.build-tree( $p );
+	my $tree = $pt.to-tree( $source );
 	$ppf.thread( $tree );
-#say $pt.dump-tree( $tree );
 	my $head = $ppf.flatten( $tree );
 
 	my $walk-me = $head;
@@ -292,10 +286,8 @@ subtest {
 subtest {
 	my $source = Q{();2;1};
 	my $edited = Q{(3);2;1};
-	my $p = $pt.parse( $source );
-	my $tree = $pt.build-tree( $p );
+	my $tree = $pt.to-tree( $source );
 	$ppf.thread( $tree );
-#say $pt.dump-tree( $tree );
 	my $head = $ppf.flatten( $tree );
 
 	my $walk-me = $head;
@@ -368,10 +360,8 @@ subtest {
 subtest {
 	my $source = Q{();2;1};
 	my $edited = Q{(3);2;1};
-	my $p = $pt.parse( $source );
-	my $tree = $pt.build-tree( $p );
+	my $tree = $pt.to-tree( $source );
 	$ppf.thread( $tree );
-#say $pt.dump-tree( $tree );
 	my $head = $ppf.flatten( $tree );
 
 	my $walk-me = $head;

@@ -557,6 +557,6 @@ _END_
 	done-testing;
 }, Q{More comma-separated lists};
 
-done-testing;
+done-testing; # Because we're going to be adding tests quite often.
 
 # vim: ft=perl6

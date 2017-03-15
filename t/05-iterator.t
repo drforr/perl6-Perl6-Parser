@@ -23,7 +23,6 @@ sub make-list {
 subtest {
 	my $tree = make-decimal( '27' );
 	$ppf.thread( $tree );
-#say $pt.dump-tree( $tree );
 
 	is $tree.parent,
 		$tree;
@@ -42,7 +41,6 @@ subtest {
 subtest {
 	my $tree = make-list();
 	$ppf.thread( $tree );
-#say $pt.dump-tree( $tree );
 
 	is $tree.parent,
 		$tree;
@@ -67,7 +65,6 @@ subtest {
 		)
 	);
 	$ppf.thread( $tree );
-#say $pt.dump-tree( $tree );
 
 	is $tree.parent,
 		$tree;
@@ -100,7 +97,6 @@ subtest {
 			)
 		);
 	$ppf.thread( $tree );
-#say $pt.dump-tree( $tree );
 
 	is $tree.parent,
 		$tree;
@@ -146,7 +142,6 @@ subtest {
 			)
 		);
 	$ppf.thread( $tree );
-#say $pt.dump-tree( $tree );
 
 	is $tree.parent,
 		$tree;
@@ -195,7 +190,6 @@ subtest {
 			)
 		);
 	$ppf.thread( $tree );
-#say $pt.dump-tree( $tree );
 
 	is $tree.parent,
 		$tree;
@@ -230,10 +224,8 @@ subtest {
 
 subtest {
 	my $source = Q{(1);2;1};
-	my $p = $pt.parse( $source );
-	my $tree = $pt.build-tree( $p );
+	my $tree = $pt.to-tree( $source );
 	$ppf.thread( $tree );
-#say $pt.dump-tree( $tree );
 	is $pt.to-string( $tree ), $source, Q{formatted};
 
 	is $tree.parent,
@@ -320,10 +312,8 @@ subtest {
 subtest {
 	my $source = Q{(1);2;1};
 	my $ecruos = Q{1;2;)1(};
-	my $p = $pt.parse( $source );
-	my $tree = $pt.build-tree( $p );
+	my $tree = $pt.to-tree( $source );
 	$ppf.thread( $tree );
-#say $pt.dump-tree( $tree );
 
 	my $head = $tree;
 	my $iterated = '';
@@ -348,10 +338,8 @@ subtest {
 subtest {
 	my $source = Q{(3);2;1};
 	my $ecruos = Q{1;2;(3)};
-	my $p = $pt.parse( $source );
-	my $tree = $pt.build-tree( $p );
+	my $tree = $pt.to-tree( $source );
 	$ppf.thread( $tree );
-#say $pt.dump-tree( $tree );
 	my $head = $ppf.flatten( $tree );
 
 	ok $head.parent ~~ Perl6::Document;

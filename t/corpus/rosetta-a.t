@@ -1405,5 +1405,4 @@ _END_
 	done-testing;
 }, Q{Averages/simple moving average};
 
-done-testing;
 # vim: ft=perl6

@@ -507,6 +507,4 @@ _END_
 	done-testing;
 }, Q{99 bottles of beer};
 
-done-testing;
-
 # vim: ft=perl6
