@@ -141,7 +141,7 @@ Now we turn to the rather bewildering array of methods on the C<Perl6::WS> class
 
 =begin METHODS
 
-=item roundtrip( Str $perl-code ) returns Perl6::Parser::Root
+=item _roundtrip( Str $perl-code ) returns Perl6::Parser::Root
 
 Given a string containing valid Perl 6 code ... well, return that code. This
 is mostly a shortcut for testing purposes, and wil probably be moved out of the
@@ -323,7 +323,7 @@ my role Debugging {
 
 my role Testing {
 
-	method roundtrip( Str $source ) {
+	method _roundtrip( Str $source ) {
 		my $parsed    = self.parse( $source );
 		my $valid     = self.validate( $parsed );
 		my $tree      = self.build-tree( $parsed );
