@@ -372,12 +372,12 @@ subtest {
 	my $iterated = '';
 
 	for Seq.new( $iter ) {
-		$iterated ~= $_.is-leaf ?? $_.content !! '';
+		$iterated ~= $_.content;
 	}
 	is $iterated, $source, Q{pull-one returns complete list};
 
 	done-testing;
-}, Q{iterator pull-one};
+}, Q{default iterator pull-one};
 
 #subtest {
 #	my $source = Q{();2;1;};
