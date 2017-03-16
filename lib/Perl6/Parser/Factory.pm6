@@ -226,10 +226,25 @@ Should you brave the internals in search of a missing term, the first thing you 
 =end pod
 
 class Perl6::Element {
-	has Int $.from is required is rw;
-	has Int $.to is required is rw;
-	has $.factory-line-number; # Purely a debugging aid.
+	
+	# .from and .to are the start glyph and (one after) the end glyph
+	# of the token or sequence in the file.
+	#
+	has Int $.from is required is rw = 0;
+	has Int $.to is required is rw = 0;
 
+	# Debugging aide to let anyone interested in the internals jump
+	# directly to the code that generates the token.
+	#
+	has $.factory-line-number;
+
+	# Links to the previous and next node, along with up and down the
+	# tree.
+	#
+	# These *may* go away if I choose to rely more on the iterator, and
+	# you'll need to use the iterator method to get a sequence of
+	# tokens.
+	#
 	has Perl6::Element $.next is rw;
 	has Perl6::Element $.previous is rw;
 
@@ -711,7 +726,7 @@ class Perl6::Sir-Not-Appearing-In-This-Statement {
 	also is Perl6::Element;
 
 	also does Leaf;
-	has $.content; # XXX because it's not quite a token.
+	has $.content; # because it's not quite a token.
 
 	method to-string returns Str {
 		~$.content
