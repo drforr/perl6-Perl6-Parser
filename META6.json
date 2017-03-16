@@ -3,7 +3,7 @@
    "tags" : [
 		"parse",
 		"parser",
-		"parsing",
+		"parsing"
    ],
    "provides" : {
       "Perl6::Parser" : "lib/Perl6/Parser.pm6"
