@@ -46,16 +46,14 @@ subtest {
 pi
 END};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok $tree.child.[0].child.[0] ~~
+			ok $node ~~
 				Perl6::String::Interpolation::WordQuoting::QuoteProtection;
-			is $tree.child.[0].child.[0].quote, Q{qqww},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{all intervening ws};
@@ -65,16 +63,14 @@ END};
 pi
 END};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok $tree.child.[0].child.[0] ~~
+			ok $node ~~
 				Perl6::String::Interpolation::WordQuoting::QuoteProtection;
-			is $tree.child.[0].child.[0].quote, Q{qqww},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{leading intervening ws};
@@ -84,16 +80,14 @@ END};
 pi
 END};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok $tree.child.[0].child.[0] ~~
+			ok $node ~~
 				Perl6::String::Interpolation::WordQuoting::QuoteProtection;
-			is $tree.child.[0].child.[0].quote, Q{qqww},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{trailing intervening ws};
@@ -103,16 +97,14 @@ END};
 pi
 END};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Interpolation::WordQuoting::QuoteProtection;
-			is $tree.child.[0].child.[0].quote, Q{qqww},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{no intervening ws};
@@ -124,16 +116,14 @@ END};
 		subtest {
 			my $source = Q{qqww :w <pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Interpolation::WordQuoting::QuoteProtection;
-			is $tree.child.[0].child.[0].quote, Q{qqww},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{all intervening ws};
@@ -141,16 +131,14 @@ END};
 		subtest {
 			my $source = Q{qqww :w<pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Interpolation::WordQuoting::QuoteProtection;
-			is $tree.child.[0].child.[0].quote, Q{qqww},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{leading intervening ws};
@@ -158,16 +146,14 @@ END};
 		subtest {
 			my $source = Q{qqww:w <pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Interpolation::WordQuoting::QuoteProtection;
-			is $tree.child.[0].child.[0].quote, Q{qqww},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{trailing intervening ws};
@@ -175,16 +161,14 @@ END};
 		subtest {
 			my $source = Q{qqww:w<pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Interpolation::WordQuoting::QuoteProtection;
-			is $tree.child.[0].child.[0].quote, Q{qqww},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{no intervening ws};
@@ -196,16 +180,14 @@ END};
 		subtest {
 			my $source = Q{qqww :x <pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Interpolation::WordQuoting::QuoteProtection;
-			is $tree.child.[0].child.[0].quote, Q{qqww},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{all intervening ws};
@@ -213,16 +195,14 @@ END};
 		subtest {
 			my $source = Q{qqww :x<pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Interpolation::WordQuoting::QuoteProtection;
-			is $tree.child.[0].child.[0].quote, Q{qqww},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{leading intervening ws};
@@ -230,16 +210,14 @@ END};
 		subtest {
 			my $source = Q{qqww:x <pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Interpolation::WordQuoting::QuoteProtection;
-			is $tree.child.[0].child.[0].quote, Q{qqww},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{trailing intervening ws};
@@ -247,16 +225,14 @@ END};
 		subtest {
 			my $source = Q{qqww:x<pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Interpolation::WordQuoting::QuoteProtection;
-			is $tree.child.[0].child.[0].quote, Q{qqww},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{no intervening ws};
@@ -267,16 +243,14 @@ END};
 	subtest {
 		my $source = Q{qqww <pi>};
 		my $tree = $pt.to-tree( $source );
+		my $node = $tree.child.[0].child.[0];
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
 		ok $tree.child.[0].child.[0] ~~
 			Perl6::String::Interpolation::WordQuoting::QuoteProtection;
-		is $tree.child.[0].child.[0].quote, Q{qqww},
-			Q{quote name};
-		is $tree.child.[0].child.[0].delimiter-start, Q{<},
-			Q{start delimiter};
-		is $tree.child.[0].child.[0].delimiter-end, Q{>},
-			Q{end delimiter};
+		is $node.quote, Q{qqww}, Q{quote name};
+		is $node.delimiter-start, Q{<}, Q{start delimiter};
+		is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 		done-testing;
 	}, Q{ws, no adverbs};
@@ -284,16 +258,14 @@ END};
 	subtest {
 		my $source = Q{qqww<pi>};
 		my $tree = $pt.to-tree( $source );
+		my $node = $tree.child.[0].child.[0];
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
 		ok $tree.child.[0].child.[0] ~~
 			Perl6::String::Interpolation::WordQuoting::QuoteProtection;
-		is $tree.child.[0].child.[0].quote, Q{qqww},
-			Q{quote name};
-		is $tree.child.[0].child.[0].delimiter-start, Q{<},
-			Q{start delimiter};
-		is $tree.child.[0].child.[0].delimiter-end, Q{>},
-			Q{end delimiter};
+		is $node.quote, Q{qqww}, Q{quote name};
+		is $node.delimiter-start, Q{<}, Q{start delimiter};
+		is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 		done-testing;
 	}, Q{no ws, no adverbs};
@@ -314,16 +286,14 @@ subtest {
 pi
 END};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Interpolation::WordQuoting;
-			is $tree.child.[0].child.[0].quote, Q{qqw},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{qqw}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{all intervening ws};
@@ -333,16 +303,14 @@ END};
 pi
 END};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Interpolation::WordQuoting;
-			is $tree.child.[0].child.[0].quote, Q{qqw},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{qqw}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{leading intervening ws};
@@ -352,16 +320,14 @@ END};
 pi
 END};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Interpolation::WordQuoting;
-			is $tree.child.[0].child.[0].quote, Q{qqw},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{qqw}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{trailing intervening ws};
@@ -371,16 +337,14 @@ END};
 pi
 END};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Interpolation::WordQuoting;
-			is $tree.child.[0].child.[0].quote, Q{qqw},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{qqw}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{no intervening ws};
@@ -392,16 +356,14 @@ END};
 		subtest {
 			my $source = Q{qqw :w <pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Interpolation::WordQuoting;
-			is $tree.child.[0].child.[0].quote, Q{qqw},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{qqw}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{all intervening ws};
@@ -409,16 +371,14 @@ END};
 		subtest {
 			my $source = Q{qqw :w<pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Interpolation::WordQuoting;
-			is $tree.child.[0].child.[0].quote, Q{qqw},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{qqw}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{leading intervening ws};
@@ -426,16 +386,14 @@ END};
 		subtest {
 			my $source = Q{qqw:w <pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Interpolation::WordQuoting;
-			is $tree.child.[0].child.[0].quote, Q{qqw},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{qqw}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{trailing intervening ws};
@@ -443,16 +401,14 @@ END};
 		subtest {
 			my $source = Q{qqw:w<pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Interpolation::WordQuoting;
-			is $tree.child.[0].child.[0].quote, Q{qqw},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{qqw}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{no intervening ws};
@@ -464,11 +420,14 @@ END};
 		subtest {
 			my $source = Q{qqw :x <pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
-			ok (grep { $_ ~~ Perl6::String::Interpolation::WordQuoting },
-					$tree.child.[0].child),
-				Q{found string};
+			ok $tree.child.[0].child.[0] ~~
+				Perl6::String::Interpolation::WordQuoting;
+			is $node.quote, Q{qqw}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{all intervening ws};
@@ -476,16 +435,14 @@ END};
 		subtest {
 			my $source = Q{qqw :x<pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Interpolation::WordQuoting;
-			is $tree.child.[0].child.[0].quote, Q{qqw},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{qqw}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{leading intervening ws};
@@ -493,16 +450,14 @@ END};
 		subtest {
 			my $source = Q{qqw:x <pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Interpolation::WordQuoting;
-			is $tree.child.[0].child.[0].quote, Q{qqw},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{qqw}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{trailing intervening ws};
@@ -510,16 +465,14 @@ END};
 		subtest {
 			my $source = Q{qqw:x<pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Interpolation::WordQuoting;
-			is $tree.child.[0].child.[0].quote, Q{qqw},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{qqw}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{no intervening ws};
@@ -530,16 +483,14 @@ END};
 	subtest {
 		my $source = Q{qqw <pi>};
 		my $tree = $pt.to-tree( $source );
+		my $node = $tree.child.[0].child.[0];
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
 		ok $tree.child.[0].child.[0] ~~
 			Perl6::String::Interpolation::WordQuoting;
-		is $tree.child.[0].child.[0].quote, Q{qqw},
-			Q{quote name};
-		is $tree.child.[0].child.[0].delimiter-start, Q{<},
-			Q{start delimiter};
-		is $tree.child.[0].child.[0].delimiter-end, Q{>},
-			Q{end delimiter};
+		is $node.quote, Q{qqw}, Q{quote name};
+		is $node.delimiter-start, Q{<}, Q{start delimiter};
+		is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 		done-testing;
 	}, Q{ws, no adverbs};
@@ -547,16 +498,14 @@ END};
 	subtest {
 		my $source = Q{qqw<pi>};
 		my $tree = $pt.to-tree( $source );
+		my $node = $tree.child.[0].child.[0];
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
 		ok $tree.child.[0].child.[0] ~~
 			Perl6::String::Interpolation::WordQuoting;
-		is $tree.child.[0].child.[0].quote, Q{qqw},
-			Q{quote name};
-		is $tree.child.[0].child.[0].delimiter-start, Q{<},
-			Q{start delimiter};
-		is $tree.child.[0].child.[0].delimiter-end, Q{>},
-			Q{end delimiter};
+		is $node.quote, Q{qqw}, Q{quote name};
+		is $node.delimiter-start, Q{<}, Q{start delimiter};
+		is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 		done-testing;
 	}, Q{no ws, no adverbs};
@@ -573,16 +522,14 @@ subtest {
 pi
 END};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Interpolation::Shell;
-			is $tree.child.[0].child.[0].quote, Q{qqx},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{qqx}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{all intervening ws};
@@ -592,16 +539,14 @@ END};
 pi
 END};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Interpolation::Shell;
-			is $tree.child.[0].child.[0].quote, Q{qqx},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{qqx}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{leading intervening ws};
@@ -611,16 +556,14 @@ END};
 pi
 END};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Interpolation::Shell;
-			is $tree.child.[0].child.[0].quote, Q{qqx},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{qqx}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{trailing intervening ws};
@@ -630,16 +573,14 @@ END};
 pi
 END};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Interpolation::Shell;
-			is $tree.child.[0].child.[0].quote, Q{qqx},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{qqx}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{no intervening ws};
@@ -651,16 +592,14 @@ END};
 		subtest {
 			my $source = Q{qqx :w <pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Interpolation::Shell;
-			is $tree.child.[0].child.[0].quote, Q{qqx},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{qqx}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{all intervening ws};
@@ -668,16 +607,14 @@ END};
 		subtest {
 			my $source = Q{qqx :w<pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Interpolation::Shell;
-			is $tree.child.[0].child.[0].quote, Q{qqx},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{qqx}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{leading intervening ws};
@@ -685,16 +622,14 @@ END};
 		subtest {
 			my $source = Q{qqx:w <pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Interpolation::Shell;
-			is $tree.child.[0].child.[0].quote, Q{qqx},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{qqx}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{trailing intervening ws};
@@ -702,16 +637,14 @@ END};
 		subtest {
 			my $source = Q{qqx:w<pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Interpolation::Shell;
-			is $tree.child.[0].child.[0].quote, Q{qqx},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{qqx}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{no intervening ws};
@@ -723,16 +656,14 @@ END};
 		subtest {
 			my $source = Q{qqx :x <pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Interpolation::Shell;
-			is $tree.child.[0].child.[0].quote, Q{qqx},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{qqx}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{all intervening ws};
@@ -740,16 +671,14 @@ END};
 		subtest {
 			my $source = Q{qqx :x<pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Interpolation::Shell;
-			is $tree.child.[0].child.[0].quote, Q{qqx},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{qqx}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{leading intervening ws};
@@ -757,16 +686,14 @@ END};
 		subtest {
 			my $source = Q{qqx:x <pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Interpolation::Shell;
-			is $tree.child.[0].child.[0].quote, Q{qqx},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{qqx}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{trailing intervening ws};
@@ -774,16 +701,14 @@ END};
 		subtest {
 			my $source = Q{qqx:x<pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Interpolation::Shell;
-			is $tree.child.[0].child.[0].quote, Q{qqx},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{qqx}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{no intervening ws};
@@ -794,16 +719,14 @@ END};
 	subtest {
 		my $source = Q{qqx <pi>};
 		my $tree = $pt.to-tree( $source );
+		my $node = $tree.child.[0].child.[0];
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
 		ok $tree.child.[0].child.[0] ~~
 			Perl6::String::Interpolation::Shell;
-		is $tree.child.[0].child.[0].quote, Q{qqx},
-			Q{quote name};
-		is $tree.child.[0].child.[0].delimiter-start, Q{<},
-			Q{start delimiter};
-		is $tree.child.[0].child.[0].delimiter-end, Q{>},
-			Q{end delimiter};
+		is $node.quote, Q{qqx}, Q{quote name};
+		is $node.delimiter-start, Q{<}, Q{start delimiter};
+		is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 		done-testing;
 	}, Q{ws, no adverbs};
@@ -811,16 +734,14 @@ END};
 	subtest {
 		my $source = Q{qqx<pi>};
 		my $tree = $pt.to-tree( $source );
+		my $node = $tree.child.[0].child.[0];
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
 		ok $tree.child.[0].child.[0] ~~
 			Perl6::String::Interpolation::Shell;
-		is $tree.child.[0].child.[0].quote, Q{qqx},
-			Q{quote name};
-		is $tree.child.[0].child.[0].delimiter-start, Q{<},
-			Q{start delimiter};
-		is $tree.child.[0].child.[0].delimiter-end, Q{>},
-			Q{end delimiter};
+		is $node.quote, Q{qqx}, Q{quote name};
+		is $node.delimiter-start, Q{<}, Q{start delimiter};
+		is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 		done-testing;
 	}, Q{no ws, no adverbs};
@@ -837,16 +758,14 @@ subtest {
 pi
 END};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::WordQuoting::QuoteProtection;
-			is $tree.child.[0].child.[0].quote, Q{qww},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{qww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{all intervening ws};
@@ -856,16 +775,14 @@ END};
 pi
 END};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::WordQuoting::QuoteProtection;
-			is $tree.child.[0].child.[0].quote, Q{qww},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{qww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{leading intervening ws};
@@ -875,16 +792,14 @@ END};
 pi
 END};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::WordQuoting::QuoteProtection;
-			is $tree.child.[0].child.[0].quote, Q{qww},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{qww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{trailing intervening ws};
@@ -894,16 +809,14 @@ END};
 pi
 END};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::WordQuoting::QuoteProtection;
-			is $tree.child.[0].child.[0].quote, Q{qww},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{qww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{no intervening ws};
@@ -915,16 +828,14 @@ END};
 		subtest {
 			my $source = Q{qww :w <pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::WordQuoting::QuoteProtection;
-			is $tree.child.[0].child.[0].quote, Q{qww},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{qww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{all intervening ws};
@@ -932,16 +843,14 @@ END};
 		subtest {
 			my $source = Q{qww :w<pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::WordQuoting::QuoteProtection;
-			is $tree.child.[0].child.[0].quote, Q{qww},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{qww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{leading intervening ws};
@@ -949,6 +858,7 @@ END};
 		subtest {
 			my $source = Q{qww:w <pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok (grep { $_ ~~ Perl6::String::WordQuoting::QuoteProtection },
@@ -961,16 +871,14 @@ END};
 		subtest {
 			my $source = Q{qww:w<pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::WordQuoting::QuoteProtection;
-			is $tree.child.[0].child.[0].quote, Q{qww},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{qww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{no intervening ws};
@@ -982,16 +890,14 @@ END};
 		subtest {
 			my $source = Q{qww :x <pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::WordQuoting::QuoteProtection;
-			is $tree.child.[0].child.[0].quote, Q{qww},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{qww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{all intervening ws};
@@ -999,16 +905,14 @@ END};
 		subtest {
 			my $source = Q{qww :x<pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::WordQuoting::QuoteProtection;
-			is $tree.child.[0].child.[0].quote, Q{qww},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{qww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{leading intervening ws};
@@ -1016,16 +920,14 @@ END};
 		subtest {
 			my $source = Q{qww:x <pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::WordQuoting::QuoteProtection;
-			is $tree.child.[0].child.[0].quote, Q{qww},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{qww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{trailing intervening ws};
@@ -1033,16 +935,14 @@ END};
 		subtest {
 			my $source = Q{qww:x<pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::WordQuoting::QuoteProtection;
-			is $tree.child.[0].child.[0].quote, Q{qww},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{qww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{no intervening ws};
@@ -1053,16 +953,14 @@ END};
 	subtest {
 		my $source = Q{qww <pi>};
 		my $tree = $pt.to-tree( $source );
+		my $node = $tree.child.[0].child.[0];
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
 		ok $tree.child.[0].child.[0] ~~
 			Perl6::String::WordQuoting::QuoteProtection;
-		is $tree.child.[0].child.[0].quote, Q{qww},
-			Q{quote name};
-		is $tree.child.[0].child.[0].delimiter-start, Q{<},
-			Q{start delimiter};
-		is $tree.child.[0].child.[0].delimiter-end, Q{>},
-			Q{end delimiter};
+		is $node.quote, Q{qww}, Q{quote name};
+		is $node.delimiter-start, Q{<}, Q{start delimiter};
+		is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 		done-testing;
 	}, Q{ws, no adverbs};
@@ -1070,16 +968,14 @@ END};
 	subtest {
 		my $source = Q{qww<pi>};
 		my $tree = $pt.to-tree( $source );
+		my $node = $tree.child.[0].child.[0];
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
 		ok $tree.child.[0].child.[0] ~~
 			Perl6::String::WordQuoting::QuoteProtection;
-		is $tree.child.[0].child.[0].quote, Q{qww},
-			Q{quote name};
-		is $tree.child.[0].child.[0].delimiter-start, Q{<},
-			Q{start delimiter};
-		is $tree.child.[0].child.[0].delimiter-end, Q{>},
-			Q{end delimiter};
+		is $node.quote, Q{qww}, Q{quote name};
+		is $node.delimiter-start, Q{<}, Q{start delimiter};
+		is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 		done-testing;
 	}, Q{no ws, no adverbs};
@@ -1094,16 +990,14 @@ subtest {
 		subtest {
 			my $source = Q{Qw :q <pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Literal::WordQuoting;
-			is $tree.child.[0].child.[0].quote, Q{Qw},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{Qw}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{all intervening ws};
@@ -1111,16 +1005,14 @@ subtest {
 		subtest {
 			my $source = Q{Qw :q<pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Literal::WordQuoting;
-			is $tree.child.[0].child.[0].quote, Q{Qw},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{Qw}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{leading intervening ws};
@@ -1128,16 +1020,14 @@ subtest {
 		subtest {
 			my $source = Q{Qw:q <pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Literal::WordQuoting;
-			is $tree.child.[0].child.[0].quote, Q{Qw},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{Qw}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{trailing intervening ws};
@@ -1145,16 +1035,14 @@ subtest {
 		subtest {
 			my $source = Q{Qw:q<pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Literal::WordQuoting;
-			is $tree.child.[0].child.[0].quote, Q{Qw},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{Qw}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{no intervening ws};
@@ -1168,16 +1056,14 @@ subtest {
 pi
 END};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Literal::WordQuoting;
-			is $tree.child.[0].child.[0].quote, Q{Qw},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{Qw}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{all intervening ws};
@@ -1187,16 +1073,14 @@ END};
 pi
 END};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Literal::WordQuoting;
-			is $tree.child.[0].child.[0].quote, Q{Qw},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{Qw}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{leading intervening ws};
@@ -1206,16 +1090,14 @@ END};
 pi
 END};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Literal::WordQuoting;
-			is $tree.child.[0].child.[0].quote, Q{Qw},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{Qw}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{trailing intervening ws};
@@ -1225,16 +1107,14 @@ END};
 pi
 END};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Literal::WordQuoting;
-			is $tree.child.[0].child.[0].quote, Q{Qw},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{Qw}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{no intervening ws};
@@ -1246,16 +1126,14 @@ END};
 		subtest {
 			my $source = Q{Qw :w <pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Literal::WordQuoting;
-			is $tree.child.[0].child.[0].quote, Q{Qw},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{Qw}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{all intervening ws};
@@ -1263,16 +1141,14 @@ END};
 		subtest {
 			my $source = Q{Qw :w<pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Literal::WordQuoting;
-			is $tree.child.[0].child.[0].quote, Q{Qw},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{Qw}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{leading intervening ws};
@@ -1280,16 +1156,14 @@ END};
 		subtest {
 			my $source = Q{Qw:w <pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Literal::WordQuoting;
-			is $tree.child.[0].child.[0].quote, Q{Qw},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{Qw}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{trailing intervening ws};
@@ -1297,16 +1171,14 @@ END};
 		subtest {
 			my $source = Q{Qw:w<pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Literal::WordQuoting;
-			is $tree.child.[0].child.[0].quote, Q{Qw},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{Qw}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{no intervening ws};
@@ -1318,16 +1190,14 @@ END};
 		subtest {
 			my $source = Q{Qw :x <pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Literal::WordQuoting;
-			is $tree.child.[0].child.[0].quote, Q{Qw},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{Qw}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{all intervening ws};
@@ -1335,16 +1205,14 @@ END};
 		subtest {
 			my $source = Q{Qw :x<pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Literal::WordQuoting;
-			is $tree.child.[0].child.[0].quote, Q{Qw},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{Qw}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{leading intervening ws};
@@ -1352,16 +1220,14 @@ END};
 		subtest {
 			my $source = Q{Qw:x <pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Literal::WordQuoting;
-			is $tree.child.[0].child.[0].quote, Q{Qw},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{Qw}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{trailing intervening ws};
@@ -1369,16 +1235,14 @@ END};
 		subtest {
 			my $source = Q{Qw:x<pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Literal::WordQuoting;
-			is $tree.child.[0].child.[0].quote, Q{Qw},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{Qw}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{no intervening ws};
@@ -1389,16 +1253,14 @@ END};
 	subtest {
 		my $source = Q{Qw <pi>};
 		my $tree = $pt.to-tree( $source );
+		my $node = $tree.child.[0].child.[0];
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
 		ok $tree.child.[0].child.[0] ~~
 			Perl6::String::Literal::WordQuoting;
-		is $tree.child.[0].child.[0].quote, Q{Qw},
-			Q{quote name};
-		is $tree.child.[0].child.[0].delimiter-start, Q{<},
-			Q{start delimiter};
-		is $tree.child.[0].child.[0].delimiter-end, Q{>},
-			Q{end delimiter};
+		is $node.quote, Q{Qw}, Q{quote name};
+		is $node.delimiter-start, Q{<}, Q{start delimiter};
+		is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 		done-testing;
 	}, Q{ws, no adverbs};
@@ -1406,16 +1268,14 @@ END};
 	subtest {
 		my $source = Q{Qw<pi>};
 		my $tree = $pt.to-tree( $source );
+		my $node = $tree.child.[0].child.[0];
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
 		ok $tree.child.[0].child.[0] ~~
 			Perl6::String::Literal::WordQuoting;
-		is $tree.child.[0].child.[0].quote, Q{Qw},
-			Q{quote name};
-		is $tree.child.[0].child.[0].delimiter-start, Q{<},
-			Q{start delimiter};
-		is $tree.child.[0].child.[0].delimiter-end, Q{>},
-			Q{end delimiter};
+		is $node.quote, Q{Qw}, Q{quote name};
+		is $node.delimiter-start, Q{<}, Q{start delimiter};
+		is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 		done-testing;
 	}, Q{no ws, no adverbs};
@@ -1428,16 +1288,14 @@ subtest {
 		subtest {
 			my $source = Q{Qx :q <pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Literal::Shell;
-			is $tree.child.[0].child.[0].quote, Q{Qx},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{Qx}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{all intervening ws};
@@ -1445,16 +1303,14 @@ subtest {
 		subtest {
 			my $source = Q{Qx :q<pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Literal::Shell;
-			is $tree.child.[0].child.[0].quote, Q{Qx},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{Qx}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{leading intervening ws};
@@ -1462,16 +1318,14 @@ subtest {
 		subtest {
 			my $source = Q{Qx:q <pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Literal::Shell;
-			is $tree.child.[0].child.[0].quote, Q{Qx},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{Qx}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{trailing intervening ws};
@@ -1479,16 +1333,14 @@ subtest {
 		subtest {
 			my $source = Q{Qx:q<pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Literal::Shell;
-			is $tree.child.[0].child.[0].quote, Q{Qx},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{Qx}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{no intervening ws};
@@ -1502,16 +1354,14 @@ subtest {
 pi
 END};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Literal::Shell;
-			is $tree.child.[0].child.[0].quote, Q{Qx},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{Qx}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{all intervening ws};
@@ -1521,16 +1371,14 @@ END};
 pi
 END};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Literal::Shell;
-			is $tree.child.[0].child.[0].quote, Q{Qx},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{Qx}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{leading intervening ws};
@@ -1540,16 +1388,14 @@ END};
 pi
 END};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Literal::Shell;
-			is $tree.child.[0].child.[0].quote, Q{Qx},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{Qx}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{trailing intervening ws};
@@ -1559,16 +1405,14 @@ END};
 pi
 END};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Literal::Shell;
-			is $tree.child.[0].child.[0].quote, Q{Qx},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{Qx}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{no intervening ws};
@@ -1580,16 +1424,14 @@ END};
 		subtest {
 			my $source = Q{Qx :w <pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Literal::Shell;
-			is $tree.child.[0].child.[0].quote, Q{Qx},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{Qx}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{all intervening ws};
@@ -1597,16 +1439,14 @@ END};
 		subtest {
 			my $source = Q{Qx :w<pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Literal::Shell;
-			is $tree.child.[0].child.[0].quote, Q{Qx},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{Qx}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{leading intervening ws};
@@ -1614,16 +1454,14 @@ END};
 		subtest {
 			my $source = Q{Qx:w <pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Literal::Shell;
-			is $tree.child.[0].child.[0].quote, Q{Qx},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{Qx}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{trailing intervening ws};
@@ -1631,16 +1469,14 @@ END};
 		subtest {
 			my $source = Q{Qx:w<pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Literal::Shell;
-			is $tree.child.[0].child.[0].quote, Q{Qx},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{Qx}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{no intervening ws};
@@ -1652,16 +1488,14 @@ END};
 		subtest {
 			my $source = Q{Qx :x <pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Literal::Shell;
-			is $tree.child.[0].child.[0].quote, Q{Qx},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{Qx}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{all intervening ws};
@@ -1669,16 +1503,14 @@ END};
 		subtest {
 			my $source = Q{Qx :x<pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Literal::Shell;
-			is $tree.child.[0].child.[0].quote, Q{Qx},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{Qx}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{leading intervening ws};
@@ -1686,16 +1518,14 @@ END};
 		subtest {
 			my $source = Q{Qx:x <pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Literal::Shell;
-			is $tree.child.[0].child.[0].quote, Q{Qx},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{Qx}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{trailing intervening ws};
@@ -1703,16 +1533,14 @@ END};
 		subtest {
 			my $source = Q{Qx:x<pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Literal::Shell;
-			is $tree.child.[0].child.[0].quote, Q{Qx},
-				Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+			is $node.quote, Q{Qx}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{no intervening ws};
@@ -1723,16 +1551,14 @@ END};
 	subtest {
 		my $source = Q{Qx <pi>};
 		my $tree = $pt.to-tree( $source );
+		my $node = $tree.child.[0].child.[0];
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
 		ok $tree.child.[0].child.[0] ~~
 			Perl6::String::Literal::Shell;
-		is $tree.child.[0].child.[0].quote, Q{Qx},
-			Q{quote name};
-		is $tree.child.[0].child.[0].delimiter-start, Q{<},
-			Q{start delimiter};
-		is $tree.child.[0].child.[0].delimiter-end, Q{>},
-			Q{end delimiter};
+		is $node.quote, Q{Qx}, Q{quote name};
+		is $node.delimiter-start, Q{<}, Q{start delimiter};
+		is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 		done-testing;
 	}, Q{ws, no adverbs};
@@ -1740,16 +1566,14 @@ END};
 	subtest {
 		my $source = Q{Qx<pi>};
 		my $tree = $pt.to-tree( $source );
+		my $node = $tree.child.[0].child.[0];
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
 		ok $tree.child.[0].child.[0] ~~
 			Perl6::String::Literal::Shell;
-		is $tree.child.[0].child.[0].quote, Q{Qx},
-			Q{quote name};
-		is $tree.child.[0].child.[0].delimiter-start, Q{<},
-			Q{start delimiter};
-		is $tree.child.[0].child.[0].delimiter-end, Q{>},
-			Q{end delimiter};
+		is $node.quote, Q{Qx}, Q{quote name};
+		is $node.delimiter-start, Q{<}, Q{start delimiter};
+		is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 		done-testing;
 	}, Q{no ws, no adverbs};
@@ -1762,16 +1586,14 @@ subtest {
 		subtest {
 			my $source = Q{qq :w <pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Interpolation;
-#		is $tree.child.[0].child.[0].quote, Q{qq},
-#			Q{quote name};
-			is $tree.child.[0].child.[0].delimiter-start, Q{<},
-				Q{start delimiter};
-			is $tree.child.[0].child.[0].delimiter-end, Q{>},
-				Q{end delimiter};
+#			is $node.quote, Q{qq}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{all intervening ws};
@@ -1779,10 +1601,14 @@ subtest {
 		subtest {
 			my $source = Q{qq :w<pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Interpolation;
+#			is $node.quote, Q{qq}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{leading intervening ws};
@@ -1790,10 +1616,14 @@ subtest {
 		subtest {
 			my $source = Q{qq:w <pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Interpolation;
+#			is $node.quote, Q{qq}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{trailing intervening ws};
@@ -1801,10 +1631,14 @@ subtest {
 		subtest {
 			my $source = Q{qq:w<pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Interpolation;
+#			is $node.quote, Q{qq}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{no intervening ws};
@@ -1816,10 +1650,14 @@ subtest {
 		subtest {
 			my $source = Q{qq :x <pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Interpolation;
+#			is $node.quote, Q{qq}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{all intervening ws};
@@ -1827,10 +1665,14 @@ subtest {
 		subtest {
 			my $source = Q{qq :x<pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Interpolation;
+#			is $node.quote, Q{qq}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{leading intervening ws};
@@ -1838,10 +1680,14 @@ subtest {
 		subtest {
 			my $source = Q{qq:x <pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Interpolation;
+#			is $node.quote, Q{qq}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{trailing intervening ws};
@@ -1849,10 +1695,14 @@ subtest {
 		subtest {
 			my $source = Q{qq:x<pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Interpolation;
+#			is $node.quote, Q{qq}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{no intervening ws};
@@ -1863,10 +1713,14 @@ subtest {
 	subtest {
 		my $source = Q{qq <pi>};
 		my $tree = $pt.to-tree( $source );
+		my $node = $tree.child.[0].child.[0];
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
 		ok $tree.child.[0].child.[0] ~~
 			Perl6::String::Interpolation;
+#		is $node.quote, Q{qq}, Q{quote name};
+		is $node.delimiter-start, Q{<}, Q{start delimiter};
+		is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 		done-testing;
 	}, Q{ws, no adverbs};
@@ -1874,10 +1728,14 @@ subtest {
 	subtest {
 		my $source = Q{qq<pi>};
 		my $tree = $pt.to-tree( $source );
+		my $node = $tree.child.[0].child.[0];
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
 		ok $tree.child.[0].child.[0] ~~
 			Perl6::String::Interpolation;
+#		is $node.quote, Q{qqww}, Q{quote name};
+		is $node.delimiter-start, Q{<}, Q{start delimiter};
+		is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 		done-testing;
 	}, Q{no ws, no adverbs};
@@ -1894,10 +1752,14 @@ subtest {
 pi
 END};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::WordQuoting;
+#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{all intervening ws};
@@ -1907,10 +1769,14 @@ END};
 pi
 END};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::WordQuoting;
+#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{leading intervening ws};
@@ -1920,10 +1786,14 @@ END};
 pi
 END};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::WordQuoting;
+#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{trailing intervening ws};
@@ -1933,10 +1803,14 @@ END};
 pi
 END};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::WordQuoting;
+#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{no intervening ws};
@@ -1948,10 +1822,14 @@ END};
 		subtest {
 			my $source = Q{qw :w <pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::WordQuoting;
+#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{all intervening ws};
@@ -1959,10 +1837,14 @@ END};
 		subtest {
 			my $source = Q{qw :w<pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::WordQuoting;
+#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{leading intervening ws};
@@ -1970,10 +1852,14 @@ END};
 		subtest {
 			my $source = Q{qw:w <pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::WordQuoting;
+#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{trailing intervening ws};
@@ -1981,10 +1867,14 @@ END};
 		subtest {
 			my $source = Q{qw:w<pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::WordQuoting;
+#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{no intervening ws};
@@ -1996,10 +1886,14 @@ END};
 		subtest {
 			my $source = Q{qw :x <pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::WordQuoting;
+#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{all intervening ws};
@@ -2007,10 +1901,14 @@ END};
 		subtest {
 			my $source = Q{qw :x<pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::WordQuoting;
+#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{leading intervening ws};
@@ -2018,10 +1916,14 @@ END};
 		subtest {
 			my $source = Q{qw:x <pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::WordQuoting;
+#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{trailing intervening ws};
@@ -2029,10 +1931,14 @@ END};
 		subtest {
 			my $source = Q{qw:x<pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::WordQuoting;
+#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{no intervening ws};
@@ -2043,10 +1949,14 @@ END};
 	subtest {
 		my $source = Q{qw <pi>};
 		my $tree = $pt.to-tree( $source );
+		my $node = $tree.child.[0].child.[0];
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
 		ok $tree.child.[0].child.[0] ~~
 			Perl6::String::WordQuoting;
+#		is $node.quote, Q{qqww}, Q{quote name};
+		is $node.delimiter-start, Q{<}, Q{start delimiter};
+		is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 		done-testing;
 	}, Q{ws, no adverbs};
@@ -2054,10 +1964,14 @@ END};
 	subtest {
 		my $source = Q{qw<pi>};
 		my $tree = $pt.to-tree( $source );
+		my $node = $tree.child.[0].child.[0];
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
 		ok $tree.child.[0].child.[0] ~~
 			Perl6::String::WordQuoting;
+#		is $node.quote, Q{qqww}, Q{quote name};
+		is $node.delimiter-start, Q{<}, Q{start delimiter};
+		is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 		done-testing;
 	}, Q{no ws, no adverbs};
@@ -2074,10 +1988,14 @@ subtest {
 pi
 END};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Shell;
+#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{all intervening ws};
@@ -2087,10 +2005,14 @@ END};
 pi
 END};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Shell;
+#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{leading intervening ws};
@@ -2100,10 +2022,14 @@ END};
 pi
 END};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Shell;
+#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{trailing intervening ws};
@@ -2113,10 +2039,14 @@ END};
 pi
 END};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Shell;
+#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{no intervening ws};
@@ -2128,10 +2058,14 @@ END};
 		subtest {
 			my $source = Q{qx :w <pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Shell;
+#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{all intervening ws};
@@ -2139,10 +2073,14 @@ END};
 		subtest {
 			my $source = Q{qx :w<pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Shell;
+#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{leading intervening ws};
@@ -2150,10 +2088,14 @@ END};
 		subtest {
 			my $source = Q{qx:w <pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Shell;
+#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{trailing intervening ws};
@@ -2161,10 +2103,14 @@ END};
 		subtest {
 			my $source = Q{qx:w<pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Shell;
+#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{no intervening ws};
@@ -2176,10 +2122,14 @@ END};
 		subtest {
 			my $source = Q{qx :x <pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Shell;
+#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{all intervening ws};
@@ -2187,10 +2137,14 @@ END};
 		subtest {
 			my $source = Q{qx :x<pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Shell;
+#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{leading intervening ws};
@@ -2198,10 +2152,14 @@ END};
 		subtest {
 			my $source = Q{qx:x <pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Shell;
+#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{trailing intervening ws};
@@ -2209,10 +2167,14 @@ END};
 		subtest {
 			my $source = Q{qx:x<pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Shell;
+#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{no intervening ws};
@@ -2223,10 +2185,14 @@ END};
 	subtest {
 		my $source = Q{qx <pi>};
 		my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
 		ok $tree.child.[0].child.[0] ~~
 			Perl6::String::Shell;
+#		is $node.quote, Q{qqww}, Q{quote name};
+		is $node.delimiter-start, Q{<}, Q{start delimiter};
+		is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 		done-testing;
 	}, Q{ws, no adverbs};
@@ -2234,10 +2200,14 @@ END};
 	subtest {
 		my $source = Q{qx<pi>};
 		my $tree = $pt.to-tree( $source );
+		my $node = $tree.child.[0].child.[0];
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
 		ok $tree.child.[0].child.[0] ~~
 			Perl6::String::Shell;
+#		is $node.quote, Q{qqww}, Q{quote name};
+		is $node.delimiter-start, Q{<}, Q{start delimiter};
+		is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 		done-testing;
 	}, Q{no ws, no adverbs};
@@ -2250,10 +2220,14 @@ subtest {
 		subtest {
 			my $source = Q{Q :q <pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Literal;
+#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{all intervening ws};
@@ -2261,10 +2235,14 @@ subtest {
 		subtest {
 			my $source = Q{Q :q<pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Literal;
+#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{leading intervening ws};
@@ -2272,10 +2250,14 @@ subtest {
 		subtest {
 			my $source = Q{Q:q <pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Literal;
+#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{trailing intervening ws};
@@ -2283,10 +2265,14 @@ subtest {
 		subtest {
 			my $source = Q{Q:q<pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Literal;
+#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{no intervening ws};
@@ -2301,10 +2287,14 @@ pi
 END
 };
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Literal;
+#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{all intervening ws};
@@ -2315,10 +2305,14 @@ pi
 END
 };
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Literal;
+#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{leading intervening ws};
@@ -2329,10 +2323,14 @@ pi
 END
 };
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Literal;
+#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{trailing intervening ws};
@@ -2343,10 +2341,14 @@ pi
 END
 };
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Literal;
+#########			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{no intervening ws};
@@ -2358,10 +2360,14 @@ END
 		subtest {
 			my $source = Q{Q :w <pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Literal;
+#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{all intervening ws};
@@ -2369,10 +2375,14 @@ END
 		subtest {
 			my $source = Q{Q :w<pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Literal;
+#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{leading intervening ws};
@@ -2380,10 +2390,14 @@ END
 		subtest {
 			my $source = Q{Q:w <pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Literal;
+#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{trailing intervening ws};
@@ -2391,10 +2405,14 @@ END
 		subtest {
 			my $source = Q{Q:w<pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Literal;
+#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{no intervening ws};
@@ -2406,10 +2424,14 @@ END
 		subtest {
 			my $source = Q{Q :x <pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Literal;
+#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{all intervening ws};
@@ -2417,10 +2439,14 @@ END
 		subtest {
 			my $source = Q{Q :x<pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Literal;
+#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{leading intervening ws};
@@ -2428,10 +2454,14 @@ END
 		subtest {
 			my $source = Q{Q:x <pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Literal;
+#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{trailing intervening ws};
@@ -2439,10 +2469,14 @@ END
 		subtest {
 			my $source = Q{Q:x<pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Literal;
+#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{no intervening ws};
@@ -2453,10 +2487,14 @@ END
 	subtest {
 		my $source = Q{Q <pi>};
 		my $tree = $pt.to-tree( $source );
+		my $node = $tree.child.[0].child.[0];
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
 		ok $tree.child.[0].child.[0] ~~
 			Perl6::String::Literal;
+#		is $node.quote, Q{qqww}, Q{quote name};
+		is $node.delimiter-start, Q{<}, Q{start delimiter};
+		is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 		done-testing;
 	}, Q{ws, no adverbs};
@@ -2464,10 +2502,14 @@ END
 	subtest {
 		my $source = Q{Q<pi>};
 		my $tree = $pt.to-tree( $source );
+		my $node = $tree.child.[0].child.[0];
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
 		ok $tree.child.[0].child.[0] ~~
 			Perl6::String::Literal;
+#		is $node.quote, Q{qqww}, Q{quote name};
+		is $node.delimiter-start, Q{<}, Q{start delimiter};
+		is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 		done-testing;
 	}, Q{no ws, no adverbs};
@@ -2485,11 +2527,15 @@ pi
 END
 };
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			# XXX Make sure to check the here-doc contents exist
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Escaping;
+#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{all intervening ws};
@@ -2500,10 +2546,14 @@ pi
 END
 };
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Escaping;
+#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{leading intervening ws};
@@ -2514,10 +2564,14 @@ pi
 END
 };
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Escaping;
+#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{trailing intervening ws};
@@ -2528,10 +2582,14 @@ pi
 END
 };
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Escaping;
+#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{no intervening ws};
@@ -2543,10 +2601,14 @@ END
 		subtest {
 			my $source = Q{q :w <pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Escaping;
+#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{all intervening ws};
@@ -2554,10 +2616,14 @@ END
 		subtest {
 			my $source = Q{q :w<pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Escaping;
+#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{leading intervening ws};
@@ -2565,10 +2631,14 @@ END
 		subtest {
 			my $source = Q{q:w <pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Escaping;
+#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{trailing intervening ws};
@@ -2576,10 +2646,14 @@ END
 		subtest {
 			my $source = Q{q:w<pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Escaping;
+#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{no intervening ws};
@@ -2591,10 +2665,14 @@ END
 		subtest {
 			my $source = Q{q :x <pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Escaping;
+#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{all intervening ws};
@@ -2602,10 +2680,14 @@ END
 		subtest {
 			my $source = Q{q :x<pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Escaping;
+#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{leading intervening ws};
@@ -2613,10 +2695,14 @@ END
 		subtest {
 			my $source = Q{q:x <pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Escaping;
+#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{trailing intervening ws};
@@ -2624,10 +2710,14 @@ END
 		subtest {
 			my $source = Q{q:x<pi>};
 			my $tree = $pt.to-tree( $source );
+			my $node = $tree.child.[0].child.[0];
 			is $pt.to-string( $tree ), $source,
 				Q{formatted};
 			ok $tree.child.[0].child.[0] ~~
 				Perl6::String::Escaping;
+#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.delimiter-start, Q{<}, Q{start delimiter};
+			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 			done-testing;
 		}, Q{no intervening ws};
@@ -2638,10 +2728,14 @@ END
 	subtest {
 		my $source = Q{q <pi>};
 		my $tree = $pt.to-tree( $source );
+		my $node = $tree.child.[0].child.[0];
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
 		ok $tree.child.[0].child.[0] ~~
 			Perl6::String::Escaping;
+#		is $node.quote, Q{qqww}, Q{quote name};
+		is $node.delimiter-start, Q{<}, Q{start delimiter};
+		is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 		done-testing;
 	}, Q{intervening ws, no adverbs};
@@ -2649,10 +2743,14 @@ END
 	subtest {
 		my $source = Q{q<pi>};
 		my $tree = $pt.to-tree( $source );
+		my $node = $tree.child.[0].child.[0];
 		is $pt.to-string( $tree ), $source,
 			Q{formatted};
 		ok $tree.child.[0].child.[0] ~~
 			Perl6::String::Escaping;
+#		is $node.quote, Q{qqww}, Q{quote name};
+		is $node.delimiter-start, Q{<}, Q{start delimiter};
+		is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 		done-testing;
 	}, Q{no ws, no adverbs};
@@ -2663,9 +2761,13 @@ END
 subtest {
 	my $source = Q{<pi>};
 	my $tree = $pt.to-tree( $source );
+	my $node = $tree.child.[0].child.[0];
 	is $pt.to-string( $tree ), $source, Q{formatted};
 	ok $tree.child.[0].child.[0] ~~
 		Perl6::String::WordQuoting;
+#	is $node.quote, Q{qqww}, Q{quote name};
+#	is $node.delimiter-start, Q{<}, Q{start delimiter};
+#	is $node.delimiter-end, Q{>}, Q{end delimiter};
 
 	done-testing;
 }, Q{<>};
@@ -2673,11 +2775,13 @@ subtest {
 subtest {
 	my $source = Q{｢pi｣};
 	my $tree = $pt.to-tree( $source );
+	my $node = $tree.child.[0].child.[0];
 	is $pt.to-string( $tree ), $source, Q{formatted};
 	ok $tree.child.[0].child.[0] ~~
 		Perl6::String::Literal;
-	is $tree.child.[0].child.[0].delimiter-start, Q{｢}, Q{start delimiter};
-	is $tree.child.[0].child.[0].delimiter-end, Q{｣}, Q{end delimiter};
+#	is $node.quote, Q{qqww}, Q{quote name};
+	is $node.delimiter-start, Q{｢}, Q{start delimiter};
+	is $node.delimiter-end, Q{｣}, Q{end delimiter};
 
 	done-testing;
 }, Q{｢｣};
@@ -2685,11 +2789,13 @@ subtest {
 subtest {
 	my $source = Q{"pi"};
 	my $tree = $pt.to-tree( $source );
+	my $node = $tree.child.[0].child.[0];
 	is $pt.to-string( $tree ), $source, Q{formatted};
 	ok $tree.child.[0].child.[0] ~~
 		Perl6::String::Interpolation;
-	is $tree.child.[0].child.[0].delimiter-start, Q{"}, Q{start delimiter};
-	is $tree.child.[0].child.[0].delimiter-end, Q{"}, Q{end delimiter};
+#	is $node.quote, Q{qqww}, Q{quote name};
+	is $node.delimiter-start, Q{"}, Q{start delimiter};
+	is $node.delimiter-end, Q{"}, Q{end delimiter};
 
 	done-testing;
 }, Q{"" (double-quote)};
@@ -2697,11 +2803,13 @@ subtest {
 subtest {
 	my $source = Q{'pi'};
 	my $tree = $pt.to-tree( $source );
+	my $node = $tree.child.[0].child.[0];
 	is $pt.to-string( $tree ), $source, Q{formatted};
 	ok $tree.child.[0].child.[0] ~~
 		Perl6::String::Escaping;
-	is $tree.child.[0].child.[0].delimiter-start, Q{'}, Q{start delimiter};
-	is $tree.child.[0].child.[0].delimiter-end, Q{'}, Q{end delimiter};
+#	is $node.quote, Q{qqww}, Q{quote name};
+	is $node.delimiter-start, Q{'}, Q{start delimiter};
+	is $node.delimiter-end, Q{'}, Q{end delimiter};
 
 	done-testing;
 }, Q{'' (single-quote)};
@@ -2734,9 +2842,13 @@ Hey,
     📝
 END
 	my $tree = $pt.to-tree( $source );
+	my $node = $tree.child.[0].child.[0];
 	is $pt.to-string( $tree ), $source, Q{formatted};
 	ok $tree.child.[0].child.[0] ~~
 		Perl6::String::Escaping;
+#	is $node.quote, Q{qqww}, Q{quote name};
+	is $node.delimiter-start, Q{<}, Q{start delimiter};
+	is $node.delimiter-end, Q{>}, Q{end delimiter};
 ]
 
 	done-testing;
