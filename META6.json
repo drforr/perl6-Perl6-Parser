@@ -1,0 +1,30 @@
+{
+   "meta6" : "0",
+   "tags" : [
+		"parse",
+		"parser",
+		"parsing",
+   ],
+   "provides" : {
+      "Perl6::Parser" : "lib/Perl6/Parser.pm6"
+   },
+   "test-depends" : [
+      "Test"
+   ],
+   "support" : {
+      "source" : "git://github.com/drforr/perl6-Perl6-Parser.git"
+   },
+   "perl" : "6.c",
+   "build-depends" : [],
+   "auth" : "github:drforr",
+   "source-url" : "git://github.com/drfor/perl6-Perl6-Parser.git",
+   "depends" : [
+   ],
+   "name" : "Perl6::Parser",
+   "authors" : [
+      "Jeffrey Goff <drforr@pobox.com>"
+   ],
+   "version" : "0.0.5",
+   "license" : "Artistic",
+   "description" : "Parse Perl 6 from within Perl 6"
+}
