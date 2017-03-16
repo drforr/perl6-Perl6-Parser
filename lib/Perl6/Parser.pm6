@@ -149,11 +149,7 @@ main file.
 
 =item parse( Str $source )
 
-Returns the underlying NQPMatch object. This is what gets passed on to C<validate()>, C<build-tree()> and every other important method in this module. It does some minor wizardry to call the Perl 6 reentrant compiler to compile the string you pass it, and return a match object. Please note that it B<has> to compile the string in order to validate things like custom operators, so this step is B<not> optional.
-
-=item validate( Mu $parsed )
-
-Makes certain that the NQPMatch object looks like a valid NQPMatch object to the current version of this Perl 6 module. This is because, while it's highly unlikely at this point, the grammar internals of Perl 6 B<could> change at some later date, and this rather extensive method (it doesn't look it, but to see what it does, look at L<Perl6::Parser::Validator>) checks to see that a given input (say, a large RosettaCode sample) returns the match object we're expecting.
+Returns the underlying NQPMatch object. This is what gets passed on to C<build-tree()> and every other important method in this module. It does some minor wizardry to call the Perl 6 reentrant compiler to compile the string you pass it, and return a match object. Please note that it B<has> to compile the string in order to validate things like custom operators, so this step is B<not> optional.
 
 =item build-tree( Mu $parsed )
 
@@ -185,7 +181,6 @@ For further information, there's a L<DEBUGGING.pod> file detailing how to go abo
 
 =end pod
 
-use Perl6::Parser::Validator;
 use Perl6::Parser::Factory;
 
 my role Debugging {
@@ -325,7 +320,6 @@ my role Testing {
 
 	method _roundtrip( Str $source ) {
 		my $parsed    = self.parse( $source );
-		my $valid     = self.validate( $parsed );
 		my $tree      = self.build-tree( $parsed );
 		my $formatted = self.to-string( $tree );
 
@@ -413,14 +407,6 @@ my role Validating {
 	method consistency-check( Perl6::Element $root ) {
 		self._consistency-check( $root );
 	}
-
-	method validate( Mu $parsed ) {
-		my $validator = Perl6::Parser::Validator.new;
-		my $res       = $validator.validate( $parsed );
-
-		$*ERR.say( "Validation failed!" ) if !$res;
-		$res
-	}
 }
 
 class Perl6::Parser {
@@ -451,9 +437,6 @@ class Perl6::Parser {
 	}
 
 	method build-tree( Mu $parsed ) {
-		self.validate( $parsed ) if
-			$*GRAMMAR-CHECK and %*ENV<AUTHOR>;
-
 		my $tree = $.factory.build( $parsed );
 		self.consistency-check( $tree ) if
 			$*CONSISTENCY-CHECK and %*ENV<AUTHOR>;

@@ -9,7 +9,6 @@ plan 5;
 my $pt = Perl6::Parser.new;
 my $ppf = Perl6::Parser::Factory.new;
 my $*CONSISTENCY-CHECK = True;
-my $*GRAMMAR-CHECK = True;
 my $*UPDATE-RANGES = True;
 my $*FALL-THROUGH = True;
 
