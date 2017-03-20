@@ -42,7 +42,7 @@ subtest {
 	my $head = $ppf.flatten( $tree );
 
 	my $walk-me = $head;
-	my $integer = $head.next.next.next.next;
+	my $integer = $head.next(4);
 
 	# Remove the current element, and do so non-recursively.
 	# That is, if there are elements "under" it in the tree, they'll
@@ -113,7 +113,7 @@ subtest {
 	ok $head ~~ Perl6::Balanced::Exit;      $head = $head.previous;
 #	ok $head ~~ Perl6::String::Body;        $head = $head.previous;
 	ok $head ~~ Perl6::Balanced::Enter;     $head = $head.previous;
-	ok $head ~~ Perl6::Operator::Circumfix; $head = $head.previous;;
+	ok $head ~~ Perl6::Operator::Circumfix; $head = $head.previous;
 	ok $head ~~ Perl6::Statement;           $head = $head.previous;
 	ok $head ~~ Perl6::Document;            $head = $head.previous;
 	ok $head.is-start;
@@ -137,7 +137,7 @@ subtest {
 	my $head = $ppf.flatten( $tree );
 
 	my $walk-me = $head;
-	my $integer = $head.next.next.next.next;
+	my $integer = $head.next(4);
 
 	$integer.replace-node-with(
 		Perl6::Number::Decimal.new(
@@ -211,7 +211,7 @@ subtest {
 	ok $head ~~ Perl6::Balanced::Exit;      $head = $head.previous;
 	ok $head ~~ Perl6::Number::Decimal;     $head = $head.previous;
 	ok $head ~~ Perl6::Balanced::Enter;     $head = $head.previous;
-	ok $head ~~ Perl6::Operator::Circumfix; $head = $head.previous;;
+	ok $head ~~ Perl6::Operator::Circumfix; $head = $head.previous;
 	ok $head ~~ Perl6::Statement;           $head = $head.previous;
 	ok $head ~~ Perl6::Document;            $head = $head.previous;
 	ok $head.is-start;
@@ -290,7 +290,7 @@ subtest {
 	my $head = $ppf.flatten( $tree );
 
 	my $walk-me = $head;
-	my $start-paren = $head.next.next.next;
+	my $start-paren = $head.next(3);
 
 	# insert '3' into the parenthesized list.
 	#
@@ -340,7 +340,7 @@ subtest {
 	ok $head ~~ Perl6::Balanced::Exit;      $head = $head.previous;
 	ok $head ~~ Perl6::Number::Decimal;     $head = $head.previous;
 	ok $head ~~ Perl6::Balanced::Enter;     $head = $head.previous;
-	ok $head ~~ Perl6::Operator::Circumfix; $head = $head.previous;;
+	ok $head ~~ Perl6::Operator::Circumfix; $head = $head.previous;
 	ok $head ~~ Perl6::Statement;           $head = $head.previous;
 	ok $head ~~ Perl6::Document;            $head = $head.previous;
 	ok $head.is-start;
@@ -364,7 +364,7 @@ subtest {
 	my $head = $ppf.flatten( $tree );
 
 	my $walk-me = $head;
-	my $start-paren = $head.next.next.next.next;
+	my $start-paren = $head.next(4);
 
 	# insert '3' into the parenthesized list.
 	#
@@ -414,7 +414,7 @@ subtest {
 	ok $head ~~ Perl6::Balanced::Exit;      $head = $head.previous;
 	ok $head ~~ Perl6::Number::Decimal;     $head = $head.previous;
 	ok $head ~~ Perl6::Balanced::Enter;     $head = $head.previous;
-	ok $head ~~ Perl6::Operator::Circumfix; $head = $head.previous;;
+	ok $head ~~ Perl6::Operator::Circumfix; $head = $head.previous;
 	ok $head ~~ Perl6::Statement;           $head = $head.previous;
 	ok $head ~~ Perl6::Document;            $head = $head.previous;
 	ok $head.is-start;

@@ -245,10 +245,49 @@ class Perl6::Element {
 	# you'll need to use the iterator method to get a sequence of
 	# tokens.
 	#
-	has Perl6::Element $.next is rw;
-	has Perl6::Element $.previous is rw;
+	has Perl6::Element $.next-node is rw;
+	has Perl6::Element $.previous-node is rw;
+	has Perl6::Element $.parent-node is rw;
 
-	has Perl6::Element $.parent is rw;
+	method next( Int $count = 1 ) {
+		my $node = self;
+		$node = $node.next-node for ^$count;
+		$node;
+	}
+
+	method next-leaf( Int $count = 1 ) {
+		my $node = self;
+		my $_count = $count;
+		while !$node.is-end and $_count > 0 {
+			$node = $node.next;
+			$_count-- if $node.is-leaf;
+		}
+		return Any unless $node.is-leaf;
+		$node;
+	}
+
+	method previous( Int $count = 1 ) {
+		my $node = self;
+		$node = $node.previous-node for ^$count;
+		$node;
+	}
+
+	method previous-leaf( Int $count = 1 ) {
+		my $node = self;
+		my $_count = $count;
+		while !$node.is-start and $_count > 0 {
+			$node = $node.previous;
+			$_count-- if $node.is-leaf;
+		}
+		return Any unless $node.is-leaf;
+		$node;
+	}
+
+	method parent( Int $count = 1 ) {
+		my $node = self;
+		$node = $node.parent-node for ^$count;
+		$node;
+	}
 
 	# Should only be run only flattened element lists.
 	# This is because it does nothing WRT .child.
@@ -269,14 +308,14 @@ class Perl6::Element {
 		self._add-offset( self.next, -( $.to - $.from ) ) if
 			$*UPDATE-RANGES;
 		if self.is-end {
-			$.previous.next = $.previous;
+			self.previous.next-node = self.previous;
 		}
 		else {
-			$.next.previous = $.previous;
-			$.previous.next = $.next;
+			self.next.previous-node = self.previous;
+			self.previous.next-node = self.next;
 		}
-		$.next = self;
-		$.previous = self;
+		$.next-node = self;
+		$.previous-node = self;
 		return self;
 	}
 
@@ -287,23 +326,23 @@ class Perl6::Element {
 		self._add-offset( self.next, $new-length - $cur-length ) if
 			$*UPDATE-RANGES;
 		if self.is-start {
-			$node.previous = $node;
-			$node.parent = $.parent;
-			$node.next = $.next;
-			$.next.previous = $node;
+			$node.previous-node = $node;
+			$node.parent-node = self.parent;
+			$node.next-node = self.next;
+			self.next.previous-node = $node;
 		}
 		elsif self.is-end {
-			$node.previous = $.previous;
-			$node.parent = $.parent;
-			$node.next = $node;
-			$.previous.next = $node;
+			$node.previous-node = self.previous;
+			$node.parent-node = self.parent;
+			$node.next-node = $node;
+			self.previous.next-node = $node;
 		}
 		else {
-			$node.previous = $.previous;
-			$node.parent = $.parent;
-			$node.next = $.next;
-			$.previous.next = $node;
-			$.next.previous = $node;
+			$node.previous-node = self.previous;
+			$node.parent-node = self.parent;
+			$node.next-node = self.next;
+			self.previous.next-node = $node;
+			self.next.previous-node = $node;
 		}
 		return $node;
 	}
@@ -311,32 +350,32 @@ class Perl6::Element {
 	method insert-node-before( Perl6::Element $node ) {
 		self._add-offset( self, $.to - $.from ) if
 			$*UPDATE-RANGES;
-		$node.next = self;
+		$node.next-node = self;
 		if self.is-start {
-			$node.previous = $node;
-			$node.parent = $node;
+			$node.previous-node = $node;
+			$node.parent-node = $node;
 		}
 		else {
-			$node.previous = $.previous;
-			$node.parent = self.parent;
-			$.previous.next = $node;
+			$node.previous-node = self.previous;
+			$node.parent-node = self.parent;
+			self.previous.next-node = $node;
 		}
-		$.previous = $node;
+		$.previous-node = $node;
 	}
 
 	method insert-node-after( Perl6::Element $node ) {
 		self._add-offset( self.next, $.to - $.from ) if
 			$*UPDATE-RANGES;
-		$node.parent = $.parent;
-		$node.previous = self;
+		$node.parent-node = self.parent;
+		$node.previous-node = self;
 		if self.is-end {
-			$node.next = $node;
+			$node.next-node = $node;
 		}
 		else {
-			$node.next = $.next;
-			$.next.previous = $node;
+			$node.next-node = self.next;
+			self.next.previous-node = $node;
 		}
-		$.next = $node;
+		$.next-node = $node;
 	}
 }
 
@@ -1365,10 +1404,10 @@ class Perl6::Parser::Factory {
 
 		method add-link( Perl6::Element $node ) {
 			return if $node ~~ Sentinel;
-			$node.previous = $.tail;
-			$.tail.next = $node;
+			$node.previous-node = $.tail;
+			$.tail.next-node = $node;
 			$!tail = $node;
-			$.tail.next = $.tail;
+			$.tail.next-node = $.tail;
 		}
 
 		# Keep the recursive method "private" so we can have a place for
@@ -1384,7 +1423,7 @@ class Perl6::Parser::Factory {
 				}
 				else {
 					for $node.child {
-						$_.parent = $node;
+						$_.parent-node = $node;
 					}
 
 					self.add-link( $node.first );
@@ -1405,9 +1444,9 @@ class Perl6::Parser::Factory {
 		}
 
 		method thread {
-			$.tail.parent = $.tail;
-			$.tail.next = $.tail;
-			$.tail.previous = $.tail;
+			$.tail.parent-node = $.tail;
+			$.tail.next-node = $.tail;
+			$.tail.previous-node = $.tail;
 			self._thread( $.tail, Sentinel.new(:from(0),:to(0)) );
 		}
 	}
@@ -1425,8 +1464,8 @@ class Perl6::Parser::Factory {
 	method flatten( Perl6::Element $node ) {
 		my $tree = $node;
 		my $head = self._flatten( $tree );
-		$head.next = $head;
-		$head.previous = $head;
+		$head.next-node = $head;
+		$head.previous-node = $head;
 
 		my $tail = $head;
 
@@ -1435,9 +1474,9 @@ class Perl6::Parser::Factory {
 			$tree = $tree.next;
 
 			my $next = self._flatten( $tree );
-			$next.previous = $tail;
-			$next.next = $next;
-			$tail.next = $next;
+			$next.previous-node = $tail;
+			$next.next-node = $next;
+			$tail.next-node = $next;
 			$tail = $tail.next;
 		}
 

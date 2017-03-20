@@ -286,15 +286,15 @@ my role Debugging {
 
 		$line ~= " (line {$term.factory-line-number})" if
 			$term.factory-line-number;
-		if $term.next {
+		if $term.is-end or !$term.next {
+			$line ~= " -> END";
+		}
+		else {
 			my $next = $term.next;
 			my $name = $next.WHAT.perl;
 			$name ~~ s/'Perl6::'//;
 			my $next-bounds = "{$next.from}-{$next.to}";
 			$line ~= " -> $name ($next-bounds)";
-		}
-		else {
-			$line ~= " -> END";
 		}
 		$line;
 	}
@@ -433,7 +433,7 @@ class Perl6::Parser {
 			:actions( $a )
 		);
 
-		return $parsed
+		$parsed;
 	}
 
 	method build-tree( Mu $parsed ) {
@@ -451,7 +451,7 @@ class Perl6::Parser {
 	method to-string( Perl6::Element $tree ) {
 		my $str = $tree.to-string;
 
-		$str
+		$str;
 	}
 
 	class CompleteIterator {
@@ -487,9 +487,6 @@ class Perl6::Parser {
 		has Bool $.is-done = False;
 
 		method pull-one {
-			while !$.head.is-leaf {
-				$!head = $.head.next;
-			}
 			if $.head.is-end {
 				if $.is-done {
 					return IterationEnd;
@@ -501,7 +498,7 @@ class Perl6::Parser {
 			}
 			else {
 				my $elem = $.head;
-				$!head = $.head.next;
+				$!head = $.head.next-leaf;
 				$elem;
 			}
 		}
@@ -523,6 +520,7 @@ class Perl6::Parser {
 		my $tree = self.build-tree( $p );
 		$.factory.thread( $tree );
 		my $head = $.factory.flatten( $tree );
+		$head = $head.next-leaf if !$head.is-leaf;
 
 		LeafIterator.new( :head( $head ) );
 	}
