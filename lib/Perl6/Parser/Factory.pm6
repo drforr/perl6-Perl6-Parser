@@ -1270,7 +1270,6 @@ class Perl6::Parser::Factory {
 	constant PAREN-CLOSE = Q')';
 
 	constant COLON = Q{:};
-	constant COMMA = Q{,};
 	constant EQUAL = Q{=};
 	constant BANG-BANG = Q{!!};
 	constant FAT-ARROW = Q{=>};
@@ -2616,7 +2615,6 @@ class Perl6::Parser::Factory {
 			$child.append( self._dotty( $p.hash.<dotty> ) );
 		}
 		elsif self.assert-hash( $p, [< fake_infix OPER colonpair >] ) {
-#die;
 			$child.append(
 				self.__Postfix(
 					$p,
@@ -2722,7 +2720,6 @@ class Perl6::Parser::Factory {
 				if self.assert-hash( $v,
 						[< dotty OPER >],
 						[< postfix_prefix_meta_operator >] ) {
-#die;
 					$child.append( self._EXPR( $v.list.[0] ) );
 					if $v.Str ~~ m{ ('>>') } {
 						$child.append(
@@ -3061,10 +3058,6 @@ class Perl6::Parser::Factory {
 		}
 		elsif self.assert-hash( $p, [< pblock >] ) {
 			$child.append( self._pblock( $p.hash.<pblock> ) );
-		}
-		elsif $p.Str ~~ m{ << (where) >> } {
-			$child.append( self.__Optional_where( $p ) );
-			$child.append( self._EXPR( $p.hash.<EXPR> ) );
 		}
 		# XXX Here begin some more ugly hacks.
 		elsif self.assert-hash( $p, [< args op triangle >] ) {
@@ -3716,14 +3709,6 @@ class Perl6::Parser::Factory {
 		if self.assert-hash( $p, [< termseq >] ) {
 			$child.append( self._termseq( $p.hash.<termseq> ) );
 		}
-		elsif $p.Str and $p.Str ~~ m{ ^ ( .+? ) \s+ $ } {
-			$child.append(
-				Perl6::StringList::Body.from-int(
-					$p.from,
-					$0.Str
-				)
-			);
-		}
 		else {
 			$child.fall-through( $_ );
 		}
@@ -4146,7 +4131,6 @@ class Perl6::Parser::Factory {
 #				[< param_var type_constraint
 #				   quant post_constraint >],
 #				[< default_value modifier trait >] ) {
-#die;
 #				# Synthesize the 'from' and 'to' markers for
 #				# 'where'
 #				$child.append(
@@ -4170,7 +4154,6 @@ class Perl6::Parser::Factory {
 #				[< type_constraint named_param quant >],
 #				[< default_value modifier trait
 #				   post_constraint >] ) {
-#die;
 #				$child.append(
 #					self._named_param(
 #						$_.hash.<named_param>
@@ -4189,7 +4172,6 @@ class Perl6::Parser::Factory {
 #				[< type_constraint param_var quant >],
 #				[< default_value modifier trait
 #				   post_constraint >] ) {
-#die;
 #				$child.append(
 #					self._type_constraint(
 #						$_.hash.<type_constraint>
@@ -4203,7 +4185,6 @@ class Perl6::Parser::Factory {
 #				[< param_var quant default_value >],
 #				[< modifier trait type_constraint
 #				   post_constraint >] ) {
-#die;
 #				$child.append(
 #					self._param_var( $_.hash.<param_var> )
 #				);
@@ -4223,7 +4204,6 @@ class Perl6::Parser::Factory {
 #				[< param_var quant >],
 #				[< default_value modifier trait
 #				   type_constraint post_constraint >] ) {
-#die;
 #				$child.append(
 #					self._param_var( $_.hash.<param_var> )
 #				);
@@ -4232,7 +4212,6 @@ class Perl6::Parser::Factory {
 #				[< type_constraint >],
 #				[< default_value modifier trait
 #				   post_constraint >] ) {
-#die;
 #				$child.append(
 #					self._type_constraint(
 #						$_.hash.<type_constraint>
@@ -4948,15 +4927,7 @@ class Perl6::Parser::Factory {
 			for $p.list {
 				if self.assert-hash( $_, [< identifier >] ) {
 					$child.append(
-						Perl6::Operator::Prefix.from-int(
-							$_.hash.<identifier>.from,
-							COLON
-						)
-					);
-					$child.append(
-						self._identifier(
-							$_.hash.<identifier>
-						)
+						Perl6::Adverb.from-match( $_ )
 					);
 				}
 				else {
@@ -5554,8 +5525,7 @@ class Perl6::Parser::Factory {
 				$child.append( self._left( $_.hash.<left> ) );
 				$child.append(
 					Perl6::Operator::Prefix.from-int(
-						$_.hash.<left>.to -
-							SLASH.chars,
+						$_.hash.<left>.to,
 						SLASH
 					)
 				);
@@ -6607,7 +6577,6 @@ class Perl6::Parser::Factory {
 #		if $p.list {
 #			for $p.list {
 #				if self.assert-hash( $_, [< trait_mod >] ) {
-#die;
 #					$child.append(
 #						self._trait_mod(
 #							$_.hash.<trait_mod>

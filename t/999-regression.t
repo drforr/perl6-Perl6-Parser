@@ -507,6 +507,15 @@ _END_
 	done-testing;
 }, Q{More comma-separated lists};
 
+subtest {
+	my $source = Q:to[_END_];
+s:g/'[]'//
+_END_
+	is $pt._roundtrip( $source ), $source, Q{formatted};
+
+	done-testing;
+}, Q{substitution with adverb};
+
 done-testing; # Because we're going to be adding tests quite often.
 
 # vim: ft=perl6
