@@ -9,7 +9,7 @@ my $pt = Perl6::Parser.new;
 my $*CONSISTENCY-CHECK = True;
 my $*FALL-THROUGH = True;
 
-# $pt.build-tree verifies that the tokens are contiguous, along with a bunch
+# $pt.to-tree verifies that the tokens are contiguous, along with a bunch
 # of other things.
 #
 # So, all I really want to verify here is that the data types are correct.

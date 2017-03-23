@@ -8,7 +8,7 @@ sub MAIN( Str $filename ) {
 
 	my $pt = Perl6::Parser.new;
 	my $p = $pt.parse-source( $text );
-	my $tree = $pt.build-tree( $p );
+	my $tree = $pt._build-tree( $p );
 	say "Source validated!" if $pt.validate( $p );
 	say $pt.dump-tree( $tree );
 }

@@ -23,8 +23,7 @@ subtest {
 
 		subtest {
 			my $source = Q{my token Foo{a}};
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -34,8 +33,7 @@ subtest {
 			my $source = Q:to[_END_];
 my token Foo     {a}
 _END_
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -43,8 +41,7 @@ _END_
 
 		subtest {
 			my $source = Q{my token Foo{a}  };
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -52,8 +49,7 @@ _END_
 
 		subtest {
 			my $source = Q{my token Foo     {a}  };
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -67,8 +63,7 @@ _END_
 			my $source = Q:to[_END_];
 my token Foo{ a  }
 _END_
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -78,8 +73,7 @@ _END_
 			my $source = Q:to[_END_];
 my token Foo     { a  }
 _END_
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -87,8 +81,7 @@ _END_
 
 		subtest {
 			my $source = Q{my token Foo{ a  }  };
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -96,8 +89,7 @@ _END_
 
 		subtest {
 			my $source = Q{my token Foo     { a  }  };
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -113,8 +105,7 @@ subtest {
 
 		subtest {
 			my $source = Q{my rule Foo{a}};
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -124,8 +115,7 @@ subtest {
 			my $source = Q:to[_END_];
 my rule Foo     {a}
 _END_
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -133,8 +123,7 @@ _END_
 
 		subtest {
 			my $source = Q{my rule Foo{a}  };
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -142,8 +131,7 @@ _END_
 
 		subtest {
 			my $source = Q{my rule Foo     {a}  };
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -155,8 +143,7 @@ _END_
 
 		subtest {
 			my $source = Q{my rule Foo{ a  }};
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -164,8 +151,7 @@ _END_
 
 		subtest {
 			my $source = Q{my rule Foo     { a  }};
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -173,8 +159,7 @@ _END_
 
 		subtest {
 			my $source = Q{my rule Foo{ a  }  };
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -182,8 +167,7 @@ _END_
 
 		subtest {
 			my $source = Q{my rule Foo     { a  }  };
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -199,8 +183,7 @@ subtest {
 
 		subtest {
 			my $source = Q{my regex Foo{a}};
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -208,8 +191,7 @@ subtest {
 
 		subtest {
 			my $source = Q{my regex Foo     {a}};
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -217,8 +199,7 @@ subtest {
 
 		subtest {
 			my $source = Q{my regex Foo{a}  };
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -226,8 +207,7 @@ subtest {
 
 		subtest {
 			my $source = Q{my regex Foo     {a}  };
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -239,8 +219,7 @@ subtest {
 
 		subtest {
 			my $source = Q{my regex Foo{ a  }};
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -248,8 +227,7 @@ subtest {
 
 		subtest {
 			my $source = Q{my regex Foo     { a  }};
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -257,8 +235,7 @@ subtest {
 
 		subtest {
 			my $source = Q{my regex Foo{ a  }   };
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;
@@ -266,8 +243,7 @@ subtest {
 
 		subtest {
 			my $source = Q{my regex Foo     { a  }   };
-			my $p = $pt.parse( $source );
-			my $tree = $pt.build-tree( $p );
+			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
 
 			done-testing;

@@ -288,8 +288,7 @@ subtest {
 		my $source = Q:to[_END_];
 my &a; :&a
 _END_
-		my $parsed = $pt.parse( $source );
-		my $tree = $pt.build-tree( $parsed );
+		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
