@@ -189,52 +189,94 @@ use Perl6::Parser::Factory;
 
 my role Debugging {
 
+	method _interrogate-element( Perl6::Element $node ) {
+		my @problem;
+		if $node.WHAT.perl eq 'Perl6::Element' {
+			@problem.push( Q{raw element} );
+			return @problem;
+		}
+		unless $node.^can('is-leaf') {
+			@problem.push( Q{no leaf test} );
+			return @problem;
+		}
+		unless $node.^can('is-twig') {
+			@problem.push( Q{no twig test} );
+			return @problem;
+		}
+		unless $node.^can('from') {
+			@problem.push( Q{no from} );
+			return @problem;
+		}
+		unless $node.^can('to') {
+			@problem.push( Q{no to} );
+			return @problem;
+		}
+
+		@problem.push( Q{from} ) if $node.from < 0;
+		@problem.push( Q{to} ) if $node.to < 0;
+		@problem.push( Q{cross} ) if $node.from > $node.to;
+
+		if $node.is-twig {
+			given $node {
+				when Perl6::Block {
+					@problem.push( Q{structure start} ) if
+						$node.child[0] !~~
+							Perl6::Balanced::Enter;
+					@problem.push( Q{structure end} ) if
+						$node.child[*-1] !~~
+							Perl6::Balanced::Exit;
+				}
+			}
+		}
+		elsif $node.is-leaf {
+			@problem.push( Q{empty} ) if $node.from == $node.to;
+
+			@problem.push( Q{short} ) if
+				$node.to - $node.from < $node.content.chars;
+			@problem.push( Q{long} ) if
+				$node.to - $node.from > $node.content.chars;
+
+			given $node {
+				when Perl6::Comment | Perl6::String | Perl6::Sir-Not-Appearing-In-This-Statement { }
+				when Perl6::WS {
+					@problem.push( Q{WS} ) if
+						$node.content ~~ /\S/;
+				}
+				default {
+					@problem.push( Q{WS} ) if
+						$node.content ~~ /\s/;
+					@problem.push( Q{EMPTY} ) if
+						$node.content eq Q{};
+				}
+			}
+		}
+		else {
+			@problem.push( Q{not tree member} );
+		}
+		@problem;
+	}
+
 	#constant indent = "\t";
 	my constant indent = ' ';
 	method _dump-tree( Perl6::Element $root,
 			  Bool $display-ws = True,
 			  Int $depth = 0 ) {
-		return '' if $root ~~ Perl6::WS and !$display-ws;
 		my $str = ( indent xx $depth ) ~ self.dump-term( $root ) ~ "\n";
 		if $root.is-twig {
 			for ^$root.child {
 				my @problem;
-				if $root.child.[$_].from < 0 {
-					@problem.push( '-' )
-				}
-				if $root.child.[$_].to < 0 {
-					@problem.push( '-' )
-				}
+				@problem.append(
+					self._interrogate-element(
+						$root.child.[$_]
+					)
+				);
+
 				# Mark the tokens that don't overlap.
 				#
 				if $root.child.[$_+1].defined and
 					$root.child.[$_].to !=
 					$root.child.[$_+1].from {
 					@problem.push( 'G' )
-				}
-				if $root.child.[$_].is-leaf {
-					if $root.child.[$_].from ==
-					   $root.child.[$_].to {
-						@problem.push( Q{''} )
-					}
-					if $root.child.[$_].to -
-					   $root.child.[$_].from != $root.child.[$_].content.chars {
-						@problem.push( Q{''} )
-					}
-					if $root.child.[$_] ~~ Perl6::WS and
-					   $root.child.[$_].content ~~ / \S / {
-						@problem.push( 'WS' )
-					}
-					if $root.child.[$_] !~~ Perl6::WS and
-					   $root.child.[$_] !~~ Perl6::Comment and
-					   $root.child.[$_] !~~ Perl6::String and
-					   $root.child.[$_].content ~~ / \s / {
-						@problem.push( 'WS' )
-					}
-					if $root.child.[$_].is-leaf and
-					   $root.child.[$_].content eq '' {
-						@problem.push( 'WS' )
-					}
 				}
 				$str ~= @problem.join( ' ' ) if @problem;
 				$str ~= self._dump-tree(
@@ -332,81 +374,34 @@ my role Testing {
 
 my role Validating {
 
-	method _consistency-check( Perl6::Element $root ) {
-		if !$root.^can('is-leaf') {
-			$*ERR.say(
-				"Element is missing is-leaf: " ~ $root.perl
-			);
-		}
-		if !$root.^can('is-twig') {
-			$*ERR.say(
-				"Element is missing is-twig: " ~ $root.perl
-			);
+	method _consistency-check( Perl6::Element $node ) {
+		my @problems = self._interrogate-element( $node );
+		if @problems {
+			$*ERR.say( @problems ~ ": " ~ $node.perl );
 		}
 
+		if $node.is-twig {
+			if $node.child.elems > 1 {
+				for $node.child.kv -> $index, $_ {
+					self._consistency-check( $_ );
 
-		if $root ~~ Perl6::Block {
-			unless $root.child.[0] ~~ Perl6::Structural {
-				$*ERR.say(
-					"First element not structural: " ~
-					$root.perl
-				);
-			}
-			unless $root.child.[*-1] ~~ Perl6::Structural {
-				$*ERR.say(
-					"Last element not structural: " ~
-					$root.perl
-				);
-			}
-		}
-		if $root.is-twig {
-			for $root.child {
-				self._consistency-check( $_ );
-				if $_.WHAT.perl eq 'Perl6::Element' {
-					$*ERR.say( "Raw Perl6::Element in: " ~ $root.perl );
-				}
-				unless $_.^can('from') {
-					$*ERR.say( "Missing 'from': " ~ $_.perl );
-				}
-			}
-			if $root.child.elems > 1 {
-				for $root.child.kv -> $index, $_ {
 					next if $index == 0;
-					next unless $root.child.[$index-1].^can('to');
-					next unless $root.child.[$index].^can('from');
-					if $root.child.[$index-1] ~~ Perl6::WS and
-					   $root.child.[$index] ~~ Perl6::WS {
+					if $node.child.[$index-1] ~~ Perl6::WS and
+					   $node.child.[$index] ~~ Perl6::WS {
 						$*ERR.say( "Two WS entries in a row" );
 					}
-					if $root.child.[$index-1].to !=
-						$root.child.[$index].from {
+					if $node.child.[$index-1].to !=
+						$node.child.[$index].from {
 						$*ERR.say( "Gap between two items" );
 					}
 				}
 			}
 		}
-		if $root.is-leaf {
-			if $root.content.chars < $root.to - $root.from {
-				$*ERR.say( "Not enough chars: " ~ $root.perl );
-			}
-			if $root.content.chars > $root.to - $root.from {
-				$*ERR.say( "Too many chars: " ~ $root.perl );
-			}
-			if $root !~~ Perl6::WS and
-					$root !~~ Perl6::StringList::Body and
-					$root !~~ Perl6::Sir-Not-Appearing-In-This-Statement and
-					$root.content ~~ m{ ^ (\s+) } {
-				$*ERR.say( "Leading whitespace: " ~ $root.perl );
-			}
-			if $root !~~ Perl6::WS and
-					$root !~~ Perl6::Comment and
-					$root !~~ Perl6::StringList::Body and
-					$root.content ~~ m{ (\s+) $ } {
-				$*ERR.say( "Trailing whitespace: " ~ $root.perl );
-			}
-		}
 	}
 
+	# Just in case we need to pass in parameters later on...
+	# sigh.
+	#
 	method consistency-check( Perl6::Element $root ) {
 		self._consistency-check( $root );
 	}
