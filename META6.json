@@ -17,7 +17,7 @@
    "perl" : "6.c",
    "build-depends" : [],
    "auth" : "github:drforr",
-   "source-url" : "https://github.com/drfor/perl6-Perl6-Parser",
+   "source-url" : "https://github.com/drforr/perl6-Perl6-Parser.git",
    "depends" : [
    ],
    "name" : "Perl6::Parser",
