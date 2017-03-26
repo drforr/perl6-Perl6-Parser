@@ -1339,7 +1339,7 @@ class Perl6::Parser::Factory {
 		my $remainder = $str;
 		my $left-margin = 0;
 
-		if %.here-doc{$from} {
+		if %.here-doc{$left-margin + $from} {
 			$child.append(
 				Perl6::Sir-Not-Appearing-In-This-Statement.new(
 					:factory-line-number(
@@ -1350,27 +1350,33 @@ class Perl6::Parser::Factory {
 					:content( $remainder )
 				)
 			);
+			$remainder = '';
 		}
-		else {
-			if $remainder ~~ m{ ^ ( \s+ ) } {
-				$child.append(
-					Perl6::WS.from-int(
-						$left-margin + $from,
-						$0.Str
-					)
-				);
-				$left-margin += $0.Str.chars;
-				$remainder = $remainder.substr(
-					$0.Str.chars
-				);
-			}
+
+		while $remainder ne '' {
 			given $remainder {
-				when m{ ^ '#' } {
+				when m{ ^ ( \s+ ) } {
+					$child.append(
+						Perl6::WS.from-int(
+							$left-margin + $from,
+							$0.Str
+						)
+					);
+					$left-margin += $0.Str.chars;
+					$remainder = $remainder.substr(
+						$0.Str.chars
+					);
+				}
+				when m{ ^ ( '#' .+? ) \s*? $ } {
 					$child.append(
 						Perl6::Comment.from-int(
 							$left-margin + $from,
-							$_
+							$0.Str
 						)
+					);
+					$left-margin += $0.Str.chars;
+					$remainder = $remainder.substr(
+						$0.Str.chars
 					);
 				}
 				when m{ ^ '=' } {
@@ -1380,16 +1386,7 @@ class Perl6::Parser::Factory {
 							$_
 						)
 					);
-				}
-				default {
-					if $_.Str.chars {
-						$child.append(
-							Perl6::WS.from-int(
-								$left-margin + $from,
-								$_
-							)
-						)
-					}
+					$remainder = '';
 				}
 			}
 		}
