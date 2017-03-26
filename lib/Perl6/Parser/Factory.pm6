@@ -726,6 +726,9 @@ class Perl6::WS does Token {
 	also does Leaf;
 	also does Matchable;
 }
+class Perl6::Newline {
+	also is Perl6::WS;
+}
 
 class Perl6::Pod does Token {
 	also is Perl6::Element;
@@ -1333,6 +1336,24 @@ class Perl6::Parser::Factory {
 		$child;
 	}
 
+	method __Whitespace-from-match( Int $from, Str $str ) {
+		my $child = Perl6::Element-List.new;
+		my $_from = $from;
+		my $_str = $str;
+		while $_str ~~ s{ ^ ( \h+ ) ( \n ) } = '' {
+			$child.append(
+				Perl6::WS.from-int( $_from, $0.Str )
+			);
+			$_from += $0.Str.chars;
+			$child.append(
+				Perl6::Newline.from-int( $_from, $1.Str )
+			);
+			$_from += $1.Str.chars;
+		}
+		$child.append( Perl6::WS.from-int( $_from, $_str ) );
+		$child;
+	}
+
 	method _string-to-tokens( Int $from, Str $str )
 			returns Perl6::Element-List {
 		my $child = Perl6::Element-List.new;
@@ -1357,7 +1378,7 @@ class Perl6::Parser::Factory {
 			given $remainder {
 				when m{ ^ ( \s+ ) } {
 					$child.append(
-						Perl6::WS.from-int(
+						self.__Whitespace-from-match(
 							$left-margin + $from,
 							$0.Str
 						)
@@ -6173,7 +6194,7 @@ class Perl6::Parser::Factory {
 			elsif $_.Str ~~ m{ ( \s+ ) $ } {
 				my Int $right-margin = $0.Str.chars;
 				$_child.append(
-					Perl6::WS.from-int(
+					self.__Whitespace-from-match(
 						$_.to - $right-margin,
 						$0.Str
 					)
