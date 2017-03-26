@@ -726,8 +726,11 @@ class Perl6::WS does Token {
 	also does Leaf;
 	also does Matchable;
 }
-class Perl6::Newline {
-	also is Perl6::WS;
+class Perl6::Newline does Token {
+	also is Perl6::Element;
+
+	also does Leaf;
+	also does Matchable;
 }
 
 class Perl6::Pod does Token {
@@ -1340,17 +1343,21 @@ class Perl6::Parser::Factory {
 		my $child = Perl6::Element-List.new;
 		my $_from = $from;
 		my $_str = $str;
-		while $_str ~~ s{ ^ ( \h+ ) ( \n ) } = '' {
-			$child.append(
-				Perl6::WS.from-int( $_from, $0.Str )
-			);
-			$_from += $0.Str.chars;
+		while $_str ~~ s{ ^ ( \h* ) ( \n ) } = '' {
+			if $0.Str {
+				$child.append(
+					Perl6::WS.from-int( $_from, $0.Str )
+				);
+				$_from += $0.Str.chars;
+			}
 			$child.append(
 				Perl6::Newline.from-int( $_from, $1.Str )
 			);
 			$_from += $1.Str.chars;
 		}
-		$child.append( Perl6::WS.from-int( $_from, $_str ) );
+		if $_str {
+			$child.append( Perl6::WS.from-int( $_from, $_str ) );
+		}
 		$child;
 	}
 

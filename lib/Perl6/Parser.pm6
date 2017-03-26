@@ -238,7 +238,7 @@ my role Debugging {
 
 			given $node {
 				when Perl6::Comment | Perl6::String | Perl6::Sir-Not-Appearing-In-This-Statement { }
-				when Perl6::WS {
+				when Perl6::WS | Perl6::Newline {
 					@problem.push( Q{WS} ) if
 						$node.content ~~ /\S/;
 				}
