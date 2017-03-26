@@ -727,6 +727,13 @@ class Perl6::WS does Token {
 	also does Matchable;
 }
 
+class Perl6::Pod does Token {
+	also is Perl6::Element;
+
+	also does Leaf;
+	also does Matchable;
+}
+
 class Perl6::Comment does Token {
 	also is Perl6::Element;
 
@@ -1329,7 +1336,8 @@ class Perl6::Parser::Factory {
 	method _string-to-tokens( Int $from, Str $str )
 			returns Perl6::Element-List {
 		my $child = Perl6::Element-List.new;
-		my $to = $from + $str.chars;
+		my $remainder = $str;
+		my $left-margin = 0;
 
 		if %.here-doc{$from} {
 			$child.append(
@@ -1337,44 +1345,51 @@ class Perl6::Parser::Factory {
 					:factory-line-number(
 						callframe(1).line
 					),
-					:from( $from ),
-					:to( %.here-doc{$from} ),
-					:content( $str )
+					:from( $left-margin + $from ),
+					:to( $left-margin + %.here-doc{$from} ),
+					:content( $remainder )
 				)
 			);
 		}
 		else {
-			given $str {
+			if $remainder ~~ m{ ^ ( \s+ ) } {
+				$child.append(
+					Perl6::WS.from-int(
+						$left-margin + $from,
+						$0.Str
+					)
+				);
+				$left-margin += $0.Str.chars;
+				$remainder = $remainder.substr(
+					$0.Str.chars
+				);
+			}
+			given $remainder {
 				when m{ ^ '#' } {
 					$child.append(
 						Perl6::Comment.from-int(
-							$from, $str
-						)
-					);
-				}
-				when m{ ^ ( \s+ ) ( '#' .+ ) $ } {
-					my Int $left-margin = $0.Str.chars;
-					$child.append(
-						Perl6::WS.from-int(
-							$from,
-							$0.Str
-						)
-					);
-					$child.append(
-						Perl6::Comment.from-int(
 							$left-margin + $from,
-							$1.Str
+							$_
 						)
 					);
 				}
-				when m{ \S } {
+				when m{ ^ '=' } {
+					$child.append(
+						Perl6::Pod.from-int(
+							$left-margin + $from,
+							$_
+						)
+					);
 				}
 				default {
-					$child.append(
-						Perl6::WS.from-int(
-							$from, $str
+					if $_.Str.chars {
+						$child.append(
+							Perl6::WS.from-int(
+								$left-margin + $from,
+								$_
+							)
 						)
-					)
+					}
 				}
 			}
 		}
@@ -6178,13 +6193,6 @@ class Perl6::Parser::Factory {
 					)
 				);
 			}
-			$child.append(
-				Perl6::Statement.from-list( $_child )
-			);
-		}
-		if !$p.hash.<statement> and $p.Str ~~ m{ . } {
-			my $_child = Perl6::Element-List.new;
-			$_child.append( Perl6::WS.from-match( $p ) );
 			$child.append(
 				Perl6::Statement.from-list( $_child )
 			);
