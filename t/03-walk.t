@@ -18,22 +18,48 @@ sub make-list {
 	Perl6::Operator::Circumfix.new( :from(0), :to(1), :child( ) );
 }
 
+sub is-linked( $node, $parent, $next, $previous ) {
+	return True if $node.parent === $parent;
+	return True if $node.next === $next;
+	return True if $node.previous === $previous;
+	return False;
+}
+sub is-linked-leaf( $node, $next-leaf, $previous-leaf ) {
+	return True if $node.next-leaf === $next-leaf;
+	return True if $node.previous-leaf === $previous-leaf;
+	return False;
+}
+
+# Just as a reminder, if you're at the end of a list and go to the next item,
+# you'll just find yourself back at the end node.
+#
+# This is mostly to keep typing simple.
+
 # 27
 subtest {
 	my $tree = make-decimal( '27' );
 	$ppf.thread( $tree );
 
-	is $tree.parent,
-		$tree;
-	ok $tree.is-root;
+	ok $tree.is-root,
+		Q{tree is its own root};
+	ok $tree.is-start,
+		Q{tree is its own start node};
+	ok $tree.is-start-leaf,
+		Q{tree is its own start leaf};
+	ok $tree.is-end,
+		Q{tree is its own end node};
+	ok $tree.is-end-leaf,
+		Q{tree is its own end leaf};
 
-	is $tree.next,
-		$tree;
-	ok $tree.is-end;
-
-	is $tree.previous,
-		$tree;
-	ok $tree.is-start;
+	ok is-linked( $tree,
+		$tree,
+		$tree,
+		$tree
+	), Q{root};
+	ok is-linked-leaf( $tree,
+		$tree,
+		$tree
+	), Q{root leaves};
 }
 
 # '()'
@@ -41,17 +67,24 @@ subtest {
 	my $tree = make-list();
 	$ppf.thread( $tree );
 
-	is $tree.parent,
-		$tree;
-	ok $tree.is-root;
+	ok $tree.is-root,
+		Q{tree is its own root};
+	ok $tree.is-start,
+		Q{tree is its own start node};
+	nok $tree.is-start-leaf,
+		Q{tree is not its own start leaf};
+	ok $tree.is-end,
+		Q{tree is its own end node};
+	nok $tree.is-end-leaf,
+		Q{tree is not its own end leaf};
 
-	is $tree.next,
-		$tree;
-	ok $tree.is-end;
-
-	is $tree.previous,
-		$tree;
-	ok $tree.is-start;
+	ok is-linked( $tree,
+		$tree,
+		$tree,
+		$tree
+	), Q{root};
+	nok $tree.next-leaf, Q{next leaf node does not exist};
+	nok $tree.previous-leaf, Q{previous leaf node does not exist};
 }
 
 # '(27)' (not really - '27' because there's no '(',')'
@@ -65,23 +98,31 @@ subtest {
 	);
 	$ppf.thread( $tree );
 
-	is $tree.parent,
-		$tree;
-	is $tree.child[0].parent,
-		$tree;
-	ok $tree.is-root;
+	ok is-linked( $tree,
+		$tree,
+		$tree.child[0],
+		$tree
+	), Q{root};
+	ok $tree.is-root, Q{tree is its own root};
+	ok $tree.is-start, Q{tree is its own start node};
+	nok $tree.is-start-leaf, Q{tree is not its own start leaf};
+	nok $tree.is-end, Q{tree is not its own end node};
+	nok $tree.is-end-leaf, Q{tree is not its own end leaf};
 
-	is $tree.next,
-		$tree.child[0];
-	is $tree.child[0].next,
-		$tree.child[0];
-	ok $tree.child[0].is-end;
+	my $twenty-seven = $tree.child[0];
 
-	is $tree.child[0].previous,
-		$tree;
-	is $tree.previous,
-		$tree;
-	ok $tree.is-start;
+	ok is-linked( $twenty-seven, $tree, $twenty-seven, $tree ), Q{'27'};
+
+	nok $twenty-seven.is-start,
+		Q{'27' s not the start};
+	ok $twenty-seven.is-start-leaf,
+		Q{'27' is the starting leaf};
+	ok $twenty-seven.is-end,
+		Q{'27' is at the end of the list};
+	ok $twenty-seven.is-end-leaf,
+		Q{'27' is the ending leaf};
+	nok $twenty-seven.is-root,
+		Q{'27' is not the root};
 }
 
 # '(27 64)' (not really - no '(',')' characters.
@@ -97,29 +138,25 @@ subtest {
 		);
 	$ppf.thread( $tree );
 
-	is $tree.parent,
-		$tree;
-	is $tree.child[0].parent,
-		$tree;
-	is $tree.child[1].parent,
-		$tree;
+	ok is-linked( $tree,
+		$tree,
+		$tree.child[0],
+		$tree
+	), Q{root};
 	ok $tree.is-root;
-
-	is $tree.next,
-		$tree.child[0];
-	is $tree.child[0].next,
-		$tree.child[1];
-	is $tree.child[1].next,
-		$tree.child[1];
-	ok $tree.child[1].is-end;
-
-	is $tree.child[1].previous,
-		$tree.child[0];
-	is $tree.child[0].previous,
-		$tree;
-	is $tree.previous,
-		$tree;
 	ok $tree.is-start;
+
+	ok is-linked( $tree.child[0],
+		$tree,
+		$tree.child[1],
+		$tree
+	), Q{'27'};
+	ok is-linked( $tree.child[1],
+		$tree,
+		$tree.child[1],
+		$tree.child[0]
+	), Q{'64'};
+	ok $tree.child[1].is-end;
 }
 
 # '(27 64)' (not really - no '(',')' characters.
@@ -138,6 +175,7 @@ subtest {
 	ok !$tree.is-leaf;
 
 	my $int-node = $tree.next-leaf;
+
 	ok $int-node ~~ Perl6::Number::Decimal;
 }
 
@@ -161,20 +199,28 @@ subtest {
 		);
 	$ppf.thread( $tree );
 
-	is $tree.parent, $tree;
-	is $tree.child[0].parent, $tree;
-	is $tree.child[1].parent, $tree;
-	ok $tree.is-root;
-
-	is $tree.next, $tree.child[0];
-	is $tree.child[0].next, $tree.child[1];
-	is $tree.child[1].next, $tree.child[1];
-	ok $tree.child[1].is-end;
-
-	is $tree.child[1].previous, $tree.child[0];
-	is $tree.child[0].previous, $tree;
-	is $tree.previous, $tree;
+	ok is-linked( $tree,
+		$tree,
+		$tree.child[0],
+		$tree
+	), Q{root};
 	ok $tree.is-start;
+	ok $tree.is-root;
+	nok $tree.is-end;
+
+	ok is-linked( $tree.child[0],
+		$tree,
+		$tree.child[1],
+		$tree
+	), Q{'()'};
+	nok $tree.child[0].is-end;
+
+	ok is-linked( $tree.child[1],
+		$tree,
+		$tree.child[1],
+		$tree.child[0]
+	), Q{'b'};
+	ok $tree.child[1].is-end;
 }
 
 # '((a)b)' - not really, '(',')' are missing.
@@ -200,23 +246,28 @@ subtest {
 		);
 	$ppf.thread( $tree );
 
-	is $tree.parent, $tree;
-	is $tree.child[0].parent, $tree;
-	is $tree.child[0].child[0].parent, $tree.child[0];
-	is $tree.child[1].parent, $tree;
+	ok is-linked( $tree, $tree, $tree.child[0], $tree );
 	ok $tree.is-root;
-
-	is $tree.next, $tree.child[0];
-	is $tree.child[0].next, $tree.child[0].child[0];
-	is $tree.child[0].child[0].next, $tree.child[1];
-	is $tree.child[1].next, $tree.child[1];
-	ok $tree.child[1].is-end;
-
-	is $tree.child[1].previous, $tree.child[0].child[0];
-	is $tree.child[0].child[0].previous, $tree.child[0];
-	is $tree.child[0].previous, $tree;
-	is $tree.previous, $tree;
 	ok $tree.is-start;
+
+	ok is-linked( $tree.child[0],
+		$tree,
+		$tree.child[0].child[0],
+		$tree
+	), Q{'(a)'};
+
+	ok is-linked( $tree.child[0].child[0],
+		$tree.child[0],
+		$tree.child[1],
+		$tree.child[0]
+	), Q{'a'};
+
+	ok is-linked( $tree.child[1],
+		$tree,
+		$tree.child[1],
+		$tree.child[0].child[0]
+	), Q{'b'};
+	ok $tree.child[1].is-end;
 }
 
 subtest {
@@ -225,51 +276,67 @@ subtest {
 	$ppf.thread( $tree );
 	is $pt.to-string( $tree ), $source, Q{formatted};
 
-	is $tree.parent, $tree;
-	is $tree.child[0].parent, $tree;
-	is $tree.child[0].child[0].parent, $tree.child[0];
-	is $tree.child[0].child[0].child[0].parent, $tree.child[0].child[0];
-	is $tree.child[0].child[0].child[1].parent, $tree.child[0].child[0];
-	is $tree.child[0].child[0].child[2].parent, $tree.child[0].child[0];
-	is $tree.child[0].child[1].parent, $tree.child[0];
-	is $tree.child[1].parent, $tree;
-	is $tree.child[1].child[0].parent, $tree.child[1];
-	is $tree.child[1].child[1].parent, $tree.child[1];
-	is $tree.child[2].parent, $tree;
-	is $tree.child[2].child[0].parent, $tree.child[2];
+	ok is-linked( $tree, $tree, $tree.child[0], $tree );
 	ok $tree.is-root;
-
-	is $tree.next, $tree.child[0];
-	is $tree.child[0].next, $tree.child[0].child[0];
-	is $tree.child[0].child[0].next, $tree.child[0].child[0].child[0];
-	is $tree.child[0].child[0].child[0].next,
-		$tree.child[0].child[0].child[1];
-	is $tree.child[0].child[0].child[1].next,
-		$tree.child[0].child[0].child[2];
-	is $tree.child[0].child[0].child[2].next, $tree.child[0].child[1];
-	is $tree.child[0].child[1].next, $tree.child[1];
-	is $tree.child[1].next, $tree.child[1].child[0];
-	is $tree.child[1].child[0].next, $tree.child[1].child[1];
-	is $tree.child[1].child[1].next, $tree.child[2];
-	is $tree.child[2].next, $tree.child[2].child[0];
-	is $tree.child[2].child[0].next, $tree.child[2].child[0];
-	ok $tree.child[2].child[0].is-end;
-
-	is $tree.child[2].child[0].previous, $tree.child[2];
-	is $tree.child[2].previous, $tree.child[1].child[1];
-	is $tree.child[1].child[1].previous, $tree.child[1].child[0];
-	is $tree.child[1].child[0].previous, $tree.child[1];
-	is $tree.child[1].previous, $tree.child[0].child[1];
-	is $tree.child[0].child[1].previous, $tree.child[0].child[0].child[2];
-	is $tree.child[0].child[0].child[2].previous,
-		$tree.child[0].child[0].child[1];
-	is $tree.child[0].child[0].child[1].previous,
-		$tree.child[0].child[0].child[0];
-	is $tree.child[0].child[0].child[0].previous, $tree.child[0].child[0];
-	is $tree.child[0].child[0].previous, $tree.child[0];
-	is $tree.child[0].previous, $tree;
-	is $tree.previous, $tree;
 	ok $tree.is-start;
+
+	ok is-linked( $tree.child[0],
+		$tree,
+		$tree.child[0].child[0],
+		$tree
+	), Q{root};
+
+	ok is-linked( $tree.child[0].child[0],
+		$tree.child[0],
+		$tree.child[0].child[0].child[0],
+		$tree.child[0]
+	);
+	ok is-linked( $tree.child[0].child[0].child[0],
+		$tree.child[0].child[0],
+		$tree.child[0].child[0].child[1],
+		$tree.child[0].child[0]
+	);
+	ok is-linked( $tree.child[0].child[0].child[1],
+		$tree.child[0].child[0],
+		$tree.child[0].child[0].child[2],
+		$tree.child[0].child[0].child[0]
+	);
+	ok is-linked( $tree.child[0].child[0].child[2],
+		$tree.child[0].child[0],
+		$tree.child[0].child[1],
+		$tree.child[0].child[0].child[1]
+	);
+	ok is-linked( $tree.child[0].child[1],
+		$tree.child[0],
+		$tree.child[1],
+		$tree.child[0].child[0].child[2]
+	);
+	ok is-linked( $tree.child[1],
+		$tree,
+		$tree.child[1].child[0],
+		$tree.child[0].child[1]
+	);
+	ok is-linked( $tree.child[1].child[0],
+		$tree.child[1],
+		$tree.child[1].child[1],
+		$tree.child[1]
+	);
+	ok is-linked( $tree.child[1].child[1],
+		$tree.child[1],
+		$tree.child[2],
+		$tree.child[1].child[0]
+	);
+	ok is-linked( $tree.child[2],
+		$tree,
+		$tree.child[2].child[0],
+		$tree.child[1].child[1]
+	);
+	ok is-linked( $tree.child[2].child[0],
+		$tree.child[2],
+		$tree.child[2].child[0],
+		$tree.child[2]
+	);
+	ok $tree.child[2].child[0].is-end;
 
 	done-testing;
 }, Q{leading, trailing ws};

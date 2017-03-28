@@ -79,6 +79,10 @@ Are we at the start or end of the stream?
 
 =cut
 
+=item C<is-start-leaf>, C<is-end-leaf>
+
+Are we at the start or end B<leaf> 0f the stream?
+
 =item C<is-leaf>, C<is-twig>
 
 Is the element a leaf (a single token) or a composite of multiple tokens? (a twig)
@@ -418,14 +422,30 @@ role Leaf {
 
 	method is-leaf returns Bool { True }
 	method is-twig returns Bool { False }
+
+	method is-start-leaf returns Bool {
+		return True if self.is-start;
+		return True unless self.previous-leaf;
+		return False;
+	}
+	method is-end-leaf returns Bool {
+		return True if self.is-end;
+		return True unless self.next-leaf;
+		return False;
+	}
 }
 role Twig {
 	also does Ordered-Tree;
 
+	# By default, no Twig can be a leaf, so these are all False.
+	#
 	method is-leaf returns Bool { False }
-	method is-twig returns Bool { True }
+	method is-start-leaf returns Bool { False }
+	method is-end-leaf returns Bool { False }
 
+	method is-twig returns Bool { True }
 	method is-empty returns Bool { @.child.elems == 0 }
+
 	method first returns Perl6::Element { @.child[0] }
 	method last returns Perl6::Element { @.child[*-1] }
 }
