@@ -427,10 +427,10 @@ subtest {
 
 subtest {
 	my $source = Q{();2;1;};
-	my $iter = $pt.iterator( $source );
+	my @token = $pt.to-list( $source );
 	my $iterated = '';
 
-	for Seq.new( $iter ) {
+	for grep { .textual }, @token {
 		$iterated ~= $_.content;
 	}
 	is $iterated, $source, Q{pull-one returns complete list};

@@ -9,20 +9,16 @@ plan 1;
 # child clases *immediately* following the test for their parent class.
 #
 subtest {
-	ok Perl6::Structural ~~ Perl6::Element;
-
 	subtest {
-		ok Perl6::Block ~~ Perl6::Structural;
-		ok Perl6::Document ~~ Perl6::Structural;
-		ok Perl6::Statement ~~ Perl6::Structural;
+		ok Perl6::Block ~~ Perl6::Element;
+		ok Perl6::Document ~~ Perl6::Element;
+		ok Perl6::Statement ~~ Perl6::Element;
 
 		done-testing;
-	}, Q{Structural};
-
-	ok Perl6::Textual ~~ Perl6::Element;
+	}, Q{Element};
 
 	subtest {
-		ok Perl6::Invisible ~~ Perl6::Textual;
+		ok Perl6::Invisible ~~ Perl6::Element;
 
 		subtest {
 			ok Perl6::Newline ~~ Perl6::Invisible;
@@ -31,7 +27,7 @@ subtest {
 			done-testing;
 		}, Q{Invisible};
 
-		ok Perl6::Visible ~~ Perl6::Textual;
+		ok Perl6::Visible ~~ Perl6::Element;
 
 		subtest {
 			ok Perl6::Adverb ~~ Perl6::Visible;
@@ -240,7 +236,7 @@ subtest {
 		}, Q{Visible};
 
 		done-testing;
-	}, Q{Textual};
+	}, Q{Element};
 
 	done-testing;
 }, Q{Element};

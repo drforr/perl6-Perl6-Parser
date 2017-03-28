@@ -441,18 +441,7 @@ class Perl6::Parser {
 		$tree
 	}
 
-	method to-tree( Str $source ) {
-		my $parsed = self.parse( $source );
-		self._build-tree( $parsed );
-	}
-
-	method to-string( Perl6::Element $tree ) {
-		my $str = $tree.to-string;
-
-		$str;
-	}
-
-	class CompleteIterator {
+	my class CompleteIterator {
 		also does Iterator;
 
 		has Perl6::Element $.head;
@@ -478,46 +467,22 @@ class Perl6::Parser {
 		method is-lazy { False }
 	}
 
-	class LeafIterator {
-		also does Iterator;
-
-		has Perl6::Element $.head;
-		has Bool $.is-done = False;
-
-		method pull-one {
-			if $.head.is-end {
-				if $.is-done {
-					return IterationEnd;
-				}
-				else {
-					$!is-done = True;
-					return $.head;
-				}
-			}
-			else {
-				my $elem = $.head;
-				$!head = $.head.next-leaf;
-				$elem;
-			}
-		}
-
-		method is-lazy { False }
+	method to-tree( Str $source ) {
+		my $parsed = self.parse( $source );
+		self._build-tree( $parsed );
 	}
 
-	method complete-iterator( Str $source ) {
+	method to-string( Perl6::Element $tree ) {
+		my $str = $tree.to-string;
+
+		$str;
+	}
+
+	method to-list( Str $source ) {
 		my $tree = self.to-tree( $source );
 		$.factory.thread( $tree );
 		my $head = $.factory.flatten( $tree );
 
-		CompleteIterator.new( :head( $head ) );
-	}
-
-	method iterator( Str $source ) {
-		my $tree = self.to-tree( $source );
-		$.factory.thread( $tree );
-		my $head = $.factory.flatten( $tree );
-		$head = $head.next-leaf while !$head.is-leaf;
-
-		LeafIterator.new( :head( $head ) );
+		Seq.new( CompleteIterator.new( :head( $head ) ) );
 	}
 }

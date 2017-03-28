@@ -10,34 +10,32 @@ Perl6::Parser::Factory - Builds client-ready Perl 6 data tree
 
 Generates the complete tree of Perl6-ready objects, shielding the client from the ugly details of the internal L<nqp> representation of the object. None of the elements, hash values or children should have L<NQPMatch> objects associated with them, as trying to view them can cause nasty crashes.
 
-Objects are divided into two general categories, L<Perl6::Token> and L<Perl6::Structural>. Structural items don't appear in the program text, because they just group things like blocks in C<grep { }> or argument lists in C<foo( 1, 2 )>.
+Objects are divided into two general categories, C<.textual> and C<.structural>. Structural items don't appear in the program text, because they just group things like blocks in C<grep { }> or argument lists in C<foo( 1, 2 )>.
 
 The metaclasses look like this:
 
 L<Perl6::Element>
-    L<Perl6::Textual> - Anything that appears in the program text.
-        L<Perl6::Visible> - Anything that's not whitespace
-            L<Perl6::Documentation> - Documentation
-                L<Perl6::Pod>
-                L<Perl6::Comment>
-        L<Perl6::Invisible> - Whitespace
-            L<Perl6::WS> - Horizontal whitespace
-            L<Perl6::Newline> - Vertical whitespace
-    L<Perl6::Structural>
+    L<Perl6::Visible> - Anything that's not whitespace
+        L<Perl6::Documentation> - Documentation
+            L<Perl6::Pod>
+            L<Perl6::Comment>
+    L<Perl6::Invisible> - Whitespace
+        L<Perl6::WS> - Horizontal whitespace
+        L<Perl6::Newline> - Vertical whitespace
 
 (note: I'm using C<class Perl6::Foo is Perl6::Bar> to denote classes whose parents are empty, "virtual".)
 
 Walking a list of objects is as simple as:
 
     my @token = Seq.new( $parser.iterator( $source ) );
-    for @token.grep: Perl6::Textual {
+    for grep { .textual }, @token {
         print $_.content;
     }
 
 Stripping comments and POD:
 
     my @token = Seq.new( $parser.iterator( $source ) );
-    for @token.grep: Perl6::Textual and not Perl6::Documentation {
+    for grep { .textual and not Perl6::Documentation }, @token {
         print $_.content;
     }
 
@@ -48,12 +46,10 @@ See the section OBJECT_TREE for the full hierarchy.
 =begin OBJECT_TREE
 
 L<Perl6::Element>
-    L<Perl6::Textual> - Anything that appears in the program text.
-        L<Perl6::Visible> - Anything that's not whitespace
-        L<Perl6::Invisible> - Whitespace
-            L<Perl6::WS> - Horizontal whitespace
-            L<Perl6::Newline> - Vertical whitespace
-    L<Perl6::Structural> - Grouping
+    L<Perl6::Visible> - Anything that's not whitespace
+    L<Perl6::Invisible> - Whitespace
+        L<Perl6::WS> - Horizontal whitespace
+        L<Perl6::Newline> - Vertical whitespace
 
 =end OBJECT_TREE
 
@@ -161,7 +157,7 @@ L<Perl6::Variable>
 
 Children: L<Perl6::Variable::Scalar::Contextualizer> and so forth.
 
-(a side note - These really should be L<Perl6::Variable::Scalar::Contextualizer>, but that would mean that these were both a Leaf (from the parent L<Perl6::Variable::Scalar> and Branching because they have children). Resolving this would mean removing the L<Perl6::Leaf> role from the L<Perl6::Variable::Scalar> class, which means that I either have to create a longer class name for L<Perl6::Variable::JustAPlainScalarVariable> or manually add the L<Perl6::Leaf>'s contents to the L<Perl6::Variable::Scalar>, and forget to update it when I change my mind in a few weeks' time about what L<Perl6::Leaf> does. Adding a separate class for this seems the lesser of two evils, especially given how often they'll appear in "real world" code.)
+(a side note - These really should be L<Perl6::Variable::Scalar::Contextualizer>, but that would mean that these were both C<.textual> (from the parent L<Perl6::Variable::Scalar> and Branching because they have children). Resolving this would mean removing the L<Perl6::Textual> role from the L<Perl6::Variable::Scalar> class, which means that I either have to create a longer class name for L<Perl6::Variable::JustAPlainScalarVariable> or manually add the L<Perl6::Textual>'s contents to the L<Perl6::Variable::Scalar>, and forget to update it when I change my mind in a few weeks' time about what L<Perl6::Textual> does. Adding a separate class for this seems the lesser of two evils, especially given how often they'll appear in "real world" code.)
 
 =cut
 
@@ -211,11 +207,11 @@ Lets the tree walking utilities know this node is a decision point.
 
 =cut
 
-=item Leaf
+=item C<.textual>
 
 Represents things such as numbers that are a token unto themselves.
 
-Classes such as C<Perl6::Number> and C<Perl6::Quote> mix in this role in order to declare that they represent stand-alone tokens. Any class that uses this can expect a C<$.content> member to contain the full text of the token, whether it be a variable such as C<$a> or a 50-line heredoc string.
+Classes such as C<Perl6::Number> and C<Perl6::Quote> set this attribute in order to declare that they represent stand-alone tokens. Any class that uses this can expect a C<$.content> member to contain the full text of the token, whether it be a variable such as C<$a> or a 50-line heredoc string.
 
 Classes can have custom attributes such as a number's radix value, or a string's delimiters, but they'll always have a C<$.content> value.
 
@@ -225,7 +221,7 @@ Classes can have custom attributes such as a number's radix value, or a string's
 
 Represents things such as lists and circumfix operators that have children.
 
-Anything that's not a C<Perl6::Leaf> wil have this role mixed in, and provide a C<@.child> accessor to get at, say, elements in a list or the expressions in a standalone subroutine.
+Anything that's not C<.textual> wil have this role mixed in, and provide a C<@.child> accessor to get at, say, elements in a list or the expressions in a standalone subroutine.
 
 Child elements aren't restricted to leaves, because a document is a tree the C<@.child> elements can be anything, even including the class itself. Although not the object itself, to avoid recursive loops.
 
@@ -248,30 +244,7 @@ Should you brave the internals in search of a missing term, the first thing you 
 
 =end pod
 
-class Perl6::Element {
-	
-	# .from and .to are the start glyph and (one after) the end glyph
-	# of the token or sequence in the file.
-	#
-	has Int $.from is required is rw = 0;
-	has Int $.to is required is rw = 0;
-
-	# Debugging aide to let anyone interested in the internals jump
-	# directly to the code that generates the token.
-	#
-	has $.factory-line-number;
-
-	# Links to the previous and next node, along with up and down the
-	# tree.
-	#
-	# These *may* go away if I choose to rely more on the iterator, and
-	# you'll need to use the iterator method to get a sequence of
-	# tokens.
-	#
-	has Perl6::Element $.next-node is rw;
-	has Perl6::Element $.previous-node is rw;
-	has Perl6::Element $.parent-node is rw;
-
+my role Movement {
 	method next( Int $count = 1 ) {
 		my $node = self;
 		$node = $node.next-node for ^$count;
@@ -311,6 +284,32 @@ class Perl6::Element {
 		$node = $node.parent-node for ^$count;
 		$node;
 	}
+}
+
+class Perl6::Element {
+	also does Movement;
+	
+	# .from and .to are the start glyph and (one after) the end glyph
+	# of the token or sequence in the file.
+	#
+	has Int $.from is required is rw = 0;
+	has Int $.to is required is rw = 0;
+
+	# Debugging aide to let anyone interested in the internals jump
+	# directly to the code that generates the token.
+	#
+	has $.factory-line-number;
+
+	# Links to the previous and next node, along with up and down the
+	# tree.
+	#
+	# These *may* go away if I choose to rely more on the iterator, and
+	# you'll need to use the iterator method to get a sequence of
+	# tokens.
+	#
+	has Perl6::Element $.next-node is rw;
+	has Perl6::Element $.previous-node is rw;
+	has Perl6::Element $.parent-node is rw;
 
 	# Should only be run only flattened element lists.
 	# This is because it does nothing WRT .child.
@@ -401,44 +400,6 @@ class Perl6::Element {
 		$.next-node = $node;
 	}
 }
-class Perl6::Textual is Perl6::Element { }
-class Perl6::Visible is Perl6::Textual { }
-class Perl6::Operator is Perl6::Visible { }
-class Perl6::String is Perl6::Visible { }
-class Perl6::Documentation is Perl6::Visible { }
-class Perl6::Invisible is Perl6::Textual { }
-class Perl6::Structural is Perl6::Element { }
-
-class Perl6::Element-List {
-	has Perl6::Element @.child;
-
-	method fall-through( Mu $p ) {
-		if $*FALL-THROUGH {
-			my %classified = classify {
-				$p.hash.{$_}.Str ?? 'with' !! 'without'
-			}, $p.hash.keys;
-			my Str @keys-with-content = @( %classified<with> );
-			my Str @keys-without-content =
-				@( %classified<without> );
-
-			$*ERR.say( "With content: {@keys-with-content.gist}" );
-			$*ERR.say(
-				"Without content: {@keys-without-content.gist}"
-			);
-			die;
-		}
-		else {
-			Perl6::Catch-All.from-match( $p );
-		}
-	}
-
-	multi method append( Perl6::Element $element ) {
-		@.child.append( $element );
-	}
-	multi method append( Perl6::Element-List $element-list ) {
-		@.child.append( $element-list.child )
-	}
-}
 
 role Ordered-Tree {
 	method is-root returns Bool {
@@ -454,17 +415,38 @@ role Ordered-Tree {
 
 role Leaf {
 	also does Ordered-Tree;
+
 	method is-leaf returns Bool { True }
 	method is-twig returns Bool { False }
 }
 role Twig {
 	also does Ordered-Tree;
+
 	method is-leaf returns Bool { False }
 	method is-twig returns Bool { True }
 
 	method is-empty returns Bool { @.child.elems == 0 }
 	method first returns Perl6::Element { @.child[0] }
 	method last returns Perl6::Element { @.child[*-1] }
+}
+
+role Textual {
+	also does Leaf;
+
+	method textual returns Bool { True }
+	method structural returns Bool { False }
+}
+role Structural {
+	method textual returns Bool { False }
+	method structural returns Bool { True }
+}
+
+role Token {
+	has Str $.content is required;
+
+	method to-string returns Str {
+		~$.content
+	}
 }
 
 role Matchable {
@@ -499,6 +481,51 @@ role Matchable {
 	}
 }
 
+class Perl6::Visible is Perl6::Element { }
+class Perl6::Operator is Perl6::Visible { }
+class Perl6::String is Perl6::Visible { }
+
+# Don't refactor documentation just yet, as POD should be more complex than
+# just a raw text block.
+#
+class Perl6::Documentation is Perl6::Visible { }
+class Perl6::Invisible is Perl6::Element {
+	also does Textual;
+	also does Token;
+	also does Matchable;
+}
+
+class Perl6::Element-List {
+	has Perl6::Element @.child;
+
+	method fall-through( Mu $p ) {
+		if $*FALL-THROUGH {
+			my %classified = classify {
+				$p.hash.{$_}.Str ?? 'with' !! 'without'
+			}, $p.hash.keys;
+			my Str @keys-with-content = @( %classified<with> );
+			my Str @keys-without-content =
+				@( %classified<without> );
+
+			$*ERR.say( "With content: {@keys-with-content.gist}" );
+			$*ERR.say(
+				"Without content: {@keys-without-content.gist}"
+			);
+			die;
+		}
+		else {
+			Perl6::Catch-All.from-match( $p );
+		}
+	}
+
+	multi method append( Perl6::Element $element ) {
+		@.child.append( $element );
+	}
+	multi method append( Perl6::Element-List $element-list ) {
+		@.child.append( $element-list.child )
+	}
+}
+
 role Child {
 	has Perl6::Element @.child;
 }
@@ -509,25 +536,15 @@ role Branching does Child {
 	}
 }
 
-role Token {
-	has Str $.content is required;
-
-	method to-string returns Str {
-		~$.content
-	}
-}
-
 class Perl6::Catch-All is Perl6::Visible {
-
+	also does Textual;
 	also does Token;
-	also does Leaf;
 	also does Matchable;
 }
 
 class Perl6::Whatever is Perl6::Visible {
-
+	also does Textual;
 	also does Token;
-	also does Leaf;
 	also does Matchable;
 }
 
@@ -535,20 +552,20 @@ class Perl6::Whatever is Perl6::Visible {
 # So they're only generated in the _statement handler.
 #
 class Perl6::Semicolon is Perl6::Visible {
-
+	also does Textual;
 	also does Token;
-	also does Leaf;
 	also does Matchable;
 }
 class Perl6::Backslash is Perl6::Visible {
-
+	also does Textual;
 	also does Token;
-	also does Leaf;
 	also does Matchable;
 }
 
 # Generic balanced character
 class Perl6::Balanced is Perl6::Visible {
+	also does Textual;
+	also does Token;
 
 	method from-int( Int $from, Str $str ) returns Perl6::Element {
 		self.bless(
@@ -559,18 +576,8 @@ class Perl6::Balanced is Perl6::Visible {
 		)
 	}
 }
-class Perl6::Balanced::Enter {
-	also is Perl6::Balanced;
-
-	also does Token;
-	also does Leaf;
-}
-class Perl6::Balanced::Exit {
-	also is Perl6::Balanced;
-
-	also does Token;
-	also does Leaf;
-}
+class Perl6::Balanced::Enter is Perl6::Balanced { }
+class Perl6::Balanced::Exit is Perl6::Balanced { }
 
 role MatchingBalanced {
 
@@ -708,71 +715,56 @@ role MatchingBalanced {
 }
 
 class Perl6::Operator::Hyper is Perl6::Operator {
-
+	also does Structural;
 	also does Branching;
 	also does Twig;
 	also does MatchingBalanced;
 }
 class Perl6::Operator::Prefix is Perl6::Operator {
-
+	also does Textual;
 	also does Token;
-	also does Leaf;
 	also does Matchable;
 }
 class Perl6::Operator::Infix is Perl6::Operator {
-
+	also does Textual;
 	also does Token;
-	also does Leaf;
 	also does Matchable;
 }
 class Perl6::Operator::Postfix is Perl6::Operator {
-
+	also does Textual;
 	also does Token;
-	also does Leaf;
 	also does Matchable;
 }
 class Perl6::Operator::Circumfix is Perl6::Operator {
-
+	also does Structural;
 	also does Branching;
 	also does Twig;
 	also does MatchingBalanced;
 }
 class Perl6::Operator::PostCircumfix is Perl6::Operator {
-
+	also does Structural;
 	also does Branching;
 	also does Twig;
 	also does MatchingBalanced;
 }
 
-class Perl6::WS is Perl6::Invisible {
-
-	also does Token;
-	also does Leaf;
-	also does Matchable;
-}
-class Perl6::Newline is Perl6::Invisible {
-
-	also does Token;
-	also does Leaf;
-	also does Matchable;
-}
+class Perl6::WS is Perl6::Invisible { }
+class Perl6::Newline is Perl6::Invisible { }
 
 class Perl6::Pod is Perl6::Documentation {
-
+	also does Textual;
 	also does Token;
-	also does Leaf;
 	also does Matchable;
 }
 
 class Perl6::Comment is Perl6::Documentation {
-
+	also does Textual;
 	also does Token;
-	also does Leaf;
 	also does Matchable;
 }
 
-class Perl6::Document is Perl6::Structural {
-
+class Perl6::Document is Perl6::Element {
+	also does Structural;
 	also does Branching;
 	also does Twig;
 
@@ -799,8 +791,8 @@ class Perl6::Document is Perl6::Structural {
 # and if so, I'm glad.
 #
 class Perl6::Sir-Not-Appearing-In-This-Statement is Perl6::Visible {
+	also does Textual;
 
-	also does Leaf;
 	has $.content; # because it's not quite a token.
 
 	method to-string returns Str {
@@ -808,8 +800,8 @@ class Perl6::Sir-Not-Appearing-In-This-Statement is Perl6::Visible {
 	}
 }
 
-class Perl6::Statement is Perl6::Structural {
-
+class Perl6::Statement is Perl6::Element {
+	also does Structural;
 	also does Branching;
 	also does Twig;
 
@@ -826,64 +818,52 @@ class Perl6::Statement is Perl6::Structural {
 # And now for the most basic tokens...
 #
 class Perl6::Number is Perl6::Visible {
-
+	also does Textual;
 	also does Token;
-	also does Leaf;
 	also does Matchable;
 
 	method base { ... }
 }
-class Perl6::Number::Binary {
-	also is Perl6::Number;
+class Perl6::Number::Binary is Perl6::Number {
 	method base { 2 }
 }
-class Perl6::Number::Octal {
-	also is Perl6::Number;
+class Perl6::Number::Octal is Perl6::Number {
 	method base { 8 }
 }
-class Perl6::Number::Decimal {
-	also is Perl6::Number;
+class Perl6::Number::Decimal is Perl6::Number {
 	method base { 10 }
 }
-class Perl6::Number::Decimal::Explicit {
-	also is Perl6::Number::Decimal;
+class Perl6::Number::Decimal::Explicit is Perl6::Number::Decimal {
 }
-class Perl6::Number::Hexadecimal {
-	also is Perl6::Number;
+class Perl6::Number::Hexadecimal is Perl6::Number {
 	method base { 16 }
 }
-class Perl6::Number::Radix {
-	also is Perl6::Number;
+class Perl6::Number::Radix is Perl6::Number {
 }
-class Perl6::Number::FloatingPoint {
-	also is Perl6::Number;
+class Perl6::Number::FloatingPoint is Perl6::Number {
 	method base { 10 }
 }
 
 class Perl6::NotANumber is Perl6::Visible {
-
+	also does Textual;
 	also does Token;
-	also does Leaf;
 	also does Matchable;
 }
 class Perl6::Infinity is Perl6::Visible {
-
+	also does Textual;
 	also does Token;
-	also does Leaf;
 	also does Matchable;
 }
 
 # XXX Come up with a better name.
 class Perl6::String::Body is Perl6::String {
-
+	also does Textual;
 	also does Token;
-	also does Leaf;
 	also does Matchable;
 }
 class Perl6::String::WordQuoting is Perl6::String {
-
+	also does Textual;
 	also does Token;
-	also does Leaf;
 	also does Matchable;
 
 	has Str $.quote;
@@ -898,9 +878,8 @@ class Perl6::String::WordQuoting::QuoteProtection {
 	also does Token;
 }
 class Perl6::String::Interpolation is Perl6::String {
-
+	also does Textual;
 	also does Token;
-	also does Leaf;
 	also does Matchable;
 
 	has Str $.quote;
@@ -919,9 +898,8 @@ class Perl6::String::Interpolation::WordQuoting::QuoteProtection {
 	also is Perl6::String::Interpolation::WordQuoting;
 }
 class Perl6::String::Shell is Perl6::String {
-
+	also does Textual;
 	also does Token;
-	also does Leaf;
 	also does Matchable;
 
 	has Bool $.is-here-doc = False;
@@ -933,9 +911,8 @@ class Perl6::String::Shell is Perl6::String {
 	has Str $.here-doc;
 }
 class Perl6::String::Escaping is Perl6::String {
-
+	also does Textual;
 	also does Token;
-	also does Leaf;
 	also does Matchable;
 
 	has Bool $.is-here-doc = False;
@@ -947,9 +924,8 @@ class Perl6::String::Escaping is Perl6::String {
 	has Str $.here-doc;
 }
 class Perl6::String::Literal is Perl6::String {
-
+	also does Textual;
 	also does Token;
-	also does Leaf;
 	also does Matchable;
 
 	has Bool $.is-here-doc = False;
@@ -960,19 +936,15 @@ class Perl6::String::Literal is Perl6::String {
 	has Str @.adverb;
 	has Str $.here-doc;
 }
-class Perl6::String::Literal::WordQuoting {
-	also is Perl6::String::Literal;
-
+class Perl6::String::Literal::WordQuoting is Perl6::String::Literal {
 	also does Token;
 }
-class Perl6::String::Literal::Shell {
-	also is Perl6::String::Literal;
-
+class Perl6::String::Literal::Shell is Perl6::String::Literal {
 	also does Token;
 }
 
 class Perl6::Regex is Perl6::Visible {
-
+	also does Structural;
 	also does Branching;
 	also does Twig;
 	also does MatchingBalanced;
@@ -981,256 +953,169 @@ class Perl6::Regex is Perl6::Visible {
 }
 
 class Perl6::Bareword is Perl6::Visible {
-
+	also does Textual;
 	also does Token;
-	also does Leaf;
 	also does Matchable;
 }
 class Perl6::Adverb is Perl6::Visible {
-
+	also does Textual;
 	also does Token;
-	also does Leaf;
 	also does Matchable;
 }
 class Perl6::PackageName is Perl6::Visible {
-
+	also does Textual;
 	also does Token;
-	also does Leaf;
 	also does Matchable;
 }
-class Perl6::ColonBareword {
-	also is Perl6::Bareword;
-
-	also does Token;
-}
-class Perl6::Block is Perl6::Structural {
-
+class Perl6::ColonBareword is Perl6::Bareword { }
+class Perl6::Block is Perl6::Element {
+	also does Structural;
 	also does Branching;
 	also does Twig;
 	also does MatchingBalanced;
 }
 
 class Perl6::Variable is Perl6::Visible {
-
 	also does Matchable;
 }
-class Perl6::Variable::Scalar {
-	also is Perl6::Variable;
-
+class Perl6::Variable::Scalar is Perl6::Variable {
+	also does Textual;
 	also does Token;
-	also does Leaf;
 
 	method sigil { Q{$} }
 }
-class Perl6::Variable::Scalar::Contextualizer {
-	also is Perl6::Variable;
-
-	also does Token;
-	also does Child;
+class Perl6::Variable::Scalar::Contextualizer is Perl6::Variable {
+	also does Structural;
+	#also does Token;
+	also does Branching;
+	#also does Child;
 
 	method sigil { Q{$} }
 }
-class Perl6::Variable::Scalar::Dynamic {
-	also is Perl6::Variable::Scalar;
-
+class Perl6::Variable::Scalar::Dynamic is Perl6::Variable::Scalar {
 	method twigil { Q{*} }
 }
-class Perl6::Variable::Scalar::Attribute {
-	also is Perl6::Variable::Scalar;
-
+class Perl6::Variable::Scalar::Attribute is Perl6::Variable::Scalar {
 	method twigil { Q{!} }
 }
-class Perl6::Variable::Scalar::Accessor {
-	also is Perl6::Variable::Scalar;
-
+class Perl6::Variable::Scalar::Accessor is Perl6::Variable::Scalar {
 	method twigil { Q{.} }
 }
-class Perl6::Variable::Scalar::CompileTime {
-	also is Perl6::Variable::Scalar;
-
+class Perl6::Variable::Scalar::CompileTime is Perl6::Variable::Scalar {
 	method twigil { Q{?} }
 }
-class Perl6::Variable::Scalar::MatchIndex {
-	also is Perl6::Variable::Scalar;
-
+class Perl6::Variable::Scalar::MatchIndex is Perl6::Variable::Scalar {
 	method twigil { Q{<} }
 }
-class Perl6::Variable::Scalar::Positional {
-	also is Perl6::Variable::Scalar;
-
+class Perl6::Variable::Scalar::Positional is Perl6::Variable::Scalar {
 	method twigil { Q{^} }
 }
-class Perl6::Variable::Scalar::Named {
-	also is Perl6::Variable::Scalar;
-
+class Perl6::Variable::Scalar::Named is Perl6::Variable::Scalar {
 	method twigil { Q{:} }
 }
-class Perl6::Variable::Scalar::Pod {
-	also is Perl6::Variable::Scalar;
-
+class Perl6::Variable::Scalar::Pod is Perl6::Variable::Scalar {
 	method twigil { Q{=} }
 }
-class Perl6::Variable::Scalar::SubLanguage {
-	also is Perl6::Variable::Scalar;
-
+class Perl6::Variable::Scalar::SubLanguage is Perl6::Variable::Scalar {
 	method twigil { Q{~} }
 }
-class Perl6::Variable::Array {
-	also is Perl6::Variable;
-
+class Perl6::Variable::Array is Perl6::Variable {
+	also does Textual;
 	also does Token;
-	also does Leaf;
 
 	method sigil { Q{@} }
 }
-class Perl6::Variable::Array::Dynamic {
-	also is Perl6::Variable::Array;
-
+class Perl6::Variable::Array::Dynamic is Perl6::Variable::Array {
 	method twigil { Q{*} }
 }
-class Perl6::Variable::Array::Attribute {
-	also is Perl6::Variable::Array;
-
+class Perl6::Variable::Array::Attribute is Perl6::Variable::Array {
 	method twigil { Q{!} }
 }
-class Perl6::Variable::Array::Accessor {
-	also is Perl6::Variable::Array;
-
+class Perl6::Variable::Array::Accessor is Perl6::Variable::Array {
 	method twigil { Q{.} }
 }
-class Perl6::Variable::Array::CompileTime {
-	also is Perl6::Variable::Array;
-
+class Perl6::Variable::Array::CompileTime is Perl6::Variable::Array {
 	method twigil { Q{?} }
 }
-class Perl6::Variable::Array::MatchIndex {
-	also is Perl6::Variable::Array;
-
+class Perl6::Variable::Array::MatchIndex is Perl6::Variable::Array {
 	method twigil { Q{<} }
 }
-class Perl6::Variable::Array::Positional {
-	also is Perl6::Variable::Array;
-
+class Perl6::Variable::Array::Positional is Perl6::Variable::Array {
 	method twigil { Q{^} }
 }
-class Perl6::Variable::Array::Named {
-	also is Perl6::Variable::Array;
-
+class Perl6::Variable::Array::Named is Perl6::Variable::Array {
 	method twigil { Q{:} }
 }
-class Perl6::Variable::Array::Pod {
-	also is Perl6::Variable::Array;
-
+class Perl6::Variable::Array::Pod is Perl6::Variable::Array {
 	method twigil { Q{=} }
 }
-class Perl6::Variable::Array::SubLanguage {
-	also is Perl6::Variable::Array;
-
+class Perl6::Variable::Array::SubLanguage is Perl6::Variable::Array {
 	method twigil { Q{~} }
 }
-class Perl6::Variable::Hash does Token {
-	also is Perl6::Variable;
-
-	also does Leaf;
+class Perl6::Variable::Hash is Perl6::Variable {
+	also does Textual;
+	also does Token;
 
 	method sigil { Q{%} }
 }
-class Perl6::Variable::Hash::Dynamic {
-	also is Perl6::Variable::Hash;
-
+class Perl6::Variable::Hash::Dynamic is Perl6::Variable::Hash {
 	method twigil { Q{*} }
 }
-class Perl6::Variable::Hash::Attribute {
-	also is Perl6::Variable::Hash;
-
+class Perl6::Variable::Hash::Attribute is Perl6::Variable::Hash {
 	method twigil { Q{!} }
 }
-class Perl6::Variable::Hash::Accessor {
-	also is Perl6::Variable::Hash;
-
+class Perl6::Variable::Hash::Accessor is Perl6::Variable::Hash {
 	method twigil { Q{.} }
 }
-class Perl6::Variable::Hash::CompileTime {
-	also is Perl6::Variable::Hash;
-
+class Perl6::Variable::Hash::CompileTime is Perl6::Variable::Hash {
 	method twigil { Q{?} }
 }
-class Perl6::Variable::Hash::MatchIndex {
-	also is Perl6::Variable::Hash;
-
+class Perl6::Variable::Hash::MatchIndex is Perl6::Variable::Hash {
 	method twigil { Q{<} }
 }
-class Perl6::Variable::Hash::Positional {
-	also is Perl6::Variable::Hash;
-
+class Perl6::Variable::Hash::Positional is Perl6::Variable::Hash {
 	method twigil { Q{^} }
 }
-class Perl6::Variable::Hash::Named {
-	also is Perl6::Variable::Hash;
-
+class Perl6::Variable::Hash::Named is Perl6::Variable::Hash {
 	method twigil { Q{:} }
 }
-class Perl6::Variable::Hash::Pod {
-	also is Perl6::Variable::Hash;
-
+class Perl6::Variable::Hash::Pod is Perl6::Variable::Hash {
 	method twigil { Q{=} }
 }
-class Perl6::Variable::Hash::SubLanguage {
-	also is Perl6::Variable::Hash;
-
+class Perl6::Variable::Hash::SubLanguage is Perl6::Variable::Hash {
 	method twigil { Q{~} }
 }
-class Perl6::Variable::Callable {
-	also is Perl6::Variable;
-
+class Perl6::Variable::Callable is Perl6::Variable {
+	also does Textual;
 	also does Token;
-	also does Leaf;
 
 	method sigil { Q{&} }
 }
-class Perl6::Variable::Callable::Dynamic {
-	also is Perl6::Variable::Callable;
-
+class Perl6::Variable::Callable::Dynamic is Perl6::Variable::Callable {
 	method twigil { Q{*} }
 }
-class Perl6::Variable::Callable::Attribute {
-	also is Perl6::Variable::Callable;
-
+class Perl6::Variable::Callable::Attribute is Perl6::Variable::Callable {
 	method twigil { Q{!} }
 }
-class Perl6::Variable::Callable::Accessor {
-	also is Perl6::Variable::Callable;
-
+class Perl6::Variable::Callable::Accessor is Perl6::Variable::Callable {
 	method twigil { Q{.} }
 }
-class Perl6::Variable::Callable::CompileTime {
-	also is Perl6::Variable::Callable;
-
+class Perl6::Variable::Callable::CompileTime is Perl6::Variable::Callable {
 	method twigil { Q{?} }
 }
-class Perl6::Variable::Callable::MatchIndex {
-	also is Perl6::Variable::Callable;
-
+class Perl6::Variable::Callable::MatchIndex is Perl6::Variable::Callable {
 	method twigil { Q{<} }
 }
-class Perl6::Variable::Callable::Positional {
-	also is Perl6::Variable::Callable;
-
+class Perl6::Variable::Callable::Positional is Perl6::Variable::Callable {
 	method twigil { Q{^} }
 }
-class Perl6::Variable::Callable::Named {
-	also is Perl6::Variable::Callable;
-
+class Perl6::Variable::Callable::Named is Perl6::Variable::Callable {
 	method twigil { Q{:} }
 }
-class Perl6::Variable::Callable::Pod {
-	also is Perl6::Variable::Callable;
-
+class Perl6::Variable::Callable::Pod is Perl6::Variable::Callable {
 	method twigil { Q{=} }
 }
-class Perl6::Variable::Callable::SubLanguage {
-	also is Perl6::Variable::Callable;
-
+class Perl6::Variable::Callable::SubLanguage is Perl6::Variable::Callable {
 	method twigil { Q{~} }
 }
 
