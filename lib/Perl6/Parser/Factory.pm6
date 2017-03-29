@@ -505,14 +505,18 @@ class Perl6::Visible is Perl6::Element { }
 class Perl6::Operator is Perl6::Visible { }
 class Perl6::String is Perl6::Visible { }
 
+role BasicTextual {
+	also does Textual;
+	also does Token;
+	also does Matchable;
+}
+
 # Don't refactor documentation just yet, as POD should be more complex than
 # just a raw text block.
 #
 class Perl6::Documentation is Perl6::Visible { }
 class Perl6::Invisible is Perl6::Element {
-	also does Textual;
-	also does Token;
-	also does Matchable;
+	also does BasicTextual;
 }
 
 class Perl6::Element-List {
@@ -557,29 +561,26 @@ role Branching does Child {
 }
 
 class Perl6::Catch-All is Perl6::Visible {
-	also does Textual;
-	also does Token;
-	also does Matchable;
+	also does BasicTextual;
 }
 
 class Perl6::Whatever is Perl6::Visible {
-	also does Textual;
-	also does Token;
-	also does Matchable;
+	also does BasicTextual;
 }
 
-# Semicolons should only occur at statement boundaries.
-# So they're only generated in the _statement handler.
-#
+class Perl6::Loop-Separator is Perl6::Visible {
+	also does BasicTextual;
+}
+
+class Perl6::Dimension-Separator is Perl6::Visible {
+	also does BasicTextual;
+}
+
 class Perl6::Semicolon is Perl6::Visible {
-	also does Textual;
-	also does Token;
-	also does Matchable;
+	also does BasicTextual;
 }
 class Perl6::Backslash is Perl6::Visible {
-	also does Textual;
-	also does Token;
-	also does Matchable;
+	also does BasicTextual;
 }
 
 # Generic balanced character
@@ -741,19 +742,13 @@ class Perl6::Operator::Hyper is Perl6::Operator {
 	also does MatchingBalanced;
 }
 class Perl6::Operator::Prefix is Perl6::Operator {
-	also does Textual;
-	also does Token;
-	also does Matchable;
+	also does BasicTextual;
 }
 class Perl6::Operator::Infix is Perl6::Operator {
-	also does Textual;
-	also does Token;
-	also does Matchable;
+	also does BasicTextual;
 }
 class Perl6::Operator::Postfix is Perl6::Operator {
-	also does Textual;
-	also does Token;
-	also does Matchable;
+	also does BasicTextual;
 }
 class Perl6::Operator::Circumfix is Perl6::Operator {
 	also does Structural;
@@ -772,15 +767,11 @@ class Perl6::WS is Perl6::Invisible { }
 class Perl6::Newline is Perl6::Invisible { }
 
 class Perl6::Pod is Perl6::Documentation {
-	also does Textual;
-	also does Token;
-	also does Matchable;
+	also does BasicTextual;
 }
 
 class Perl6::Comment is Perl6::Documentation {
-	also does Textual;
-	also does Token;
-	also does Matchable;
+	also does BasicTextual;
 }
 
 class Perl6::Document is Perl6::Element {
@@ -838,11 +829,9 @@ class Perl6::Statement is Perl6::Element {
 # And now for the most basic tokens...
 #
 class Perl6::Number is Perl6::Visible {
-	also does Textual;
-	also does Token;
-	also does Matchable;
+	also does BasicTextual;
 
-	method base { ... }
+	method base { !!! }
 }
 class Perl6::Number::Binary is Perl6::Number {
 	method base { 2 }
@@ -865,26 +854,18 @@ class Perl6::Number::FloatingPoint is Perl6::Number {
 }
 
 class Perl6::NotANumber is Perl6::Visible {
-	also does Textual;
-	also does Token;
-	also does Matchable;
+	also does BasicTextual;
 }
 class Perl6::Infinity is Perl6::Visible {
-	also does Textual;
-	also does Token;
-	also does Matchable;
+	also does BasicTextual;
 }
 
 # XXX Come up with a better name.
 class Perl6::String::Body is Perl6::String {
-	also does Textual;
-	also does Token;
-	also does Matchable;
+	also does BasicTextual;
 }
 class Perl6::String::WordQuoting is Perl6::String {
-	also does Textual;
-	also does Token;
-	also does Matchable;
+	also does BasicTextual;
 
 	has Str $.quote;
 	has Str $.delimiter-start;
@@ -898,9 +879,7 @@ class Perl6::String::WordQuoting::QuoteProtection {
 	also does Token;
 }
 class Perl6::String::Interpolation is Perl6::String {
-	also does Textual;
-	also does Token;
-	also does Matchable;
+	also does BasicTextual;
 
 	has Str $.quote;
 	has Str $.delimiter-start;
@@ -918,9 +897,7 @@ class Perl6::String::Interpolation::WordQuoting::QuoteProtection {
 	also is Perl6::String::Interpolation::WordQuoting;
 }
 class Perl6::String::Shell is Perl6::String {
-	also does Textual;
-	also does Token;
-	also does Matchable;
+	also does BasicTextual;
 
 	has Bool $.is-here-doc = False;
 
@@ -931,9 +908,7 @@ class Perl6::String::Shell is Perl6::String {
 	has Str $.here-doc;
 }
 class Perl6::String::Escaping is Perl6::String {
-	also does Textual;
-	also does Token;
-	also does Matchable;
+	also does BasicTextual;
 
 	has Bool $.is-here-doc = False;
 
@@ -944,9 +919,7 @@ class Perl6::String::Escaping is Perl6::String {
 	has Str $.here-doc;
 }
 class Perl6::String::Literal is Perl6::String {
-	also does Textual;
-	also does Token;
-	also does Matchable;
+	also does BasicTextual;
 
 	has Bool $.is-here-doc = False;
 
@@ -973,19 +946,15 @@ class Perl6::Regex is Perl6::Visible {
 }
 
 class Perl6::Bareword is Perl6::Visible {
-	also does Textual;
-	also does Token;
-	also does Matchable;
+	also does BasicTextual;
 }
+class Perl6::SubroutineDeclaration is Perl6::Bareword { }
+
 class Perl6::Adverb is Perl6::Visible {
-	also does Textual;
-	also does Token;
-	also does Matchable;
+	also does BasicTextual;
 }
 class Perl6::PackageName is Perl6::Visible {
-	also does Textual;
-	also does Token;
-	also does Matchable;
+	also does BasicTextual;
 }
 class Perl6::ColonBareword is Perl6::Bareword { }
 class Perl6::Block is Perl6::Element {
@@ -5340,7 +5309,7 @@ class Perl6::Parser::Factory {
 						if $x ~~ m{ (';') } {
 							my Int $left-margin = $0.from;
 							$child.append(
-								Perl6::Operator::Infix.from-int(
+								Perl6::Dimension-Separator.from-int(
 									$left-margin + $v.to,
 									$0.Str
 								)
@@ -5935,7 +5904,7 @@ class Perl6::Parser::Factory {
 				);
 				$x ~~ m{ (';') };
 				$_child.append(
-					Perl6::Semicolon.from-int(
+					Perl6::Loop-Separator.from-int(
 						$_.hash.<e1>.to + $0.from,
 						$0.Str
 					)
@@ -5947,7 +5916,7 @@ class Perl6::Parser::Factory {
 				);
 				$x ~~ m{ (';') };
 				$_child.append(
-					Perl6::Semicolon.from-int(
+					Perl6::Loop-Separator.from-int(
 						$_.hash.<e2>.to + $0.from,
 						$0.Str
 					)
@@ -6267,7 +6236,18 @@ class Perl6::Parser::Factory {
 	method _sym( Mu $p ) returns Perl6::Element-List {
 		my $child = Perl6::Element-List.new;
 		if $p.Str {
-			$child.append( Perl6::Bareword.from-match( $p ) );
+			given $p.Str {
+				when 'sub' {
+					$child.append(
+						Perl6::SubroutineDeclaration.from-match( $p )
+					);
+				}
+				default {
+					$child.append(
+						Perl6::Bareword.from-match( $p )
+					);
+				}
+			}
 		}
 		else {
 			$child.fall-through( $p );
