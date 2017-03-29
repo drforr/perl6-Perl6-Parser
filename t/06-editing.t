@@ -4,7 +4,7 @@ use Test;
 use Perl6::Parser;
 use Perl6::Parser::Factory;
 
-plan 5;
+plan 6;
 
 my $pt = Perl6::Parser.new;
 my $ppf = Perl6::Parser::Factory.new;
@@ -429,5 +429,23 @@ subtest {
 
 	done-testing;
 }, Q{Insert internal node before ')'};
+
+subtest {
+	my $source = Q{();2;1;};
+	my $edited = Q{();42;1;};
+	my @token = $pt.to-list( $source );
+	my $iterated = '';
+
+	my $replacement = Perl6::Number::Decimal.new( :from(0), :to(0), :content('42') );
+
+	@token.splice( 7, 1, $replacement );
+
+	for grep { .textual }, @token {
+		$iterated ~= $_.content;
+	}
+	is $iterated, $edited, Q{splice into array works};
+
+	done-testing;
+}, Q{edit list};
 
 # vim: ft=perl6

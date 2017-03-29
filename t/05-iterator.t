@@ -4,7 +4,7 @@ use Test;
 use Perl6::Parser;
 use Perl6::Parser::Factory;
 
-plan 11;
+plan 12;
 
 my $pt = Perl6::Parser.new;
 my $ppf = Perl6::Parser::Factory.new;
@@ -438,18 +438,17 @@ subtest {
 	done-testing;
 }, Q{default iterator pull-one};
 
-#subtest {
-#	my $source = Q{();2;1;};
-#	my $iter = $pt.iterator( $source );
-#	my $iterated = '';
-#	my $target = (1..Inf).iterator;
-#
-#	my @element;
-#
-#	$iter.push-exactly( $target, 3 );
-#	ok $target.[0] ~~ Perl6::Document;
-#
-#	done-testing;
-#}, Q{iterator push-exactly};
+subtest {
+	my $source = Q{();2;1;};
+	my @token = $pt.to-tokens-only( $source );
+	my $iterated = '';
+
+	for @token {
+		$iterated ~= $_.content;
+	}
+	is $iterated, $source, Q{tokens only display cleanly};
+
+	done-testing;
+}, Q{token-only iterator}
 
 # vim: ft=perl6

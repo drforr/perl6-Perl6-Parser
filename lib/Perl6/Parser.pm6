@@ -13,8 +13,19 @@ Perl6::Parser - Extract a Perl 6 AST from the NQP Perl 6 Parser
        code-goes-here();
        that you( $want-to, $parse );
     _END_
+
+    # Get a fully-parsed data tree
+    #
     my $tree = $pt.to-tree( $source );
     say $pt.dump-tree( $tree );
+
+    # Return only the displayed tokens (including whitespace) in the document
+    #
+    my @token = $pt.to-tokens-only( $source );
+
+    # Return all tokens and structures in the document
+    #
+    my @everything = $pt.to-list( $source );
 
     # This *will* execute phasers such as BEGIN in your existing code.
     # This may constitute a security hole, at least until the author figures
@@ -467,6 +478,33 @@ class Perl6::Parser {
 		method is-lazy { False }
 	}
 
+	my class TokenIterator {
+		also does Iterator;
+
+		has Perl6::Element $.head;
+		has Bool $.is-done = False;
+
+		method pull-one {
+			if $.head.is-end-leaf {
+				if $.is-done {
+					return IterationEnd;
+				}
+				else {
+					$!is-done = True;
+					return $.head;
+				}
+			}
+			else {
+				my $elem = $.head;
+				$!head = $.head.next;
+				$!head = $!head.next while !$.head.is-leaf;
+				$elem;
+			}
+		}
+
+		method is-lazy { False }
+	}
+
 	method to-tree( Str $source ) {
 		my $parsed = self.parse( $source );
 		self._build-tree( $parsed );
@@ -476,6 +514,15 @@ class Perl6::Parser {
 		my $str = $tree.to-string;
 
 		$str;
+	}
+
+	method to-tokens-only( Str $source ) {
+		my $tree = self.to-tree( $source );
+		$.factory.thread( $tree );
+		my $head = $.factory.flatten( $tree );
+		$head = $head.next while !$head.is-leaf and !$head.is-end-leaf;
+
+		Seq.new( TokenIterator.new( :head( $head ) ) );
 	}
 
 	method to-list( Str $source ) {
