@@ -25,6 +25,10 @@ subtest {
 			my $source = Q{my token Foo{a}};
 			my $tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{formatted};
+			ok $tree.child[0].child[5].child[0] ~~
+				Perl6::Block::Enter, Q{enter brace};
+			ok $tree.child[0].child[5].child[2] ~~
+				Perl6::Block::Exit, Q{exit brace};
 
 			done-testing;
 		}, Q{no ws};

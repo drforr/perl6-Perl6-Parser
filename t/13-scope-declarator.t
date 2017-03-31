@@ -82,6 +82,10 @@ class Foo{has$x}
 _END_
 		my $tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source, Q{formatted};
+		ok $tree.child[0].child[3].child[0] ~~
+			Perl6::Block::Enter, Q{enter brace};
+		ok $tree.child[0].child[3].child[2] ~~
+			Perl6::Block::Exit, Q{exit brace};
 
 		done-testing;
 	}, Q{no ws};

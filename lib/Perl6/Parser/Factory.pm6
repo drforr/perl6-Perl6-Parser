@@ -600,18 +600,32 @@ class Perl6::Balanced is Perl6::Visible {
 class Perl6::Balanced::Enter is Perl6::Balanced { }
 class Perl6::Balanced::Exit is Perl6::Balanced { }
 
+class Perl6::Block::Enter is Perl6::Balanced::Enter { }
+class Perl6::Block::Exit is Perl6::Balanced::Exit { }
+
 role MatchingBalanced {
+
+	method Enter-from-int( Int $from, Str $content ) {
+		return ( $content eq Q'{' ) ??
+			Perl6::Block::Enter.from-int( $from, $content ) !!
+			Perl6::Balanced::Enter.from-int( $from, $content );
+	}
+	method Exit-from-int( Int $from, Str $content ) {
+		return ( $content eq Q'}' ) ??
+			Perl6::Block::Exit.from-int( $from, $content ) !!
+			Perl6::Balanced::Exit.from-int( $from, $content );
+	}
 
 	method from-match( Mu $p, Perl6::Element-List $child )
 			returns Perl6::Element {
 		my $_child = Perl6::Element-List.new;
 		$p.Str ~~ m{ ^ (.) .* (.) $ };
 		$_child.append(
-			Perl6::Balanced::Enter.from-int( $p.from, $0.Str )
+			self.Enter-from-int( $p.from, $0.Str )
 		);
 		$_child.append( $child );
 		$_child.append(
-			Perl6::Balanced::Exit.from-int(
+			self.Exit-from-int(
 				$p.to - $1.Str.chars,
 				$1.Str
 			)
@@ -636,14 +650,14 @@ role MatchingBalanced {
 		my $right-edge = $1.Str;
 		my $right-margin = $0.Str.chars;
 		$_child.append(
-			Perl6::Balanced::Enter.from-int(
+			self.Enter-from-int(
 				$p.from - $left-margin - $left-edge.chars,
 				$left-edge
 			)
 		);
 		$_child.append( $child );
 		$_child.append(
-			Perl6::Balanced::Exit.from-int(
+			self.Exit-from-int(
 				$p.to + $right-margin,
 				$right-edge
 			)
@@ -670,14 +684,14 @@ role MatchingBalanced {
 		my $right-edge = $1.Str;
 		my $right-margin = $0.Str.chars;
 		$_child.append(
-			Perl6::Balanced::Enter.from-int(
+			self.Enter-from-int(
 				$from - $left-margin - $left-edge.chars,
 				$left-edge
 			)
 		);
 		$_child.append( $child );
 		$_child.append(
-			Perl6::Balanced::Exit.from-int(
+			self.Exit-from-int(
 				$to + $right-margin,
 				$right-edge
 			)
@@ -695,11 +709,11 @@ role MatchingBalanced {
 		my $_child = Perl6::Element-List.new;
 		$str ~~ m{ ^ (.) .* (.) $ };
 		$_child.append(
-			Perl6::Balanced::Enter.from-int( $from, $0.Str )
+			self.Enter-from-int( $from, $0.Str )
 		);
 		$_child.append( $child );
 		$_child.append(
-			Perl6::Balanced::Exit.from-int(
+			self.Exit-from-int(
 				$from + $str.chars - 1,
 				$1.Str
 			)
@@ -717,11 +731,11 @@ role MatchingBalanced {
 			returns Perl6::Element {
 		my $_child = Perl6::Element-List.new;
 		$_child.append(
-			Perl6::Balanced::Enter.from-int( $p.from, $front )
+			self.Enter-from-int( $p.from, $front )
 		);
 		$_child.append( $child );
 		$_child.append(
-			Perl6::Balanced::Exit.from-int(
+			self.Exit-from-int(
 				$p.to - $back.chars,
 				$back
 			)
