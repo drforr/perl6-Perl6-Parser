@@ -603,6 +603,9 @@ class Perl6::Balanced::Exit is Perl6::Balanced { }
 class Perl6::Block::Enter is Perl6::Balanced::Enter { }
 class Perl6::Block::Exit is Perl6::Balanced::Exit { }
 
+class Perl6::String::Enter is Perl6::Balanced::Enter { }
+class Perl6::String::Exit is Perl6::Balanced::Exit { }
+
 role MatchingBalanced {
 
 	method Enter-from-int( Int $from, Str $content ) {
@@ -4688,7 +4691,7 @@ class Perl6::Parser::Factory {
 				$child.append( self._sym( $_.hash.<sym> ) );
 				# XXX The first place negative indices are used
 				$_child.append(
-					Perl6::Balanced::Enter.from-int(
+					Perl6::String::Enter.from-int(
 						$_.hash.<quibble>.hash.<nibble>.from - 1,
 						$_.hash.<quibble>.Str.substr(
 							*-($_.hash.<quibble>.hash.<nibble>.chars + 2),
@@ -4702,7 +4705,7 @@ class Perl6::Parser::Factory {
 					)
 				);
 				$_child.append(
-					Perl6::Balanced::Exit.from-int(
+					Perl6::String::Exit.from-int(
 						$_.hash.<quibble>.hash.<nibble>.to,
 						$_.hash.<quibble>.Str.substr(
 							$_.hash.<quibble>.chars - 1,
@@ -4816,6 +4819,7 @@ class Perl6::Parser::Factory {
 						),
 						:from( $_.from ),
 						:to( $_.to ),
+						:quote( $q-map-name ),
 						:content( $_.Str ),
 						:adverb( @q-adverb ),
 						:here-doc( $here-doc-body ),

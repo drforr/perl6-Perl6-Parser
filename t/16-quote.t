@@ -1513,7 +1513,7 @@ subtest {
 
 			is $pt.to-string( $tree ), $source, Q{formatted};
 			ok $node ~~ Perl6::String::Interpolation;
-#			is $node.quote, Q{qq}, Q{quote name};
+			is $node.quote, Q{qq}, Q{quote name};
 			is $node.delimiter-start, Q{<}, Q{start delimiter};
 			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -1527,7 +1527,7 @@ subtest {
 
 			is $pt.to-string( $tree ), $source, Q{formatted};
 			ok $node ~~ Perl6::String::Interpolation;
-#			is $node.quote, Q{qq}, Q{quote name};
+			is $node.quote, Q{qq}, Q{quote name};
 			is $node.delimiter-start, Q{<}, Q{start delimiter};
 			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -1541,7 +1541,7 @@ subtest {
 
 			is $pt.to-string( $tree ), $source, Q{formatted};
 			ok $node ~~ Perl6::String::Interpolation;
-#			is $node.quote, Q{qq}, Q{quote name};
+			is $node.quote, Q{qq}, Q{quote name};
 			is $node.delimiter-start, Q{<}, Q{start delimiter};
 			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -1555,7 +1555,7 @@ subtest {
 
 			is $pt.to-string( $tree ), $source, Q{formatted};
 			ok $node ~~ Perl6::String::Interpolation;
-#			is $node.quote, Q{qq}, Q{quote name};
+			is $node.quote, Q{qq}, Q{quote name};
 			is $node.delimiter-start, Q{<}, Q{start delimiter};
 			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -1573,7 +1573,7 @@ subtest {
 
 			is $pt.to-string( $tree ), $source, Q{formatted};
 			ok $node ~~ Perl6::String::Interpolation;
-#			is $node.quote, Q{qq}, Q{quote name};
+			is $node.quote, Q{qq}, Q{quote name};
 			is $node.delimiter-start, Q{<}, Q{start delimiter};
 			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -1587,7 +1587,7 @@ subtest {
 
 			is $pt.to-string( $tree ), $source, Q{formatted};
 			ok $node ~~ Perl6::String::Interpolation;
-#			is $node.quote, Q{qq}, Q{quote name};
+			is $node.quote, Q{qq}, Q{quote name};
 			is $node.delimiter-start, Q{<}, Q{start delimiter};
 			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -1601,7 +1601,7 @@ subtest {
 
 			is $pt.to-string( $tree ), $source, Q{formatted};
 			ok $node ~~ Perl6::String::Interpolation;
-#			is $node.quote, Q{qq}, Q{quote name};
+			is $node.quote, Q{qq}, Q{quote name};
 			is $node.delimiter-start, Q{<}, Q{start delimiter};
 			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -1615,7 +1615,7 @@ subtest {
 
 			is $pt.to-string( $tree ), $source, Q{formatted};
 			ok $node ~~ Perl6::String::Interpolation;
-#			is $node.quote, Q{qq}, Q{quote name};
+			is $node.quote, Q{qq}, Q{quote name};
 			is $node.delimiter-start, Q{<}, Q{start delimiter};
 			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -1632,7 +1632,7 @@ subtest {
 
 		is $pt.to-string( $tree ), $source, Q{formatted};
 		ok $node ~~ Perl6::String::Interpolation;
-#		is $node.quote, Q{qq}, Q{quote name};
+		is $node.quote, Q{qq}, Q{quote name};
 		is $node.delimiter-start, Q{<}, Q{start delimiter};
 		is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -1646,7 +1646,7 @@ subtest {
 
 		is $pt.to-string( $tree ), $source, Q{formatted};
 		ok $node ~~ Perl6::String::Interpolation;
-#		is $node.quote, Q{qqww}, Q{quote name};
+		is $node.quote, Q{qq}, Q{quote name};
 		is $node.delimiter-start, Q{<}, Q{start delimiter};
 		is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -1669,7 +1669,7 @@ END};
 
 			is $pt.to-string( $tree ), $source, Q{formatted};
 			ok $node ~~ Perl6::String::WordQuoting;
-#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.quote, Q{qw}, Q{quote name};
 			is $node.delimiter-start, Q{<}, Q{start delimiter};
 			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -1685,7 +1685,7 @@ END};
 
 			is $pt.to-string( $tree ), $source, Q{formatted};
 			ok $node ~~ Perl6::String::WordQuoting;
-#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.quote, Q{qw}, Q{quote name};
 			is $node.delimiter-start, Q{<}, Q{start delimiter};
 			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -1701,7 +1701,7 @@ END};
 
 			is $pt.to-string( $tree ), $source, Q{formatted};
 			ok $node ~~ Perl6::String::WordQuoting;
-#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.quote, Q{qw}, Q{quote name};
 			is $node.delimiter-start, Q{<}, Q{start delimiter};
 			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -1717,7 +1717,7 @@ END};
 
 			is $pt.to-string( $tree ), $source, Q{formatted};
 			ok $node ~~ Perl6::String::WordQuoting;
-#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.quote, Q{qw}, Q{quote name};
 			is $node.delimiter-start, Q{<}, Q{start delimiter};
 			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -1735,7 +1735,7 @@ END};
 
 			is $pt.to-string( $tree ), $source, Q{formatted};
 			ok $node ~~ Perl6::String::WordQuoting;
-#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.quote, Q{qw}, Q{quote name};
 			is $node.delimiter-start, Q{<}, Q{start delimiter};
 			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -1749,7 +1749,7 @@ END};
 
 			is $pt.to-string( $tree ), $source, Q{formatted};
 			ok $node ~~ Perl6::String::WordQuoting;
-#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.quote, Q{qw}, Q{quote name};
 			is $node.delimiter-start, Q{<}, Q{start delimiter};
 			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -1763,7 +1763,7 @@ END};
 
 			is $pt.to-string( $tree ), $source, Q{formatted};
 			ok $node ~~ Perl6::String::WordQuoting;
-#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.quote, Q{qw}, Q{quote name};
 			is $node.delimiter-start, Q{<}, Q{start delimiter};
 			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -1777,7 +1777,7 @@ END};
 
 			is $pt.to-string( $tree ), $source, Q{formatted};
 			ok $node ~~ Perl6::String::WordQuoting;
-#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.quote, Q{qw}, Q{quote name};
 			is $node.delimiter-start, Q{<}, Q{start delimiter};
 			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -1795,7 +1795,7 @@ END};
 
 			is $pt.to-string( $tree ), $source, Q{formatted};
 			ok $node ~~ Perl6::String::WordQuoting;
-#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.quote, Q{qw}, Q{quote name};
 			is $node.delimiter-start, Q{<}, Q{start delimiter};
 			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -1809,7 +1809,7 @@ END};
 
 			is $pt.to-string( $tree ), $source, Q{formatted};
 			ok $node ~~ Perl6::String::WordQuoting;
-#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.quote, Q{qw}, Q{quote name};
 			is $node.delimiter-start, Q{<}, Q{start delimiter};
 			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -1823,7 +1823,7 @@ END};
 
 			is $pt.to-string( $tree ), $source, Q{formatted};
 			ok $node ~~ Perl6::String::WordQuoting;
-#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.quote, Q{qw}, Q{quote name};
 			is $node.delimiter-start, Q{<}, Q{start delimiter};
 			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -1837,7 +1837,7 @@ END};
 
 			is $pt.to-string( $tree ), $source, Q{formatted};
 			ok $node ~~ Perl6::String::WordQuoting;
-#			is $node.quote, Q{qqww}, Q{quote name};
+			is $node.quote, Q{qw}, Q{quote name};
 			is $node.delimiter-start, Q{<}, Q{start delimiter};
 			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -1854,7 +1854,7 @@ END};
 
 		is $pt.to-string( $tree ), $source, Q{formatted};
 		ok $node ~~ Perl6::String::WordQuoting;
-#		is $node.quote, Q{qqww}, Q{quote name};
+		is $node.quote, Q{qw}, Q{quote name};
 		is $node.delimiter-start, Q{<}, Q{start delimiter};
 		is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -1868,7 +1868,7 @@ END};
 
 		is $pt.to-string( $tree ), $source, Q{formatted};
 		ok $node ~~ Perl6::String::WordQuoting;
-#		is $node.quote, Q{qqww}, Q{quote name};
+		is $node.quote, Q{qw}, Q{quote name};
 		is $node.delimiter-start, Q{<}, Q{start delimiter};
 		is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -2109,7 +2109,7 @@ subtest {
 
 			is $pt.to-string( $tree ), $source, Q{formatted};
 			ok $node ~~ Perl6::String::Literal;
-#			is $node.quote, Q{Q}, Q{quote name};
+			is $node.quote, Q{Q}, Q{quote name};
 			is $node.delimiter-start, Q{<}, Q{start delimiter};
 			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -2123,7 +2123,7 @@ subtest {
 
 			is $pt.to-string( $tree ), $source, Q{formatted};
 			ok $node ~~ Perl6::String::Literal;
-#			is $node.quote, Q{Q}, Q{quote name};
+			is $node.quote, Q{Q}, Q{quote name};
 			is $node.delimiter-start, Q{<}, Q{start delimiter};
 			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -2137,7 +2137,7 @@ subtest {
 
 			is $pt.to-string( $tree ), $source, Q{formatted};
 			ok $node ~~ Perl6::String::Literal;
-#			is $node.quote, Q{Q}, Q{quote name};
+			is $node.quote, Q{Q}, Q{quote name};
 			is $node.delimiter-start, Q{<}, Q{start delimiter};
 			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -2151,7 +2151,7 @@ subtest {
 
 			is $pt.to-string( $tree ), $source, Q{formatted};
 			ok $node ~~ Perl6::String::Literal;
-#			is $node.quote, Q{Q}, Q{quote name};
+			is $node.quote, Q{Q}, Q{quote name};
 			is $node.delimiter-start, Q{<}, Q{start delimiter};
 			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -2172,7 +2172,7 @@ END
 
 			is $pt.to-string( $tree ), $source, Q{formatted};
 			ok $node ~~ Perl6::String::Literal;
-#			is $node.quote, Q{Q}, Q{quote name};
+			is $node.quote, Q{Q}, Q{quote name};
 			is $node.delimiter-start, Q{<}, Q{start delimiter};
 			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -2189,7 +2189,7 @@ END
 
 			is $pt.to-string( $tree ), $source, Q{formatted};
 			ok $node ~~ Perl6::String::Literal;
-#			is $node.quote, Q{Q}, Q{quote name};
+			is $node.quote, Q{Q}, Q{quote name};
 			is $node.delimiter-start, Q{<}, Q{start delimiter};
 			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -2206,7 +2206,7 @@ END
 
 			is $pt.to-string( $tree ), $source, Q{formatted};
 			ok $node ~~ Perl6::String::Literal;
-#			is $node.quote, Q{Q}, Q{quote name};
+			is $node.quote, Q{Q}, Q{quote name};
 			is $node.delimiter-start, Q{<}, Q{start delimiter};
 			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -2223,7 +2223,7 @@ END
 
 			is $pt.to-string( $tree ), $source, Q{formatted};
 			ok $node ~~ Perl6::String::Literal;
-#			is $node.quote, Q{Q}, Q{quote name};
+			is $node.quote, Q{Q}, Q{quote name};
 			is $node.delimiter-start, Q{<}, Q{start delimiter};
 			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -2241,7 +2241,7 @@ END
 
 			is $pt.to-string( $tree ), $source, Q{formatted};
 			ok $node ~~ Perl6::String::Literal;
-#			is $node.quote, Q{Q}, Q{quote name};
+			is $node.quote, Q{Q}, Q{quote name};
 			is $node.delimiter-start, Q{<}, Q{start delimiter};
 			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -2255,7 +2255,7 @@ END
 
 			is $pt.to-string( $tree ), $source, Q{formatted};
 			ok $node ~~ Perl6::String::Literal;
-#			is $node.quote, Q{Q}, Q{quote name};
+			is $node.quote, Q{Q}, Q{quote name};
 			is $node.delimiter-start, Q{<}, Q{start delimiter};
 			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -2269,7 +2269,7 @@ END
 
 			is $pt.to-string( $tree ), $source, Q{formatted};
 			ok $node ~~ Perl6::String::Literal;
-#			is $node.quote, Q{Q}, Q{quote name};
+			is $node.quote, Q{Q}, Q{quote name};
 			is $node.delimiter-start, Q{<}, Q{start delimiter};
 			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -2283,7 +2283,7 @@ END
 
 			is $pt.to-string( $tree ), $source, Q{formatted};
 			ok $node ~~ Perl6::String::Literal;
-#			is $node.quote, Q{Q}, Q{quote name};
+			is $node.quote, Q{Q}, Q{quote name};
 			is $node.delimiter-start, Q{<}, Q{start delimiter};
 			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -2301,7 +2301,7 @@ END
 
 			is $pt.to-string( $tree ), $source, Q{formatted};
 			ok $node ~~ Perl6::String::Literal;
-#			is $node.quote, Q{Q}, Q{quote name};
+			is $node.quote, Q{Q}, Q{quote name};
 			is $node.delimiter-start, Q{<}, Q{start delimiter};
 			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -2315,7 +2315,7 @@ END
 
 			is $pt.to-string( $tree ), $source, Q{formatted};
 			ok $node ~~ Perl6::String::Literal;
-#			is $node.quote, Q{Q}, Q{quote name};
+			is $node.quote, Q{Q}, Q{quote name};
 			is $node.delimiter-start, Q{<}, Q{start delimiter};
 			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -2329,7 +2329,7 @@ END
 
 			is $pt.to-string( $tree ), $source, Q{formatted};
 			ok $node ~~ Perl6::String::Literal;
-#			is $node.quote, Q{Q}, Q{quote name};
+			is $node.quote, Q{Q}, Q{quote name};
 			is $node.delimiter-start, Q{<}, Q{start delimiter};
 			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -2343,7 +2343,7 @@ END
 
 			is $pt.to-string( $tree ), $source, Q{formatted};
 			ok $node ~~ Perl6::String::Literal;
-#			is $node.quote, Q{Q}, Q{quote name};
+			is $node.quote, Q{Q}, Q{quote name};
 			is $node.delimiter-start, Q{<}, Q{start delimiter};
 			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -2360,7 +2360,7 @@ END
 
 		is $pt.to-string( $tree ), $source, Q{formatted};
 		ok $node ~~ Perl6::String::Literal;
-#		is $node.quote, Q{Q}, Q{quote name};
+		is $node.quote, Q{Q}, Q{quote name};
 		is $node.delimiter-start, Q{<}, Q{start delimiter};
 		is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -2374,7 +2374,7 @@ END
 
 		is $pt.to-string( $tree ), $source, Q{formatted};
 		ok $node ~~ Perl6::String::Literal;
-#		is $node.quote, Q{Q}, Q{quote name};
+		is $node.quote, Q{Q}, Q{quote name};
 		is $node.delimiter-start, Q{<}, Q{start delimiter};
 		is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -2398,7 +2398,7 @@ END
 
 			is $pt.to-string( $tree ), $source, Q{formatted};
 			ok $node ~~ Perl6::String::Escaping;
-#			is $node.quote, Q{q}, Q{quote name};
+			is $node.quote, Q{q}, Q{quote name};
 			is $node.delimiter-start, Q{<}, Q{start delimiter};
 			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -2415,7 +2415,7 @@ END
 
 			is $pt.to-string( $tree ), $source, Q{formatted};
 			ok $node ~~ Perl6::String::Escaping;
-#			is $node.quote, Q{q}, Q{quote name};
+			is $node.quote, Q{q}, Q{quote name};
 			is $node.delimiter-start, Q{<}, Q{start delimiter};
 			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -2432,7 +2432,7 @@ END
 
 			is $pt.to-string( $tree ), $source, Q{formatted};
 			ok $node ~~ Perl6::String::Escaping;
-#			is $node.quote, Q{q}, Q{quote name};
+			is $node.quote, Q{q}, Q{quote name};
 			is $node.delimiter-start, Q{<}, Q{start delimiter};
 			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -2449,7 +2449,7 @@ END
 
 			is $pt.to-string( $tree ), $source, Q{formatted};
 			ok $node ~~ Perl6::String::Escaping;
-#			is $node.quote, Q{q}, Q{quote name};
+			is $node.quote, Q{q}, Q{quote name};
 			is $node.delimiter-start, Q{<}, Q{start delimiter};
 			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -2467,7 +2467,7 @@ END
 
 			is $pt.to-string( $tree ), $source, Q{formatted};
 			ok $node ~~ Perl6::String::Escaping;
-#			is $node.quote, Q{q}, Q{quote name};
+			is $node.quote, Q{q}, Q{quote name};
 			is $node.delimiter-start, Q{<}, Q{start delimiter};
 			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -2481,7 +2481,7 @@ END
 
 			is $pt.to-string( $tree ), $source, Q{formatted};
 			ok $node ~~ Perl6::String::Escaping;
-#			is $node.quote, Q{q}, Q{quote name};
+			is $node.quote, Q{q}, Q{quote name};
 			is $node.delimiter-start, Q{<}, Q{start delimiter};
 			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -2495,7 +2495,7 @@ END
 
 			is $pt.to-string( $tree ), $source, Q{formatted};
 			ok $node ~~ Perl6::String::Escaping;
-#			is $node.quote, Q{q}, Q{quote name};
+			is $node.quote, Q{q}, Q{quote name};
 			is $node.delimiter-start, Q{<}, Q{start delimiter};
 			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -2509,7 +2509,7 @@ END
 
 			is $pt.to-string( $tree ), $source, Q{formatted};
 			ok $node ~~ Perl6::String::Escaping;
-#			is $node.quote, Q{q}, Q{quote name};
+			is $node.quote, Q{q}, Q{quote name};
 			is $node.delimiter-start, Q{<}, Q{start delimiter};
 			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -2527,7 +2527,7 @@ END
 
 			is $pt.to-string( $tree ), $source, Q{formatted};
 			ok $node ~~ Perl6::String::Escaping;
-#			is $node.quote, Q{q}, Q{quote name};
+			is $node.quote, Q{q}, Q{quote name};
 			is $node.delimiter-start, Q{<}, Q{start delimiter};
 			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -2541,7 +2541,7 @@ END
 
 			is $pt.to-string( $tree ), $source, Q{formatted};
 			ok $node ~~ Perl6::String::Escaping;
-#			is $node.quote, Q{q}, Q{quote name};
+			is $node.quote, Q{q}, Q{quote name};
 			is $node.delimiter-start, Q{<}, Q{start delimiter};
 			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -2555,7 +2555,7 @@ END
 
 			is $pt.to-string( $tree ), $source, Q{formatted};
 			ok $node ~~ Perl6::String::Escaping;
-#			is $node.quote, Q{q}, Q{quote name};
+			is $node.quote, Q{q}, Q{quote name};
 			is $node.delimiter-start, Q{<}, Q{start delimiter};
 			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -2569,7 +2569,7 @@ END
 
 			is $pt.to-string( $tree ), $source, Q{formatted};
 			ok $node ~~ Perl6::String::Escaping;
-#			is $node.quote, Q{q}, Q{quote name};
+			is $node.quote, Q{q}, Q{quote name};
 			is $node.delimiter-start, Q{<}, Q{start delimiter};
 			is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -2586,7 +2586,7 @@ END
 
 		is $pt.to-string( $tree ), $source, Q{formatted};
 		ok $node ~~ Perl6::String::Escaping;
-#		is $node.quote, Q{qqww}, Q{quote name};
+		is $node.quote, Q{q}, Q{quote name};
 		is $node.delimiter-start, Q{<}, Q{start delimiter};
 		is $node.delimiter-end, Q{>}, Q{end delimiter};
 
@@ -2600,7 +2600,7 @@ END
 
 		is $pt.to-string( $tree ), $source, Q{formatted};
 		ok $node ~~ Perl6::String::Escaping;
-#		is $node.quote, Q{qqww}, Q{quote name};
+		is $node.quote, Q{q}, Q{quote name};
 		is $node.delimiter-start, Q{<}, Q{start delimiter};
 		is $node.delimiter-end, Q{>}, Q{end delimiter};
 
