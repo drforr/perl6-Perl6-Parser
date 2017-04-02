@@ -1294,7 +1294,9 @@ class Perl6::Parser::Factory {
 						callframe(1).line
 					),
 					:from( $left-margin + $from ),
-					:to( $left-margin + %.here-doc{$from} ),
+					:to( $left-margin + $from +
+						$remainder.Str.chars
+					),
 					:content( $remainder )
 				)
 			);
