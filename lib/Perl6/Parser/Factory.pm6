@@ -765,6 +765,7 @@ class Perl6::Semicolon is Perl6::Visible {
 class Perl6::Backslash is Perl6::Visible {
 	also does BasicTextual;
 
+	also does Constructor-from-match;
 	also does Constructor-from-int;
 }
 
@@ -1673,27 +1674,18 @@ class Perl6::Parser::Factory {
 	# name
 	# ~~
 	#
-#	method _assertion( Mu $p ) returns Perl6::Element-List {
-#		my $child = Perl6::Element-List.new;
-#		given $p {
-#			when self.assert-hash( $_, [< var >] ) {
-#				self._var( $_.hash.<var> );
-#			}
-#			when self.assert-hash( $_, [< longname >] ) {
-#				self._longname( $_.hash.<longname> );
-#			}
-#			when self.assert-hash( $_, [< cclass_elem >] ) {
-#				self._cclass_elem( $_.hash.<cclass_elem> );
-#			}
-#			when self.assert-hash( $_, [< codeblock >] ) {
-#				self._codeblock( $_.hash.<codeblock> );
-#			}
-#			default {
-#				$child.fall-through( $_ );
-#			}
-#		}
-#		$child;
-#	}
+	method _assertion( Mu $p ) returns Perl6::Element-List {
+		my $child = Perl6::Element-List.new;
+		if $p.Str {
+			$child.append(
+				Perl6::Bareword.from-match( $p )
+			);
+		}
+		else {
+			$child.fall-through( $p );
+		}
+		$child;
+	}
 
 	method _atom( Mu $p ) returns Perl6::Element-List {
 		my $child = Perl6::Element-List.new;
@@ -1760,11 +1752,6 @@ class Perl6::Parser::Factory {
 #	method _backslash( Mu $p ) returns Perl6::Element-List {
 #		my $child = Perl6::Element-List.new;
 #		given $p {
-#			when self.assert-hash( $_, [< sym >] ) {
-#				$child.append(
-#					self._sym( $_.hash.<sym> )
-#				);
-#			}
 #			default {
 #				$child.fall-through( $_ );
 #			}
@@ -3419,44 +3406,56 @@ class Perl6::Parser::Factory {
 	method _metachar( Mu $p ) returns Perl6::Element-List {
 		my $child = Perl6::Element-List.new;
 		if self.assert-hash( $p, [< sym >] ) {
+			$child.append( self._sym( $p.hash.<sym> ) );
+		}
+		elsif self.assert-hash( $p, [< assertion >] ) {
+			my $_child = Perl6::Element-List.new;
+			$_child.append(
+				self._assertion( $p.hash.<assertion> )
+			);
 			$child.append(
-				self._sym( $p.hash.<sym> )
+				Perl6::Operator::Circumfix.from-match(
+					$p,
+					$_child
+				)
 			);
 		}
-# XXX
-#		elsif self.assert-hash( $p, [< assertion >] ) {
-#			$child.append(
-#				self._assertion( $p.hash.<assertion> )
-#			);
-#		}
-# XXX
-#		elsif self.assert-hash( $p, [< nibble >] ) {
-#			$child.append(
-#				self._nibble( $p.hash.<nibble> )
-#			);
-#		}
+		elsif self.assert-hash( $p, [< nibble >] ) {
+			my $_child = Perl6::Element-List.new;
+			$_child.append( self._nibble( $p.hash.<nibble> ) );
+			$child.append(
+				self._Operator_Circumfix-from-match(
+					$p,
+					$_child
+				)
+			);
+		}
 		elsif self.assert-hash( $p, [< codeblock >] ) {
+			$child.append( self._codeblock( $p.hash.<codeblock> ) );
+		}
+		elsif self.assert-hash( $p, [< backslash >] ) {
 			$child.append(
-				self._codeblock( $p.hash.<codeblock> )
+				Perl6::Backslash.from-match( $p )
 			);
 		}
-# XXX
-#		elsif self.assert-hash( $p, [< backslash >] ) {
-#			$child.append(
-#				self._backslash( $p.hash.<backslash> )
-#			);
-#		}
 		elsif self.assert-hash( $p, [< quote >] ) {
+			$child.append( self._quote( $p.hash.<quote> ) );
+		}
+		elsif self.assert-hash( $p, [< nibbler >] ) {
+			my $_child = Perl6::Element-List.new;
+			# XXX pack this into <nibbler> somehow.
+			$_child.append(
+				Perl6::Bareword.from-match(
+					$p.hash.<nibbler>
+				)
+			);
 			$child.append(
-				self._quote( $p.hash.<quote> )
+				self._Operator_Circumfix-from-match(
+					$p,
+					$_child
+				)
 			);
 		}
-# XXX
-#		elsif self.assert-hash( $p, [< nibbler >] ) {
-#			$child.append(
-#				self._nibbler( $p.hash.<nibbler> )
-#			);
-#		}
 		elsif $p.Str {
 			$child.append(
 				Perl6::Bareword.from-match( $p )
