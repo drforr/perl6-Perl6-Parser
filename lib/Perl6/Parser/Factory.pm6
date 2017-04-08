@@ -1676,7 +1676,12 @@ class Perl6::Parser::Factory {
 	#
 	method _assertion( Mu $p ) returns Perl6::Element-List {
 		my $child = Perl6::Element-List.new;
-		if $p.Str {
+		if self.assert-hash( $p, [< cclass_elem >] ) {
+			$child.append(
+				self._cclass_elem( $p.hash.<cclass_elem> )
+			);
+		}
+		elsif $p.Str {
 			$child.append(
 				Perl6::Bareword.from-match( $p )
 			);
@@ -1827,46 +1832,26 @@ class Perl6::Parser::Factory {
 #		$child;
 #	} 
 
-#	method _cclass_elem( Mu $p ) returns Perl6::Element-List {
-#		my $child = Perl6::Element-List.new;
-#		if $p.list {
-#			for $p.list {
-#				if self.assert-hash( $_,
-#						[< identifier name sign >],
-#						[< charspec >] ) {
-#					$child.append(
-#						self._identifier(
-#							$_.hash.<identifier>
-#						)
-#					);
-#					$child.append(
-#						self._name( $_.hash.<name> )
-#					);
-#					$child.append(
-#						self._sign( $_.hash.<sign> )
-#					);
-#				}
-#				elsif self.assert-hash( $_,
-#						[< charspec sign >] ) {
-#					$child.append(
-#						self._sign( $p.hash.<sign> )
-#					);
-#					$child.append(
-#						self._charspec(
-#							$p.hash.<charspec>
-#						)
-#					);
-#				}
-#				else {
-#					$child.fall-through( $_ );
-#				}
-#			}
-#		}
-#		else {
-#			$child.fall-through( $_ );
-#		}
-#		$child;
-#	}
+	method _cclass_elem( Mu $p ) returns Perl6::Element-List {
+		my $child = Perl6::Element-List.new;
+		if $p.list {
+			my $_child = Perl6::Element-List.new;
+			for $p.list {
+				if self.assert-hash( $_, [< sign charspec >] ) {
+					$child.append(
+						Perl6::Bareword.from-match( $p )
+					);
+				}
+				else {
+					$child.fall-through( $_ );
+				}
+			}
+		}
+		else {
+			$child.fall-through( $_ );
+		}
+		$child;
+	}
 
 #	method _charspec( Mu $p ) returns Perl6::Element-List {
 #		my $child = Perl6::Element-List.new;
@@ -3434,9 +3419,7 @@ class Perl6::Parser::Factory {
 			$child.append( self._codeblock( $p.hash.<codeblock> ) );
 		}
 		elsif self.assert-hash( $p, [< backslash >] ) {
-			$child.append(
-				Perl6::Backslash.from-match( $p )
-			);
+			$child.append( Perl6::Backslash.from-match( $p ) );
 		}
 		elsif self.assert-hash( $p, [< quote >] ) {
 			$child.append( self._quote( $p.hash.<quote> ) );
@@ -3445,9 +3428,7 @@ class Perl6::Parser::Factory {
 			my $_child = Perl6::Element-List.new;
 			# XXX pack this into <nibbler> somehow.
 			$_child.append(
-				Perl6::Bareword.from-match(
-					$p.hash.<nibbler>
-				)
+				Perl6::Bareword.from-match( $p.hash.<nibbler> )
 			);
 			$child.append(
 				self._Operator_Circumfix-from-match(
@@ -3457,9 +3438,7 @@ class Perl6::Parser::Factory {
 			);
 		}
 		elsif $p.Str {
-			$child.append(
-				Perl6::Bareword.from-match( $p )
-			);
+			$child.append( Perl6::Bareword.from-match( $p ) );
 		}
 		else {
 			$child.fall-through( $p );
