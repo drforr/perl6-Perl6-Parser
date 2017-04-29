@@ -8,20 +8,13 @@ plan 3;
 my $pt = Perl6::Parser.new;
 my $*CONSISTENCY-CHECK = True;
 my $*FALL-THROUGH = True;
+my $parsed;
 
-subtest {
-	plan 1;
-	
-	my $parsed = $pt.parse( Q{} );
-	ok $parsed.hash.<statementlist>, Q{statementlist};
-}, Q{Empty file};
+$parsed = $pt.parse( Q{} );
+ok $parsed.hash.<statementlist>, Q{Empty file};
 
-subtest {
-	plan 1;
-	
-	my $parsed = $pt.parse( Q {} );
-	ok $parsed.hash.<statementlist>, Q{statementlist};
-}, Q{whitespace-only};
+$parsed = $pt.parse( Q {} );
+ok $parsed.hash.<statementlist>, Q{whitespace-only};
 
 subtest {
 	plan 11;

@@ -8,6 +8,7 @@ plan 3;
 my $pt = Perl6::Parser.new;
 my $*CONSISTENCY-CHECK = True;
 my $*FALL-THROUGH = True;
+my ( $source, $tree );
 
 subtest {
 	plan 2;
@@ -18,71 +19,41 @@ subtest {
 		subtest {
 			plan 2;
 
-			subtest {
-				my $source = Q{sub foo(){}};
-				my $tree = $pt.to-tree( $source );
-				is $pt.to-string( $tree ),
-					$source, Q{formatted};
+			$source = Q{sub foo(){}};
+			$tree = $pt.to-tree( $source );
+			is $pt.to-string( $tree ), $source, Q{no ws};
 
-				done-testing;
-			}, Q{no ws};
-
-			subtest {
-				my $source = Q{sub foo( ) { }};
-				my $tree = $pt.to-tree( $source );
-				is $pt.to-string( $tree ),
-					$source, Q{formatted};
-
-				done-testing;
-			}, Q{intra-term ws};
+			$source = Q{sub foo( ) { }};
+			$tree = $pt.to-tree( $source );
+			is $pt.to-string( $tree ), $source, Q{intra-term ws};
 		}, Q{empty};
 
 		subtest {
 			plan 2;
 
-			subtest {
-				my $source = Q{sub foo(0){}};
-				my $tree = $pt.to-tree( $source );
-				is $pt.to-string( $tree ),
-					$source, Q{formatted};
+			$source = Q{sub foo(0){}};
+			$tree = $pt.to-tree( $source );
+			is $pt.to-string( $tree ), $source, Q{no ws};
 
-				done-testing;
-			}, Q{no ws};
-
-			subtest {
-				my $source = Q:to[_END_];
+			$source = Q:to[_END_];
 sub foo( 0 ) { }
 _END_
-				my $tree = $pt.to-tree( $source );
-				is $pt.to-string( $tree ),
-					$source, Q{formatted};
-
-				done-testing;
-			}, Q{ws};
+			$tree = $pt.to-tree( $source );
+			is $pt.to-string( $tree ), $source, Q{ws};
 		}, Q{constant};
 
 		subtest {
 			plan 2;
 
-			subtest {
-				my $source = Q{sub foo($a){}};
-				my $tree = $pt.to-tree( $source );
-				is $pt.to-string( $tree ),
-					$source, Q{formatted};
+			$source = Q{sub foo($a){}};
+			$tree = $pt.to-tree( $source );
+			is $pt.to-string( $tree ), $source, Q{no ws};
 
-				done-testing;
-			}, Q{no ws};
-
-			subtest {
-				my $source = Q:to[_END_];
+			$source = Q:to[_END_];
 sub foo( $a ) { }
 _END_
-				my $tree = $pt.to-tree( $source );
-				is $pt.to-string( $tree ),
-					$source, Q{formatted};
-
-				done-testing;
-			}, Q{ws};
+			$tree = $pt.to-tree( $source );
+			is $pt.to-string( $tree ), $source, Q{ws};
 		}, Q{untyped};
 
 		subtest {
@@ -91,146 +62,86 @@ _END_
 			subtest {
 				plan 2;
 
-				subtest {
-					my $source = Q{sub foo(Int$a){}};
-					my $tree = $pt.to-tree( $source );
-					is $pt.to-string( $tree ),
-						$source, Q{formatted};
+				$source = Q{sub foo(Int$a){}};
+				$tree = $pt.to-tree( $source );
+				is $pt.to-string( $tree ), $source, Q{no ws};
 
-					done-testing;
-				}, Q{no ws};
-
-				subtest {
-					my $source = Q:to[_END_];
+				$source = Q:to[_END_];
 sub foo( Int $a ) { }
 _END_
-					my $tree = $pt.to-tree( $source );
-					is $pt.to-string( $tree ),
-						$source, Q{formatted};
-
-					done-testing;
-				}, Q{ws};
+				$tree = $pt.to-tree( $source );
+				is $pt.to-string( $tree ), $source, Q{ws};
 			}, Q{typed};
 
 			subtest {
 				plan 2;
 
-				subtest {
-					my $source = Q{sub foo(Int$a=32){}};
-					my $tree = $pt.to-tree( $source );
-					is $pt.to-string( $tree ),
-						$source, Q{formatted};
+				$source = Q{sub foo(Int$a=32){}};
+				$tree = $pt.to-tree( $source );
+				is $pt.to-string( $tree ), $source, Q{no ws};
 
-					done-testing;
-				}, Q{no ws};
-
-				subtest {
-					my $source = Q:to[_END_];
+				$source = Q:to[_END_];
 sub foo( Int $a = 32 ) { }
 _END_
-					my $tree = $pt.to-tree( $source );
-					is $pt.to-string( $tree ),
-						$source, Q{formatted};
-
-					done-testing;
-				}, Q{ws};
+				$tree = $pt.to-tree( $source );
+				is $pt.to-string( $tree ), $source, Q{ws};
 			}, Q{typed and declared};
 
 			subtest {
 				plan 2;
 
-				subtest {
-					my $source = Q{sub foo(::T$a){}};
-					my $tree = $pt.to-tree( $source );
-					is $pt.to-string( $tree ),
-						$source, Q{formatted};
+				$source = Q{sub foo(::T$a){}};
+				$tree = $pt.to-tree( $source );
+				is $pt.to-string( $tree ), $source, Q{no ws};
 
-					done-testing;
-				}, Q{no ws};
-
-				subtest {
-					my $source = Q:to[_END_];
+				$source = Q:to[_END_];
 sub foo( ::T $a ) { }
 _END_
-					my $tree = $pt.to-tree( $source );
-					is $pt.to-string( $tree ),
-						$source, Q{formatted};
-
-					done-testing;
-				}, Q{ws};
+				$tree = $pt.to-tree( $source );
+				is $pt.to-string( $tree ), $source, Q{ws};
 			}, Q{type-capture};
 
 			subtest {
 				plan 2;
 
-				subtest {
-					my $source = Q{sub foo(Int){}};
-					my $tree = $pt.to-tree( $source );
-					is $pt.to-string( $tree ),
-						$source, Q{formatted};
+				$source = Q{sub foo(Int){}};
+				$tree = $pt.to-tree( $source );
+				is $pt.to-string( $tree ), $source, Q{no ws};
 
-					done-testing;
-				}, Q{no ws};
-
-				subtest {
-					my $source = Q:to[_END_];
+				$source = Q:to[_END_];
 sub foo( Int ) { }
 _END_
-					my $tree = $pt.to-tree( $source );
-					is $pt.to-string( $tree ),
-						$source, Q{formatted};
-
-					done-testing;
-				}, Q{ws};
+				$tree = $pt.to-tree( $source );
+				is $pt.to-string( $tree ), $source, Q{ws};
 			}, Q{type-only};
 
 			subtest {
 				plan 2;
 
-				subtest {
-					my $source = Q{sub foo(Int$a where 1){}};
-					my $tree = $pt.to-tree( $source );
-					is $pt.to-string( $tree ),
-						$source, Q{formatted};
+				$source = Q{sub foo(Int$a where 1){}};
+				$tree = $pt.to-tree( $source );
+				is $pt.to-string( $tree ), $source, Q{no ws};
 
-					done-testing;
-				}, Q{no ws};
-
-				subtest {
-					my $source = Q:to[_END_];
+				$source = Q:to[_END_];
 sub foo( Int $a where 1 ) { }
 _END_
-					my $tree = $pt.to-tree( $source );
-					is $pt.to-string( $tree ),
-						$source, Q{formatted};
-
-					done-testing;
-				}, Q{ws};
+				$tree = $pt.to-tree( $source );
+				is $pt.to-string( $tree ), $source, Q{ws};
 			}, Q{type-constrained};
 		}, Q{typed};
 
 		subtest {
 			plan 2;
 
-			subtest {
-				my $source = Q{sub foo($a=0){}};
-				my $tree = $pt.to-tree( $source );
-				is $pt.to-string( $tree ),
-					$source, Q{formatted};
+			$source = Q{sub foo($a=0){}};
+			$tree = $pt.to-tree( $source );
+			is $pt.to-string( $tree ), $source, Q{no ws};
 
-				done-testing;
-			}, Q{no ws};
-
-			subtest {
-				my $source = Q:to[_END_];
+			$source = Q:to[_END_];
 sub foo( $a = 0 ) { }
 _END_
-				my $tree = $pt.to-tree( $source );
-				is $pt.to-string( $tree ),
-					$source, Q{formatted};
-
-				done-testing;
-			}, Q{ws};
+			$tree = $pt.to-tree( $source );
+			is $pt.to-string( $tree ), $source, Q{ws};
 		}, Q{default};
 
 		# XXX 'sub foo(:a) { }' illegal
@@ -239,53 +150,36 @@ _END_
 	subtest {
 		plan 2;
 
-		subtest {
-			my $source = Q{sub foo($a,$b){}};
-			my $tree = $pt.to-tree( $source );
-			is $pt.to-string( $tree ), $source, Q{formatted};
+		$source = Q{sub foo($a,$b){}};
+		$tree = $pt.to-tree( $source );
+		is $pt.to-string( $tree ), $source, Q{no ws};
 
-			done-testing;
-		}, Q{no ws};
-
-		subtest {
-			my $source = Q:to[_END_];
+		$source = Q:to[_END_];
 sub foo( $a, $b ) { }
 _END_
-			my $tree = $pt.to-tree( $source );
-			is $pt.to-string( $tree ), $source, Q{formatted};
-
-			done-testing;
-		}, Q{ws};
+		$tree = $pt.to-tree( $source );
+		is $pt.to-string( $tree ), $source, Q{ws};
 	}, Q{multiple};
 }, Q{scalar arguments};
 
 subtest {
 	plan 4;
 
-	subtest {
-		my $source = Q{sub foo($a,Str$b,Str$c where"foo",Int$d=32){}};
-		my $tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{formatted};
+	$source = Q{sub foo($a,Str$b,Str$c where"foo",Int$d=32){}};
+	$tree = $pt.to-tree( $source );
+	is $pt.to-string( $tree ), $source, Q{christmas tree, minimal spacing};
 
-		done-testing;
-	}, Q{christmas tree, minimal spacing};
-
-	subtest {
-		my $source = Q:to[_END_];
+	$source = Q:to[_END_];
 sub foo($a,Str$b,Str$c where"foo",Int$d=32){}
 _END_
-		my $tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{formatted};
-
-		done-testing;
-	}, Q{christmas tree, minimal spacing};
+	$tree = $pt.to-tree( $source );
+	is $pt.to-string( $tree ), $source, Q{christmas tree, minimal spacing};
 
 	# Having differing whitespace on each side of an operator assures
 	# that Perl6::WS objects aren't being reused, and the WS isn't
 	# actually being copied from the wrong RE.
 	#
-	subtest {
-		my $source = Q:to[_END_];
+	$source = Q:to[_END_];
 sub foo(
 $a  ,
 Str  $b
@@ -297,31 +191,21 @@ Int  $d
 )  {
 }
 _END_
-		my $tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{formatted};
+	$tree = $pt.to-tree( $source );
+	is $pt.to-string( $tree ), $source,
+		Q{christmas tree, alternating spacing};
 
-		done-testing;
-	}, Q{christmas tree, alternating spacing};
-
-	subtest {
-		my $source = Q:to[_END_];
+	$source = Q:to[_END_];
 sub foo(  $a  ,  Str  $b  ,  Str  $c  where  "foo"  ,  Int  $d  =  32  )  {  }
 _END_
-		my $tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{formatted};
-
-		done-testing;
-	}, Q{christmas tree, maximal spacing};
+	$tree = $pt.to-tree( $source );
+	is $pt.to-string( $tree ), $source, Q{christmas tree, maximal spacing};
 }, Q{christmas tree};
 
-subtest {
-	my $source = Q:to[_END_];
+$source = Q:to[_END_];
 sub foo ( ) { }
 _END_
-	my $tree = $pt.to-tree( $source );
-	is $pt.to-string( $tree ), $source, Q{formatted};
-
-	done-testing;
-}, Q{separate function name and open paren};
+$tree = $pt.to-tree( $source );
+is $pt.to-string( $tree ), $source, Q{separate function name and open paren};
 
 # vim: ft=perl6

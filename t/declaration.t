@@ -8,6 +8,7 @@ plan 2;
 my $pt = Perl6::Parser.new;
 my $*CONSISTENCY-CHECK = True;
 my $*FALL-THROUGH = True;
+my ( $source, $tree );
 
 subtest {
 	plan 2;
@@ -15,47 +16,22 @@ subtest {
 	subtest {
 		plan 3;
 
-		subtest {
-			my $source = Q{my Int $a};
-			my $tree = $pt.to-tree( $source );
-			is $pt.to-string( $tree ),
-				Q{my Int $a}, Q{formatted};
+		$source = Q{my Int $a};
+		$tree = $pt.to-tree( $source );
+		is $pt.to-string( $tree ), $source, Q{regular};
 
-			done-testing;
-		}, Q{regular};
+		$source = Q{my Int:U $a};
+		$tree = $pt.to-tree( $source );
+		is $pt.to-string( $tree ), $source, Q{undefined};
 
-		subtest {
-			my $source = Q{my Int:U $a};
-			my $tree = $pt.to-tree( $source );
-			is $pt.to-string( $tree ),
-				Q{my Int:U $a}, Q{formatted};
-
-			done-testing;
-		}, Q{undefined};
-
-		subtest {
-			my $source = Q{my Int:D $a = 0};
-			my $tree = $pt.to-tree( $source );
-			is $pt.to-string( $tree ),
-				Q{my Int:D $a = 0},
-				Q{formatted};
-
-			done-testing;
-		}, Q{defined};
+		$source = Q{my Int:D $a = 0};
+		$tree = $pt.to-tree( $source );
+		is $pt.to-string( $tree ), $source, Q{defined};
 	}, Q{typed};
 
-	subtest {
-		plan 1;
-
-		subtest {
-			my $source = Q{my $a where 1};
-			my $tree = $pt.to-tree( $source );
-			is $pt.to-string( $tree ),
-				Q{my $a where 1}, Q{formatted};
-
-			done-testing;
-		}, Q{my $a where 1};
-	}, Q{constrained};
+	$source = Q{my $a where 1};
+	$tree = $pt.to-tree( $source );
+	is $pt.to-string( $tree ), $source, Q{constrained};
 }, Q{variable};
 
 subtest {
@@ -64,22 +40,15 @@ subtest {
 	subtest {
 		plan 2;
 
-		subtest {
-			my $source = Q{sub foo returns Int {}};
-			my $tree = $pt.to-tree( $source );
-			is $pt.to-string( $tree ), $source, Q{formatted};
+		$source = Q{sub foo returns Int {}};
+		$tree = $pt.to-tree( $source );
+		is $pt.to-string( $tree ), $source, Q{ws};
 
-			done-testing;
-		}, Q{ws};
-		subtest {
-			my $source = Q:to[_END_];
-sub foo returns Int {}
-_END_
-			my $tree = $pt.to-tree( $source );
-			is $pt.to-string( $tree ), $source, Q{formatted};
-
-			done-testing;
-		}, Q{ws};
+		$source = Q:to[_END_];
+		sub foo returns Int {}
+		_END_
+		$tree = $pt.to-tree( $source );
+		is $pt.to-string( $tree ), $source, Q{ws};
 	}, Q{sub foo returns Int {}};
 }, Q{subroutine};
 
