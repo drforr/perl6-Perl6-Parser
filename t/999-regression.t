@@ -9,512 +9,313 @@ use Perl6::Parser;
 my $pt = Perl6::Parser.new;
 my $*CONSISTENCY-CHECK = True;
 my $*FALL-THROUGH = True;
+my $source;
 
-subtest {
-	my $source = Q:to[_END_];
+sub can-roundtrip( $pt, $source ) {
+	$pt._roundtrip( $source ) eq $source
+}
+
+$source = Q:to[_END_];
 say <closed open>;
 _END_
-	is $pt._roundtrip( $source ), $source, Q{formatted};
+ok can-roundtrip( $pt, $source ), Q{say <closed open>};
 
-	done-testing;
-}, Q{say <closed open>};
-
-my @quantities = flat (99 ... 1), 'No more', 99;
-
-subtest {
-	my $source = Q:to[_END_];
+$source = Q:to[_END_];
 my @quantities = flat (99 ... 1), 'No more', 99;
 _END_
-	is $pt._roundtrip( $source ), $source, Q{formatted};
+ok can-roundtrip( $pt, $source ), Q{flat (99 ... 1)};
 
-	done-testing;
-}, Q{flat (99 ... 1)};
-
-subtest {
-	my $source = Q:to[_END_];
+$source = Q:to[_END_];
 sub foo( $a is copy ) { }
 _END_
-	is $pt._roundtrip( $source ), $source, Q{formatted};
+ok can-roundtrip( $pt, $source ), Q{is copy};
 
-	done-testing;
-}, Q{flat (99 ... 1)};
-
-subtest {
-	my $source = Q:to[_END_];
+$source = Q:to[_END_];
 grammar Foo {
     token TOP { ^ <exp> $ { fail } }
 }
 _END_
-	is $pt._roundtrip( $source ), $source, Q{formatted};
+ok can-roundtrip( $pt, $source ), Q{actions in grammars};
 
-	done-testing;
-}, Q{flat (99 ... 1)};
-
-subtest {
-	my $source = Q:to[_END_];
+$source = Q:to[_END_];
 grammar Foo {
     rule exp { <term>+ % <op> }
 }
 _END_
-	is $pt._roundtrip( $source ), $source, Q{formatted};
+ok can-roundtrip( $pt, $source ), Q{mod in grammar};
 
-	done-testing;
-}, Q{flat (99 ... 1)};
-
-subtest {
-	my $source = Q:to[_END_];
+$source = Q:to[_END_];
 my @blocks;
 @blocks.grep: { }
 _END_
-	is $pt._roundtrip( $source ), $source, Q{formatted};
+ok can-roundtrip( $pt, $source ), Q{grep: {}};
 
-	done-testing;
-}, Q{grep: {}};
-
-subtest {
-	my $source = Q:to[_END_];
+$source = Q:to[_END_];
 my \y = 1;
 _END_
-	is $pt._roundtrip( $source ), $source, Q{formatted};
+ok can-roundtrip( $pt, $source ), Q{my \y};
 
-	done-testing;
-}, Q{my \y};
-
-subtest {
-	my $source = Q:to[_END_];
+$source = Q:to[_END_];
 class Bitmap {
   method fill-pixel($i) { }
 }
 _END_
-	is $pt._roundtrip( $source ), $source, Q{formatted};
+ok can-roundtrip( $pt, $source ), Q{method fill-pixel($i)};
 
-	done-testing;
-}, Q{method fill-pixel($i)};
-
-subtest {
-	my $source = Q:to[_END_];
+$source = Q:to[_END_];
 my %dir = (
    "\e[A" => 'up',
    "\e[B" => 'down',
    "\e[C" => 'left',
 );
 _END_
-	is $pt._roundtrip( $source ), $source, Q{formatted};
+ok can-roundtrip( $pt, $source ),Q{quoted hash};
 
-	done-testing;
-}, Q{method fill-pixel($i)};
-
-grammar Exp24 { rule term { <exp> | <digits> } }
-
-subtest {
-	my $source = Q:to[_END_];
+$source = Q:to[_END_];
 grammar Exp24 { rule term { <exp> | <digits> } }
 _END_
-	is $pt._roundtrip( $source ), $source, Q{formatted};
+ok can-roundtrip( $pt, $source ), Q{alternation};
 
-	done-testing;
-}, Q{alternation};
-
-subtest {
-	my $source = Q:to[_END_];
+$source = Q:to[_END_];
 say $[0];
 _END_
-	is $pt._roundtrip( $source ), $source, Q{formatted};
+ok can-roundtrip( $pt, $source ), Q{contextualized};
 
-	done-testing;
-}, Q{contextualized};
-
-subtest {
-	my $source = Q:to[_END_];
+$source = Q:to[_END_];
 my @solved = [1,2,3,4],[5,6,7,8],[9,10,11,12],[13,14,15,' '];
 _END_
-	is $pt._roundtrip( $source ), $source, Q{formatted};
+ok can-roundtrip( $pt, $source ), Q{list reference};
 
-	done-testing;
-}, Q{list reference};
-
-subtest {
-	my $source = Q:to[_END_];
+$source = Q:to[_END_];
 role a_role {             # role to add a variable: foo,
    has $.foo is rw = 2;   # with an initial value of 2
 }
 _END_
-	is $pt._roundtrip( $source ), $source, Q{formatted};
+ok can-roundtrip( $pt, $source ), Q{class attribute traits};
 
-	done-testing;
-}, Q{class attribute traits};
-
-subtest {
-	my $source = Q:to[_END_];
+$source = Q:to[_END_];
 constant expansions = 1;
  
 expansions[1].[2]
 _END_
-	is $pt._roundtrip( $source ), $source, Q{formatted};
+ok can-roundtrip( $pt, $source ), Q{infix period};
 
-	done-testing;
-}, Q{infix period};
-
-subtest {
-	my $source = Q:to[_END_];
+$source = Q:to[_END_];
 my @c;
 rx/<@c>/;
 _END_
-	is $pt._roundtrip( $source ), $source, Q{formatted};
+ok can-roundtrip( $pt, $source ), Q{rx with bracketed array};
 
-	done-testing;
-}, Q{rx with bracketed array};
-
-subtest {
-	my $source = Q:to[_END_];
+$source = Q:to[_END_];
 for 99...1 -> $bottles { }
 
 #| Prints a verse about a certain number of beers, possibly on a wall.
 _END_
-	is $pt._roundtrip( $source ), $source, Q{formatted};
+ok can-roundtrip( $pt, $source ), Q{range};
 
-	done-testing;
-}, Q{rx with bracketed array};
-
-subtest {
-	my $source = Q:to[_END_];
+$source = Q:to[_END_];
 sub sma(Int \P) returns Sub {
     sub ($x) {
     }
 }
 _END_
-	is $pt._roundtrip( $source ), $source, Q{formatted};
+ok can-roundtrip( $pt, $source ), Q{return Sub type};
 
-	done-testing;
-}, Q{rx with bracketed array};
-
-subtest {
-	my $source = Q:to[_END_];
+$source = Q:to[_END_];
 sub sma(Int \P where * > 0) returns Sub { }
 _END_
-	is $pt._roundtrip( $source ), $source, Q{formatted};
+ok can-roundtrip( $pt, $source ), Q{subroutine with 'where' clause};
 
-	done-testing;
-}, Q{subroutine with 'where' clause};
-
-subtest {
-	my $source = Q:to[_END_];
+$source = Q:to[_END_];
 /<[ d ]>*/
 _END_
-	is $pt._roundtrip( $source ), $source, Q{formatted};
+ok can-roundtrip( $pt, $source ), Q{regex modifier};
 
-	done-testing;
-}, Q{regex modifier};
-
-subtest {
-	my $source = Q:to[_END_];
+$source = Q:to[_END_];
 my @a;
 bag +« flat @a».comb: 1
 _END_
-	is $pt._roundtrip( $source ), $source, Q{formatted};
+ok can-roundtrip( $pt, $source ), Q{guillemot};
 
-	done-testing;
-}, Q{guillemot};
-
-subtest {
-	my $source = Q:to[_END_];
+$source = Q:to[_END_];
 my @x; @x.grep( +@($_) )
 _END_
-	is $pt._roundtrip( $source ), $source, Q{formatted};
+ok can-roundtrip( $pt, $source ), Q{dereference};
 
-	done-testing;
-}, Q{Dereference};
-
-subtest {
-	my $source = Q:to[_END_];
+$source = Q:to[_END_];
 roundrobin( 1 ; 2 );
 _END_
-	is $pt._roundtrip( $source ), $source, Q{formatted};
+ok can-roundtrip( $pt, $source ), Q{semicolon in function call};
 
-	done-testing;
-}, Q{semicolon in function call};
-
-subtest {
-	my $source = Q:to[_END_];
+$source = Q:to[_END_];
 my @board;
 @board[*;1] = 1,2;
 _END_
-	is $pt._roundtrip( $source ), $source, Q{formatted};
+ok can-roundtrip( $pt, $source ), Q{semicolon in array slice};
 
-	done-testing;
-}, Q{semicolon in array slice};
-
-subtest {
-	my $source = Q:to[_END_];
+$source = Q:to[_END_];
     print qq:to/END/;
 	Press direction arrows to move.
 	Press q to quit. Press n for a new puzzle.
 END
 _END_
-	is $pt._roundtrip( $source ), $source, Q{formatted};
+ok can-roundtrip( $pt, $source ), Q{here-doc with text after marker};
 
-	done-testing;
-}, Q{here-doc with text after marker};
-
-subtest {
-	my $source = Q:to[_END_];
+$source = Q:to[_END_];
 my ($x,@x);
 $x.push: @x[$x] += @x.shift;
 _END_
-	is $pt._roundtrip( $source ), $source, Q{formatted};
+ok can-roundtrip( $pt, $source ), Q{infix-increment};
 
-	done-testing;
-}, Q{infix-increment};
-
-subtest {
-	my $source = Q:to[_END_];
+$source = Q:to[_END_];
 sub sing( Bool :$wall ) { }
 _END_
-	is $pt._roundtrip( $source ), $source, Q{formatted};
+ok can-roundtrip( $pt, $source ), Q{optional argument};
 
-	done-testing;
-}, Q{optional argument};
-
-subtest {
-	my $source = Q:to[_END_];
+$source = Q:to[_END_];
 sub sing( Int $a , Int $b , Bool :$wall, ) { }
 _END_
-	is $pt._roundtrip( $source ), $source, Q{formatted};
+ok can-roundtrip( $pt, $source ), Q{optional argument w/ trailing comma};
 
-	done-testing;
-}, Q{optional argument w/ trailing comma};
-
-subtest {
-	my $source = Q:to[_END_];
+$source = Q:to[_END_];
 my ($n,$k);
 loop (my ($p, $f) = 2, 0; $f < $k && $p*$p <= $n; $p++) { }
 _END_
-	is $pt._roundtrip( $source ), $source, Q{formatted};
+ok can-roundtrip( $pt, $source ), Q{loop};
 
-	done-testing;
-}, Q{loop};
-
-subtest {
-	my $source = Q:to[_END_];
+$source = Q:to[_END_];
 my @a;
 (sub ($w1, $w2, $w3, $w4){ })(|@a);
 _END_
-	is $pt._roundtrip( $source ), $source, Q{formatted};
+ok can-roundtrip( $pt, $source ), Q{break up args};
 
-	done-testing;
-}, Q{loop};
-
-subtest {
-	my $source = Q:to[_END_];
+$source = Q:to[_END_];
 ("a".comb «~» "a".comb);
 _END_
-	is $pt._roundtrip( $source ), $source, Q{formatted};
+ok can-roundtrip( $pt, $source ), Q{meta-tilde};
 
-	done-testing;
-}, Q{meta-tilde};
-
-subtest {
-	my $source = Q:to[_END_];
+$source = Q:to[_END_];
 my $x; $x()
 _END_
-	is $pt._roundtrip( $source ), $source, Q{formatted};
+ok can-roundtrip( $pt, $source ), Q{postcircumfix method call};
 
-	done-testing;
-}, Q{postcircumfix method call};
-
-subtest {
-	my $source = Q:to[_END_];
+$source = Q:to[_END_];
 if 1 { } elsif 2 { } elsif 3 { }
 _END_
-	is $pt._roundtrip( $source ), $source, Q{formatted};
+ok can-roundtrip( $pt, $source ), Q{if-elsif};
 
-	done-testing;
-}, Q{if-elsif};
-
-subtest {
-	my $source = Q:to[_END_];
+$source = Q:to[_END_];
 sub infix:<lf> ($a,$b) { }
 _END_
-	is $pt._roundtrip( $source ), $source, Q{formatted};
+ok can-roundtrip( $pt, $source ), Q{operation: bareword};
 
-	done-testing;
-}, Q{operation bareword};
-
-subtest {
-	my $source = Q:to[_END_];
+$source = Q:to[_END_];
 do -> (:value(@pa)) { };
 _END_
-	is $pt._roundtrip( $source ), $source, Q{formatted};
+ok can-roundtrip( $pt, $source ), Q{param argument};
 
-	done-testing;
-}, Q{param argument};
-
-subtest {
-	my $source = Q:to[_END_];
+#`( Aha, found another potential lockup
+$source = Q:to[_END_];
 .put for slurp\
+()
 _END_
-	is $pt._roundtrip( $source ), $source, Q{formatted};
+ok can-roundtrip( $pt, $source ), Q{trailing slash};
+)
 
-	done-testing;
-}, Q{trailing slash};
-
-subtest {
-	my $source = Q:to[_END_];
+$source = Q:to[_END_];
 my (@a,@b);
 my %h = @a Z=> @b;
 _END_
-	is $pt._roundtrip( $source ), $source, Q{formatted};
+ok can-roundtrip( $pt, $source ), Q{zip-equal};
 
-	done-testing;
-}, Q{zip-equal};
-
-subtest {
-	my $source = Q:to[_END_];
+$source = Q:to[_END_];
 do 0 => [], -> { 2 ... 1 } ... *
 _END_
-	is $pt._roundtrip( $source ), $source, Q{formatted};
+ok can-roundtrip( $pt, $source ), Q{multiple ...};
 
-	done-testing;
-}, Q{multiple ...};
-
-subtest {
-	my $source = Q:to[_END_];
+$source = Q:to[_END_];
 open  "example.txt" , :r  or 1;
 _END_
-	is $pt._roundtrip( $source ), $source, Q{formatted};
+ok can-roundtrip( $pt, $source ), Q{postfix 'or'};
 
-	done-testing;
-}, Q{postfix 'or'};
-
-subtest {
-	my $source = Q:to[_END_];
+$source = Q:to[_END_];
 sub ev (Str $s --> Num) { }
 _END_
-	is $pt._roundtrip( $source ), $source, Q{formatted};
+ok can-roundtrip( $pt, $source ), Q{implicit return type};
 
-	done-testing;
-}, Q{implicit return type};
-
-subtest {
-	my $source = Q:to[_END_];
+$source = Q:to[_END_];
 grammar { token literal { ['.' \d+]? || '.' } }
 _END_
-	is $pt._roundtrip( $source ), $source, Q{formatted};
+ok can-roundtrip( $pt, $source ), Q{ordered alternation};
 
-	done-testing;
-}, Q{ordered alternation};
-
-subtest {
-	my $source = Q:to[_END_];
+$source = Q:to[_END_];
 repeat { } while 1;
 _END_
-	is $pt._roundtrip( $source ), $source, Q{formatted};
+ok can-roundtrip( $pt, $source ), Q{repeat block};
 
-	done-testing;
-}, Q{repeat block};
-
-subtest {
-	my $source = Q:to[_END_];
+$source = Q:to[_END_];
 $<bulls>
 _END_
-	is $pt._roundtrip( $source ), $source, Q{formatted};
+ok can-roundtrip( $pt, $source ), Q{postcircumfix operator};
 
-	done-testing;
-}, Q{postcircumfix operator};
-
-subtest {
-	my $source = Q:to[_END_];
+$source = Q:to[_END_];
 m:s/^ \d $/
 _END_
-	is $pt._roundtrip( $source ), $source, Q{formatted};
+ok can-roundtrip( $pt, $source ), Q{regex with adverb};
 
-	done-testing;
-}, Q{regex with adverb};
-
-subtest {
-	my $source = Q:to[_END_];
+$source = Q:to[_END_];
 my %hash{Any};
 _END_
-	is $pt._roundtrip( $source ), $source, Q{formatted};
+ok can-roundtrip( $pt, $source ), Q{shaped hash};
 
-	done-testing;
-}, Q{shaped hash};
-
-subtest {
-	my $source = Q:to[_END_];
+$source = Q:to[_END_];
 my $s;
 1 given [\+] '\\' «leg« $s.comb;
 _END_
-	is $pt._roundtrip( $source ), $source, Q{formatted};
+ok can-roundtrip( $pt, $source ), Q{hyper triangle};
 
-	done-testing;
-}, Q{hyper triangle};
-
-subtest {
-	my $source = Q:to[_END_];
+#`(
+$source = Q:to[_END_];
 proto A { {*} }
 _END_
-	is $pt._roundtrip( $source ), $source, Q{formatted};
+ok can-roundtrip( $pt, $source ), Q{whateverable prototype};
+)
 
-	done-testing;
-}, Q{whateverable prototype};
-
-subtest {
-	my $source = Q:to[_END_];
+$source = Q:to[_END_];
 sub find-loop { %^mapping{*} }
 _END_
-	is $pt._roundtrip( $source ), $source, Q{formatted};
+ok can-roundtrip( $pt, $source ), Q{whateverable placeholder};
 
-	done-testing;
-}, Q{whateverable placeholder};
-
-subtest {
-	my $source = Q:to[_END_];
+#`( Another potential lockup - Add '+1' on the next line to make it compile,
+    yet it still locks the parser.
+$source = Q:to[_END_];
 2 for 1\ # foo
 _END_
-	is $pt._roundtrip( $source ), $source, Q{formatted};
+ok can-roundtrip( $pt, $source ), Q{Another backslash};
+)
 
-	done-testing;
-}, Q{Another backslash};
-
-subtest {
-	my $source = Q:to[_END_];
+$source = Q:to[_END_];
 sort()»<name>;
 _END_
-	is $pt._roundtrip( $source ), $source, Q{formatted};
+ok can-roundtrip( $pt, $source ), Q{guillemot again};
 
-	done-testing;
-}, Q{Another backslash};
-
-subtest {
-	my $source = Q:to[_END_];
+$source = Q:to[_END_];
 sub binary_search (&p, Int $lo, Int $hi --> Int) {
 }
 _END_
-	is $pt._roundtrip( $source ), $source, Q{formatted};
+ok can-roundtrip( $pt, $source ), Q{More comma-separated lists};
 
-	done-testing;
-}, Q{More comma-separated lists};
-
-subtest {
-	my $source = Q:to[_END_];
+$source = Q:to[_END_];
 class Bitmap {
     method pixel( $i, $j --> Int ) is rw { }
 }
 _END_
-	is $pt._roundtrip( $source ), $source, Q{formatted};
+ok can-roundtrip( $pt, $source ), Q{Even more comma-separated lists};
 
-	done-testing;
-}, Q{More comma-separated lists};
-
-subtest {
-	my $source = Q:to[_END_];
+$source = Q:to[_END_];
 s:g/'[]'//
 _END_
-	is $pt._roundtrip( $source ), $source, Q{formatted};
-
-	done-testing;
-}, Q{substitution with adverb};
+ok can-roundtrip( $pt, $source ), Q{substitution with adverb};
 
 done-testing; # Because we're going to be adding tests quite often.
 
