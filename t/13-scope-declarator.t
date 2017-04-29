@@ -26,61 +26,46 @@ plan 4;
 my $pt = Perl6::Parser.new;
 my $*CONSISTENCY-CHECK = True;
 my $*FALL-THROUGH = True;
+my ( $source, $tree );
 
 subtest {
-	subtest {
-		my $source = Q:to[_END_];
-my$x
-_END_
-		my $tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{formatted};
+	$source = Q:to[_END_];
+	my$x
+	_END_
+	$tree = $pt.to-tree( $source );
+	is $pt.to-string( $tree ), $source, Q{no ws};
 
-		done-testing;
-	}, Q{no ws};
-
-	subtest {
-		my $source = Q:to[_END_];
-my     $x
-_END_
-		my $tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{formatted};
-
-		done-testing;
-	}, Q{leading ws};
+	$source = Q:to[_END_];
+	my     $x
+	_END_
+	$tree = $pt.to-tree( $source );
+	is $pt.to-string( $tree ), $source, Q{leading ws};
 
 	done-testing;
 }, Q{my};
 
 subtest {
-	subtest {
-		my $source = Q:to[_END_];
-our$x
-_END_
-		my $tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{formatted};
+	$source = Q:to[_END_];
+	our$x
+	_END_
+	$tree = $pt.to-tree( $source );
+	is $pt.to-string( $tree ), $source, Q{no ws};
 
-		done-testing;
-	}, Q{no ws};
-
-	subtest {
-		my $source = Q:to[_END_];
-our     $x
-_END_
-		my $tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{formatted};
-
-		done-testing;
-	}, Q{leading ws};
+	$source = Q:to[_END_];
+	our     $x
+	_END_
+	$tree = $pt.to-tree( $source );
+	is $pt.to-string( $tree ), $source, Q{leading ws};
 
 	done-testing;
 }, Q{our};
 
 subtest {
 	subtest {
-		my $source = Q:to[_END_];
-class Foo{has$x}
-_END_
-		my $tree = $pt.to-tree( $source );
+		$source = Q:to[_END_];
+		class Foo{has$x}
+		_END_
+		$tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source, Q{formatted};
 		ok $tree.child[0].child[3].child[0] ~~
 			Perl6::Block::Enter, Q{enter brace};
@@ -90,15 +75,11 @@ _END_
 		done-testing;
 	}, Q{no ws};
 
-	subtest {
-		my $source = Q:to[_END_];
-class Foo{has     $x}
-_END_
-		my $tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{formatted};
-
-		done-testing;
-	}, Q{leading ws};
+	$source = Q:to[_END_];
+	class Foo{has     $x}
+	_END_
+	$tree = $pt.to-tree( $source );
+	is $pt.to-string( $tree ), $source, Q{leading ws};
 
 	done-testing;
 }, Q{has};
@@ -109,18 +90,18 @@ _END_
 #	plan 2;
 #
 #	subtest {
-#		my $source = Q{class Foo is repr('CStruct'){HAS int $x}};
-#		my $tree = $pt.to-tree( $source );
+#		$source = Q{class Foo is repr('CStruct'){HAS int $x}};
+#		$tree = $pt.to-tree( $source );
 #		is $pt.to-string( $tree ), $source, Q{formatted};
 #
 #		done-testing;
 #	}, Q{no ws};
 #
 #	subtest {
-#		my $source = Q:to[_END_];
+#		$source = Q:to[_END_];
 #class Foo is repr( 'CStruct' ) { HAS int $x }
 #_END_
-#		my $tree = $pt.to-tree( $source );
+#		$tree = $pt.to-tree( $source );
 #		is $pt.to-string( $tree ), $source, Q{formatted};
 #
 #		done-testing;
@@ -134,23 +115,15 @@ _END_
 subtest {
 	plan 2;
 
-	subtest {
-		my $source = Q{state$x};
-		my $tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{formatted};
+	$source = Q{state$x};
+	$tree = $pt.to-tree( $source );
+	is $pt.to-string( $tree ), $source, Q{no ws};
 
-		done-testing;
-	}, Q{no ws};
-
-	subtest {
-		my $source = Q:to[_END_];
-state     $x
-_END_
-		my $tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{formatted};
-
-		done-testing;
-	}, Q{leading ws};
+	$source = Q:to[_END_];
+	state     $x
+	_END_
+	$tree = $pt.to-tree( $source );
+	is $pt.to-string( $tree ), $source, Q{leading ws};
 }, Q{state};
 
 # XXX 'supersede $x' NIY

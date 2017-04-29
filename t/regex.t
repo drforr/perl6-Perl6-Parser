@@ -8,93 +8,62 @@ plan 4;
 my $pt = Perl6::Parser.new;
 my $*CONSISTENCY-CHECK = True;
 my $*FALL-THROUGH = True;
+my ( $source, $tree );
 
 subtest {
 	plan 2;
 
-	subtest {
-		my $source = Q{/pi/};
-		my $tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{formatted};
+	$source = Q{/pi/};
+	$tree = $pt.to-tree( $source );
+	is $pt.to-string( $tree ), $source, Q{no ws};
 
-		done-testing;
-	}, Q{no ws};
-
-	subtest {
-		my $source = Q:to[_END_];
-/pi/
-_END_
-		my $tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{formatted};
-
-		done-testing;
-	}, Q{ws};
+	$source = Q:to[_END_];
+	/pi/
+	_END_
+	$tree = $pt.to-tree( $source );
+	is $pt.to-string( $tree ), $source, Q{ws};
 }, Q{/pi/};
 
 subtest {
 	plan 2;
 
-	subtest {
-		my $source = Q{/<[ p i ]>/};
-		my $tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{formatted};
+	$source = Q{/<[ p i ]>/};
+	$tree = $pt.to-tree( $source );
+	is $pt.to-string( $tree ), $source, Q{no ws};
 
-		done-testing;
-	}, Q{no ws};
-
-	subtest {
-		my $source = Q:to[_END_];
-/ <[ p i ]> /
-_END_
-		my $tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{formatted};
-
-		done-testing;
-	}, Q{ws};
+	$source = Q:to[_END_];
+	/ <[ p i ]> /
+	_END_
+	$tree = $pt.to-tree( $source );
+	is $pt.to-string( $tree ), $source, Q{ws};
 }, Q{/<[ p i ]>/};
 
 subtest {
 	plan 2;
 
-	subtest {
-		my $source = Q{/\d/};
-		my $tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{formatted};
+	$source = Q{/\d/};
+	$tree = $pt.to-tree( $source );
+	is $pt.to-string( $tree ), $source, Q{no ws};
 
-		done-testing;
-	}, Q{no ws};
-
-	subtest {
-		my $source = Q:to[_END_];
-/ \d /
-_END_
-		my $tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{formatted};
-
-		done-testing;
-	}, Q{ws};
+	$source = Q:to[_END_];
+	/ \d /
+	_END_
+	$tree = $pt.to-tree( $source );
+	is $pt.to-string( $tree ), $source, Q{ws};
 }, Q{/ \d /};
 
 subtest {
 	plan 2;
 
-	subtest {
-		my $source = Q{/./};
-		my $tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{formatted};
+	$source = Q{/./};
+	$tree = $pt.to-tree( $source );
+	is $pt.to-string( $tree ), $source, Q{no ws};
 
-		done-testing;
-	}, Q{no ws};
-
-	subtest {
-		my $source = Q:to[_END_];
-/ . /
-_END_
-		my $tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{formatted};
-
-		done-testing;
-	}, Q{ws};
+	$source = Q:to[_END_];
+	/ . /
+	_END_
+	$tree = $pt.to-tree( $source );
+	is $pt.to-string( $tree ), $source, Q{ws};
 }, Q{/ . /};
 
 # vim: ft=perl6

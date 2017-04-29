@@ -11,9 +11,9 @@ my $*FALL-THROUGH = True;
 
 subtest {
 	my $source = Q:to[_END_];
-=begin EMPTY
-=end EMPTY
-_END_
+	=begin EMPTY
+	=end EMPTY
+	_END_
 	my $tree = $pt.to-tree( $source );
 	is $pt.to-string( $tree ), $source, Q{formatted};
 
