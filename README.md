@@ -141,7 +141,7 @@ PLEASE DO NOT ASSUME THIS IS STABLE OR IN ANY WAY REPRESENTATIVE OF THE FINAL
 PRODUCT. Doing so will void your warranty, and may cause demons to fly from
 your nose. YOU HAVE BEEN WARNED.
 
-** DEBUGGING UTILITIES
+## DEBUGGING UTILITIES
 
 There are two methods in L<Perl6::Parser>, and one core method that you'll find
 useful as you delve into the murky waters of the code.
