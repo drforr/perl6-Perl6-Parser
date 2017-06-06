@@ -141,7 +141,7 @@ PLEASE DO NOT ASSUME THIS IS STABLE OR IN ANY WAY REPRESENTATIVE OF THE FINAL
 PRODUCT. Doing so will void your warranty, and may cause demons to fly from
 your nose. YOU HAVE BEEN WARNED.
 
-=begin DEBUGGING UTILITIES
+** DEBUGGING UTILITIES
 
 There are two methods in L<Perl6::Parser>, and one core method that you'll find
 useful as you delve into the murky waters of the code.
@@ -168,9 +168,12 @@ Finally, there's a little C<$pt.ruler( $source )> helper. All it does is put
 up a bit of text like so:
 
 
+``` perl6
   #          1         2
   #012345678901234567890
   #unit subset Foo;␤
+
+```
 
 First it puts up a tiny ASCII-art ruler that helps you count characters, with
 every 10 characters called out w/an extra tick above. This way you don't go
@@ -186,9 +189,7 @@ And then, so you can copy the text into another buffer without worrying about
 whether it'll be accidentally run as code, adds '#' to the start so that it's
 automatically a valid comment.
 
-=end DEBUGGING UTILITIES
-
-=begin DEVELOPER NOTES
+## DEVELOPER NOTES
 
 Internal classes are labeled with a leading C<_> so they will never be confused with native Perl6 classes. This is very likely with this sort of grammar, see L<_Signature> vs. the existing L<Signature> class.
 
@@ -209,8 +210,6 @@ When it comes to debugging the NQP internals, one simple thing to do is not to d
 It's a habit of mine, though by no means a requirement, to stuff test data into the L<t/> files with every line starting with C<###>, so that I have a simple marker to search for when I'm parsing new lines.
 
 Incidentally, L<t/rosetta-*> files are just meant to be echoes of the RosettaCode examples, not an exhaustive Christmas-tree test of the entire grammar. There doesn't appear to be an existing test of the actual parsing in the Rakudo test suite beyond "Lookie here, it can read 'hello, world!'", which is fine; If the grammar has gone south then any test suites are probably going to generate more noise than they're worth.
-
-=end DEVELOPER NOTES
 
 
 Installation
