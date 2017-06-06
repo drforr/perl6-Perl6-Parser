@@ -167,9 +167,10 @@ me, they're not something I can/should be tweaking.
 Finally, there's a little C<$pt.ruler( $source )> helper. All it does is put
 up a bit of text like so:
 
-#          1         2
-#012345678901234567890
-#unit subset Foo;␤
+
+  #          1         2
+  #012345678901234567890
+  #unit subset Foo;␤
 
 First it puts up a tiny ASCII-art ruler that helps you count characters, with
 every 10 characters called out w/an extra tick above. This way you don't go
