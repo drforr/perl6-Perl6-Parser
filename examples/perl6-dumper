@@ -3,12 +3,14 @@
 use lib '../lib';
 use Perl6::Parser;
 
-sub MAIN( Str $filename ) {
+sub MAIN(Str $filename, Bool :$ruler = False) {
 	my $text = $filename.IO.slurp;
-
 	my $pt = Perl6::Parser.new;
-	my $p = $pt.parse-source( $text );
-	my $tree = $pt._build-tree( $p );
-	say "Source validated!" if $pt.validate( $p );
+	if $ruler {
+	    say $pt.ruler( $text );
+	    return;
+	}
+	my $p = $pt.parse( $text );
+	my $tree = $pt.build-tree( $p );
 	say $pt.dump-tree( $tree );
 }
