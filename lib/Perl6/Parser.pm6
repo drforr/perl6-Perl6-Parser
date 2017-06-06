@@ -131,7 +131,7 @@ And rerun your code. Or make the appropriate calls in the debugger, it's your fu
 
     45 60 [[0, $_ ... 100]]
 
-The two numbers are the glyphs where the matched text starts and stops, respectively. The bit in between [..] (in this case seemingly doubled, but that's because the text is itself bracketed) is the actual text that's been matched. 
+The two numbers are the glyphs where the matched text starts and stops, respectively. The bit in between [..] (in this case seemingly doubled, but that's because the text is itself bracketed) is the actual text that's been matched.
 
 So, by now you know what the text you're matching actually looks like, where it is in the string, and maybe eve have a rough idea of why what you're seeing isn't being displayedk
 
@@ -445,7 +445,7 @@ class Perl6::Parser {
 		$parsed;
 	}
 
-	method _build-tree( Mu $parsed ) {
+	method build-tree( Mu $parsed ) {
 		my $tree = $.factory.build( $parsed );
 		self.consistency-check( $tree ) if
 			$*CONSISTENCY-CHECK and %*ENV<AUTHOR>;

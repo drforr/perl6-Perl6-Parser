@@ -146,7 +146,7 @@ your nose. YOU HAVE BEEN WARNED.
 There are two methods in L<Perl6::Parser>, and one core method that you'll find
 useful as you delve into the murky waters of the code.
 
-The first one is useful after C<$pt.parse-source( $source )> - You can use
+The first one is useful after C<$pt.parse( $source )> - You can use
 C<.dump> on the resultant object, and (usually) get a dump of the NQPMatch
 object that the Perl 6 parser has generated for your source. I say "usually"
 because there are some conditions under which C<.dump> will hang, most of the
@@ -168,7 +168,7 @@ Finally, there's a little C<$pt.ruler( $source )> helper. All it does is put
 up a bit of text like so:
 
 #          1         2
-#01234567890123456789
+#012345678901234567890
 #unit subset Foo;␤
 
 First it puts up a tiny ASCII-art ruler that helps you count characters, with
@@ -215,10 +215,10 @@ Incidentally, L<t/rosetta-*> files are just meant to be echoes of the RosettaCod
 Installation
 ============
 
-* Using panda (a module management tool bundled with Rakudo Star):
+* Using zef (a module management tool bundled with Rakudo Star):
 
 ```
-    panda update && panda install Perl6::Parser
+    zef update && zef install Perl6::Parser
 ```
 
 ## Testing
