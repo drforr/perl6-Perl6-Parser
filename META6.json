@@ -6,7 +6,8 @@
 		"parsing"
    ],
    "provides" : {
-      "Perl6::Parser" : "lib/Perl6/Parser.pm6"
+      "Perl6::Parser" : "lib/Perl6/Parser.pm6",
+      "Perl6::Parser::Factory" : "lib/Perl6/Parser/Factory.pm6"
    },
    "test-depends" : [
       "Test"
@@ -25,6 +26,6 @@
       "Jeffrey Goff <drforr@pobox.com>"
    ],
    "version" : "0.0.5",
-   "license" : "Artistic",
+   "license" : "Artistic-2.0",
    "description" : "Parse Perl 6 from within Perl 6"
 }
