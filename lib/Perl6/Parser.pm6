@@ -507,7 +507,7 @@ class Perl6::Parser {
 
 	method to-tree( Str $source ) {
 		my $parsed = self.parse( $source );
-		self._build-tree( $parsed );
+		self.build-tree( $parsed );
 	}
 
 	method to-string( Perl6::Element $tree ) {
