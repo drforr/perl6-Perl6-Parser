@@ -66,7 +66,7 @@ The first thing is to break the offending bit of code out so it's easier to debu
     _END_
     my $p = $pt.parse( $source );
     say $p.dump;
-    my $tree = $pt._build-tree( $p );
+    my $tree = $pt.build-tree( $p );
     say $pt.dump-tree($tree);
     is $pt.to-string( $tree ), $source, Q{formatted};
 
@@ -76,7 +76,7 @@ Second, I'm not doing anything that you as a user of the class would do. As a us
 
 (side note - This will probably have changed in detail since I wrote this text - Consult your nearest test file for examples of current usage.)
 
-Internally, the library takes sevaral steps to get to the nicely objectified tree that you see on your output. The two important steps in our case are the C<.parse( 'text goes here' )> method call, and C<._build-tree( $parse-tree )>.
+Internally, the library takes sevaral steps to get to the nicely objectified tree that you see on your output. The two important steps in our case are the C<.parse( 'text goes here' )> method call, and C<.build-tree( $parse-tree )>.
 
 The C<.parse()> call returns a very raw L<NQPMatch> object, which is the Perl 6 internal we're trying to reparse into a more useful form. Most of the time you can call C<.dump()> on this object and get back a semi-useful object tree. On occasion this B<will> lock up, most often because you're trying to C<.dump()> a L<list> accessor, and that hasn't been implemented for NQPMatch. The actual C<list> accessor works, but the C<.dump()> call will not. A simple workaround is to call C<$p.list.[0].dump> on one of the list elements inside, and hope there is one.
 
@@ -164,9 +164,9 @@ This is normally what you want, it returns the Perl 6 parsed tree corresponding 
 
 =item parse( Str $source )
 
-Returns the underlying NQPMatch object. This is what gets passed on to C<_build-tree()> and every other important method in this module. It does some minor wizardry to call the Perl 6 reentrant compiler to compile the string you pass it, and return a match object. Please note that it B<has> to compile the string in order to validate things like custom operators, so this step is B<not> optional.
+Returns the underlying NQPMatch object. This is what gets passed on to C<build-tree()> and every other important method in this module. It does some minor wizardry to call the Perl 6 reentrant compiler to compile the string you pass it, and return a match object. Please note that it B<has> to compile the string in order to validate things like custom operators, so this step is B<not> optional.
 
-=item _build-tree( Mu $parsed )
+=item build-tree( Mu $parsed )
 
 Build the Perl6::Element tree from the NQPMatch object. This is the core, and runs the factory which silly-walks the match tree and returns one or more tokens for every single match entry it finds, and B<more>.
 
@@ -507,7 +507,7 @@ class Perl6::Parser {
 
 	method to-tree( Str $source ) {
 		my $parsed = self.parse( $source );
-		self._build-tree( $parsed );
+		self.build-tree( $parsed );
 	}
 
 	method to-string( Perl6::Element $tree ) {
