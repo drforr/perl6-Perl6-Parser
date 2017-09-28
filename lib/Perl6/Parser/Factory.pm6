@@ -1276,9 +1276,356 @@ my role Options {
 	}
 }
 
+grammar Perl6::Parser::Grammar {
+	token identifier {
+		<alpha> <[ \w \- _ ]>*
+	}
+	token sigil {
+		<[ $ % @ & ]>
+	}
+	token PackageName {
+		'::'? <identifier>+ %% '::' # XXX revisit leading '::'
+	}
+
+	# .0 is valid, but not tested...
+	# 1.0e-1 is valid but not tested
+	token floating_point {
+	|| '-'? <[ 0 .. 9 ]>* [ '.' <[ 0 .. 9 ]>+ ]? [ 'e' '-'? <[ 0 .. 9 ]>+ ]?
+	}
+	# grammar Exp24 { rule term { <exp> | <digits> } } <-- 'exp', 'digits'
+	#
+	token _assertion_fallthrough {
+	|| '@' <alpha> \w* # XXX part of the fallthrough cases.
+	|| <alpha> \w*
+	}
+	token _circumfix_content {
+	||	'«' [ <-[ » ]> | '\\' . ]* '»'
+	||	'<' [ <-[ > ]> | '\\' . ]* '>' # XXX Catches <[]> inexplicably.
+	}
+	token _colonpair_identifier {
+	||	':' '!' <identifier> # XXX refactor if needed
+	||	':' <identifier>
+	}
+	token _dig {
+	||	<[ ² ³ ]> # XXX needs more work
+	}
+	token _floating_point {
+		<floating_point>
+	}
+	token _identifier {
+		<alpha> <[ \w _ - ]>* # XXX watch out - 'foo-' is legal
+	}
+	token _infix_circumfix_meta_operator {
+	#|| '«~»' # XXX Looks to me like guillemots surrounding a regular oper.
+	#XXX but remember that custom oerators lurk.
+	|| '«' <-[ « ]>+ '«'
+	|| '»' <-[ « ]>+ '«'
+	|| '«' <-[ » ]>+ '»'
+	}
+	token _integer_binary {
+		<[ + - ]>? '0b' [ '_'? <[ 0 1 ]> ]+
+	}
+	token _integer_octal {
+		<[ + - ]>? '0o' [ '_'? <[ 0 .. 7 ]> ]+
+	}
+	token _integer_decimal {
+	|| <[ + - ]>? '0d' [ '_'? <[ 0 .. 9 ]> ]+
+	|| <[ + - ]>? <[ 1 .. 9 ]> [ '_'? <[ 0 .. 9 ]> ]*
+	|| <[ + - ]>? '0'
+	}
+	token _integer_hexadecimal {
+		<[ + - ]>? '0x' [ '_'? <[ 0 .. 9 a .. f A .. F ]> ]+
+	}
+	token _key {
+		<identifier>
+	}
+	token _lambda {
+		'->'
+	}
+	token _metachar_backslash {
+		'\\' <[ d D h H n N s S t T v V w W ]>
+	}
+	token _name_identifier {
+		<PackageName>
+	}
+	token _morename {
+		<PackageName>
+	}
+	token _infinity {
+		'Inf' # XXX should also be ∞
+	}
+	token _nan {
+		'NaN'
+	}
+	token _postfix_prefix {
+		'>>' # XXX likely has other alternatives...
+	}
+	token _quant {
+		'*'
+	}
+	token _quotepair_adverb {
+		':' .
+	}
+	token _septype {
+		'%'
+	}
+	token _sigil {
+		<sigil>
+	}
+	token _sym_sub {
+		'sub' # XXX The heck?
+	}
+	token _typename_defined {
+		<PackageName> ':' <[ D U ]>
+	}
+	token _typename {
+		<PackageName>
+	}
+	token _wu {
+		'while' # XXX The heck?
+	}
+}
+
+class Perl6::Parser::Actions {
+	has $.offset is rw = 0;
+
+	method __Bareword( $/ ) {
+		Perl6::Bareword.new(
+			:factory-line-number( callframe(1).line ),
+			:from( $/.from + $.offset ),
+			:to( $/.to + $.offset ),
+			:content( $/.Str )
+		)
+	}
+	method __String__WordQuoting( $/ ) {
+		Perl6::String::WordQuoting.new(
+			:factory-line-number( callframe(1).line ),
+			:from( $/.from + $.offset ),
+			:to( $/.to + $.offset ),
+			:content( $/.Str )
+		)
+	}
+	method __ColonBareword( $/ ) {
+		Perl6::ColonBareword.new(
+			:factory-line-number( callframe(1).line ),
+			:from( $/.from + $.offset ),
+			:to( $/.to + $.offset ),
+			:content( $/.Str )
+		)
+	}
+	method __Operator__Infix( $/ ) {
+		Perl6::Operator::Infix.new(
+			:factory-line-number( callframe(1).line ),
+			:from( $/.from + $.offset ),
+			:to( $/.to + $.offset ),
+			:content( $/.Str )
+		)
+	}
+	method __Number__Binary( $/ ) {
+		Perl6::Number::Binary.new(
+			:factory-line-number( callframe(1).line ),
+			:from( $/.from + $.offset ),
+			:to( $/.to + $.offset ),
+			:content( $/.Str )
+		)
+	}
+	method __Number__Octal( $/ ) {
+		Perl6::Number::Octal.new(
+			:factory-line-number( callframe(1).line ),
+			:from( $/.from + $.offset ),
+			:to( $/.to + $.offset ),
+			:content( $/.Str )
+		)
+	}
+	method __Number__Decimal( $/ ) {
+		Perl6::Number::Decimal.new(
+			:factory-line-number( callframe(1).line ),
+			:from( $/.from + $.offset ),
+			:to( $/.to + $.offset ),
+			:content( $/.Str )
+		)
+	}
+	method __Number__Hexadecimal( $/ ) {
+		Perl6::Number::Hexadecimal.new(
+			:factory-line-number( callframe(1).line ),
+			:from( $/.from + $.offset ),
+			:to( $/.to + $.offset ),
+			:content( $/.Str )
+		)
+	}
+	method __Operator__Postfix( $/ ) {
+		Perl6::Operator::Postfix.new(
+			:factory-line-number( callframe(1).line ),
+			:from( $/.from + $.offset ),
+			:to( $/.to + $.offset ),
+			:content( $/.Str )
+		)
+	}
+	method __Number__FloatingPoint( $/ ) {
+		Perl6::Number::FloatingPoint.new(
+			:factory-line-number( callframe(1).line ),
+			:from( $/.from + $.offset ),
+			:to( $/.to + $.offset ),
+			:content( $/.Str )
+		)
+	}
+	method __Backslash( $/ ) {
+		Perl6::Backslash.new(
+			:factory-line-number( callframe(1).line ),
+			:from( $/.from + $.offset ),
+			:to( $/.to + $.offset ),
+			:content( $/.Str )
+		)
+	}
+	method __PackageName( $/ ) {
+		Perl6::PackageName.new(
+			:factory-line-number( callframe(1).line ),
+			:from( $/.from + $.offset ),
+			:to( $/.to + $.offset ),
+			:content( $/.Str )
+		)
+	}
+	method __Infinity( $/ ) {
+		Perl6::Infinity.new(
+			:factory-line-number( callframe(1).line ),
+			:from( $/.from + $.offset ),
+			:to( $/.to + $.offset ),
+			:content( $/.Str )
+		)
+	}
+	method __NaN( $/ ) {
+		Perl6::NotANumber.new(
+			:factory-line-number( callframe(1).line ),
+			:from( $/.from + $.offset ),
+			:to( $/.to + $.offset ),
+			:content( $/.Str )
+		)
+	}
+	method __Adverb( $/ ) {
+		Perl6::Adverb.new(
+			:factory-line-number( callframe(1).line ),
+			:from( $/.from + $.offset ),
+			:to( $/.to + $.offset ),
+			:content( $/.Str )
+		)
+	}
+	method __Number_Radix( $/ ) {
+		Perl6::Number::Radix.new(
+			:factory-line-number( callframe(1).line ),
+			:from( $/.from + $.offset ),
+			:to( $/.to + $.offset ),
+			:content( $/.Str )
+		)
+	}
+	method __SubroutineDeclaration( $/ ) {
+		Perl6::SubroutineDeclaration.new(
+			:factory-line-number( callframe(1).line ),
+			:from( $/.from + $.offset ),
+			:to( $/.to + $.offset ),
+			:content( $/.Str )
+		)
+	}
+
+	method _assertion_fallthrough( $/ ) {
+		make self.__Bareword( $/ )
+	}
+	method _circumfix_content( $/ ) {
+		make self.__String__WordQuoting( $/ )
+	}
+	method _colonpair_identifier( $/ ) {
+		make self.__ColonBareword( $/ )
+	}
+	method _dig( $/ ) {
+		make self.__Operator__Postfix( $/ )
+	}
+	method _floating_point( $/ ) {
+		make self.__Number__FloatingPoint( $/ )
+	}
+	method _identifier( $/ ) {
+		make self.__Bareword( $/ )
+	}
+	method _infix_circumfix_meta_operator( $/ ) {
+		make self.__Operator__Infix( $/ )
+	}
+	method _integer_binary( $/ ) {
+		make self.__Number__Binary( $/ )
+	}
+	method _integer_octal( $/ ) {
+		make self.__Number__Octal( $/ )
+	}
+	method _integer_decimal( $/ ) {
+		make self.__Number__Decimal( $/ )
+	}
+	method _integer_hexadecimal( $/ ) {
+		make self.__Number__Hexadecimal( $/ )
+	}
+	method _key( $/ ) {
+		make self.__Bareword( $/ )
+	}
+	method _lambda( $/ ) {
+		make self.__Operator__Infix( $/ )
+	}
+	method _metachar_backslash( $/ ) {
+		make self.__Backslash( $/ )
+	}
+	method _name_identifier( $/ ) {
+		make self.__Bareword( $/ )
+	}
+	method _morename( $/ ) { # XXX This is the reason for leading ::
+				 # XXX There's only one in the grammar so far
+		make self.__PackageName( $/ )
+	}
+	method _infinity( $/ ) {
+		make self.__Infinity( $/ )
+	}
+	method _nan( $/ ) {
+		make self.__NaN( $/ )
+	}
+	method _postfix_prefix( $/ ) {
+		make self.__Operator__Infix( $/ )
+	}
+	method _quant( $/ ) {
+		make self.__Bareword( $/ )
+	}
+	method _quotepair_adverb( $/ ) {
+		make self.__Bareword( $/ )
+	}
+	method _septype( $/ ) {
+		make self.__Bareword( $/ )
+	}
+	method _sigil( $/ ) {
+		make self.__Bareword( $/ ) # XXX
+	}
+	method _sym_sub( $/ ) {
+		make self.__SubroutineDeclaration( $/ )
+	}
+	method _typename_defined( $/ ) {
+		make self.__Bareword( $/ ) # XXX
+	}
+	method _typename( $/ ) {
+		make self.__Bareword( $/ ) # XXX
+	}
+	method _wu( $/ ) {
+		make self.__Bareword( $/ ) # XXX
+	}
+}
+
 class Perl6::Parser::Factory {
 	also does Assertions;
 	also does Options;
+
+	has $.grammar = Perl6::Parser::Grammar.new;
+	has $.actions = Perl6::Parser::Actions.new;
+
+	method parse( Mu $p, Str $rule ) {
+		$.actions.offset = $p.from;
+		my $ast = $.grammar.parse(
+			$p.Str,
+			:rule( $rule ),
+			:actions( $.actions )
+		).ast;
+		$ast
+	}
 
 	has Int %.here-doc;
 
@@ -1682,9 +2029,18 @@ class Perl6::Parser::Factory {
 			);
 		}
 		elsif $p.Str {
-			$child.append(
-				Perl6::Bareword.from-match( $p )
-			);
+			if $*INTERNAL-PARSER {
+				$child.append(
+					Perl6::Bareword.from-match( $p )
+				);
+			}
+			else {
+				$child.append(
+					self.parse(
+						$p, '_assertion_fallthrough'
+					)
+				);
+			}
 		}
 		else {
 			$child.fall-through( $p );
@@ -1917,11 +2273,18 @@ class Perl6::Parser::Factory {
 						)
 					);
 					# XXX probably needs work.
-					$child.append(
-						Perl6::String::WordQuoting.from-match(
-							$_
-						)
-					);
+					if $*INTERNAL-PARSER {
+						$child.append(
+							Perl6::String::WordQuoting.from-match(
+								$_
+							)
+						);
+					}
+					else {
+						$child.append(
+							self.parse( $_, '_circumfix_content' )
+						);
+					}
 				}
 				default {
 					$child.fall-through( $_ );
@@ -2026,9 +2389,16 @@ class Perl6::Parser::Factory {
 					);
 				}
 				when self.assert-hash( $_, [< identifier >] ) {
-					$child.append(
-						Perl6::ColonBareword.from-match( $_ )
-					);
+					if $*INTERNAL-PARSER {
+						$child.append(
+							Perl6::ColonBareword.from-match( $_ )
+						);
+					}
+					else {
+						$child.append(
+							self.parse( $_, '_colonpair_identifier' )
+						);
+					}
 				}
 				when self.assert-hash( $_, [< fakesignature >] ) {
 					my $_child = Perl6::Element-List.new;
@@ -2449,7 +2819,12 @@ class Perl6::Parser::Factory {
 #	}
 
 	method _dig( Mu $p ) returns Perl6::Element {
-		Perl6::Operator::Postfix.from-match( $p );
+		if $*INTERNAL-PARSER {
+			Perl6::Operator::Postfix.from-match( $p );
+		}
+		else {
+			self.parse( $p, '_dig' );
+		}
 	}
 
 #	method _doc( Mu $p ) returns Perl6::Element-List {
@@ -3184,7 +3559,12 @@ class Perl6::Parser::Factory {
 	}
 
 	method __FloatingPoint( Mu $p ) returns Perl6::Element {
-		Perl6::Number::FloatingPoint.from-match( $p );
+		if $*INTERNAL-PARSER {
+			Perl6::Number::FloatingPoint.from-match( $p );
+		}
+		else {
+			self.parse( $p, '_floating_point' );
+		}
 	}
 
 #	method _hexint( Mu $p ) returns Perl6::Element {
@@ -3193,7 +3573,12 @@ class Perl6::Parser::Factory {
 
 	method _identifier( Mu $p ) returns Perl6::Element-List {
 		my $child = Perl6::Element-List.new;
-		$child.append( Perl6::Bareword.from-match( $p ) );
+		if $*INTERNAL-PARSER {
+			$child.append( Perl6::Bareword.from-match( $p ) );
+		}
+		else {
+			$child.append( self.parse( $p, '_identifier' ) );
+		}
 		$child;
 	}
 
@@ -3233,9 +3618,16 @@ class Perl6::Parser::Factory {
 		given $p {
 			when self.assert-hash( $_,
 				[< closing infixish opening >], [< O >] ) {
-				$child.append(
-					Perl6::Operator::Infix.from-match( $_ )
-				);
+				if $*INTERNAL-PARSER {
+					$child.append(
+						Perl6::Operator::Infix.from-match( $_ )
+					);
+				}
+				else {
+					$child.append(
+						self.parse( $_, '_infix_circumfix_meta_operator' )
+					);
+				}
 			}
 			default {
 				$child.fall-through( $_ );
@@ -3297,26 +3689,54 @@ class Perl6::Parser::Factory {
 		my $child = Perl6::Element-List.new;
 		given $p {
 			when self.assert-hash( $_, [< binint VALUE >] ) {
-				$child.append(
-					Perl6::Number::Binary.from-match( $_ )
-				);
+				if $*INTERNAL-PARSER {
+					$child.append(
+						Perl6::Number::Binary.from-match( $_ )
+					);
+				}
+				else {
+					$child.append(
+						self.parse( $_, '_integer_binary' )
+					);
+				}
 			}
 			when self.assert-hash( $_, [< octint VALUE >] ) {
-				$child.append(
-					Perl6::Number::Octal.from-match( $_ )
-				);
+				if $*INTERNAL-PARSER {
+					$child.append(
+						Perl6::Number::Octal.from-match( $_ )
+					);
+				}
+				else {
+					$child.append(
+						self.parse( $_, '_integer_octal' )
+					);
+				}
 			}
 			when self.assert-hash( $_, [< decint VALUE >] ) {
-				$child.append(
-					Perl6::Number::Decimal.from-match( $_ )
-				);
+				if $*INTERNAL-PARSER {
+					$child.append(
+						Perl6::Number::Decimal.from-match( $_ )
+					);
+				}
+				else {
+					$child.append(
+						self.parse( $_, '_integer_decimal' )
+					);
+				}
 			}
 			when self.assert-hash( $_, [< hexint VALUE >] ) {
-				$child.append(
-					Perl6::Number::Hexadecimal.from-match(
-						$_
-					)
-				);
+				if $*INTERNAL-PARSER {
+					$child.append(
+						Perl6::Number::Hexadecimal.from-match(
+							$_
+						)
+					);
+				}
+				else {
+					$child.append(
+						self.parse( $_, '_integer_hexadecimal' )
+					);
+				}
 			}
 			default {
 				$child.fall-through( $_ );
@@ -3337,11 +3757,21 @@ class Perl6::Parser::Factory {
 #	}
 
 	method _key( Mu $p ) returns Perl6::Element {
-		Perl6::Bareword.from-match( $p );
+		if $*INTERNAL-PARSER {
+			Perl6::Bareword.from-match( $p );
+		}
+		else {
+			self.parse( $p, '_key' );
+		}
 	}
 
 	method _lambda( Mu $p ) returns Perl6::Element {
-		Perl6::Operator::Infix.from-match( $p );
+		if $*INTERNAL-PARSER {
+			Perl6::Operator::Infix.from-match( $p );
+		}
+		else {
+			self.parse( $p, '_lambda' );
+		}
 	}
 
 	method _left( Mu $p ) returns Perl6::Element-List {
@@ -3419,7 +3849,14 @@ class Perl6::Parser::Factory {
 			$child.append( self._codeblock( $p.hash.<codeblock> ) );
 		}
 		elsif self.assert-hash( $p, [< backslash >] ) {
-			$child.append( Perl6::Backslash.from-match( $p ) );
+			if $*INTERNAL-PARSER {
+				$child.append( Perl6::Backslash.from-match( $p ) );
+			}
+			else {
+				$child.append(
+					self.parse( $p, '_metachar_backslash' )
+				);
+			}
 		}
 		elsif self.assert-hash( $p, [< quote >] ) {
 			$child.append( self._quote( $p.hash.<quote> ) );
@@ -3571,9 +4008,16 @@ class Perl6::Parser::Factory {
 		given $p {
 			when self.assert-hash( $_, [< decint VALUE >] ) {
 				# XXX The decimal is just a string.
-				$child.append(
-					Perl6::Number::Decimal.from-match( $_ )
-				);
+				if $*INTERNAL-PARSER {
+					$child.append(
+						Perl6::Number::Decimal.from-match( $_ )
+					);
+				}
+				else {
+					$child.append(
+						self.parse( $_, '_integer_decimal' )
+					);
+				}
 			}
 			default {
 				$child.fall-through( $_ );
@@ -3734,9 +4178,16 @@ class Perl6::Parser::Factory {
 						[< identifier >],
 						[< morename >] ) {
 					# XXX replace with _identifier(..)
-					$child.append(
-						Perl6::Bareword.from-match( $_ )
-					);
+					if $*INTERNAL-PARSER {
+						$child.append(
+							Perl6::Bareword.from-match( $_ )
+						);
+					}
+					else {
+						$child.append(
+							self.parse( $_, '_name_identifier' )
+						);
+					}
 					# XXX Probably should be Enter(':')..Exit('')
 					if $_.orig.Str.substr( $_.to, 1 ) eq
 							COLON {
@@ -3750,9 +4201,16 @@ class Perl6::Parser::Factory {
 				}
 				when self.assert-hash( $_, [< morename >] ) {
 					# XXX replace with _morename(..)
-					$child.append(
-						Perl6::PackageName.from-match( $_ )
-					);
+					if $*INTERNAL-PARSER {
+						$child.append(
+							Perl6::PackageName.from-match( $_ )
+						);
+					}
+					else {
+						$child.append(
+							self.parse( $_, '_morename' )
+						);
+					}
 				}
 				default {
 					$child.fall-through( $_ );
@@ -3760,7 +4218,14 @@ class Perl6::Parser::Factory {
 			}
 		}
 		elsif $p.Str {
-			$child.append( Perl6::Bareword.from-match( $p ) );
+			if $*INTERNAL-PARSER {
+				$child.append( Perl6::Bareword.from-match( $p ) );
+			}
+			else {
+				$child.append(
+					self.parse( $p, '_identifier' )
+				);
+			}
 		}
 		else {
 			$child.fall-through( $p );
@@ -3906,11 +4371,21 @@ class Perl6::Parser::Factory {
 	}
 
 	method __Inf( Mu $p ) returns Perl6::Element {
-		Perl6::Infinity.from-match( $p );
+		if $*INTERNAL-PARSER {
+			Perl6::Infinity.from-match( $p );
+		}
+		else {
+			self.parse( $p, '_infinity' );
+		}
 	}
 
 	method __NaN( Mu $p ) returns Perl6::Element {
-		Perl6::NotANumber.from-match( $p );
+		if $*INTERNAL-PARSER {
+			Perl6::NotANumber.from-match( $p );
+		}
+		else {
+			self.parse( $p, '_nan' );
+		}
 	}
 
 	method _numish( Mu $p ) returns Perl6::Element-List {
@@ -4473,11 +4948,19 @@ class Perl6::Parser::Factory {
 					);
 				}
 				elsif $_.Str {
-					$child.append(
-						Perl6::Operator::Infix.from-match(
-							$_
-						)
-					);
+					if $*INTERNAL-PARSER {
+						$child.append(
+							Perl6::Operator::Infix.from-match(
+								$_
+							)
+						);
+					}
+					else {
+						# XXX revisit - probably a catchall
+						$child.append(
+							self.parse( $_, '_postfix_prefix' )
+						);
+					}
 				}
 				else {
 					$child.fall-through( $_ );
@@ -4664,9 +5147,16 @@ class Perl6::Parser::Factory {
 		if $p.Str {
 			# XXX Need to propagate this back upwards.
 			if $p.Str ne BACKSLASH {
-				$child.append(
-					Perl6::Bareword.from-match( $p )
-				);
+				if $*INTERNAL-PARSER {
+					$child.append(
+						Perl6::Bareword.from-match( $p )
+					);
+				}
+				else {
+					$child.append(
+						self.parse( $p, '_quant' )
+					);
+				}
 			}
 		}
 		else {
@@ -5002,9 +5492,16 @@ class Perl6::Parser::Factory {
 		if $p.list {
 			for $p.list {
 				if self.assert-hash( $_, [< identifier >] ) {
-					$child.append(
-						Perl6::Adverb.from-match( $_ )
-					);
+					if $*INTERNAL-PARSER {
+						$child.append(
+							Perl6::Adverb.from-match( $_ )
+						);
+					}
+					else {
+						$child.append(
+							self.parse( $_, '_quotepair_adverb' )
+						);
+					}
 				}
 				else {
 					$child.fall-through( $_ );
@@ -5559,7 +6056,12 @@ class Perl6::Parser::Factory {
 	}
 
 	method _septype( Mu $p ) returns Perl6::Element {
-		Perl6::Bareword.from-match( $p );
+		if $*INTERNAL-PARSER {
+			Perl6::Bareword.from-match( $p );
+		}
+		else {
+			self.parse( $p, '_septype' );
+		}
 	}
 
 #	method _sequence( Mu $p ) returns Perl6::Element-List {
@@ -5631,7 +6133,12 @@ class Perl6::Parser::Factory {
 #	}
 
 	method _sigil( Mu $p ) returns Perl6::Element {
-		Perl6::Bareword.from-match( $p );
+		if $*INTERNAL-PARSER {
+			Perl6::Bareword.from-match( $p );
+		}
+		else {
+			self.parse( $p, '_sigil' )
+		}
 	}
 
 #	method _sigmaybe( Mu $p ) returns Perl6::Element-List {
@@ -6373,9 +6880,17 @@ class Perl6::Parser::Factory {
 		if $p.Str {
 			given $p.Str {
 				when 'sub' {
-					$child.append(
-						Perl6::SubroutineDeclaration.from-match( $p )
-					);
+					if $*INTERNAL-PARSER {
+						$child.append(
+							Perl6::SubroutineDeclaration.from-match( $p )
+						);
+
+					}
+					else {
+						$child.append(
+							self.parse( $p, '_sym_sub' )
+						);
+					}
 				}
 				default {
 					$child.append(
@@ -6784,17 +7299,33 @@ class Perl6::Parser::Factory {
 						[< colonpairs longname >],
 						[< colonpair >] ) {
 					# XXX Can probably be narrowed
-					$child.append(
-						Perl6::Bareword.from-match( $_ )
-					);
+					if $*INTERNAL-PARSER {
+						$child.append(
+							Perl6::Bareword.from-match( $_ )
+						);
+
+					}
+					else {
+						$child.append(
+							self.parse( $_, '_typename_defined' )
+						);
+					}
 				}
 				elsif self.assert-hash( $_,
 						[< longname >],
 						[< colonpairs >] ) {
 					# XXX Can probably be narrowed
-					$child.append(
-						Perl6::Bareword.from-match( $_ )
-					);
+					if $*INTERNAL-PARSER {
+						$child.append(
+							Perl6::Bareword.from-match( $_ )
+						);
+
+					}
+					else {
+						$child.append(
+							self.parse( $_, '_typename' )
+						);
+					}
 				}
 				else {
 					$child.fall-through( $_ );
@@ -7124,7 +7655,12 @@ class Perl6::Parser::Factory {
 #	}
 
 	method _wu( Mu $p ) returns Perl6::Element {
-		Perl6::Bareword.from-match( $p )
+		if $*INTERNAL-PARSER {
+			Perl6::Bareword.from-match( $p )
+		}
+		else {
+			self.parse( $p, '_wu' );
+		}
 	}
 
 	method _xblock( Mu $p ) returns Perl6::Element-List {

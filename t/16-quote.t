@@ -8,6 +8,7 @@ plan 16;
 my $pt = Perl6::Parser.new;
 my $*CONSISTENCY-CHECK = True;
 my $*FALL-THROUGH = True;
+my $*INTERNAL-PARSER = True;
 
 #
 # String and qw() delimiters should be balanced.

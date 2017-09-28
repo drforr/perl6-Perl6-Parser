@@ -8,6 +8,7 @@ plan 1;
 my $pt = Perl6::Parser.new;
 my $*CONSISTENCY-CHECK = True;
 my $*FALL-THROUGH = True;
+my $*INTERNAL-PARSER = True;
 
 subtest {
 	my $source = Q:to[_END_];

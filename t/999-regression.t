@@ -9,6 +9,7 @@ use Perl6::Parser;
 my $pt = Perl6::Parser.new;
 my $*CONSISTENCY-CHECK = True;
 my $*FALL-THROUGH = True;
+my $*INTERNAL-PARSER = True;
 my $source;
 
 sub can-roundtrip( $pt, $source ) {

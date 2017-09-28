@@ -26,6 +26,7 @@ plan 25;
 my $pt = Perl6::Parser.new;
 my $*CONSISTENCY-CHECK = True;
 my $*FALL-THROUGH = True;
+my $*INTERNAL-PARSER = True;
 
 subtest {
 	plan 4;
