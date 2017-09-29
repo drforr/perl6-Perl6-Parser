@@ -21,111 +21,112 @@ use Perl6::Parser;
 #
 # lang <name>
 
-plan 4;
+plan 2 * 4;
 
 my $pt = Perl6::Parser.new;
 my $*CONSISTENCY-CHECK = True;
 my $*FALL-THROUGH = True;
-my $*INTERNAL-PARSER = True;
 my ( $source, $tree );
 
-subtest {
-	$source = Q:to[_END_];
-	my$x
-	_END_
-	$tree = $pt.to-tree( $source );
-	is $pt.to-string( $tree ), $source, Q{no ws};
-
-	$source = Q:to[_END_];
-	my     $x
-	_END_
-	$tree = $pt.to-tree( $source );
-	is $pt.to-string( $tree ), $source, Q{leading ws};
-
-	done-testing;
-}, Q{my};
-
-subtest {
-	$source = Q:to[_END_];
-	our$x
-	_END_
-	$tree = $pt.to-tree( $source );
-	is $pt.to-string( $tree ), $source, Q{no ws};
-
-	$source = Q:to[_END_];
-	our     $x
-	_END_
-	$tree = $pt.to-tree( $source );
-	is $pt.to-string( $tree ), $source, Q{leading ws};
-
-	done-testing;
-}, Q{our};
-
-subtest {
+for ( True, False ) -> $*PURE-PERL {
 	subtest {
 		$source = Q:to[_END_];
-		class Foo{has$x}
+		my$x
 		_END_
 		$tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{formatted};
-		ok $tree.child[0].child[3].child[0] ~~
-			Perl6::Block::Enter, Q{enter brace};
-		ok $tree.child[0].child[3].child[2] ~~
-			Perl6::Block::Exit, Q{exit brace};
+		is $pt.to-string( $tree ), $source, Q{no ws};
+
+		$source = Q:to[_END_];
+		my     $x
+		_END_
+		$tree = $pt.to-tree( $source );
+		is $pt.to-string( $tree ), $source, Q{leading ws};
 
 		done-testing;
-	}, Q{no ws};
+	}, Q{my};
 
-	$source = Q:to[_END_];
-	class Foo{has     $x}
-	_END_
-	$tree = $pt.to-tree( $source );
-	is $pt.to-string( $tree ), $source, Q{leading ws};
+	subtest {
+		$source = Q:to[_END_];
+		our$x
+		_END_
+		$tree = $pt.to-tree( $source );
+		is $pt.to-string( $tree ), $source, Q{no ws};
 
-	done-testing;
-}, Q{has};
+		$source = Q:to[_END_];
+		our     $x
+		_END_
+		$tree = $pt.to-tree( $source );
+		is $pt.to-string( $tree ), $source, Q{leading ws};
 
-# HAS requires another class definition.
-#
-#subtest {
-#	plan 2;
-#
-#	subtest {
-#		$source = Q{class Foo is repr('CStruct'){HAS int $x}};
-#		$tree = $pt.to-tree( $source );
-#		is $pt.to-string( $tree ), $source, Q{formatted};
-#
-#		done-testing;
-#	}, Q{no ws};
-#
-#	subtest {
-#		$source = Q:to[_END_];
-#class Foo is repr( 'CStruct' ) { HAS int $x }
-#_END_
-#		$tree = $pt.to-tree( $source );
-#		is $pt.to-string( $tree ), $source, Q{formatted};
-#
-#		done-testing;
-#	}, Q{leading ws};
-#}, Q{HAS};
+		done-testing;
+	}, Q{our};
 
-# XXX 'augment $x' is NIY
+	subtest {
+		subtest {
+			$source = Q:to[_END_];
+			class Foo{has$x}
+			_END_
+			$tree = $pt.to-tree( $source );
+			is $pt.to-string( $tree ), $source, Q{formatted};
+			ok $tree.child[0].child[3].child[0] ~~
+				Perl6::Block::Enter, Q{enter brace};
+			ok $tree.child[0].child[3].child[2] ~~
+				Perl6::Block::Exit, Q{exit brace};
 
-# XXX 'anon $x' is NIY
+			done-testing;
+		}, Q{no ws};
 
-subtest {
-	plan 2;
+		$source = Q:to[_END_];
+		class Foo{has     $x}
+		_END_
+		$tree = $pt.to-tree( $source );
+		is $pt.to-string( $tree ), $source, Q{leading ws};
 
-	$source = Q{state$x};
-	$tree = $pt.to-tree( $source );
-	is $pt.to-string( $tree ), $source, Q{no ws};
+		done-testing;
+	}, Q{has};
 
-	$source = Q:to[_END_];
-	state     $x
-	_END_
-	$tree = $pt.to-tree( $source );
-	is $pt.to-string( $tree ), $source, Q{leading ws};
-}, Q{state};
+	# HAS requires another class definition.
+	#
+	#subtest {
+	#	plan 2;
+	#
+	#	subtest {
+	#		$source = Q{class Foo is repr('CStruct'){HAS int $x}};
+	#		$tree = $pt.to-tree( $source );
+	#		is $pt.to-string( $tree ), $source, Q{formatted};
+	#
+	#		done-testing;
+	#	}, Q{no ws};
+	#
+	#	subtest {
+	#		$source = Q:to[_END_];
+	#class Foo is repr( 'CStruct' ) { HAS int $x }
+	#_END_
+	#		$tree = $pt.to-tree( $source );
+	#		is $pt.to-string( $tree ), $source, Q{formatted};
+	#
+	#		done-testing;
+	#	}, Q{leading ws};
+	#}, Q{HAS};
+
+	# XXX 'augment $x' is NIY
+
+	# XXX 'anon $x' is NIY
+
+	subtest {
+		plan 2;
+
+		$source = Q{state$x};
+		$tree = $pt.to-tree( $source );
+		is $pt.to-string( $tree ), $source, Q{no ws};
+
+		$source = Q:to[_END_];
+		state     $x
+		_END_
+		$tree = $pt.to-tree( $source );
+		is $pt.to-string( $tree ), $source, Q{leading ws};
+	}, Q{state};
+}
 
 # XXX 'supersede $x' NIY
 

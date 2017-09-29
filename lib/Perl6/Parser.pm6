@@ -27,9 +27,13 @@ Perl6::Parser - Extract a Perl 6 AST from the NQP Perl 6 Parser
     #
     my @everything = $pt.to-list( $source );
 
-    # This *will* execute phasers such as BEGIN in your existing code.
-    # This may constitute a security hole, at least until the author figures
-    # out how to truly make the Perl 6 grammar standalone.
+    # This will fire phasers such as BEGIN in existing code.
+
+    # Use 'my $*PURE-PERL = True;' before parsing to enable an experimental
+    # pure-Perl6 parser which will not execute phasers, but also won't install
+    # custom operators in your code or any slangs that you may have in place.
+    # As of 2017-09-28 it just bypasses NQP matches for the terminals such as
+    # numbers, operators and keywords, but this will change.
 
 =end SYNOPSIS
 

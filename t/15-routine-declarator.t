@@ -16,203 +16,204 @@ use Perl6::Parser;
 #
 # macro <name> ... { } # NYI
 
-plan 3;
+plan 2 * 3;
 
 my $pt = Perl6::Parser.new;
 my $*CONSISTENCY-CHECK = True;
 my $*FALL-THROUGH = True;
-my $*INTERNAL-PARSER = True;
 my ( $source, $tree );
 
-subtest {
-	plan 3;
-
+for ( True, False ) -> $*PURE-PERL {
 	subtest {
-		plan 4;
+		plan 3;
 
 		subtest {
+			plan 4;
+
+			subtest {
+				$source = Q:to[_END_];
+				sub Foo{}
+				_END_
+				$tree = $pt.to-tree( $source );
+				is $pt.to-string( $tree ), $source, Q{formatted};
+				ok $tree.child[0].child[3].child[0] ~~
+					Perl6::Block::Enter, Q{enter brace};
+				ok $tree.child[0].child[3].child[1] ~~
+					Perl6::Block::Exit, Q{exit brace};
+
+				done-testing;
+			}, Q{no ws};
+
 			$source = Q:to[_END_];
-			sub Foo{}
+			sub Foo     {}
 			_END_
 			$tree = $pt.to-tree( $source );
-			is $pt.to-string( $tree ), $source, Q{formatted};
-			ok $tree.child[0].child[3].child[0] ~~
-				Perl6::Block::Enter, Q{enter brace};
-			ok $tree.child[0].child[3].child[1] ~~
-				Perl6::Block::Exit, Q{exit brace};
+			is $pt.to-string( $tree ), $source, Q{leading ws};
 
-			done-testing;
-		}, Q{no ws};
+			$source = Q{sub Foo{}  };
+			$tree = $pt.to-tree( $source );
+			is $pt.to-string( $tree ), $source, Q{trailing ws};
 
-		$source = Q:to[_END_];
-		sub Foo     {}
-		_END_
-		$tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{leading ws};
+			$source = Q{sub Foo     {}  };
+			$tree = $pt.to-tree( $source );
+			is $pt.to-string( $tree ), $source, Q{leading, trailing ws};
+		}, Q{no intrabrace spacing};
 
-		$source = Q{sub Foo{}  };
-		$tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{trailing ws};
+		subtest {
+			plan 4;
 
-		$source = Q{sub Foo     {}  };
-		$tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{leading, trailing ws};
-	}, Q{no intrabrace spacing};
+			$source = Q:to[_END_];
+			sub Foo{   }
+			_END_
+			$tree = $pt.to-tree( $source );
+			is $pt.to-string( $tree ), $source, Q{no ws};
 
-	subtest {
-		plan 4;
+			$source = Q:to[_END_];
+			sub Foo     {   }
+			_END_
+			$tree = $pt.to-tree( $source );
+			is $pt.to-string( $tree ), $source, Q{leading ws};
 
-		$source = Q:to[_END_];
-		sub Foo{   }
-		_END_
-		$tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{no ws};
+			$source = Q{sub Foo{   }  };
+			$tree = $pt.to-tree( $source );
+			is $pt.to-string( $tree ), $source, Q{trailing ws};
 
-		$source = Q:to[_END_];
-		sub Foo     {   }
-		_END_
-		$tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{leading ws};
+			$source = Q{sub Foo     {   }  };
+			$tree = $pt.to-tree( $source );
+			is $pt.to-string( $tree ), $source, Q{leading, trailing ws};
+		}, Q{intrabrace spacing};
 
-		$source = Q{sub Foo{   }  };
-		$tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{trailing ws};
+		subtest {
+			plan 2;
 
-		$source = Q{sub Foo     {   }  };
-		$tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{leading, trailing ws};
-	}, Q{intrabrace spacing};
+			$source = Q{unit sub MAIN;};
+			$tree = $pt.to-tree( $source );
+			is $pt.to-string( $tree ), $source, Q{no ws};
+
+			$source = Q:to[_END_];
+			unit sub MAIN  ;
+			_END_
+			$tree = $pt.to-tree( $source );
+			is $pt.to-string( $tree ), $source, Q{ws before semi};
+		}, Q{unit form};
+	}, Q{sub};
 
 	subtest {
 		plan 2;
 
-		$source = Q{unit sub MAIN;};
-		$tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{no ws};
-
-		$source = Q:to[_END_];
-		unit sub MAIN  ;
-		_END_
-		$tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{ws before semi};
-	}, Q{unit form};
-}, Q{sub};
-
-subtest {
-	plan 2;
-
-	subtest {
-		plan 4;
-
 		subtest {
+			plan 4;
+
+			subtest {
+				$source = Q:to[_END_];
+				class Foo{method Bar{}}
+				_END_
+				$tree = $pt.to-tree( $source );
+				is $pt.to-string( $tree ), $source, Q{formatted};
+				ok $tree.child[0].child[3].child[0] ~~
+					Perl6::Block::Enter, Q{enter brace};
+				ok $tree.child[0].child[3].child[2] ~~
+					Perl6::Block::Exit, Q{exit brace};
+				ok $tree.child[0].child[3].child[1].child[3].child[0] ~~
+					Perl6::Block::Enter, Q{enter brace};
+				ok $tree.child[0].child[3].child[1].child[3].child[1] ~~
+					Perl6::Block::Exit, Q{exit brace};
+
+				done-testing;
+			}, Q{no ws};
+
 			$source = Q:to[_END_];
-			class Foo{method Bar{}}
+			class Foo{method Bar     {}}
 			_END_
 			$tree = $pt.to-tree( $source );
-			is $pt.to-string( $tree ), $source, Q{formatted};
-			ok $tree.child[0].child[3].child[0] ~~
-				Perl6::Block::Enter, Q{enter brace};
-			ok $tree.child[0].child[3].child[2] ~~
-				Perl6::Block::Exit, Q{exit brace};
-			ok $tree.child[0].child[3].child[1].child[3].child[0] ~~
-				Perl6::Block::Enter, Q{enter brace};
-			ok $tree.child[0].child[3].child[1].child[3].child[1] ~~
-				Perl6::Block::Exit, Q{exit brace};
+			is $pt.to-string( $tree ), $source, Q{leading ws};
 
-			done-testing;
-		}, Q{no ws};
+			$source = Q{class Foo{method Foo{}  }};
+			$tree = $pt.to-tree( $source );
+			is $pt.to-string( $tree ), $source, Q{trailing ws};
 
-		$source = Q:to[_END_];
-		class Foo{method Bar     {}}
-		_END_
-		$tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{leading ws};
+			$source = Q{class Foo{method Bar     {}  }};
+			$tree = $pt.to-tree( $source );
+			is $pt.to-string( $tree ), $source, Q{leading, trailing ws};
+		}, Q{no intrabrace spacing};
 
-		$source = Q{class Foo{method Foo{}  }};
-		$tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{trailing ws};
+		subtest {
+			plan 4;
 
-		$source = Q{class Foo{method Bar     {}  }};
-		$tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{leading, trailing ws};
-	}, Q{no intrabrace spacing};
+			$source = Q:to[_END_];
+			class Foo{method Bar   {}}
+			_END_
+			$tree = $pt.to-tree( $source );
+			is $pt.to-string( $tree ), $source, Q{no ws};
 
-	subtest {
-		plan 4;
+			$source = Q:to[_END_];
+			class Foo{method Bar     {   }}
+			_END_
+			$tree = $pt.to-tree( $source );
+			is $pt.to-string( $tree ), $source, Q{leading ws};
 
-		$source = Q:to[_END_];
-		class Foo{method Bar   {}}
-		_END_
-		$tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{no ws};
+			$source = Q{class Foo{method Foo{   }  }};
+			$tree = $pt.to-tree( $source );
+			is $pt.to-string( $tree ), $source, Q{trailing ws};
 
-		$source = Q:to[_END_];
-		class Foo{method Bar     {   }}
-		_END_
-		$tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{leading ws};
-
-		$source = Q{class Foo{method Foo{   }  }};
-		$tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{trailing ws};
-
-		$source = Q{class Foo{method Bar     {   }  }};
-		$tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{leading, trailing ws};
-	}, Q{with intrabrace spacing};
-}, Q{method};
-
-subtest {
-	plan 2;
+			$source = Q{class Foo{method Bar     {   }  }};
+			$tree = $pt.to-tree( $source );
+			is $pt.to-string( $tree ), $source, Q{leading, trailing ws};
+		}, Q{with intrabrace spacing};
+	}, Q{method};
 
 	subtest {
-		plan 4;
+		plan 2;
 
-		$source = Q:to[_END_];
-		class Foo{submethod Bar{}}
-		_END_
-		$tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{no ws};
+		subtest {
+			plan 4;
 
-		$source = Q:to[_END_];
-		class Foo{submethod Bar     {}}
-		_END_
-		$tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{leading ws};
+			$source = Q:to[_END_];
+			class Foo{submethod Bar{}}
+			_END_
+			$tree = $pt.to-tree( $source );
+			is $pt.to-string( $tree ), $source, Q{no ws};
 
-		$source = Q{class Foo{submethod Foo{}  }};
-		$tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{trailing ws};
+			$source = Q:to[_END_];
+			class Foo{submethod Bar     {}}
+			_END_
+			$tree = $pt.to-tree( $source );
+			is $pt.to-string( $tree ), $source, Q{leading ws};
 
-		$source = Q{class Foo{submethod Bar     {}  }};
-		$tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{leading, trailing ws};
-	}, Q{no intrabrace spacing};
+			$source = Q{class Foo{submethod Foo{}  }};
+			$tree = $pt.to-tree( $source );
+			is $pt.to-string( $tree ), $source, Q{trailing ws};
 
-	subtest {
-		plan 4;
+			$source = Q{class Foo{submethod Bar     {}  }};
+			$tree = $pt.to-tree( $source );
+			is $pt.to-string( $tree ), $source, Q{leading, trailing ws};
+		}, Q{no intrabrace spacing};
 
-		$source = Q:to[_END_];
-		class Foo{submethod Bar   {}}
-		_END_
-		$tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{no ws};
+		subtest {
+			plan 4;
 
-		$source = Q:to[_END_];
-		class Foo{submethod Bar     {   }}
-		_END_
-		$tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{leading ws};
+			$source = Q:to[_END_];
+			class Foo{submethod Bar   {}}
+			_END_
+			$tree = $pt.to-tree( $source );
+			is $pt.to-string( $tree ), $source, Q{no ws};
 
-		$source = Q{class Foo{submethod Foo{   }  }};
-		$tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{trailing ws};
+			$source = Q:to[_END_];
+			class Foo{submethod Bar     {   }}
+			_END_
+			$tree = $pt.to-tree( $source );
+			is $pt.to-string( $tree ), $source, Q{leading ws};
 
-		$source = Q{class Foo{submethod Bar     {   }  }};
-		$tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{leading, trailing ws};
-	}, Q{with intrabrace spacing};
-}, Q{submethod};
+			$source = Q{class Foo{submethod Foo{   }  }};
+			$tree = $pt.to-tree( $source );
+			is $pt.to-string( $tree ), $source, Q{trailing ws};
+
+			$source = Q{class Foo{submethod Bar     {   }  }};
+			$tree = $pt.to-tree( $source );
+			is $pt.to-string( $tree ), $source, Q{leading, trailing ws};
+		}, Q{with intrabrace spacing};
+	}, Q{submethod};
+}
 
 # XXX 'macro Foo{}' is still experimental.
 

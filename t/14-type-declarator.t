@@ -9,120 +9,121 @@ use Perl6::Parser;
 # subset <name> of Type
 # constant <name> = 1
 
-plan 3;
+plan 2 * 3;
 
 my $pt = Perl6::Parser.new;
 my $*CONSISTENCY-CHECK = True;
 my $*FALL-THROUGH = True;
-my $*INTERNAL-PARSER = True;
 my ( $source, $tree );
 
-subtest {
-	plan 2;
-
+for ( True, False ) -> $*PURE-PERL {
 	subtest {
-		plan 4;
+		plan 2;
 
-		$source = Q:to[_END_];
-		enum Foo()
-		_END_
-		$tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{no ws};
+		subtest {
+			plan 4;
 
-		$source = Q:to[_END_];
-		enum Foo     ()
-		_END_
-		$tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{leading ws};
+			$source = Q:to[_END_];
+			enum Foo()
+			_END_
+			$tree = $pt.to-tree( $source );
+			is $pt.to-string( $tree ), $source, Q{no ws};
 
-		$source = Q{enum Foo()  };
-		$tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{trailing ws};
+			$source = Q:to[_END_];
+			enum Foo     ()
+			_END_
+			$tree = $pt.to-tree( $source );
+			is $pt.to-string( $tree ), $source, Q{leading ws};
 
-		$source = Q{enum Foo     ()  };
-		$tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{leading, trailing ws};
-	}, Q{no intrabrace spacing};
+			$source = Q{enum Foo()  };
+			$tree = $pt.to-tree( $source );
+			is $pt.to-string( $tree ), $source, Q{trailing ws};
 
-	subtest {
-		plan 4;
+			$source = Q{enum Foo     ()  };
+			$tree = $pt.to-tree( $source );
+			is $pt.to-string( $tree ), $source, Q{leading, trailing ws};
+		}, Q{no intrabrace spacing};
 
-		$source = Q:to[_END_];
-		enum Foo(   )
-		_END_
-		$tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{no ws};
+		subtest {
+			plan 4;
 
-		$source = Q:to[_END_];
-		enum Foo     (   )
-		_END_
-		$tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{leading ws};
+			$source = Q:to[_END_];
+			enum Foo(   )
+			_END_
+			$tree = $pt.to-tree( $source );
+			is $pt.to-string( $tree ), $source, Q{no ws};
 
-		$source = Q{enum Foo(   )  };
-		$tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{trailing ws};
+			$source = Q:to[_END_];
+			enum Foo     (   )
+			_END_
+			$tree = $pt.to-tree( $source );
+			is $pt.to-string( $tree ), $source, Q{leading ws};
 
-		$source = Q{enum Foo     (   )  };
-		$tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{leading, trailing ws};
-	}, Q{intrabrace spacing};
-}, Q{enum};
+			$source = Q{enum Foo(   )  };
+			$tree = $pt.to-tree( $source );
+			is $pt.to-string( $tree ), $source, Q{trailing ws};
 
-subtest {
-	plan 2;
+			$source = Q{enum Foo     (   )  };
+			$tree = $pt.to-tree( $source );
+			is $pt.to-string( $tree ), $source, Q{leading, trailing ws};
+		}, Q{intrabrace spacing};
+	}, Q{enum};
 
 	subtest {
 		plan 2;
 
+		subtest {
+			plan 2;
+
+			$source = Q:to[_END_];
+			subset Foo of Int
+			_END_
+			$tree = $pt.to-tree( $source );
+			is $pt.to-string( $tree ), $source, Q{no ws};
+
+			$source = Q{subset Foo of Int  };
+			$tree = $pt.to-tree( $source );
+			is $pt.to-string( $tree ), $source, Q{trailing ws};
+		}, Q{Normal version};
+
 		$source = Q:to[_END_];
-		subset Foo of Int
+		unit subset Foo;
+		_END_
+		$tree = $pt.to-tree( $source );
+		is $pt.to-string( $tree ), $source, Q{unit form};
+	}, Q{subset};
+
+	subtest {
+		plan 5;
+
+		$source = Q:to[_END_];
+		constant Foo=1
 		_END_
 		$tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source, Q{no ws};
 
-		$source = Q{subset Foo of Int  };
+		$source = Q:to[_END_];
+		constant Foo     =1
+		_END_
+		$tree = $pt.to-tree( $source );
+		is $pt.to-string( $tree ), $source, Q{leading ws};
+
+		$source = Q:to[_END_];
+		constant Foo=   1
+		_END_
+		$tree = $pt.to-tree( $source );
+		is $pt.to-string( $tree ), $source, Q{intermediate ws};
+
+		$source = Q:to[_END_];
+		constant Foo     =   1
+		_END_
+		$tree = $pt.to-tree( $source );
+		is $pt.to-string( $tree ), $source, Q{intermediate ws};
+
+		$source = Q{constant Foo=1     };
 		$tree = $pt.to-tree( $source );
 		is $pt.to-string( $tree ), $source, Q{trailing ws};
-	}, Q{Normal version};
-
-	$source = Q:to[_END_];
-	unit subset Foo;
-	_END_
-	$tree = $pt.to-tree( $source );
-	is $pt.to-string( $tree ), $source, Q{unit form};
-}, Q{subset};
-
-subtest {
-	plan 5;
-
-	$source = Q:to[_END_];
-	constant Foo=1
-	_END_
-	$tree = $pt.to-tree( $source );
-	is $pt.to-string( $tree ), $source, Q{no ws};
-
-	$source = Q:to[_END_];
-	constant Foo     =1
-	_END_
-	$tree = $pt.to-tree( $source );
-	is $pt.to-string( $tree ), $source, Q{leading ws};
-
-	$source = Q:to[_END_];
-	constant Foo=   1
-	_END_
-	$tree = $pt.to-tree( $source );
-	is $pt.to-string( $tree ), $source, Q{intermediate ws};
-
-	$source = Q:to[_END_];
-	constant Foo     =   1
-	_END_
-	$tree = $pt.to-tree( $source );
-	is $pt.to-string( $tree ), $source, Q{intermediate ws};
-
-	$source = Q{constant Foo=1     };
-	$tree = $pt.to-tree( $source );
-	is $pt.to-string( $tree ), $source, Q{trailing ws};
-}, Q{constant};
+	}, Q{constant};
+}
 
 # vim: ft=perl6
