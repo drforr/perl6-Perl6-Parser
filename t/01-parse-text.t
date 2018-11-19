@@ -20,8 +20,8 @@ subtest {
 	plan 11;
 
 	my $p = $pt.parse( Q{'a'} );
-	is-deeply [ $p.hash.keys ], [< statementlist >],
-		Q{document has correct hash keys};
+	ok $p.hash.keys.any eq ‘statementlist’,
+		Q{document has a statementlist};
 
 	my $a = $p.hash.<statementlist>;
 	is-deeply [ $a.hash.keys ], [< statement >],
