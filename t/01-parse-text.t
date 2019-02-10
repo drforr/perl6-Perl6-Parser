@@ -17,11 +17,16 @@ $parsed = $pt.parse( Q {} );
 ok $parsed.hash.<statementlist>, Q{whitespace-only};
 
 subtest {
-	plan 11;
+	plan 12;
 
+	# lang-version appears now, but in the interest of backwards
+	# compatibility, only make sure that statementlist is there.
+	#
 	my $p = $pt.parse( Q{'a'} );
-	is-deeply [ $p.hash.keys ], [< statementlist >],
-		Q{document has correct hash keys};
+	ok $p.hash.<statementlist>,
+		Q{document has statementlist hash key};
+	ok ( ( $p.hash.keys.elems == 1 ) or $p.hash.<lang-version> ),
+		Q{document also may have lang-version};
 
 	my $a = $p.hash.<statementlist>;
 	is-deeply [ $a.hash.keys ], [< statement >],
