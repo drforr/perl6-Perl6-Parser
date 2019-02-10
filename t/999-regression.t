@@ -15,6 +15,23 @@ sub can-roundtrip( $pt, $source ) {
 	$pt._roundtrip( $source ) eq $source
 }
 
+# Classes, modules, packages &c can no longer be redeclared.
+# Which is probably a good thing, but plays havoc with testing here.
+#
+# This is a little ol' tool that generates a fresh package name every time
+# through the testing suite. I can't just make up new names as the test suite
+# goes along because I'm running the full test suite twice, once with the
+# original Perl6 parser-aided version, and once with the new regex-based parser.
+#
+# Use it to build out package names and such.
+#
+sub gensym-package( Str $code ) {
+	state $appendix = 'A';
+	my $package = 'Foo' ~ $appendix++;
+
+	return sprintf $code, $package;
+}
+
 for ( True, False ) -> $*PURE-PERL {
 	$source = Q:to[_END_];
 	say <closed open>;
@@ -31,16 +48,19 @@ for ( True, False ) -> $*PURE-PERL {
 	_END_
 	ok can-roundtrip( $pt, $source ), Q{is copy};
 
-	$source = Q:to[_END_];
-	grammar Foo {
+	$source = gensym-package Q:to[_END_];
+	grammar %s {
 	    token TOP { ^ <exp> $ { fail } }
 	}
 	_END_
 	ok can-roundtrip( $pt, $source ), Q{actions in grammars};
 
-	$source = Q:to[_END_];
-	grammar Foo {
-	    rule exp { <term>+ % <op> }
+	# Despite how it looks, '%%' here isn't doubled-percent.
+	# The sprintf() format rewrites %% to %.
+	#
+	$source = gensym-package Q:to[_END_];
+	grammar %s {
+	    rule exp { <term>+ %% <op> }
 	}
 	_END_
 	ok can-roundtrip( $pt, $source ), Q{mod in grammar};
@@ -56,8 +76,8 @@ for ( True, False ) -> $*PURE-PERL {
 	_END_
 	ok can-roundtrip( $pt, $source ), Q{my \y};
 
-	$source = Q:to[_END_];
-	class Bitmap {
+	$source = gensym-package Q:to[_END_];
+	class %s {
 	  method fill-pixel($i) { }
 	}
 	_END_
@@ -72,8 +92,8 @@ for ( True, False ) -> $*PURE-PERL {
 	_END_
 	ok can-roundtrip( $pt, $source ),Q{quoted hash};
 
-	$source = Q:to[_END_];
-	grammar Exp24 { rule term { <exp> | <digits> } }
+	$source = gensym-package Q:to[_END_];
+	grammar %s { rule term { <exp> | <digits> } }
 	_END_
 	ok can-roundtrip( $pt, $source ), Q{alternation};
 
@@ -306,8 +326,8 @@ for ( True, False ) -> $*PURE-PERL {
 	_END_
 	ok can-roundtrip( $pt, $source ), Q{More comma-separated lists};
 
-	$source = Q:to[_END_];
-	class Bitmap {
+	$source = gensym-package Q:to[_END_];
+	class %s {
 	    method pixel( $i, $j --> Int ) is rw { }
 	}
 	_END_

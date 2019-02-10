@@ -16,23 +16,59 @@ use Perl6::Parser;
 #
 # macro <name> ... { } # NYI
 
-plan 2 * 3;
+plan 2 * 3 + 1;
 
 my $pt = Perl6::Parser.new;
 my $*CONSISTENCY-CHECK = True;
 my $*FALL-THROUGH = True;
 my ( $source, $tree );
 
+# Classes, modules, packages &c can no longer be redeclared.
+# Which is probably a good thing, but plays havoc with testing here.
+#
+# This is a little ol' tool that generates a fresh package name every time
+# through the testing suite. I can't just make up new names as the test suite
+# goes along because I'm running the full test suite twice, once with the
+# original Perl6 parser-aided version, and once with the new regex-based parser.
+#
+# Use it to build out package names and such.
+#
+sub gensym-package( Str $code ) {
+	state $appendix = 'A';
+	my $package = 'Foo' ~ $appendix++;
+
+	return sprintf $code, $package;
+}
+
+# MAIN is the only subroutine that allows the 'unit sub FOO' form,
+# and naturally it can't be redeclared, as there's only one MAIN.
+#
+# So here it remains, outside the testing block.
+#
+subtest {
+	plan 2;
+
+	$source = Q{unit sub MAIN;};
+	$tree = $pt.to-tree( $source );
+	is $pt.to-string( $tree ), $source, Q{no ws};
+
+	$source = Q:to[_END_];
+	unit sub MAIN  ;
+	_END_
+	$tree = $pt.to-tree( $source );
+	is $pt.to-string( $tree ), $source, Q{ws before semi};
+}, Q{unit form};
+
 for ( True, False ) -> $*PURE-PERL {
 	subtest {
-		plan 3;
+		plan 2;
 
 		subtest {
 			plan 4;
 
 			subtest {
-				$source = Q:to[_END_];
-				sub Foo{}
+				$source = gensym-package Q:to[_END_];
+				sub %s{}
 				_END_
 				$tree = $pt.to-tree( $source );
 				is $pt.to-string( $tree ), $source, Q{formatted};
@@ -44,17 +80,17 @@ for ( True, False ) -> $*PURE-PERL {
 				done-testing;
 			}, Q{no ws};
 
-			$source = Q:to[_END_];
-			sub Foo     {}
+			$source = gensym-package Q:to[_END_];
+			sub %s     {}
 			_END_
 			$tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{leading ws};
 
-			$source = Q{sub Foo{}  };
+			$source = gensym-package Q{sub %s{}  };
 			$tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{trailing ws};
 
-			$source = Q{sub Foo     {}  };
+			$source = gensym-package Q{sub %s     {}  };
 			$tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{leading, trailing ws};
 		}, Q{no intrabrace spacing};
@@ -62,40 +98,26 @@ for ( True, False ) -> $*PURE-PERL {
 		subtest {
 			plan 4;
 
-			$source = Q:to[_END_];
-			sub Foo{   }
+			$source = gensym-package Q:to[_END_];
+			sub %s{   }
 			_END_
 			$tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{no ws};
 
-			$source = Q:to[_END_];
-			sub Foo     {   }
+			$source = gensym-package Q:to[_END_];
+			sub %s     {   }
 			_END_
 			$tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{leading ws};
 
-			$source = Q{sub Foo{   }  };
+			$source = gensym-package Q{sub %s{   }  };
 			$tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{trailing ws};
 
-			$source = Q{sub Foo     {   }  };
+			$source = gensym-package Q{sub %s     {   }  };
 			$tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{leading, trailing ws};
 		}, Q{intrabrace spacing};
-
-		subtest {
-			plan 2;
-
-			$source = Q{unit sub MAIN;};
-			$tree = $pt.to-tree( $source );
-			is $pt.to-string( $tree ), $source, Q{no ws};
-
-			$source = Q:to[_END_];
-			unit sub MAIN  ;
-			_END_
-			$tree = $pt.to-tree( $source );
-			is $pt.to-string( $tree ), $source, Q{ws before semi};
-		}, Q{unit form};
 	}, Q{sub};
 
 	subtest {
@@ -105,8 +127,8 @@ for ( True, False ) -> $*PURE-PERL {
 			plan 4;
 
 			subtest {
-				$source = Q:to[_END_];
-				class Foo{method Bar{}}
+				$source = gensym-package Q:to[_END_];
+				class %s{method Bar{}}
 				_END_
 				$tree = $pt.to-tree( $source );
 				is $pt.to-string( $tree ), $source, Q{formatted};
@@ -122,17 +144,17 @@ for ( True, False ) -> $*PURE-PERL {
 				done-testing;
 			}, Q{no ws};
 
-			$source = Q:to[_END_];
-			class Foo{method Bar     {}}
+			$source = gensym-package Q:to[_END_];
+			class %s{method Bar     {}}
 			_END_
 			$tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{leading ws};
 
-			$source = Q{class Foo{method Foo{}  }};
+			$source = gensym-package Q{class %s{method Foo{}  }};
 			$tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{trailing ws};
 
-			$source = Q{class Foo{method Bar     {}  }};
+			$source = gensym-package Q{class %s{method Bar     {}  }};
 			$tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{leading, trailing ws};
 		}, Q{no intrabrace spacing};
@@ -140,51 +162,51 @@ for ( True, False ) -> $*PURE-PERL {
 		subtest {
 			plan 4;
 
-			$source = Q:to[_END_];
-			class Foo{method Bar   {}}
+			$source = gensym-package Q:to[_END_];
+			class %s{method Bar   {}}
 			_END_
 			$tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{no ws};
 
-			$source = Q:to[_END_];
-			class Foo{method Bar     {   }}
+			$source = gensym-package Q:to[_END_];
+			class %s{method Bar     {   }}
 			_END_
 			$tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{leading ws};
 
-			$source = Q{class Foo{method Foo{   }  }};
+			$source = gensym-package Q{class %s{method Foo{   }  }};
 			$tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{trailing ws};
 
-			$source = Q{class Foo{method Bar     {   }  }};
+			$source = gensym-package Q{class %s{method Bar     {   }  }};
 			$tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{leading, trailing ws};
 		}, Q{with intrabrace spacing};
 	}, Q{method};
-
+#
 	subtest {
 		plan 2;
 
 		subtest {
 			plan 4;
 
-			$source = Q:to[_END_];
-			class Foo{submethod Bar{}}
+			$source = gensym-package Q:to[_END_];
+			class %s{submethod Bar{}}
 			_END_
 			$tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{no ws};
 
-			$source = Q:to[_END_];
-			class Foo{submethod Bar     {}}
+			$source = gensym-package Q:to[_END_];
+			class %s{submethod Bar     {}}
 			_END_
 			$tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{leading ws};
 
-			$source = Q{class Foo{submethod Foo{}  }};
+			$source = gensym-package Q{class %s{submethod Foo{}  }};
 			$tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{trailing ws};
 
-			$source = Q{class Foo{submethod Bar     {}  }};
+			$source = gensym-package Q{class %s{submethod Bar     {}  }};
 			$tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{leading, trailing ws};
 		}, Q{no intrabrace spacing};
@@ -192,23 +214,23 @@ for ( True, False ) -> $*PURE-PERL {
 		subtest {
 			plan 4;
 
-			$source = Q:to[_END_];
-			class Foo{submethod Bar   {}}
+			$source = gensym-package Q:to[_END_];
+			class %s{submethod Bar   {}}
 			_END_
 			$tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{no ws};
 
-			$source = Q:to[_END_];
-			class Foo{submethod Bar     {   }}
+			$source = gensym-package Q:to[_END_];
+			class %s{submethod Bar     {   }}
 			_END_
 			$tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{leading ws};
 
-			$source = Q{class Foo{submethod Foo{   }  }};
+			$source = gensym-package Q{class %s{submethod Foo{   }  }};
 			$tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{trailing ws};
 
-			$source = Q{class Foo{submethod Bar     {   }  }};
+			$source = gensym-package Q{class %s{submethod Bar     {   }  }};
 			$tree = $pt.to-tree( $source );
 			is $pt.to-string( $tree ), $source, Q{leading, trailing ws};
 		}, Q{with intrabrace spacing};
