@@ -1,253 +1,192 @@
-# Perl6::Parser [![Build Status](https://secure.travis-ci.org/drforr/perl6-Perl6-Parser.svg?branch=master)](http://travis-ci.org/drforr/perl6-Perl6-Parser)
-Perl6::Parser
+[![Build Status](https://travis-ci.org/drforr/perl6-Perl6-Parser.svg?branch=master)](https://travis-ci.org/drforr/perl6-Perl6-Parser)
+
+NAME
+====
+
+Perl6::Parser - Extract a Perl 6 AST from the NQP Perl 6 Parser
+
+SYNOPSIS
+========
+
+    my $pt = Perl6::Parser.new;
+    my $source = Q:to[_END_];
+       code-goes-here();
+       that you( $want-to, $parse );
+    _END_
+
+    # Get a fully-parsed data tree
+    #
+    my $tree = $pt.to-tree( $source );
+    say $pt.dump-tree( $tree );
+
+    # Return only the displayed tokens (including whitespace) in the document
+    #
+    my @token = $pt.to-tokens-only( $source );
+
+    # Return all tokens and structures in the document
+    #
+    my @everything = $pt.to-list( $source );
+
+    # This will fire phasers such as BEGIN in existing code.
+
+    # Use 'my $*PURE-PERL = True;' before parsing to enable an experimental
+    # pure-Perl6 parser which will not execute phasers, but also won't install
+    # custom operators in your code or any slangs that you may have in place.
+    # As of 2017-09-28 it just bypasses NQP matches for the terminals such as
+    # numbers, operators and keywords, but this will change.
+
+DESCRIPTION
+===========
+
+Uses the built-in Perl 6 parser exposed by the internal nqp module, so that you can parse Perl 6 using Perl 6 itself. If it scares you... well, it probably should. Assuming everything works out, you'll get back a Perl 6 object tree that exactly mirrors your source file's layout, with every bit of whitespace, POD, and code given one or more tokens.
+
+Redisplaying it becomes a matter of calling the `to-string()` method on the tree, which passes an optional formatting hashref down the tree. You can use the format methods as they are, or add a role or subclass the objects created as you see fit to create new objects.
+
+This process **will** be simplified and encapsulated in the near future, as reformatting Perl 6 code was what this rather extensive module was designed to do.
+
+I've added fairly extensive debugging documentation to the [README.md](README.md) of this module, along with an internal [DEBUGGING.pod](DEBUGGING.pod) file talking about what you're seeing here, and why on **earth** didn't I do it **this** way? I have my reasons, but can be talked out of it with a good argument.
+
+Please **please** note that this, out of necessity, does compile your Perl 6 code, which **does** mean executing phasers such as `BEGIN`. There may be a way to oerride this behavior, and if you have suggestions that don't involve rewriting the Perl 6 grammar as a standalone library (which would not be such a bad idea in general) then please let the author know.
+
+As it stands, the `.parse` method returns a deeply-nested object representation of the Perl 6 code it's given. It handles the regex language, but not the other braided languages such as embedded blocks in strings. It will do so eventually, but for the moment I'm busy getting the grammar rules covered.
+
+While classes like [EClass](EClass) won't go away, their parent classes like [DecInteger](DecInteger) will remove them from the tree once their validation job has been done. For example, while the internals need to know that [$/<eclass> ]($/<eclass> ) (the exponent for a scientific-notation number) hasn't been renamed or moved elsewhere in the tree, you as a consumer of the [DecInteger](DecInteger) class don't need to know that. The `DecInteger.perl6` method will delete the child classes so that we don't end up with a **horribly** cluttered tree.
+
+Classes representing Perl 6 object code are currently in the same file as the main [Perl6::Parser](Perl6::Parser) class, as moving them to separate files caused a severe performance penalty. When the time is right I'll look at moving these to another location, but as shuffling out 20 classes increased my runtime on my little ol' VM from 6 to 20 seconds, it's not worth my time to break them out. And besides, having them all in one file makes editing en masse easier.
+
+DEBUGGING
+=========
+
+Some notes on how I go about debugging various issues follow.
+
+Let's take the case of the following glitch: The terms `$_` and `0` don't show up in the fragment `[$_, 0 .. 100]`, for various reasons, mostly because there's a branch that's either not being traversed, or simply a term has gone missing.
+
+The first thing is to break the offending bit of code out so it's easier to debug. The test file I make to do this (usually an existing test file I've got lying around) looks partially like this, with boilerplate stripped out:
+
+    my $source = Q:to[_END_];
+        my @a; @a[$_, 0 .. 100];
+    _END_
+    my $p = $pt.parse( $source );
+    say $p.dump;
+    my $tree = $pt.build-tree( $p );
+    say $pt.dump-tree($tree);
+    is $pt.to-string( $tree ), $source, Q{formatted};
+
+Already a few things might stand out. First, the code inside the here-doc doesn't actually do anything, it'll never print anything to the screen or do anything interesting. That's not the point at this stage in the game. At this point all I need is a syntactically valid bit of Perl 6 that has the constructs that reproduce the bug. I don't care what the code actually does in the real world.
+
+Second, I'm not doing anything that you as a user of the class would do. As a user of a the class, all you have to do is run the to-string() method, and it does what you want. I'm breaking things down into their component steps.
+
+(side note - This will probably have changed in detail since I wrote this text - Consult your nearest test file for examples of current usage.)
+
+Internally, the library takes sevaral steps to get to the nicely objectified tree that you see on your output. The two important steps in our case are the `.parse( 'text goes here' )` method call, and `.build-tree( $parse-tree )`.
+
+The `.parse()` call returns a very raw [NQPMatch](NQPMatch) object, which is the Perl 6 internal we're trying to reparse into a more useful form. Most of the time you can call `.dump()` on this object and get back a semi-useful object tree. On occasion this **will** lock up, most often because you're trying to `.dump()` a [list](list) accessor, and that hasn't been implemented for NQPMatch. The actual `list` accessor works, but the `.dump()` call will not. A simple workaround is to call `$p.list.[0].dump` on one of the list elements inside, and hope there is one.
+
+Again, these are NQP internals, and aren't quite as stable as the Perl 6 main support layer.
+
+Once you've got a dump of the offending area, it'll look something like this:
+
+    - postcircumfix: [0, $_ ... 100]
+      - semilist: 0, $_ ... 100
+        - statement: 1 matches
+          - EXPR: ...
+            - 0: ,
+              - 0: 0
+                - value: 0
+                # ...
+              - 1: $_
+                - variable: $_
+                  - sigil: $
+                  # ...
+              - infix: ,
+                - sym: ,
+                - O: <object>
+              - OPER: ,
+
+The full thing will probably go on for a few hundred lines. Hope you've got scrollback, or just use tmux as I do.
+
+With this you can almost immediately jump to what appears to be the offending expression, albeit with a bit of interpretation. You'll see `- 0: 0` and `- 1: $_`, and these are exactly the two bits of syntax that have gone missing in our example. Down below you'll see `- infix: ,` which is where the comma separator goes.
+
+We can combine these facts and reason that we have to search for the bit of code where we find an `infix` operator and two list elements. The `- 0` and `- 1` bits tell us that we're dealing with two list elements, and the `- infix` and `- OPER` bits tell us that we've also got two hash keys to find.
+
+Look down in this file for a `assert-hash-keys()` call attempting to assert the existence of exactly a `infix` and `OPER` tag. There may actually be other hash keys in this data structure, as `.dump()` doesn't report unused hash keys; this caused me a deal of confusion.
+
+Eventually you'll find in the `_EXPR()` method this bit of code: (due to change, obviously)
+
+    when self.assert-hash-keys( $_, [< infix OPER >] ) {
+	    @child.append(
+		    self._infix( $_.hash.<infix> )
+	    )
+    }
+
+You're most welcome to use the Perl 6 debugger, but what I just do is add a `say 1;` statement just above the `@child.append()` method call (and anywhere else I find a `infix` and `OPER` hash key hiding, because there are multiple places in the code that match an `infix` and `OPER` hash key) and rerun the test.
+
+Now that we've confirmed where the element `should` be getting generated, but somehow isn't, we need to look at the actual text to verify that this is actually where the `$_` and `0` bits are being matched, and we can use another internal debugging tool to help out with that. Add these lines:
+
+    key-bounds $_.list.[0];
+    key-bounds $_.hash.<infix>;
+    key-bounds $_.list.[1];
+    key-bounds $_.hash.<OPER>;
+    key-bounds $_;
+
+And rerun your code. Or make the appropriate calls in the debugger, it's your funeral :) What this function does is return something that looks like this:
+
+    45 60 [[0, $_ ... 100]]
+
+The two numbers are the glyphs where the matched text starts and stops, respectively. The bit in between [..] (in this case seemingly doubled, but that's because the text is itself bracketed) is the actual text that's been matched.
+
+So, by now you know what the text you're matching actually looks like, where it is in the string, and maybe eve have a rough idea of why what you're seeing isn't being displayedk
+
+With any luck you'll see that the code simply isn't adding the variables to the list that is being glommed onto the `@child` array, and can add it.
+
+By convention, when you're dumping a `- semilist:` match, you can always call `self._semilist( $p.hash.<semilist> )` in order to get back the list of tokens generated by matching on the `$p.hash.semilist` object. You might be wondering why I don't just subclass NQPMatch and add this as a generic multimethod or dispatch it in some other way.
+
+Well, the reason it's called `NQP` is because it's Not Quite Perl 6, and like poor Rudolph, Perl 6 won't let NQP objects join in any subclasing or dispatching games, because it's Not Quite Perl. And yes, this leads to quite a bit of frustruation.
+
+Let's assume that you've found the `$_.list.[0]` and `$_.hash.<infix> ` handlers, and now need to add whitespace between the `$_` and `0` elements in your generated code.
+
+Now we turn to the rather bewildering array of methods on the `Perl6::WS` class. This profusion of methods is because of two things:
+
+    * Whitespace can be inside a token, before or after a token, or even simply not be there because it's actually inside the L<NQPMatch> object one or more levels up, so you're never B<quite> sure where your whitespace will be hiding.
+    * If each of the ~50 classes handled whitespace on its own, I'd have to track down each of the ~50 whitespace-generating methods in order to see which of the whitespace calls is being made. This way I can just look for L<Perl6::WS> and know that those are the only B<possible> places where a whitespace token could be being generated.
+
+METHODS
 =======
 
-## Caveat
+  * _roundtrip( Str $perl-code ) returns Perl6::Parser::Root
 
-This is very much an Alpha release. The code style here is in *NO WAY* meant to reflect common Perl 6 usage patterns. I'm *deliberately* keeping this simple so that as many people as possible can understand the code and try to improve it.
+Given a string containing valid Perl 6 code ... well, return that code. This is mostly a shortcut for testing purposes, and wil probably be moved out of the main file.
 
-Most common Perl 6 constructs work at the moment.
+  * to-tree( Str $source )
 
-Actually, almost all of them do, but not all are referenced "correctly." For instance, ',' is used in lists, obviously. The Perl 6 compiler has to know that a list is comma-separated, but it doesn't have to match each comma explicitly. Perl6::Parser, however, has to know where each one is. So any construct that's not explicitly matched, I have to seek out in the text and find.
+This is normally what you want, it returns the Perl 6 parsed tree corresponding to your source code.
 
-Not all of the classes representing the full complexity of Perl 6 terms are there, and looking at the output of the tree (please look at the .dump-tree method for more info) there are probably a lot of keywords and operators that are mis-classified.
+  * parse( Str $source )
 
-## Contributing
+Returns the underlying NQPMatch object. This is what gets passed on to `build-tree()` and every other important method in this module. It does some minor wizardry to call the Perl 6 reentrant compiler to compile the string you pass it, and return a match object. Please note that it **has** to compile the string in order to validate things like custom operators, so this step is **not** optional.
 
-Read DEBUGGING.pod in this distribution for more information, but on the whole I *encourage* you to liberally copy/paste from the existing code. If other people go and write the same branch in their own style, it just makes it that much harder for me to search for the code later when I want to refactor. So please, copy/paste as much as you like.
+  * build-tree( Mu $parsed )
 
-### APIs
+Build the Perl6::Element tree from the NQPMatch object. This is the core, and runs the factory which silly-walks the match tree and returns one or more tokens for every single match entry it finds, and **more**.
 
-Send a PR with a t/20-my-failing-API.t file in it, and I'll either just code it right up if it looks good, or ask questions trying to figure out what you're trying to achieve.
+  * consistency-check( Perl6::Element $root )
 
-* Searching for a class of tokens
-* Walking the token tree (see the Debugging role in lib/Perl6/Parser.pm for inspiration)
-* Ignoring whitespace and/or structural tags like ()[]{}; while walking
-* Editing existing code
+Check the integrity of the data structure. The Factory at its core puts together the structure very sloppily, to give the tree every possible chance to create actual quasi-valid text. This method makes sure that the factory returned valid tokens, which often doesn't happen. But since you really want to see the data round-tripped, most users don't care what the tree loos like internally.
 
-### Out-of-scope
+  * to-string( Perl6::Element $tree ) returns Str
 
-(but likely to be modules in the Perl6::Parser space)
+Call .perl6 on each element of the tree. You can subclass or override this method in any class as you see fit to properly pretty-print the methods. Right now it's awkward to use, and will probably be removed in favor of an upcoming [Perl6::Tidy](Perl6::Tidy) module. That's why I wrote this yak.. er, module in the first place.
 
-* Dataflow
-* method, subroutine, variable and keyword completion
-* Perl6::Tidy - This is what I started out working on, will be next.
-* Perl6::Critic - This is where I want to get to.
+  * dump-tree( Perl6::Element $root ) returns Str
 
-## Back to documentation
+Given a Perl6::Document (or other) object, return a full nested tree of text detailing every single token, for debugging purposes.
 
-Perl 6's grammar is now pretty much fleshed out, but it's hard to get at from
-within. This makes tools like code formatters, coverage and analysis tools
-hard to put together.
+  * ruler( Str $source )
 
-This module aims to fix that.
+Purely a debugging aid, it puts an ASCII ruler above your source so that you don't have to go blind counting whitespace to figure out which ' ' a given token belongs to. As a courtesy it also makes newlines visible so you don't have to count those separately. I might use the visible space character later to make it easier to read, if I happen to like it.
 
-As such, it is very much a work in progress. At the moment I'm working on
-covering the grammar rules. The code is very paranoid, for good reason, as it
-relies on the underlying match tree, in the murky area of NQP, or
-/Not Quite Perl/. It's pretty stable, but slow and relentlessly checks the
-details of the match object.
+Further-Information
+===================
 
-It comes with a single tool, examples/perl6-dumper. Run this tool on a Perl 6
-source file, and with any luck you'll get back a detailed syntax tree, like the
-following:
+For further information, there's a [DEBUGGING.pod](DEBUGGING.pod) file detailing how to go about tracing down a bug in this module, and an extensive test suite in [t/README.pod](t/README.pod) with some ideas of how I'm structuring the test suite.
 
-```
-Document
-        Statement (line 7095)
-                Bareword ("use") (0-3) (line 7286)
-                WS (" ") (3-4) (line 6537)
-                Bareword ("MONKEY-SEE-NO-EVAL") (4-22) (line 3775)
-                Semicolon (22-23) (line 5017)
-        Statement (line 7095)
-		...
-                Operator::Circumfix (75-81) (line 1911)
-                        Balanced::Enter ("(") (75-76) (line 1911)
-                        Number::Decimal (1) (76-77) (line 3406)
-                        Operator::Infix ("..") (77-79) (line 3209)
-                        Number::Decimal (9) (79-80) (line 3406)
-                        Balanced::Exit (")") (80-81) (line 1911)
-
-```
-
-This is an absurdly detailed breakdown of every character in your Perl 6 source
-file, and it deserves a bit of explanation.
-
-The module is designed with the following principles in mind:
-
-    * Each glyph, including WS, comments and POD, is part of exactly one token.
-    * Tokens must never overlap.
-    * Tokens must always abut one another.
-
-(Here-docs of course break all of these rules, but they're accounted for.)
-
-In a typical Perl6:: dump, here's what you'll see:
-
-    * Document - The root of the Perl 6 source tree.
-    * Statement - `my $a = 1;', `class foo {...}' and so on.
-    * Bareword - Terms such as `my', `use', `class'.
-    * WS - Whitespace
-    * Operator::Circumfix - Function signatures, lists, lots of things.
-    * Balanced::{Enter,Exit}
-        * Blocks and circumfix operators generally have balanced delimiters.
-        * `Balanced::Enter' is used for the start, ::Exit for the end.
-    * Number::Decimal - Decimal values.
-        * `Number' is their parent class, so you can just check against
-           $x ~~ Perl6::Number if you don't care what base it's in.
-
-Whitespace, semicolons and braces also belong to a generic `Structure' category
-so you can ignore those if you want to.
-
-What do all the '(...)' mean? And why are there G and WS cluttering up the
-far left side of the display? Well, I'm glad you asked.
-
-    * ("use") is the actual text of the bareword, string or variable name.
-    * (75-76) is the start and end glyph (not character) of the token.
-    * (line 3406) is the line where this object was created.
-
-    * 'G' on the left means there's a gap between the end of token N and the start of token N+1.
-        * This should not happen, and is a bug.
-    * 'WS' on the left means that either a Whitespace token has non-WS, or a non-Whitespace token (strings excepted) has whitespace.
-    * '' means either:
-        * A null token (start == end, shouldn't happen)
-        * A token (for example) spanning (76-78) doesn't have (78-76=2) glyphs.
-
-These are mainly debugging aids, as for performance reasons the entire parser
-core is a single large class. If you'd like to know my reasoning, please ask
-directly; but the TL;DR is that NQPMatch objects and regular Perl 6 objects
-don't play nicely.
-
-In essence, I can take this tool, run it over a source file, and when it breaks
-I've got a good idea of where the problem happens. This parser contains
-waterbed problems on top of waterbed problems - The type where you refactor one
-bit of code from where it is to a higher level, and find out you've broken code
-5 tokens *before* the change.
-
-When testing changes it's very important to run the verification suite,
-especially if you've changed where you're returning whitespace.
-
-Again, the included examples/perl6-dumper tool should help show you the variety
-of what the tool can already parse. There are many known problems, and many more
-unknowns I've yet to encounter.
-
-
-I make no guarantees that any of the tokens in the code are present in the
-final output, although it is my sincere hope that I haven't missed anything. In
-point of fact you'll note that the test suite only checks that the top-level
-object exists. I do intend to do some deeper tests shortly, but getting full
-coverage of the grammar is my current priority.
-
-PLEASE DO NOT ASSUME THIS IS STABLE OR IN ANY WAY REPRESENTATIVE OF THE FINAL
-PRODUCT. Doing so will void your warranty, and may cause demons to fly from
-your nose. YOU HAVE BEEN WARNED.
-
-## DEBUGGING UTILITIES
-
-There are two methods in L<Perl6::Parser>, and one core method that you'll find
-useful as you delve into the murky waters of the code.
-
-The first one is useful after ```$pt.parse( $source )``` - You can use
-```.dump``` on the resultant object, and (usually) get a dump of the NQPMatch
-object that the Perl 6 parser has generated for your source. I say "usually"
-because there are some conditions under which ```.dump``` will hang, most of the
-time because you've passed it a list element. This is an issue with the
-NQP core, and deprioritized as such.
-
-The next one is useful after ```$pt.build-tree( $p )```, and that is
-```$pt.dump-tree( $tree )```. This gives a nicely-annotated view of the
-L<Perl6::Parser> tree, complete with text that it's matched in gist form, and
-the start and end markers of each leaf on the tree.
-(Start and end markers for constructs like L<Perl6::Document> and
-L<Perl6::Statement> are elided because they're computed from the underlying
-  ```:child``` elements. My rationale for ignoring those is that when I'm
-debugging line boundaries, I'm most concerned with what I can immediately
-affect in the code; since statement and document boundaries are generated for
-me, they're not something I can/should be tweaking.
-
-Finally, there's a little ```$pt.ruler( $source )``` helper. All it does is put
-up a bit of text like so:
-
-
-```
-  #          1         2
-  #012345678901234567890
-  #unit subset Foo;␤
-
-```
-
-First it puts up a tiny ASCII-art ruler that helps you count characters, with
-every 10 characters called out w/an extra tick above. This way you don't go
-blind counting characters. It renders just the first 72 characters so that
-things don't go wrapping around the terminal, and adds an ellipsis ('...') if
-the source text is more than 72 characters.
-
-It munges UNIX newlines (eventually CRLF when I get around to it) into the
-equivalent Unicode control pictures, so they don't wrap around to the next
-line of the screen.
-
-And then, so you can copy the text into another buffer without worrying about
-whether it'll be accidentally run as code, adds '#' to the start so that it's
-automatically a valid comment.
-
-## DEVELOPER NOTES
-
-Internal classes are labeled with a leading ```_``` so they will never be confused with native Perl6 classes. This is very likely with this sort of grammar, see L<_Signature> vs. the existing L<Signature> class.
-
-At the moment, moving the 160+ separate classes out into a separate directory causes a severe run-time penalty on my VM, so they'll stay in a single file. Doing search-and-destroy on one file is easier than search-n-destroy on 160 different files, and I run less of a risk of forgetting something if the internal classes are all in one file.
-
-Classes that will be exposed to the outside world won't have the leading ```_``` of course, and will have names that reflect their place in the grammar more closely.
-
-If the flow of control inside a ```new()``` or ```is-valid()``` method ever gets to the end of its block, the code should simply die. Something went wrong, and it's better to get information as close to the point of failure as possible. Also once this goes into the ecosystem I want to be terribly paranoid about changes to Perl6 core code.
-
-Flow of control should never make it to the bottom of a loop block either, because one of the validators inside the loop should handle at least one of the cases.
-
-Until I come up with a better scheme, validators should be ordered in descending number of terms, regardless of whether the terms are defined or not.
-
-I'm eventually going to remove all the compound classes such as L<_Atom_SigFinal> because that's where the combinatoric explosion will start to happen, and I'm already starting to see that q.v. L<_Atom_SigFinal> and L<_Atom_SigFinal_Quantifier> - Better to have just the separate L<_Atom> and L<_SigFinal> classes, and let the grammar put them together naturally.
-
-When it comes to debugging the NQP internals, one simple thing to do is not to dump the $parsed object right at the point of invocation, but look one layer up the stack and debug from inside that function. It's a happy coincidence that usually any ```Mu $parsed``` argument can be ```.dump```'d cleanly.
-
-It's a habit of mine, though by no means a requirement, to stuff test data into the L<t/> files with every line starting with ```###```, so that I have a simple marker to search for when I'm parsing new lines.
-
-Incidentally, L<t/rosetta-*> files are just meant to be echoes of the RosettaCode examples, not an exhaustive Christmas-tree test of the entire grammar. There doesn't appear to be an existing test of the actual parsing in the Rakudo test suite beyond "Lookie here, it can read 'hello, world!'", which is fine; If the grammar has gone south then any test suites are probably going to generate more noise than they're worth.
-
-
-Installation
-============
-
-* Using zef (a module management tool bundled with Rakudo Star):
-
-```
-    zef update && zef install Perl6::Parser
-```
-
-## Testing
-
-To run tests:
-
-```
-    prove -e perl6
-```
-
-## Known Bugs
-
-```
-    max=
-    #`(..)
-    Some comma-separated lists
-    Z=>
-    Z in certain situations
-    here-docs
-       I wrote one pass at it, but two corner cases in the grammar cause a
-       problem.
-```
-By all means, please file bugs as you see them.
-
-
-## Author
-
-Jeffrey Goff, DrForr on #perl6, https://github.com/drforr/
-
-## License
-
-Artistic License 2.0

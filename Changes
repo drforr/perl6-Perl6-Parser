@@ -1,0 +1,4 @@
+Revision history for Perl6-Parser
+
+{{$NEXT}}
+    - Fixing newly-generated redeclaration errors in test suites.
