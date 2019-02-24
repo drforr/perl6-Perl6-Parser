@@ -3,7 +3,7 @@ use v6;
 use Test;
 use Perl6::Parser;
 
-plan 2 * 27;
+plan 2 * 19;
 
 my $pt = Perl6::Parser.new;
 my $*CONSISTENCY-CHECK = True;
@@ -145,7 +145,7 @@ for ( True, False ) -> $*PURE-PERL {
 			done-testing;
 		}, Q{version 3};
 
-		subtest {
+#`{		subtest {
 			my $source = Q:to[_END_];
 	grammar BalBrack { token TOP { '[' <TOP>* ']' } }
 	 
@@ -157,11 +157,12 @@ for ( True, False ) -> $*PURE-PERL {
 
 			done-testing;
 		}, Q{version 4};
+}
 
 		done-testing;
 	}, Q{Balanced brackets};
 
-	subtest {
+#`[	subtest {
 		my $source = Q:to[_END_];
 	class BT {
 	    has @.coeff;
@@ -231,8 +232,9 @@ for ( True, False ) -> $*PURE-PERL {
 
 		done-testing;
 	}, Q{Balanced ternary};
+]
 
-	subtest {
+#`{	subtest {
 		# XXX Make up a 'Image::PNG::Portable' class
 		my $source = Q:to[_END_];
 	class Image::PNG::Portable { has ( $.width, $.height ); method set { }; method write { } }
@@ -261,6 +263,7 @@ for ( True, False ) -> $*PURE-PERL {
 
 		done-testing;
 	}, Q{Barnsley fern};
+}
 
 	subtest {
 		my $source = Q:to[_END_];
@@ -470,7 +473,7 @@ for ( True, False ) -> $*PURE-PERL {
 		done-testing;
 	}, Q{Binary search};
 
-	subtest {
+#`{	subtest {
 		my $source = Q:to[_END_];
 	# Perl 6 is perfectly fine with NUL *characters* in strings:
 	 
@@ -560,6 +563,7 @@ for ( True, False ) -> $*PURE-PERL {
 
 		done-testing;
 	}, Q{Binary strings};
+}
 
 	subtest {
 		# XXX class Digest::SHA exports 'sha256'
@@ -624,7 +628,7 @@ for ( True, False ) -> $*PURE-PERL {
 		done-testing;
 	}, Q{Bitcoin public point to address};
 
-	subtest {
+#`{	subtest {
 		my $source = Q:to[_END_];
 	class Pixel { has UInt ($.R, $.G, $.B) }
 	class Bitmap {
@@ -660,8 +664,9 @@ for ( True, False ) -> $*PURE-PERL {
 
 		done-testing;
 	}, Q{Bitmap};
+}
 
-	subtest {
+#`{	subtest {
 		# XXX Create a shell 'Bitmap' class.. yes, just above but separation...
 		my $source = Q:to[_END_];
 	class Pixel { has UInt ($.R, $.G, $.B) }
@@ -701,8 +706,9 @@ for ( True, False ) -> $*PURE-PERL {
 
 		done-testing;
 	}, Q{Bitmap / Bresenham's line algorithm};
+}
 
-	subtest {
+#`{	subtest {
 		# XXX Create a shell 'Bitmap' class.. yes, just above but separation...
 		my $source = Q:to[_END_];
 	use MONKEY-TYPING;
@@ -748,8 +754,9 @@ for ( True, False ) -> $*PURE-PERL {
 
 		done-testing;
 	}, Q{Bitmap / midpoint circle algorithm};
+}
 
-	subtest {
+#`{	subtest {
 	#`[
 		my $source = Q:to[_END_];
 	class Pixel { has uint8 ($.R, $.G, $.B) }
@@ -788,6 +795,7 @@ for ( True, False ) -> $*PURE-PERL {
 
 		done-testing;
 	}, Q{Bitmap / write a PPM file};
+}
 
 	subtest {
 		my $source = Q:to[_END_];
@@ -943,7 +951,7 @@ for ( True, False ) -> $*PURE-PERL {
 		done-testing;
 	}, Q{Brace expansion};
 
-	subtest {
+#`{	subtest {
 		my $source = Q:to[_END_];
 	class Foo {
 	    has $!shyguy = 42;
@@ -956,6 +964,7 @@ for ( True, False ) -> $*PURE-PERL {
 
 		done-testing;
 	}, Q{Break OO privacy};
+}
 
 	subtest {
 		my $source = Q:to[_END_];

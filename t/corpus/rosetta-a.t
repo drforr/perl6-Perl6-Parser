@@ -3,7 +3,7 @@ use v6;
 use Test;
 use Perl6::Parser;
 
-plan 2 * 42;
+plan 2 * 38;
 
 my $pt = Perl6::Parser.new;
 my $*CONSISTENCY-CHECK = True;
@@ -71,7 +71,7 @@ for ( True, False ) -> $*PURE-PERL {
 		done-testing;
 	}, Q{ABC Problem};
 
-	subtest {
+#`{	subtest {
 		my $source = Q:to[_END_];
 	use v6;
 
@@ -97,6 +97,7 @@ for ( True, False ) -> $*PURE-PERL {
 
 		done-testing;
 	}, Q{Abstract Class};
+}
 
 	subtest {
 		my $source = Q:to[_END_];
@@ -172,7 +173,7 @@ for ( True, False ) -> $*PURE-PERL {
 	}, Q{Ackermann Function};
 
 	subtest {
-		subtest {
+#`{		subtest {
 			my $source = Q:to[_END_];
 	class Bar { }             # an empty class
 	 
@@ -201,6 +202,7 @@ for ( True, False ) -> $*PURE-PERL {
 
 			done-testing;
 		}, Q{version 1};
+}
 
 		subtest {
 			my $source = Q:to[_END_];
@@ -684,26 +686,26 @@ for ( True, False ) -> $*PURE-PERL {
 		done-testing;
 	}, Q{Arbitrary-precision integers};
 
-	subtest {
-		# XXX Make up a 'Image::PNG::Portable' class
-		my $source = Q:to[_END_];
-	class Image::PNG::Portable { has ( $.width, $.height ); method set { }; method write { } }
-	#use Image::PNG::Portable;
-
-	my ($w, $h) = (400, 400);
-
-	my $png = Image::PNG::Portable.new: :width($w), :height($h);
-
-	for 0, .025 ... 52*π -> \Θ {
-	    $png.set: |((cis( Θ / π ) * Θ).reals »+« ($w/2, $h/2))».Int, 255, 0, 255;
-	}
-
-	$png.write: 'Archimedean-spiral-perl6.png';
-	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
-
-		done-testing;
-	}, Q{Archimedean spiral};
+#	subtest {
+#		# XXX Make up a 'Image::PNG::Portable' class
+#		my $source = Q:to[_END_];
+#	class Image::PNG::Portable { has ( $.width, $.height ); method set { }; method write { } }
+#	#use Image::PNG::Portable;
+#
+#	my ($w, $h) = (400, 400);
+#
+#	my $png = Image::PNG::Portable.new: :width($w), :height($h);
+#
+#	for 0, .025 ... 52*π -> \Θ {
+#	    $png.set: |((cis( Θ / π ) * Θ).reals »+« ($w/2, $h/2))».Int, 255, 0, 255;
+#	}
+#
+#	$png.write: 'Archimedean-spiral-perl6.png';
+#	_END_
+#		is $pt._roundtrip( $source ), $source,  Q{version 1};
+#
+#		done-testing;
+#	}, Q{Archimedean spiral};
 
 	subtest {
 		my $source = Q:to[_END_];
@@ -824,7 +826,7 @@ for ( True, False ) -> $*PURE-PERL {
 		done-testing;
 	}, Q{Arithmetic coding};
 
-	subtest {
+#`{	subtest {
 		my $source = Q:to[_END_];
 	sub ev (Str $s --> Num) {
 	 
@@ -873,6 +875,7 @@ for ( True, False ) -> $*PURE-PERL {
 
 		done-testing;
 	}, Q{Arithmetic evaluation};
+}
 
 	subtest {
 		subtest {
@@ -1049,7 +1052,7 @@ for ( True, False ) -> $*PURE-PERL {
 		done-testing;
 	}, Q{Array length};
 
-	subtest {
+#`{	subtest {
 		# XXX Synthesize JSON::Tiny
 		my $source = Q:to[_END_];
 	class JSON::Tiny { sub from-json is export { } }
@@ -1074,6 +1077,7 @@ for ( True, False ) -> $*PURE-PERL {
 
 		done-testing;
 	}, Q{Array search};
+}
 
 	subtest {
 		my $source = Q:to[_END_];
@@ -1136,7 +1140,7 @@ for ( True, False ) -> $*PURE-PERL {
 			done-testing;
 		}, Q{version 4};
 
-		subtest {
+#`{		subtest {
 			my $source = Q:to[_END_];
 	my %hash{Any}; # same as %hash{*}
 	class C {};
@@ -1147,6 +1151,7 @@ for ( True, False ) -> $*PURE-PERL {
 
 			done-testing;
 		}, Q{version 5};
+}
 
 		subtest {
 			my $source = Q:to[_END_];
