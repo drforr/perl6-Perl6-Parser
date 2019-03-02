@@ -3,7 +3,10 @@ use v6;
 use Test;
 use Perl6::Parser;
 
-plan 2 * 38;
+use lib 't/lib';
+use Utils; # Get gensym-package
+
+plan 2 * 39;
 
 my $pt = Perl6::Parser.new;
 my $*CONSISTENCY-CHECK = True;
@@ -591,7 +594,7 @@ for ( True, False ) -> $*PURE-PERL {
 		}, Q{version 1};
 
 		subtest {
-	#`[
+	#`[ Infiniloop?
 			my $source = Q:to[_END_];
 	.put for                             # print each element of the array made this way:
 	slurp('unixdict.txt')\               # load file in memory
@@ -826,11 +829,11 @@ for ( True, False ) -> $*PURE-PERL {
 		done-testing;
 	}, Q{Arithmetic coding};
 
-#`{	subtest {
-		my $source = Q:to[_END_];
+	subtest {
+		my $source = gensym-package Q:to[_END_];
 	sub ev (Str $s --> Num) {
 	 
-	    grammar expr {
+	    grammar %s {
 		token TOP { ^ <sum> $ }
 		token sum { <product> (('+' || '-') <product>)* }
 		token product { <factor> (('*' || '/') <factor>)* }
@@ -860,7 +863,7 @@ for ( True, False ) -> $*PURE-PERL {
 		  !! $x<literal>)
 	    }
 	 
-	    expr.parse([~] split /\s+/, $s);
+	    %s.parse([~] split /\s+/, $s);
 	    $/ or fail 'No parse.';
 	    sum $/<sum>;
 	 
@@ -875,7 +878,6 @@ for ( True, False ) -> $*PURE-PERL {
 
 		done-testing;
 	}, Q{Arithmetic evaluation};
-}
 
 	subtest {
 		subtest {
@@ -1140,18 +1142,17 @@ for ( True, False ) -> $*PURE-PERL {
 			done-testing;
 		}, Q{version 4};
 
-#`{		subtest {
-			my $source = Q:to[_END_];
-	my %hash{Any}; # same as %hash{*}
-	class C {};
-	my %cash{C};
-	%cash{C.new} = 1;
+		subtest {
+			my $source = gensym-package Q:to[_END_];
+	my %%hash{Any}; # same as %%hash{*}
+	class %s {};
+	my %%cash{%s};
+	%%cash{%s.new} = 1;
 	_END_
 			is $pt._roundtrip( $source ), $source,  Q{version 5};
 
 			done-testing;
 		}, Q{version 5};
-}
 
 		subtest {
 			my $source = Q:to[_END_];

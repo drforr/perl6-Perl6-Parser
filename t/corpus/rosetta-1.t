@@ -3,7 +3,10 @@ use v6;
 use Test;
 use Perl6::Parser;
 
-plan 2 * 4;
+plan 2 * 7;
+
+use lib 't/lib';
+use Utils; # Get gensym-package
 
 my $pt = Perl6::Parser.new;
 my $*CONSISTENCY-CHECK = True;
@@ -54,137 +57,137 @@ for ( True, False ) -> $*PURE-PERL {
 		done-testing;
 	}, Q{100 doors};
 
-#	subtest {
-#	# The parser also recursively parses use'd classes, so since Term::termios might
-#	# not be present on all systems, stub it out.
-#		my $source = Q:to[_END_];
-#	class Term::termios { has $fd; method getattr {}; method unset_lflags { }; method unset_iflags { }; method setattr { } }
-#	#use Term::termios;
-#
-#	constant $saved   = Term::termios.new(fd => 1).getattr;
-#	constant $termios = Term::termios.new(fd => 1).getattr;
-#	# raw mode interferes with carriage returns, so
-#	# set flags needed to emulate it manually
-#	$termios.unset_iflags(<BRKINT ICRNL ISTRIP IXON>);
-#	$termios.unset_lflags(< ECHO ICANON IEXTEN ISIG>);
-#	$termios.setattr(:DRAIN);
-#
-#	# reset terminal to original setting on exit
-#	END { $saved.setattr(:NOW) }
-#	 
-#	constant n    = 4; # board size
-#	constant cell = 6; # cell width
-#	 
-#	constant $top = join '─' x cell, '┌', '┬' xx n-1, '┐';
-#	constant $mid = join '─' x cell, '├', '┼' xx n-1, '┤';
-#	constant $bot = join '─' x cell, '└', '┴' xx n-1, '┘';
-#	 
-#	my %dir = (
-#	   "\e[A" => 'up',
-#	   "\e[B" => 'down',
-#	   "\e[C" => 'right',
-#	   "\e[D" => 'left',
-#	);
-#
-#	my @solved = [1,2,3,4],[5,6,7,8],[9,10,11,12],[13,14,15,' '];
-#	my @board;
-#	new();
-#	 
-#	sub new () {
-#	    loop {
-#		@board = shuffle();
-#		last if parity-ok(@board);
-#	    }
-#	}
-#	 
-#	sub shuffle () {
-#	    my @c = [1,2,3,4],[5,6,7,8],[9,10,11,12],[13,14,15,' '];
-#	    for (^16).pick(*) -> $y, $x {
-#		my ($yd, $ym, $xd, $xm) = ($y div n, $y mod n, $x div n, $x mod n);
-#		my $temp    = @c[$ym;$yd];
-#		@c[$ym;$yd] = @c[$xm;$xd];
-#		@c[$xm;$xd] = $temp;
-#	    }
-#	    @c;
-#	}
-#
-#	sub parity-ok (@b) {
-#	    so (sum @b».grep(/' '/,:k).grep(/\d/, :kv)) %% 2;
-#	}
-#
-#	sub row (@row) { '│' ~ (join '│', @row».&center) ~ '│' }
-#
-#	sub center ($s){
-#	    my $c   = cell - $s.chars;
-#	    my $pad = ' ' x ceiling($c/2);
-#	    sprintf "%{cell}s", "$s$pad";
-#	}
-#
-#	sub draw-board {
-#	    run('clear');
-#	    print qq:to/END/;
-#	 
-#	 
-#		Press direction arrows to move.
-#	 
-#		Press q to quit. Press n for a new puzzle.
-#	 
-#		$top
-#		{ join "\n\t$mid\n\t", map { .&row }, @board }
-#		$bot
-#	 
-#		{ (so @board ~~ @solved) ?? 'Solved!!' !! '' }
-#	END
-#	}
-#
-#	sub slide (@c is copy) {
-#	    my $t = (grep { /' '/ }, :k, @c)[0];
-#	    return @c unless $t and $t > 0;
-#	    @c[$t,$t-1] = @c[$t-1,$t];
-#	    @c;
-#	}
-#
-#	multi sub move('up') {
-#	    map { @board[*;$_] = reverse slide reverse @board[*;$_] }, ^n;
-#	}
-#	 
-#	multi sub move('down') {
-#	    map { @board[*;$_] = slide @board[*;$_] }, ^n;
-#	}
-#	 
-#	multi sub move('left') {
-#	    map { @board[$_] = reverse slide reverse @board[$_] }, ^n;
-#	}
-#	 
-#	multi sub move('right') {
-#	    map { @board[$_] = slide @board[$_] }, ^n;
-#	}
-#	 
-#	loop {
-#	    draw-board;
-#	 
-#	    # Read up to 4 bytes from keyboard buffer.
-#	    # Page navigation keys are 3-4 bytes each.
-#	    # Specifically, arrow keys are 3.
-#	    my $key = $*IN.read(4).decode;
-#	 
-#	    move %dir{$key} if so %dir{$key};
-#	    last if $key eq 'q'; # (q)uit
-#	    new() if $key eq 'n';
-#	}
-#	_END_
-#		is $pt._roundtrip( $source ), $source,  Q{version 1};
-#
-#		done-testing;
-#	}, Q{15 Puzzle};
+	subtest {
+	# The parser also recursively parses use'd classes, so since Term::termios might
+	# not be present on all systems, stub it out.
+		my $source = gensym-package Q:to[_END_];
+	class %s { has $fd; method getattr {}; method unset_lflags { }; method unset_iflags { }; method setattr { } }
+	#use %s;
 
-#`{	subtest {
-		my $source = Q:to[_END_];
-	class Term::termios { has $fd; method getattr {}; method unset_lflags { }; method unset_iflags { }; method setattr { } }
-	#use Term::termios;
+	constant $saved   = %s.new(fd => 1).getattr;
+	constant $termios = %s.new(fd => 1).getattr;
+	# raw mode interferes with carriage returns, so
+	# set flags needed to emulate it manually
+	$termios.unset_iflags(<BRKINT ICRNL ISTRIP IXON>);
+	$termios.unset_lflags(< ECHO ICANON IEXTEN ISIG>);
+	$termios.setattr(:DRAIN);
+
+	# reset terminal to original setting on exit
+	END { $saved.setattr(:NOW) }
 	 
-	constant $saved   = Term::termios.new(fd => 1).getattr;
-	constant $termios = Term::termios.new(fd => 1).getattr;
+	constant n    = 4; # board size
+	constant cell = 6; # cell width
+	 
+	constant $top = join '─' x cell, '┌', '┬' xx n-1, '┐';
+	constant $mid = join '─' x cell, '├', '┼' xx n-1, '┤';
+	constant $bot = join '─' x cell, '└', '┴' xx n-1, '┘';
+	 
+	my %%dir = (
+	   "\e[A" => 'up',
+	   "\e[B" => 'down',
+	   "\e[C" => 'right',
+	   "\e[D" => 'left',
+	);
+
+	my @solved = [1,2,3,4],[5,6,7,8],[9,10,11,12],[13,14,15,' '];
+	my @board;
+	new();
+	 
+	sub new () {
+	    loop {
+		@board = shuffle();
+		last if parity-ok(@board);
+	    }
+	}
+	 
+	sub shuffle () {
+	    my @c = [1,2,3,4],[5,6,7,8],[9,10,11,12],[13,14,15,' '];
+	    for (^16).pick(*) -> $y, $x {
+		my ($yd, $ym, $xd, $xm) = ($y div n, $y mod n, $x div n, $x mod n);
+		my $temp    = @c[$ym;$yd];
+		@c[$ym;$yd] = @c[$xm;$xd];
+		@c[$xm;$xd] = $temp;
+	    }
+	    @c;
+	}
+
+	sub parity-ok (@b) {
+	    so (sum @b».grep(/' '/,:k).grep(/\d/, :kv)) %%%% 2;
+	}
+
+	sub row (@row) { '│' ~ (join '│', @row».&center) ~ '│' }
+
+	sub center ($s){
+	    my $c   = cell - $s.chars;
+	    my $pad = ' ' x ceiling($c/2);
+	    sprintf "%%{cell}s", "$s$pad";
+	}
+
+	sub draw-board {
+	    run('clear');
+	    print qq:to/END/;
+	 
+	 
+		Press direction arrows to move.
+	 
+		Press q to quit. Press n for a new puzzle.
+	 
+		$top
+		{ join "\n\t$mid\n\t", map { .&row }, @board }
+		$bot
+	 
+		{ (so @board ~~ @solved) ?? 'Solved!!' !! '' }
+	END
+	}
+
+	sub slide (@c is copy) {
+	    my $t = (grep { /' '/ }, :k, @c)[0];
+	    return @c unless $t and $t > 0;
+	    @c[$t,$t-1] = @c[$t-1,$t];
+	    @c;
+	}
+
+	multi sub move('up') {
+	    map { @board[*;$_] = reverse slide reverse @board[*;$_] }, ^n;
+	}
+	 
+	multi sub move('down') {
+	    map { @board[*;$_] = slide @board[*;$_] }, ^n;
+	}
+	 
+	multi sub move('left') {
+	    map { @board[$_] = reverse slide reverse @board[$_] }, ^n;
+	}
+	 
+	multi sub move('right') {
+	    map { @board[$_] = slide @board[$_] }, ^n;
+	}
+	 
+	loop {
+	    draw-board;
+	 
+	    # Read up to 4 bytes from keyboard buffer.
+	    # Page navigation keys are 3-4 bytes each.
+	    # Specifically, arrow keys are 3.
+	    my $key = $*IN.read(4).decode;
+	 
+	    move %%dir{$key} if so %%dir{$key};
+	    last if $key eq 'q'; # (q)uit
+	    new() if $key eq 'n';
+	}
+	_END_
+		is $pt._roundtrip( $source ), $source,  Q{version 1};
+
+		done-testing;
+	}, Q{15 Puzzle};
+
+	subtest {
+		my $source = gensym-package Q:to[_END_];
+	class %s { has $fd; method getattr {}; method unset_lflags { }; method unset_iflags { }; method setattr { } }
+	#use %s;
+	 
+	constant $saved   = %s.new(fd => 1).getattr;
+	constant $termios = %s.new(fd => 1).getattr;
 	# raw mode interferes with carriage returns, so
 	# set flags needed to emulate it manually
 	$termios.unset_iflags(<BRKINT ICRNL ISTRIP IXON>);
@@ -206,7 +209,7 @@ for ( True, False ) -> $*PURE-PERL {
 	constant $mid = join '─' x cell, '├', '┼' xx n-1, '┤';
 	constant $bot = join '─' x cell, '└', '┴' xx n-1, '┘';
 	 
-	my %dir = (
+	my %%dir = (
 	   "\e[A" => 'up',
 	   "\e[B" => 'down',
 	   "\e[C" => 'right',
@@ -221,7 +224,7 @@ for ( True, False ) -> $*PURE-PERL {
 	sub center ($s){
 	    my $c   = cell - $s.chars;
 	    my $pad = ' ' x ceiling($c/2);
-	    my $tile = sprintf "%{cell}s", "$s$pad";
+	    my $tile = sprintf "%%{cell}s", "$s$pad";
 	    my $idx = $s ?? $s.log(2) !! 0;
 	    ansi ?? "\e[{@ANSI[$idx]}m$tile\e[0m" !! $tile;
 	}
@@ -291,7 +294,7 @@ for ( True, False ) -> $*PURE-PERL {
 	    # Specifically, arrow keys are 3.
 	    my $key = $*IN.read(4).decode;
 
-	    move %dir{$key} if so %dir{$key};
+	    move %%dir{$key} if so %%dir{$key};
 	    last if $key eq 'q'; # (q)uit
 	}
 	_END_
@@ -299,24 +302,23 @@ for ( True, False ) -> $*PURE-PERL {
 
 		done-testing;
 	}, Q{2048};
-}
 
-#`{	subtest {
-		my $source = Q:to[_END_];
+	subtest {
+		my $source = gensym-package Q:to[_END_];
 	use MONKEY-SEE-NO-EVAL;
 	 
 	say "Here are your digits: ", 
 	constant @digits = (1..9).roll(4)».Str;
 
-	grammar Exp24 {
+	grammar %s {
 	    token TOP { ^ <exp> $ { fail unless EVAL($/) == 24 } }
-	    rule exp { <term>+ % <op> }
+	    rule exp { <term>+ %% <op> }
 	    rule term { '(' <exp> ')' | <@digits> }
 	    token op { < + - * / > }
 	}
 
 	while my $exp = prompt "\n24? " {
-	    if try Exp24.parse: $exp {
+	    if try %s.parse: $exp {
 		say "You win :)";
 		last;
 	    } else {
@@ -334,7 +336,6 @@ for ( True, False ) -> $*PURE-PERL {
 
 		done-testing;
 	}, Q{24 game};
-}
 
 	subtest {
 		my $source = Q:to[_END_];

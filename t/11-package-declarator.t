@@ -3,6 +3,9 @@ use v6;
 use Test;
 use Perl6::Parser;
 
+use lib 't/lib';
+use Utils; # Get gensym-package
+
 # The terms that get tested here are:
 
 # package <name> { }
@@ -40,12 +43,6 @@ my ( $source, $tree );
 #
 # Use it to build out package names and such.
 #
-sub gensym-package( Str $code ) {
-	state $appendix = 'A';
-	my $package = 'Foo' ~ $appendix++;
-
-	return sprintf $code, $package;
-}
 
 for ( True, False ) -> $*PURE-PERL {
 	subtest {

@@ -3,7 +3,10 @@ use v6;
 use Test;
 use Perl6::Parser;
 
-plan 2 * 19;
+use lib 't/lib';
+use Utils; # Get gensym-package
+
+plan 2 * 21;
 
 my $pt = Perl6::Parser.new;
 my $*CONSISTENCY-CHECK = True;
@@ -145,33 +148,32 @@ for ( True, False ) -> $*PURE-PERL {
 			done-testing;
 		}, Q{version 3};
 
-#`{		subtest {
-			my $source = Q:to[_END_];
-	grammar BalBrack { token TOP { '[' <TOP>* ']' } }
+		subtest {
+			my $source = gensym-package Q:to[_END_];
+	grammar %s { token TOP { '[' <TOP>* ']' } }
 	 
 	my $n = prompt "Number of bracket pairs: ";
 	my $s = ('[' xx $n, ']' xx $n).flat.pick(*).join;
-	say "$s { BalBrack.parse($s) ?? "is" !! "is not" } well-balanced";
+	say "$s { %s.parse($s) ?? "is" !! "is not" } well-balanced";
 	_END_
 			is $pt._roundtrip( $source ), $source,  Q{version 4};
 
 			done-testing;
 		}, Q{version 4};
-}
 
 		done-testing;
 	}, Q{Balanced brackets};
 
-#`[	subtest {
-		my $source = Q:to[_END_];
-	class BT {
+	subtest {
+		my $source = gensym-package Q:to[_END_];
+	class %s {
 	    has @.coeff;
 	 
-	    my %co2bt = '-1' => '-', '0' => '0', '1' => '+';
-	    my %bt2co = %co2bt.invert;
+	    my %%co2bt = '-1' => '-', '0' => '0', '1' => '+';
+	    my %%bt2co = %%co2bt.invert;
 	 
 	    multi method new (Str $s) {
-		self.bless(*, coeff => %bt2co{$s.flip.comb});
+		self.bless(*, coeff => %%bt2co{$s.flip.comb});
 	    }
 	    multi method new (Int $i where $i >= 0) {
 		self.bless(*, coeff => carry $i.base(3).comb.reverse);
@@ -180,7 +182,7 @@ for ( True, False ) -> $*PURE-PERL {
 		self.new(-$i).neg;
 	    }
 	 
-	    method Str () { %co2bt{@!coeff}.join.flip }
+	    method Str () { %%co2bt{@!coeff}.join.flip }
 	    method Int () { [+] @!coeff Z* (1,3,9...*) }
 	 
 	    multi method neg () {
@@ -197,16 +199,16 @@ for ( True, False ) -> $*PURE-PERL {
 	    @digits;
 	}
 	 
-	multi prefix:<-> (BT $x) { $x.neg }
+	multi prefix:<-> (%s $x) { $x.neg }
 	 
-	multi infix:<+> (BT $x, BT $y) {
+	multi infix:<+> (%s $x, %s $y) {
 	    my ($b,$a) = sort +*.coeff, $x, $y;
-	    BT.new: coeff => carry $a.coeff Z+ $b.coeff, 0 xx *;
+	    %s.new: coeff => carry $a.coeff Z+ $b.coeff, 0 xx *;
 	}
 	 
-	multi infix:<-> (BT $x, BT $y) { $x + $y.neg }
+	multi infix:<-> (%s $x, %s $y) { $x + $y.neg }
 	 
-	multi infix:<*> (BT $x, BT $y) {
+	multi infix:<*> (%s $x, %s $y) {
 	    my @x = $x.coeff;
 	    my @y = $y.coeff;
 	    my @z = 0 xx @x+@y-1;
@@ -215,12 +217,12 @@ for ( True, False ) -> $*PURE-PERL {
 		@z = @z Z+ (@y X* $xd), 0 xx *;
 		@safe.push: @z.shift;
 	    }
-	    BT.new: coeff => carry @safe, @z;
+	    %s.new: coeff => carry @safe, @z;
 	}
 	 
-	my $a = BT.new: "+-0++0+";
-	my $b = BT.new: -436;
-	my $c = BT.new: "+-++-";
+	my $a = %s.new: "+-0++0+";
+	my $b = %s.new: -436;
+	my $c = %s.new: "+-++-";
 	my $x = $a * ( $b - $c );
 	 
 	say 'a == ', $a.Int;
@@ -232,17 +234,16 @@ for ( True, False ) -> $*PURE-PERL {
 
 		done-testing;
 	}, Q{Balanced ternary};
-]
 
-#`{	subtest {
+	subtest {
 		# XXX Make up a 'Image::PNG::Portable' class
-		my $source = Q:to[_END_];
-	class Image::PNG::Portable { has ( $.width, $.height ); method set { }; method write { } }
-	#use Image::PNG::Portable;
+		my $source = gensym-package Q:to[_END_];
+	class %s { has ( $.width, $.height ); method set { }; method write { } }
+	#use %s;
 	 
 	my ($w, $h) = (640, 640);
 	 
-	my $png = Image::PNG::Portable.new: :width($w), :height($h);
+	my $png = %s.new: :width($w), :height($h);
 	 
 	my ($x, $y) = (0, 0);
 	 
@@ -263,7 +264,6 @@ for ( True, False ) -> $*PURE-PERL {
 
 		done-testing;
 	}, Q{Barnsley fern};
-}
 
 	subtest {
 		my $source = Q:to[_END_];

@@ -3,6 +3,9 @@ use v6;
 use Test;
 use Perl6::Parser;
 
+use lib 't/lib';
+use Utils; # Get gensym-package
+
 # The terms that get tested here are:
 #
 # my <name>
@@ -27,23 +30,6 @@ my $pt = Perl6::Parser.new;
 my $*CONSISTENCY-CHECK = True;
 my $*FALL-THROUGH = True;
 my ( $source, $tree );
-
-# Classes, modules, packages &c can no longer be redeclared.
-# Which is probably a good thing, but plays havoc with testing here.
-#
-# This is a little ol' tool that generates a fresh package name every time
-# through the testing suite. I can't just make up new names as the test suite
-# goes along because I'm running the full test suite twice, once with the
-# original Perl6 parser-aided version, and once with the new regex-based parser.
-#
-# Use it to build out package names and such.
-#
-sub gensym-package( Str $code ) {
-	state $appendix = 'A';
-	my $package = 'Foo' ~ $appendix++;
-
-	return sprintf $code, $package;
-}
 
 for ( True, False ) -> $*PURE-PERL {
 	subtest {
