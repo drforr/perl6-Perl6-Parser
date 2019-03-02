@@ -2,5 +2,9 @@ Revision history for Perl6-Parser
 
 {{$NEXT}}
 
+0.2.1  2019-03-02T14:34:58+09:00
+
+    - Uncomment a few mor tests, adding some more pure-perl stuff next.
+
 0.2.0  2019-02-24T14:29:06+09:00
     - Fixing newly-generated redeclaration errors in test suites.

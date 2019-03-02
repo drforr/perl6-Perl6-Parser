@@ -422,7 +422,7 @@ my role Validating {
 	}
 }
 
-class Perl6::Parser:ver<0.2.0> {
+class Perl6::Parser:ver<0.2.1> {
 	also does Debugging;
 	also does Testing;
 	also does Validating;
