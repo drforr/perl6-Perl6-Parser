@@ -6,7 +6,7 @@ use Perl6::Parser;
 use lib 't/lib';
 use Utils; # Get gensym-package
 
-plan 2 * 21;
+plan 2 * 22;
 
 my $pt = Perl6::Parser.new;
 my $*CONSISTENCY-CHECK = True;
@@ -951,12 +951,12 @@ for ( True, False ) -> $*PURE-PERL {
 		done-testing;
 	}, Q{Brace expansion};
 
-#`{	subtest {
-		my $source = Q:to[_END_];
-	class Foo {
+	subtest {
+		my $source = gensym-package Q:to[_END_];
+	class %s {
 	    has $!shyguy = 42;
 	}
-	my Foo $foo .= new;
+	my %s $foo .= new;
 
 	say $foo.^attributes.first('$!shyguy').get_value($foo);
 	_END_
@@ -964,7 +964,6 @@ for ( True, False ) -> $*PURE-PERL {
 
 		done-testing;
 	}, Q{Break OO privacy};
-}
 
 	subtest {
 		my $source = Q:to[_END_];
