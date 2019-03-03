@@ -1,4 +1,7 @@
 class Utils {
+
+	use Perl6::Parser;
+
 	# Classes, modules, packages &c can no longer be redeclared.
 	# Which is probably a good thing, but plays havoc with testing here.
 	#
@@ -16,5 +19,12 @@ class Utils {
 		my $package = 'Foo' ~ $appendix++;
 
 		return sprintf $code, ( $package ) xx $num-package-uses;
+	}
+
+	sub round-trips( Str $code ) returns Bool is export {
+		my $pp   = Perl6::Parser.new;
+		my $tree = $pp.to-tree( $code );
+
+		return $pp.to-string( $tree ) eq $code;
 	}
 }

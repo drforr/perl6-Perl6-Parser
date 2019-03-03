@@ -14,10 +14,9 @@ use Utils; # Get gensym-package
 
 plan 2 * 3;
 
-my $pt = Perl6::Parser.new;
 my $*CONSISTENCY-CHECK = True;
-my $*FALL-THROUGH = True;
-my ( $source, $tree );
+my $*FALL-THROUGH      = True;
+my ( $source );
 
 for ( True, False ) -> $*PURE-PERL {
 	subtest {
@@ -29,22 +28,18 @@ for ( True, False ) -> $*PURE-PERL {
 			$source = gensym-package Q:to[_END_];
 			enum %s()
 			_END_
-			$tree = $pt.to-tree( $source );
-			is $pt.to-string( $tree ), $source, Q{no ws};
+			ok round-trips( $source ), Q{no ws};
 
 			$source = gensym-package Q:to[_END_];
 			enum %s     ()
 			_END_
-			$tree = $pt.to-tree( $source );
-			is $pt.to-string( $tree ), $source, Q{leading ws};
+			ok round-trips( $source ), Q{leading ws};
 
 			$source = gensym-package Q{enum %s()  };
-			$tree = $pt.to-tree( $source );
-			is $pt.to-string( $tree ), $source, Q{trailing ws};
+			ok round-trips( $source ), Q{trailing ws};
 
 			$source = gensym-package Q{enum %s     ()  };
-			$tree = $pt.to-tree( $source );
-			is $pt.to-string( $tree ), $source, Q{leading, trailing ws};
+			ok round-trips( $source ), Q{leading, trailing ws};
 		}, Q{no intrabrace spacing};
 
 		subtest {
@@ -53,22 +48,18 @@ for ( True, False ) -> $*PURE-PERL {
 			$source = gensym-package Q:to[_END_];
 			enum %s(   )
 			_END_
-			$tree = $pt.to-tree( $source );
-			is $pt.to-string( $tree ), $source, Q{no ws};
+			ok round-trips( $source ), Q{no ws};
 
 			$source = gensym-package Q:to[_END_];
 			enum %s     (   )
 			_END_
-			$tree = $pt.to-tree( $source );
-			is $pt.to-string( $tree ), $source, Q{leading ws};
+			ok round-trips( $source ), Q{leading ws};
 
 			$source = gensym-package Q{enum %s(   )  };
-			$tree = $pt.to-tree( $source );
-			is $pt.to-string( $tree ), $source, Q{trailing ws};
+			ok round-trips( $source ), Q{trailing ws};
 
 			$source = gensym-package Q{enum %s     (   )  };
-			$tree = $pt.to-tree( $source );
-			is $pt.to-string( $tree ), $source, Q{leading, trailing ws};
+			ok round-trips( $source ), Q{leading, trailing ws};
 		}, Q{intrabrace spacing};
 	}, Q{enum};
 
@@ -81,19 +72,16 @@ for ( True, False ) -> $*PURE-PERL {
 			$source = gensym-package Q:to[_END_];
 			subset %s of Int
 			_END_
-			$tree = $pt.to-tree( $source );
-			is $pt.to-string( $tree ), $source, Q{no ws};
+			ok round-trips( $source ), Q{no ws};
 
 			$source = gensym-package Q{subset %s of Int  };
-			$tree = $pt.to-tree( $source );
-			is $pt.to-string( $tree ), $source, Q{trailing ws};
+			ok round-trips( $source ), Q{trailing ws};
 		}, Q{Normal version};
 
 		$source = gensym-package Q:to[_END_];
 		unit subset %s;
 		_END_
-		$tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{unit form};
+		ok round-trips( $source ), Q{unit form};
 	}, Q{subset};
 
 	subtest {
@@ -102,30 +90,25 @@ for ( True, False ) -> $*PURE-PERL {
 		$source = Q:to[_END_];
 		constant Foo=1
 		_END_
-		$tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{no ws};
+		ok round-trips( $source ), Q{no ws};
 
 		$source = Q:to[_END_];
 		constant Foo     =1
 		_END_
-		$tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{leading ws};
+		ok round-trips( $source ), Q{leading ws};
 
 		$source = Q:to[_END_];
 		constant Foo=   1
 		_END_
-		$tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{intermediate ws};
+		ok round-trips( $source ), Q{intermediate ws};
 
 		$source = Q:to[_END_];
 		constant Foo     =   1
 		_END_
-		$tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{intermediate ws};
+		ok round-trips( $source ), Q{intermediate ws};
 
 		$source = Q{constant Foo=1     };
-		$tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{trailing ws};
+		ok round-trips( $source ), Q{trailing ws};
 	}, Q{constant};
 }
 

@@ -5,18 +5,18 @@ use Perl6::Parser;
 
 plan 9;
 
-my $pt = Perl6::Parser.new;
+my $pp = Perl6::Parser.new;
 my $*CONSISTENCY-CHECK = True;
 my $*FALL-THROUGH = True;
 
-# $pt.to-tree verifies that the tokens are contiguous, along with a bunch
+# $pp.to-tree verifies that the tokens are contiguous, along with a bunch
 # of other things.
 #
 # So, all I really want to verify here is that the data types are correct.
 #
 subtest {
 	my $source = Q{};
-	my $t = $pt.to-tree( $source );
+	my $t = $pp.to-tree( $source );
 	isa-ok $t, Perl6::Document;
 
 	done-testing;
@@ -24,7 +24,7 @@ subtest {
 
 subtest {
 	my $source = Q{ };
-	my $t = $pt.to-tree( $source );
+	my $t = $pp.to-tree( $source );
 	isa-ok $t, Perl6::Document;
 	isa-ok $t.child.[0], Perl6::WS;
 
@@ -33,7 +33,7 @@ subtest {
 
 subtest {
 	my $source = Q{my$a};
-	my $t = $pt.to-tree( $source );
+	my $t = $pp.to-tree( $source );
 
 	isa-ok $t, Perl6::Document;
 	isa-ok $t.child.[0], Perl6::Statement;
@@ -45,7 +45,7 @@ subtest {
 
 subtest {
 	my $source = Q{ my$a};
-	my $t = $pt.to-tree( $source );
+	my $t = $pp.to-tree( $source );
 
 	isa-ok $t, Perl6::Document;
 	isa-ok $t.child.[0], Perl6::WS;
@@ -58,7 +58,7 @@ subtest {
 
 subtest {
 	my $source = Q{my $a};
-	my $t = $pt.to-tree( $source );
+	my $t = $pp.to-tree( $source );
 
 	isa-ok $t, Perl6::Document;
 	isa-ok $t.child.[0], Perl6::Statement;
@@ -71,7 +71,7 @@ subtest {
 
 subtest {
 	my $source = Q{my$a;};
-	my $t = $pt.to-tree( $source );
+	my $t = $pp.to-tree( $source );
 
 	isa-ok $t, Perl6::Document;
 	isa-ok $t.child.[0], Perl6::Statement;
@@ -84,7 +84,7 @@ subtest {
 
 subtest {
 	my $source = Q{my $a;};
-	my $t = $pt.to-tree( $source );
+	my $t = $pp.to-tree( $source );
 
 	isa-ok $t, Perl6::Document;
 	isa-ok $t.child.[0], Perl6::Statement;
@@ -98,7 +98,7 @@ subtest {
 
 subtest {
 	my $source = Q{my $a = 1};
-	my $t = $pt.to-tree( $source );
+	my $t = $pp.to-tree( $source );
 
 	isa-ok $t, Perl6::Document;
 	isa-ok $t.child.[0], Perl6::Statement;
@@ -115,7 +115,7 @@ subtest {
 
 subtest {
 	my $source = Q{my $a = 1 + 2};
-	my $t = $pt.to-tree( $source );
+	my $t = $pp.to-tree( $source );
 
 	isa-ok $t, Perl6::Document;
 	isa-ok $t.child.[0], Perl6::Statement;

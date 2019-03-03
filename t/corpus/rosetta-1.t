@@ -1,66 +1,45 @@
 use v6;
 
+use lib 't/lib';
+
 use Test;
 use Perl6::Parser;
+use Utils;
 
 plan 2 * 7;
 
-use lib 't/lib';
-use Utils; # Get gensym-package
-
-my $pt = Perl6::Parser.new;
 my $*CONSISTENCY-CHECK = True;
-my $*FALL-THROUGH = True;
+my $*FALL-THROUGH      = True;
 
 for ( True, False ) -> $*PURE-PERL {
 	subtest {
-		subtest {
-			my $source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{version 1};
 	my @doors = False xx 101;
 	 
 	(.=not for @doors[0, $_ ... 100]) for 1..100;
 	 
 	say "Door $_ is ", <closed open>[ @doors[$_] ] for 1..100;
 	_END_
-			is $pt._roundtrip( $source ), $source,  Q{version 1};
 
-			done-testing;
-		}, Q{version 1};
-
-		subtest {
-			my $source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{version 2};
 	say "Door $_ is open" for map {$^n ** 2}, 1..10;
 	_END_
-			is $pt._roundtrip( $source ), $source,  Q{version 2};
 
-			done-testing;
-		}, Q{version 2};
-
-		subtest {
-			my $source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{version 3};
 	say "Door $_ is open" for 1..10 X** 2;
 	_END_
-			is $pt._roundtrip( $source ), $source,  Q{version 3};
 
-			done-testing;
-		}, Q{version 3};
-
-		subtest {
-			my $source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{version 4};
 	say "Door $_ is ", <closed open>[.sqrt == .sqrt.floor] for 1..100;
 	_END_
-			is $pt._roundtrip( $source ), $source,  Q{version 4};
-
-			done-testing;
-		}, Q{version 4};
 
 		done-testing;
 	}, Q{100 doors};
 
 	subtest {
-	# The parser also recursively parses use'd classes, so since Term::termios might
-	# not be present on all systems, stub it out.
-		my $source = gensym-package Q:to[_END_];
+	# The parser also recursively parses use'd classes, so since
+	# Term::termios might not be present on all systems, stub it out.
+		ok round-trips( gensym-package Q:to[_END_] ), Q{version 1};
 	class %s { has $fd; method getattr {}; method unset_lflags { }; method unset_iflags { }; method setattr { } }
 	#use %s;
 
@@ -176,13 +155,12 @@ for ( True, False ) -> $*PURE-PERL {
 	    new() if $key eq 'n';
 	}
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
 
 		done-testing;
 	}, Q{15 Puzzle};
 
 	subtest {
-		my $source = gensym-package Q:to[_END_];
+		ok round-trips( gensym-package Q:to[_END_] ), Q{version 1};
 	class %s { has $fd; method getattr {}; method unset_lflags { }; method unset_iflags { }; method setattr { } }
 	#use %s;
 	 
@@ -298,13 +276,12 @@ for ( True, False ) -> $*PURE-PERL {
 	    last if $key eq 'q'; # (q)uit
 	}
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
 
 		done-testing;
 	}, Q{2048};
 
 	subtest {
-		my $source = gensym-package Q:to[_END_];
+		ok round-trips( gensym-package Q:to[_END_] ), Q{version 1};
 	use MONKEY-SEE-NO-EVAL;
 	 
 	say "Here are your digits: ", 
@@ -332,13 +309,12 @@ for ( True, False ) -> $*PURE-PERL {
 	    }
 	}
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
 
 		done-testing;
 	}, Q{24 game};
 
 	subtest {
-		my $source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{version 1};
 	use MONKEY-SEE-NO-EVAL;
 
 	my @digits;
@@ -384,13 +360,12 @@ for ( True, False ) -> $*PURE-PERL {
 	    %h.values;
 	}
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
 
 		done-testing;
 	}, Q{24 game/Solve};
 
 	subtest {
-		my $source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{version 1};
 	my @todo = $[1];
 	my @sums = 0;
 	sub nextrow($n) {
@@ -421,14 +396,12 @@ for ( True, False ) -> $*PURE-PERL {
 	    say $_, "\t", [+] nextrow($_)[];
 	}
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
 
 		done-testing;
 	}, Q{9 billion names of God};
 
 	subtest {
-		subtest {
-			my $source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{version 1};
 	my $b = 99;
 
 	repeat while --$b {
@@ -443,13 +416,8 @@ for ( True, False ) -> $*PURE-PERL {
 	    "$b bottle{'s' if $b != 1} of beer";
 	}
 	_END_
-			is $pt._roundtrip( $source ), $source,  Q{version 1};
 
-			done-testing;
-		}, Q{version 1};
-
-		subtest {
-			my $source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{version 2};
 	for 99...1 -> $bottles {
 	    sing $bottles, :wall;
 	    sing $bottles;
@@ -469,13 +437,8 @@ for ( True, False ) -> $*PURE-PERL {
 	    say "$quantity bottle$plural of beer$location"
 	}
 	_END_
-			is $pt._roundtrip( $source ), $source,  Q{version 2};
 
-			done-testing;
-		}, Q{version 2};
-
-		subtest {
-			my $source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{version 3};
 	my @quantities = flat (99 ... 1), 'No more', 99;
 	my @bottles = flat 'bottles' xx 98, 'bottle', 'bottles' xx 2;
 	my @actions = flat 'Take one down, pass it around' xx 99,
@@ -490,10 +453,6 @@ for ( True, False ) -> $*PURE-PERL {
 	    say "$d $e of beer on the wall\n";
 	}
 	_END_
-			is $pt._roundtrip( $source ), $source,  Q{version 3};
-
-			done-testing;
-		}, Q{version 3};
 
 		done-testing;
 	}, Q{99 bottles of beer};

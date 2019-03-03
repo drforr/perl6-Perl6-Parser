@@ -4,13 +4,13 @@ use lib '../lib';
 use Perl6::Parser;
 
 sub MAIN(Str $filename, Bool :$ruler = False) {
-	my $text = $filename.IO.slurp;
-	my $pt = Perl6::Parser.new;
+	my $source = $filename.IO.slurp;
+	my $pp     = Perl6::Parser.new;
 	if $ruler {
-	    say $pt.ruler( $text );
+	    say $pp.ruler( $source );
 	    return;
 	}
-	my $p = $pt.parse( $text );
-	my $tree = $pt.build-tree( $p );
-	say $pt.dump-tree( $tree );
+	my $tree = $pp.to-tree( $source );
+
+	say $pp.dump-tree( $tree );
 }

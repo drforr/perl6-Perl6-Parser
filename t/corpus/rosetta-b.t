@@ -6,15 +6,13 @@ use Perl6::Parser;
 use lib 't/lib';
 use Utils; # Get gensym-package
 
-plan 2 * 22;
+plan 2 * 20;
 
-my $pt = Perl6::Parser.new;
 my $*CONSISTENCY-CHECK = True;
-my $*FALL-THROUGH = True;
+my $*FALL-THROUGH      = True;
 
 for ( True, False ) -> $*PURE-PERL {
-	subtest {
-		my $source = Q:to[_END_];
+	ok round-trips( Q:to[_END_] ), Q{Babbage problem};
 	# For all positives integers from 1 to Infinity
 	for 1 .. Inf -> $integer {
 	    # calculate the square of the integer
@@ -23,13 +21,8 @@ for ( True, False ) -> $*PURE-PERL {
 	    print "{$integer}² equals $square" and exit if $square % 1000000 == 269696;
 	}
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
 
-		done-testing;
-	}, Q{Babbage problem};
-
-	subtest {
-		my $source = Q:to[_END_];
+	ok round-trips( Q:to[_END_] ), Q{Bacon cipher};
 	my $secret = q:to/END/;
 	    This task is to implement a program for encryption and decryption
 	    of plaintext using the simple alphabet of the Baconian cipher or
@@ -85,14 +78,9 @@ for ( True, False ) -> $*PURE-PERL {
 	say "Hidden message revealed:";
 	say reveal $steganography;
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
-
-		done-testing;
-	}, Q{Bacon cipher};
 
 	subtest {
-		subtest {
-			my $source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{version 1};
 	sub balanced($s) {
 	    my $l = 0;
 	    for $s.comb {
@@ -111,13 +99,8 @@ for ( True, False ) -> $*PURE-PERL {
 	my $s = (<[ ]> xx $n).flat.pick(*).join;
 	say "$s {balanced($s) ?? "is" !! "is not"} well-balanced"
 	_END_
-			is $pt._roundtrip( $source ), $source,  Q{version 1};
 
-			done-testing;
-		}, Q{version 1};
-
-		subtest {
-			my $source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{version 2};
 	sub balanced($s) {
 	    .none < 0 and .[*-1] == 0
 		given [\+] '\\' «leg« $s.comb;
@@ -127,13 +110,8 @@ for ( True, False ) -> $*PURE-PERL {
 	my $s = <[ ]>.roll($n*2).join;
 	say "$s { balanced($s) ?? "is" !! "is not" } well-balanced"
 	_END_
-			is $pt._roundtrip( $source ), $source,  Q{version 2};
 
-			done-testing;
-		}, Q{version 2};
-
-		subtest {
-			my $source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{version 3};
 	sub balanced($_ is copy) {
 	    Nil while s:g/'[]'//;
 	    $_ eq '';
@@ -143,29 +121,19 @@ for ( True, False ) -> $*PURE-PERL {
 	my $s = <[ ]>.roll($n*2).join;
 	say "$s is", ' not' x not balanced($s), " well-balanced";
 	_END_
-			is $pt._roundtrip( $source ), $source,  Q{version 3};
 
-			done-testing;
-		}, Q{version 3};
-
-		subtest {
-			my $source = gensym-package Q:to[_END_];
+		ok round-trips( gensym-package Q:to[_END_] ), Q{version 4};
 	grammar %s { token TOP { '[' <TOP>* ']' } }
 	 
 	my $n = prompt "Number of bracket pairs: ";
 	my $s = ('[' xx $n, ']' xx $n).flat.pick(*).join;
 	say "$s { %s.parse($s) ?? "is" !! "is not" } well-balanced";
 	_END_
-			is $pt._roundtrip( $source ), $source,  Q{version 4};
-
-			done-testing;
-		}, Q{version 4};
 
 		done-testing;
 	}, Q{Balanced brackets};
 
-	subtest {
-		my $source = gensym-package Q:to[_END_];
+	ok round-trips( gensym-package Q:to[_END_] ), Q{Balanced ternary};
 	class %s {
 	    has @.coeff;
 	 
@@ -230,14 +198,9 @@ for ( True, False ) -> $*PURE-PERL {
 	say 'c == ', $c.Int;
 	say "a × (b − c) == ", ~$x, ' == ', $x.Int;
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
 
-		done-testing;
-	}, Q{Balanced ternary};
-
-	subtest {
-		# XXX Make up a 'Image::PNG::Portable' class
-		my $source = gensym-package Q:to[_END_];
+	# XXX Make up a 'Image::PNG::Portable' class
+	ok round-trips( gensym-package Q:to[_END_] ), Q{Barnsley fern};
 	class %s { has ( $.width, $.height ); method set { }; method write { } }
 	#use %s;
 	 
@@ -260,13 +223,8 @@ for ( True, False ) -> $*PURE-PERL {
 	 
 	$png.write: 'Barnsley-fern-perl6.png';
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
 
-		done-testing;
-	}, Q{Barnsley fern};
-
-	subtest {
-		my $source = Q:to[_END_];
+	ok round-trips( Q:to[_END_] ), Q{Base64 encode data};
 	sub MAIN {
 	    my $buf = slurp("/tmp/favicon.ico", :bin);
 	    say buf-to-Base64($buf);
@@ -291,13 +249,8 @@ for ( True, False ) -> $*PURE-PERL {
 	    }
 	}
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
 
-		done-testing;
-	}, Q{Base64 encode data};
-
-	subtest {
-		my $source = Q:to[_END_];
+	ok round-trips( Q:to[_END_] ), Q{Benford's law};
 	sub benford(@a) { bag +« flat @a».comb: /<( <[ 1..9 ]> )> <[ , . \d ]>*/ }
 	 
 	sub show(%distribution) {
@@ -313,14 +266,9 @@ for ( True, False ) -> $*PURE-PERL {
 	multi MAIN($file) { show benford $file.IO.lines }
 	multi MAIN() { show benford ( 1, 1, 2, *+* ... * )[^1000] }
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
-
-		done-testing;
-	}, Q{Benford's law};
 
 	subtest {
-		subtest {
-			my $source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{version 2};
 	sub bernoulli($n) {
 	    my @a;
 	    for 0..$n -> $m {
@@ -339,13 +287,8 @@ for ( True, False ) -> $*PURE-PERL {
 	 
 	printf $form, .key, .value.nude for @bpairs;
 	_END_
-			is $pt._roundtrip( $source ), $source,  Q{version 1};
 
-			done-testing;
-		}, Q{version 1};
-
-		subtest {
-			my $source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{version 2};
 	constant bernoulli = gather {
 	    my @a;
 	    for 0..* -> $m {
@@ -365,13 +308,8 @@ for ( True, False ) -> $*PURE-PERL {
 	 
 	printf $form, .key, .value.nude for @bpairs;
 	_END_
-			is $pt._roundtrip( $source ), $source,  Q{version 2};
 
-			done-testing;
-		}, Q{version 2};
-
-		subtest {
-			my $source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{version 3};
 	my sub infix:<bop>(\prev,\this) { this.key => this.key * (this.value - prev.value) }
 	 
 	constant bernoulli = grep *.value, map { (.key => .value.[*-1]) }, do
@@ -380,16 +318,11 @@ for ( True, False ) -> $*PURE-PERL {
 		     $pm + 1 => [ map *.value, [\bop] ($pm + 2 ... 1) Z=> FatRat.new(1, $pm + 2), @pa ];
 		} ... *;
 	_END_
-			is $pt._roundtrip( $source ), $source,  Q{version 3};
-
-			done-testing;
-		}, Q{version 3};
 
 		done-testing;
 	}, Q{Balanced brackets};
 
-	subtest {
-		my $source = Q:to[_END_];
+	ok round-trips( Q:to[_END_] ), Q{Best shuffle};
 	sub best-shuffle(Str $orig) {
 	 
 	    my @s = $orig.comb;
@@ -415,23 +348,13 @@ for ( True, False ) -> $*PURE-PERL {
 	printf "%s, %s, (%d)\n", $_, best-shuffle $_
 	    for <abracadabra seesaw elk grrrrrr up a>;
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
 
-		done-testing;
-	}, Q{Best shuffle};
-
-	subtest {
-		my $source = Q:to[_END_];
+	ok round-trips( Q:to[_END_] ), Q{Binary digits};
 	say .fmt("%b") for 5, 50, 9000;
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
-
-		done-testing;
-	}, Q{Binary digits};
 
 	subtest {
-		subtest {
-			my $source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{version 1};
 	sub search (@a, $x --> Int) {
 	    binary_search { $x cmp @a[$^i] }, 0, @a.end
 	}
@@ -448,13 +371,8 @@ for ( True, False ) -> $*PURE-PERL {
 	    fail;
 	}
 	_END_
-			is $pt._roundtrip( $source ), $source,  Q{version 1};
 
-			done-testing;
-		}, Q{version 1};
-
-		subtest {
-			my $source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{version 2};
 	sub binary_search (&p, Int $lo, Int $hi --> Int) {
 	    $lo <= $hi or fail;
 	    my Int $mid = ($lo + $hi) div 2;
@@ -465,16 +383,11 @@ for ( True, False ) -> $*PURE-PERL {
 	    }
 	}
 	_END_
-			is $pt._roundtrip( $source ), $source,  Q{version 2};
-
-			done-testing;
-		}, Q{version 2};
 
 		done-testing;
 	}, Q{Binary search};
 
-#`{	subtest {
-		my $source = Q:to[_END_];
+#`{	ok round-trips( Q:to[_END_] ), Q{Binary strings};
 	# Perl 6 is perfectly fine with NUL *characters* in strings:
 	 
 	my Str $s = 'nema' ~ 0.chr ~ 'problema!';
@@ -559,15 +472,10 @@ for ( True, False ) -> $*PURE-PERL {
 	my ByteStr $b3 = $b1 ~ $sub;
 	say 'joined = ', $b3;
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
-
-		done-testing;
-	}, Q{Binary strings};
 }
 
-	subtest {
-		# XXX class Digest::SHA exports 'sha256'
-		my $source = Q:to[_END_];
+	# XXX class Digest::SHA exports 'sha256'
+	ok round-trips( Q:to[_END_] ), Q{Bitcoin validation};
 	sub sha256 { }
 	my $bitcoin-address = rx/
 	    <+alnum-[0IOl]> ** 26..*  # an address is at least 26 characters long
@@ -587,14 +495,9 @@ for ( True, False ) -> $*PURE-PERL {
 
 	say "Here is a bitcoin address: 1AGNa15ZQXAZUgFiqJ2i7Z2DPU2J6hW62i" ~~ $bitcoin-address;
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
 
-		done-testing;
-	}, Q{Bitcoin validation};
-
-	subtest {
-		# XXX class Digest::SHA exports sub sha256, sub rmd160
-		my $source = Q:to[_END_];
+	# XXX class Digest::SHA exports sub sha256, sub rmd160
+	ok round-trips( Q:to[_END_] ), Q{Bitcoin public point to address};
 	sub sha256 { }; sub rmd160 { }
 	#use SSL::Digest;
 	 
@@ -623,13 +526,8 @@ for ( True, False ) -> $*PURE-PERL {
 	0x50863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B2352,
 	0x2CD470243453A299FA9E77237716103ABC11A1DF38855ED6F2EE187E9C582BA6;
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
 
-		done-testing;
-	}, Q{Bitcoin public point to address};
-
-#`{	subtest {
-		my $source = Q:to[_END_];
+#`{	ok round-trips( Q:to[_END_] ), Q{Bitmap};
 	class Pixel { has UInt ($.R, $.G, $.B) }
 	class Bitmap {
 	    has UInt ($.width, $.height);
@@ -660,15 +558,10 @@ for ( True, False ) -> $*PURE-PERL {
 
 	say $b.perl;
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
-
-		done-testing;
-	}, Q{Bitmap};
 }
 
-#`{	subtest {
-		# XXX Create a shell 'Bitmap' class.. yes, just above but separation...
-		my $source = Q:to[_END_];
+	# XXX Create a shell 'Bitmap' class.. yes, just above but separation...
+#`{	ok round-trips( Q:to[_END_] ), Q{Bitmap / Bresenham's line algorithm};
 	class Pixel { has UInt ($.R, $.G, $.B) }
 	class Bitmap { has ($.width, $.height, @!data); method fill { }; method pixel { }; method set-pixel { }; method get-pixel { } }
 	sub line(Bitmap $bitmap, $x0 is copy, $x1 is copy, $y0 is copy, $y1 is copy) {
@@ -702,15 +595,10 @@ for ( True, False ) -> $*PURE-PERL {
 	    } 
 	}
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
-
-		done-testing;
-	}, Q{Bitmap / Bresenham's line algorithm};
 }
 
-#`{	subtest {
-		# XXX Create a shell 'Bitmap' class.. yes, just above but separation...
-		my $source = Q:to[_END_];
+	# XXX Create a shell 'Bitmap' class.. yes, just above but separation...
+#`{	ok round-trips( Q:to[_END_] ), Q{Bitmap / midpoint circle algorithm};
 	use MONKEY-TYPING;
 	class Pixel { has UInt ($.R, $.G, $.B) }
 	class Bitmap { has ($.width, $.height, @!data); method fill { }; method pixel { }; method set-pixel { }; method get-pixel { } }
@@ -750,15 +638,9 @@ for ( True, False ) -> $*PURE-PERL {
 	    }
 	}
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
-
-		done-testing;
-	}, Q{Bitmap / midpoint circle algorithm};
 }
 
-#`{	subtest {
-	#`[
-		my $source = Q:to[_END_];
+#`{	ok round-trips( Q:to[_END_] ), Q{Bitmap / write a PPM file};
 	class Pixel { has uint8 ($.R, $.G, $.B) }
 	class Bitmap {
 	    has UInt ($.width, $.height);
@@ -790,15 +672,9 @@ for ( True, False ) -> $*PURE-PERL {
 
 	$*OUT.write: $b.P6;
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
-	]
-
-		done-testing;
-	}, Q{Bitmap / write a PPM file};
 }
 
-	subtest {
-		my $source = Q:to[_END_];
+	ok round-trips( Q:to[_END_] ), Q{Bitwise I/O};
 	sub encode-ascii(Str $s) {
 	    my @b = $s.ords».fmt("%07b")».comb;
 	    @b.push(0) until @b %% 8;   # padding
@@ -814,14 +690,8 @@ for ( True, False ) -> $*PURE-PERL {
 	say my $encode = encode-ascii 'STRING';
 	say decode-ascii $encode;
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
 
-		done-testing;
-	}, Q{Bitwise I/O};
-
-	subtest {
-	#`[
-		my $source = Q:to[_END_];
+#`[	ok round-trips( Q:to[_END_] ), Q{Bitwise operations};
 	constant MAXINT = uint.Range.max;
 	constant BITS = MAXINT.base(2).chars;
 
@@ -851,24 +721,14 @@ for ( True, False ) -> $*PURE-PERL {
 	    printf("%30s: %{'0' ~ BITS}b\n", $message, $value +& MAXINT);
 	}
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
-	]
+]
 
-		done-testing;
-	}, Q{Bitwise operations};
-
-	subtest {
-		my $source = Q:to[_END_];
+	ok round-trips( Q:to[_END_] ), Q{Boolean types};
 	my Bool $crashed = False;
 	my $val = 0 but True;
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
 
-		done-testing;
-	}, Q{Boolean types};
-
-	subtest {
-		my $source = Q:to[_END_];
+	ok round-trips( Q:to[_END_] ), Q{Box the compass};
 	sub point (Int $index) {
 	    my $ix = $index % 32;
 	    if $ix +& 1
@@ -892,14 +752,8 @@ for ( True, False ) -> $*PURE-PERL {
 				 tc point angle-to-point 𝜽;
 	}
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
 
-		done-testing;
-	}, Q{Box the compass};
-
-	subtest {
-	#`[
-		my $source = Q:to[_END_];
+#`[	ok round-trips( Q:to[_END_] ), Q{Brace expansion};
 	grammar BraceExpansion {
 	    token TOP  { ( <meta> | . )* }
 	    token meta { '{' <alts> '}' | \\ .  }
@@ -945,14 +799,9 @@ for ( True, False ) -> $*PURE-PERL {
 	    {a,b{{1,2}e}f
 	    END
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
-	]
+]
 
-		done-testing;
-	}, Q{Brace expansion};
-
-	subtest {
-		my $source = gensym-package Q:to[_END_];
+	ok round-trips( gensym-package Q:to[_END_] ), Q{Break OO privacy};
 	class %s {
 	    has $!shyguy = 42;
 	}
@@ -960,13 +809,8 @@ for ( True, False ) -> $*PURE-PERL {
 
 	say $foo.^attributes.first('$!shyguy').get_value($foo);
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
 
-		done-testing;
-	}, Q{Break OO privacy};
-
-	subtest {
-		my $source = Q:to[_END_];
+	ok round-trips( Q:to[_END_] ), Q{Brownian tree};
 	constant size = 100;
 	constant particlenum = 1_000;
 	 
@@ -1040,13 +884,8 @@ for ( True, False ) -> $*PURE-PERL {
 	say "time elapsed: ", (now - BEGIN { now }).Num.fmt("%.2f"), " seconds";
 	say "";
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
 
-		done-testing;
-	}, Q{Brownian tree};
-
-	subtest {
-		my $source = Q:to[_END_];
+	ok round-trips( Q:to[_END_] ), Q{Bulls and cows};
 	my $size = 4;
 	my @secret = pick $size, '1' .. '9';
 	 
@@ -1069,13 +908,8 @@ for ( True, False ) -> $*PURE-PERL {
 
 	say 'A winner is you!';
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
 
-		done-testing;
-	}, Q{Bulls and cows};
-
-	subtest {
-		my $source = Q:to[_END_];
+	ok round-trips( Q:to[_END_] ), Q{Bulls and cows / player};
 	# we use the [] reduction meta operator along with the Cartesian Product
 	# operator X to create the Cartesian Product of four times [1..9] and then get
 	# all the elements where the number of unique digits is four.
@@ -1122,10 +956,6 @@ for ( True, False ) -> $*PURE-PERL {
 		?? "Your secret number is {@candidates[0].join}!"
 		!! "I think you made a mistake with your scoring.";
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
-
-		done-testing;
-	}, Q{Bulls and cows / player};
 }
 
 # vim: ft=perl6

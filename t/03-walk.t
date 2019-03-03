@@ -6,7 +6,7 @@ use Perl6::Parser::Factory;
 
 plan 10;
 
-my $pt = Perl6::Parser.new;
+my $pp = Perl6::Parser.new;
 my $ppf = Perl6::Parser::Factory.new;
 my $*CONSISTENCY-CHECK = True;
 my $*FALL-THROUGH = True;
@@ -272,9 +272,9 @@ subtest {
 
 subtest {
 	my $source = Q{(1);2;1};
-	my $tree = $pt.to-tree( $source );
+	my $tree = $pp.to-tree( $source );
 	$ppf.thread( $tree );
-	is $pt.to-string( $tree ), $source, Q{formatted};
+	is $pp.to-string( $tree ), $source, Q{formatted};
 
 	ok is-linked( $tree, $tree, $tree.child[0], $tree );
 	ok $tree.is-root;
@@ -344,7 +344,7 @@ subtest {
 subtest {
 	my $source = Q{(1);2;1};
 	my $ecruos = Q{1;2;)1(};
-	my $tree = $pt.to-tree( $source );
+	my $tree = $pp.to-tree( $source );
 	$ppf.thread( $tree );
 
 	my $head = $tree;
@@ -370,7 +370,7 @@ subtest {
 subtest {
 	my $source = Q{(3);2;1};
 	my $ecruos = Q{1;2;(3)};
-	my $tree = $pt.to-tree( $source );
+	my $tree = $pp.to-tree( $source );
 	$ppf.thread( $tree );
 	my $head = $ppf.flatten( $tree );
 

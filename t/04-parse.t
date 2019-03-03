@@ -5,15 +5,15 @@ use Perl6::Parser;
 
 plan 3;
 
-my $pt = Perl6::Parser.new;
+my $pp = Perl6::Parser.new;
 my $*CONSISTENCY-CHECK = True;
 my $*FALL-THROUGH = True;
 
-is $pt._roundtrip( Q{} ),
+is $pp._roundtrip( Q{} ),
 	Q{},
 	Q{Empty string};
 
-is $pt._roundtrip( Q{ } ),
+is $pp._roundtrip( Q{ } ),
 	Q{ },
 	Q{whitespace only};
 
@@ -26,19 +26,19 @@ subtest {
 		my $source;
 
 		$source = Q{my$a};
-		is $pt._roundtrip( $source ), $source, Q{my$a};
+		is $pp._roundtrip( $source ), $source, Q{my$a};
 
 		$source = Q{my$a;};
-		is $pt._roundtrip( $source ), $source, Q{my$a;};
+		is $pp._roundtrip( $source ), $source, Q{my$a;};
 
 		$source = Q{my $a};
-		is $pt._roundtrip( $source ), $source, Q{my $a};
+		is $pp._roundtrip( $source ), $source, Q{my $a};
 
 		$source = Q{my $a;};
-		is $pt._roundtrip( $source ), $source, Q{my $a;};
+		is $pp._roundtrip( $source ), $source, Q{my $a;};
 
 		$source = Q{my $a ;};
-		is $pt._roundtrip( $source ), $source, Q{my $a ;};
+		is $pp._roundtrip( $source ), $source, Q{my $a ;};
 	}, Q{simple declaration};
 
 	subtest {
@@ -47,19 +47,19 @@ subtest {
 		my $source;
 
 		$source = Q{my$a=1};
-		is $pt._roundtrip( $source ), $source, Q{my$a=1};
+		is $pp._roundtrip( $source ), $source, Q{my$a=1};
 
 		$source = Q{my$a=1;};
-		is $pt._roundtrip( $source ), $source, Q{my$a=1;};
+		is $pp._roundtrip( $source ), $source, Q{my$a=1;};
 
 		$source = Q{my $a=1};
-		is $pt._roundtrip( $source ), $source, Q{my $a=1};
+		is $pp._roundtrip( $source ), $source, Q{my $a=1};
 
 		$source = Q{my $a=1;};
-		is $pt._roundtrip( $source ), $source, Q{my $a=1;};
+		is $pp._roundtrip( $source ), $source, Q{my $a=1;};
 
 		$source = Q{my $a=1 ;};
-		is $pt._roundtrip( $source ), $source, Q{my $a=1 ;};
+		is $pp._roundtrip( $source ), $source, Q{my $a=1 ;};
 	}, Q{initializer};
 }, Q{passthrough};
 

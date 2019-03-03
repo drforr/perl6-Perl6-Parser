@@ -6,7 +6,7 @@ use Perl6::Parser::Factory;
 
 plan 6;
 
-my $pt = Perl6::Parser.new;
+my $pp = Perl6::Parser.new;
 my $ppf = Perl6::Parser::Factory.new;
 my $*CONSISTENCY-CHECK = True;
 my $*UPDATE-RANGES = True;
@@ -37,7 +37,7 @@ sub check-node(
 subtest {
 	my $source = Q{(3);2;1};
 	my $edited = Q{();2;1};
-	my $tree = $pt.to-tree( $source );
+	my $tree = $pp.to-tree( $source );
 	$ppf.thread( $tree );
 	my $head = $ppf.flatten( $tree );
 
@@ -132,7 +132,7 @@ subtest {
 subtest {
 	my $source = Q{(3);2;1};
 	my $edited = Q{(42);2;1};
-	my $tree = $pt.to-tree( $source );
+	my $tree = $pp.to-tree( $source );
 	$ppf.thread( $tree );
 	my $head = $ppf.flatten( $tree );
 
@@ -230,7 +230,7 @@ subtest {
 subtest {
 	my $source = Q{(3);2;1};
 	my $edited = Q{(3);2;};
-	my $tree = $pt.to-tree( $source );
+	my $tree = $pp.to-tree( $source );
 	$ppf.thread( $tree );
 	my $head = $ppf.flatten( $tree );
 
@@ -285,7 +285,7 @@ subtest {
 subtest {
 	my $source = Q{();2;1};
 	my $edited = Q{(3);2;1};
-	my $tree = $pt.to-tree( $source );
+	my $tree = $pp.to-tree( $source );
 	$ppf.thread( $tree );
 	my $head = $ppf.flatten( $tree );
 
@@ -359,7 +359,7 @@ subtest {
 subtest {
 	my $source = Q{();2;1};
 	my $edited = Q{(3);2;1};
-	my $tree = $pt.to-tree( $source );
+	my $tree = $pp.to-tree( $source );
 	$ppf.thread( $tree );
 	my $head = $ppf.flatten( $tree );
 
@@ -433,7 +433,7 @@ subtest {
 subtest {
 	my $source = Q{();2;1;};
 	my $edited = Q{();42;1;};
-	my @token = $pt.to-list( $source );
+	my @token = $pp.to-list( $source );
 	my $iterated = '';
 
 	my $replacement = Perl6::Number::Decimal.new( :from(0), :to(0), :content('42') );

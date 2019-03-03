@@ -8,45 +8,28 @@ use Utils; # Get gensym-package
 
 plan 2 * 39;
 
-my $pt = Perl6::Parser.new;
 my $*CONSISTENCY-CHECK = True;
-my $*FALL-THROUGH = True;
+my $*FALL-THROUGH      = True;
 
 for ( True, False ) -> $*PURE-PERL {
 	subtest {
-		subtest {
-			my $source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{version 1};
 	get.words.sum.say;
 	_END_
-			is $pt._roundtrip( $source ), $source,  Q{version 1};
 
-			done-testing;
-		}, Q{version 1};
-
-		subtest {
-			my $source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{version 2};
 	say [+] get.words;
 	_END_
-			is $pt._roundtrip( $source ), $source,  Q{version 2};
 
-			done-testing;
-		}, Q{version 2};
-
-		subtest {
-			my $source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{version 3};
 	my ($a, $b) = $*IN.get.split(" ");
 	say $a + $b;
 	_END_
-			is $pt._roundtrip( $source ), $source,  Q{version 3};
-
-			done-testing;
-		}, Q{version 3};
 
 		done-testing;
 	}, Q{A + B};
 
-	subtest {
-		my $source = Q:to[_END_];
+	ok round-trips( Q:to[_END_] ), Q{ABC Problem};
 	multi can-spell-word(Str $word, @blocks) {
 	    my @regex = @blocks.map({ my @c = .comb; rx/<@c>/ }).grep: { .ACCEPTS($word.uc) }
 	    can-spell-word $word.uc.comb.list, @regex;
@@ -69,13 +52,8 @@ for ( True, False ) -> $*PURE-PERL {
 	    say "$_     &can-spell-word($_, @b)";
 	}
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
 
-		done-testing;
-	}, Q{ABC Problem};
-
-#`{	subtest {
-		my $source = Q:to[_END_];
+#`{	ok round-trips( Q:to[_END_] ), Q{Abstract Class};
 	use v6;
 
 	role A {
@@ -96,14 +74,9 @@ for ( True, False ) -> $*PURE-PERL {
 	$obj.abstract();
 	$obj.concrete();
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
-
-		done-testing;
-	}, Q{Abstract Class};
 }
 
-	subtest {
-		my $source = Q:to[_END_];
+	ok round-trips( Q:to[_END_] ), Q{Abundant, Deficient and Perfect numbers};
 	sub propdivsum (\x) {
 	    [+] flat(x > 1, gather for 2 .. x.sqrt.floor -> \d {
 		my \y = x div d;
@@ -113,47 +86,27 @@ for ( True, False ) -> $*PURE-PERL {
 
 	say bag map { propdivsum($_) <=> $_ }, 1..20000
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
 
-		done-testing;
-	}, Q{Abundant, Deficient and Perfect numbers};
-
-	subtest {
-		my $source = Q:to[_END_];
+	ok round-trips( Q:to[_END_] ), Q{Accumulator factory};
 	sub accum ($n is copy) { sub { $n += $^x } }
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
-
-		done-testing;
-	}, Q{Accumulator factory};
 
 	subtest {
-		subtest {
-			my $source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{version 1};
 	sub A(Int $m, Int $n) {
 	    if    $m == 0 { $n + 1 } 
 	    elsif $n == 0 { A($m - 1, 1) }
 	    else          { A($m - 1, A($m, $n - 1)) }
 	}
 	_END_
-			is $pt._roundtrip( $source ), $source,  Q{version 1};
 
-			done-testing;
-		}, Q{version 1};
-
-		subtest {
-			my $source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{version 2};
 	multi sub A(0,      Int $n) { $n + 1                   }
 	multi sub A(Int $m, 0     ) { A($m - 1, 1)             }
 	multi sub A(Int $m, Int $n) { A($m - 1, A($m, $n - 1)) }
 	_END_
-			is $pt._roundtrip( $source ), $source,  Q{version 2};
 
-			done-testing;
-		}, Q{version 2};
-
-		subtest {
-			my $source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{version 3};
 	proto A(Int \𝑚, Int \𝑛) { (state @)[𝑚][𝑛] //= {*} }
 
 	multi A(0,      Int \𝑛) { 𝑛 + 1 }
@@ -167,17 +120,12 @@ for ( True, False ) -> $*PURE-PERL {
 	say A(4,1);
 	say .chars, " digits starting with ", .substr(0,50), "..." given A(4,2);
 	_END_
-			is $pt._roundtrip( $source ), $source,  Q{version 3};
-
-			done-testing;
-		}, Q{version 3};
 
 		done-testing;
 	}, Q{Ackermann Function};
 
 	subtest {
-#`{		subtest {
-			my $source = Q:to[_END_];
+#`{		ok round-trips( Q:to[_END_] ), Q{version 1};
 	class Bar { }             # an empty class
 	 
 	my $object = Bar.new;     # new instance
@@ -201,44 +149,30 @@ for ( True, False ) -> $*PURE-PERL {
 	my $that = $object.clone; # instantiate a new Bar derived from $object copying any variables
 	say $that.foo;            # 5 - value from the cloned object
 	_END_
-			is $pt._roundtrip( $source ), $source,  Q{version 1};
-
-			done-testing;
-		}, Q{version 1};
 }
 
-		subtest {
-			my $source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{version 2};
 	my $lue = 42 but role { has $.answer = "Life, the Universe, and Everything" }
 	 
 	say $lue;          # 42
 	say $lue.answer;   # Life, the Universe, and Everything
 	_END_
-			is $pt._roundtrip( $source ), $source,  Q{version 2};
 
-			done-testing;
-		}, Q{version 2};
 
 #`( XXX augment no longer works?...
-		subtest {
-			my $source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{version 3};
 	use MONKEY-TYPING;
 	augment class Int {
 	    method my-answer { "Life, the Universe, and Everything" }
 	}
 	say 42.my-answer;     # Life, the Universe, and Everything
 	_END_
-			is $pt._roundtrip( $source ), $source,  Q{version 3};
-
-			done-testing;
-		}, Q{version 3};
 )
 
 		done-testing;
 	}, Q{Add a variable to a class at runtime};
 
-	subtest {
-		my $source = Q:to[_END_];
+	ok round-trips( Q:to[_END_] ), Q{Address of a variable};
 	my $x;
 	say $x.WHERE;
 	 
@@ -249,13 +183,8 @@ for ( True, False ) -> $*PURE-PERL {
 	$x = 42;
 	say $y;  # 42
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
 
-		done-testing;
-	}, Q{Address of a variable};
-
-	subtest {
-		my $source = Q:to[_END_];
+	ok round-trips( Q:to[_END_] ), Q{AKS test for primality};
 	constant expansions = [1], [1,-1], -> @prior { [|@prior,0 Z- 0,|@prior] } ... *;
 	 
 	sub polyprime($p where 2..*) { so expansions[$p].[1 ..^ */2].all %% $p }
@@ -282,14 +211,9 @@ for ( True, False ) -> $*PURE-PERL {
 	    )
 	}
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
-
-		done-testing;
-	}, Q{AKS test for primality};
 
 	subtest {
-		subtest {
-			my $source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{version 1};
 	#to be called with perl6 columnaligner.pl <orientation>(left, center , right )
 	#with left as default
 	my $fh = open  "example.txt" , :r  or die "Can't read text file!\n" ;
@@ -329,13 +253,8 @@ for ( True, False ) -> $*PURE-PERL {
 	   say ''; #for the newline
 	}
 	_END_
-			is $pt._roundtrip( $source ), $source,  Q{version 1};
 
-			done-testing;
-		}, Q{version 1};
-
-		subtest {
-			my $source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{version 2};
 	my @lines = slurp("example.txt").lines;
 	my @widths;
 
@@ -352,13 +271,8 @@ for ( True, False ) -> $*PURE-PERL {
 		}
 	}
 	_END_
-			is $pt._roundtrip( $source ), $source,  Q{version 2};
 
-			done-testing;
-		}, Q{version 2};
-
-		subtest {
-			my $source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{version 3};
 	sub MAIN ($alignment where 'left'|'right', $file) {
 	    my @lines := $file.IO.lines.map(*.split: '$').List;
 	    my @widths = roundrobin(|@lines).map(*».chars.max);
@@ -367,16 +281,11 @@ for ( True, False ) -> $*PURE-PERL {
 	    printf $format, |$_ for @lines;
 	}
 	_END_
-			is $pt._roundtrip( $source ), $source,  Q{version 3};
-
-			done-testing;
-		}, Q{version 3};
 
 		done-testing;
 	}, Q{Align columns};
 
-	subtest {
-		my $source = Q:to[_END_];
+	ok round-trips( Q:to[_END_] ), Q{Aliquot sequence};
 	sub propdivsum (\x) {
 	    my @l = x > 1, gather for 2 .. x.sqrt.floor -> \d {
 		my \y = x div d;
@@ -413,14 +322,9 @@ for ( True, False ) -> $*PURE-PERL {
 	    790, 909, 562, 1064, 1488,
 	    15355717786080;
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
-
-		done-testing;
-	}, Q{Aliquot sequence};
 
 	subtest {
-		subtest {
-			my $source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{version 1};
 	sub is-k-almost-prime($n is copy, $k) returns Bool {
 	    loop (my ($p, $f) = 2, 0; $f < $k && $p*$p <= $n; $p++) {
 		$n /= $p, $f++ while $n %% $p;
@@ -433,14 +337,9 @@ for ( True, False ) -> $*PURE-PERL {
 		given grep { is-k-almost-prime($_, $k) }, 2 .. *
 	}
 	_END_
-			is $pt._roundtrip( $source ), $source,  Q{version 1};
 
-			done-testing;
-		}, Q{version 1};
-
-		subtest {
-			# 'factor^2' was superscript-2
-		my $source = Q:to[_END_];
+		# 'factor^2' was superscript-2
+		ok round-trips( Q:to[_END_] ), Q{version 2};
 	constant @primes = 2, |(3, 5, 7 ... *).grep: *.is-prime;
 
 	multi sub factors(1) { 1 }
@@ -465,17 +364,12 @@ for ( True, False ) -> $*PURE-PERL {
 
 	put almost($_)[^10] for 1..5;
 	_END_
-			is $pt._roundtrip( $source ), $source,  Q{version 2};
-
-			done-testing;
-		}, Q[version 2];
 
 		done-testing;
 	}, Q{Almost prime};
 
 	subtest {
-		subtest {
-			my $source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{version 1};
 	#| an array of four words, that have more possible values. 
 	#| Normally we would want `any' to signify we want any of the values, but well negate later and thus we need `all'
 	my @a =
@@ -495,13 +389,8 @@ for ( True, False ) -> $*PURE-PERL {
 	  say "$w1 $w2 $w3 $w4"
 	})(|@a); # supply the array as argumetns
 	_END_
-			is $pt._roundtrip( $source ), $source,  Q{version 1};
 
-			done-testing;
-		}, Q{version 1};
-	 
-		subtest {
-			my $source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{version 2};
 	sub infix:<lf> ($a,$b) {
 	    next unless try $a.substr(*-1,1) eq $b.substr(0,1);
 	    "$a $b";
@@ -521,13 +410,8 @@ for ( True, False ) -> $*PURE-PERL {
 		{'quickly'},
 		{ die 'fire' };
 	_END_
-			is $pt._roundtrip( $source ), $source,  Q{version 2};
 
-			done-testing;
-		}, Q{version 2};
-
-		subtest {
-			my $source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{version 3};
 	sub amb($var,*@a) {
 	    "[{
 		@a.pick(*).map: {"||\{ $var = '$_' }"}
@@ -551,16 +435,11 @@ for ( True, False ) -> $*PURE-PERL {
 	    <!>
 	/;
 	_END_
-			is $pt._roundtrip( $source ), $source,  Q{version 3};
-
-			done-testing;
-		}, Q{version 3};
 
 		done-testing;
 	}, Q{Almost prime};
 
-	subtest {
-		my $source = Q:to[_END_];
+	ok round-trips( Q:to[_END_] ), Q{Amicable pairs};
 	sub propdivsum (\x) {
 	    my @l = x > 1, gather for 2 .. x.sqrt.floor -> \d {
 		my \y = x div d;
@@ -574,27 +453,18 @@ for ( True, False ) -> $*PURE-PERL {
 	    say "$i $j" if $j > $i and $i == propdivsum($j);
 	}
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
-
-		done-testing;
-	}, Q{Amicable pairs};
 
 	subtest {
-		subtest {
-			my $source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{version 1};
 	my %anagram = slurp('unixdict.txt').words.classify( { .comb.sort.join } );
 	 
 	my $max = [max] map { +@($_) }, %anagram.values;
 	 
 	%anagram.values.grep( { +@($_) >= $max } )».join(' ')».say;
 	_END_
-			is $pt._roundtrip( $source ), $source,  Q{version 1};
 
-			done-testing;
-		}, Q{version 1};
-
-		subtest {
 	#`[ Infiniloop?
+		ok round-trips( Q:to[_END_] ), Q{version 2};
 			my $source = Q:to[_END_];
 	.put for                             # print each element of the array made this way:
 	slurp('unixdict.txt')\               # load file in memory
@@ -604,17 +474,12 @@ for ( True, False ) -> $*PURE-PERL {
 	.max( :by(*.key) ).value\            # get the group with highest number of anagrams
 	.flat».value                         # get all groups of anagrams in the group just selected
 	_END_
-			is $pt._roundtrip( $source ), $source,  Q{version 2};
 	]
-
-			done-testing;
-		}, Q{version 2};
 
 		done-testing;
 	}, Q{Anagrams};
 
-	subtest {
-		my $source = Q:to[_END_];
+	ok round-trips( Q:to[_END_] ), Q{Anagrams / Derangements};
 	my %anagram = slurp('dict.ie').words.map({[.comb]}).classify({ .sort.join });
 
 	for %anagram.values.sort({ -@($_[0]) }) -> @aset {
@@ -628,13 +493,8 @@ for ( True, False ) -> $*PURE-PERL {
 	    }
 	}
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
 
-		done-testing;
-	}, Q{Anagrams / Derangements};
-
-	subtest {
-		my $source = Q:to[_END_];
+	ok round-trips( Q:to[_END_] ), Q{Anonymous recursion};
 	sub fib($n) {
 	    die "Naughty fib" if $n < 0;
 	    return {
@@ -646,13 +506,8 @@ for ( True, False ) -> $*PURE-PERL {
 	 
 	say fib(10);
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
 
-		done-testing;
-	}, Q{Anonymous recursion};
-
-	subtest {
-		my $source = Q:to[_END_];
+	ok round-trips( Q:to[_END_] ), Q{Apply a callback to an array};
 	sub function { 2 * $^x + 3 };
 	my @array = 1 .. 5;
 	 
@@ -673,25 +528,15 @@ for ( True, False ) -> $*PURE-PERL {
 	# we neither need a variable for the array nor for the function
 	say [1,2,3]>>.&({ $^x + 1});
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
 
-		done-testing;
-	}, Q{Apply a callback to an array};
-
-	subtest {
-		my $source = Q:to[_END_];
+	ok round-trips( Q:to[_END_] ), Q{Arbitrary-precision integers};
 	given ~[**] 5, 4, 3, 2 {
 	   say "5**4**3**2 = {.substr: 0,20}...{.substr: *-20} and has {.chars} digits";
 	}
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
 
-		done-testing;
-	}, Q{Arbitrary-precision integers};
-
-#	subtest {
-#		# XXX Make up a 'Image::PNG::Portable' class
-#		my $source = Q:to[_END_];
+#	# XXX Make up a 'Image::PNG::Portable' class
+#	ok round-trips( Q:to[_END_] ), Q{Archimedean spiral};
 #	class Image::PNG::Portable { has ( $.width, $.height ); method set { }; method write { } }
 #	#use Image::PNG::Portable;
 #
@@ -705,13 +550,8 @@ for ( True, False ) -> $*PURE-PERL {
 #
 #	$png.write: 'Archimedean-spiral-perl6.png';
 #	_END_
-#		is $pt._roundtrip( $source ), $source,  Q{version 1};
-#
-#		done-testing;
-#	}, Q{Archimedean spiral};
 
-	subtest {
-		my $source = Q:to[_END_];
+	ok round-trips( Q:to[_END_] ), Q{Arithmetic coding};
 	sub cumulative_freq(%freq) {
 	    my %cf;
 	    my $total = 0;
@@ -824,13 +664,8 @@ for ( True, False ) -> $*PURE-PERL {
 	    }
 	}
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
 
-		done-testing;
-	}, Q{Arithmetic coding};
-
-	subtest {
-		my $source = gensym-package Q:to[_END_];
+	ok round-trips( gensym-package Q:to[_END_] ), Q{Arithmetic evaluation};
 	sub ev (Str $s --> Num) {
 	 
 	    grammar %s {
@@ -874,16 +709,11 @@ for ( True, False ) -> $*PURE-PERL {
 	say ev '1 + 5*3.4 - .5  -4 / -2 * (3+4) -6';   #  25.5
 	say ev '((11+15)*15)* 2 + (3) * -4 *1';        # 768
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
-
-		done-testing;
-	}, Q{Arithmetic evaluation};
 
 	subtest {
-		subtest {
-			# XXX Restore this bit.
-			#($a, $g) = ($a + $g)/2, sqrt $a * $g until $a ≅ $g;
-			my $source = Q:to[_END_];
+		# XXX Restore this bit.
+		#($a, $g) = ($a + $g)/2, sqrt $a * $g until $a ≅ $g;
+		ok round-trips( Q:to[_END_] ), Q{version 1};
 	sub agm( $a is copy, $g is copy ) {
 	    ($a, $g) = ($a + $g)/2, sqrt $a * $g until $a = $g;
 	    return $a;
@@ -891,14 +721,9 @@ for ( True, False ) -> $*PURE-PERL {
 	 
 	say agm 1, 1/sqrt 2;
 	_END_
-			is $pt._roundtrip( $source ), $source,  Q{version 1};
 
-			done-testing;
-		}, Q{version 1};
-
-		subtest {
-	    #$a ≅ $g ?? $a !! agm(|@$_)
-			my $source = Q:to[_END_];
+		    #$a ≅ $g ?? $a !! agm(|@$_)
+		ok round-trips( Q:to[_END_] ), Q{version 2};
 	sub agm( $a, $g ) {
 	    $a = $g ?? $a !! agm(|@$_)
 		given ($a + $g)/2, sqrt $a * $g;
@@ -906,16 +731,11 @@ for ( True, False ) -> $*PURE-PERL {
 	 
 	say agm 1, 1/sqrt 2;
 	_END_
-			is $pt._roundtrip( $source ), $source,  Q{version 2};
-
-			done-testing;
-		}, Q{version 2};
 
 		done-testing;
 	}, Q{Arithmetic-geometric mean};
 
-	subtest {
-		my $source = Q:to[_END_];
+	ok round-trips( Q:to[_END_] ), Q{Arithmetic-geometric mean/Calculate pi};
 	constant number-of-decimals = 100;
 	 
 	multi sqrt(Int $n) {
@@ -941,26 +761,16 @@ for ( True, False ) -> $*PURE-PERL {
 	    }
 	}
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
 
-		done-testing;
-	}, Q{Arithmetic-geometric mean/Calculate pi};
-
-	subtest {
-		my $source = Q:to[_END_];
+	ok round-trips( Q:to[_END_] ), Q{Arithmetic/complex};
 	my $a = 1 + i;
 	my $b = pi + 1.25i;
 	 
 	.say for $a + $b, $a * $b, -$a, 1 / $a, $a.conj;
 	.say for $a.abs, $a.sqrt, $a.re, $a.im;
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
 
-		done-testing;
-	}, Q{Arithmetic/complex};
-
-	subtest {
-		my $source = Q:to[_END_];
+	ok round-trips( Q:to[_END_] ), Q{Arithmetic/integer};
 	my Int $a = get.floor;
 	my Int $b = get.floor;
 	 
@@ -971,14 +781,9 @@ for ( True, False ) -> $*PURE-PERL {
 	say 'remainder:        ', $a % $b;
 	say 'exponentiation:   ', $a**$b;
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
-
-		done-testing;
-	}, Q{Arithmetic/integer};
 
 	subtest {
-		subtest {
-			my $source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{version 1};
 	for 2..2**19 -> $candidate {
 	    my $sum = 1 / $candidate;
 	    for 2 .. ceiling(sqrt($candidate)) -> $factor {
@@ -991,25 +796,15 @@ for ( True, False ) -> $*PURE-PERL {
 	    }
 	}
 	_END_
-			is $pt._roundtrip( $source ), $source,  Q{version 1};
 
-			done-testing;
-		}, Q{version 1};
-
-		subtest {
-			my $source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{version 2};
 	for 1.0, 1.1, 1.2 ... 10 { .say }
 	_END_
-			is $pt._roundtrip( $source ), $source,  Q{version 2};
-
-			done-testing;
-		}, Q{version 2};
 
 		done-testing;
 	}, Q{Arithmetic/rational};
 
-	subtest {
-		my $source = Q:to[_END_];
+	ok round-trips( Q:to[_END_] ), Q{Array concatenation};
 	# the prefix:<|> operator (called "slip") can be used to interpolate arrays into a list:
 	sub cat-arrays(@a, @b) { 
 		|@a, |@b 
@@ -1019,14 +814,9 @@ for ( True, False ) -> $*PURE-PERL {
 	my @a2 = (2,3,4);
 	cat-arrays(@a1,@a2).join(", ").say;
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
-
-		done-testing;
-	}, Q{Array concatenation};
 
 	subtest {
-		subtest {
-			my $source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{version 1};
 	my @array = <apple orange banana>;
 	 
 	say @array.elems;  # 3
@@ -1034,29 +824,19 @@ for ( True, False ) -> $*PURE-PERL {
 	say +@array;       # 3
 	say @array + 1;    # 4
 	_END_
-			is $pt._roundtrip( $source ), $source,  Q{version 1};
 
-			done-testing;
-		}, Q{version 1};
-
-		subtest {
-			my $source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{version 2};
 	my @infinite = 1 .. Inf;  # 1, 2, 3, 4, ...
 	 
 	say @infinite[5000];  # 5001
 	say @infinite.elems;  # Throws exception "Cannot .elems a lazy list"
 	_END_
-			is $pt._roundtrip( $source ), $source,  Q{version 2};
-
-			done-testing;
-		}, Q{version 2};
 
 		done-testing;
 	}, Q{Array length};
 
-#`{	subtest {
-		# XXX Synthesize JSON::Tiny
-		my $source = Q:to[_END_];
+	# XXX Synthesize JSON::Tiny
+#`{	ok round-trips( Q:to[_END_] ), Q{Array search};
 	class JSON::Tiny { sub from-json is export { } }
 	#use JSON::Tiny;
 	 
@@ -1075,14 +855,9 @@ for ( True, False ) -> $*PURE-PERL {
 	# Find all of the city names that contain an 'm' 
 	say join ', ', sort grep( {$_<name>.lc ~~ /'m'/}, @$cities )»<name>; # Dar Es Salaam, Khartoum-Omdurman, Mogadishu
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
-
-		done-testing;
-	}, Q{Array search};
 }
 
-	subtest {
-		my $source = Q:to[_END_];
+	ok round-trips( Q:to[_END_] ), Q{Arrays};
 	my @arr;
 	 
 	push @arr, 1;
@@ -1092,85 +867,50 @@ for ( True, False ) -> $*PURE-PERL {
 	 
 	say @arr[0];
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
-
-		done-testing;
-	}, Q{Arrays};
 
 	subtest {
-		subtest {
-			my $source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{version 1};
 	my %h1 = key1 => 'val1', 'key-2' => 2, three => -238.83, 4 => 'val3';
 	my %h2 = 'key1', 'val1', 'key-2', 2, 'three', -238.83, 4, 'val3';
 	_END_
-			is $pt._roundtrip( $source ), $source,  Q{version 1};
 
-			done-testing;
-		}, Q{version 1};
-
-		subtest {
-			my $source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{version 2};
 	my @a = 1..5;
 	my @b = 'a'..'e';
 	my %h = @a Z=> @b;
 	_END_
-			is $pt._roundtrip( $source ), $source,  Q{version 2};
 
-			done-testing;
-		}, Q{version 2};
-
-		subtest {
-			my $source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{version 3};
 	my %h1;
 	say %h1{'key1'};
 	say %h1<key1>;
 	%h1<key1> = 'val1';
 	%h1<key1 three> = 'val1', -238.83;
 	_END_
-			is $pt._roundtrip( $source ), $source,  Q{version 3};
 
-			done-testing;
-		}, Q{version 3};
-
-		subtest {
-			my $source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{version 4};
 	my $h = {key1 => 'val1', 'key-2' => 2, three => -238.83, 4 => 'val3'};
 	say $h<key1>;
 	_END_
-			is $pt._roundtrip( $source ), $source,  Q{version 4};
 
-			done-testing;
-		}, Q{version 4};
-
-		subtest {
-			my $source = gensym-package Q:to[_END_];
+		ok round-trips( gensym-package Q:to[_END_] ), Q{version 5};
 	my %%hash{Any}; # same as %%hash{*}
 	class %s {};
 	my %%cash{%s};
 	%%cash{%s.new} = 1;
 	_END_
-			is $pt._roundtrip( $source ), $source,  Q{version 5};
 
-			done-testing;
-		}, Q{version 5};
-
-		subtest {
-			my $source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{version 6};
 	my @infinite = 1 .. Inf;  # 1, 2, 3, 4, ...
 	 
 	say @infinite[5000];  # 5001
 	say @infinite.elems;  # Throws exception "Cannot .elems a lazy list"
 	_END_
-			is $pt._roundtrip( $source ), $source,  Q{version 6};
-
-			done-testing;
-		}, Q{version 6};
 
 		done-testing;
 	}, Q{Associative array/creation};
 
-	subtest {
-		my $source = Q:to[_END_];
+	ok round-trips( Q:to[_END_] ), Q{Associative array/iteration};
 	my %pairs = hello => 13, world => 31, '!' => 71;
 	 
 	for %pairs.kv -> $k, $v {
@@ -1183,13 +923,8 @@ for ( True, False ) -> $*PURE-PERL {
 	 
 	say "value = $_" for %pairs.values;
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
 
-		done-testing;
-	}, Q{Associative array/iteration};
-
-	subtest {
-		my $source = Q:to[_END_];
+	ok round-trips( Q:to[_END_] ), Q{Average loop length};
 	constant MAX_N  = 20;
 	constant TRIALS = 100;
 	 
@@ -1209,23 +944,13 @@ for ( True, False ) -> $*PURE-PERL {
 	sub random-mapping { hash .list Z=> .roll given ^$^size }
 	sub find-loop { 0, %^mapping{*} ...^ { (state %){$_}++ } }
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
 
-		done-testing;
-	}, Q{Average loop length};
-
-	subtest {
-		my $source = Q:to[_END_];
+	ok round-trips( Q:to[_END_] ), Q{Averages/arithmetic mean};
 	multi mean([]){ Failure.new('mean on empty list is not defined') }; # Failure-objects are lazy exceptions
 	multi mean (@a) { ([+] @a) / @a }
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
 
-		done-testing;
-	}, Q{Averages/arithmetic mean};
-
-	subtest {
-		my $source = Q:to[_END_];
+	ok round-trips( Q:to[_END_] ), Q{Averages/mean angle};
 	# Of course, you can still use pi and 180.
 	sub deg2rad { $^d * tau / 360 }
 	sub rad2deg { $^r * 360 / tau }
@@ -1243,13 +968,8 @@ for ( True, False ) -> $*PURE-PERL {
 	    [90, 180, 270, 360],
 	    [10, 20, 30];
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
 
-		done-testing;
-	}, Q{Averages/mean angle};
-
-	subtest {
-		my $source = Q:to[_END_];
+	ok round-trips( Q:to[_END_] ), Q{Averages/mean time of day};
 	sub tod2rad($_) { [+](.comb(/\d+/) Z* 3600,60,1) * tau / 86400 }
 	 
 	sub rad2tod ($r) {
@@ -1265,25 +985,15 @@ for ( True, False ) -> $*PURE-PERL {
 	 
 	say "{ mean-time(@times) } is the mean time of @times[]";
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
 
-		done-testing;
-	}, Q{Averages/mean time of day};
-
-	subtest {
-		my $source = Q:to[_END_];
+	ok round-trips( Q:to[_END_] ), Q{Averages/median};
 	sub median {
 	  my @a = sort @_;
 	  return (@a[@a.end / 2] + @a[@a / 2]) / 2;
 	}
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
 
-		done-testing;
-	}, Q{Averages/median};
-
-	subtest {
-		my $source = Q:to[_END_];
+	ok round-trips( Q:to[_END_] ), Q{version 2}; Q{Averages/mode};
 	sub mode (*@a) {
 	    my %counts;
 	    ++%counts{$_} for @a;
@@ -1291,13 +1001,8 @@ for ( True, False ) -> $*PURE-PERL {
 	    return |map { .key }, grep { .value == $max }, %counts.pairs;
 	}
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
 
-		done-testing;
-	}, Q{Averages/mode};
-
-	subtest {
-		my $source = Q:to[_END_];
+	ok round-trips( Q:to[_END_] ), Q{Averages/Pythagorean means};
 	sub A { ([+] @_) / @_ }
 	sub G { ([*] @_) ** (1 / @_) }
 	sub H { @_ / [+] 1 X/ @_ }
@@ -1306,37 +1011,22 @@ for ( True, False ) -> $*PURE-PERL {
 	say "G(1,...,10) = ", G(1..10);
 	say "H(1,...,10) = ", H(1..10);
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
-
-		done-testing;
-	}, Q{Averages/Pythagorean means};
 
 	subtest {
-		subtest {
-			my $source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{version 1};
 	sub rms(*@nums) { sqrt [+](@nums X** 2) / @nums }
 	 
 	say rms 1..10;
 	_END_
-			is $pt._roundtrip( $source ), $source,  Q{version 1};
 
-			done-testing;
-		}, Q{version 1};
-
-		subtest {
-			my $source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{version 2};
 	sub rms { sqrt @_ R/ [+] @_ X** 2 }
 	_END_
-			is $pt._roundtrip( $source ), $source,  Q{version 2};
-
-			done-testing;
-		}, Q{version 2};
 
 		done-testing;
 	}, Q{Averages/root mean square};
 
-	subtest {
-		my $source = Q:to[_END_];
+	ok round-trips( Q:to[_END_] ), Q{Averages/simple moving average};
 	sub sma(Int \P where * > 0) returns Sub {
 	    sub ($x) {
 		state @a = 0 xx P;
@@ -1345,10 +1035,6 @@ for ( True, False ) -> $*PURE-PERL {
 	    }
 	}
 	_END_
-		is $pt._roundtrip( $source ), $source,  Q{version 1};
-
-		done-testing;
-	}, Q{Averages/simple moving average};
 }
 
 # vim: ft=perl6

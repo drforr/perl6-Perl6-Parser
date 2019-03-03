@@ -440,11 +440,25 @@ class Perl6::Parser:ver<0.2.1> {
 		#$g.HOW.trace-on($g);
 		my $a := nqp::findmethod($compiler,'parseactions')($compiler);
 
+#my $munged-source = $source;
+#$munged-source ~~ s:ge{ 'will' (\s+) 'begin' }{'will' ~ $0 ~ 'enter'};
+#$munged-source ~~ s:g{ 'BEGIN' } = 'ENTER';
+
+#my @munged-BEGINs;
+#for @( $/ ) -> $match {
+#	@munged-BEGINs.push: $match.from;
+#}
+#warn @munged-BEGINs;
 		my $parsed = $g.parse(
+			#$munged-source,
 			$source,
 			:p( 0 ),
 			:actions( $a )
 		);
+#warn $parsed.perl;
+#for @munged-BEGINs -> $begin {
+#	$parsed.substr( $begin, 'BEGIN'.chars ) = 'BEGIN';
+#}
 
 		$parsed;
 	}

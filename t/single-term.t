@@ -5,7 +5,7 @@ use Perl6::Parser;
 
 plan 2 * 7;
 
-my $pt = Perl6::Parser.new;
+my $pp = Perl6::Parser.new;
 my $*CONSISTENCY-CHECK = True;
 my $*FALL-THROUGH = True;
 
@@ -15,11 +15,11 @@ for ( True, False ) -> $*PURE-PERL {
 			subtest {
 				subtest {
 					my $source = Q{0};
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[0].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -27,11 +27,11 @@ for ( True, False ) -> $*PURE-PERL {
 
 				subtest {
 					my $source = Q{ 0  };
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[1].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -43,11 +43,11 @@ for ( True, False ) -> $*PURE-PERL {
 			subtest {
 				subtest {
 					my $source = Q{1};
-				my $tree = $pt.to-tree( $source );
+				my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[0].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -55,11 +55,11 @@ for ( True, False ) -> $*PURE-PERL {
 
 				subtest {
 					my $source = Q{ 1  };
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[1].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -71,11 +71,11 @@ for ( True, False ) -> $*PURE-PERL {
 			subtest {
 				subtest {
 					my $source = Q{-1};
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[0].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -83,11 +83,11 @@ for ( True, False ) -> $*PURE-PERL {
 
 				subtest {
 					my $source = Q{ -1  };
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[1].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -99,11 +99,11 @@ for ( True, False ) -> $*PURE-PERL {
 			subtest {
 				subtest {
 					my $source = Q{1_1};
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[0].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -111,11 +111,11 @@ for ( True, False ) -> $*PURE-PERL {
 
 				subtest {
 					my $source = Q{ 1_1  };
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[1].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -127,11 +127,11 @@ for ( True, False ) -> $*PURE-PERL {
 			subtest {
 				subtest {
 					my $source = Q{Inf};
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Infinity },
 							$tree.child.[0].child),
 						Q{found Infinity};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -139,11 +139,11 @@ for ( True, False ) -> $*PURE-PERL {
 
 				subtest {
 					my $source = Q{ Inf  };
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Infinity },
 							$tree.child.[1].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -155,11 +155,11 @@ for ( True, False ) -> $*PURE-PERL {
 			subtest {
 				subtest {
 					my $source = Q{NaN};
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::NotANumber },
 							$tree.child.[0].child),
 						Q{found NotANumber};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -167,11 +167,11 @@ for ( True, False ) -> $*PURE-PERL {
 
 				subtest {
 					my $source = Q{ NaN  };
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::NotANumber },
 							$tree.child.[1].child),
 						Q{found NotANumber};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -187,11 +187,11 @@ for ( True, False ) -> $*PURE-PERL {
 			subtest {
 				subtest {
 					my $source = Q{0b0};
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[0].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -199,11 +199,11 @@ for ( True, False ) -> $*PURE-PERL {
 
 				subtest {
 					my $source = Q{ 0b0  };
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[1].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -213,11 +213,11 @@ for ( True, False ) -> $*PURE-PERL {
 			subtest {
 				subtest {
 					my $source = Q{0b1};
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[0].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -225,11 +225,11 @@ for ( True, False ) -> $*PURE-PERL {
 
 				subtest {
 					my $source = Q{ 0b1  };
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[1].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -239,11 +239,11 @@ for ( True, False ) -> $*PURE-PERL {
 			subtest {
 				subtest {
 					my $source = Q{-0b1};
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[0].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -251,11 +251,11 @@ for ( True, False ) -> $*PURE-PERL {
 
 				subtest {
 					my $source = Q{ -0b1  };
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[1].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -271,11 +271,11 @@ for ( True, False ) -> $*PURE-PERL {
 			subtest {
 				subtest {
 					my $source = Q{0o0};
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[0].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -283,11 +283,11 @@ for ( True, False ) -> $*PURE-PERL {
 
 				subtest {
 					my $source = Q{ 0o0  };
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[1].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -299,11 +299,11 @@ for ( True, False ) -> $*PURE-PERL {
 			subtest {
 				subtest {
 					my $source = Q{0o1};
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[0].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -311,11 +311,11 @@ for ( True, False ) -> $*PURE-PERL {
 
 				subtest {
 					my $source = Q{ 0o1  };
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[1].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -327,11 +327,11 @@ for ( True, False ) -> $*PURE-PERL {
 			subtest {
 				subtest {
 					my $source = Q{-0o1};
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[0].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -339,11 +339,11 @@ for ( True, False ) -> $*PURE-PERL {
 
 				subtest {
 					my $source = Q{ -0o1  };
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[1].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -359,11 +359,11 @@ for ( True, False ) -> $*PURE-PERL {
 			subtest {
 				subtest {
 					my $source = Q{0d0};
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[0].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -371,11 +371,11 @@ for ( True, False ) -> $*PURE-PERL {
 
 				subtest {
 					my $source = Q{ 0d0  };
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[1].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -387,11 +387,11 @@ for ( True, False ) -> $*PURE-PERL {
 			subtest {
 				subtest {
 					my $source = Q{0d1};
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[0].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -399,11 +399,11 @@ for ( True, False ) -> $*PURE-PERL {
 
 				subtest {
 					my $source = Q{ 0d1  };
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[1].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -415,11 +415,11 @@ for ( True, False ) -> $*PURE-PERL {
 			subtest {
 				subtest {
 					my $source = Q{-0d1};
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[0].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -427,11 +427,11 @@ for ( True, False ) -> $*PURE-PERL {
 
 				subtest {
 					my $source = Q{ -0d1  };
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[1].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -447,11 +447,11 @@ for ( True, False ) -> $*PURE-PERL {
 			subtest {
 				subtest {
 					my $source = Q{0};
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[0].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -459,11 +459,11 @@ for ( True, False ) -> $*PURE-PERL {
 
 				subtest {
 					my $source = Q{ 0  };
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[1].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -475,11 +475,11 @@ for ( True, False ) -> $*PURE-PERL {
 			subtest {
 				subtest {
 					my $source = Q{1};
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[0].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -487,11 +487,11 @@ for ( True, False ) -> $*PURE-PERL {
 
 				subtest {
 					my $source = Q{ 1  };
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[1].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -503,11 +503,11 @@ for ( True, False ) -> $*PURE-PERL {
 			subtest {
 				subtest {
 					my $source = Q{-1};
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[0].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -515,11 +515,11 @@ for ( True, False ) -> $*PURE-PERL {
 
 				subtest {
 					my $source = Q{ -1  };
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[1].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -535,11 +535,11 @@ for ( True, False ) -> $*PURE-PERL {
 			subtest {
 				subtest {
 					my $source = Q{0x0};
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[0].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -547,11 +547,11 @@ for ( True, False ) -> $*PURE-PERL {
 
 				subtest {
 					my $source = Q{ 0x0  };
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[1].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -563,11 +563,11 @@ for ( True, False ) -> $*PURE-PERL {
 			subtest {
 				subtest {
 					my $source = Q{0x1};
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[0].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -575,11 +575,11 @@ for ( True, False ) -> $*PURE-PERL {
 
 				subtest {
 					my $source = Q{ 0x1  };
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[1].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -591,11 +591,11 @@ for ( True, False ) -> $*PURE-PERL {
 			subtest {
 				subtest {
 					my $source = Q{-0x1};
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[0].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -603,11 +603,11 @@ for ( True, False ) -> $*PURE-PERL {
 
 				subtest {
 					my $source = Q{ -0x1  };
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[1].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -623,11 +623,11 @@ for ( True, False ) -> $*PURE-PERL {
 			subtest {
 				subtest {
 					my $source = Q{:13(0)};
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[0].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -635,11 +635,11 @@ for ( True, False ) -> $*PURE-PERL {
 
 				subtest {
 					my $source = Q{ :13(0)  };
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[1].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -651,11 +651,11 @@ for ( True, False ) -> $*PURE-PERL {
 			subtest {
 				subtest {
 					my $source = Q{:13(1)};
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[0].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -663,11 +663,11 @@ for ( True, False ) -> $*PURE-PERL {
 
 				subtest {
 					my $source = Q{ :13(1)  };
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[1].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -679,11 +679,11 @@ for ( True, False ) -> $*PURE-PERL {
 			subtest {
 				subtest {
 					my $source = Q{:13(-1)};
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[0].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -691,11 +691,11 @@ for ( True, False ) -> $*PURE-PERL {
 
 				subtest {
 					my $source = Q{ :13(-1)  };
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[1].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -711,11 +711,11 @@ for ( True, False ) -> $*PURE-PERL {
 			subtest {
 				subtest {
 					my $source = Q{0e0};
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[0].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -723,11 +723,11 @@ for ( True, False ) -> $*PURE-PERL {
 
 				subtest {
 					my $source = Q{ 0e0  };
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[1].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -739,11 +739,11 @@ for ( True, False ) -> $*PURE-PERL {
 			subtest {
 				subtest {
 					my $source = Q{0e1};
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[0].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -751,11 +751,11 @@ for ( True, False ) -> $*PURE-PERL {
 
 				subtest {
 					my $source = Q{ 0e1  };
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[1].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -767,11 +767,11 @@ for ( True, False ) -> $*PURE-PERL {
 			subtest {
 				subtest {
 					my $source = Q{-0e1};
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[0].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -779,11 +779,11 @@ for ( True, False ) -> $*PURE-PERL {
 
 				subtest {
 					my $source = Q{ -0e1  };
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[1].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -795,11 +795,11 @@ for ( True, False ) -> $*PURE-PERL {
 			subtest {
 				subtest {
 					my $source = Q{0e-1};
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[0].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -807,11 +807,11 @@ for ( True, False ) -> $*PURE-PERL {
 
 				subtest {
 					my $source = Q{ 0e-1  };
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[1].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -827,11 +827,11 @@ for ( True, False ) -> $*PURE-PERL {
 			subtest {
 				subtest {
 					my $source = Q{0i};
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[0].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -839,11 +839,11 @@ for ( True, False ) -> $*PURE-PERL {
 
 				subtest {
 					my $source = Q{ 0i  };
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[1].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -855,11 +855,11 @@ for ( True, False ) -> $*PURE-PERL {
 			subtest {
 				subtest {
 					my $source = Q{1i};
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[0].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -867,11 +867,11 @@ for ( True, False ) -> $*PURE-PERL {
 
 				subtest {
 					my $source = Q{ 1i  };
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[1].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -883,11 +883,11 @@ for ( True, False ) -> $*PURE-PERL {
 			subtest {
 				subtest {
 					my $source = Q{-1i};
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[0].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -895,11 +895,11 @@ for ( True, False ) -> $*PURE-PERL {
 
 				subtest {
 					my $source = Q{ -1i  };
-					my $tree = $pt.to-tree( $source );
+					my $tree = $pp.to-tree( $source );
 					ok (grep { $_ ~~ Perl6::Number },
 							$tree.child.[1].child),
 						Q{found number};
-					is $pt.to-string( $tree ), $source,
+					is $pp.to-string( $tree ), $source,
 						Q{formatted};
 
 					done-testing;
@@ -918,22 +918,22 @@ for ( True, False ) -> $*PURE-PERL {
 		subtest {
 			subtest {
 				my $source = Q{@*ARGS};
-				my $tree = $pt.to-tree( $source );
+				my $tree = $pp.to-tree( $source );
 				ok (grep { $_ ~~ Perl6::Variable },
 						$tree.child.[0].child),
 					Q{found variable};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pp.to-string( $tree ), $source, Q{formatted};
 
 				done-testing;
 			}, Q{no ws};
 
 			subtest {
 				my $source = Q{ @*ARGS  };
-				my $tree = $pt.to-tree( $source );
+				my $tree = $pp.to-tree( $source );
 				ok (grep { $_ ~~ Perl6::Variable },
 					$tree.child.[1].child),
 					Q{found variable};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pp.to-string( $tree ), $source, Q{formatted};
 
 				done-testing;
 			}, Q{ws};
@@ -944,22 +944,22 @@ for ( True, False ) -> $*PURE-PERL {
 		subtest {
 			subtest {
 				my $source = Q{$};
-				my $tree = $pt.to-tree( $source );
+				my $tree = $pp.to-tree( $source );
 				ok (grep { $_ ~~ Perl6::Variable },
 						$tree.child.[0].child),
 					Q{found variable};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pp.to-string( $tree ), $source, Q{formatted};
 
 				done-testing;
 			}, Q{no ws};
 
 			subtest {
 				my $source = Q{ $  };
-				my $tree = $pt.to-tree( $source );
+				my $tree = $pp.to-tree( $source );
 				ok (grep { $_ ~~ Perl6::Variable },
 					$tree.child.[1].child),
 					Q{found variable};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pp.to-string( $tree ), $source, Q{formatted};
 
 				done-testing;
 			}, Q{ws};
@@ -970,22 +970,22 @@ for ( True, False ) -> $*PURE-PERL {
 		subtest {
 			subtest {
 				my $source = Q{$_};
-				my $tree = $pt.to-tree( $source );
+				my $tree = $pp.to-tree( $source );
 				ok (grep { $_ ~~ Perl6::Variable },
 						$tree.child.[0].child),
 					Q{found variable};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pp.to-string( $tree ), $source, Q{formatted};
 
 				done-testing;
 			}, Q{no ws};
 
 			subtest {
 				my $source = Q{ $_  };
-				my $tree = $pt.to-tree( $source );
+				my $tree = $pp.to-tree( $source );
 				ok (grep { $_ ~~ Perl6::Variable },
 					$tree.child.[1].child),
 					Q{found variable};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pp.to-string( $tree ), $source, Q{formatted};
 
 				done-testing;
 			}, Q{ws};
@@ -996,22 +996,22 @@ for ( True, False ) -> $*PURE-PERL {
 		subtest {
 			subtest {
 				my $source = Q{$/};
-				my $tree = $pt.to-tree( $source );
+				my $tree = $pp.to-tree( $source );
 				ok (grep { $_ ~~ Perl6::Variable },
 						$tree.child.[0].child),
 					Q{found variable};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pp.to-string( $tree ), $source, Q{formatted};
 
 				done-testing;
 			}, Q{no ws};
 
 			subtest {
 				my $source = Q{ $/  };
-				my $tree = $pt.to-tree( $source );
+				my $tree = $pp.to-tree( $source );
 				ok (grep { $_ ~~ Perl6::Variable },
 					$tree.child.[1].child),
 					Q{found variable};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pp.to-string( $tree ), $source, Q{formatted};
 
 				done-testing;
 			}, Q{ws};
@@ -1022,22 +1022,22 @@ for ( True, False ) -> $*PURE-PERL {
 		subtest {
 			subtest {
 				my $source = Q{$!};
-				my $tree = $pt.to-tree( $source );
+				my $tree = $pp.to-tree( $source );
 				ok (grep { $_ ~~ Perl6::Variable },
 						$tree.child.[0].child),
 					Q{found variable};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pp.to-string( $tree ), $source, Q{formatted};
 
 				done-testing;
 			}, Q{no ws};
 
 			subtest {
 				my $source = Q{ $!  };
-				my $tree = $pt.to-tree( $source );
+				my $tree = $pp.to-tree( $source );
 				ok (grep { $_ ~~ Perl6::Variable },
 					$tree.child.[1].child),
 					Q{found variable};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pp.to-string( $tree ), $source, Q{formatted};
 
 				done-testing;
 			}, Q{ws};
@@ -1048,22 +1048,22 @@ for ( True, False ) -> $*PURE-PERL {
 		subtest {
 			subtest {
 				my $source = Q{$Foo::Bar};
-				my $tree = $pt.to-tree( $source );
+				my $tree = $pp.to-tree( $source );
 				ok (grep { $_ ~~ Perl6::Variable },
 						$tree.child.[0].child),
 					Q{found variable};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pp.to-string( $tree ), $source, Q{formatted};
 
 				done-testing;
 			}, Q{no ws};
 
 			subtest {
 				my $source = Q{ $Foo::Bar  };
-				my $tree = $pt.to-tree( $source );
+				my $tree = $pp.to-tree( $source );
 				ok (grep { $_ ~~ Perl6::Variable },
 					$tree.child.[1].child),
 					Q{found variable};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pp.to-string( $tree ), $source, Q{formatted};
 
 				done-testing;
 			}, Q{ws};
@@ -1075,16 +1075,16 @@ for ( True, False ) -> $*PURE-PERL {
 		subtest {
 			subtest {
 				my $source = Q{&sum};
-				my $tree = $pt.to-tree( $source );
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				my $tree = $pp.to-tree( $source );
+				is $pp.to-string( $tree ), $source, Q{formatted};
 
 				done-testing;
 			}, Q{no ws};
 
 			subtest {
 				my $source = Q{ &sum  };
-				my $tree = $pt.to-tree( $source );
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				my $tree = $pp.to-tree( $source );
+				is $pp.to-string( $tree ), $source, Q{formatted};
 
 				done-testing;
 			}, Q{ws};
@@ -1095,22 +1095,22 @@ for ( True, False ) -> $*PURE-PERL {
 		subtest {
 			subtest {
 				my $source = Q{$Foo::($*GLOBAL)::Bar};
-				my $tree = $pt.to-tree( $source );
+				my $tree = $pp.to-tree( $source );
 				ok (grep { $_ ~~ Perl6::Variable },
 						$tree.child.[0].child),
 					Q{found variable};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pp.to-string( $tree ), $source, Q{formatted};
 
 				done-testing;
 			}, Q{no ws};
 
 			subtest {
 				my $source = Q{ $Foo::($*GLOBAL)::Bar  };
-				my $tree = $pt.to-tree( $source );
+				my $tree = $pp.to-tree( $source );
 				ok (grep { $_ ~~ Perl6::Variable },
 					$tree.child.[1].child),
 					Q{found variable};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pp.to-string( $tree ), $source, Q{formatted};
 
 				done-testing;
 			}, Q{ws};
@@ -1123,24 +1123,24 @@ for ( True, False ) -> $*PURE-PERL {
 		subtest {
 			subtest {
 				my $source = Q{Int};
-				my $tree = $pt.to-tree( $source );
+				my $tree = $pp.to-tree( $source );
 	# XXX Probably shouldn't be a bareword...
 	#			ok (grep { $_ ~~ Perl6::Number },
 	#					$tree.child.[0].child),
 	#				Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pp.to-string( $tree ), $source, Q{formatted};
 
 				done-testing;
 			}, Q{no ws};
 
 			subtest {
 				my $source = Q{ Int  };
-				my $tree = $pt.to-tree( $source );
+				my $tree = $pp.to-tree( $source );
 	# XXX Probably shouldn't be a bareword...
 	#			ok (grep { $_ ~~ Perl6::Number },
 	#					$tree.child.[0].child),
 	#				Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pp.to-string( $tree ), $source, Q{formatted};
 
 				done-testing;
 			}, Q{ws};
@@ -1151,24 +1151,24 @@ for ( True, False ) -> $*PURE-PERL {
 		subtest {
 			subtest {
 				my $source = Q{IO::Handle};
-				my $tree = $pt.to-tree( $source );
+				my $tree = $pp.to-tree( $source );
 	# XXX Probably shouldn't be a bareword...
 	#			ok (grep { $_ ~~ Perl6::Number },
 	#					$tree.child.[0].child),
 	#				Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pp.to-string( $tree ), $source, Q{formatted};
 
 				done-testing;
 			}, Q{no ws};
 
 			subtest {
 				my $source = Q{ IO::Handle  };
-				my $tree = $pt.to-tree( $source );
+				my $tree = $pp.to-tree( $source );
 	# XXX Probably shouldn't be a bareword...
 	#			ok (grep { $_ ~~ Perl6::Number },
 	#					$tree.child.[0].child),
 	#				Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pp.to-string( $tree ), $source, Q{formatted};
 
 				done-testing;
 			}, Q{ws};
@@ -1183,24 +1183,24 @@ for ( True, False ) -> $*PURE-PERL {
 		subtest {
 			subtest {
 				my $source = Q{pi};
-				my $tree = $pt.to-tree( $source );
+				my $tree = $pp.to-tree( $source );
 	# XXX Probably shouldn't be a bareword...
 	#			ok (grep { $_ ~~ Perl6::Number },
 	#					$tree.child.[0].child),
 	#				Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pp.to-string( $tree ), $source, Q{formatted};
 
 				done-testing;
 			}, Q{no ws};
 
 			subtest {
 				my $source = Q{ pi  };
-				my $tree = $pt.to-tree( $source );
+				my $tree = $pp.to-tree( $source );
 	# XXX Probably shouldn't be a bareword...
 	#			ok (grep { $_ ~~ Perl6::Number },
 	#					$tree.child.[0].child),
 	#				Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pp.to-string( $tree ), $source, Q{formatted};
 
 				done-testing;
 			}, Q{ws};
@@ -1215,22 +1215,22 @@ for ( True, False ) -> $*PURE-PERL {
 		subtest {
 			subtest {
 				my $source = Q{sum};
-				my $tree = $pt.to-tree( $source );
+				my $tree = $pp.to-tree( $source );
 	#			ok (grep { $_ ~~ Perl6::Number },
 	#					$tree.child.[0].child),
 	#				Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pp.to-string( $tree ), $source, Q{formatted};
 
 				done-testing;
 			}, Q{no ws};
 
 			subtest {
 				my $source = Q{ sum  };
-				my $tree = $pt.to-tree( $source );
+				my $tree = $pp.to-tree( $source );
 	#			ok (grep { $_ ~~ Perl6::Number },
 	#					$tree.child.[0].child),
 	#				Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pp.to-string( $tree ), $source, Q{formatted};
 
 				done-testing;
 			}, Q{ws};
@@ -1245,22 +1245,22 @@ for ( True, False ) -> $*PURE-PERL {
 		subtest {
 			subtest {
 				my $source = Q{()};
-				my $tree = $pt.to-tree( $source );
+				my $tree = $pp.to-tree( $source );
 	#			ok (grep { $_ ~~ Perl6::Number },
 	#					$tree.child.[0].child),
 	#				Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pp.to-string( $tree ), $source, Q{formatted};
 
 				done-testing;
 			}, Q{no ws};
 
 			subtest {
 				my $source = Q{ ()  };
-				my $tree = $pt.to-tree( $source );
+				my $tree = $pp.to-tree( $source );
 	#			ok (grep { $_ ~~ Perl6::Number },
 	#					$tree.child.[0].child),
 	#				Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pp.to-string( $tree ), $source, Q{formatted};
 
 				done-testing;
 			}, Q{ws};
@@ -1277,22 +1277,22 @@ for ( True, False ) -> $*PURE-PERL {
 		subtest {
 			subtest {
 				my $source = Q{:()};
-				my $tree = $pt.to-tree( $source );
+				my $tree = $pp.to-tree( $source );
 	#			ok (grep { $_ ~~ Perl6::Number },
 	#					$tree.child.[0].child),
 	#				Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pp.to-string( $tree ), $source, Q{formatted};
 
 				done-testing;
 			}, Q{no ws};
 
 			subtest {
 				my $source = Q{ :()  };
-				my $tree = $pt.to-tree( $source );
+				my $tree = $pp.to-tree( $source );
 	#			ok (grep { $_ ~~ Perl6::Number },
 	#					$tree.child.[0].child),
 	#				Q{found number};
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				is $pp.to-string( $tree ), $source, Q{formatted};
 
 				done-testing;
 			}, Q{ws};

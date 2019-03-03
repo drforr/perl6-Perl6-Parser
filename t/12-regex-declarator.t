@@ -11,7 +11,7 @@ use Perl6::Parser;
 
 plan 2 * 3;
 
-my $pt = Perl6::Parser.new;
+my $pp = Perl6::Parser.new;
 my $*CONSISTENCY-CHECK = True;
 my $*FALL-THROUGH = True;
 my ( $source, $tree );
@@ -25,8 +25,8 @@ for ( True, False ) -> $*PURE-PERL {
 
 			subtest {
 				$source = Q{my token Foo{a}};
-				$tree = $pt.to-tree( $source );
-				is $pt.to-string( $tree ), $source, Q{formatted};
+				$tree = $pp.to-tree( $source );
+				is $pp.to-string( $tree ), $source, Q{formatted};
 				ok $tree.child[0].child[5].child[0] ~~
 					Perl6::Block::Enter, Q{enter brace};
 				ok $tree.child[0].child[5].child[2] ~~
@@ -38,16 +38,16 @@ for ( True, False ) -> $*PURE-PERL {
 			$source = Q:to[_END_];
 			my token Foo     {a}
 			_END_
-			$tree = $pt.to-tree( $source );
-			is $pt.to-string( $tree ), $source, Q{leading ws};
+			$tree = $pp.to-tree( $source );
+			is $pp.to-string( $tree ), $source, Q{leading ws};
 
 			$source = Q{my token Foo{a}  };
-			$tree = $pt.to-tree( $source );
-			is $pt.to-string( $tree ), $source, Q{trailing ws};
+			$tree = $pp.to-tree( $source );
+			is $pp.to-string( $tree ), $source, Q{trailing ws};
 
 			$source = Q{my token Foo     {a}  };
-			$tree = $pt.to-tree( $source );
-			is $pt.to-string( $tree ), $source, Q{leading, trailing ws};
+			$tree = $pp.to-tree( $source );
+			is $pp.to-string( $tree ), $source, Q{leading, trailing ws};
 		}, Q{no intrabrace spacing};
 
 		subtest {
@@ -56,22 +56,22 @@ for ( True, False ) -> $*PURE-PERL {
 			$source = Q:to[_END_];
 			my token Foo{ a  }
 			_END_
-			$tree = $pt.to-tree( $source );
-			is $pt.to-string( $tree ), $source, Q{no ws};
+			$tree = $pp.to-tree( $source );
+			is $pp.to-string( $tree ), $source, Q{no ws};
 
 			$source = Q:to[_END_];
 			my token Foo     { a  }
 			_END_
-			$tree = $pt.to-tree( $source );
-			is $pt.to-string( $tree ), $source, Q{leading ws};
+			$tree = $pp.to-tree( $source );
+			is $pp.to-string( $tree ), $source, Q{leading ws};
 
 			$source = Q{my token Foo{ a  }  };
-			$tree = $pt.to-tree( $source );
-			is $pt.to-string( $tree ), $source, Q{trailing ws};
+			$tree = $pp.to-tree( $source );
+			is $pp.to-string( $tree ), $source, Q{trailing ws};
 
 			$source = Q{my token Foo     { a  }  };
-			$tree = $pt.to-tree( $source );
-			is $pt.to-string( $tree ), $source, Q{leading, trailing ws};
+			$tree = $pp.to-tree( $source );
+			is $pp.to-string( $tree ), $source, Q{leading, trailing ws};
 		}, Q{intrabrace spacing};
 	}, Q{token};
 
@@ -82,42 +82,42 @@ for ( True, False ) -> $*PURE-PERL {
 			plan 4;
 
 			$source = Q{my rule Foo{a}};
-			$tree = $pt.to-tree( $source );
-			is $pt.to-string( $tree ), $source, Q{no ws};
+			$tree = $pp.to-tree( $source );
+			is $pp.to-string( $tree ), $source, Q{no ws};
 
 			$source = Q:to[_END_];
 			my rule Foo     {a}
 			_END_
-			$tree = $pt.to-tree( $source );
-			is $pt.to-string( $tree ), $source, Q{leading ws};
+			$tree = $pp.to-tree( $source );
+			is $pp.to-string( $tree ), $source, Q{leading ws};
 
 			$source = Q{my rule Foo{a}  };
-			$tree = $pt.to-tree( $source );
-			is $pt.to-string( $tree ), $source, Q{trailing ws};
+			$tree = $pp.to-tree( $source );
+			is $pp.to-string( $tree ), $source, Q{trailing ws};
 
 			$source = Q{my rule Foo     {a}  };
-			$tree = $pt.to-tree( $source );
-			is $pt.to-string( $tree ), $source, Q{leading, trailing ws};
+			$tree = $pp.to-tree( $source );
+			is $pp.to-string( $tree ), $source, Q{leading, trailing ws};
 		}, Q{no intrabrace spacing};
 
 		subtest {
 			plan 4;
 
 			$source = Q{my rule Foo{ a  }};
-			$tree = $pt.to-tree( $source );
-			is $pt.to-string( $tree ), $source, Q{no ws};
+			$tree = $pp.to-tree( $source );
+			is $pp.to-string( $tree ), $source, Q{no ws};
 
 			$source = Q{my rule Foo     { a  }};
-			$tree = $pt.to-tree( $source );
-			is $pt.to-string( $tree ), $source, Q{leading ws};
+			$tree = $pp.to-tree( $source );
+			is $pp.to-string( $tree ), $source, Q{leading ws};
 
 			$source = Q{my rule Foo{ a  }  };
-			$tree = $pt.to-tree( $source );
-			is $pt.to-string( $tree ), $source, Q{trailing ws};
+			$tree = $pp.to-tree( $source );
+			is $pp.to-string( $tree ), $source, Q{trailing ws};
 
 			$source = Q{my rule Foo     { a  }  };
-			$tree = $pt.to-tree( $source );
-			is $pt.to-string( $tree ), $source, Q{leading, trailing ws};
+			$tree = $pp.to-tree( $source );
+			is $pp.to-string( $tree ), $source, Q{leading, trailing ws};
 		}, Q{intrabrace spacing};
 	}, Q{rule};
 
@@ -128,40 +128,40 @@ for ( True, False ) -> $*PURE-PERL {
 			plan 4;
 
 			$source = Q{my regex Foo{a}};
-			$tree = $pt.to-tree( $source );
-			is $pt.to-string( $tree ), $source, Q{no ws};
+			$tree = $pp.to-tree( $source );
+			is $pp.to-string( $tree ), $source, Q{no ws};
 
 			$source = Q{my regex Foo     {a}};
-			$tree = $pt.to-tree( $source );
-			is $pt.to-string( $tree ), $source, Q{leading ws};
+			$tree = $pp.to-tree( $source );
+			is $pp.to-string( $tree ), $source, Q{leading ws};
 
 			$source = Q{my regex Foo{a}  };
-			$tree = $pt.to-tree( $source );
-			is $pt.to-string( $tree ), $source, Q{trailing ws};
+			$tree = $pp.to-tree( $source );
+			is $pp.to-string( $tree ), $source, Q{trailing ws};
 
 			$source = Q{my regex Foo     {a}  };
-			$tree = $pt.to-tree( $source );
-			is $pt.to-string( $tree ), $source, Q{leading, trailing ws};
+			$tree = $pp.to-tree( $source );
+			is $pp.to-string( $tree ), $source, Q{leading, trailing ws};
 		}, Q{no intrabrace spacing};
 
 		subtest {
 			plan 4;
 
 			$source = Q{my regex Foo{ a  }};
-			$tree = $pt.to-tree( $source );
-			is $pt.to-string( $tree ), $source, Q{no ws};
+			$tree = $pp.to-tree( $source );
+			is $pp.to-string( $tree ), $source, Q{no ws};
 
 			$source = Q{my regex Foo     { a  }};
-			$tree = $pt.to-tree( $source );
-			is $pt.to-string( $tree ), $source, Q{leading ws};
+			$tree = $pp.to-tree( $source );
+			is $pp.to-string( $tree ), $source, Q{leading ws};
 
 			$source = Q{my regex Foo{ a  }   };
-			$tree = $pt.to-tree( $source );
-			is $pt.to-string( $tree ), $source, Q{trailing ws};
+			$tree = $pp.to-tree( $source );
+			is $pp.to-string( $tree ), $source, Q{trailing ws};
 
 			$source = Q{my regex Foo     { a  }   };
-			$tree = $pt.to-tree( $source );
-			is $pt.to-string( $tree ), $source, Q{leading, trailing ws};
+			$tree = $pp.to-tree( $source );
+			is $pp.to-string( $tree ), $source, Q{leading, trailing ws};
 		}, Q{intrabrace spacing};
 	}, Q{regex};
 }

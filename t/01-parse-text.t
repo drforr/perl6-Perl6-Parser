@@ -5,15 +5,15 @@ use Perl6::Parser;
 
 plan 3;
 
-my $pt = Perl6::Parser.new;
+my $pp = Perl6::Parser.new;
 my $*CONSISTENCY-CHECK = True;
 my $*FALL-THROUGH = True;
 my $parsed;
 
-$parsed = $pt.parse( Q{} );
+$parsed = $pp.parse( Q{} );
 ok $parsed.hash.<statementlist>, Q{Empty file};
 
-$parsed = $pt.parse( Q {} );
+$parsed = $pp.parse( Q {} );
 ok $parsed.hash.<statementlist>, Q{whitespace-only};
 
 subtest {
@@ -22,7 +22,7 @@ subtest {
 	# lang-version appears now, but in the interest of backwards
 	# compatibility, only make sure that statementlist is there.
 	#
-	my $p = $pt.parse( Q{'a'} );
+	my $p = $pp.parse( Q{'a'} );
 	ok $p.hash.<statementlist>,
 		Q{document has statementlist hash key};
 	ok ( ( $p.hash.keys.elems == 1 ) or $p.hash.<lang-version> ),

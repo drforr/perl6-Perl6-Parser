@@ -5,7 +5,7 @@ use Perl6::Parser;
 
 plan 2 * 1;
 
-my $pt = Perl6::Parser.new;
+my $pp = Perl6::Parser.new;
 my $*CONSISTENCY-CHECK = True;
 my $*FALL-THROUGH = True;
 
@@ -15,8 +15,8 @@ for ( True, False ) -> $*PURE-PERL {
 		=begin EMPTY
 		=end EMPTY
 		_END_
-		my $tree = $pt.to-tree( $source );
-		is $pt.to-string( $tree ), $source, Q{formatted};
+		my $tree = $pp.to-tree( $source );
+		is $pp.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
 	}, Q{empty};
