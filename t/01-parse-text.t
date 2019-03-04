@@ -7,7 +7,7 @@ plan 3;
 
 my $pp = Perl6::Parser.new;
 my $*CONSISTENCY-CHECK = True;
-my $*FALL-THROUGH = True;
+my $*FALL-THROUGH      = True;
 my $parsed;
 
 $parsed = $pp.parse( Q{} );

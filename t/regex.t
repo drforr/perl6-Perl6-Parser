@@ -3,68 +3,53 @@ use v6;
 use Test;
 use Perl6::Parser;
 
+use lib 't/lib';
+use Utils;
+
 plan 2 * 4;
 
-my $pp = Perl6::Parser.new;
 my $*CONSISTENCY-CHECK = True;
-my $*FALL-THROUGH = True;
-my ( $source, $tree );
+my $*FALL-THROUGH      = True;
 
 for ( True, False ) -> $*PURE-PERL {
 	subtest {
 		plan 2;
 
-		$source = Q{/pi/};
-		$tree = $pp.to-tree( $source );
-		is $pp.to-string( $tree ), $source, Q{no ws};
+		ok round-trips( Q{/pi/} ), Q{no ws};
 
-		$source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{ws};
 		/pi/
 		_END_
-		$tree = $pp.to-tree( $source );
-		is $pp.to-string( $tree ), $source, Q{ws};
 	}, Q{/pi/};
 
 	subtest {
 		plan 2;
 
-		$source = Q{/<[ p i ]>/};
-		$tree = $pp.to-tree( $source );
-		is $pp.to-string( $tree ), $source, Q{no ws};
+		ok round-trips( Q{/<[ p i ]>/} ), Q{no ws};
 
-		$source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{ws};
 		/ <[ p i ]> /
 		_END_
-		$tree = $pp.to-tree( $source );
-		is $pp.to-string( $tree ), $source, Q{ws};
 	}, Q{/<[ p i ]>/};
 
 	subtest {
 		plan 2;
 
-		$source = Q{/\d/};
-		$tree = $pp.to-tree( $source );
-		is $pp.to-string( $tree ), $source, Q{no ws};
+		ok round-trips( Q{/\d/} ), Q{no ws};
 
-		$source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{ws};
 		/ \d /
 		_END_
-		$tree = $pp.to-tree( $source );
-		is $pp.to-string( $tree ), $source, Q{ws};
 	}, Q{/ \d /};
 
 	subtest {
 		plan 2;
 
-		$source = Q{/./};
-		$tree = $pp.to-tree( $source );
-		is $pp.to-string( $tree ), $source, Q{no ws};
+		ok round-trips( Q{/./} ), Q{no ws};
 
-		$source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{ws};
 		/ . /
 		_END_
-		$tree = $pp.to-tree( $source );
-		is $pp.to-string( $tree ), $source, Q{ws};
 	}, Q{/ . /};
 }
 

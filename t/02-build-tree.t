@@ -7,35 +7,20 @@ plan 9;
 
 my $pp = Perl6::Parser.new;
 my $*CONSISTENCY-CHECK = True;
-my $*FALL-THROUGH = True;
+my $*FALL-THROUGH      = True;
 
 # $pp.to-tree verifies that the tokens are contiguous, along with a bunch
 # of other things.
 #
 # So, all I really want to verify here is that the data types are correct.
 #
-subtest {
-	my $source = Q{};
-	my $t = $pp.to-tree( $source );
-	isa-ok $t, Perl6::Document;
+isa-ok Perl6::Parser.new.to-tree( Q{} ), Perl6::Document, Q{no ws};
 
-	done-testing;
-}, Q{no ws};
+isa-ok Perl6::Parser.new.to-tree( Q{ } ).child.[0], Perl6::WS, Q{ws};
 
 subtest {
-	my $source = Q{ };
-	my $t = $pp.to-tree( $source );
-	isa-ok $t, Perl6::Document;
-	isa-ok $t.child.[0], Perl6::WS;
+	my $t = $pp.to-tree( Q{my$a} );
 
-	done-testing;
-}, Q{ws};
-
-subtest {
-	my $source = Q{my$a};
-	my $t = $pp.to-tree( $source );
-
-	isa-ok $t, Perl6::Document;
 	isa-ok $t.child.[0], Perl6::Statement;
 	isa-ok $t.child.[0].child.[0], Perl6::Bareword;
 	isa-ok $t.child.[0].child.[1], Perl6::Variable::Scalar;
@@ -44,10 +29,8 @@ subtest {
 }, Q{without semi, without ws};
 
 subtest {
-	my $source = Q{ my$a};
-	my $t = $pp.to-tree( $source );
+	my $t = $pp.to-tree( Q{ my$a} );
 
-	isa-ok $t, Perl6::Document;
 	isa-ok $t.child.[0], Perl6::WS;
 	isa-ok $t.child.[1], Perl6::Statement;
 	isa-ok $t.child.[1].child.[0], Perl6::Bareword;
@@ -57,10 +40,8 @@ subtest {
 }, Q{without semi, with};
 
 subtest {
-	my $source = Q{my $a};
-	my $t = $pp.to-tree( $source );
+	my $t = $pp.to-tree( Q{my $a} );
 
-	isa-ok $t, Perl6::Document;
 	isa-ok $t.child.[0], Perl6::Statement;
 	isa-ok $t.child.[0].child.[0], Perl6::Bareword;
 	isa-ok $t.child.[0].child.[1], Perl6::WS;
@@ -70,10 +51,8 @@ subtest {
 }, Q{without semi, without ws};
 
 subtest {
-	my $source = Q{my$a;};
-	my $t = $pp.to-tree( $source );
+	my $t = $pp.to-tree( Q{my$a;} );
 
-	isa-ok $t, Perl6::Document;
 	isa-ok $t.child.[0], Perl6::Statement;
 	isa-ok $t.child.[0].child.[0], Perl6::Bareword;
 	isa-ok $t.child.[0].child.[1], Perl6::Variable::Scalar;
@@ -83,10 +62,8 @@ subtest {
 }, Q{with semi, without ws};
 
 subtest {
-	my $source = Q{my $a;};
-	my $t = $pp.to-tree( $source );
+	my $t = $pp.to-tree( Q{my $a;} );
 
-	isa-ok $t, Perl6::Document;
 	isa-ok $t.child.[0], Perl6::Statement;
 	isa-ok $t.child.[0].child.[0], Perl6::Bareword;
 	isa-ok $t.child.[0].child.[1], Perl6::WS;
@@ -97,10 +74,8 @@ subtest {
 }, Q{with semi, with ws};
 
 subtest {
-	my $source = Q{my $a = 1};
-	my $t = $pp.to-tree( $source );
+	my $t = $pp.to-tree( Q{my $a = 1} );
 
-	isa-ok $t, Perl6::Document;
 	isa-ok $t.child.[0], Perl6::Statement;
 	isa-ok $t.child.[0].child.[0], Perl6::Bareword;
 	isa-ok $t.child.[0].child.[1], Perl6::WS;
@@ -114,10 +89,8 @@ subtest {
 }, Q{assignment without semi, with ws};
 
 subtest {
-	my $source = Q{my $a = 1 + 2};
-	my $t = $pp.to-tree( $source );
+	my $t = $pp.to-tree( Q{my $a = 1 + 2} );
 
-	isa-ok $t, Perl6::Document;
 	isa-ok $t.child.[0], Perl6::Statement;
 	isa-ok $t.child.[0].child.[0], Perl6::Bareword;
 	isa-ok $t.child.[0].child.[1], Perl6::WS;

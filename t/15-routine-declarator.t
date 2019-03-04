@@ -24,7 +24,6 @@ plan 2 * 3 + 1;
 my $pp                 = Perl6::Parser.new;
 my $*CONSISTENCY-CHECK = True;
 my $*FALL-THROUGH      = True;
-my ( $source, $tree );
 
 # MAIN is the only subroutine that allows the 'unit sub FOO' form,
 # and naturally it can't be redeclared, as there's only one MAIN.
@@ -34,13 +33,11 @@ my ( $source, $tree );
 subtest {
 	plan 2;
 
-	$source = Q{unit sub MAIN;};
-	ok round-trips( $source ), Q{no ws};
+	ok round-trips( Q{unit sub MAIN;} ), Q{no ws};
 
-	$source = Q:to[_END_];
+	ok round-trips( Q:to[_END_] ), Q{ws before semi};
 	unit sub MAIN  ;
 	_END_
-	ok round-trips( $source ), Q{ws before semi};
 }, Q{unit form};
 
 for ( True, False ) -> $*PURE-PERL {
@@ -51,10 +48,10 @@ for ( True, False ) -> $*PURE-PERL {
 			plan 4;
 
 			subtest {
-				$source = gensym-package Q:to[_END_];
+				my $source = gensym-package Q:to[_END_];
 				sub %s{}
 				_END_
-				$tree = $pp.to-tree( $source );
+				my $tree = $pp.to-tree( $source );
 				is $pp.to-string( $tree ), $source, Q{formatted};
 				ok $tree.child[0].child[3].child[0] ~~
 					Perl6::Block::Enter, Q{enter brace};
@@ -64,36 +61,33 @@ for ( True, False ) -> $*PURE-PERL {
 				done-testing;
 			}, Q{no ws};
 
-			$source = gensym-package Q:to[_END_];
+			ok round-trips( gensym-package Q:to[_END_] ), Q{leading ws};
 			sub %s     {}
 			_END_
-			ok round-trips( $source ), Q{leading ws};
 
-			$source = gensym-package Q{sub %s{}  };
-			ok round-trips( $source ), Q{trailing ws};
+			ok round-trips( gensym-package Q{sub %s{}  } ),
+				Q{trailing ws};
 
-			$source = gensym-package Q{sub %s     {}  };
-			ok round-trips( $source ), Q{leading, trailing ws};
+			ok round-trips( gensym-package Q{sub %s     {}  } ),
+				Q{leading, trailing ws};
 		}, Q{no intrabrace spacing};
 
 		subtest {
 			plan 4;
 
-			$source = gensym-package Q:to[_END_];
+			ok round-trips( gensym-package Q:to[_END_] ), Q{no ws};
 			sub %s{   }
 			_END_
-			ok round-trips( $source ), Q{no ws};
 
-			$source = gensym-package Q:to[_END_];
+			ok round-trips( gensym-package Q:to[_END_] ), Q{leading ws};
 			sub %s     {   }
 			_END_
-			ok round-trips( $source ), Q{leading ws};
 
-			$source = gensym-package Q{sub %s{   }  };
-			ok round-trips( $source ), Q{trailing ws};
+			ok round-trips( gensym-package Q{sub %s{   }  } ),
+				Q{trailing ws};
 
-			$source = gensym-package Q{sub %s     {   }  };
-			ok round-trips( $source ), Q{leading, trailing ws};
+			ok round-trips( gensym-package Q{sub %s     {   }  } ),
+				Q{leading, trailing ws};
 		}, Q{intrabrace spacing};
 	}, Q{sub};
 
@@ -104,10 +98,10 @@ for ( True, False ) -> $*PURE-PERL {
 			plan 4;
 
 			subtest {
-				$source = gensym-package Q:to[_END_];
+				my $source = gensym-package Q:to[_END_];
 				class %s{method Bar{}}
 				_END_
-				$tree = $pp.to-tree( $source );
+				my $tree = $pp.to-tree( $source );
 				is $pp.to-string( $tree ), $source, Q{formatted};
 				ok $tree.child[0].child[3].child[0] ~~
 					Perl6::Block::Enter, Q{enter brace};
@@ -121,36 +115,33 @@ for ( True, False ) -> $*PURE-PERL {
 				done-testing;
 			}, Q{no ws};
 
-			$source = gensym-package Q:to[_END_];
+			ok round-trips( gensym-package Q:to[_END_] ), Q{leading ws};
 			class %s{method Bar     {}}
 			_END_
-			ok round-trips( $source ), Q{leading ws};
 
-			$source = gensym-package Q{class %s{method Foo{}  }};
-			ok round-trips( $source ), Q{trailing ws};
+			ok round-trips( gensym-package Q{class %s{method Foo{}  }} ),
+				Q{trailing ws};
 
-			$source = gensym-package Q{class %s{method Bar     {}  }};
-			ok round-trips( $source ), Q{leading, trailing ws};
+			ok round-trips( gensym-package Q{class %s{method Bar     {}  }} ),
+				Q{leading, trailing ws};
 		}, Q{no intrabrace spacing};
 
 		subtest {
 			plan 4;
 
-			$source = gensym-package Q:to[_END_];
+			ok round-trips( gensym-package Q:to[_END_] ), Q{no ws};
 			class %s{method Bar   {}}
 			_END_
-			ok round-trips( $source ), Q{no ws};
 
-			$source = gensym-package Q:to[_END_];
+			ok round-trips( gensym-package Q:to[_END_] ), Q{leading ws};
 			class %s{method Bar     {   }}
 			_END_
-			ok round-trips( $source ), Q{leading ws};
 
-			$source = gensym-package Q{class %s{method Foo{   }  }};
-			ok round-trips( $source ), Q{trailing ws};
+			ok round-trips( gensym-package Q{class %s{method Foo{   }  }} ),
+				Q{trailing ws};
 
-			$source = gensym-package Q{class %s{method Bar     {   }  }};
-			ok round-trips( $source ), Q{leading, trailing ws};
+			ok round-trips( gensym-package Q{class %s{method Bar     {   }  }} ),
+				Q{leading, trailing ws};
 		}, Q{with intrabrace spacing};
 	}, Q{method};
 #
@@ -160,41 +151,37 @@ for ( True, False ) -> $*PURE-PERL {
 		subtest {
 			plan 4;
 
-			$source = gensym-package Q:to[_END_];
+			ok round-trips( gensym-package Q:to[_END_] ), Q{no ws};
 			class %s{submethod Bar{}}
 			_END_
-			ok round-trips( $source ), Q{no ws};
 
-			$source = gensym-package Q:to[_END_];
+			ok round-trips( gensym-package Q:to[_END_] ), Q{leading ws};
 			class %s{submethod Bar     {}}
 			_END_
-			ok round-trips( $source ), Q{leading ws};
 
-			$source = gensym-package Q{class %s{submethod Foo{}  }};
-			ok round-trips( $source ), Q{trailing ws};
+			ok round-trips( gensym-package Q{class %s{submethod Foo{}  }} ),
+				Q{trailing ws};
 
-			$source = gensym-package Q{class %s{submethod Bar     {}  }};
-			ok round-trips( $source ), Q{leading, trailing ws};
+			ok round-trips( gensym-package Q{class %s{submethod Bar     {}  }} ),
+				Q{leading, trailing ws};
 		}, Q{no intrabrace spacing};
 
 		subtest {
 			plan 4;
 
-			$source = gensym-package Q:to[_END_];
+			ok round-trips( gensym-package Q:to[_END_] ), Q{no ws};
 			class %s{submethod Bar   {}}
 			_END_
-			ok round-trips( $source ), Q{no ws};
 
-			$source = gensym-package Q:to[_END_];
+			ok round-trips( gensym-package Q:to[_END_] ), Q{leading ws};
 			class %s{submethod Bar     {   }}
 			_END_
-			ok round-trips( $source ), Q{leading ws};
 
-			$source = gensym-package Q{class %s{submethod Foo{   }  }};
-			ok round-trips( $source ), Q{trailing ws};
+			ok round-trips( gensym-package Q{class %s{submethod Foo{   }  }} ),
+				Q{trailing ws};
 
-			$source = gensym-package Q{class %s{submethod Bar     {   }  }};
-			ok round-trips( $source ), Q{leading, trailing ws};
+			ok round-trips( gensym-package Q{class %s{submethod Bar     {   }  }} ),
+				Q{leading, trailing ws};
 		}, Q{with intrabrace spacing};
 	}, Q{submethod};
 }

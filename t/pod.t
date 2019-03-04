@@ -3,20 +3,20 @@ use v6;
 use Test;
 use Perl6::Parser;
 
+use lib 't/lib';
+use Utils;
+
 plan 2 * 1;
 
-my $pp = Perl6::Parser.new;
 my $*CONSISTENCY-CHECK = True;
-my $*FALL-THROUGH = True;
+my $*FALL-THROUGH      = True;
 
 for ( True, False ) -> $*PURE-PERL {
 	subtest {
-		my $source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{formatted};
 		=begin EMPTY
 		=end EMPTY
 		_END_
-		my $tree = $pp.to-tree( $source );
-		is $pp.to-string( $tree ), $source, Q{formatted};
 
 		done-testing;
 	}, Q{empty};

@@ -26,46 +26,45 @@ use Utils;
 
 plan 2 * 4;
 
-my $pp                 = Perl6::Parser.new;
 my $*CONSISTENCY-CHECK = True;
 my $*FALL-THROUGH      = True;
-my ( $source, $tree );
 
 for ( True, False ) -> $*PURE-PERL {
 	subtest {
-		$source = Q:to[_END_];
+		plan 2;
+
+		ok round-trips( Q:to[_END_] ), Q{no ws};
 		my$x
 		_END_
-		ok round-trips( $source ), Q{no ws};
 
-		$source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{leading ws};
 		my     $x
 		_END_
-		ok round-trips( $source ), Q{leading ws};
 
 		done-testing;
 	}, Q{my};
 
 	subtest {
-		$source = Q:to[_END_];
+		plan 2;
+
+		ok round-trips( Q:to[_END_] ), Q{no ws};
 		our$x
 		_END_
-		ok round-trips( $source ), Q{no ws};
 
-		$source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{leading ws};
 		our     $x
 		_END_
-		ok round-trips( $source ), Q{leading ws};
 
 		done-testing;
 	}, Q{our};
 
 	subtest {
 		subtest {
-			$source = gensym-package Q:to[_END_];
+			my $pp = Perl6::Parser.new;
+			my $source = gensym-package Q:to[_END_];
 			class %s{has$x}
 			_END_
-			$tree = $pp.to-tree( $source );
+			my $tree = $pp.to-tree( $source );
 			is $pp.to-string( $tree ), $source, Q{formatted};
 			ok $tree.child[0].child[3].child[0] ~~
 				Perl6::Block::Enter, Q{enter brace};
@@ -75,10 +74,9 @@ for ( True, False ) -> $*PURE-PERL {
 			done-testing;
 		}, Q{no ws};
 
-		$source = gensym-package Q:to[_END_];
+		ok round-trips( gensym-package Q:to[_END_] ), Q{leading ws};
 		class %s{has     $x}
 		_END_
-		ok round-trips( $source ), Q{leading ws};
 
 		done-testing;
 	}, Q{has};
@@ -110,15 +108,11 @@ for ( True, False ) -> $*PURE-PERL {
 	# XXX 'anon $x' is NIY
 
 	subtest {
-		plan 2;
+		plan 1;
 
-		$source = Q{state$x};
-		ok round-trips( $source ), Q{no ws};
-
-		$source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{no ws};
 		state     $x
 		_END_
-		ok round-trips( $source ), Q{leading ws};
 	}, Q{state};
 }
 

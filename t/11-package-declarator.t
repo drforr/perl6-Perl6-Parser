@@ -26,12 +26,10 @@ use Utils; # Get gensym-package
 #
 # lang <name>
 
-plan 2 * 11;
+plan 2 * 25;
 
-my $pp = Perl6::Parser.new;
 my $*CONSISTENCY-CHECK = True;
-my $*FALL-THROUGH = True;
-my ( $source, $tree );
+my $*FALL-THROUGH      = True;
 
 # Classes, modules, packages &c can no longer be redeclared.
 # Which is probably a good thing, but plays havoc with testing here.
@@ -44,518 +42,393 @@ my ( $source, $tree );
 # Use it to build out package names and such.
 #
 
+# package tests, don't make it a subtest because of nesting.
+#
 for ( True, False ) -> $*PURE-PERL {
 	subtest {
-		plan 3;
+		plan 4;
 
 		subtest {
-			plan 4;
+			my $pp     = Perl6::Parser.new;
+			my $source = gensym-package Q{package %s{}};
+			my $tree   = $pp.to-tree( $source );
 
-			subtest {
-				$source = gensym-package Q{package %s{}};
-				$tree = $pp.to-tree( $source );
-				is $pp.to-string( $tree ), $source, Q{formatted};
-				ok $tree.child[0].child[3].child[0] ~~
-					Perl6::Block::Enter, Q{enter brace};
-				ok $tree.child[0].child[3].child[1] ~~
-					Perl6::Block::Exit, Q{exit brace};
+			is $pp.to-string( $tree ), $source, Q{formatted};
+			ok $tree.child[0].child[3].child[0] ~~
+				Perl6::Block::Enter, Q{enter brace};
+			ok $tree.child[0].child[3].child[1] ~~
+				Perl6::Block::Exit, Q{exit brace};
 
-				done-testing;
-			}, Q{no ws};
+			done-testing;
+		}, Q{no ws};
 
-			$source = gensym-package Q:to[_END_];
-			package %s     {}
-			_END_
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{leading ws};
+		ok round-trips( gensym-package Q:to[_END_] ), Q{leading ws};
+		package %s     {}
+		_END_
 
-			$source = gensym-package Q{package %s{}  };
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{trailing ws};
+		ok round-trips( gensym-package Q{package %s{}  } ),
+		   Q{trailing ws};
 
-			$source = gensym-package Q{package %s     {}  };
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{leading, trailing ws};
-		}, Q{no intrabrace spacing};
-
-		subtest {
-			plan 4;
-
-			$source = gensym-package Q{package %s{   }};
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{no ws};
-
-			$source = gensym-package Q:to[_END_];
-			package %s     {   }
-			_END_
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{leading ws};
-
-			$source = gensym-package Q{package %s{   }  };
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{trailing ws};
-
-			$source = gensym-package Q{package %s     {   }  };
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{leading, trailing ws};
-		}, Q{intrabrace spacing};
-
-		subtest {
-			plan 2;
-
-			$source = gensym-package Q{unit package %s;};
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{no ws};
-
-			$source = gensym-package Q:to[_END_];
-			unit package %s  ;
-			_END_
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{ws before semi};
-		}, Q{unit form};
-	}, Q{package};
+		ok round-trips( gensym-package Q{package %s     {}  } ),
+		   Q{leading, trailing ws};
+	}, Q{package - no intrabrace spacing};
 
 	subtest {
-		plan 3;
+		plan 4;
 
-		subtest {
-			plan 4;
+		ok round-trips( gensym-package Q{package %s{   }} ), Q{no ws};
 
-			$source = gensym-package Q{module %s{}};
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{no ws};
+		ok round-trips( gensym-package Q:to[_END_] ), Q{leading ws};
+		package %s     {   }
+		_END_
 
-			$source = gensym-package Q:to[_END_];
-			module %s     {}
-			_END_
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{leading ws};
+		ok round-trips( gensym-package Q{package %s{   }  } ),
+		   Q{trailing ws};
 
-			$source = gensym-package Q{module %s{}  };
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{trailing ws};
-
-			$source = gensym-package Q{module %s     {}  };
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{leading, trailing ws};
-		}, Q{no intrabrace spacing};
-
-		subtest {
-			plan 4;
-
-			$source = gensym-package Q{module %s{   }};
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{no ws};
-
-			$source = gensym-package Q:to[_END_];
-			module %s     {   }
-			_END_
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{leading ws};
-
-			$source = gensym-package Q{module %s{   }  };
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{trailing ws};
-
-			$source = gensym-package Q{module %s     {   }  };
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{leading, trailing ws};
-		}, Q{intrabrace spacing};
-
-		subtest {
-			plan 2;
-
-			$source = gensym-package Q{unit module %s;};
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{no ws};
-
-			$source = gensym-package Q:to[_END_];
-			unit module %s;
-			_END_
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{ws};
-		}, Q{unit form};
-	}, Q{module};
-
-	subtest {
-		plan 3;
-
-		subtest {
-			plan 4;
-
-			$source = gensym-package Q{class %s{}};
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{no ws};
-
-			$source = gensym-package Q:to[_END_];
-			class %s     {}
-			_END_
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{leading ws};
-
-			$source = gensym-package Q{class %s{}  };
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{trailing ws};
-
-			$source = gensym-package Q{class %s     {}  };
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{leading, trailing ws};
-		}, Q{no intrabrace spacing};
-
-		subtest {
-			plan 4;
-
-			$source = gensym-package Q{class %s{   }};
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{no ws};
-
-			$source = gensym-package Q:to[_END_];
-			class %s     {   }
-			_END_
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{leading ws};
-
-			$source = gensym-package Q{class %s{   }  };
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{trailing ws};
-
-			$source = gensym-package Q{class %s     {   }  };
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{leading, trailing ws};
-		}, Q{intrabrace spacing};
-
-		subtest {
-			plan 2;
-
-			$source = gensym-package Q{unit class %s;};
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{no ws};
-
-			$source = gensym-package Q:to[_END_];
-			unit class %s;
-			_END_
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{ws};
-		}, Q{unit form};
-	}, Q{class};
+		ok round-trips( gensym-package Q{package %s     {   }  } ),
+		   Q{leading, trailing ws};
+	}, Q{package - intrabrace spacing};
 
 	subtest {
 		plan 2;
 
-		$source = gensym-package Q{class %s{also is Int}};
-		$tree = $pp.to-tree( $source );
-		is $pp.to-string( $tree ), $source, Q{no ws};
+		ok round-trips( gensym-package Q{unit package %s;} ), Q{no ws};
 
-		$source = gensym-package Q:to[_END_];
+		ok round-trips( gensym-package Q:to[_END_] ), Q{ws before semi};
+		unit package %s  ;
+		_END_
+	}, Q{package - unit form};
+}
+
+# Module tests
+#
+for ( True, False ) -> $*PURE-PERL {
+	subtest {
+		plan 4;
+
+		ok round-trips( gensym-package Q{module %s{}} ), Q{no ws};
+
+		ok round-trips( gensym-package Q:to[_END_] ), Q{leading ws};
+		module %s     {}
+		_END_
+
+		ok round-trips( gensym-package Q{module %s{}  } ),
+		   Q{trailing ws};
+
+		ok round-trips( gensym-package Q{module %s     {}  } ),
+		   Q{leading, trailing ws};
+	}, Q{module - no intrabrace spacing};
+
+	subtest {
+		plan 4;
+
+		ok round-trips( gensym-package Q{module %s{   }} ), Q{no ws};
+
+		ok round-trips( gensym-package Q:to[_END_] ), Q{leading ws};
+		module %s     {   }
+		_END_
+
+		ok round-trips( gensym-package Q{module %s{   }  } ),
+		   Q{trailing ws};
+
+		ok round-trips( gensym-package Q{module %s     {   }  } ),
+		   Q{leading, trailing ws};
+	}, Q{module - intrabrace spacing};
+
+	subtest {
+		plan 2;
+
+		ok round-trips( gensym-package Q{unit module %s;} ), Q{no ws};
+
+		ok round-trips( gensym-package Q:to[_END_] ), Q{ws};
+		unit module %s;
+		_END_
+	}, Q{module - unit form};
+}
+
+# Class
+#
+for ( True, False ) -> $*PURE-PERL {
+	subtest {
+		plan 4;
+
+		ok round-trips( gensym-package Q{class %s{}} ), Q{no ws};
+
+		ok round-trips( gensym-package Q:to[_END_] ), Q{leading ws};
+		class %s     {}
+		_END_
+
+		ok round-trips( gensym-package Q{class %s{}  } ),
+		   Q{trailing ws};
+
+		ok round-trips( gensym-package Q{class %s     {}  } ),
+		   Q{leading, trailing ws};
+	}, Q{class - no intrabrace spacing};
+
+	subtest {
+		plan 4;
+
+		ok round-trips( gensym-package Q{class %s{   }} ), Q{no ws};
+
+		ok round-trips( gensym-package Q:to[_END_] ), Q{leading ws};
+		class %s     {   }
+		_END_
+
+		ok round-trips( gensym-package Q{class %s{   }  } ),
+		   Q{trailing ws};
+
+		ok round-trips( gensym-package Q{class %s     {   }  } ),
+		   Q{leading, trailing ws};
+	}, Q{class - intrabrace spacing};
+
+	subtest {
+		plan 2;
+
+		ok round-trips( gensym-package Q{unit class %s;} ), Q{no ws};
+
+		ok round-trips( gensym-package Q:to[_END_] ), Q{ws};
+		unit class %s;
+		_END_
+	}, Q{class - unit form};
+}
+
+for ( True, False ) -> $*PURE-PERL {
+	subtest {
+		plan 2;
+
+		ok round-trips( gensym-package Q{class %s{also is Int}} ),
+		   Q{no ws};
+
+		ok round-trips( gensym-package Q:to[_END_] ), Q{ws};
 		class %s{also     is   Int}
 		_END_
-		$tree = $pp.to-tree( $source );
-		is $pp.to-string( $tree ), $source, Q{ws};
 	}, Q{class Foo also is};
 
 	subtest {
 		plan 2;
 
 		# space between 'Int' and {} is required
-		$source = gensym-package Q{class %s is Int {}};
-		$tree = $pp.to-tree( $source );
-		is $pp.to-string( $tree ), $source, Q{no ws};
+		ok round-trips( gensym-package Q{class %s is Int {}} ),
+		   Q{no ws};
 
-		$source = gensym-package Q:to[_END_];
+		ok round-trips( gensym-package Q:to[_END_] ), Q{ws};
 		class %s is Int {}
 		_END_
-		$tree = $pp.to-tree( $source );
-		is $pp.to-string( $tree ), $source, Q{ws};
 	}, Q{class Foo is};
 
 	subtest {
 		plan 4;
 
-		$source = gensym-package Q{class %s is repr('CStruct'){has int8$i}};
-		$tree = $pp.to-tree( $source );
-		is $pp.to-string( $tree ), $source, Q{no ws};
+		ok round-trips( gensym-package Q{class %s is repr('CStruct'){has int8$i}} ),
+		   Q{no ws};
 
-		$source = gensym-package Q:to[_END_];
+		ok round-trips( gensym-package Q:to[_END_] ), Q{ws};
 		class %s is repr('CStruct'){has int8$i}
 		_END_
-		$tree = $pp.to-tree( $source );
-		is $pp.to-string( $tree ), $source, Q{ws};
 
-		$source = gensym-package Q:to[_END_];
+		ok round-trips( gensym-package Q:to[_END_] ), Q{more ws};
 		class %s is repr('CStruct') { has int8 $i }
 		_END_
-		$tree = $pp.to-tree( $source );
-		is $pp.to-string( $tree ), $source, Q{more ws};
 
-		$source = gensym-package Q:to[_END_];
+		ok round-trips( gensym-package Q:to[_END_] ), Q{even more ws};
 		class %s is repr( 'CStruct' ) { has int8 $i }
 		_END_
-		$tree = $pp.to-tree( $source );
-		is $pp.to-string( $tree ), $source, Q{even more ws};
 	}, Q{class Foo is repr()};
 
 	subtest {
 		plan 2;
 
 		# space between 'Int' and {} is required
-		$source = gensym-package Q{class %s{trusts Int}};
-		$tree = $pp.to-tree( $source );
-		is $pp.to-string( $tree ), $source, Q{no ws};
+		ok round-trips( gensym-package Q{class %s{trusts Int}} ),
+		   Q{no ws};
 
-		$source = gensym-package Q:to[_END_];
+		ok round-trips( gensym-package Q:to[_END_] ), Q{ws};
 		class %s { trusts Int }
 		_END_
-		$tree = $pp.to-tree( $source );
-		is $pp.to-string( $tree ), $source, Q{ws};
 	}, Q{class Foo trusts};
+}
+
+# grammar
+for ( True, False ) -> $*PURE-PERL {
+	subtest {
+		plan 4;
+
+		ok round-trips( gensym-package Q{grammar %s{}} ),
+		   Q{no ws};
+
+		ok round-trips( gensym-package Q:to[_END_] ), Q{leading ws};
+		grammar %s     {}
+		_END_
+
+		ok round-trips( gensym-package Q{grammar %s{}  } ),
+		   Q{trailing ws};
+
+		ok round-trips( gensym-package Q{grammar %s     {}  } ),
+		   Q{leading, trailing ws};
+	}, Q{grammar - no intrabrace spacing};
 
 	subtest {
-		plan 3;
+		plan 4;
 
-		subtest {
-			plan 4;
+		ok round-trips( gensym-package Q{grammar %s{   }} ),
+		   Q{no ws};
 
-			$source = gensym-package Q{grammar %s{}};
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{no ws};
+		ok round-trips( gensym-package Q:to[_END_] ), Q{leading ws};
+		grammar %s     {   }
+		_END_
 
-			$source = gensym-package Q:to[_END_];
-			grammar %s     {}
-			_END_
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{leading ws};
+		ok round-trips( gensym-package Q{grammar %s{   }  } ),
+		   Q{trailing ws};
 
-			$source = gensym-package Q{grammar %s{}  };
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{trailing ws};
-
-			$source = gensym-package Q{grammar %s     {}  };
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{leading, trailing ws};
-		}, Q{no intrabrace spacing};
-
-		subtest {
-			plan 4;
-
-			$source = gensym-package Q{grammar %s{   }};
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{no ws};
-
-			$source = gensym-package Q:to[_END_];
-			grammar %s     {   }
-			_END_
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{leading ws};
-
-			$source = gensym-package Q{grammar %s{   }  };
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{trailing ws};
-
-			$source = gensym-package Q{grammar %s     {   }  };
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{leading, trailing ws};
-		}, Q{intrabrace spacing};
-
-		subtest {
-			plan 2;
-
-			$source = gensym-package Q{unit grammar %s;};
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{no ws};
-
-			$source = gensym-package Q:to[_END_];
-			unit grammar %s;
-			_END_
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{ws};
-		}, Q{unit form};
-	}, Q{grammar};
+		ok round-trips( gensym-package Q{grammar %s     {   }  } ),
+		   Q{leading, trailing ws};
+	}, Q{grammar - intrabrace spacing};
 
 	subtest {
-		plan 3;
+		plan 2;
 
-		subtest {
-			plan 4;
+		ok round-trips( gensym-package Q{unit grammar %s;} ),
+		   Q{no ws};
 
-			$source = gensym-package Q{role %s{}};
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{no ws};
+		ok round-trips( gensym-package Q:to[_END_] ), Q{ws};
+		unit grammar %s;
+		_END_
+	}, Q{grammar - unit form};
+}
 
-			$source = gensym-package Q:to[_END_];
-			role %s     {}
-			_END_
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{leading ws};
+# roles
+for ( True, False ) -> $*PURE-PERL {
+	subtest {
+		plan 4;
 
-			$source = gensym-package Q{role %s{}  };
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{trailing ws};
+		ok round-trips( gensym-package Q{role %s{}} ), Q{no ws};
 
-			$source = gensym-package Q{role %s     {}  };
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{leading, trailing ws};
-		}, Q{no intrabrace spacing};
+		ok round-trips( gensym-package Q:to[_END_] ), Q{leading ws};
+		role %s     {}
+		_END_
 
-		subtest {
-			plan 4;
+		ok round-trips( gensym-package Q{role %s{}  } ),
+		   Q{trailing ws};
 
-			$source = Q{role Foo{   }};
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{no ws};
-
-			$source = Q:to[_END_];
-			role Foo     {   }
-			_END_
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{leading ws};
-
-			$source = Q{role Foo{   }  };
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{trailing ws};
-
-			$source = Q{role Foo     {   }  };
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{leading, trailing ws};
-		}, Q{intrabrace spacing};
-
-		subtest {
-			plan 2;
-
-			$source = gensym-package Q{unit role %s;};
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{no ws};
-
-			$source = gensym-package Q:to[_END_];
-			unit role %s;
-			_END_
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source,  Q{ws};
-		}, Q{unit form};
-	}, Q{role};
+		ok round-trips( gensym-package Q{role %s     {}  } ),
+		   Q{leading, trailing ws};
+	}, Q{no intrabrace spacing};
 
 	subtest {
-		plan 3;
+		plan 4;
 
-		subtest {
-			plan 4;
+		ok round-trips( Q{role Foo{   }} ), Q{no ws};
 
-			$source = gensym-package Q{knowhow %s{}};
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{no ws};
+		ok round-trips( Q:to[_END_] ), Q{leading ws};
+		role Foo     {   }
+		_END_
 
-			$source = gensym-package Q:to[_END_];
-			knowhow %s     {}
-			_END_
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{leading ws};
+		ok round-trips( Q{role Foo{   }  } ), Q{trailing ws};
 
-			$source = gensym-package Q{knowhow %s{}  };
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{trailing ws};
-
-			$source = gensym-package Q{knowhow %s     {}  };
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{leading, trailing ws};
-		}, Q{no intrabrace spacing};
-
-		subtest {
-			plan 4;
-
-			$source = gensym-package Q{knowhow %s{   }};
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{no ws};
-
-			$source = gensym-package Q:to[_END_];
-			knowhow %s     {   }
-			_END_
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{leading ws};
-
-			$source = gensym-package Q{knowhow %s{   }  };
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{trailing ws};
-
-			$source = gensym-package Q{knowhow %s     {   }  };
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{leading, trailing ws};
-		}, Q{intrabrace spacing};
-
-		subtest {
-			plan 2;
-
-			$source = gensym-package Q{unit knowhow %s;};
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{no ws};
-
-			$source = gensym-package Q:to[_END_];
-			unit knowhow %s;
-			_END_
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{ws};
-		}, Q{unit form};
-	}, Q{knowhow};
+		ok round-trips( Q{role Foo     {   }  } ),
+		   Q{leading, trailing ws};
+	}, Q{intrabrace spacing};
 
 	subtest {
-		plan 3;
+		plan 2;
 
-		subtest {
-			plan 4;
+		ok round-trips( gensym-package Q{unit role %s;} ), Q{no ws};
 
-			$source = gensym-package Q{native %s{}};
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{no ws};
+		ok round-trips( gensym-package Q:to[_END_] ), Q{ws};
+		unit role %s;
+		_END_
+	}, Q{unit form};
+}
 
-			$source = gensym-package Q:to[_END_];
-			native %s     {}
-			_END_
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{leading ws};
+# knowhow
+#
+for ( True, False ) -> $*PURE-PERL {
+	subtest {
+		plan 4;
 
-			$source = gensym-package Q{native %s{}  };
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{trailing ws};
+		ok round-trips( gensym-package Q{knowhow %s{}} ), Q{no ws};
 
-			$source = gensym-package Q{native %s     {}  };
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{leading, trailing ws};
-		}, Q{no intrabrace spacing};
+		ok round-trips( gensym-package Q:to[_END_] ), Q{leading ws};
+		knowhow %s     {}
+		_END_
 
-		subtest {
-			plan 4;
+		ok round-trips( gensym-package Q{knowhow %s{}  } ),
+		   Q{trailing ws};
 
-			$source = gensym-package Q{native %s{   }};
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{no ws};
+		ok round-trips( gensym-package Q{knowhow %s     {}  } ),
+		   Q{leading, trailing ws};
+	}, Q{no intrabrace spacing};
 
-			$source = gensym-package Q:to[_END_];
-			native %s     {   }
-			_END_
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{leading ws};
+	subtest {
+		plan 4;
 
-			$source = gensym-package Q{native %s{   }  };
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{trailing ws};
+		ok round-trips( gensym-package Q{knowhow %s{   }} ), Q{no ws};
 
-			$source = gensym-package Q{native %s     {   }  };
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{leading, trailing ws};
-		}, Q{intrabrace spacing};
+		ok round-trips( gensym-package Q:to[_END_] ), Q{leading ws};
+		knowhow %s     {   }
+		_END_
 
-		subtest {
-			plan 2;
+		ok round-trips( gensym-package Q{knowhow %s{   }  } ),
+		   Q{trailing ws};
 
-			$source = gensym-package Q{unit native %s;};
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{no ws};
+		ok round-trips( gensym-package Q{knowhow %s     {   }  } ),
+		   Q{leading, trailing ws};
+	}, Q{intrabrace spacing};
 
-			$source = gensym-package Q:to[_END_];
-			unit native %s;
-			_END_
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{ws};
-		}, Q{unit form};
-	}, Q{native};
+	subtest {
+		plan 2;
+
+		ok round-trips( gensym-package Q{unit knowhow %s;} ), Q{no ws};
+
+		ok round-trips( gensym-package Q:to[_END_] ), Q{ws};
+		unit knowhow %s;
+		_END_
+	}, Q{unit form};
+}
+
+# native
+for ( True, False ) -> $*PURE-PERL {
+	subtest {
+		plan 4;
+
+		ok round-trips( gensym-package Q{native %s{}} ), Q{no ws};
+
+		ok round-trips( gensym-package Q:to[_END_] ), Q{leading ws};
+		native %s     {}
+		_END_
+
+		ok round-trips( gensym-package Q{native %s{}  } ),
+		   Q{trailing ws};
+
+		ok round-trips( gensym-package Q{native %s     {}  } ),
+		   Q{leading, trailing ws};
+	}, Q{native - no intrabrace spacing};
+
+	subtest {
+		plan 4;
+
+		ok round-trips( gensym-package Q{native %s{   }} ), Q{no ws};
+
+		ok round-trips( gensym-package Q:to[_END_] ), Q{leading ws};
+		native %s     {   }
+		_END_
+
+		ok round-trips( gensym-package Q{native %s{   }  } ),
+		   Q{trailing ws};
+
+		ok round-trips( gensym-package Q{native %s     {   }  } ),
+		   Q{leading, trailing ws};
+	}, Q{native - intrabrace spacing};
+
+	subtest {
+		plan 2;
+
+		ok round-trips( gensym-package Q{unit native %s;} ), Q{no ws};
+
+		ok round-trips( gensym-package Q:to[_END_] ), Q{ws};
+		unit native %s;
+		_END_
+	}, Q{native - unit form};
 }
 
 # XXX 'lang Foo{}' illegal

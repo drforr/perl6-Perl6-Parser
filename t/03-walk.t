@@ -6,10 +6,10 @@ use Perl6::Parser::Factory;
 
 plan 10;
 
-my $pp = Perl6::Parser.new;
-my $ppf = Perl6::Parser::Factory.new;
+my $pp                 = Perl6::Parser.new;
+my $ppf                = Perl6::Parser::Factory.new;
 my $*CONSISTENCY-CHECK = True;
-my $*FALL-THROUGH = True;
+my $*FALL-THROUGH      = True;
 
 sub make-decimal( Str $value ) {
 	Perl6::Number::Decimal.new( :from(0), :to(2), :content($value) );
@@ -40,16 +40,11 @@ subtest {
 	my $tree = make-decimal( '27' );
 	$ppf.thread( $tree );
 
-	ok $tree.is-root,
-		Q{tree is its own root};
-	ok $tree.is-start,
-		Q{tree is its own start node};
-	ok $tree.is-start-leaf,
-		Q{tree is its own start leaf};
-	ok $tree.is-end,
-		Q{tree is its own end node};
-	ok $tree.is-end-leaf,
-		Q{tree is its own end leaf};
+	ok $tree.is-root,       Q{tree is its own root};
+	ok $tree.is-start,      Q{tree is its own start node};
+	ok $tree.is-start-leaf, Q{tree is its own start leaf};
+	ok $tree.is-end,        Q{tree is its own end node};
+	ok $tree.is-end-leaf,   Q{tree is its own end leaf};
 
 	ok is-linked( $tree,
 		$tree,
@@ -67,16 +62,11 @@ subtest {
 	my $tree = make-list();
 	$ppf.thread( $tree );
 
-	ok $tree.is-root,
-		Q{tree is its own root};
-	ok $tree.is-start,
-		Q{tree is its own start node};
-	nok $tree.is-start-leaf,
-		Q{tree is not its own start leaf};
-	ok $tree.is-end,
-		Q{tree is its own end node};
-	nok $tree.is-end-leaf,
-		Q{tree is not its own end leaf};
+	ok $tree.is-root,        Q{tree is its own root};
+	ok $tree.is-start,       Q{tree is its own start node};
+	nok $tree.is-start-leaf, Q{tree is not its own start leaf};
+	ok $tree.is-end,         Q{tree is its own end node};
+	nok $tree.is-end-leaf,   Q{tree is not its own end leaf};
 
 	ok is-linked( $tree,
 		$tree,
@@ -103,26 +93,21 @@ subtest {
 		$tree.child[0],
 		$tree
 	), Q{root};
-	ok $tree.is-root, Q{tree is its own root};
-	ok $tree.is-start, Q{tree is its own start node};
+	ok $tree.is-root,        Q{tree is its own root};
+	ok $tree.is-start,       Q{tree is its own start node};
 	nok $tree.is-start-leaf, Q{tree is not its own start leaf};
-	nok $tree.is-end, Q{tree is not its own end node};
-	nok $tree.is-end-leaf, Q{tree is not its own end leaf};
+	nok $tree.is-end,        Q{tree is not its own end node};
+	nok $tree.is-end-leaf,   Q{tree is not its own end leaf};
 
 	my $twenty-seven = $tree.child[0];
 
 	ok is-linked( $twenty-seven, $tree, $twenty-seven, $tree ), Q{'27'};
 
-	nok $twenty-seven.is-start,
-		Q{'27' s not the start};
-	ok $twenty-seven.is-start-leaf,
-		Q{'27' is the starting leaf};
-	ok $twenty-seven.is-end,
-		Q{'27' is at the end of the list};
-	ok $twenty-seven.is-end-leaf,
-		Q{'27' is the ending leaf};
-	nok $twenty-seven.is-root,
-		Q{'27' is not the root};
+	nok $twenty-seven.is-start,     Q{'27' s not the start};
+	ok $twenty-seven.is-start-leaf, Q{'27' is the starting leaf};
+	ok $twenty-seven.is-end,        Q{'27' is at the end of the list};
+	ok $twenty-seven.is-end-leaf,   Q{'27' is the ending leaf};
+	nok $twenty-seven.is-root,      Q{'27' is not the root};
 }
 
 # '(27 64)' (not really - no '(',')' characters.
@@ -174,9 +159,7 @@ subtest {
 
 	ok !$tree.is-leaf;
 
-	my $int-node = $tree.next-leaf;
-
-	ok $int-node ~~ Perl6::Number::Decimal;
+	ok $tree.next-leaf ~~ Perl6::Number::Decimal;
 }
 
 # '(()b)' (not really - '(',')' are missing

@@ -3,12 +3,13 @@ use v6;
 use Test;
 use Perl6::Parser;
 
+use lib 't/lib';
+use Utils;
+
 plan 2 * 2;
 
-my $pp = Perl6::Parser.new;
 my $*CONSISTENCY-CHECK = True;
-my $*FALL-THROUGH = True;
-my ( $source, $tree );
+my $*FALL-THROUGH      = True;
 
 for ( True, False ) -> $*PURE-PERL {
 	subtest {
@@ -17,22 +18,14 @@ for ( True, False ) -> $*PURE-PERL {
 		subtest {
 			plan 3;
 
-			$source = Q{my Int $a};
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{regular};
+			ok round-trips( Q{my Int $a} ), Q{regular};
 
-			$source = Q{my Int:U $a};
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{undefined};
+			ok round-trips( Q{my Int:U $a} ), Q{undefined};
 
-			$source = Q{my Int:D $a = 0};
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{defined};
+			ok round-trips( Q{my Int:D $a = 0} ), Q{defined};
 		}, Q{typed};
 
-		$source = Q{my $a where 1};
-		$tree = $pp.to-tree( $source );
-		is $pp.to-string( $tree ), $source, Q{constrained};
+		ok round-trips( Q{my $a where 1} ), Q{constrained};
 	}, Q{variable};
 
 	subtest {
@@ -41,15 +34,11 @@ for ( True, False ) -> $*PURE-PERL {
 		subtest {
 			plan 2;
 
-			$source = Q{sub foo returns Int {}};
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{ws};
+			ok round-trips( Q{sub foo returns Int {}} ), Q{ws};
 
-			$source = Q:to[_END_];
+			ok round-trips( Q:to[_END_] ), Q{ws};
 			sub foo returns Int {}
 			_END_
-			$tree = $pp.to-tree( $source );
-			is $pp.to-string( $tree ), $source, Q{ws};
 		}, Q{sub foo returns Int {}};
 	}, Q{subroutine};
 }

@@ -3,19 +3,18 @@ use v6;
 use Test;
 use Perl6::Parser;
 
+use lib 't/lib';
+use Utils;
+
 plan 3;
 
-my $pp = Perl6::Parser.new;
+my $pp                 = Perl6::Parser.new;
 my $*CONSISTENCY-CHECK = True;
-my $*FALL-THROUGH = True;
+my $*FALL-THROUGH      = True;
 
-is $pp._roundtrip( Q{} ),
-	Q{},
-	Q{Empty string};
+ok round-trips( Q{} ), Q{Empty string};
 
-is $pp._roundtrip( Q{ } ),
-	Q{ },
-	Q{whitespace only};
+ok round-trips( Q{ } ), Q{whitespace only};
 
 subtest {
 	plan 2;
@@ -23,43 +22,21 @@ subtest {
 	subtest {
 		plan 5;
 
-		my $source;
-
-		$source = Q{my$a};
-		is $pp._roundtrip( $source ), $source, Q{my$a};
-
-		$source = Q{my$a;};
-		is $pp._roundtrip( $source ), $source, Q{my$a;};
-
-		$source = Q{my $a};
-		is $pp._roundtrip( $source ), $source, Q{my $a};
-
-		$source = Q{my $a;};
-		is $pp._roundtrip( $source ), $source, Q{my $a;};
-
-		$source = Q{my $a ;};
-		is $pp._roundtrip( $source ), $source, Q{my $a ;};
+		ok round-trips( Q{my$a}    ), Q{my$a};
+		ok round-trips( Q{my$a;}   ), Q{my$a;};
+		ok round-trips( Q{my $a}   ), Q{my $a};
+		ok round-trips( Q{my $a;}  ), Q{my $a;};
+		ok round-trips( Q{my $a ;} ), Q{my $a ;};
 	}, Q{simple declaration};
 
 	subtest {
 		plan 5;
 
-		my $source;
-
-		$source = Q{my$a=1};
-		is $pp._roundtrip( $source ), $source, Q{my$a=1};
-
-		$source = Q{my$a=1;};
-		is $pp._roundtrip( $source ), $source, Q{my$a=1;};
-
-		$source = Q{my $a=1};
-		is $pp._roundtrip( $source ), $source, Q{my $a=1};
-
-		$source = Q{my $a=1;};
-		is $pp._roundtrip( $source ), $source, Q{my $a=1;};
-
-		$source = Q{my $a=1 ;};
-		is $pp._roundtrip( $source ), $source, Q{my $a=1 ;};
+		ok round-trips( Q{my$a=1}    ), Q{my$a=1};
+		ok round-trips( Q{my$a=1;}   ), Q{my$a=1;};
+		ok round-trips( Q{my $a=1}   ), Q{my $a=1};
+		ok round-trips( Q{my $a=1;}  ), Q{my $a=1;};
+		ok round-trips( Q{my $a=1 ;} ), Q{my $a=1 ;};
 	}, Q{initializer};
 }, Q{passthrough};
 

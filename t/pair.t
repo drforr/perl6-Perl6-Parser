@@ -3,194 +3,143 @@ use v6;
 use Test;
 use Perl6::Parser;
 
+use lib 't/lib';
+use Utils;
+
 plan 2 * 13;
 
-my $pp = Perl6::Parser.new;
 my $*CONSISTENCY-CHECK = True;
-my $*FALL-THROUGH = True;
-my ( $source, $tree );
+my $*FALL-THROUGH      = True;
 
 for ( True, False ) -> $*PURE-PERL {
 	subtest {
 		plan 2;
 
-		$source = Q{a=>1};
-		$tree = $pp.to-tree( $source );
-		is $pp.to-string( $tree ), $source, Q{no ws};
+		ok round-trips( Q{a=>1} ), Q{no ws};
 
-		$source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{ws};
 		a => 1
 		_END_
-		$tree = $pp.to-tree( $source );
-		is $pp.to-string( $tree ), $source, Q{ws};
 	}, Q{a => 1};
 
 	subtest {
 		plan 2;
 
-		$source = Q{'a'=>'b'};
-		$tree = $pp.to-tree( $source );
-		is $pp.to-string( $tree ), $source, Q{no ws};
+		ok round-trips( Q{'a'=>'b'} ), Q{no ws};
 
-		$source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{ws};
 		'a' => 'b'
 		_END_
-		$tree = $pp.to-tree( $source );
-		is $pp.to-string( $tree ), $source, Q{ws};
 	}, Q{a => 1};
 
 	subtest {
 		plan 2;
 
-		$source = Q{:a};
-		$tree = $pp.to-tree( $source );
-		is $pp.to-string( $tree ), $source, Q{no ws};
+		ok round-trips( Q{:a} ), Q{no ws};
 
-		$source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{ws};
 		:a
 		_END_
-		$tree = $pp.to-tree( $source );
-		is $pp.to-string( $tree ), $source, Q{ws};
 	}, Q{:a};
 
 	subtest {
 		plan 2;
 
-		$source = Q{:!a};
-		$tree = $pp.to-tree( $source );
-		is $pp.to-string( $tree ), $source, Q{no ws};
+		ok round-trips( Q{:!a} ), Q{no ws};
 
-		$source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{ws};
 		:!a
 		_END_
-		$tree = $pp.to-tree( $source );
-		is $pp.to-string( $tree ), $source, Q{ws};
 	}, Q{:!a};
 
 	subtest {
 		plan 2;
 
-		$source = Q{:a<b>};
-		$tree = $pp.to-tree( $source );
-		is $pp.to-string( $tree ), $source, Q{no ws};
+		ok round-trips( Q{:a<b>} ), Q{no ws};
 
-		$source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{ws};
 		:a< b >
 		_END_
-		$tree = $pp.to-tree( $source );
-		is $pp.to-string( $tree ), $source, Q{ws};
 	}, Q{:a<b>};
 
 	subtest {
 		plan 2;
 
-		$source = Q{:a<b c>};
-		$tree = $pp.to-tree( $source );
-		is $pp.to-string( $tree ), $source, Q{no ws};
+		ok round-trips( Q{:a<b c>} ), Q{no ws};
 
-		$source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{ws};
 		:a< b c >
 		_END_
-		$tree = $pp.to-tree( $source );
-		is $pp.to-string( $tree ), $source, Q{ws};
 	}, Q{:a< b c >};
 
 	subtest {
 		plan 2;
 
-		$source = Q{my$a;:a{$a}};
-		$tree = $pp.to-tree( $source );
-		is $pp.to-string( $tree ), $source, Q{no ws};
+		ok round-trips( Q{my$a;:a{$a}} ), Q{no ws};
 
-		$source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{ws};
 		my $a; :a{$a}
 		_END_
-		$tree = $pp.to-tree( $source );
-		is $pp.to-string( $tree ), $source, Q{ws};
 	}, Q{:a{$a}};
 
 	subtest {
 		plan 2;
 
-		$source = Q{my$a;:a{'a','b'}};
-		$tree = $pp.to-tree( $source );
-		is $pp.to-string( $tree ), $source, Q{no ws};
+		ok round-trips( Q{my$a;:a{'a','b'}} ), Q{no ws};
 
-		$source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{ws};
 		my $a; :a{'a', 'b'}
 		_END_
-		$tree = $pp.to-tree( $source );
-		is $pp.to-string( $tree ), $source, Q{ws};
 	}, Q{:a{'a', 'b'}};
 
 	subtest {
 		plan 2;
 
-		$source = Q{my$a;:a{'a'=>'b'}};
-		$tree = $pp.to-tree( $source );
-		is $pp.to-string( $tree ), $source, Q{no ws};
+		ok round-trips( Q{my$a;:a{'a'=>'b'}} ), Q{no ws};
 
-		$source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{ws};
 		my $a; :a{'a' => 'b'}
 		_END_
-		$tree = $pp.to-tree( $source );
-		is $pp.to-string( $tree ), $source, Q{ws};
 	}, Q{:a{'a' => 'b'}};
 
 	subtest {
 		plan 2;
 
-		$source = Q{my$a;:$a};
-		$tree = $pp.to-tree( $source );
-		is $pp.to-string( $tree ), $source, Q{no ws};
+		ok round-trips( Q{my$a;:$a} ), Q{no ws};
 
-		$source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{ws};
 		my $a; :$a
 		_END_
-		$tree = $pp.to-tree( $source );
-		is $pp.to-string( $tree ), $source, Q{ws};
 	}, Q{:$a};
 
 	subtest {
 		plan 2;
 
-		$source = Q{my@a;:@a};
-		$tree = $pp.to-tree( $source );
-		is $pp.to-string( $tree ), $source, Q{no ws};
+		ok round-trips( Q{my@a;:@a} ), Q{no ws};
 
-		$source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{ws};
 		my @a; :@a
 		_END_
-		$tree = $pp.to-tree( $source );
-		is $pp.to-string( $tree ), $source, Q{ws};
 	}, Q{:@a};
 
 	subtest {
 		plan 2;
 
-		$source = Q{my%a;:%a};
-		$tree = $pp.to-tree( $source );
-		is $pp.to-string( $tree ), $source, Q{no ws};
+		ok round-trips( Q{my%a;:%a} ), Q{no ws};
 
-		$source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{ws};
 		my %a; :%a
 		_END_
-		$tree = $pp.to-tree( $source );
-		is $pp.to-string( $tree ), $source, Q{ws};
 	}, Q{:%a};
 
 	subtest {
 		plan 2;
 
-		$source = Q{my&a;:&a};
-		$tree = $pp.to-tree( $source );
-		is $pp.to-string( $tree ), $source, Q{no ws};
+		ok round-trips( Q{my&a;:&a} ), Q{no ws};
 
-		$source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{ws};
 		my &a; :&a
 		_END_
-		$tree = $pp.to-tree( $source );
-		is $pp.to-string( $tree ), $source, Q{ws};
 	}, Q{:&a};
 }
 

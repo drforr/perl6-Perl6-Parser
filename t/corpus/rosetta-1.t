@@ -37,8 +37,9 @@ for ( True, False ) -> $*PURE-PERL {
 	}, Q{100 doors};
 
 	subtest {
-	# The parser also recursively parses use'd classes, so since
-	# Term::termios might not be present on all systems, stub it out.
+		# The parser also recursively parses use'd classes, so since
+		# Term::termios might not be present on all systems, stub it
+		# out.
 		ok round-trips( gensym-package Q:to[_END_] ), Q{version 1};
 	class %s { has $fd; method getattr {}; method unset_lflags { }; method unset_iflags { }; method setattr { } }
 	#use %s;

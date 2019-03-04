@@ -4,7 +4,7 @@ use Test;
 use Perl6::Parser;
 
 use lib 't/lib';
-use Utils; # Get gensym-package
+use Utils;
 
 # The terms that get tested here are:
 #
@@ -16,7 +16,6 @@ plan 2 * 3;
 
 my $*CONSISTENCY-CHECK = True;
 my $*FALL-THROUGH      = True;
-my ( $source );
 
 for ( True, False ) -> $*PURE-PERL {
 	subtest {
@@ -25,41 +24,37 @@ for ( True, False ) -> $*PURE-PERL {
 		subtest {
 			plan 4;
 
-			$source = gensym-package Q:to[_END_];
+			ok round-trips( gensym-package Q:to[_END_] ), Q{no ws};
 			enum %s()
 			_END_
-			ok round-trips( $source ), Q{no ws};
 
-			$source = gensym-package Q:to[_END_];
+			ok round-trips( gensym-package Q:to[_END_] ), Q{leading ws};
 			enum %s     ()
 			_END_
-			ok round-trips( $source ), Q{leading ws};
 
-			$source = gensym-package Q{enum %s()  };
-			ok round-trips( $source ), Q{trailing ws};
+			ok round-trips( gensym-package Q{enum %s()  } ),
+				Q{trailing ws};
 
-			$source = gensym-package Q{enum %s     ()  };
-			ok round-trips( $source ), Q{leading, trailing ws};
+			ok round-trips( gensym-package Q{enum %s     ()  } ),
+				Q{leading, trailing ws};
 		}, Q{no intrabrace spacing};
 
 		subtest {
 			plan 4;
 
-			$source = gensym-package Q:to[_END_];
+			ok round-trips( gensym-package Q:to[_END_] ), Q{no ws};
 			enum %s(   )
 			_END_
-			ok round-trips( $source ), Q{no ws};
 
-			$source = gensym-package Q:to[_END_];
+			ok round-trips( gensym-package Q:to[_END_] ), Q{leading ws};
 			enum %s     (   )
 			_END_
-			ok round-trips( $source ), Q{leading ws};
 
-			$source = gensym-package Q{enum %s(   )  };
-			ok round-trips( $source ), Q{trailing ws};
+			ok round-trips( gensym-package Q{enum %s(   )  } ),
+				Q{trailing ws};
 
-			$source = gensym-package Q{enum %s     (   )  };
-			ok round-trips( $source ), Q{leading, trailing ws};
+			ok round-trips( gensym-package Q{enum %s     (   )  } ),
+				Q{leading, trailing ws};
 		}, Q{intrabrace spacing};
 	}, Q{enum};
 
@@ -69,46 +64,39 @@ for ( True, False ) -> $*PURE-PERL {
 		subtest {
 			plan 2;
 
-			$source = gensym-package Q:to[_END_];
+			ok round-trips( gensym-package Q:to[_END_] ), Q{no ws};
 			subset %s of Int
 			_END_
-			ok round-trips( $source ), Q{no ws};
 
-			$source = gensym-package Q{subset %s of Int  };
-			ok round-trips( $source ), Q{trailing ws};
+			ok round-trips( gensym-package Q{subset %s of Int  } ),
+				Q{trailing ws};
 		}, Q{Normal version};
 
-		$source = gensym-package Q:to[_END_];
+		ok round-trips( gensym-package Q:to[_END_] ), Q{unit form};
 		unit subset %s;
 		_END_
-		ok round-trips( $source ), Q{unit form};
 	}, Q{subset};
 
 	subtest {
 		plan 5;
 
-		$source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{no ws};
 		constant Foo=1
 		_END_
-		ok round-trips( $source ), Q{no ws};
 
-		$source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{leading ws};
 		constant Foo     =1
 		_END_
-		ok round-trips( $source ), Q{leading ws};
 
-		$source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{intermediate ws};
 		constant Foo=   1
 		_END_
-		ok round-trips( $source ), Q{intermediate ws};
 
-		$source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{intermediate ws};
 		constant Foo     =   1
 		_END_
-		ok round-trips( $source ), Q{intermediate ws};
 
-		$source = Q{constant Foo=1     };
-		ok round-trips( $source ), Q{trailing ws};
+		ok round-trips( Q{constant Foo=1     } ), Q{trailing ws};
 	}, Q{constant};
 }
 

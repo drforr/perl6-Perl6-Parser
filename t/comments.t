@@ -3,54 +3,45 @@ use v6;
 use Test;
 use Perl6::Parser;
 
+use lib 't/lib';
+use Utils;
+
 plan 2 * 3;
 
-my $pp = Perl6::Parser.new;
 my $*CONSISTENCY-CHECK = True;
-my $*FALL-THROUGH = True;
-my ( $source, $tree );
+my $*FALL-THROUGH      = True;
 
 for ( True, False ) -> $*PURE-PERL {
-	$source = Q:to[_END_];
+	ok round-trips( Q:to[_END_] ), Q{shebang line};
 	#!/usr/bin/env perl6
 	_END_
-	$tree = $pp.to-tree( $source );
-	is $pp.to-string( $tree ), $source, Q{shebang line};
 
 	subtest {
 		plan 2;
 
-		$source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{single EOL comment};
 		# comment to end of line
 		_END_
-		$tree = $pp.to-tree( $source );
-		is $pp.to-string( $tree ), $source, Q{single EOL comment};
 
-		$source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{Two EOL comments in a row};
 		# comment to end of line
 		# comment to end of line
 		_END_
-		$tree = $pp.to-tree( $source );
-		is $pp.to-string( $tree ), $source, Q{Two EOL comments in a row};
 	}, Q{full-line comments};
 
 	subtest {
 		plan 2;
 
-		$source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{single EOL comment};
 		#`( comment on single line )
 		_END_
-		$tree = $pp.to-tree( $source );
-		is $pp.to-string( $tree ), $source, Q{single EOL comment};
 
-		$source = Q:to[_END_];
+		ok round-trips( Q:to[_END_] ), Q{Two EOL comments in a row};
 		#`( comment
 		spanning
 		multiple
 		lines )
 		_END_
-		$tree = $pp.to-tree( $source );
-		is $pp.to-string( $tree ), $source, Q{Two EOL comments in a row};
 	}, Q{spanning comment};
 }
 
