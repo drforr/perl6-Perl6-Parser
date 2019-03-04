@@ -993,7 +993,7 @@ for ( True, False ) -> $*PURE-PERL {
 	}
 	_END_
 
-	ok round-trips( Q:to[_END_] ), Q{version 2}; Q{Averages/mode};
+	ok round-trips( Q:to[_END_] ), Q{Averages/mode};
 	sub mode (*@a) {
 	    my %counts;
 	    ++%counts{$_} for @a;
