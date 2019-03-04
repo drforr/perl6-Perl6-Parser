@@ -464,7 +464,7 @@ my role Structural {
 }
 
 my role Token {
-	has Str $.content is required;
+	has Str $.content is required is rw;
 
 	method to-string returns Str {
 		~$.content

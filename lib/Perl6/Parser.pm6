@@ -27,7 +27,7 @@ Perl6::Parser - Extract a Perl 6 AST from the NQP Perl 6 Parser
     #
     my @everything = $pt.to-list( $source );
 
-    # This will fire phasers such as BEGIN in existing code.
+    # This used to fire BEGIN and CHECK phasers, it no longer does so.
 
     # Use 'my $*PURE-PERL = True;' before parsing to enable an experimental
     # pure-Perl6 parser which will not execute phasers, but also won't install
@@ -422,6 +422,48 @@ my role Validating {
 	}
 }
 
+my class Munge-Phasers {
+	has @.munged-BEGIN;
+	has @.munged-CHECK;
+
+	method _munge-element( Perl6::Element $node ) {
+		return unless $node.^can( 'content' );
+
+		for @.munged-BEGIN -> $from {
+			next unless $node.from <= $from <= $node.to;
+			$node.content.substr-rw(
+				$from - $node.from,
+				'BEGIN'.chars
+			) = 'BEGIN';
+		}
+		for @.munged-CHECK -> $from {
+			next unless $node.from <= $from <= $node.to;
+			$node.content.substr-rw(
+				$from - $node.from,
+				'CHECK'.chars
+			) = 'CHECK';
+		}
+	}
+
+	method _munge-phasers( Perl6::Element $node ) {
+		self._munge-element( $node );
+
+		if $node.is-twig {
+			for $node.child.kv -> $index, $_ {
+				self._munge-phasers( $_ );
+			}
+		}
+	}
+
+	# Just in case we need to pass in parameters later on...
+	# sigh.
+	#
+	method munge-phasers( Perl6::Element $root ) {
+		return unless @.munged-BEGIN or @.munged-CHECK;
+		self._munge-phasers( $root );
+	}
+}
+
 class Perl6::Parser:ver<0.2.1> {
 	also does Debugging;
 	also does Testing;
@@ -429,6 +471,8 @@ class Perl6::Parser:ver<0.2.1> {
 	use nqp;
 
 	has $.factory = Perl6::Parser::Factory.new;
+	has @.munged-BEGIN;
+	has @.munged-CHECK;
 
 	# These could easily be a single method, but I'll separate them for
 	# testing purposes.
@@ -440,31 +484,32 @@ class Perl6::Parser:ver<0.2.1> {
 		#$g.HOW.trace-on($g);
 		my $a := nqp::findmethod($compiler,'parseactions')($compiler);
 
-#my $munged-source = $source;
-#$munged-source ~~ s:ge{ 'will' (\s+) 'begin' }{'will' ~ $0 ~ 'enter'};
-#$munged-source ~~ s:g{ 'BEGIN' } = 'ENTER';
-
-#my @munged-BEGINs;
-#for @( $/ ) -> $match {
-#	@munged-BEGINs.push: $match.from;
-#}
-#warn @munged-BEGINs;
+		@.munged-BEGIN = ();
+		my $munged-source = $source;
+		$munged-source ~~ s:g{ 'BEGIN' } = 'ENTER';
+		for @( $/ ) -> $BEGIN {
+			@.munged-BEGIN.push: $BEGIN.from;
+		}
+		$munged-source ~~ s:g{ 'CHECK' } = 'ENTER';
+		for @( $/ ) -> $CHECK {
+			@.munged-CHECK.push: $CHECK.from;
+		}
 		my $parsed = $g.parse(
-			#$munged-source,
-			$source,
+			$munged-source,
 			:p( 0 ),
 			:actions( $a )
 		);
-#warn $parsed.perl;
-#for @munged-BEGINs -> $begin {
-#	$parsed.substr( $begin, 'BEGIN'.chars ) = 'BEGIN';
-#}
 
 		$parsed;
 	}
 
 	method build-tree( Mu $parsed ) {
-		my $tree = $.factory.build( $parsed );
+		my $tree   = $.factory.build( $parsed );
+		my $munger = Munge-Phasers.new(
+			:munged-BEGIN( @.munged-BEGIN ),
+			:munged-CHECK( @.munged-CHECK ),
+		);
+		$munger.munge-phasers( $tree );
 		self.consistency-check( $tree ) if
 			$*CONSISTENCY-CHECK and %*ENV<AUTHOR>;
 		$tree
