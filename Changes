@@ -2,9 +2,13 @@ Revision history for Perl6-Parser
 
 {{$NEXT}}
 
+0.3.0  2019-03-04T15:32:10+09:00
+
+    - Stop compiling CHECK and BEGIN blocks.
+
 0.2.1  2019-03-02T14:34:58+09:00
 
-    - Uncomment a few mor tests, adding some more pure-perl stuff next.
+    - Uncomment a few more tests, adding some more pure-perl stuff next.
 
 0.2.0  2019-02-24T14:29:06+09:00
     - Fixing newly-generated redeclaration errors in test suites.

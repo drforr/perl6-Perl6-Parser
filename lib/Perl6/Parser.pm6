@@ -526,7 +526,7 @@ my class Munge-Phasers {
 	}
 }
 
-class Perl6::Parser:ver<0.2.1> {
+class Perl6::Parser:ver<0.3.0> {
 	also does Debugging;
 	also does Testing;
 	also does Validating;

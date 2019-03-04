@@ -27,7 +27,7 @@ SYNOPSIS
     #
     my @everything = $pt.to-list( $source );
 
-    # This will fire phasers such as BEGIN in existing code.
+    # This used to fire BEGIN and CHECK phasers, it no longer does so.
 
     # Use 'my $*PURE-PERL = True;' before parsing to enable an experimental
     # pure-Perl6 parser which will not execute phasers, but also won't install
@@ -46,7 +46,7 @@ This process **will** be simplified and encapsulated in the near future, as refo
 
 I've added fairly extensive debugging documentation to the [README.md](README.md) of this module, along with an internal [DEBUGGING.pod](DEBUGGING.pod) file talking about what you're seeing here, and why on **earth** didn't I do it **this** way? I have my reasons, but can be talked out of it with a good argument.
 
-Please **please** note that this, out of necessity, does compile your Perl 6 code, which **does** mean executing phasers such as `BEGIN`. There may be a way to oerride this behavior, and if you have suggestions that don't involve rewriting the Perl 6 grammar as a standalone library (which would not be such a bad idea in general) then please let the author know.
+Please note that this does compile your code, but it takes the precaution of munging `BEGIN` and `CHECK` phasers into `ENTER` instead so that it won't run at compile time.
 
 As it stands, the `.parse` method returns a deeply-nested object representation of the Perl 6 code it's given. It handles the regex language, but not the other braided languages such as embedded blocks in strings. It will do so eventually, but for the moment I'm busy getting the grammar rules covered.
 
