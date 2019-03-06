@@ -29,11 +29,11 @@ SYNOPSIS
 
     # This used to fire BEGIN and CHECK phasers, it no longer does so.
 
-    # Use 'my $*PURE-PERL = True;' before parsing to enable an experimental
-    # pure-Perl6 parser which will not execute phasers, but also won't install
-    # custom operators in your code or any slangs that you may have in place.
-    # As of 2017-09-28 it just bypasses NQP matches for the terminals such as
-    # numbers, operators and keywords, but this will change.
+    # As of 2019-03-05 $*PURE-PERL has gone away, instead all lines that *can*
+    # call the pure Perl 6 parser *do* call it, and I'm replacing calls to the
+    # internal Perl6 nqp parser with calls to regular Perl 6 code. This method
+    # will eventually get rid of some code that I use to bypass BEGIN and CHECK
+    # phasers, but that's a ways off.
 
 DESCRIPTION
 ===========

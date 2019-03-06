@@ -29,11 +29,10 @@ Perl6::Parser - Extract a Perl 6 AST from the NQP Perl 6 Parser
 
     # This used to fire BEGIN and CHECK phasers, it no longer does so.
 
-    # Use 'my $*PURE-PERL = True;' before parsing to enable an experimental
-    # pure-Perl6 parser which will not execute phasers, but also won't install
-    # custom operators in your code or any slangs that you may have in place.
-    # As of 2017-09-28 it just bypasses NQP matches for the terminals such as
-    # numbers, operators and keywords, but this will change.
+    # As of 2019-03-05 $*PURE-PERL no longer exists, because it's still
+    # a bit of a misnomer. And it tends to mess with the test suites a bit.
+    # I've instead chosen to just make it the default, and add a comment to
+    # lines that go directly to the pure Perl6 parser.
 
 =end SYNOPSIS
 
