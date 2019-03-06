@@ -2466,7 +2466,13 @@ class Perl6::Parser::Factory {
 			}
 			when self.assert-hash( $_,
 					[< circumfix coercee sigil >] ) {
-				$child.append( self._sigil( $_.hash.<sigil> ) );
+				#$child.append( self._sigil( $_.hash.<sigil> ) );
+				# PURE-PERL nonterminal
+				$child.append(
+					self.parse(
+						$_.hash.<sigil>, '_sigil'
+					)
+				);
 				# XXX coercee handled inside circumfix
 				$child.append(
 					self._circumfix( $_.hash.<circumfix> )
@@ -2703,13 +2709,25 @@ class Perl6::Parser::Factory {
 		my $child = Perl6::Element-List.new;
 		given $p {
 			when self.assert-hash( $_, [< coeff frac int >] ) {
-				$child.append( self.__FloatingPoint( $_ ) );
+				#$child.append( self.__FloatingPoint( $_ ) );
+				# PURE-PERL nonterminal
+				$child.append(
+					self.parse( $_, '_floating_point' )
+				);
 			}
 			when self.assert-hash( $_, [< coeff escale int >] ) {
-				$child.append( self.__FloatingPoint( $_ ) );
+				#$child.append( self.__FloatingPoint( $_ ) );
+				# PURE-PERL nonterminal
+				$child.append(
+					self.parse( $_, '_floating_point' )
+				);
 			}
 			when self.assert-hash( $_, [< coeff frac >] ) {
-				$child.append( self.__FloatingPoint( $_ ) );
+				#$child.append( self.__FloatingPoint( $_ ) );
+				# PURE-PERL nonterminal
+				$child.append(
+					self.parse( $_, '_floating_point' )
+				);
 			}
 			default {
 				$child.fall-through( $_ );
@@ -2818,10 +2836,10 @@ class Perl6::Parser::Factory {
 #		$child;
 #	}
 
-	method _dig( Mu $p ) returns Perl6::Element {
-		# PURE-PERL parser
-		self.parse( $p, '_dig' );
-	}
+#	method _dig( Mu $p ) returns Perl6::Element {
+#		# PURE-PERL parser
+#		self.parse( $p, '_dig' );
+#	}
 
 #	method _doc( Mu $p ) returns Perl6::Element-List {
 #		my $child = Perl6::Element-List.new;
@@ -3539,7 +3557,11 @@ class Perl6::Parser::Factory {
 		my $child = Perl6::Element-List.new;
 		given $p {
 			when self.assert-hash( $_, [< key val >] ) {
-				$child.append( self._key( $_.hash.<key> ) );
+				#$child.append( self._key( $_.hash.<key> ) );
+				# PURE-PERL nonterminal
+				$child.append(
+					self.parse( $_.hash.<key>, '_key' )
+				);
 				$child.append(
 					Perl6::Operator::Infix.from-sample(
 						$_, FAT-ARROW
@@ -3554,10 +3576,10 @@ class Perl6::Parser::Factory {
 		$child;
 	}
 
-	method __FloatingPoint( Mu $p ) returns Perl6::Element {
-		# PURE-PERL parser
-		self.parse( $p, '_floating_point' );
-	}
+#	method __FloatingPoint( Mu $p ) returns Perl6::Element {
+#		# PURE-PERL parser
+#		self.parse( $p, '_floating_point' );
+#	}
 
 #	method _hexint( Mu $p ) returns Perl6::Element {
 #		Perl6::Number::Hexadecimal.from-match( $p );
@@ -3690,15 +3712,15 @@ class Perl6::Parser::Factory {
 #		$child;
 #	}
 
-	method _key( Mu $p ) returns Perl6::Element {
-		# PURE-PERL parser
-		self.parse( $p, '_key' );
-	}
+#	method _key( Mu $p ) returns Perl6::Element {
+#		# PURE-PERL parser
+#		self.parse( $p, '_key' );
+#	}
 
-	method _lambda( Mu $p ) returns Perl6::Element {
-		# PURE-PERL parser
-		self.parse( $p, '_lambda' );
-	}
+#	method _lambda( Mu $p ) returns Perl6::Element {
+#		# PURE-PERL parser
+#		self.parse( $p, '_lambda' );
+#	}
 
 	method _left( Mu $p ) returns Perl6::Element-List {
 		my $child = Perl6::Element-List.new;
@@ -4270,15 +4292,15 @@ class Perl6::Parser::Factory {
 		$child;
 	}
 
-	method __Inf( Mu $p ) returns Perl6::Element {
-		# PURE-PERL parser
-		self.parse( $p, '_infinity' );
-	}
+#	method __Inf( Mu $p ) returns Perl6::Element {
+#		# PURE-PERL parser
+#		self.parse( $p, '_infinity' );
+#	}
 
-	method __NaN( Mu $p ) returns Perl6::Element {
-		# PURE-PERL parser
-		self.parse( $p, '_nan' );
-	}
+#	method __NaN( Mu $p ) returns Perl6::Element {
+#		# PURE-PERL parser
+#		self.parse( $p, '_nan' );
+#	}
 
 	method _numish( Mu $p ) returns Perl6::Element-List {
 		my $child = Perl6::Element-List.new;
@@ -4299,10 +4321,18 @@ class Perl6::Parser::Factory {
 				);
 			}
 			when $_.Str eq 'Inf' {
-				$child.append( self.__Inf( $_ ) );
+				#$child.append( self.__Inf( $_ ) );
+				# PURE-PERL nonterminal
+				$child.append(
+					self.parse( $_, '_infinity' )
+				);
 			}
 			when $_.Str eq 'NaN' {
-				$child.append( self.__NaN( $_ ) );
+				#$child.append( self.__NaN( $_ ) );
+				# PURE-PERL nonterminal
+				$child.append(
+					self.parse( $_, '_nan' )
+				);
 			}
 			default {
 				$child.fall-through( $_ );
@@ -4429,6 +4459,10 @@ class Perl6::Parser::Factory {
 #			}
 #			when self.assert-hash( $_, [< dig O >] ) {
 #				$child.append( self._dig( $_.hash.<dig> ) );
+#				# PURE-PERL nonterminal
+#				$child.append(
+#					self.parse( $_.hash.<dig>, '_dig' )
+#				);
 #				$child.append( self._O( $_.hash.<O> ) );
 #			}
 #			when self.assert-hash( $_, [< O >] ) {
@@ -4737,7 +4771,11 @@ class Perl6::Parser::Factory {
 				);
 			}
 			when self.assert-hash( $_, [< sigil >] ) {
-				$child.append( self._sigil( $_.hash.<sigil> ) );
+				#$child.append( self._sigil( $_.hash.<sigil> ) );
+				# PURE-PERL nonterminal
+				$child.append(
+					self.parse( $_.hash.<sigil>, '_sigil' )
+				);
 			}
 			default {
 				$child.fall-through( $_ );
@@ -4751,8 +4789,14 @@ class Perl6::Parser::Factory {
 		given $p {
 			when self.assert-hash( $_,
 					[< blockoid lambda signature >] ) {
+				#$child.append(
+				#	self._lambda( $_.hash.<lambda> )
+				#);
+				# PURE-PERL nonterminal
 				$child.append(
-					self._lambda( $_.hash.<lambda> )
+					self.parse(
+						$_.hash.<lambda>, '_lambda'
+					)
 				);
 				$child.append(
 					self._signature( $_.hash.<signature> )
@@ -4956,7 +5000,10 @@ class Perl6::Parser::Factory {
 				);
 			}
 			when self.assert-hash( $_, [< dig O >] ) {
-				$child.append( self._dig( $_.hash.<dig> ) );
+				# PURE-PERL nonterminal
+				$child.append(
+					self.parse( $_.hash.<dig>, '_dig' )
+				);
 			}
 			default {
 				$child.fall-through( $_ );
@@ -5910,8 +5957,14 @@ class Perl6::Parser::Factory {
 		given $p {
 			when self.assert-hash( $_,
 					[< quantified_atom septype >] ) {
+				#$child.append(
+				#	self._septype( $_.hash.<septype> )
+				#);
+				# PURE-PERL nonterminal
 				$child.append(
-					self._septype( $_.hash.<septype> )
+					self.parse(
+						$_.hash.<septype>, '_septype'
+					)
 				);
 				$child.append(
 					self._quantified_atom(
@@ -5926,10 +5979,10 @@ class Perl6::Parser::Factory {
 		$child;
 	}
 
-	method _septype( Mu $p ) returns Perl6::Element {
-		# PURE-PERL parser
-		self.parse( $p, '_septype' );
-	}
+#	method _septype( Mu $p ) returns Perl6::Element {
+#		# PURE-PERL parser
+#		self.parse( $p, '_septype' );
+#	}
 
 #	method _sequence( Mu $p ) returns Perl6::Element-List {
 #		my $child = Perl6::Element-List.new;
@@ -5999,10 +6052,10 @@ class Perl6::Parser::Factory {
 #		$child;
 #	}
 
-	method _sigil( Mu $p ) returns Perl6::Element {
-		# PURE-PERL parser
-		self.parse( $p, '_sigil' )
-	}
+#	method _sigil( Mu $p ) returns Perl6::Element {
+#		# PURE-PERL parser
+#		self.parse( $p, '_sigil' )
+#	}
 
 #	method _sigmaybe( Mu $p ) returns Perl6::Element-List {
 #		my $child = Perl6::Element-List.new;
@@ -6456,7 +6509,11 @@ class Perl6::Parser::Factory {
 				$child.append(
 					self._pblock( $_.hash.<pblock> )
 				);
-				$child.append( self._wu( $_.hash.<wu> ) );
+				#$child.append( self._wu( $_.hash.<wu> ) );
+				# PURE-PERL nonterminal
+				$child.append(
+					self.parse( $_.hash.<wu>, '_wu' )
+				);
 				$child.append( self._EXPR( $_.hash.<EXPR> ) );
 			}
 			when self.assert-hash( $_,
@@ -6504,7 +6561,11 @@ class Perl6::Parser::Factory {
 			}
 			when self.assert-hash( $_, [< sym wu xblock >] ) {
 				$child.append( self._sym( $_.hash.<sym> ) );
-				$child.append( self._wu( $_.hash.<wu> ) );
+				#$child.append( self._wu( $_.hash.<wu> ) );
+				# PURE-PERL nonterminal
+				$child.append(
+					self.parse( $_.hash.<wu>, '_wu' )
+				);
 				$child.append(
 					self._xblock( $_.hash.<xblock> )
 				);
@@ -7496,10 +7557,10 @@ class Perl6::Parser::Factory {
 #		$child;
 #	}
 
-	method _wu( Mu $p ) returns Perl6::Element {
-		# PURE-PERL parser
-		self.parse( $p, '_wu' );
-	}
+#	method _wu( Mu $p ) returns Perl6::Element {
+#		# PURE-PERL parser
+#		self.parse( $p, '_wu' );
+#	}
 
 	method _xblock( Mu $p ) returns Perl6::Element-List {
 		my $child = Perl6::Element-List.new;
