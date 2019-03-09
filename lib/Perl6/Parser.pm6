@@ -576,7 +576,7 @@ class Perl6::Parser:ver<0.3.0> {
 		);
 		$munger.munge-phasers( $tree );
 		self.consistency-check( $tree ) if
-			$*CONSISTENCY-CHECK and %*ENV<AUTHOR>;
+			$*CONSISTENCY-CHECK;
 		$tree
 	}
 

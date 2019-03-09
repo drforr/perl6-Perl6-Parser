@@ -4,7 +4,7 @@ use Test;
 use Perl6::Parser;
 
 use lib 't/lib';
-use Utils; # Get gensym-package
+use Utils;
 
 # The terms that get tested here are:
 
@@ -30,17 +30,6 @@ plan 25;
 
 my $*CONSISTENCY-CHECK = True;
 my $*FALL-THROUGH      = True;
-
-# Classes, modules, packages &c can no longer be redeclared.
-# Which is probably a good thing, but plays havoc with testing here.
-#
-# This is a little ol' tool that generates a fresh package name every time
-# through the testing suite. I can't just make up new names as the test suite
-# goes along because I'm running the full test suite twice, once with the
-# original Perl6 parser-aided version, and once with the new regex-based parser.
-#
-# Use it to build out package names and such.
-#
 
 # package tests, don't make it a subtest because of nesting.
 #

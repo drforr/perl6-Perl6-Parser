@@ -4,7 +4,7 @@ use Test;
 use Perl6::Parser;
 
 use lib 't/lib';
-use Utils; # Get gensym-package
+use Utils;
 
 # The terms that get tested here are:
 #

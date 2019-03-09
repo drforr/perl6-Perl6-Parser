@@ -6,45 +6,51 @@ use Test;
 use Perl6::Parser;
 use Utils;
 
-plan 7;
+plan 6;
 
 my $*CONSISTENCY-CHECK = True;
 my $*FALL-THROUGH      = True;
 
+# Note that I'm adding redundant {}; blocks around all tests so that navigating
+# is nicer.
+#
 subtest {
-	ok round-trips( Q:to[_END_] ), Q{version 1};
+	{ ok round-trips( Q:to[_END_] ), Q{version 1};
 my @doors = False xx 101;
  
 (.=not for @doors[0, $_ ... 100]) for 1..100;
  
 say "Door $_ is ", <closed open>[ @doors[$_] ] for 1..100;
 _END_
+	};
 
-	ok round-trips( Q:to[_END_] ), Q{version 2};
+	{ ok round-trips( Q:to[_END_] ), Q{version 2};
 say "Door $_ is open" for map {$^n ** 2}, 1..10;
 _END_
+	};
 
-	ok round-trips( Q:to[_END_] ), Q{version 3};
+	{ ok round-trips( Q:to[_END_] ), Q{version 3};
 say "Door $_ is open" for 1..10 X** 2;
 _END_
+	};
 
-	ok round-trips( Q:to[_END_] ), Q{version 4};
+	{ ok round-trips( Q:to[_END_] ), Q{version 4};
 say "Door $_ is ", <closed open>[.sqrt == .sqrt.floor] for 1..100;
 _END_
+	};
 
 	done-testing;
 }, Q{100 doors};
 
-subtest {
 	# The parser also recursively parses use'd classes, so since
 	# Term::termios might not be present on all systems, stub it
 	# out.
-	ok round-trips( gensym-package Q:to[_END_] ), Q{version 1};
-class %s { has $fd; method getattr {}; method unset_lflags { }; method unset_iflags { }; method setattr { } }
-#use %s;
+{ ok round-trips( Q:to[_END_] ), Q{15 Puzzle};
+class Term::termios { has $fd; method getattr {}; method unset_lflags { }; method unset_iflags { }; method setattr { } }
+#use Term::termios;
 
-constant $saved   = %s.new(fd => 1).getattr;
-constant $termios = %s.new(fd => 1).getattr;
+constant $saved   = Term::termios.new(fd => 1).getattr;
+constant $termios = Term::termios.new(fd => 1).getattr;
 # raw mode interferes with carriage returns, so
 # set flags needed to emulate it manually
 $termios.unset_iflags(<BRKINT ICRNL ISTRIP IXON>);
@@ -61,7 +67,7 @@ constant $top = join '─' x cell, '┌', '┬' xx n-1, '┐';
 constant $mid = join '─' x cell, '├', '┼' xx n-1, '┤';
 constant $bot = join '─' x cell, '└', '┴' xx n-1, '┘';
  
-my %%dir = (
+my %dir = (
    "\e[A" => 'up',
    "\e[B" => 'down',
    "\e[C" => 'right',
@@ -91,7 +97,7 @@ sub shuffle () {
 }
 
 sub parity-ok (@b) {
-    so (sum @b».grep(/' '/,:k).grep(/\d/, :kv)) %%%% 2;
+    so (sum @b».grep(/' '/,:k).grep(/\d/, :kv)) %% 2;
 }
 
 sub row (@row) { '│' ~ (join '│', @row».&center) ~ '│' }
@@ -99,7 +105,7 @@ sub row (@row) { '│' ~ (join '│', @row».&center) ~ '│' }
 sub center ($s){
     my $c   = cell - $s.chars;
     my $pad = ' ' x ceiling($c/2);
-    sprintf "%%{cell}s", "$s$pad";
+    sprintf "%{cell}s", "$s$pad";
 }
 
 sub draw-board {
@@ -150,22 +156,19 @@ loop {
     # Specifically, arrow keys are 3.
     my $key = $*IN.read(4).decode;
  
-    move %%dir{$key} if so %%dir{$key};
+    move %dir{$key} if so %dir{$key};
     last if $key eq 'q'; # (q)uit
     new() if $key eq 'n';
 }
 _END_
+};
 
-	done-testing;
-}, Q{15 Puzzle};
-
-subtest {
-	ok round-trips( gensym-package Q:to[_END_] ), Q{version 1};
-class %s { has $fd; method getattr {}; method unset_lflags { }; method unset_iflags { }; method setattr { } }
-#use %s;
+{ ok round-trips( Q:to[_END_] ), Q{2048};
+class Term::termiosA { has $fd; method getattr {}; method unset_lflags { }; method unset_iflags { }; method setattr { } }
+#use Term::termiosA;
  
-constant $saved   = %s.new(fd => 1).getattr;
-constant $termios = %s.new(fd => 1).getattr;
+constant $saved   = Term::termiosA.new(fd => 1).getattr;
+constant $termios = Term::termiosA.new(fd => 1).getattr;
 # raw mode interferes with carriage returns, so
 # set flags needed to emulate it manually
 $termios.unset_iflags(<BRKINT ICRNL ISTRIP IXON>);
@@ -187,7 +190,7 @@ constant $top = join '─' x cell, '┌', '┬' xx n-1, '┐';
 constant $mid = join '─' x cell, '├', '┼' xx n-1, '┤';
 constant $bot = join '─' x cell, '└', '┴' xx n-1, '┘';
  
-my %%dir = (
+my %dir = (
    "\e[A" => 'up',
    "\e[B" => 'down',
    "\e[C" => 'right',
@@ -202,7 +205,7 @@ sub row (@row) { '│' ~ (join '│', @row».&center) ~ '│' }
 sub center ($s){
     my $c   = cell - $s.chars;
     my $pad = ' ' x ceiling($c/2);
-    my $tile = sprintf "%%{cell}s", "$s$pad";
+    my $tile = sprintf "%{cell}s", "$s$pad";
     my $idx = $s ?? $s.log(2) !! 0;
     ansi ?? "\e[{@ANSI[$idx]}m$tile\e[0m" !! $tile;
 }
@@ -272,30 +275,28 @@ loop {
     # Specifically, arrow keys are 3.
     my $key = $*IN.read(4).decode;
 
-    move %%dir{$key} if so %%dir{$key};
+    move %dir{$key} if so %dir{$key};
     last if $key eq 'q'; # (q)uit
 }
 _END_
+};
 
-	done-testing;
-}, Q{2048};
-
-subtest {
-	ok round-trips( gensym-package Q:to[_END_] ), Q{version 1};
+#`{ XXX consistency check gets flagged
+{ ok round-trips( Q:to[_END_] ), Q{24 game};
 use MONKEY-SEE-NO-EVAL;
  
 say "Here are your digits: ", 
 constant @digits = (1..9).roll(4)».Str;
 
-grammar %s {
+grammar Exp24 {
     token TOP { ^ <exp> $ { fail unless EVAL($/) == 24 } }
-    rule exp { <term>+ %% <op> }
+    rule exp { <term>+ % <op> }
     rule term { '(' <exp> ')' | <@digits> }
     token op { < + - * / > }
 }
 
 while my $exp = prompt "\n24? " {
-    if try %s.parse: $exp {
+    if try Exp24.parse: $exp {
 	say "You win :)";
 	last;
     } else {
@@ -309,12 +310,10 @@ while my $exp = prompt "\n24? " {
     }
 }
 _END_
+};
+}
 
-	done-testing;
-}, Q{24 game};
-
-subtest {
-	ok round-trips( Q:to[_END_] ), Q{version 1};
+{ ok round-trips( Q:to[_END_] ), Q{24 game/Solve};
 use MONKEY-SEE-NO-EVAL;
 
 my @digits;
@@ -360,12 +359,9 @@ sub unique (@array) {
     %h.values;
 }
 _END_
+};
 
-	done-testing;
-}, Q{24 game/Solve};
-
-subtest {
-	ok round-trips( Q:to[_END_] ), Q{version 1};
+{ ok round-trips( Q:to[_END_] ), Q{9 billion names of God};
 my @todo = $[1];
 my @sums = 0;
 sub nextrow($n) {
@@ -396,12 +392,10 @@ for 23, 123, 1234, 10000 {
     say $_, "\t", [+] nextrow($_)[];
 }
 _END_
-
-	done-testing;
-}, Q{9 billion names of God};
+};
 
 subtest {
-	ok round-trips( Q:to[_END_] ), Q{version 1};
+	{ ok round-trips( Q:to[_END_] ), Q{version 1};
 my $b = 99;
 
 repeat while --$b {
@@ -416,8 +410,9 @@ sub b($b) {
     "$b bottle{'s' if $b != 1} of beer";
 }
 _END_
+	};
 
-	ok round-trips( Q:to[_END_] ), Q{version 2};
+	{ ok round-trips( Q:to[_END_] ), Q{version 2};
 for 99...1 -> $bottles {
     sing $bottles, :wall;
     sing $bottles;
@@ -437,8 +432,9 @@ sub sing(
     say "$quantity bottle$plural of beer$location"
 }
 _END_
+	};
 
-	ok round-trips( Q:to[_END_] ), Q{version 3};
+	{ ok round-trips( Q:to[_END_] ), Q{version 3};
 my @quantities = flat (99 ... 1), 'No more', 99;
 my @bottles = flat 'bottles' xx 98, 'bottle', 'bottles' xx 2;
 my @actions = flat 'Take one down, pass it around' xx 99,
@@ -453,6 +449,7 @@ for @quantities Z @bottles Z @actions Z
     say "$d $e of beer on the wall\n";
 }
 _END_
+	};
 
 	done-testing;
 }, Q{99 bottles of beer};

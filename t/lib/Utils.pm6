@@ -27,4 +27,14 @@ class Utils {
 
 		return $pp.to-string( $tree ) eq $code;
 	}
+
+	sub has-a( $root, $type-object ) returns Bool  is export {
+		return True if $root ~~ $type-object;
+		if $root.is-twig {
+			for $root.child -> $child {
+				return True if has-a( $child, $type-object );
+			}
+		}
+		return False;
+	}
 }

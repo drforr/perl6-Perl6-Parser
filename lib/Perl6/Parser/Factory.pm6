@@ -1070,7 +1070,7 @@ class Perl6::Variable::Scalar is Perl6::Variable {
 
 	method sigil { Q{$} }
 }
-class Perl6::Variable::Scalar::Contextualizer is Perl6::Variable {
+class Perl6::Variable::Scalar::Contextualizer is Perl6::Variable::Scalar {
 	also does Structural;
 	#also does Token;
 	also does Branching;
@@ -1909,18 +1909,18 @@ class Perl6::Parser::Factory {
 	}
 
 	method _fill-gap( Mu $p, Perl6::Element $root, Int $index ) {
-		my $child = Perl6::Element-List.new;
+		my $child     = Perl6::Element-List.new;
 		my Int $start = $root.child.[$index].to;
-		my Int $end = $root.child.[$index+1].from;
+		my Int $end   = $root.child.[$index+1].from;
 
 		if $start < 0 or $end < 0 {
 			$*ERR.say( "Negative match index!" ) if
-				%*ENV<AUTHOR>;
+				$*CONSISTENCY-CHECK;
 			return;
 		}
 		elsif $start > $end {
 			$*ERR.say( "Crossing streams" ) if
-				%*ENV<AUTHOR>;
+				$*CONSISTENCY-CHECK;
 			return;
 		}
 
@@ -5156,7 +5156,6 @@ class Perl6::Parser::Factory {
 		Q{qq} => Perl6::String::Interpolation,
 		Q{Q} => Perl6::String::Literal,
 		Q{q} => Perl6::String::Escaping;
-		
 
 	# apos # ' .. '
 	# sapos # ('smart single quotes')..()
