@@ -12,29 +12,30 @@ use Utils;
 # my token Foo { } # 'token' is a regex_declaration
 # my regex Foo { } # 'regex' is a regex_declaration
 
-plan 4;
+plan 5;
 
 my $*CONSISTENCY-CHECK = True;
 my $*FALL-THROUGH      = True;
+
+subtest {
+	my $pp     = Perl6::Parser.new;
+	my $source = Q{my token Foo{a}};
+	my $tree   = $pp.to-tree( $source );
+
+	ok $tree.child[0].child[5].child[0] ~~
+		Perl6::Block::Enter, Q{enter brace};
+	ok $tree.child[0].child[5].child[2] ~~
+		Perl6::Block::Exit, Q{exit brace};
+
+	done-testing;
+}, Q{Check the token structure};
 
 # Token - get rid of an indent level
 #
 subtest {
 	plan 4;
 
-	subtest {
-		my $pp     = Perl6::Parser.new;
-		my $source = Q{my token Foo{a}};
-		my $tree   = $pp.to-tree( $source );
-
-		is $pp.to-string( $tree ), $source, Q{formatted};
-		ok $tree.child[0].child[5].child[0] ~~
-			Perl6::Block::Enter, Q{enter brace};
-		ok $tree.child[0].child[5].child[2] ~~
-			Perl6::Block::Exit, Q{exit brace};
-
-		done-testing;
-	}, Q{no ws};
+	ok round-trips( Q{my token Foo{a}} ), Q{no ws};
 
 	ok round-trips( Q:to[_END_] ), Q{leading ws};
 	my token Foo     {a}

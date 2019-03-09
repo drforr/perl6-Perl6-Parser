@@ -18,7 +18,28 @@ my $*CONSISTENCY-CHECK = True;
 my $*FALL-THROUGH      = True;
 
 subtest {
-	plan 2;
+	plan 3;
+
+	subtest {
+		my $pp     = Perl6::Parser.new;
+		my $source = gensym-package Q:to[_END_];
+		enum %s()
+		_END_
+
+		my $tree   = $pp.to-tree( $source );
+
+		ok $tree.child[0].child[0] ~~ Perl6::Bareword, Q{'my'};
+		ok $tree.child[0].child[1] ~~ Perl6::WS, Q{' '};
+		ok $tree.child[0].child[2] ~~ Perl6::Bareword, Q{Foo%s};
+		ok $tree.child[0].child[3] ~~ Perl6::Operator::Circumfix;
+		ok $tree.child[0].child[3].child[0] ~~ Perl6::Balanced::Enter,
+			Q{enter brace};
+		ok $tree.child[0].child[3].child[1] ~~ Perl6::Balanced::Exit,
+			Q{exit brace};
+		ok $tree.child[0].child[4] ~~ Perl6::Newline, Q{\n};
+
+		done-testing;
+	}, Q{Check the token structure};
 
 	subtest {
 		plan 4;

@@ -13,10 +13,26 @@ use Utils;
 # only
 # null
 
-plan 3;
+plan 4;
 
 my $*CONSISTENCY-CHECK = True;
 my $*FALL-THROUGH      = True;
+
+subtest {
+	my $pp = Perl6::Parser.new;
+	my $source = Q:to[_END_];
+	multi Foo{}
+	_END_
+
+	my $tree = $pp.to-tree( $source );
+
+	ok $tree.child[0].child[3].child[0] ~~
+	   Perl6::Block::Enter, Q{enter brace};
+	ok $tree.child[0].child[3].child[1] ~~
+	   Perl6::Block::Exit, Q{exit brace};
+
+	done-testing;
+}, Q{Check the token structure};
 
 subtest {
 	plan 2;
@@ -24,22 +40,9 @@ subtest {
 	subtest {
 		plan 4;
 
-		subtest {
-			my $pp = Perl6::Parser.new;
-			my $source = Q:to[_END_];
-			multi Foo{}
-			_END_
-			my $tree = $pp.to-tree( $source );
-
-			is $pp.to-string( $tree ), $source,
-			   Q{formatted};
-			ok $tree.child[0].child[3].child[0] ~~
-			   Perl6::Block::Enter, Q{enter brace};
-			ok $tree.child[0].child[3].child[1] ~~
-			   Perl6::Block::Exit, Q{exit brace};
-
-			done-testing;
-		}, Q{no ws};
+		ok round-trips( Q:to[_END_] ), Q{no ws};
+		multi Foo{}
+		_END_
 
 		ok round-trips( Q:to[_END_] ), Q{leading ws};
 		multi Foo     {}

@@ -30,7 +30,22 @@ my $*CONSISTENCY-CHECK = True;
 my $*FALL-THROUGH      = True;
 
 subtest {
-	plan 2;
+	plan 3;
+
+	subtest {
+		my $pp     = Perl6::Parser.new;
+		my $source = Q:to[_END_];
+		my$x
+		_END_
+
+		my $tree   = $pp.to-tree( $source );
+
+		ok $tree.child[0].child[0] ~~ Perl6::Bareword, Q{'my'};
+		ok $tree.child[0].child[1] ~~ Perl6::Variable::Scalar, Q{'$x'};
+		ok $tree.child[0].child[2] ~~ Perl6::Newline, Q{\n};
+
+		done-testing;
+	}, Q{Check the token structure};
 
 	ok round-trips( Q:to[_END_] ), Q{no ws};
 	my$x
@@ -64,14 +79,17 @@ subtest {
 		class %s{has$x}
 		_END_
 		my $tree = $pp.to-tree( $source );
-		is $pp.to-string( $tree ), $source, Q{formatted};
 		ok $tree.child[0].child[3].child[0] ~~
 			Perl6::Block::Enter, Q{enter brace};
 		ok $tree.child[0].child[3].child[2] ~~
 			Perl6::Block::Exit, Q{exit brace};
 
 		done-testing;
-	}, Q{no ws};
+	}, Q{Check the token structure};
+
+	ok round-trips( gensym-package Q:to[_END_] ), Q{no ws};
+	class %s{has$x}
+	_END_
 
 	ok round-trips( gensym-package Q:to[_END_] ), Q{leading ws};
 	class %s{has     $x}
@@ -106,13 +124,9 @@ subtest {
 
 # XXX 'anon $x' is NIY
 
-subtest {
-	plan 1;
-
-	ok round-trips( Q:to[_END_] ), Q{no ws};
-	state     $x
-	_END_
-}, Q{state};
+ok round-trips( Q:to[_END_] ), Q{state};
+state     $x
+_END_
 
 # XXX 'supersede $x' NIY
 

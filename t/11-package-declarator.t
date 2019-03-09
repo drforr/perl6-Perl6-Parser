@@ -26,29 +26,30 @@ use Utils;
 #
 # lang <name>
 
-plan 25;
+plan 26;
 
 my $*CONSISTENCY-CHECK = True;
 my $*FALL-THROUGH      = True;
+
+subtest {
+	my $pp     = Perl6::Parser.new;
+	my $source = gensym-package Q{package %s{}};
+	my $tree   = $pp.to-tree( $source );
+
+	ok $tree.child[0].child[3].child[0] ~~
+		Perl6::Block::Enter, Q{enter brace};
+	ok $tree.child[0].child[3].child[1] ~~
+		Perl6::Block::Exit, Q{exit brace};
+
+	done-testing;
+}, Q{Check the token structure};
 
 # package tests, don't make it a subtest because of nesting.
 #
 subtest {
 	plan 4;
 
-	subtest {
-		my $pp     = Perl6::Parser.new;
-		my $source = gensym-package Q{package %s{}};
-		my $tree   = $pp.to-tree( $source );
-
-		is $pp.to-string( $tree ), $source, Q{formatted};
-		ok $tree.child[0].child[3].child[0] ~~
-			Perl6::Block::Enter, Q{enter brace};
-		ok $tree.child[0].child[3].child[1] ~~
-			Perl6::Block::Exit, Q{exit brace};
-
-		done-testing;
-	}, Q{no ws};
+	ok round-trips( gensym-package Q{package %s{}} ), Q{no ws};
 
 	ok round-trips( gensym-package Q:to[_END_] ), Q{leading ws};
 	package %s     {}
