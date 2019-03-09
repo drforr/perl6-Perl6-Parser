@@ -845,7 +845,10 @@ class Perl6::Comment is Perl6::Documentation {
 	also does Constructor-from-int;
 }
 
-class Perl6::Document is Perl6::Element {
+class Perl6::Structural is Perl6::Element {
+}
+
+class Perl6::Document is Perl6::Structural {
 	also does Structural;
 	also does Branching;
 	also does Twig;
@@ -882,7 +885,7 @@ class Perl6::Sir-Not-Appearing-In-This-Statement is Perl6::Visible {
 	}
 }
 
-class Perl6::Statement is Perl6::Element {
+class Perl6::Statement is Perl6::Structural {
 	also does Structural;
 	also does Branching;
 	also does Twig;
@@ -1049,7 +1052,7 @@ class Perl6::PackageName is Perl6::Visible {
 	also does Constructor-from-match;
 }
 class Perl6::ColonBareword is Perl6::Bareword { }
-class Perl6::Block is Perl6::Element {
+class Perl6::Block is Perl6::Structural {
 	also does Structural;
 	also does Branching;
 	also does Twig;
