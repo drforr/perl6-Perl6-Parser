@@ -3,10 +3,8 @@ use v6;
 use Test;
 use Perl6::Parser;
 
-use lib 't/lib';
+use lib 't/lib/';
 use Utils;
-
-plan 18;
 
 my $*CONSISTENCY-CHECK = True;
 my $*FALL-THROUGH      = True;
@@ -1003,4 +1001,6 @@ say @candidates
 _END_
 };
 
-# vim: ft=perl6
+done-testing;
+
+#vim: ft=perl6

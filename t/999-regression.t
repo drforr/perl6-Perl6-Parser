@@ -6,13 +6,13 @@ use Perl6::Parser;
 use lib 't/lib';
 use Utils;
 
+my $*CONSISTENCY-CHECK = True;
+my $*FALL-THROUGH      = True;
+
 # No plan here.
 
 # We're just checking odds and ends here, so no need to rigorously check
 # the object tree.
-
-my $*CONSISTENCY-CHECK = True;
-my $*FALL-THROUGH      = True;
 
 ok round-trips( Q:to[_END_] ), Q{say <closed open>};
 say <closed open>;

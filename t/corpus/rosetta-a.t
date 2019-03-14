@@ -3,10 +3,8 @@ use v6;
 use Test;
 use Perl6::Parser;
 
-use lib 't/lib';
+use lib 't/lib/';
 use Utils;
-
-plan 38;
 
 my $*CONSISTENCY-CHECK = True;
 my $*FALL-THROUGH      = True;
@@ -1107,5 +1105,7 @@ sub sma(Int \P where * > 0) returns Sub {
 }
 _END_
 };
+
+done-testing;
 
 # vim: ft=perl6

@@ -95,6 +95,10 @@ Tokens are things like C<12,3>, C<'foo'> or C<+>. Everything else is a C<twig>, 
 
 Go from one element to the next in sequence. There are no "end of stream" or "beginning of stream" markers, for that please use the C<is-end> and C<is-start> methods. This is mainly so that I can keep the guts statically-typed to help catch developer errors. Otherwise I'd have to use a compound type or constraints, and I want to keep the guts as simple as possible.
 
+=item C<first-child>, C<last-child>
+
+Go from a node to its first child, or last child.
+
 =cut
 
 =item C<remove-node>, C<insert-node-before>, C<insert-node-after>
@@ -286,6 +290,20 @@ my role Movement {
 	method parent( Int $count = 1 ) {
 		my $node = self;
 		$node = $node.parent-node for ^$count;
+		$node;
+	}
+
+	method first-child {
+		my $node = self;
+		return Any unless $node.is-twig;
+		$node = $node.child.[0];
+		$node;
+	}
+
+	method last-child {
+		my $node = self;
+		return Any unless $node.is-twig;
+		$node = $node.child.[*-1];
 		$node;
 	}
 }

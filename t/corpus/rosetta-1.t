@@ -1,12 +1,10 @@
 use v6;
 
-use lib 't/lib';
-
 use Test;
 use Perl6::Parser;
-use Utils;
 
-plan 6;
+use lib 't/lib/';
+use Utils;
 
 my $*CONSISTENCY-CHECK = True;
 my $*FALL-THROUGH      = True;
@@ -453,5 +451,7 @@ _END_
 
 	done-testing;
 }, Q{99 bottles of beer};
+
+done-testing;
 
 # vim: ft=perl6

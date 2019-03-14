@@ -2,7 +2,6 @@ use v6;
 
 use Test;
 use Perl6::Parser;
-use Perl6::Parser::Factory;
 
 plan 6;
 
