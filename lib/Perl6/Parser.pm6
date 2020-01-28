@@ -540,7 +540,7 @@ class Perl6::Parser:ver<0.3.0> {
 	#
 	method parse( Str $source ) {
 		my $*LINEPOSCACHE;
-		my $compiler := nqp::getcomp('Raku') // nqp::getcomp('perl6');
+		my $compiler := nqp::getcomp('Raku') || nqp::getcomp('perl6');
 		my $g := nqp::findmethod(
 			$compiler,'parsegrammar'
 		)($compiler);
