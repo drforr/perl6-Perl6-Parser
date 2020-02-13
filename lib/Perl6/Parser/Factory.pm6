@@ -551,9 +551,8 @@ class Perl6::Element-List {
 			my %classified = classify {
 				$p.hash.{$_}.Str ?? 'with' !! 'without'
 			}, $p.hash.keys;
-			my Str @keys-with-content = @( %classified<with> );
-			my Str @keys-without-content =
-				@( %classified<without> );
+			my Str @keys-with-content =    @$_ with %classified<with>;
+			my Str @keys-without-content = @$_ with %classified<without>;
 
 			$*ERR.say( "With content: {@keys-with-content.gist}" );
 			$*ERR.say(
