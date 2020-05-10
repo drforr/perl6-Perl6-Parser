@@ -1,0 +1,16 @@
+=begin pod
+
+Pod 6, determined heuristically.
+
+=end pod
+
+#| Base class for magicians 
+class Magician {
+  has Int $.level;
+  has Str @.spells;
+}
+ 
+#| Flight mechanics 
+sub duel(Magician $a, Magician $b) {
+}
+#= Magicians only, no mortals. 
